@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.chat.mapper.ChatMapper">
+
+    <resultMap id="MsgMap" type="com.agrimatch.chat.domain.BusChatMessage">
+        <id column="id" property="id"/>
+        <result column="from_user_id" property="fromUserId"/>
+        <result column="to_user_id" property="toUserId"/>
+        <result column="from_user_name" property="fromUserName"/>
+        <result column="from_nick_name" property="fromNickName"/>
+        <result column="to_user_name" property="toUserName"/>
+        <result column="to_nick_name" property="toNickName"/>
+        <result column="content" property="content"/>
+        <result column="is_read" property="isRead"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insertMessage" parameterType="com.agrimatch.chat.domain.BusChatMessage"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_chat_message
+        (from_user_id, to_user_id, content, is_read, is_deleted, create_time, update_time)
+        VALUES
+        (#{fromUserId}, #{toUserId}, #{content}, 0, 0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="selectHistory" resultMap="MsgMap">
+        SELECT
+            m.id, m.from_user_id, m.to_user_id,
+            fu.user_name AS from_user_name,
+            fu.nick_name AS from_nick_name,
+            tu.user_name AS to_user_name,
+            tu.nick_name AS to_nick_name,
+            m.content, m.is_read, m.is_deleted, m.create_time, m.update_time
+        FROM bus_chat_message m
+        LEFT JOIN sys_user fu ON fu.user_id = m.from_user_id AND fu.del_flag = '0'
+        LEFT JOIN sys_user tu ON tu.user_id = m.to_user_id AND tu.del_flag = '0'
+        WHERE m.is_deleted = 0
+          AND ((m.from_user_id = #{a} AND m.to_user_id = #{b})
+            OR (m.from_user_id = #{b} AND m.to_user_id = #{a}))
+        ORDER BY m.create_time DESC, m.id DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <update id="markReadFromPeer">
+        UPDATE bus_chat_message
+        SET is_read = 1,
+            update_time = NOW(3)
+        WHERE to_user_id = #{toUserId}
+          AND from_user_id = #{fromUserId}
+          AND is_deleted = 0
+          AND is_read = 0
+    </update>
+
+    <select id="selectPeers" resultType="com.agrimatch.chat.mapper.ChatMapper$PeerRow">
+        SELECT
+            t.peer_user_id AS peerUserId,
+            pu.user_name AS peerUserName,
+            pu.nick_name AS peerNickName,
+            pc.company_name AS peerCompanyName,
+            t.last_content AS lastContent,
+            t.last_time AS lastTime,
+            IFNULL(u.unread_count, 0) AS unreadCount
+        FROM (
+            SELECT peer_user_id,
+                   SUBSTRING_INDEX(GROUP_CONCAT(content ORDER BY create_time DESC SEPARATOR '\n'), '\n', 1) AS last_content,
+                   MAX(create_time) AS last_time
+            FROM (
+                SELECT CASE WHEN from_user_id = #{userId} THEN to_user_id ELSE from_user_id END AS peer_user_id,
+                       content,
+                       create_time
+                FROM bus_chat_message
+                WHERE is_deleted = 0
+                  AND (from_user_id = #{userId} OR to_user_id = #{userId})
+            ) x
+            GROUP BY peer_user_id
+        ) t
+        LEFT JOIN (
+            SELECT from_user_id AS peer_user_id, COUNT(1) AS unread_count
+            FROM bus_chat_message
+            WHERE to_user_id = #{userId}
+              AND is_deleted = 0
+              AND is_read = 0
+            GROUP BY from_user_id
+        ) u ON u.peer_user_id = t.peer_user_id
+        LEFT JOIN sys_user pu ON pu.user_id = t.peer_user_id AND pu.del_flag = '0'
+        LEFT JOIN bus_company pc ON pc.id = pu.company_id AND (pc.is_deleted IS NULL OR pc.is_deleted = 0)
+        ORDER BY t.last_time DESC
+    </select>
+
+</mapper>
+
+

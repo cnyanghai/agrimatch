@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: agrimatch-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/nonghuitong?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&createDatabaseIfNotExist=true
+    username: root
+    password: 123123
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+      schema-locations:
+        - classpath:db/agrimatch_core.sql
+        - classpath:db/nht_product.sql
+        - classpath:db/nht_product_parameters.sql
+      continue-on-error: true
+
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    jdbc-type-for-null: 'NULL'
+
+logging:
+  level:
+    com.agrimatch: info
+
+app:
+  upload-dir: uploads
+
+amap:
+  # 高德地图：Web服务 Key（用于后端地理编码：地址->经纬度）
+  web-key: ${AMAP_WEB_KEY:}
+  # 高德地图：JS API Key（前端加载地图脚本用；也可只放前端 VITE_AMAP_JS_KEY）
+  js-key: ${AMAP_JS_KEY:}
+
+

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.user.mapper.UserMapper">
+
+    <resultMap id="SysUserResultMap" type="com.agrimatch.user.domain.SysUser">
+        <id column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="password" property="password"/>
+        <result column="nick_name" property="nickName"/>
+        <result column="phonenumber" property="phonenumber"/>
+        <result column="wechat" property="wechat"/>
+        <result column="company_id" property="companyId"/>
+        <result column="is_buyer" property="isBuyer"/>
+        <result column="is_seller" property="isSeller"/>
+        <result column="user_type" property="userType"/>
+        <result column="pay_info_json" property="payInfoJson"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.agrimatch.user.domain.SysUser"
+            useGeneratedKeys="true" keyProperty="userId" keyColumn="user_id">
+        INSERT INTO sys_user
+        (user_name, password, nick_name, phonenumber, wechat, company_id, is_buyer, is_seller, user_type, pay_info_json, is_deleted, del_flag, status, create_time, update_time)
+        VALUES
+        (#{userName}, #{password}, #{nickName}, #{phonenumber}, #{wechat}, #{companyId}, #{isBuyer}, #{isSeller}, #{userType}, #{payInfoJson}, 0, '0', '0', NOW(), NOW())
+    </insert>
+
+    <select id="selectById" resultMap="SysUserResultMap">
+        SELECT user_id, user_name, password, nick_name, phonenumber, wechat, company_id, is_buyer, is_seller, user_type, pay_info_json, is_deleted, create_time, update_time
+        FROM sys_user
+        WHERE user_id = #{userId}
+          AND del_flag = '0'
+          AND (is_deleted IS NULL OR is_deleted = 0)
+        LIMIT 1
+    </select>
+
+    <select id="selectByUserName" resultMap="SysUserResultMap">
+        SELECT user_id, user_name, password, nick_name, phonenumber, wechat, company_id, is_buyer, is_seller, user_type, pay_info_json, is_deleted, create_time, update_time
+        FROM sys_user
+        WHERE user_name = #{userName}
+          AND del_flag = '0'
+          AND (is_deleted IS NULL OR is_deleted = 0)
+        LIMIT 1
+    </select>
+
+    <update id="update" parameterType="com.agrimatch.user.domain.SysUser">
+        UPDATE sys_user
+        <set>
+            <if test="nickName != null">nick_name = #{nickName},</if>
+            <if test="phonenumber != null">phonenumber = #{phonenumber},</if>
+            <if test="wechat != null">wechat = #{wechat},</if>
+            <if test="companyId != null">company_id = #{companyId},</if>
+            <if test="payInfoJson != null">pay_info_json = #{payInfoJson},</if>
+            update_time = NOW()
+        </set>
+        WHERE user_id = #{userId}
+          AND del_flag = '0'
+          AND (is_deleted IS NULL OR is_deleted = 0)
+    </update>
+
+    <update id="updateRoles">
+        UPDATE sys_user
+        SET is_buyer = #{isBuyer},
+            is_seller = #{isSeller},
+            user_type = #{userType},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND del_flag = '0'
+          AND (is_deleted IS NULL OR is_deleted = 0)
+    </update>
+
+    <select id="search" resultType="com.agrimatch.user.dto.UserBriefResponse">
+        SELECT
+            u.user_id AS userId,
+            u.user_name AS userName,
+            u.nick_name AS nickName,
+            u.company_id AS companyId,
+            c.company_name AS companyName
+        FROM sys_user u
+        LEFT JOIN bus_company c ON c.id = u.company_id AND (c.is_deleted IS NULL OR c.is_deleted = 0)
+        WHERE u.del_flag = '0'
+          AND (u.is_deleted IS NULL OR u.is_deleted = 0)
+          <if test="keyword != null and keyword != ''">
+            AND (
+              u.user_name LIKE CONCAT('%', #{keyword}, '%')
+              OR u.nick_name LIKE CONCAT('%', #{keyword}, '%')
+              OR u.phonenumber LIKE CONCAT('%', #{keyword}, '%')
+            )
+          </if>
+        ORDER BY u.user_id DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>
+
+

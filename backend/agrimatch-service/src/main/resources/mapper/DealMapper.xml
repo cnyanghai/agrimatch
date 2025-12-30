@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.deal.mapper.DealMapper">
+
+    <resultMap id="DealMap" type="com.agrimatch.deal.domain.BusDeal">
+        <id column="id" property="id"/>
+        <result column="requirement_id" property="requirementId"/>
+        <result column="supply_id" property="supplyId"/>
+        <result column="buyer_company_id" property="buyerCompanyId"/>
+        <result column="seller_company_id" property="sellerCompanyId"/>
+        <result column="buyer_user_id" property="buyerUserId"/>
+        <result column="seller_user_id" property="sellerUserId"/>
+        <result column="quantity" property="quantity"/>
+        <result column="final_ex_factory_price" property="finalExFactoryPrice"/>
+        <result column="delivery_mode" property="deliveryMode"/>
+        <result column="distance_km" property="distanceKm"/>
+        <result column="freight_rate_per_ton_km" property="freightRatePerTonKm"/>
+        <result column="delivered_price" property="deliveredPrice"/>
+        <result column="status" property="status"/>
+        <result column="remark" property="remark"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.agrimatch.deal.domain.BusDeal"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_deal
+        (requirement_id, supply_id,
+         buyer_company_id, seller_company_id,
+         buyer_user_id, seller_user_id,
+         quantity, final_ex_factory_price, delivery_mode,
+         distance_km, freight_rate_per_ton_km, delivered_price,
+         status, remark, is_deleted, create_time, update_time)
+        VALUES
+        (#{requirementId}, #{supplyId},
+         #{buyerCompanyId}, #{sellerCompanyId},
+         #{buyerUserId}, #{sellerUserId},
+         #{quantity}, #{finalExFactoryPrice}, #{deliveryMode},
+         #{distanceKm}, #{freightRatePerTonKm}, #{deliveredPrice},
+         #{status}, #{remark}, 0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="selectById" resultMap="DealMap">
+        SELECT
+            d.id, d.requirement_id, d.supply_id,
+            d.buyer_company_id, d.seller_company_id,
+            d.buyer_user_id, d.seller_user_id,
+            d.quantity, d.final_ex_factory_price, d.delivery_mode,
+            d.distance_km, d.freight_rate_per_ton_km, d.delivered_price,
+            d.status, d.remark, d.is_deleted, d.create_time, d.update_time
+        FROM bus_deal d
+        WHERE d.id = #{id}
+          AND d.is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectByRequirementId" resultMap="DealMap">
+        SELECT
+            d.id, d.requirement_id, d.supply_id,
+            d.buyer_company_id, d.seller_company_id,
+            d.buyer_user_id, d.seller_user_id,
+            d.quantity, d.final_ex_factory_price, d.delivery_mode,
+            d.distance_km, d.freight_rate_per_ton_km, d.delivered_price,
+            d.status, d.remark, d.is_deleted, d.create_time, d.update_time
+        FROM bus_deal d
+        WHERE d.requirement_id = #{requirementId}
+          AND d.is_deleted = 0
+          AND d.status = 1
+        ORDER BY d.id DESC
+        LIMIT 200
+    </select>
+
+    <select id="sumConfirmedQuantityByRequirementId" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(d.quantity), 0)
+        FROM bus_deal d
+        WHERE d.requirement_id = #{requirementId}
+          AND d.is_deleted = 0
+          AND d.status = 1
+    </select>
+
+</mapper>
+
+

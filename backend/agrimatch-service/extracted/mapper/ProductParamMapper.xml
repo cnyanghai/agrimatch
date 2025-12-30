@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.product_param.mapper.ProductParamMapper">
+
+    <resultMap id="ParamMap" type="com.agrimatch.product_param.domain.NhtProductParam">
+        <id column="id" property="id"/>
+        <result column="product_id" property="productId"/>
+        <result column="options" property="options"/>
+        <result column="param_name" property="paramName"/>
+        <result column="param_type" property="paramType"/>
+        <result column="required" property="required"/>
+        <result column="sort" property="sort"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectByProductId" resultMap="ParamMap">
+        SELECT id, product_id, options, param_name, param_type, required, sort, del_flag, create_time, update_time
+        FROM nht_product_parameters
+        WHERE product_id = #{productId}
+          AND del_flag = '0'
+        ORDER BY sort ASC, id ASC
+    </select>
+
+    <select id="selectById" resultMap="ParamMap">
+        SELECT id, product_id, options, param_name, param_type, required, sort, del_flag, create_time, update_time
+        FROM nht_product_parameters
+        WHERE id = #{id}
+        LIMIT 1
+    </select>
+
+    <update id="updateOptions">
+        UPDATE nht_product_parameters
+        SET options = #{options},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+</mapper>
+
+

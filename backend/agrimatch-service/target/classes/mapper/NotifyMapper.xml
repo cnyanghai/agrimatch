@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.notify.mapper.NotifyMapper">
+
+    <resultMap id="NotifyMap" type="com.agrimatch.notify.domain.BusNotify">
+        <id column="id" property="id"/>
+        <result column="to_user_id" property="toUserId"/>
+        <result column="type" property="type"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="link" property="link"/>
+        <result column="is_read" property="isRead"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.agrimatch.notify.domain.BusNotify"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_notify
+        (to_user_id, type, title, content, link, is_read, is_deleted, create_time, update_time)
+        VALUES
+        (#{toUserId}, #{type}, #{title}, #{content}, #{link}, 0, 0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="selectMyList" resultMap="NotifyMap">
+        SELECT id, to_user_id, type, title, content, link, is_read, is_deleted, create_time, update_time
+        FROM bus_notify
+        WHERE to_user_id = #{toUserId}
+          AND is_deleted = 0
+        ORDER BY is_read ASC, create_time DESC, id DESC
+    </select>
+
+    <update id="markRead">
+        UPDATE bus_notify
+        SET is_read = 1,
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND to_user_id = #{toUserId}
+          AND is_deleted = 0
+    </update>
+
+    <update id="markAllRead">
+        UPDATE bus_notify
+        SET is_read = 1,
+            update_time = NOW(3)
+        WHERE to_user_id = #{toUserId}
+          AND is_deleted = 0
+          AND is_read = 0
+    </update>
+
+</mapper>
+
+

@@ -1,0 +1,190 @@
+package com.agrimatch.company.service.impl;
+
+import com.agrimatch.common.api.ResultCode;
+import com.agrimatch.common.exception.ApiException;
+import com.agrimatch.company.domain.BusCompany;
+import com.agrimatch.company.dto.CompanyBriefResponse;
+import com.agrimatch.company.dto.CompanyCreateRequest;
+import com.agrimatch.company.dto.CompanyResponse;
+import com.agrimatch.company.dto.CompanyUpdateRequest;
+import com.agrimatch.company.mapper.CompanyMapper;
+import com.agrimatch.company.service.CompanyService;
+import com.agrimatch.geo.dto.GeoPoint;
+import com.agrimatch.geo.service.AmapGeocodeService;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import java.util.List;
+
+@Service
+public class CompanyServiceImpl implements CompanyService {
+    private final CompanyMapper companyMapper;
+    private final AmapGeocodeService amapGeocodeService;
+
+    public CompanyServiceImpl(CompanyMapper companyMapper, AmapGeocodeService amapGeocodeService) {
+        this.companyMapper = companyMapper;
+        this.amapGeocodeService = amapGeocodeService;
+    }
+
+    @Override
+    public Long create(Long ownerUserId, CompanyCreateRequest req) {
+        if (ownerUserId == null) throw new ApiException(401, "未登录");
+        BusCompany c = new BusCompany();
+        c.setOwnerUserId(ownerUserId);
+        c.setCompanyName(req.getCompanyName());
+        c.setLicenseNo(req.getLicenseNo());
+        c.setContacts(req.getContacts());
+        c.setPhone(req.getPhone());
+        c.setWechat(req.getWechat());
+        c.setProvince(req.getProvince());
+        c.setCity(req.getCity());
+        c.setDistrict(req.getDistrict());
+        c.setAddress(req.getAddress());
+        c.setLat(req.getLat());
+        c.setLng(req.getLng());
+        c.setLocationsJson(req.getLocationsJson());
+        c.setBankInfoJson(req.getBankInfoJson());
+
+        // 自动地理编码：仅当用户未手填坐标但提供了地址
+        if ((c.getLat() == null || c.getLng() == null) && StringUtils.hasText(c.getAddress())) {
+            GeoPoint p = amapGeocodeService.geocode(c.getAddress(), c.getCity(), c.getCompanyName());
+            if (p != null) {
+                c.setLat(p.getLat());
+                c.setLng(p.getLng());
+            }
+        }
+
+        int rows = companyMapper.insert(c);
+        if (rows != 1 || c.getId() == null) throw new ApiException(ResultCode.SERVER_ERROR);
+        return c.getId();
+    }
+
+    @Override
+    public CompanyResponse getMyCompany(Long ownerUserId) {
+        if (ownerUserId == null) throw new ApiException(401, "未登录");
+        BusCompany c = companyMapper.selectByOwnerUserId(ownerUserId);
+        if (c == null) return null;
+        return toResp(c);
+    }
+
+    @Override
+    public CompanyResponse getById(Long id) {
+        BusCompany c = companyMapper.selectById(id);
+        if (c == null) throw new ApiException(ResultCode.NOT_FOUND);
+        return toResp(c);
+    }
+
+    @Override
+    public void update(Long ownerUserId, Long id, CompanyUpdateRequest req) {
+        if (ownerUserId == null) throw new ApiException(401, "未登录");
+        // 取旧数据，用于“自动补坐标”判断
+        BusCompany old = companyMapper.selectById(id);
+        if (old == null) throw new ApiException(ResultCode.NOT_FOUND);
+        if (!ownerUserId.equals(old.getOwnerUserId())) throw new ApiException(ResultCode.NOT_FOUND);
+
+        BusCompany c = new BusCompany();
+        c.setId(id);
+        c.setOwnerUserId(ownerUserId);
+        c.setCompanyName(emptyToNull(req.getCompanyName()));
+        c.setLicenseNo(emptyToNull(req.getLicenseNo()));
+        c.setLicenseImgUrl(emptyToNull(req.getLicenseImgUrl()));
+        c.setContacts(emptyToNull(req.getContacts()));
+        c.setPhone(emptyToNull(req.getPhone()));
+        c.setWechat(emptyToNull(req.getWechat()));
+        c.setProvince(emptyToNull(req.getProvince()));
+        c.setCity(emptyToNull(req.getCity()));
+        c.setDistrict(emptyToNull(req.getDistrict()));
+        c.setAddress(emptyToNull(req.getAddress()));
+        c.setLat(req.getLat());
+        c.setLng(req.getLng());
+        c.setLocationsJson(emptyToNull(req.getLocationsJson()));
+        c.setBankInfoJson(emptyToNull(req.getBankInfoJson()));
+
+        // 自动地理编码：仅当本次没有提供坐标，且旧数据也没有坐标，且地址在本次或旧数据存在
+        boolean noLatLngProvided = (c.getLat() == null || c.getLng() == null);
+        boolean oldMissingLatLng = (old.getLat() == null || old.getLng() == null);
+        String addr = c.getAddress() != null ? c.getAddress() : old.getAddress();
+        String city = c.getCity() != null ? c.getCity() : old.getCity();
+        if (noLatLngProvided && oldMissingLatLng && StringUtils.hasText(addr)) {
+            String cname = c.getCompanyName() != null ? c.getCompanyName() : old.getCompanyName();
+            GeoPoint p = amapGeocodeService.geocode(addr, city, cname);
+            if (p != null) {
+                c.setLat(p.getLat());
+                c.setLng(p.getLng());
+            }
+        }
+
+        int rows = companyMapper.update(c);
+        if (rows != 1) throw new ApiException(ResultCode.NOT_FOUND);
+    }
+
+    /**
+     * 触发一次“按地址地理编码”并写回公司坐标（用于手动补全历史数据）
+     */
+    public CompanyResponse geocodeAndUpdate(Long ownerUserId, Long id) {
+        if (ownerUserId == null) throw new ApiException(401, "未登录");
+        BusCompany c = companyMapper.selectById(id);
+        if (c == null || !ownerUserId.equals(c.getOwnerUserId())) throw new ApiException(ResultCode.NOT_FOUND);
+        if (!StringUtils.hasText(c.getAddress())) throw new ApiException(400, "请先填写公司地址");
+        GeoPoint p = amapGeocodeService.geocode(c.getAddress(), c.getCity(), c.getCompanyName());
+        if (p == null) {
+            throw new ApiException(400, "无法解析坐标：请填写更完整地址（建议包含省/市/区/镇），并确认后端已配置 AMAP_WEB_KEY（Web服务Key）且已开通“地理编码/POI检索”服务");
+        }
+
+        BusCompany u = new BusCompany();
+        u.setId(id);
+        u.setOwnerUserId(ownerUserId);
+        u.setLat(p.getLat());
+        u.setLng(p.getLng());
+        int rows = companyMapper.update(u);
+        if (rows != 1) throw new ApiException(ResultCode.SERVER_ERROR);
+        BusCompany out = companyMapper.selectById(id);
+        return toResp(out);
+    }
+
+    @Override
+    public void updateLicenseUrl(Long ownerUserId, Long id, String licenseImgUrl) {
+        CompanyUpdateRequest req = new CompanyUpdateRequest();
+        req.setLicenseImgUrl(licenseImgUrl);
+        update(ownerUserId, id, req);
+    }
+
+    @Override
+    public List<CompanyBriefResponse> search(String keyword, Integer limit) {
+        String kw = StringUtils.hasText(keyword) ? keyword.trim() : null;
+        if (kw == null) {
+            throw new ApiException(ResultCode.PARAM_ERROR);
+        }
+        int lim = (limit == null ? 20 : Math.max(1, Math.min(limit, 50)));
+        return companyMapper.search(kw, lim);
+    }
+
+    private static CompanyResponse toResp(BusCompany c) {
+        CompanyResponse r = new CompanyResponse();
+        r.setId(c.getId());
+        r.setOwnerUserId(c.getOwnerUserId());
+        r.setCompanyName(c.getCompanyName());
+        r.setLicenseNo(c.getLicenseNo());
+        r.setLicenseImgUrl(c.getLicenseImgUrl());
+        r.setContacts(c.getContacts());
+        r.setPhone(c.getPhone());
+        r.setWechat(c.getWechat());
+        r.setProvince(c.getProvince());
+        r.setCity(c.getCity());
+        r.setDistrict(c.getDistrict());
+        r.setAddress(c.getAddress());
+        r.setLat(c.getLat());
+        r.setLng(c.getLng());
+        r.setLocationsJson(c.getLocationsJson());
+        r.setBankInfoJson(c.getBankInfoJson());
+        r.setCreateTime(c.getCreateTime());
+        r.setUpdateTime(c.getUpdateTime());
+        return r;
+    }
+
+    private static String emptyToNull(String s) {
+        return StringUtils.hasText(s) ? s : null;
+    }
+}
+
+

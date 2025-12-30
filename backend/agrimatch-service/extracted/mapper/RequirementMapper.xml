@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.requirement.mapper.RequirementMapper">
+
+    <resultMap id="BusRequirementResultMap" type="com.agrimatch.requirement.domain.BusRequirement">
+        <id column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="user_id" property="userId"/>
+        <result column="company_name" property="companyName"/>
+        <result column="user_name" property="userName"/>
+        <result column="nick_name" property="nickName"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="quantity" property="quantity"/>
+        <result column="packaging" property="packaging"/>
+        <result column="payment_method" property="paymentMethod"/>
+        <result column="params_json" property="paramsJson"/>
+        <result column="expire_minutes" property="expireMinutes"/>
+        <result column="expire_time" property="expireTime"/>
+        <result column="purchase_lat" property="purchaseLat"/>
+        <result column="purchase_lng" property="purchaseLng"/>
+        <result column="purchase_address" property="purchaseAddress"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.agrimatch.requirement.domain.BusRequirement"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_requirement
+        (company_id, user_id, category_name, quantity, packaging, payment_method, params_json, expire_minutes, expire_time,
+         purchase_lat, purchase_lng, purchase_address, status, is_deleted, create_time, update_time)
+        VALUES
+        (#{companyId}, #{userId}, #{categoryName}, #{quantity}, #{packaging}, #{paymentMethod}, #{paramsJson}, #{expireMinutes}, #{expireTime},
+         #{purchaseLat}, #{purchaseLng}, #{purchaseAddress},
+         #{status}, 0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="selectById" resultMap="BusRequirementResultMap">
+        SELECT
+            r.id, r.company_id, r.user_id,
+            c.company_name AS company_name,
+            u.user_name AS user_name,
+            u.nick_name AS nick_name,
+            r.category_name, r.quantity, r.packaging, r.payment_method, r.params_json, r.expire_minutes, r.expire_time,
+            r.purchase_lat, r.purchase_lng, r.purchase_address,
+            r.status, r.is_deleted, r.create_time, r.update_time
+        FROM bus_requirement r
+        LEFT JOIN bus_company c ON c.id = r.company_id AND c.is_deleted = 0
+        LEFT JOIN sys_user u ON u.user_id = r.user_id AND u.is_deleted = 0
+        WHERE r.id = #{id}
+          AND r.is_deleted = 0
+          AND (r.expire_time IS NULL OR r.expire_time > NOW(3))
+        LIMIT 1
+    </select>
+
+    <select id="selectList" resultMap="BusRequirementResultMap">
+        SELECT
+            r.id, r.company_id, r.user_id,
+            c.company_name AS company_name,
+            u.user_name AS user_name,
+            u.nick_name AS nick_name,
+            r.category_name, r.quantity, r.packaging, r.payment_method, r.params_json, r.expire_minutes, r.expire_time,
+            r.purchase_lat, r.purchase_lng, r.purchase_address,
+            r.status, r.is_deleted, r.create_time, r.update_time
+        FROM bus_requirement r
+        LEFT JOIN bus_company c ON c.id = r.company_id AND c.is_deleted = 0
+        LEFT JOIN sys_user u ON u.user_id = r.user_id AND u.is_deleted = 0
+        <where>
+            r.is_deleted = 0
+            AND (r.expire_time IS NULL OR r.expire_time > NOW(3))
+            <if test="q != null and q.companyId != null">
+                AND r.company_id = #{q.companyId}
+            </if>
+            <if test="q != null and q.userId != null">
+                AND r.user_id = #{q.userId}
+            </if>
+            <if test="q != null and q.categoryName != null and q.categoryName != ''">
+                AND r.category_name LIKE CONCAT('%', #{q.categoryName}, '%')
+            </if>
+            <if test="q != null and q.status != null">
+                AND r.status = #{q.status}
+            </if>
+        </where>
+        ORDER BY
+        <choose>
+            <when test="q != null and q.orderBy == 'create_time'">
+                r.create_time
+            </when>
+            <when test="q != null and q.orderBy == 'distance'">
+                r.create_time
+            </when>
+            <otherwise>
+                r.create_time
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="q != null and q.order == 'asc'">
+                ASC
+            </when>
+            <otherwise>
+                DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <update id="update" parameterType="com.agrimatch.requirement.domain.BusRequirement">
+        UPDATE bus_requirement
+        <set>
+            <if test="categoryName != null">category_name = #{categoryName},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="packaging != null">packaging = #{packaging},</if>
+            <if test="paymentMethod != null">payment_method = #{paymentMethod},</if>
+            <if test="paramsJson != null">params_json = #{paramsJson},</if>
+            <if test="expireMinutes != null">expire_minutes = #{expireMinutes},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+            <if test="purchaseLat != null">purchase_lat = #{purchaseLat},</if>
+            <if test="purchaseLng != null">purchase_lng = #{purchaseLng},</if>
+            <if test="purchaseAddress != null">purchase_address = #{purchaseAddress},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW(3)
+        </set>
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
+    <update id="logicalDelete">
+        UPDATE bus_requirement
+        SET is_deleted = 1,
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
+</mapper>
+
+

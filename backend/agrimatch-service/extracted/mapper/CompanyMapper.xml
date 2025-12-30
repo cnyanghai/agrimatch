@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.company.mapper.CompanyMapper">
+
+    <resultMap id="BusCompanyMap" type="com.agrimatch.company.domain.BusCompany">
+        <id column="id" property="id"/>
+        <result column="owner_user_id" property="ownerUserId"/>
+        <result column="company_name" property="companyName"/>
+        <result column="license_no" property="licenseNo"/>
+        <result column="license_img_url" property="licenseImgUrl"/>
+        <result column="contacts" property="contacts"/>
+        <result column="phone" property="phone"/>
+        <result column="wechat" property="wechat"/>
+        <result column="province" property="province"/>
+        <result column="city" property="city"/>
+        <result column="district" property="district"/>
+        <result column="address" property="address"/>
+        <result column="lat" property="lat"/>
+        <result column="lng" property="lng"/>
+        <result column="locations_json" property="locationsJson"/>
+        <result column="bank_info_json" property="bankInfoJson"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.agrimatch.company.domain.BusCompany"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_company
+        (owner_user_id, company_name, license_no, license_img_url, contacts, phone, wechat,
+         province, city, district, address, lat, lng, locations_json, bank_info_json,
+         is_deleted, create_time, update_time)
+        VALUES
+        (#{ownerUserId}, #{companyName}, #{licenseNo}, #{licenseImgUrl}, #{contacts}, #{phone}, #{wechat},
+         #{province}, #{city}, #{district}, #{address}, #{lat}, #{lng}, #{locationsJson}, #{bankInfoJson},
+         0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="selectById" resultMap="BusCompanyMap">
+        SELECT *
+        FROM bus_company
+        WHERE id = #{id}
+          AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectByOwnerUserId" resultMap="BusCompanyMap">
+        SELECT *
+        FROM bus_company
+        WHERE owner_user_id = #{ownerUserId}
+          AND is_deleted = 0
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <update id="update" parameterType="com.agrimatch.company.domain.BusCompany">
+        UPDATE bus_company
+        <set>
+            <if test="companyName != null">company_name = #{companyName},</if>
+            <if test="licenseNo != null">license_no = #{licenseNo},</if>
+            <if test="licenseImgUrl != null">license_img_url = #{licenseImgUrl},</if>
+            <if test="contacts != null">contacts = #{contacts},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="wechat != null">wechat = #{wechat},</if>
+            <if test="province != null">province = #{province},</if>
+            <if test="city != null">city = #{city},</if>
+            <if test="district != null">district = #{district},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="lat != null">lat = #{lat},</if>
+            <if test="lng != null">lng = #{lng},</if>
+            <if test="locationsJson != null">locations_json = #{locationsJson},</if>
+            <if test="bankInfoJson != null">bank_info_json = #{bankInfoJson},</if>
+            update_time = NOW(3)
+        </set>
+        WHERE id = #{id}
+          AND owner_user_id = #{ownerUserId}
+          AND is_deleted = 0
+    </update>
+
+    <select id="selectNamesByIds" resultType="com.agrimatch.company.mapper.CompanyMapper$IdNameRow">
+        SELECT id AS id, company_name AS companyName
+        FROM bus_company
+        WHERE is_deleted = 0
+          <if test="ids != null and ids.size() &gt; 0">
+            AND id IN
+            <foreach collection="ids" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+          </if>
+    </select>
+
+    <select id="search" resultType="com.agrimatch.company.dto.CompanyBriefResponse">
+        SELECT
+            c.id AS id,
+            c.company_name AS companyName,
+            c.address AS address
+        FROM bus_company c
+        WHERE c.is_deleted = 0
+          <if test="keyword != null and keyword != ''">
+            AND (
+              c.company_name LIKE CONCAT('%', #{keyword}, '%')
+              OR c.address LIKE CONCAT('%', #{keyword}, '%')
+            )
+          </if>
+        ORDER BY c.update_time DESC, c.id DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>
+
+

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.requirement_template.mapper.RequirementTemplateMapper">
+
+    <resultMap id="TemplateMap" type="com.agrimatch.requirement_template.domain.BusRequirementTemplate">
+        <id column="id" property="id"/>
+        <result column="owner_user_id" property="ownerUserId"/>
+        <result column="template_name" property="templateName"/>
+        <result column="template_json" property="templateJson"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.agrimatch.requirement_template.domain.BusRequirementTemplate"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_requirement_template
+        (owner_user_id, template_name, template_json, is_deleted, create_time, update_time)
+        VALUES
+        (#{ownerUserId}, #{templateName}, #{templateJson}, 0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="selectByOwner" resultMap="TemplateMap">
+        SELECT id, owner_user_id, template_name, template_json, is_deleted, create_time, update_time
+        FROM bus_requirement_template
+        WHERE owner_user_id = #{ownerUserId}
+          AND is_deleted = 0
+        ORDER BY id DESC
+        LIMIT 200
+    </select>
+
+    <select id="selectById" resultMap="TemplateMap">
+        SELECT id, owner_user_id, template_name, template_json, is_deleted, create_time, update_time
+        FROM bus_requirement_template
+        WHERE id = #{id}
+          AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <update id="logicalDelete">
+        UPDATE bus_requirement_template
+        SET is_deleted = 1,
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND owner_user_id = #{ownerUserId}
+          AND is_deleted = 0
+    </update>
+
+</mapper>
+
+

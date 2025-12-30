@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.post.mapper.PostMapper">
+
+    <resultMap id="PostMap" type="com.agrimatch.post.domain.BusPost">
+        <id column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="user_id" property="userId"/>
+        <result column="company_name" property="companyName"/>
+        <result column="user_name" property="userName"/>
+        <result column="nick_name" property="nickName"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="images_json" property="imagesJson"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.agrimatch.post.domain.BusPost"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_post
+        (company_id, user_id, title, content, images_json, is_deleted, create_time, update_time)
+        VALUES
+        (#{companyId}, #{userId}, #{title}, #{content}, #{imagesJson}, 0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="selectById" resultMap="PostMap">
+        SELECT
+            p.id, p.company_id, p.user_id,
+            c.company_name AS company_name,
+            u.user_name AS user_name,
+            u.nick_name AS nick_name,
+            p.title, p.content, p.images_json, p.is_deleted, p.create_time, p.update_time
+        FROM bus_post p
+        LEFT JOIN bus_company c ON c.id = p.company_id AND c.is_deleted = 0
+        LEFT JOIN sys_user u ON u.user_id = p.user_id AND u.is_deleted = 0
+        WHERE p.id = #{id}
+          AND p.is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectList" resultMap="PostMap">
+        SELECT
+            p.id, p.company_id, p.user_id,
+            c.company_name AS company_name,
+            u.user_name AS user_name,
+            u.nick_name AS nick_name,
+            p.title, p.content, p.images_json, p.is_deleted, p.create_time, p.update_time
+        FROM bus_post p
+        LEFT JOIN bus_company c ON c.id = p.company_id AND c.is_deleted = 0
+        LEFT JOIN sys_user u ON u.user_id = p.user_id AND u.is_deleted = 0
+        <where>
+            p.is_deleted = 0
+            <if test="q != null and q.companyId != null">
+                AND p.company_id = #{q.companyId}
+            </if>
+            <if test="q != null and q.userId != null">
+                AND p.user_id = #{q.userId}
+            </if>
+            <if test="q != null and q.keyword != null and q.keyword != ''">
+                AND (p.title LIKE CONCAT('%', #{q.keyword}, '%')
+                OR p.content LIKE CONCAT('%', #{q.keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY
+        <choose>
+            <when test="q != null and q.orderBy == 'create_time'">
+                p.create_time
+            </when>
+            <otherwise>
+                p.create_time
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="q != null and q.order == 'asc'">ASC</when>
+            <otherwise>DESC</otherwise>
+        </choose>
+    </select>
+
+    <update id="logicalDelete">
+        UPDATE bus_post
+        SET is_deleted = 1,
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
+</mapper>
+
+

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.points.mapper.PointsMapper">
+
+    <resultMap id="AccountMap" type="com.agrimatch.points.domain.BusPointsAccount">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="points_balance" property="pointsBalance"/>
+        <result column="cny_balance" property="cnyBalance"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="TxMap" type="com.agrimatch.points.domain.BusPointsTx">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="tx_type" property="txType"/>
+        <result column="points_delta" property="pointsDelta"/>
+        <result column="cny_delta" property="cnyDelta"/>
+        <result column="remark" property="remark"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectAccountByUserId" resultMap="AccountMap">
+        SELECT id, user_id, points_balance, cny_balance, is_deleted, create_time, update_time
+        FROM bus_points_account
+        WHERE user_id = #{userId}
+          AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectAccountByUserIdForUpdate" resultMap="AccountMap">
+        SELECT id, user_id, points_balance, cny_balance, is_deleted, create_time, update_time
+        FROM bus_points_account
+        WHERE user_id = #{userId}
+          AND is_deleted = 0
+        LIMIT 1
+        FOR UPDATE
+    </select>
+
+    <insert id="insertAccount" parameterType="com.agrimatch.points.domain.BusPointsAccount"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_points_account
+        (user_id, points_balance, cny_balance, is_deleted, create_time, update_time)
+        VALUES
+        (#{userId}, #{pointsBalance}, #{cnyBalance}, 0, NOW(3), NOW(3))
+    </insert>
+
+    <update id="updateAccountBalance">
+        UPDATE bus_points_account
+        SET points_balance = #{pointsBalance},
+            cny_balance = #{cnyBalance},
+            update_time = NOW(3)
+        WHERE user_id = #{userId}
+          AND is_deleted = 0
+    </update>
+
+    <insert id="insertTx" parameterType="com.agrimatch.points.domain.BusPointsTx"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_points_tx
+        (user_id, tx_type, points_delta, cny_delta, remark, is_deleted, create_time, update_time)
+        VALUES
+        (#{userId}, #{txType}, #{pointsDelta}, #{cnyDelta}, #{remark}, 0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="selectTxListByUserId" resultMap="TxMap">
+        SELECT id, user_id, tx_type, points_delta, cny_delta, remark, is_deleted, create_time, update_time
+        FROM bus_points_tx
+        WHERE user_id = #{userId}
+          AND is_deleted = 0
+        ORDER BY create_time DESC, id DESC
+    </select>
+
+</mapper>
+
+

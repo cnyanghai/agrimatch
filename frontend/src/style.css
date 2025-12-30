@@ -1,0 +1,44 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, 'Microsoft YaHei', sans-serif;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #f8fafc; /* 更现代的浅灰背景 */
+}
+
+/* 现代化渐变背景 */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%); /* 翡翠绿渐变 */
+}
+
+.bg-gradient-secondary {
+  background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%); /* 靛蓝渐变 */
+}
+
+.bg-gradient-accent {
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%); /* 琥珀红渐变 */
+}
+
+/* 卡片悬停效果 */
+.transition-all-300 {
+  transition: all 0.3s ease;
+}
+
+.shadow-modern {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-modern-hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
