@@ -1,0 +1,27 @@
+# AgriMatch UI/UX 设计规范
+
+你现在是一名资深前端设计师，负责将控制台页面重构为与 Gemini 生成的静态页一致的高级风格。
+
+## 1. 核心视觉规范
+- **色彩**: 
+  - 主背景: 使用 `bg-gray-50`。
+  - 容器: 使用 `bg-white` 配合 `border border-gray-100`。
+  - 品牌色: 供应类使用 Emerald-600，采购类使用 Blue-600。
+- **圆角**: 
+  - 外层卡片: `rounded-2xl` (16px)。
+  - 按钮/输入框: `rounded-full` (Pill shape) 或 `rounded-xl`。
+- **阴影**: 
+  - 默认无阴影或极轻微 `shadow-sm`。
+  - 悬停(Hover): `hover:shadow-md` 且 `hover:border-primary`。
+
+## 2. 布局要求
+- **呼吸感**: 增加元素间的留白，卡片内边距统一使用 `p-6`。
+- **文字排版**: 
+  - 标题: `font-bold text-gray-900`。
+  - 描述: `text-sm text-gray-500`。
+  - 标签: 使用 `text-[10px] font-bold` 的微型胶囊标签。
+
+## 3. 组件约束
+- **图标**: 必须使用 Lucide 风格的线性图标，stroke-width 设为 2。
+- **按钮**: 必须包含 `transition-all` 和 `active:scale-95` 的点击反馈。
+- **列表**: 每一行元素必须有明显的 `hover:bg-gray-50/50` 反馈。
