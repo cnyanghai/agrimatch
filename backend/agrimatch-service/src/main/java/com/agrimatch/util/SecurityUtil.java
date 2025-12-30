@@ -14,6 +14,16 @@ public class SecurityUtil {
         }
         return ((LoginUser) authentication.getPrincipal()).getUserId();
     }
+
+    /**
+     * 可选获取用户ID，如果未登录返回 null
+     */
+    public static Long getUserIdOrNull(Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof LoginUser)) {
+            return null;
+        }
+        return ((LoginUser) authentication.getPrincipal()).getUserId();
+    }
 }
 
 

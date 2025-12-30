@@ -5,6 +5,7 @@ import GeminiNeedHallView from '../views/gemini/GeminiNeedHallView.vue'
 import GeminiTalksView from '../views/gemini/GeminiTalksView.vue'
 import GeminiInsightsView from '../views/gemini/GeminiInsightsView.vue'
 import GeminiTalksPublishView from '../views/gemini/GeminiTalksPublishView.vue'
+import GeminiTalkDetailView from '../views/gemini/GeminiTalkDetailView.vue'
 import LoginView from '../views/LoginView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import RequirementDemoView from '../views/RequirementDemoView.vue'
@@ -29,6 +30,7 @@ const router = createRouter({
     { path: '/hall/supply', name: 'hall-supply', component: GeminiSupplyHallView, meta: { public: true, minimal: true } },
     { path: '/hall/need', name: 'hall-need', component: GeminiNeedHallView, meta: { public: true, minimal: true } },
     { path: '/talks', name: 'talks', component: GeminiTalksView, meta: { public: true, minimal: true } },
+    { path: '/talks/:id', name: 'talk-detail', component: GeminiTalkDetailView, meta: { public: true, minimal: true } },
     { path: '/insights', name: 'insights', component: GeminiInsightsView, meta: { public: true, minimal: true } },
     { path: '/talks/publish', name: 'talks-publish', component: GeminiTalksPublishView, meta: { minimal: true, requiresAuth: true } },
 

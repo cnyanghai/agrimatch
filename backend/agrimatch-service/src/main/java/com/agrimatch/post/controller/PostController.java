@@ -43,7 +43,8 @@ public class PostController {
 
     @GetMapping
     public Result<List<PostResponse>> list(Authentication authentication, PostQuery q) {
-        Long userId = SecurityUtil.requireUserId(authentication);
+        // 允许未登录用户查看列表，但无法看到自己的点赞状态
+        Long userId = SecurityUtil.getUserIdOrNull(authentication);
         if (q == null) q = new PostQuery();
         q.setViewerUserId(userId);
         return Result.success(postService.list(q));

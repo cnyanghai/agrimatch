@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Present, Search } from '@element-plus/icons-vue'
 import { createPost, createPostComment, deletePost, listPostComments, listPosts, togglePostLike, type PostCommentResponse, type PostResponse } from '../api/post'
 import { useAuthStore } from '../store/auth'
 import { getMyCompany, type CompanyResponse } from '../api/company'
 import { giftPoints } from '../api/points'
+import { requireAuth } from '../utils/requireAuth'
 import PageHeader from '../components/PageHeader.vue'
 
 const auth = useAuthStore()
@@ -40,7 +41,8 @@ const q = reactive({
   order: 'desc'
 })
 
-const canCreate = computed(() => form.title.trim().length > 0)
+const canCreate = computed(() => form.title.trim().length > 0 && !!auth.token)
+const isLoggedIn = computed(() => !!auth.token)
 
 async function refresh() {
   loading.value = true
@@ -57,6 +59,13 @@ async function refresh() {
 
 async function onToggleLike(row: PostResponse) {
   if (liking.value[row.id]) return
+  
+  // 检查登录状态
+  if (!requireAuth('/posts')) {
+    ElMessage.warning('请先登录后再点赞')
+    return
+  }
+  
   liking.value = { ...liking.value, [row.id]: true }
   try {
     const r = await togglePostLike(row.id)
@@ -92,6 +101,13 @@ async function onAddComment() {
   if (!pid) return
   const content = commentText.value.trim()
   if (!content) return
+  
+  // 检查登录状态
+  if (!requireAuth('/posts')) {
+    ElMessage.warning('请先登录后再评论')
+    return
+  }
+  
   try {
     const r = await createPostComment(pid, content)
     if (r.code !== 0) throw new Error(r.message)
@@ -106,6 +122,13 @@ async function onAddComment() {
 
 async function onCreate() {
   if (!canCreate.value) return
+  
+  // 检查登录状态
+  if (!requireAuth('/posts')) {
+    ElMessage.warning('请先登录后再发布话题')
+    return
+  }
+  
   creating.value = true
   try {
     const r = await createPost({ title: form.title.trim(), content: form.content?.trim() || undefined })
@@ -181,15 +204,17 @@ async function submitTip() {
   }
 }
 
-refresh()
-;(async () => {
-  try {
-    const r = await getMyCompany()
-    if (r.code === 0) company.value = r.data ?? null
-  } catch {
-    // ignore
-  }
-})()
+onMounted(() => {
+  refresh()
+  ;(async () => {
+    try {
+      const r = await getMyCompany()
+      if (r.code === 0) company.value = r.data ?? null
+    } catch {
+      // ignore
+    }
+  })()
+})
 </script>
 
 <template>
@@ -200,17 +225,22 @@ refresh()
       <!-- 发布帖子 -->
       <div class="bg-white rounded-xl shadow-card border border-gray-100 p-5">
         <div class="font-bold text-gray-800 mb-4">发布帖子</div>
-        <el-form label-width="92px">
+        <div v-if="!isLoggedIn" class="text-center py-8">
+          <el-empty description="请先登录后再发布话题">
+            <el-button type="primary" @click="requireAuth('/posts')">去登录</el-button>
+          </el-empty>
+        </div>
+        <el-form v-else label-width="92px">
           <el-form-item label="用户/公司">
             <el-text>{{ auth.me?.nickName || auth.me?.userName || '-' }}</el-text>
             <el-divider direction="vertical" />
             <el-text type="info">{{ company?.companyName ?? '未绑定公司（可先去"我的档案"完善）' }}</el-text>
           </el-form-item>
           <el-form-item label="标题">
-            <el-input v-model="form.title" maxlength="120" show-word-limit />
+            <el-input v-model="form.title" maxlength="120" show-word-limit placeholder="请输入话题标题" />
           </el-form-item>
           <el-form-item label="内容">
-            <el-input v-model="form.content" type="textarea" :rows="5" maxlength="20000" show-word-limit />
+            <el-input v-model="form.content" type="textarea" :rows="5" maxlength="20000" show-word-limit placeholder="分享你的观点..." />
           </el-form-item>
           <el-form-item>
             <el-button type="primary" :disabled="!canCreate" :loading="creating" @click="onCreate">发布</el-button>

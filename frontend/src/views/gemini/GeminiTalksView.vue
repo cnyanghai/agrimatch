@@ -1,10 +1,21 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { requireAuth } from '../../utils/requireAuth'
 import { useUiStore } from '../../store/ui'
+import { useAuthStore } from '../../store/auth'
+import { listPosts, type PostResponse } from '../../api/post'
 
 const router = useRouter()
 const ui = useUiStore()
+const auth = useAuthStore()
+
+const loading = ref(false)
+const posts = ref<PostResponse[]>([])
+const keyword = ref('')
+const orderBy = ref('create_time')
+const order = ref<'asc' | 'desc'>('desc')
 
 function go(path: string) {
   router.push(path)
@@ -23,6 +34,51 @@ function onEnterMy() {
   if (!requireAuth('/console')) return
   go('/console')
 }
+
+async function loadPosts() {
+  loading.value = true
+  try {
+    const r = await listPosts({ 
+      keyword: keyword.value.trim() || undefined, 
+      orderBy: orderBy.value, 
+      order: order.value 
+    })
+    if (r.code !== 0) throw new Error(r.message)
+    posts.value = r.data ?? []
+  } catch (e: any) {
+    ElMessage.error(e?.message ?? '加载话题列表失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+function onSearch() {
+  loadPosts()
+}
+
+function onOrderChange() {
+  loadPosts()
+}
+
+function formatTime(timeStr: string | undefined) {
+  if (!timeStr) return '未知时间'
+  const date = new Date(timeStr)
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  
+  if (minutes < 1) return '刚刚'
+  if (minutes < 60) return `${minutes}分钟前`
+  if (hours < 24) return `${hours}小时前`
+  if (days < 7) return `${days}天前`
+  return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+}
+
+onMounted(() => {
+  loadPosts()
+})
 </script>
 
 <template>
@@ -35,7 +91,8 @@ function onEnterMy() {
             <span class="text-2xl font-bold text-indigo-600 italic cursor-pointer" @click="go('/')">AgriMatch</span>
             <div class="hidden md:flex space-x-6 text-sm font-medium text-gray-600">
               <button class="hover:text-indigo-600" @click="go('/')">首页</button>
-              <button class="hover:text-indigo-600" @click="go('/hall/supply')">交易大厅</button>
+              <button class="hover:text-emerald-600" @click="go('/hall/supply')">供应大厅</button>
+              <button class="hover:text-blue-600" @click="go('/hall/need')">采购大厅</button>
               <button class="hover:text-indigo-600" @click="go('/insights')">观点资讯</button>
               <button class="text-indigo-600 border-b-2 border-indigo-600 pb-5" @click="go('/talks')">话题广场</button>
             </div>
@@ -87,61 +144,83 @@ function onEnterMy() {
         <div class="lg:col-span-8 space-y-6">
           <div class="flex flex-col sm:flex-row gap-4 mb-8">
             <div class="flex-1 relative search-focus border bg-white rounded-xl transition-all">
-              <input type="text" placeholder="搜索你感兴趣的话题或关键字..." class="w-full h-11 bg-transparent px-10 text-sm outline-none" />
+              <input 
+                v-model="keyword"
+                type="text" 
+                placeholder="搜索你感兴趣的话题或关键字..." 
+                class="w-full h-11 bg-transparent px-10 text-sm outline-none"
+                @keyup.enter="onSearch"
+              />
               <svg class="w-4 h-4 text-gray-400 absolute left-4 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
             <div class="relative min-w-[120px]">
-              <select class="w-full h-11 bg-white border rounded-xl px-4 text-sm font-medium text-gray-600 appearance-none outline-none cursor-pointer hover:bg-gray-50">
-                <option>最热排序</option>
-                <option>最新发布</option>
-                <option>积分最高</option>
-                <option>最多评论</option>
+              <select 
+                v-model="order"
+                class="w-full h-11 bg-white border rounded-xl px-4 text-sm font-medium text-gray-600 appearance-none outline-none cursor-pointer hover:bg-gray-50"
+                @change="onOrderChange"
+              >
+                <option value="desc">最新发布</option>
+                <option value="asc">最早发布</option>
               </select>
               <svg class="w-4 h-4 text-gray-400 absolute right-4 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
             </div>
           </div>
 
-          <div class="topic-card bg-white rounded-3xl p-6 border border-gray-100 transition-all cursor-pointer">
-            <div class="flex justify-between items-start mb-4">
-              <div class="flex items-center gap-3">
-                <span class="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded">热议</span>
-                <span class="text-[10px] text-gray-400 font-medium">15分钟前 · 玉米专区</span>
-              </div>
-              <button class="text-gray-300 hover:text-indigo-600">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
-              </button>
-            </div>
-            <h3 class="text-xl font-bold text-gray-900 mb-3 hover:text-indigo-600 transition-colors">
-              东北地区“地趴粮”集中出货期将至，今年价格底部在哪里？
-            </h3>
-            <p class="text-sm text-gray-600 leading-relaxed line-clamp-2">
-              近期气温回升较快，辽宁、吉林部分地区农户售粮意愿增强。销区需求疲软，港口库存高企，这种供需博弈下价格走势如何？
-            </p>
-            <div class="mt-6 flex items-center justify-between">
-              <div class="flex items-center gap-4">
-                <div class="flex -space-x-2">
-                  <img class="w-7 h-7 rounded-full border-2 border-white bg-gray-100" src="https://api.dicebear.com/7.x/avataaars/svg?seed=John" />
-                  <img class="w-7 h-7 rounded-full border-2 border-white bg-gray-200" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" />
-                  <img class="w-7 h-7 rounded-full border-2 border-white bg-gray-300" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mike" />
+          <div v-loading="loading" class="space-y-6">
+            <div 
+              v-for="post in posts" 
+              :key="post.id"
+              class="topic-card bg-white rounded-3xl p-6 border border-gray-100 transition-all cursor-pointer"
+              @click="go(`/talks/${post.id}`)"
+            >
+              <div class="flex justify-between items-start mb-4">
+                <div class="flex items-center gap-3">
+                  <span 
+                    v-if="post.likeCount && post.likeCount > 10"
+                    class="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded"
+                  >
+                    热议
+                  </span>
+                  <span class="text-[10px] text-gray-400 font-medium">
+                    {{ formatTime(post.createTime) }} · {{ post.companyName || '个人' }}
+                  </span>
                 </div>
-                <span class="text-xs text-gray-400 font-medium">1,286 人正在讨论</span>
               </div>
-              <div class="flex items-center gap-4 text-xs text-gray-500">
-                <span class="flex items-center gap-1">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                  256
-                </span>
-                <span class="flex items-center gap-1">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                  842
-                </span>
+              <h3 
+                class="text-xl font-bold text-gray-900 mb-3 hover:text-indigo-600 transition-colors cursor-pointer"
+                @click.stop="go(`/talks/${post.id}`)"
+              >
+                {{ post.title }}
+              </h3>
+              <p v-if="post.content" class="text-sm text-gray-600 leading-relaxed line-clamp-2">
+                {{ post.content }}
+              </p>
+              <div class="mt-6 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold">
+                      {{ (post.nickName || post.userName || '?')[0] }}
+                    </div>
+                    <span class="text-xs text-gray-500">{{ post.nickName || post.userName || '匿名' }}</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 text-xs text-gray-500">
+                  <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                    {{ post.commentCount ?? 0 }}
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                    {{ post.likeCount ?? 0 }}
+                  </span>
+                </div>
               </div>
+            </div>
+
+            <div v-if="!loading && posts.length === 0" class="text-center py-12">
+              <div class="text-gray-400 text-sm">暂无话题，快来发布第一个话题吧！</div>
             </div>
           </div>
-
-          <button class="w-full py-4 text-sm font-bold text-gray-400 hover:text-indigo-600 transition-colors border-2 border-dashed border-gray-100 rounded-3xl hover:border-indigo-100">
-            加载更多话题...
-          </button>
         </div>
 
         <!-- 右侧 -->

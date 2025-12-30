@@ -2,14 +2,19 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { createPost } from '../../api/post'
+import { useAuthStore } from '../../store/auth'
+import { requireAuth } from '../../utils/requireAuth'
 
 const router = useRouter()
+const auth = useAuthStore()
 
 type PostType = 'general' | 'bounty' | 'poll'
 const postType = ref<PostType>('general')
 
 const title = ref('')
 const content = ref('')
+const submitting = ref(false)
 
 const bountyPoints = ref(50)
 const showBounty = computed(() => postType.value === 'bounty')
@@ -18,15 +23,42 @@ function close() {
   router.back()
 }
 
-function submit() {
+async function submit() {
   if (!title.value.trim()) return ElMessage.warning('请输入标题')
   if (!content.value.trim()) return ElMessage.warning('请输入内容')
-  ElMessage.success('已提交（演示页面，后续接后端发帖接口）')
-  close()
+  
+  // 检查登录状态
+  if (!requireAuth('/talks/publish')) {
+    ElMessage.warning('请先登录后再发布话题')
+    return
+  }
+  
+  submitting.value = true
+  try {
+    const r = await createPost({ 
+      title: title.value.trim(), 
+      content: content.value.trim() || undefined 
+    })
+    if (r.code !== 0) throw new Error(r.message)
+    ElMessage.success('发布成功！')
+    // 清空表单
+    title.value = ''
+    content.value = ''
+    postType.value = 'general'
+    // 返回话题广场
+    router.push('/talks')
+  } catch (e: any) {
+    ElMessage.error(e?.message ?? '发布失败，请稍后重试')
+  } finally {
+    submitting.value = false
+  }
 }
 
 onMounted(() => {
-  // 默认打开即展示（该页本身就是“发布弹窗页”）
+  // 检查登录状态
+  if (!auth.token) {
+    requireAuth('/talks/publish')
+  }
 })
 </script>
 
@@ -105,8 +137,12 @@ onMounted(() => {
           </div>
           <div class="flex gap-4">
             <button class="text-sm font-bold text-gray-400 hover:text-gray-600" @click="close">取消</button>
-            <button class="bg-indigo-600 text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all" @click="submit">
-              立即发布
+            <button 
+              class="bg-indigo-600 text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+              :disabled="submitting"
+              @click="submit"
+            >
+              {{ submitting ? '发布中...' : '立即发布' }}
             </button>
           </div>
         </div>
