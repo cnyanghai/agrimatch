@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交易条件议定工作站 - AgriMatch Enterprise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+SC:wght@300;500;700;900&display=swap');
+        
+        :root {
+            --brand-primary: #1e293b;
+            --brand-accent: #4f46e5;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            height: calc(100vh - 64px);
+        }
+
+        .diff-added { background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+        .diff-removed { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; text-decoration: line-through; }
+        
+        .input-card {
+            @apply bg-white border border-slate-200 rounded-xl p-4 transition-all hover:border-indigo-300 hover:shadow-md;
+        }
+
+        .parameter-label {
+            @apply text-[12px] font-bold text-slate-500 mb-2 block uppercase tracking-wider;
+        }
+
+        .pro-input {
+            @apply w-full bg-slate-50 border-none rounded-lg px-3 py-2 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none;
+        }
+
+        /* 隐藏滚动条但保留功能 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="overflow-hidden">
+
+    <!-- 顶部导航栏 -->
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 z-20 relative">
+        <div class="flex items-center gap-4">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black italic">A</div>
+            <h1 class="text-lg font-black text-slate-800 tracking-tight">AgriMatch <span class="text-indigo-600">Enterprise</span></h1>
+            <div class="h-4 w-px bg-slate-200 mx-2"></div>
+            <span class="text-sm font-bold text-slate-500 uppercase">议价单编号: AM-PRO-20251230-01</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="text-right">
+                <p class="text-[10px] font-bold text-slate-400">当前总估值</p>
+                <p id="totalValueDisplay" class="text-sm font-black text-slate-900">¥ 490,000.00</p>
+            </div>
+            <button class="bg-slate-900 text-white px-6 py-2 rounded-lg text-xs font-bold hover:bg-slate-800 transition-all">
+                退出洽谈
+            </button>
+        </div>
+    </header>
+
+    <main class="workspace-grid">
+        <!-- 左侧：历史记录与聊天 -->
+        <aside class="bg-white border-r border-slate-200 flex flex-col">
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="font-bold text-sm text-slate-700">商务协商记录</h3>
+                <span class="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-black rounded">在线</span>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+                <!-- 历史系统消息 -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 italic text-[11px] text-slate-500">
+                    2025-12-30 14:00: 卖家发布了初始挂单。
+                </div>
+
+                <!-- 模拟对方对话 -->
+                <div class="flex gap-3">
+                    <div class="w-8 h-8 rounded-full bg-slate-200 shrink-0"></div>
+                    <div class="bg-white border border-slate-200 p-3 rounded-2xl rounded-tl-none text-xs text-slate-600 leading-relaxed shadow-sm">
+                        你好，关于这批玉米，我们的价格是基于目前的库容情况给出的。如果能增加采购量，我们可以考虑下调单价。
+                    </div>
+                </div>
+
+                <!-- 己方动作展示 -->
+                <div id="actionHistory">
+                    <!-- 动态插入议价动作 -->
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-slate-200">
+                <div class="relative">
+                    <input type="text" placeholder="向对方发送私信..." class="w-full bg-slate-100 border-none rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/20">
+                    <button class="absolute right-3 top-2.5 text-indigo-600 font-bold text-xs">发送</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 右侧：议价核心工作区 -->
+        <section class="overflow-y-auto bg-slate-50 p-8 no-scrollbar">
+            <div class="max-w-5xl mx-auto space-y-8">
+                
+                <div class="flex items-end justify-between">
+                    <div>
+                        <h2 class="text-3xl font-black text-slate-900 tracking-tighter">参数修订工作台</h2>
+                        <p class="text-slate-500 text-sm mt-1">您可以同时调整价格、数量、规格及支付条款。系统将实时计算差异。</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="resetForm()" class="px-4 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-600 hover:bg-white">重置默认</button>
+                        <button onclick="sendOffer()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700">发送正式要约 (OFFER)</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-12 gap-6">
+                    <!-- 核心交易参数 -->
+                    <div class="col-span-8 space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- 价格输入 -->
+                            <div class="input-card">
+                                <label class="parameter-label">拟定单价 (元/吨)</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="number" id="inputPrice" oninput="calculate()" value="2380" class="pro-input text-xl">
+                                    <div class="shrink-0 text-right">
+                                        <p class="text-[9px] font-bold text-slate-400">原始: 2450</p>
+                                        <p id="priceDiff" class="text-[10px] font-bold text-red-500">-70.00</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 数量输入 -->
+                            <div class="input-card">
+                                <label class="parameter-label">拟定采购量 (吨)</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="number" id="inputQty" oninput="calculate()" value="200" class="pro-input text-xl">
+                                    <div class="shrink-0 text-right">
+                                        <p class="text-[9px] font-bold text-slate-400">原始: 200</p>
+                                        <p id="qtyDiff" class="text-[10px] font-bold text-green-500">持平</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 质量指标修订 -->
+                        <div class="bg-white border border-slate-200 rounded-2xl p-6">
+                            <h4 class="text-sm font-black text-slate-800 mb-6 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"/></svg>
+                                规格参数调整 (质量置换价格)
+                            </h4>
+                            <div class="grid grid-cols-3 gap-6">
+                                <div class="space-y-2">
+                                    <label class="parameter-label">水分 (Moisture) ≤</label>
+                                    <select id="inputWater" onchange="calculate()" class="pro-input">
+                                        <option value="13.0">13.0% (原始标准)</option>
+                                        <option value="14.0">14.0% (+1.0%)</option>
+                                        <option value="15.0" selected>15.0% (+2.0%)</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="parameter-label">蛋白 (Protein) ≥</label>
+                                    <select id="inputProtein" onchange="calculate()" class="pro-input">
+                                        <option value="12.5">12.5% (原始标准)</option>
+                                        <option value="12.0" selected>12.0% (-0.5%)</option>
+                                        <option value="11.5">11.5% (-1.0%)</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="parameter-label">杂质 (Impurity) ≤</label>
+                                    <select id="inputImp" onchange="calculate()" class="pro-input">
+                                        <option value="1.0" selected>1.0% (标准)</option>
+                                        <option value="2.0">2.0% (放宽)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100">
+                                <p class="text-[11px] text-amber-700 leading-relaxed">
+                                    <strong>策略提示：</strong> 您放宽了水分要求 (+2.0%)。这通常意味着供应商可减少烘干支出，有助于您争取每吨 30-50 元的价格降幅。
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 商务条款修订 -->
+                        <div class="bg-white border border-slate-200 rounded-2xl p-6">
+                            <h4 class="text-sm font-black text-slate-800 mb-6 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke-width="2"/></svg>
+                                交付与结算修订
+                            </h4>
+                            <div class="grid grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="parameter-label">交付方式</label>
+                                    <div class="flex gap-2">
+                                        <button class="flex-1 py-2 rounded-lg border-2 border-indigo-600 text-indigo-600 text-xs font-bold">卖家送货</button>
+                                        <button class="flex-1 py-2 rounded-lg border-2 border-slate-200 text-slate-400 text-xs font-bold">买家自提</button>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="parameter-label">结算周期</label>
+                                    <select class="pro-input">
+                                        <option>货到即付 (现汇)</option>
+                                        <option>承兑汇票 (90天)</option>
+                                        <option>分期支付 (3-7-0)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧：对比与分析摘要 -->
+                    <div class="col-span-4 space-y-6">
+                        <div class="bg-slate-900 rounded-[2rem] p-6 text-white shadow-2xl sticky top-0">
+                            <h3 class="text-xs font-bold opacity-50 uppercase tracking-[0.2em] mb-6">修订要约摘要</h3>
+                            
+                            <div class="space-y-6">
+                                <div class="flex justify-between items-end">
+                                    <span class="text-[10px] font-bold opacity-50">拟定价格差异</span>
+                                    <span id="summaryPriceDiff" class="text-xl font-black text-red-400">-70.00 / 吨</span>
+                                </div>
+                                <div class="flex justify-between items-end">
+                                    <span class="text-[10px] font-bold opacity-50">总货值变动</span>
+                                    <span id="summaryTotalDiff" class="text-xl font-black text-indigo-300">- ¥ 14,000.00</span>
+                                </div>
+                                
+                                <div class="pt-6 border-t border-white/10 space-y-4">
+                                    <div class="flex justify-between text-[11px]">
+                                        <span class="opacity-50 text-white">质量标准变动:</span>
+                                        <span class="text-green-400 font-bold">放宽 (有益卖家)</span>
+                                    </div>
+                                    <div class="flex justify-between text-[11px]">
+                                        <span class="opacity-50 text-white">履约风险评估:</span>
+                                        <span class="text-blue-400 font-bold">低</span>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white/5 p-4 rounded-2xl border border-white/10">
+                                    <p class="text-[10px] leading-relaxed opacity-70">
+                                        该提议通过放宽水分要求换取了单价下调。由于采购量保持不变，建议结合账期缩短来增强要约吸引力。
+                                    </p>
+                                </div>
+
+                                <button onclick="sendOffer()" class="w-full py-4 bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl font-black text-sm transition-all shadow-lg shadow-indigo-500/20">
+                                    提交并生成法律存证
+                                </button>
+                                <p class="text-center text-[9px] opacity-30 mt-4">提交后，系统将自动生成对应参数的补充协议草案</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const ORIGINAL = {
+            price: 2450,
+            qty: 200,
+            water: 13.0,
+            protein: 12.5
+        };
+
+        function calculate() {
+            const p = parseFloat(document.getElementById('inputPrice').value) || 0;
+            const q = parseFloat(document.getElementById('inputQty').value) || 0;
+            
+            // 差异计算
+            const pDiff = p - ORIGINAL.price;
+            const qDiff = q - ORIGINAL.qty;
+            const total = p * q;
+            const totalDiff = (p * q) - (ORIGINAL.price * ORIGINAL.qty);
+
+            // 更新UI
+            document.getElementById('priceDiff').innerText = (pDiff >= 0 ? '+' : '') + pDiff.toFixed(2);
+            document.getElementById('priceDiff').className = `text-[10px] font-bold ${pDiff >= 0 ? 'text-green-500' : 'text-red-500'}`;
+            
+            document.getElementById('qtyDiff').innerText = qDiff === 0 ? '持平' : ((qDiff > 0 ? '+' : '') + qDiff.toFixed(2));
+            document.getElementById('qtyDiff').className = `text-[10px] font-bold ${qDiff >= 0 ? 'text-green-500' : 'text-red-500'}`;
+
+            document.getElementById('totalValueDisplay').innerText = `¥ ${total.toLocaleString()}`;
+            document.getElementById('summaryPriceDiff').innerText = `${(pDiff >= 0 ? '+' : '') + pDiff.toFixed(2)} / 吨`;
+            document.getElementById('summaryTotalDiff').innerText = `${totalDiff >= 0 ? '+' : '-'} ¥ ${Math.abs(totalDiff).toLocaleString()}`;
+            document.getElementById('summaryTotalDiff').className = `text-xl font-black ${totalDiff >= 0 ? 'text-green-400' : 'text-red-400'}`;
+        }
+
+        function sendOffer() {
+            const p = document.getElementById('inputPrice').value;
+            const q = document.getElementById('inputQty').value;
+            const w = document.getElementById('inputWater').value;
+            const pr = document.getElementById('inputProtein').value;
+
+            const history = document.getElementById('actionHistory');
+            const entry = document.createElement('div');
+            entry.className = "mt-4 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300";
+            entry.innerHTML = `
+                <div class="bg-indigo-600 text-white p-4 rounded-2xl rounded-tr-none shadow-lg">
+                    <p class="text-[9px] font-bold opacity-60 mb-2 uppercase tracking-widest">已发送要约修订</p>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-white/10 p-2 rounded-lg font-bold">价: ¥${p}</div>
+                        <div class="bg-white/10 p-2 rounded-lg font-bold">量: ${q}吨</div>
+                        <div class="col-span-2 bg-white/10 p-2 rounded-lg text-[10px]">
+                            指标: 水分≤${w}% / 蛋白≥${pr}%
+                        </div>
+                    </div>
+                    <p class="text-[9px] mt-2 opacity-50 italic">等待对方响应中...</p>
+                </div>
+            `;
+            history.prepend(entry);
+            
+            // 滚动到顶部
+            history.parentElement.scrollTop = 0;
+        }
+
+        function resetForm() {
+            document.getElementById('inputPrice').value = ORIGINAL.price;
+            document.getElementById('inputQty').value = ORIGINAL.qty;
+            document.getElementById('inputWater').value = "13.0";
+            document.getElementById('inputProtein').value = "12.5";
+            calculate();
+        }
+
+        // 初始化
+        calculate();
+    </script>
+</body>
+</html>

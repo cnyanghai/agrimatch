@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>供应商反报价操作</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .edit-pulse {
+            animation: border-glow 2s infinite;
+        }
+        @keyframes border-glow {
+            0% { box-shadow: 0 0 0 0px rgba(37, 99, 235, 0.2); }
+            50% { box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+            100% { box-shadow: 0 0 0 0px rgba(37, 99, 235, 0.2); }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <!-- 顶部导航 -->
+    <header class="h-14 bg-slate-900 text-white flex items-center justify-between px-6 shrink-0">
+        <div class="flex items-center gap-4">
+            <span class="text-lg font-bold">中煤能源销售管理系统</span>
+            <div class="h-4 w-[1px] bg-slate-700"></div>
+            <span class="text-xs text-slate-400">正在响应：华能电力 Q5500 采购需求</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="text-right">
+                <p class="text-[10px] text-slate-500 uppercase">实时汇率 (USD/CNY)</p>
+                <p class="text-xs font-mono">7.1245</p>
+            </div>
+            <button class="bg-slate-800 hover:bg-slate-700 p-2 rounded-lg transition-colors">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+        <!-- 侧边栏：待办 -->
+        <aside class="w-64 bg-white border-r flex flex-col shrink-0">
+            <div class="p-4 border-b font-bold text-sm flex items-center justify-between">
+                议价队列
+                <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px]">12</span>
+            </div>
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-2">
+                <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl relative">
+                    <div class="w-1.5 h-1.5 bg-blue-600 rounded-full absolute top-3 right-3"></div>
+                    <p class="text-xs font-bold text-slate-800">华能电力</p>
+                    <p class="text-[10px] text-blue-600 mt-1">正在修改报价...</p>
+                </div>
+                <div class="p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer border border-transparent">
+                    <p class="text-xs font-bold text-slate-500">大唐国际</p>
+                    <p class="text-[10px] text-gray-400 mt-1">已发送等待反馈</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主操作区：反报价编辑视图 -->
+        <main class="flex-1 bg-slate-50 flex flex-col overflow-hidden">
+            <!-- 状态进度条 -->
+            <div class="bg-white border-b px-8 py-3 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[10px] font-bold">1</span>
+                        <span class="text-xs font-bold text-slate-800">修改条款</span>
+                    </div>
+                    <div class="w-8 h-[1px] bg-gray-200"></div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
+                        <span class="text-xs font-medium text-gray-400">预览并发送</span>
+                    </div>
+                </div>
+                <button onclick="cancelCounter()" class="text-xs text-gray-400 hover:text-gray-600 font-medium">放弃修改</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-8">
+                <div class="max-w-2xl mx-auto space-y-6">
+                    
+                    <!-- 核心调价表单 -->
+                    <div class="bg-white rounded-2xl shadow-sm border p-8 space-y-8 edit-pulse">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <svg width="20" height="20" class="text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                编辑反报价方案
+                            </h2>
+                            <p class="text-xs text-gray-400 mt-1">您可以调整价格、数量或支付细节来发起一轮新的议价。</p>
+                        </div>
+
+                        <!-- 价格输入 -->
+                        <div class="grid grid-cols-2 gap-8">
+                            <div class="space-y-2">
+                                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">买方出价</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 text-sm">¥</div>
+                                    <input type="text" disabled value="860.00" class="w-full bg-gray-50 border-gray-200 rounded-xl py-3 pl-8 text-sm text-gray-400 font-bold">
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[11px] font-bold text-blue-600 uppercase tracking-wider">您的新报价 (反报价)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-600 text-sm font-bold">¥</div>
+                                    <input type="number" id="counter-price" value="865.00" oninput="updateImpact()" class="w-full border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 rounded-xl py-3 pl-8 text-sm font-black text-slate-800 transition-all">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 其他条款调整 -->
+                        <div class="grid grid-cols-2 gap-8 pt-4">
+                            <div class="space-y-2">
+                                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">交付数量 (吨)</label>
+                                <input type="number" value="50000" class="w-full border-gray-200 rounded-xl py-3 px-4 text-sm font-medium text-slate-700">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">结算周期</label>
+                                <select class="w-full border-gray-200 rounded-xl py-3 px-4 text-sm font-medium text-slate-700 bg-gray-50">
+                                    <option>款到发货 (现汇)</option>
+                                    <option>信用证 30天</option>
+                                    <option>信用证 90天</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 理由说明 -->
+                        <div class="space-y-2 pt-4">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">反报价说明 (可选)</label>
+                            <textarea placeholder="例如：考虑到当前港口作业费上涨，建议此价格..." class="w-full border-gray-200 rounded-xl py-3 px-4 text-sm min-h-[100px] focus:ring-0 focus:border-gray-300"></textarea>
+                        </div>
+
+                        <div class="pt-6 border-t flex gap-4">
+                            <button onclick="submitCounter()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-sm shadow-lg shadow-blue-200 transition-all">确认并发送反报价</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 侧边栏：商品信息与动态影响分析 -->
+        <aside class="w-80 bg-white border-l flex flex-col shrink-0">
+            <div class="p-4 border-b bg-gray-50">
+                <h3 class="font-bold text-sm text-gray-700">报价影响评估</h3>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-5 space-y-8">
+                <!-- 商品规格看板 (保持显示) -->
+                <section>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-4">当前标的规格</span>
+                    <div class="p-4 bg-slate-900 rounded-2xl text-white">
+                        <p class="text-[10px] text-slate-400 mb-1">动力煤 (Q5500)</p>
+                        <p class="text-sm font-bold mb-3">准格尔2号 - 洗精煤</p>
+                        <div class="flex justify-between items-center text-[10px] border-t border-white/10 pt-3">
+                            <span>发热量: 5500</span>
+                            <span>全水: 12%</span>
+                            <span>硫分: 0.8%</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 实时调价联动数据 -->
+                <section class="space-y-4">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">财务影响预测</span>
+                    
+                    <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                        <p class="text-[10px] text-emerald-600 font-bold mb-1">毛利变动 (估算)</p>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-2xl font-black text-emerald-700" id="impact-profit">+ ¥250,000</span>
+                        </div>
+                        <p class="text-[10px] text-emerald-500 mt-1">较买方原出价提升</p>
+                    </div>
+
+                    <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        <p class="text-[10px] text-blue-600 font-bold mb-1">库存货值</p>
+                        <p class="text-lg font-bold text-slate-800">¥43,250,000</p>
+                        <p class="text-[10px] text-blue-400 mt-1">此笔交易占比: 40.2%</p>
+                    </div>
+                </section>
+
+                <!-- 市场对比 -->
+                <section>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-4">市场参考价</span>
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">环渤海指数 (BSPI)</span>
+                            <span class="font-bold">¥862.00</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">昨日挂牌均价</span>
+                            <span class="font-bold">¥868.00</span>
+                        </div>
+                        <div class="mt-4 p-3 bg-orange-50 border border-orange-100 rounded-lg">
+                            <p class="text-[10px] text-orange-700 font-bold">提示：您的新报价处于市场合理区间内，建议发送。</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            
+            <div class="p-4 border-t bg-gray-50">
+                <div class="flex items-center gap-2 text-[10px] text-gray-400">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>修改后将生成新的法律要约</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- 成功提示遮罩 -->
+    <div id="success-overlay" class="fixed inset-0 bg-slate-900/95 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-all duration-300 z-50">
+        <div class="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center mb-4">
+            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-white mb-1">反报价已发送</h3>
+        <p class="text-slate-400 text-sm">正在等待华能电力的反馈...</p>
+    </div>
+
+    <script>
+        function updateImpact() {
+            const price = document.getElementById('counter-price').value;
+            const impactProfit = document.getElementById('impact-profit');
+            
+            // 简单的联动逻辑模拟
+            const diff = (price - 860) * 50000;
+            if (diff >= 0) {
+                impactProfit.innerText = "+ ¥" + diff.toLocaleString();
+                impactProfit.parentElement.parentElement.className = "p-4 bg-emerald-50 rounded-xl border border-emerald-100";
+            } else {
+                impactProfit.innerText = "- ¥" + Math.abs(diff).toLocaleString();
+                impactProfit.parentElement.parentElement.className = "p-4 bg-red-50 rounded-xl border border-red-100";
+            }
+        }
+
+        function submitCounter() {
+            const overlay = document.getElementById('success-overlay');
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+
+        function cancelCounter() {
+            if(confirm("确定放弃当前的修改吗？")) {
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
