@@ -80,7 +80,7 @@ function navigateTo(path: string) {
       <div class="container mx-auto px-4 flex items-center justify-between">
         <!-- Logo -->
         <div class="flex items-center gap-3 cursor-pointer" @click="navigateTo('/')">
-          <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-xl">A</div>
+          <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold text-xl">A</div>
           <div class="flex flex-col">
             <span class="text-xl font-bold text-gray-800 leading-none">农汇通</span>
             <span class="text-xs text-gray-500 font-medium">AgriMatch</span>
@@ -112,8 +112,8 @@ function navigateTo(path: string) {
 
         <!-- Auth -->
         <div class="flex items-center gap-3 ml-8">
-          <button class="px-5 py-1.5 rounded-full border border-blue-600 text-blue-600 hover:bg-blue-50 transition-colors font-medium text-sm" @click="navigateTo('/login')">登录</button>
-          <button class="px-5 py-1.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium text-sm" @click="navigateTo('/login?tab=register')">注册</button>
+          <button class="px-5 py-1.5 rounded-full border border-emerald-600 text-emerald-700 hover:bg-emerald-50 transition-colors font-medium text-sm" @click="navigateTo('/login')">登录</button>
+          <button class="px-5 py-1.5 rounded-full bg-emerald-600 text-white hover:bg-emerald-700 transition-colors font-medium text-sm" @click="navigateTo('/login?tab=register')">注册</button>
         </div>
       </div>
     </header>
@@ -176,7 +176,7 @@ function navigateTo(path: string) {
           </div>
           
           <div class="flex gap-6">
-            <button class="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-bold text-lg transition-all shadow-lg shadow-blue-500/30 flex items-center gap-2">
+            <button class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-lg transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
               <el-icon><Box /></el-icon>
               发布供应
             </button>

@@ -178,7 +178,10 @@ onMounted(() => {
                     <div class="w-7 h-7 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold">
                       {{ (post.nickName || post.userName || '?')[0] }}
                     </div>
-                    <span class="text-xs text-gray-500">{{ post.nickName || post.userName || '匿名' }}</span>
+                    <span class="text-xs text-gray-500 truncate">
+                      {{ post.nickName || post.userName || '匿名' }}
+                      <span class="text-gray-400">· {{ post.position || '暂无职位' }}</span>
+                    </span>
                   </div>
                 </div>
                 <div class="flex items-center gap-4 text-xs text-gray-500">

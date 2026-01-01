@@ -51,11 +51,11 @@ function onQuote() {
             <input
               type="text"
               placeholder="搜索您想供应的品种、求购区域或指标要求..."
-              class="w-full border-2 border-gray-100 rounded-xl py-2.5 px-10 focus:border-blue-500 outline-none transition-all"
+              class="w-full border-2 border-gray-100 rounded-xl py-2.5 px-10 focus:border-emerald-500 outline-none transition-all"
             />
             <svg class="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </div>
-          <button class="px-8 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all">搜索需求</button>
+          <button class="px-8 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all active:scale-95">搜索需求</button>
         </div>
 
         <div class="space-y-4">
@@ -109,7 +109,7 @@ function onQuote() {
                 <span class="text-gray-400 text-[10px]">编号: B24991</span>
               </div>
               <h3 class="text-lg font-bold text-gray-900 truncate">长期求购东北一等玉米</h3>
-              <div class="mt-1 text-xl font-black text-blue-600 italic">意向: ¥2400 <span class="text-xs font-normal text-gray-400 not-italic">元/吨</span></div>
+              <div class="mt-1 text-xl font-black text-emerald-600 italic">意向: ¥2400 <span class="text-xs font-normal text-gray-400 not-italic">元/吨</span></div>
             </div>
 
             <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs py-2 bg-gray-50/50 rounded-lg px-4">
@@ -132,11 +132,11 @@ function onQuote() {
             </div>
 
             <div class="shrink-0 flex flex-col items-center gap-2">
-              <button class="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-md shadow-blue-50 hover:bg-blue-700 transition-all active:scale-95" @click="onQuote">
+              <button class="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-sm hover:bg-slate-800 transition-all active:scale-95" @click="onQuote">
                 立即报价
               </button>
               <div class="w-24 bg-gray-200 h-1.5 rounded-full overflow-hidden">
-                <div class="bg-blue-500 h-full w-2/3"></div>
+                <div class="bg-emerald-500 h-full w-2/3"></div>
               </div>
               <span class="text-[10px] text-gray-400">已有 8 家参与竞价</span>
             </div>
@@ -146,7 +146,7 @@ function onQuote() {
 
       <div class="flex justify-center mt-10 gap-2">
         <button class="px-4 py-2 bg-white border rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition-colors">上一页</button>
-        <button class="px-4 py-2 bg-blue-600 text-white border-blue-600 rounded-lg text-sm font-bold">1</button>
+        <button class="px-4 py-2 bg-slate-900 text-white border-slate-900 rounded-lg text-sm font-bold">1</button>
         <button class="px-4 py-2 bg-white border rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition-colors">2</button>
         <button class="px-4 py-2 bg-white border rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition-colors">下一页</button>
       </div>
@@ -162,17 +162,17 @@ function onQuote() {
 
 <style scoped>
 .filter-tag:hover {
-  border-color: #3b82f6;
-  color: #3b82f6;
+  border-color: #10b981;
+  color: #047857;
 }
 .filter-tag.active {
-  background-color: #3b82f6;
+  background-color: #10b981;
   color: white;
-  border-color: #3b82f6;
+  border-color: #10b981;
 }
 .purchase-card:hover {
-  border-color: #3b82f6;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.05);
+  border-color: #a7f3d0;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
 }
 .animate-marquee {
   display: inline-block;

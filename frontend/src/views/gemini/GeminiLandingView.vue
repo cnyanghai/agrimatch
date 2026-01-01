@@ -343,7 +343,7 @@ onBeforeUnmount(() => {
 
         <div>
           <div class="flex items-center gap-2 mb-6">
-            <div class="w-1 h-6 bg-blue-600"></div>
+            <div class="w-1 h-6 bg-slate-900"></div>
             <h3 class="text-xl font-bold">大咖观点</h3>
           </div>
           <div class="space-y-4">

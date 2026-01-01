@@ -138,17 +138,17 @@ async function onRegister() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-orange-50">
+  <div class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-emerald-50 via-white to-amber-50">
     <!-- 背景装饰 -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute -top-40 -right-40 w-80 h-80 bg-blue-100 rounded-full opacity-50 blur-3xl"></div>
-      <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-100 rounded-full opacity-50 blur-3xl"></div>
+      <div class="absolute -top-40 -right-40 w-80 h-80 bg-emerald-100 rounded-full opacity-50 blur-3xl"></div>
+      <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-amber-100 rounded-full opacity-50 blur-3xl"></div>
     </div>
 
     <div class="relative w-full max-w-md">
       <!-- Logo区域 -->
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-white font-bold text-2xl shadow-lg shadow-blue-200 mb-4">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 text-white font-bold text-2xl shadow-lg shadow-emerald-200 mb-4">
           A
         </div>
         <h1 class="text-2xl font-bold text-gray-800">农汇通 AgriMatch</h1>
@@ -161,19 +161,19 @@ async function onRegister() {
         <div class="flex border-b border-gray-100">
           <button
             class="flex-1 py-4 text-center font-medium transition-all relative"
-            :class="active === 'login' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'"
+            :class="active === 'login' ? 'text-emerald-700' : 'text-gray-400 hover:text-gray-600'"
             @click="active = 'login'"
           >
             登录
-            <div v-if="active === 'login'" class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-blue-600 rounded-full"></div>
+            <div v-if="active === 'login'" class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-emerald-600 rounded-full"></div>
           </button>
           <button
             class="flex-1 py-4 text-center font-medium transition-all relative"
-            :class="active === 'register' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'"
+            :class="active === 'register' ? 'text-emerald-700' : 'text-gray-400 hover:text-gray-600'"
             @click="active = 'register'"
           >
             注册
-            <div v-if="active === 'register'" class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-blue-600 rounded-full"></div>
+            <div v-if="active === 'register'" class="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-emerald-600 rounded-full"></div>
           </button>
         </div>
 
@@ -260,7 +260,7 @@ async function onRegister() {
             </el-button>
 
             <div class="text-center text-sm text-gray-500">
-              还没有账号？<span class="text-blue-600 cursor-pointer hover:underline" @click="active = 'register'">立即注册</span>
+              还没有账号？<span class="text-emerald-700 cursor-pointer hover:underline" @click="active = 'register'">立即注册</span>
             </div>
           </div>
 
@@ -341,37 +341,37 @@ async function onRegister() {
               <label class="block text-sm font-medium text-gray-700 mb-3">选择您的身份 <span class="text-red-500">*</span></label>
               <div class="grid grid-cols-2 gap-4">
                 <div
-                  class="relative p-4 border-2 rounded-xl cursor-pointer transition-all hover:border-blue-300"
-                  :class="regForm.userType === 'buyer' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                  class="relative p-4 border-2 rounded-xl cursor-pointer transition-all hover:border-blue-200"
+                  :class="regForm.userType === 'buyer' ? 'border-blue-300 bg-blue-50' : 'border-gray-200'"
                   @click="regForm.userType = 'buyer'"
                 >
                   <div class="flex flex-col items-center">
                     <div class="w-12 h-12 rounded-full flex items-center justify-center mb-2"
-                         :class="regForm.userType === 'buyer' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500'">
+                         :class="regForm.userType === 'buyer' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'">
                       <el-icon :size="24"><ShoppingCart /></el-icon>
                     </div>
                     <div class="font-medium" :class="regForm.userType === 'buyer' ? 'text-blue-700' : 'text-gray-700'">采购商</div>
                     <div class="text-xs text-gray-500 mt-1 text-center">发布采购需求<br/>浏览供应信息</div>
                   </div>
-                  <div v-if="regForm.userType === 'buyer'" class="absolute top-2 right-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                    <el-icon class="text-white" :size="12"><Check /></el-icon>
+                  <div v-if="regForm.userType === 'buyer'" class="absolute top-2 right-2 w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center border border-blue-200">
+                    <el-icon class="text-blue-700" :size="12"><Check /></el-icon>
                   </div>
                 </div>
 
                 <div
-                  class="relative p-4 border-2 rounded-xl cursor-pointer transition-all hover:border-orange-300"
-                  :class="regForm.userType === 'seller' ? 'border-orange-500 bg-orange-50' : 'border-gray-200'"
+                  class="relative p-4 border-2 rounded-xl cursor-pointer transition-all hover:border-emerald-200"
+                  :class="regForm.userType === 'seller' ? 'border-emerald-400 bg-emerald-50' : 'border-gray-200'"
                   @click="regForm.userType = 'seller'"
                 >
                   <div class="flex flex-col items-center">
                     <div class="w-12 h-12 rounded-full flex items-center justify-center mb-2"
-                         :class="regForm.userType === 'seller' ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-500'">
+                         :class="regForm.userType === 'seller' ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-500'">
                       <el-icon :size="24"><Box /></el-icon>
                     </div>
-                    <div class="font-medium" :class="regForm.userType === 'seller' ? 'text-orange-700' : 'text-gray-700'">供应商</div>
+                    <div class="font-medium" :class="regForm.userType === 'seller' ? 'text-emerald-800' : 'text-gray-700'">供应商</div>
                     <div class="text-xs text-gray-500 mt-1 text-center">发布供应信息<br/>浏览采购需求</div>
                   </div>
-                  <div v-if="regForm.userType === 'seller'" class="absolute top-2 right-2 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+                  <div v-if="regForm.userType === 'seller'" class="absolute top-2 right-2 w-5 h-5 bg-emerald-600 rounded-full flex items-center justify-center">
                     <el-icon class="text-white" :size="12"><Check /></el-icon>
                   </div>
                 </div>
@@ -391,7 +391,7 @@ async function onRegister() {
             </el-button>
 
             <div class="text-center text-sm text-gray-500">
-              已有账号？<span class="text-blue-600 cursor-pointer hover:underline" @click="active = 'login'">立即登录</span>
+              已有账号？<span class="text-emerald-700 cursor-pointer hover:underline" @click="active = 'login'">立即登录</span>
             </div>
           </div>
         </div>
@@ -399,7 +399,7 @@ async function onRegister() {
 
       <!-- 底部信息 -->
       <div class="mt-6 text-center text-xs text-gray-400">
-        <p>登录即表示同意 <span class="text-blue-500 cursor-pointer">用户协议</span> 和 <span class="text-blue-500 cursor-pointer">隐私政策</span></p>
+        <p>登录即表示同意 <span class="text-emerald-700 cursor-pointer">用户协议</span> 和 <span class="text-emerald-700 cursor-pointer">隐私政策</span></p>
       </div>
     </div>
   </div>

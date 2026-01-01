@@ -418,11 +418,11 @@ onMounted(() => {
               
               <!-- 发送的消息 -->
               <div v-else class="flex items-start gap-3 max-w-[70%] flex-row-reverse">
-                <div class="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm shrink-0">
+                <div class="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center text-white text-sm shrink-0">
                   {{ (auth.me?.nickName || 'U')[0] }}
                 </div>
                 <div>
-                  <div class="bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm">
+                  <div class="bg-emerald-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm">
                     <div>{{ msg.content }}</div>
                   </div>
                   <div class="text-xs text-gray-400 mt-1 mr-1 text-right">{{ msg.time }}</div>

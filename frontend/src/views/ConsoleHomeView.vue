@@ -36,7 +36,8 @@ function getIconClass(color: string) {
     indigo: 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white',
     emerald: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white',
     orange: 'bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white',
-    blue: 'bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white'
+    // 用中性 Slate 替代高饱和蓝，避免与全站 Emerald 主色冲突
+    blue: 'bg-slate-50 text-slate-600 group-hover:bg-slate-900 group-hover:text-white'
   }
   return colorMap[color] || colorMap.indigo
 }

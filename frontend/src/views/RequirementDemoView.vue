@@ -467,11 +467,11 @@ const tabs = [
           v-for="tab in tabs"
           :key="tab.key"
           class="flex-1 py-4 text-center font-medium transition-all relative"
-          :class="activeTab === tab.key ? 'text-blue-600 bg-blue-50/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
+          :class="activeTab === tab.key ? 'text-emerald-700 bg-emerald-50/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
           @click="activeTab = tab.key"
         >
           <span class="mr-2 inline-flex align-text-bottom"><el-icon><component :is="tab.icon" /></el-icon></span>{{ tab.label }}
-          <div v-if="activeTab === tab.key" class="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-0.5 bg-blue-600 rounded-full"></div>
+          <div v-if="activeTab === tab.key" class="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-0.5 bg-emerald-600 rounded-full"></div>
         </button>
       </div>
     </div>
