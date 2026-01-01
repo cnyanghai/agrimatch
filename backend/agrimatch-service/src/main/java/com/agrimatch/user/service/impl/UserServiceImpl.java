@@ -63,6 +63,7 @@ public class UserServiceImpl implements UserService {
         u.setNickName(emptyToNull(req.getNickName()));
         u.setPhonenumber(emptyToNull(req.getPhonenumber()));
         u.setWechat(emptyToNull(req.getWechat()));
+        u.setPosition(emptyToNull(req.getPosition()));
         u.setCompanyId(req.getCompanyId());
         u.setPayInfoJson(emptyToNull(req.getPayInfoJson()));
 
@@ -105,6 +106,7 @@ public class UserServiceImpl implements UserService {
         r.setIsBuyer(u.getIsBuyer());
         r.setIsSeller(u.getIsSeller());
         r.setUserType(u.getUserType());
+        r.setPosition(u.getPosition());
         r.setPayInfoJson(u.getPayInfoJson());
         r.setCreateTime(u.getCreateTime());
         r.setUpdateTime(u.getUpdateTime());

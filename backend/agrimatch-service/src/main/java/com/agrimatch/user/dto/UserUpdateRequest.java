@@ -12,6 +12,9 @@ public class UserUpdateRequest {
     @Size(max = 50)
     private String wechat;
 
+    @Size(max = 50)
+    private String position;
+
     private Long companyId;
     private String payInfoJson;
 
@@ -37,6 +40,14 @@ public class UserUpdateRequest {
 
     public void setWechat(String wechat) {
         this.wechat = wechat;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 
     public Long getCompanyId() {

@@ -11,6 +11,7 @@ public class BusPost {
     private String companyName;
     private String userName;
     private String nickName;
+    private String position;
     private String title;
     private String content;
     private String imagesJson;
@@ -112,6 +113,14 @@ public class BusPost {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 }
 

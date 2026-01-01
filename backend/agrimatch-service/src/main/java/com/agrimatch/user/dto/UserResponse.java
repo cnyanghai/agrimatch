@@ -12,6 +12,7 @@ public class UserResponse {
     private Integer isBuyer;
     private Integer isSeller;
     private String userType;
+    private String position;
     private String payInfoJson;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
@@ -86,6 +87,14 @@ public class UserResponse {
 
     public void setUserType(String userType) {
         this.userType = userType;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 
     public String getPayInfoJson() {

@@ -13,6 +13,7 @@ public class SysUser {
     private Integer isBuyer;
     private Integer isSeller;
     private String userType;
+    private String position;
     private String payInfoJson;
     private Integer isDeleted;
     private LocalDateTime createTime;
@@ -96,6 +97,14 @@ public class SysUser {
 
     public void setUserType(String userType) {
         this.userType = userType;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 
     public String getPayInfoJson() {

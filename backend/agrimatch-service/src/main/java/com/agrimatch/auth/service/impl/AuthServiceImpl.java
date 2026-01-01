@@ -156,6 +156,7 @@ public class AuthServiceImpl implements AuthService {
         r.setIsBuyer(u.getIsBuyer());
         r.setIsSeller(u.getIsSeller());
         r.setUserType(u.getUserType());
+        r.setPosition(u.getPosition());
         return r;
     }
 }

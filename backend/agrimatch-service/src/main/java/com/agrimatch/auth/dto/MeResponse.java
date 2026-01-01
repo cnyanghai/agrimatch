@@ -10,6 +10,7 @@ public class MeResponse {
     private Integer isBuyer;
     private Integer isSeller;
     private String userType;
+    private String position;
 
     public Long getUserId() {
         return userId;
@@ -81,6 +82,14 @@ public class MeResponse {
 
     public void setUserType(String userType) {
         this.userType = userType;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 }
 

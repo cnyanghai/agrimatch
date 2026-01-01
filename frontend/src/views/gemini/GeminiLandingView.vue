@@ -317,7 +317,9 @@ onBeforeUnmount(() => {
                 </div>
                 <div class="min-w-0">
                   <div class="font-bold text-sm truncate">{{ displayName(post) }}</div>
-                  <div class="text-xs text-gray-500">{{ formatTime(post.createTime) }}</div>
+                  <div class="text-xs text-gray-500 truncate">
+                    {{ post.companyName || '个人' }} · {{ post.position || '暂无职位' }} · {{ formatTime(post.createTime) }}
+                  </div>
                 </div>
               </div>
               <h4 class="text-sm font-bold text-gray-900 mb-2 line-clamp-1">

@@ -11,6 +11,7 @@
         <result column="company_name" property="companyName"/>
         <result column="user_name" property="userName"/>
         <result column="nick_name" property="nickName"/>
+        <result column="position" property="position"/>
         <result column="title" property="title"/>
         <result column="content" property="content"/>
         <result column="images_json" property="imagesJson"/>
@@ -33,6 +34,7 @@
             c.company_name AS company_name,
             u.user_name AS user_name,
             u.nick_name AS nick_name,
+            u.position AS position,
             p.title, p.content, p.images_json, p.is_deleted, p.create_time, p.update_time
         FROM bus_post p
         LEFT JOIN bus_company c ON c.id = p.company_id AND (c.is_deleted IS NULL OR c.is_deleted = 0)
@@ -48,6 +50,7 @@
             c.company_name AS company_name,
             u.user_name AS user_name,
             u.nick_name AS nick_name,
+            u.position AS position,
             p.title, p.content, p.images_json, p.is_deleted, p.create_time, p.update_time
         FROM bus_post p
         LEFT JOIN bus_company c ON c.id = p.company_id AND (c.is_deleted IS NULL OR c.is_deleted = 0)

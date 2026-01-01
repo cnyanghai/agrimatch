@@ -13,6 +13,7 @@ export interface PostResponse {
   companyName?: string
   userName?: string
   nickName?: string
+  position?: string
   title: string
   content?: string
   imagesJson?: string
