@@ -157,6 +157,9 @@ public class AuthServiceImpl implements AuthService {
         r.setIsSeller(u.getIsSeller());
         r.setUserType(u.getUserType());
         r.setPosition(u.getPosition());
+        r.setBirthDate(u.getBirthDate());
+        r.setGender(u.getGender());
+        r.setBio(u.getBio());
         return r;
     }
 }

@@ -1,5 +1,6 @@
 package com.agrimatch.user.dto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class UserResponse {
@@ -13,6 +14,9 @@ public class UserResponse {
     private Integer isSeller;
     private String userType;
     private String position;
+    private LocalDate birthDate;
+    private Integer gender;
+    private String bio;
     private String payInfoJson;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
@@ -95,6 +99,30 @@ public class UserResponse {
 
     public void setPosition(String position) {
         this.position = position;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public Integer getGender() {
+        return gender;
+    }
+
+    public void setGender(Integer gender) {
+        this.gender = gender;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
     }
 
     public String getPayInfoJson() {

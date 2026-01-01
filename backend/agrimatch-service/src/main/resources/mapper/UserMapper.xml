@@ -16,6 +16,9 @@
         <result column="is_seller" property="isSeller"/>
         <result column="user_type" property="userType"/>
         <result column="position" property="position"/>
+        <result column="birth_date" property="birthDate"/>
+        <result column="gender" property="gender"/>
+        <result column="bio" property="bio"/>
         <result column="pay_info_json" property="payInfoJson"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="create_time" property="createTime"/>
@@ -31,7 +34,7 @@
     </insert>
 
     <select id="selectById" resultMap="SysUserResultMap">
-        SELECT user_id, user_name, password, nick_name, phonenumber, wechat, company_id, is_buyer, is_seller, user_type, position, pay_info_json, is_deleted, create_time, update_time
+        SELECT user_id, user_name, password, nick_name, phonenumber, wechat, company_id, is_buyer, is_seller, user_type, position, birth_date, gender, bio, pay_info_json, is_deleted, create_time, update_time
         FROM sys_user
         WHERE user_id = #{userId}
           AND del_flag = '0'
@@ -40,7 +43,7 @@
     </select>
 
     <select id="selectByUserName" resultMap="SysUserResultMap">
-        SELECT user_id, user_name, password, nick_name, phonenumber, wechat, company_id, is_buyer, is_seller, user_type, position, pay_info_json, is_deleted, create_time, update_time
+        SELECT user_id, user_name, password, nick_name, phonenumber, wechat, company_id, is_buyer, is_seller, user_type, position, birth_date, gender, bio, pay_info_json, is_deleted, create_time, update_time
         FROM sys_user
         WHERE user_name = #{userName}
           AND del_flag = '0'
@@ -56,6 +59,9 @@
             <if test="wechat != null">wechat = #{wechat},</if>
             <if test="companyId != null">company_id = #{companyId},</if>
             <if test="position != null">position = #{position},</if>
+            <if test="birthDate != null">birth_date = #{birthDate},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="bio != null">bio = #{bio},</if>
             <if test="payInfoJson != null">pay_info_json = #{payInfoJson},</if>
             update_time = NOW()
         </set>

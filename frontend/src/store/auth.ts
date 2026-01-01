@@ -11,6 +11,10 @@ export interface MeResponse {
   nickName?: string
   phonenumber?: string
   wechat?: string
+  position?: string
+  birthDate?: string // YYYY-MM-DD
+  gender?: number    // 1-男 2-女
+  bio?: string
   companyId?: number
   isBuyer?: number
   isSeller?: number

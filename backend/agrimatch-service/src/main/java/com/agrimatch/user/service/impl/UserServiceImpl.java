@@ -64,6 +64,9 @@ public class UserServiceImpl implements UserService {
         u.setPhonenumber(emptyToNull(req.getPhonenumber()));
         u.setWechat(emptyToNull(req.getWechat()));
         u.setPosition(emptyToNull(req.getPosition()));
+        u.setBirthDate(req.getBirthDate());
+        u.setGender(req.getGender());
+        u.setBio(emptyToNull(req.getBio()));
         u.setCompanyId(req.getCompanyId());
         u.setPayInfoJson(emptyToNull(req.getPayInfoJson()));
 

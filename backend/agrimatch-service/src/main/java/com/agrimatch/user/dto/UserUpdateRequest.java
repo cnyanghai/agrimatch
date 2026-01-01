@@ -1,5 +1,6 @@
 package com.agrimatch.user.dto;
 
+import java.time.LocalDate;
 import jakarta.validation.constraints.Size;
 
 public class UserUpdateRequest {
@@ -14,6 +15,13 @@ public class UserUpdateRequest {
 
     @Size(max = 50)
     private String position;
+
+    private LocalDate birthDate;
+
+    private Integer gender;
+
+    @Size(max = 500)
+    private String bio;
 
     private Long companyId;
     private String payInfoJson;
@@ -48,6 +56,30 @@ public class UserUpdateRequest {
 
     public void setPosition(String position) {
         this.position = position;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public Integer getGender() {
+        return gender;
+    }
+
+    public void setGender(Integer gender) {
+        this.gender = gender;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
     }
 
     public Long getCompanyId() {

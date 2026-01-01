@@ -19,6 +19,9 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
   `is_seller` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否供应商（0否 1是）',
   `user_type` varchar(20) DEFAULT 'SYS_USER' COMMENT '用户类型（SYS_USER/CG_USER/GY_USER/CG_GY_USER）',
   `position` varchar(50) DEFAULT NULL COMMENT '职位/岗位（如采购经理/交易员等）',
+  `birth_date` date DEFAULT NULL COMMENT '出生年月（取当月1号）',
+  `gender` tinyint(1) DEFAULT NULL COMMENT '性别（1男 2女）',
+  `bio` varchar(500) DEFAULT NULL COMMENT '个人介绍',
   `pay_info_json` longtext COMMENT '收付款信息（银行卡/三方账户）JSON',
   `status` char(1) DEFAULT '0' COMMENT '账号状态（0正常 1停用）',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
@@ -37,6 +40,9 @@ ALTER TABLE `sys_user` ADD COLUMN `is_buyer` tinyint(1) NOT NULL DEFAULT 0 COMME
 ALTER TABLE `sys_user` ADD COLUMN `is_seller` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否供应商（0否 1是）';
 ALTER TABLE `sys_user` ADD COLUMN `pay_info_json` longtext COMMENT '收付款信息（银行卡/三方账户）JSON';
 ALTER TABLE `sys_user` ADD COLUMN `position` varchar(50) DEFAULT NULL COMMENT '职位/岗位（如采购经理/交易员等）';
+ALTER TABLE `sys_user` ADD COLUMN `birth_date` date DEFAULT NULL COMMENT '出生年月（取当月1号）';
+ALTER TABLE `sys_user` ADD COLUMN `gender` tinyint(1) DEFAULT NULL COMMENT '性别（1男 2女）';
+ALTER TABLE `sys_user` ADD COLUMN `bio` varchar(500) DEFAULT NULL COMMENT '个人介绍';
 ALTER TABLE `sys_user` ADD COLUMN `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除（0否 1是）';
 ALTER TABLE `sys_user` ADD COLUMN `password` varchar(100) DEFAULT '' COMMENT '密码(BCrypt)';
 
