@@ -6,6 +6,8 @@ public class PostQuery {
     private String keyword;
     private String orderBy; // create_time
     private String order; // asc/desc
+    private Integer recentDays; // 用于 hot_7d：仅查询最近 N 天内发布的帖子
+    private Integer limit; // 返回条数限制（首页等场景）
     private Long viewerUserId; // 用于计算“我是否点赞”，不参与过滤
 
     public Long getCompanyId() {
@@ -46,6 +48,22 @@ public class PostQuery {
 
     public void setOrder(String order) {
         this.order = order;
+    }
+
+    public Integer getRecentDays() {
+        return recentDays;
+    }
+
+    public void setRecentDays(Integer recentDays) {
+        this.recentDays = recentDays;
+    }
+
+    public Integer getLimit() {
+        return limit;
+    }
+
+    public void setLimit(Integer limit) {
+        this.limit = limit;
     }
 
     public Long getViewerUserId() {

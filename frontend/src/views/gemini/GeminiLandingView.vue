@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { requireAuth } from '../../utils/requireAuth'
 import { getProductTree, type ProductNode } from '../../api/product'
+import { listPosts, type PostResponse } from '../../api/post'
 import PublicTopNav from '../../components/PublicTopNav.vue'
 
 const router = useRouter()
@@ -14,6 +15,10 @@ let onResize: any = null
 // 数据库产品分类（树）
 const categoryTree = ref<ProductNode[]>([])
 const categoryLoading = ref(false)
+
+// 首页热门话题（动态 Top2）
+const hotTopicsLoading = ref(false)
+const hotTopics = ref<PostResponse[]>([])
 
 const topCategories = computed(() => {
   const list = categoryTree.value ?? []
@@ -49,6 +54,45 @@ function chunk<T>(arr: T[], columns: number): T[][] {
 
 function go(path: string) {
   router.push(path)
+}
+
+function displayName(p: PostResponse) {
+  return (p.nickName || p.userName || '用户').trim() || '用户'
+}
+
+function avatarText(p: PostResponse) {
+  const n = displayName(p)
+  const ch = n[0] ?? 'U'
+  return /\d/.test(ch) ? 'U' : ch
+}
+
+function formatTime(timeStr: string | undefined) {
+  if (!timeStr) return '未知时间'
+  const date = new Date(timeStr)
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+
+  if (minutes < 1) return '刚刚'
+  if (minutes < 60) return `${minutes}分钟前`
+  if (hours < 24) return `${hours}小时前`
+  if (days < 7) return `${days}天前`
+  return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+}
+
+async function loadHotTopics() {
+  hotTopicsLoading.value = true
+  try {
+    const r = await listPosts({ orderBy: 'hot_7d', recentDays: 7, limit: 2 })
+    if (r.code === 0) hotTopics.value = r.data ?? []
+    else hotTopics.value = []
+  } catch {
+    hotTopics.value = []
+  } finally {
+    hotTopicsLoading.value = false
+  }
 }
 
 function onPublishSupply() {
@@ -88,6 +132,7 @@ function goCategory(node: ProductNode) {
 function startCanvas() {
   const canvas = canvasRef.value
   if (!canvas) return
+  const c = canvas
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
@@ -95,8 +140,8 @@ function startCanvas() {
   const numPoints = 80
 
   function resize() {
-    canvas.width = canvas.offsetWidth
-    canvas.height = canvas.offsetHeight
+    c.width = c.offsetWidth
+    c.height = c.offsetHeight
   }
 
   onResize = () => resize()
@@ -105,8 +150,8 @@ function startCanvas() {
 
   for (let i = 0; i < numPoints; i++) {
     points.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
+      x: Math.random() * c.width,
+      y: Math.random() * c.height,
       vx: (Math.random() - 0.5) * 0.5,
       vy: (Math.random() - 0.5) * 0.5,
       size: Math.random() * 2 + 1
@@ -114,15 +159,15 @@ function startCanvas() {
   }
 
   const loop = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.clearRect(0, 0, c.width, c.height)
     ctx.strokeStyle = 'rgba(16, 185, 129, 0.15)'
     ctx.lineWidth = 0.5
 
     points.forEach((p, i) => {
       p.x += p.vx
       p.y += p.vy
-      if (p.x < 0 || p.x > canvas.width) p.vx *= -1
-      if (p.y < 0 || p.y > canvas.height) p.vy *= -1
+      if (p.x < 0 || p.x > c.width) p.vx *= -1
+      if (p.y < 0 || p.y > c.height) p.vy *= -1
 
       ctx.beginPath()
       ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
@@ -132,6 +177,7 @@ function startCanvas() {
 
       for (let j = i + 1; j < points.length; j++) {
         const p2 = points[j]
+        if (!p2) continue
         const dist = Math.hypot(p.x - p2.x, p.y - p2.y)
         if (dist < 150) {
           ctx.beginPath()
@@ -153,6 +199,7 @@ function startCanvas() {
 onMounted(() => {
   startCanvas()
   loadCategories()
+  loadHotTopics()
 })
 onBeforeUnmount(() => {
   if (raf) cancelAnimationFrame(raf)
@@ -245,28 +292,43 @@ onBeforeUnmount(() => {
             <h3 class="text-xl font-bold">热门话题</h3>
           </div>
           <div class="space-y-4">
-            <div class="bg-white p-5 rounded-2xl border hover:shadow-md transition-shadow cursor-pointer" @click="go('/talks')">
-              <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center font-bold text-orange-600">老</div>
-                <div>
-                  <div class="font-bold text-sm">老王谈粮</div>
-                  <div class="text-xs text-gray-500">10分钟前</div>
-                </div>
-              </div>
-              <p class="text-gray-700 leading-relaxed mb-4">“大雪封路，东北玉米发运困难，短期内南方销区价格还要涨吗？”</p>
-              <div class="flex items-center text-xs text-emerald-600 font-semibold bg-emerald-50 w-max px-2 py-1 rounded">128人参与讨论</div>
+            <div v-if="hotTopicsLoading" class="bg-white p-6 rounded-2xl border border-gray-100">
+              <div class="text-sm text-gray-500">正在加载热门话题...</div>
             </div>
-
-            <div class="bg-white p-5 rounded-2xl border hover:shadow-md transition-shadow cursor-pointer" @click="go('/talks')">
+            <div v-else-if="hotTopics.length === 0" class="bg-white p-6 rounded-2xl border border-gray-100">
+              <div class="text-sm text-gray-500">暂无热门话题</div>
+              <button class="mt-3 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-all active:scale-95" @click="go('/talks')">
+                去话题广场看看 →
+              </button>
+            </div>
+            <div
+              v-else
+              v-for="(post, idx) in hotTopics"
+              :key="post.id"
+              class="bg-white p-6 rounded-2xl border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
+              @click="go(`/talks/${post.id}`)"
+            >
               <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">李</div>
-                <div>
-                  <div class="font-bold text-sm">饲料配方师李工</div>
-                  <div class="text-xs text-gray-500">2小时前</div>
+                <div
+                  class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
+                  :class="idx % 2 === 0 ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'"
+                >
+                  {{ avatarText(post) }}
+                </div>
+                <div class="min-w-0">
+                  <div class="font-bold text-sm truncate">{{ displayName(post) }}</div>
+                  <div class="text-xs text-gray-500">{{ formatTime(post.createTime) }}</div>
                 </div>
               </div>
-              <p class="text-gray-700 leading-relaxed mb-4">“最近DDGS的毒素问题大家怎么看？有没有好的替代方案？”</p>
-              <div class="flex items-center text-xs text-blue-600 font-semibold bg-blue-50 w-max px-2 py-1 rounded">56条评论</div>
+              <p class="text-gray-700 leading-relaxed mb-4 line-clamp-2">
+                {{ post.content || post.title }}
+              </p>
+              <div
+                class="flex items-center text-xs font-semibold w-max px-2 py-1 rounded"
+                :class="idx % 2 === 0 ? 'text-emerald-600 bg-emerald-50' : 'text-blue-600 bg-blue-50'"
+              >
+                {{ (post.commentCount ?? 0) + (post.likeCount ?? 0) }} 人参与讨论
+              </div>
             </div>
           </div>
         </div>

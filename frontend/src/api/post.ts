@@ -28,6 +28,8 @@ export interface PostQuery {
   keyword?: string
   orderBy?: string
   order?: string
+  recentDays?: number
+  limit?: number
 }
 
 export async function createPost(req: PostCreateRequest) {

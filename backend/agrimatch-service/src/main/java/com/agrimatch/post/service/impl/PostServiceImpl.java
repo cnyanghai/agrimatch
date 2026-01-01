@@ -125,6 +125,15 @@ public class PostServiceImpl implements PostService {
         if (!StringUtils.hasText(q.getOrderBy())) q.setOrderBy("create_time");
         if (!StringUtils.hasText(q.getOrder())) q.setOrder("desc");
         else q.setOrder(q.getOrder().toLowerCase());
+
+        // 首页热门话题：近 N 天热度
+        if ("hot_7d".equals(q.getOrderBy())) {
+            if (q.getRecentDays() == null || q.getRecentDays() <= 0) q.setRecentDays(7);
+            // hot 默认 desc
+            q.setOrder("desc");
+            // 默认只取少量（防止误传空 limit 拉全表）
+            if (q.getLimit() == null || q.getLimit() <= 0) q.setLimit(2);
+        }
     }
 
     private static String emptyToNull(String s) {

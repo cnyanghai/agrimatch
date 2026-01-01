@@ -52,8 +52,28 @@
         FROM bus_post p
         LEFT JOIN bus_company c ON c.id = p.company_id AND (c.is_deleted IS NULL OR c.is_deleted = 0)
         LEFT JOIN sys_user u ON u.user_id = p.user_id AND u.del_flag = '0'
+        <!-- hot_7d 热度：近 N 天内的点赞/评论计数（仅用于排序，不返回到 domain） -->
+        <if test="q != null and q.orderBy == 'hot_7d'">
+            LEFT JOIN (
+                SELECT post_id, COUNT(1) AS cnt
+                FROM bus_post_like
+                WHERE is_deleted = 0
+                  AND create_time &gt;= DATE_SUB(NOW(3), INTERVAL #{q.recentDays} DAY)
+                GROUP BY post_id
+            ) pl ON pl.post_id = p.id
+            LEFT JOIN (
+                SELECT post_id, COUNT(1) AS cnt
+                FROM bus_post_comment
+                WHERE is_deleted = 0
+                  AND create_time &gt;= DATE_SUB(NOW(3), INTERVAL #{q.recentDays} DAY)
+                GROUP BY post_id
+            ) pc ON pc.post_id = p.id
+        </if>
         <where>
             p.is_deleted = 0
+            <if test="q != null and q.orderBy == 'hot_7d' and q.recentDays != null">
+                AND p.create_time &gt;= DATE_SUB(NOW(3), INTERVAL #{q.recentDays} DAY)
+            </if>
             <if test="q != null and q.companyId != null">
                 AND p.company_id = #{q.companyId}
             </if>
@@ -67,6 +87,10 @@
         </where>
         ORDER BY
         <choose>
+            <when test="q != null and q.orderBy == 'hot_7d'">
+                (IFNULL(pl.cnt, 0) + IFNULL(pc.cnt, 0)) DESC,
+                p.create_time
+            </when>
             <when test="q != null and q.orderBy == 'create_time'">
                 p.create_time
             </when>
@@ -78,6 +102,9 @@
             <when test="q != null and q.order == 'asc'">ASC</when>
             <otherwise>DESC</otherwise>
         </choose>
+        <if test="q != null and q.limit != null and q.limit &gt; 0">
+            LIMIT #{q.limit}
+        </if>
     </select>
 
     <update id="logicalDelete">
