@@ -3,6 +3,7 @@
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/requirement/dto/RequirementResponse.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/supply/service/SupplyService.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/chat/dto/ChatMessageResponse.java
+/home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/auth/dto/SmsSendRequest.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/points/dto/PointsMeResponse.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/eval/dto/EvalResponse.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/post/dto/PostQuery.java
@@ -22,6 +23,7 @@
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/company/dto/CompanyBriefResponse.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/product/controller/ProductController.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/auth/dto/RegisterRequest.java
+/home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/auth/dto/LoginBySmsRequest.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/post_social/dto/PostCommentCreateRequest.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/company/dto/CompanyCreateRequest.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/requirement_template/service/impl/RequirementTemplateServiceImpl.java
@@ -59,6 +61,7 @@
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/eval/domain/BusOrderEval.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/user/dto/UserResponse.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/company/dto/CompanyUpdateRequest.java
+/home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/auth/service/SmsCodeService.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/requirement/mapper/RequirementMapper.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/post/dto/PostResponse.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/points/dto/PointsRedeemRequest.java

@@ -207,7 +207,7 @@ onBeforeUnmount(() => {
     <section class="relative hero-gradient overflow-hidden text-white min-h-[600px] flex items-center">
       <canvas ref="canvasRef" class="map-canvas"></canvas>
 
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-20 flex flex-col md:flex-row gap-12 md:gap-56">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-20 flex flex-col md:flex-row gap-12 md:gap-60">
         <!-- 左侧悬浮菜单 -->
         <div class="w-64 glass-card rounded-xl p-2 self-start">
           <div class="p-3 font-bold border-b border-white/10 mb-2">全部分类</div>

@@ -4,6 +4,7 @@ import com.agrimatch.auth.dto.LoginResponse;
 import com.agrimatch.auth.dto.MeResponse;
 import com.agrimatch.auth.dto.RegisterRequest;
 import com.agrimatch.auth.service.AuthService;
+import com.agrimatch.auth.service.SmsCodeService;
 import com.agrimatch.company.domain.BusCompany;
 import com.agrimatch.company.mapper.CompanyMapper;
 import com.agrimatch.common.api.ResultCode;
@@ -21,12 +22,18 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
     private final CompanyMapper companyMapper;
+    private final SmsCodeService smsCodeService;
 
-    public AuthServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder, JwtTokenUtil jwtTokenUtil, CompanyMapper companyMapper) {
+    public AuthServiceImpl(UserMapper userMapper,
+                           PasswordEncoder passwordEncoder,
+                           JwtTokenUtil jwtTokenUtil,
+                           CompanyMapper companyMapper,
+                           SmsCodeService smsCodeService) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenUtil = jwtTokenUtil;
         this.companyMapper = companyMapper;
+        this.smsCodeService = smsCodeService;
     }
 
     @Override
@@ -46,15 +53,40 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public LoginResponse loginByPhone(String phone) {
+        if (!StringUtils.hasText(phone)) {
+            throw new ApiException(ResultCode.PARAM_ERROR);
+        }
+        String userName = phone.trim();
+        SysUser u = userMapper.selectByUserName(userName);
+        if (u == null) {
+            throw new ApiException(404, "账号不存在，请先注册");
+        }
+        String token = jwtTokenUtil.generateToken(u.getUserId(), u.getUserName());
+        return new LoginResponse(token);
+    }
+
+    @Override
     public LoginResponse register(RegisterRequest req) {
         String userName = req.getUserName();
         String password = req.getPassword();
         String nickName = req.getNickName();
         String companyName = req.getCompanyName();
+        String companyType = req.getCompanyType();
+        String phone = StringUtils.hasText(req.getPhonenumber()) ? req.getPhonenumber() : userName;
         
-        if (!StringUtils.hasText(userName) || !StringUtils.hasText(password) || !StringUtils.hasText(nickName)) {
+        if (!StringUtils.hasText(userName) || !StringUtils.hasText(password)) {
             throw new ApiException(ResultCode.PARAM_ERROR);
         }
+        // 昵称在前端不再强制：后端兜底用联系人/手机号作为展示名
+        if (!StringUtils.hasText(nickName)) {
+            nickName = StringUtils.hasText(phone) ? phone.trim() : userName.trim();
+        } else {
+            nickName = nickName.trim();
+        }
+        // 注册必须校验短信验证码（type=1 注册）；开发期支持固定码 000000
+        smsCodeService.verifyOrThrow(phone, 1, req.getSmsCode());
+
         SysUser existed = userMapper.selectByUserName(userName);
         if (existed != null) {
             throw new ApiException(409, "账号已存在");
@@ -91,6 +123,7 @@ public class AuthServiceImpl implements AuthService {
             BusCompany c = new BusCompany();
             c.setOwnerUserId(u.getUserId());
             c.setCompanyName(companyName.trim());
+            if (StringUtils.hasText(companyType)) c.setCompanyType(companyType.trim());
             c.setContacts(nickName);
             int cr = companyMapper.insert(c);
             if (cr == 1 && c.getId() != null) {

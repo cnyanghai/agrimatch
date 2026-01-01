@@ -32,6 +32,7 @@ public class CompanyServiceImpl implements CompanyService {
         BusCompany c = new BusCompany();
         c.setOwnerUserId(ownerUserId);
         c.setCompanyName(req.getCompanyName());
+        c.setCompanyType(emptyToNull(req.getCompanyType()));
         c.setLicenseNo(req.getLicenseNo());
         c.setContacts(req.getContacts());
         c.setPhone(req.getPhone());
@@ -86,6 +87,7 @@ public class CompanyServiceImpl implements CompanyService {
         c.setId(id);
         c.setOwnerUserId(ownerUserId);
         c.setCompanyName(emptyToNull(req.getCompanyName()));
+        c.setCompanyType(emptyToNull(req.getCompanyType()));
         c.setLicenseNo(emptyToNull(req.getLicenseNo()));
         c.setLicenseImgUrl(emptyToNull(req.getLicenseImgUrl()));
         c.setContacts(emptyToNull(req.getContacts()));
@@ -164,6 +166,7 @@ public class CompanyServiceImpl implements CompanyService {
         r.setId(c.getId());
         r.setOwnerUserId(c.getOwnerUserId());
         r.setCompanyName(c.getCompanyName());
+        r.setCompanyType(c.getCompanyType());
         r.setLicenseNo(c.getLicenseNo());
         r.setLicenseImgUrl(c.getLicenseImgUrl());
         r.setContacts(c.getContacts());

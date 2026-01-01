@@ -1,10 +1,13 @@
 package com.agrimatch.auth.controller;
 
 import com.agrimatch.auth.dto.LoginRequest;
+import com.agrimatch.auth.dto.LoginBySmsRequest;
 import com.agrimatch.auth.dto.LoginResponse;
 import com.agrimatch.auth.dto.MeResponse;
 import com.agrimatch.auth.dto.RegisterRequest;
+import com.agrimatch.auth.dto.SmsSendRequest;
 import com.agrimatch.auth.service.AuthService;
+import com.agrimatch.auth.service.SmsCodeService;
 import com.agrimatch.common.api.Result;
 import com.agrimatch.security.LoginUser;
 import jakarta.validation.Valid;
@@ -19,14 +22,29 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService authService;
+    private final SmsCodeService smsCodeService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, SmsCodeService smsCodeService) {
         this.authService = authService;
+        this.smsCodeService = smsCodeService;
     }
 
     @PostMapping("/login")
     public Result<LoginResponse> login(@Valid @RequestBody LoginRequest req) {
         return Result.success(authService.login(req.getUserName(), req.getPassword()));
+    }
+
+    @PostMapping("/login/sms")
+    public Result<LoginResponse> loginBySms(@Valid @RequestBody LoginBySmsRequest req) {
+        // type=2 登录
+        smsCodeService.verifyOrThrow(req.getPhone(), 2, req.getSmsCode());
+        return Result.success(authService.loginByPhone(req.getPhone()));
+    }
+
+    @PostMapping("/sms/send")
+    public Result<Void> sendSms(@Valid @RequestBody SmsSendRequest req) {
+        smsCodeService.send(req.getPhone(), req.getType());
+        return Result.success();
     }
 
     @PostMapping("/register")

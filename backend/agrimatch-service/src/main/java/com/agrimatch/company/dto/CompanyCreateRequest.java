@@ -10,6 +10,9 @@ public class CompanyCreateRequest {
     @Size(max = 128)
     private String companyName;
 
+    @Size(max = 32)
+    private String companyType;
+
     @Size(max = 64)
     private String licenseNo;
 
@@ -46,6 +49,14 @@ public class CompanyCreateRequest {
 
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
+    }
+
+    public String getCompanyType() {
+        return companyType;
+    }
+
+    public void setCompanyType(String companyType) {
+        this.companyType = companyType;
     }
 
     public String getLicenseNo() {

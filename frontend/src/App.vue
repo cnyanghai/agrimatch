@@ -73,7 +73,10 @@ function logout() {
   <div v-else class="h-full flex bg-neutral-50">
     <!-- Sidebar -->
     <aside v-if="auth.token" class="hidden md:flex w-60 flex-col bg-white shadow-modern">
-      <div class="px-5 py-4 border-b border-neutral-100 flex items-center gap-3">
+      <div
+        class="px-5 py-4 border-b border-neutral-100 flex items-center gap-3 cursor-pointer hover:bg-gray-50/50 transition-all active:scale-[0.99]"
+        @click="go('/')"
+      >
         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-200">A</div>
         <div class="leading-tight">
           <div class="font-bold text-lg text-neutral-800">AgriMatch</div>

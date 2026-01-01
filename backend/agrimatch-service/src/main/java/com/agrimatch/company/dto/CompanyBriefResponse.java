@@ -3,6 +3,7 @@ package com.agrimatch.company.dto;
 public class CompanyBriefResponse {
     private Long id;
     private String companyName;
+    private String companyType;
     private String address;
 
     public Long getId() {
@@ -19,6 +20,14 @@ public class CompanyBriefResponse {
 
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
+    }
+
+    public String getCompanyType() {
+        return companyType;
+    }
+
+    public void setCompanyType(String companyType) {
+        this.companyType = companyType;
     }
 
     public String getAddress() {

@@ -66,7 +66,8 @@ CREATE TABLE IF NOT EXISTS `bus_company` (
   KEY `idx_bus_company_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='公司资质及位置坐标表';
 
-ALTER TABLE `bus_company` ADD COLUMN `owner_user_id` bigint DEFAULT NULL COMMENT '创建人用户ID（sys_user.user_id）';
+-- 企业类型（饲料厂/贸易商/粮库/加工厂/物流仓储/其他）
+ALTER TABLE `bus_company` ADD COLUMN `company_type` varchar(32) DEFAULT NULL COMMENT '企业类型';
 
 -- Table structure for bus_requirement
 CREATE TABLE IF NOT EXISTS `bus_requirement` (

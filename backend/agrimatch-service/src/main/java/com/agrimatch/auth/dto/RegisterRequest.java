@@ -12,12 +12,14 @@ public class RegisterRequest {
     @Size(min = 6, max = 64)
     private String password;
 
-    @NotBlank
     @Size(max = 30)
     private String nickName;
 
     @Size(max = 128)
     private String companyName;
+
+    @Size(max = 32)
+    private String companyType;
 
     @Size(max = 11)
     private String phonenumber;
@@ -58,6 +60,14 @@ public class RegisterRequest {
 
     public void setCompanyName(String companyName) {
         this.companyName = companyName;
+    }
+
+    public String getCompanyType() {
+        return companyType;
+    }
+
+    public void setCompanyType(String companyType) {
+        this.companyType = companyType;
     }
 
     public String getPhonenumber() {

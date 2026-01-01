@@ -23,8 +23,11 @@ export interface RegisterRequest {
   phone: string
   smsCode: string
   password: string
-  nickName: string
+  // 系统不强制昵称：前端可用联系人姓名/手机号代替
+  nickName?: string
   userType: 'buyer' | 'seller'
+  companyName?: string
+  companyType?: 'feed_factory' | 'trader' | 'grain_depot' | 'processor' | 'logistics' | 'other'
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -100,7 +103,9 @@ export const useAuthStore = defineStore('auth', {
         userName: req.phone,
         phonenumber: req.phone,
         password: req.password,
-        nickName: req.nickName,
+        nickName: req.nickName || req.phone,
+        companyName: req.companyName,
+        companyType: req.companyType,
         smsCode: req.smsCode,
         isBuyer: req.userType === 'buyer' ? 1 : 0,
         isSeller: req.userType === 'seller' ? 1 : 0

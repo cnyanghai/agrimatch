@@ -1,7 +1,10 @@
 import { http, type Result } from './http'
 
+export type CompanyType = 'feed_factory' | 'trader' | 'grain_depot' | 'processor' | 'logistics' | 'other'
+
 export interface CompanyCreateRequest {
   companyName: string
+  companyType?: CompanyType
   licenseNo?: string
   contacts?: string
   phone?: string
@@ -24,6 +27,7 @@ export interface CompanyResponse {
   id: number
   ownerUserId?: number
   companyName: string
+  companyType?: CompanyType
   licenseNo?: string
   licenseImgUrl?: string
   contacts?: string
@@ -44,6 +48,7 @@ export interface CompanyResponse {
 export interface CompanyBriefResponse {
   id: number
   companyName: string
+  companyType?: CompanyType
   address?: string
 }
 
@@ -57,7 +62,7 @@ export async function createCompany(req: CompanyCreateRequest) {
   return data
 }
 
-export async function updateCompany(id: number, req: CompanyUpdateRequest) {
+export async function updateCompany(id: number | string, req: CompanyUpdateRequest) {
   const { data } = await http.put<Result<void>>(`/api/companies/${id}`, req)
   return data
 }
