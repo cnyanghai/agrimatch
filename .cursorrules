@@ -1,27 +1,125 @@
-# AgriMatch UI/UX 设计规范
+# AgriMatch 统一 UI 语言（Gemini 静态页风格提炼）
 
-你现在是一名资深前端设计师，负责将控制台页面重构为与 Gemini 生成的静态页一致的高级风格。
+你现在是一名资深前端设计师/实现者。后续所有页面与组件重构，都必须统一为：**Neo‑Minimal（新极简）+ Soft Glass（柔性玻璃）+ Card‑First（卡片优先）的现代 B2B SaaS 控制台风格**，并与 `gemini3控制台`、`Gemini3版本` 静态页的质感保持一致。
 
-## 1. 核心视觉规范
-- **色彩**: 
-  - 主背景: 使用 `bg-gray-50`。
-  - 容器: 使用 `bg-white` 配合 `border border-gray-100`。
-  - 品牌色: 供应类使用 Emerald-600，采购类使用 Blue-600。
-- **圆角**: 
-  - 外层卡片: `rounded-2xl` (16px)。
-  - 按钮/输入框: `rounded-full` (Pill shape) 或 `rounded-xl`。
-- **阴影**: 
-  - 默认无阴影或极轻微 `shadow-sm`。
-  - 悬停(Hover): `hover:shadow-md` 且 `hover:border-primary`。
+> 关键词：低噪配色、强信息层级、轻动效、圆角大、阴影克制、微标签体系、hover/active 手感统一。
 
-## 2. 布局要求
-- **呼吸感**: 增加元素间的留白，卡片内边距统一使用 `p-6`。
-- **文字排版**: 
-  - 标题: `font-bold text-gray-900`。
-  - 描述: `text-sm text-gray-500`。
-  - 标签: 使用 `text-[10px] font-bold` 的微型胶囊标签。
+---
 
-## 3. 组件约束
-- **图标**: 必须使用 Lucide 风格的线性图标，stroke-width 设为 2。
-- **按钮**: 必须包含 `transition-all` 和 `active:scale-95` 的点击反馈。
-- **列表**: 每一行元素必须有明显的 `hover:bg-gray-50/50` 反馈。
+## 0. 设计原则（必须遵守）
+- **信息层级优先**：用排版/间距/色彩语义做层级，而不是堆阴影与渐变。
+- **低噪配色**：主色只用于“动作/语义强调”，避免大面积高饱和色块（尤其是实心亮蓝）。
+- **卡片化布局**：页面=导航（Top/Side）+ 内容卡片区；卡片之间有充分留白。
+- **一致的交互手感**：hover 有反馈、active 有缩放、focus 有 ring，且全站一致。
+
+---
+
+## 1. 视觉 Token（颜色 / 圆角 / 阴影 / 字体）
+### 1.1 色彩（语义优先）
+- **全站背景**：`bg-gray-50`（必要时公共页可 `bg-gray-50 text-gray-900 min-h-screen`）
+- **容器卡片**：`bg-white border border-gray-100`（不要重阴影）
+- **文字**：
+  - 标题：`font-bold text-gray-900`
+  - 描述/辅助：`text-sm text-gray-500` 或 `text-xs text-gray-400`
+
+### 1.2 品牌与业务语义色（“供应=绿、采购=蓝”但要克制）
+- **供应（主品牌/主 CTA）**：Emerald
+  - 主按钮：`bg-emerald-600 hover:bg-emerald-700 text-white`
+  - 浅底：`bg-emerald-50 text-emerald-700 border-emerald-100`
+  - Focus：`focus:ring-emerald-500` / `focus:border-emerald-500`
+- **采购（识别色，不当作全站主按钮色）**：Blue
+  - 推荐用法：`text-blue-700 bg-blue-50 border-blue-200`（标签/描边/小面积 icon 背景）
+  - 避免：大面积 `bg-blue-600 text-white` 作为全站通用主按钮（会“刺眼”且与 Emerald 冲突）
+  - 需要强主按钮时优先用：`bg-slate-900 hover:bg-slate-800 text-white`（更高级/耐看）
+- **危险/退出**：`text-red-600` / `hover:bg-red-50`
+- **提示**：
+  - 警告：`amber-*`
+  - 信息：`slate-*` / `gray-*`
+
+### 1.3 圆角（大圆角+一致）
+- **外层卡片**：`rounded-2xl`（默认），关键弹窗/核心卡允许 `rounded-[32px]`
+- **按钮/输入**：`rounded-full` 或 `rounded-xl`
+- **头像/徽章**：`rounded-full`
+
+### 1.4 阴影（克制）
+- 默认：无阴影或 `shadow-sm`
+- Hover：`hover:shadow-md`（或少量 `hover:shadow-lg` 仅用于“可点击主卡片”）
+- 不要全屏 heavy shadow；强调层级用 border + blur + spacing
+
+### 1.5 字体与排版
+- 字体体系：`Inter` 优先（静态页风格），否则系统字体
+- 微标签：`text-[10px] font-bold uppercase tracking-widest`
+- 页面标题：`text-3xl font-extrabold tracking-tight`
+
+---
+
+## 2. 组件与布局模式（固定模板）
+### 2.1 顶部导航（TopNav）
+- `bg-white border-b sticky top-0 z-50`
+- 支持可选 **glass**：`bg-white/80 backdrop-blur-md`
+- 登录态区域统一（头像/昵称/下拉），按钮风格统一（见 3.1）
+
+### 2.2 侧边栏（Console Sidebar）
+- 背景：`bg-white`，分组标题：`text-[10px] font-bold text-gray-400 uppercase tracking-widest`
+- 菜单项必须有：
+  - `transition-all`
+  - `hover:bg-gray-50/50`
+  - active 态用浅底 + 强调色（优先 emerald 系）
+
+### 2.3 卡片（Card‑First）
+- 基础卡：`bg-white p-6 rounded-2xl border border-gray-100`
+- 可点击卡：加 `cursor-pointer hover:shadow-md transition-shadow`
+- 列表行 hover：`hover:bg-gray-50/50`
+
+### 2.4 弹窗/发布窗口（Soft Glass Modal）
+- 遮罩：`bg-slate-900/60 backdrop-blur-sm`
+- 容器：`bg-white rounded-[32px] shadow-2xl overflow-hidden`
+- 动效：`animate-fade-in` + `animate-zoom-in`（0.3s，scale 0.95→1）
+- 顶部 sticky header，底部 toolbar（`bg-gray-50 border-t`）
+
+---
+
+## 3. 交互规范（必须）
+### 3.1 按钮
+- 所有按钮必须包含：`transition-all active:scale-95`
+- 主按钮（默认主 CTA）：`bg-emerald-600 hover:bg-emerald-700 text-white`
+- 次按钮：`bg-gray-100 hover:bg-gray-200 text-gray-700`
+- 描边按钮：`border border-gray-200 hover:bg-gray-50`
+- 禁止：无 hover/active 的“硬按钮”
+
+### 3.2 输入框
+- 默认：`border-2 border-gray-100 rounded-xl`
+- Focus：`focus:border-emerald-500 outline-none transition-all`
+
+### 3.3 列表/卡片 hover
+- 列表行：`hover:bg-gray-50/50`
+- 卡片：`hover:shadow-md`（可点击）+ `transition-shadow`
+
+---
+
+## 4. 图标规范
+- **必须使用 Lucide 风格线性图标**（stroke-width=2）
+- 图标容器常用：`w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600`
+- 采购语义 icon：用 `bg-blue-50 text-blue-700`（小面积即可）
+
+---
+
+## 5. 内容呈现规则（高频组件）
+### 5.1 “话题/帖子”卡片信息结构（统一）
+- 头像 + 姓名（可加 `· 职位`，职位用灰色弱化）
+- 次行：公司/职位/时间用 `text-xs text-gray-500` 且 `truncate`
+- 标题：`font-bold text-gray-900 line-clamp-1`
+- 摘要：`text-sm text-gray-500 line-clamp-2`
+- 互动：`(commentCount+likeCount)` 做“参与讨论”胶囊标签（浅底 + 强调色）
+
+---
+
+## 6. 允许的“点缀色”范围（避免跑偏）
+- 可以用：`amber-*`（奖励/提示）、`red-*`（紧急/热议）、`slate-*`（高端主按钮/深色区块）
+- 蓝色：仅用于采购语义的小面积点缀（标签/描边/文字/小 icon 背景），避免全局铺底
+
+---
+
+## 7. 实施要求（工程侧）
+- 优先用 Tailwind 原子类；少写自定义 CSS（除非做动效/特殊布局），且必须与上述 token 对齐。
+- 新增页面/组件前先复用现有公共组件（如 `PublicTopNav`），保持风格一致。
