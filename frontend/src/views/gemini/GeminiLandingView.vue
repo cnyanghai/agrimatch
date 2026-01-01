@@ -320,8 +320,14 @@ onBeforeUnmount(() => {
                   <div class="text-xs text-gray-500">{{ formatTime(post.createTime) }}</div>
                 </div>
               </div>
-              <p class="text-gray-700 leading-relaxed mb-4 line-clamp-2">
-                {{ post.content || post.title }}
+              <h4 class="text-sm font-bold text-gray-900 mb-2 line-clamp-1">
+                {{ post.title }}
+              </h4>
+              <p v-if="post.content" class="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-2">
+                {{ post.content }}
+              </p>
+              <p v-else class="text-sm text-gray-400 leading-relaxed mb-4 italic">
+                暂无摘要
               </p>
               <div
                 class="flex items-center text-xs font-semibold w-max px-2 py-1 rounded"
