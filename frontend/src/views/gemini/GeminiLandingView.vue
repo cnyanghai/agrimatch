@@ -178,7 +178,7 @@ onBeforeUnmount(() => {
             <div v-else-if="topCategories.length === 0" class="p-3 text-sm text-white/70">暂无分类数据</div>
 
             <!-- 一级分类 -->
-            <div v-for="cat in topCategories" :key="cat.id" class="hover-menu group">
+            <div v-for="cat in topCategories" :key="cat.id" class="hover-menu group relative">
               <button
                 type="button"
                 class="w-full p-3 flex justify-between items-center cursor-pointer hover:bg-white/10 rounded-lg transition-colors text-left"
@@ -191,7 +191,7 @@ onBeforeUnmount(() => {
               <!-- 悬浮二/三级菜单 -->
               <div
                 v-if="(cat.children?.length ?? 0) > 0"
-                class="submenu hidden absolute left-full top-0 ml-2 w-[520px] bg-white text-gray-800 rounded-xl shadow-2xl p-6 grid-cols-3 gap-4 border z-50"
+                class="submenu hidden absolute left-full top-0 w-[520px] bg-white text-gray-800 rounded-xl shadow-2xl p-6 grid-cols-3 gap-4 border border-gray-100 border-l-8 border-l-transparent z-50"
               >
                 <template v-for="(col, idx) in chunk(buildGroups(cat), 3)" :key="idx">
                   <div class="space-y-5">
