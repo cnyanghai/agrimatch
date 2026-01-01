@@ -207,7 +207,7 @@ onBeforeUnmount(() => {
     <section class="relative hero-gradient overflow-hidden text-white min-h-[600px] flex items-center">
       <canvas ref="canvasRef" class="map-canvas"></canvas>
 
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-20 flex flex-col md:flex-row gap-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-20 flex flex-col md:flex-row gap-12 md:gap-56">
         <!-- 左侧悬浮菜单 -->
         <div class="w-64 glass-card rounded-xl p-2 self-start">
           <div class="p-3 font-bold border-b border-white/10 mb-2">全部分类</div>
@@ -258,7 +258,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- 文案区 -->
-        <div class="flex-1 flex flex-col justify-center text-center md:text-left">
+        <div class="flex-1 flex flex-col justify-center items-center md:items-start md:pl-8 text-center md:text-left">
           <h1 class="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
             连接饲料人，<br /><span class="text-emerald-400">交易更透明</span>
           </h1>
