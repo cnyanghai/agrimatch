@@ -9,7 +9,7 @@ import { useUiStore } from '../store/ui'
 export function requireAuth(targetPath?: string, query?: Record<string, any>) {
   const auth = useAuthStore()
   const ui = useUiStore()
-  if (auth.token) return true
+  if (auth.me) return true
   ui.openAuthDialog('login', targetPath ? { path: targetPath, query } : undefined)
   return false
 }

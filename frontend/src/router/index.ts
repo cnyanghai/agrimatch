@@ -56,12 +56,7 @@ router.beforeEach(async (to) => {
   // 显式 public 直接放行
   if (to.meta.public) return true
 
-  // 需要登录：统一弹出登录对话框（而不是跳转整页登录）
-  if (!auth.token) {
-    ui.openAuthDialog('login', { path: to.path, query: to.query as any })
-    return false
-  }
-
+  // Cookie 登录态：不再依赖 auth.token，优先用 /api/auth/me 恢复会话
   if (!auth.me) {
     try {
       await auth.fetchMe()

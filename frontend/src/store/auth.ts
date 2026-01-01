@@ -62,6 +62,17 @@ export const useAuthStore = defineStore('auth', {
       this.me = null
       localStorage.removeItem('agrimatch_token')
     },
+
+    // HttpOnly Cookie 会话退出
+    async logout() {
+      try {
+        await http.post<Result<void>>('/api/auth/logout')
+      } catch {
+        // ignore
+      } finally {
+        this.clear()
+      }
+    },
     
     // 发送短信验证码
     async sendSmsCode(phone: string, type: number) {

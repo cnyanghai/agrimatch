@@ -1,17 +1,12 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { requireAuth } from '../../utils/requireAuth'
-import { useUiStore } from '../../store/ui'
+import PublicTopNav from '../../components/PublicTopNav.vue'
 
 const router = useRouter()
-const ui = useUiStore()
 
 function go(path: string) {
   router.push(path)
-}
-
-function openLogin() {
-  ui.openAuthDialog('login')
 }
 
 function onPublishSupply() {
@@ -40,29 +35,13 @@ function onConsult() {
       </div>
     </div>
 
-    <!-- 导航栏 -->
-    <nav class="bg-white border-b sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center gap-8">
-            <span class="text-2xl font-bold text-emerald-600 italic cursor-pointer" @click="go('/')">AgriMatch</span>
-            <div class="hidden md:flex space-x-6 text-sm font-medium text-gray-600">
-              <button class="hover:text-emerald-600" @click="go('/')">首页</button>
-              <button class="text-emerald-600 border-b-2 border-emerald-600 pb-5" @click="go('/hall/supply')">供应大厅</button>
-              <button class="hover:text-emerald-600" @click="go('/hall/need')">采购大厅</button>
-              <button class="hover:text-emerald-600" @click="go('/insights')">观点资讯</button>
-              <button class="hover:text-emerald-600" @click="go('/talks')">话题广场</button>
-            </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <button class="text-sm text-gray-500 hover:text-emerald-600" @click="openLogin">登录/注册</button>
-            <button class="bg-emerald-600 text-white px-5 py-2 rounded-lg font-bold text-sm hover:bg-emerald-700 transition-colors" @click="onPublishSupply">
-              发布供应
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <PublicTopNav>
+      <template #actions>
+        <button class="bg-emerald-600 text-white px-5 py-2 rounded-full font-bold hover:bg-emerald-700 transition-all active:scale-95" @click="onPublishSupply">
+          发布供应
+        </button>
+      </template>
+    </PublicTopNav>
 
     <!-- 筛选区 -->
     <section class="bg-white border-b shadow-sm">

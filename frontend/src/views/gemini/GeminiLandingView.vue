@@ -2,11 +2,10 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { requireAuth } from '../../utils/requireAuth'
-import { useUiStore } from '../../store/ui'
 import { getProductTree, type ProductNode } from '../../api/product'
+import PublicTopNav from '../../components/PublicTopNav.vue'
 
 const router = useRouter()
-const ui = useUiStore()
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 let raf: number | null = null
@@ -32,7 +31,8 @@ function buildGroups(cat: ProductNode): CategoryGroup[] {
     return {
       title: s.name,
       titleNode: s,
-      items: thirds.length ? thirds : [s]
+      // 若无三级类目，则只展示二级标题（避免“标题=唯一子项”重复显示）
+      items: thirds.length ? thirds : []
     }
   })
 }
@@ -49,10 +49,6 @@ function chunk<T>(arr: T[], columns: number): T[][] {
 
 function go(path: string) {
   router.push(path)
-}
-
-function openLogin() {
-  ui.openAuthDialog('login')
 }
 
 function onPublishSupply() {
@@ -166,42 +162,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="bg-gray-50 text-gray-900 min-h-screen">
-    <!-- 顶部导航栏 -->
-    <nav class="bg-white border-b sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex-shrink-0 flex items-center cursor-pointer" @click="go('/')">
-            <span class="text-2xl font-bold text-emerald-600 tracking-tight">AgriMatch</span>
-          </div>
-
-          <div class="hidden md:flex flex-1 max-w-md mx-8">
-            <div class="relative w-full">
-              <input
-                type="text"
-                placeholder="搜品种、搜产地、搜企业..."
-                class="w-full bg-gray-100 border-transparent rounded-full py-2 px-4 pl-10 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
-              />
-              <div class="absolute left-3 top-2.5 text-gray-400">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div class="flex items-center space-x-6 text-sm font-medium text-gray-600">
-            <button class="text-emerald-600" @click="go('/')">首页</button>
-            <button class="hover:text-emerald-600" @click="go('/hall/supply')">供应大厅</button>
-            <button class="hover:text-emerald-600" @click="go('/hall/need')">采购大厅</button>
-            <button class="hover:text-emerald-600" @click="go('/insights')">观点资讯</button>
-            <button class="hover:text-emerald-600" @click="go('/talks')">话题广场</button>
-            <button class="bg-emerald-600 text-white px-6 py-2 rounded-full font-bold hover:bg-emerald-700 transition-colors" @click="openLogin">
-              登录/注册
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <PublicTopNav />
 
     <!-- Hero -->
     <section class="relative hero-gradient overflow-hidden text-white min-h-[600px] flex items-center">

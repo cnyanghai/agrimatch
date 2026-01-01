@@ -56,9 +56,7 @@ async function submit() {
 
 onMounted(() => {
   // 检查登录状态
-  if (!auth.token) {
-    requireAuth('/talks/publish')
-  }
+  if (!auth.me) requireAuth('/talks/publish')
 })
 </script>
 

@@ -3,6 +3,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Present } from '@element-plus/icons-vue'
+import PublicTopNav from '../../components/PublicTopNav.vue'
 import { 
   getPost, 
   togglePostLike, 
@@ -196,26 +197,13 @@ onMounted(() => {
 
 <template>
   <div class="bg-gray-50 text-gray-900 min-h-screen">
-    <!-- 导航栏 -->
-    <nav class="bg-white border-b sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center gap-8">
-            <span class="text-2xl font-bold text-indigo-600 italic cursor-pointer" @click="router.push('/')">AgriMatch</span>
-            <div class="hidden md:flex space-x-6 text-sm font-medium text-gray-600">
-              <button class="hover:text-indigo-600" @click="router.push('/')">首页</button>
-              <button class="hover:text-emerald-600" @click="router.push('/hall/supply')">供应大厅</button>
-              <button class="hover:text-blue-600" @click="router.push('/hall/need')">采购大厅</button>
-              <button class="hover:text-indigo-600" @click="router.push('/insights')">观点资讯</button>
-              <button class="text-indigo-600 border-b-2 border-indigo-600 pb-5" @click="router.push('/talks')">话题广场</button>
-            </div>
-          </div>
-          <button class="text-sm text-gray-500 hover:text-indigo-600" @click="router.push('/talks')">
-            ← 返回话题广场
-          </button>
-        </div>
-      </div>
-    </nav>
+    <PublicTopNav>
+      <template #actions>
+        <button class="text-sm font-bold text-gray-500 hover:text-emerald-600 transition-all active:scale-95" @click="router.push('/talks')">
+          ← 返回话题广场
+        </button>
+      </template>
+    </PublicTopNav>
 
     <main class="max-w-4xl mx-auto px-4 py-8" v-loading="loading">
       <!-- 话题内容 -->

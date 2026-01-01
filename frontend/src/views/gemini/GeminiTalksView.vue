@@ -3,13 +3,10 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { requireAuth } from '../../utils/requireAuth'
-import { useUiStore } from '../../store/ui'
-import { useAuthStore } from '../../store/auth'
 import { listPosts, type PostResponse } from '../../api/post'
+import PublicTopNav from '../../components/PublicTopNav.vue'
 
 const router = useRouter()
-const ui = useUiStore()
-const auth = useAuthStore()
 
 const loading = ref(false)
 const posts = ref<PostResponse[]>([])
@@ -19,10 +16,6 @@ const order = ref<'asc' | 'desc'>('desc')
 
 function go(path: string) {
   router.push(path)
-}
-
-function openLogin() {
-  ui.openAuthDialog('login')
 }
 
 function onPublishTalk() {
@@ -83,30 +76,14 @@ onMounted(() => {
 
 <template>
   <div class="bg-gray-50 text-gray-900 min-h-screen">
-    <!-- 导航栏 -->
-    <nav class="bg-white border-b sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <div class="flex items-center gap-8">
-            <span class="text-2xl font-bold text-indigo-600 italic cursor-pointer" @click="go('/')">AgriMatch</span>
-            <div class="hidden md:flex space-x-6 text-sm font-medium text-gray-600">
-              <button class="hover:text-indigo-600" @click="go('/')">首页</button>
-              <button class="hover:text-emerald-600" @click="go('/hall/supply')">供应大厅</button>
-              <button class="hover:text-blue-600" @click="go('/hall/need')">采购大厅</button>
-              <button class="hover:text-indigo-600" @click="go('/insights')">观点资讯</button>
-              <button class="text-indigo-600 border-b-2 border-indigo-600 pb-5" @click="go('/talks')">话题广场</button>
-            </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <button class="text-sm text-gray-500 hover:text-indigo-600" @click="openLogin">登录/注册</button>
-            <button class="bg-indigo-600 text-white px-5 py-2 rounded-full font-bold text-sm hover:bg-indigo-700 transition-all flex items-center gap-2" @click="onPublishTalk">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-              发布话题
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
+    <PublicTopNav>
+      <template #actions>
+        <button class="bg-emerald-600 text-white px-5 py-2 rounded-full font-bold hover:bg-emerald-700 transition-all active:scale-95 flex items-center gap-2" @click="onPublishTalk">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          发布话题
+        </button>
+      </template>
+    </PublicTopNav>
 
     <!-- 头部 -->
     <header class="bg-white border-b">

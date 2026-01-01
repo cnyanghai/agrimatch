@@ -3,7 +3,9 @@ import { useAuthStore } from '../store/auth'
 
 export const http = axios.create({
   baseURL: '',
-  timeout: 15000
+  timeout: 15000,
+  // 为 HttpOnly Cookie 会话准备（同域也无害；跨域部署时必须）
+  withCredentials: true
 })
 
 export interface Result<T> {

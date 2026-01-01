@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './store/auth'
 import AuthDialog from './components/AuthDialog.vue'
@@ -14,6 +14,7 @@ const route = useRoute()
 const auth = useAuthStore()
 
 const minimal = computed(() => Boolean(route.meta.minimal))
+const isLoggedIn = computed(() => Boolean(auth.me))
 const showProfileGuide = ref(false)
 const profileGuideChecked = ref(false)
 
@@ -59,9 +60,18 @@ function go(path: string) {
 }
 
 function logout() {
-  auth.clear()
-  go('/login')
+  auth.logout()
+  go('/')
 }
+
+// App 启动时尝试用 HttpOnly Cookie 恢复登录态
+onMounted(async () => {
+  try {
+    if (!auth.me) await auth.fetchMe()
+  } catch {
+    // 未登录/过期：静默即可
+  }
+})
 </script>
 
 <template>
@@ -72,7 +82,7 @@ function logout() {
 
   <div v-else class="h-full flex bg-neutral-50">
     <!-- Sidebar -->
-    <aside v-if="auth.token" class="hidden md:flex w-60 flex-col bg-white shadow-modern">
+    <aside v-if="isLoggedIn" class="hidden md:flex w-60 flex-col bg-white shadow-modern">
       <div
         class="px-5 py-4 border-b border-neutral-100 flex items-center gap-3 cursor-pointer hover:bg-gray-50/50 transition-all active:scale-[0.99]"
         @click="go('/')"
