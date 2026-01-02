@@ -195,7 +195,14 @@ async function loadCompanyInfo() {
       company.value = r.data
       // 设置默认值
       publishForm.companyName = r.data.companyName || ''
-      publishForm.purchaseAddress = r.data.address || ''
+      // 拼接完整地址：省 + 市 + 区 + 详细地址
+      const fullAddress = [
+        r.data.province,
+        r.data.city,
+        r.data.district,
+        r.data.address
+      ].filter(Boolean).join('')
+      publishForm.purchaseAddress = fullAddress || ''
     }
   } catch (e) {
     // 静默失败

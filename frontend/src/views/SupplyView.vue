@@ -204,7 +204,14 @@ async function loadCompanyInfo() {
     if (r.code === 0 && r.data) {
       company.value = r.data
       publishForm.companyName = r.data.companyName || ''
-      publishForm.shipAddress = r.data.address || ''
+      // 拼接完整地址：省 + 市 + 区 + 详细地址
+      const fullAddress = [
+        r.data.province,
+        r.data.city,
+        r.data.district,
+        r.data.address
+      ].filter(Boolean).join('')
+      publishForm.shipAddress = fullAddress || ''
     }
   } catch (e) {
     // 静默失败
@@ -299,13 +306,13 @@ async function addParamOption(paramId: number, optionValue: string) {
 }
 
 function buildParamsJson() {
-  const params: Record<string, any> = {}
+  const params: Record<string, { name: string; value: any }> = {}
   const custom: Record<string, any> = {}
   
   categoryParams.value.forEach(param => {
     const value = dynamicParams.value[param.id]
     if (value !== undefined && value !== '') {
-      params[param.id] = value
+      params[param.id] = { name: param.paramName, value }
     }
   })
   

@@ -138,6 +138,38 @@ onMounted(() => {
 watch(focusIdFromRoute, () => {
   applyFocusIfNeeded()
 })
+
+// 解析品类参数 JSON，提取关键参数显示（兼容新旧格式）
+function parseParams(paramsJson?: string): string {
+  if (!paramsJson) return '暂无参数'
+  try {
+    const data = JSON.parse(paramsJson)
+    const params = data?.params || {}
+    const entries = Object.entries(params)
+    if (entries.length === 0) return '暂无参数'
+    // 取前3个参数显示，兼容新格式 { name, value } 和旧格式（直接值）
+    return entries
+      .slice(0, 3)
+      .map(([k, v]) => {
+        // 新格式：{ name, value }
+        if (typeof v === 'object' && v !== null && 'name' in v && 'value' in v) {
+          const name = (v as any).name || k
+          const value = (v as any).value
+          return `${name}:${value}`
+        }
+
+        // 旧格式：键=参数名，值=参数值
+        const raw = String(v ?? '')
+        if (!raw) return `${k}:-`
+        // 若值本身已经是 "参数名:参数值" 形式，则直接复用，避免重复
+        if (raw.startsWith(`${k}:`)) return raw
+        return `${k}:${raw}`
+      })
+      .join(' / ')
+  } catch {
+    return '暂无参数'
+  }
+}
 </script>
 
 <template>
@@ -221,7 +253,7 @@ watch(focusIdFromRoute, () => {
           class="purchase-card bg-white rounded-2xl p-5 border border-gray-100 transition-all"
           :class="focusedId === r.id ? 'ring-2 ring-blue-500/50 bg-blue-50/40' : 'hover:shadow-md hover:border-blue-100'"
         >
-          <div class="flex flex-col lg:flex-row items-center gap-6">
+          <div class="flex flex-col lg:flex-row lg:flex-wrap items-start gap-6 mx-0">
             <div class="w-full lg:w-44 flex items-center gap-3 shrink-0 border-r border-gray-50 pr-4">
               <div class="w-12 h-12 bg-blue-50 text-blue-700 rounded-lg flex items-center justify-center text-xl font-bold shrink-0">
                 {{ (r.companyName || r.nickName || r.userName || '采')[0] }}
@@ -235,33 +267,37 @@ watch(focusIdFromRoute, () => {
               </div>
             </div>
 
-            <div class="w-full lg:w-64 shrink-0">
+            <div class="w-full lg:w-[120px] shrink-0">
               <div class="flex items-center gap-2 mb-1">
                 <span class="bg-red-100 text-red-600 text-[10px] px-1.5 py-0.5 rounded font-bold">急需</span>
                 <span class="text-gray-400 text-[10px]">ID: {{ r.id }}</span>
               </div>
               <h3 class="text-lg font-bold text-gray-900 truncate">{{ r.categoryName }}</h3>
               <div class="mt-1 text-xl font-black text-emerald-600 italic">
-                <span v-if="r.expectedPrice != null">意向: ¥{{ r.expectedPrice }}</span>
+                <template v-if="r.expectedPrice != null">
+                  <span class="whitespace-nowrap inline-flex items-baseline gap-1">
+                    <span>意向: ¥{{ r.expectedPrice }}</span>
+                    <span class="text-xs font-normal text-gray-400 not-italic">元/吨</span>
+                  </span>
+                </template>
                 <span v-else>面议 / 基差报价</span>
-                <span class="text-xs font-normal text-gray-400 not-italic">元/吨</span>
               </div>
             </div>
 
-            <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs py-2 bg-gray-50/50 rounded-lg px-4">
-              <div>
+            <div class="flex-1 grid grid-cols-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_190px] gap-4 text-xs py-2 bg-gray-50/50 rounded-lg px-4">
+              <div class="min-w-0">
                 <div class="text-gray-400 mb-0.5">需求数量</div>
                 <div class="font-semibold text-gray-700">{{ r.quantity ?? '-' }} 吨</div>
               </div>
-              <div>
+              <div class="min-w-0">
                 <div class="text-gray-400 mb-0.5">收货地</div>
                 <div class="font-semibold text-gray-700 truncate">{{ r.purchaseAddress || '-' }}</div>
               </div>
-              <div>
+              <div class="min-w-0">
                 <div class="text-gray-400 mb-0.5">指标要求</div>
-                <div class="font-semibold text-gray-700 truncate">详见参数</div>
+                <div class="font-semibold text-gray-700 truncate">{{ parseParams(r.paramsJson) }}</div>
               </div>
-              <div>
+              <div class="min-w-0">
                 <div class="text-gray-400 mb-0.5">最晚到货</div>
                 <div class="font-semibold text-red-500">-</div>
               </div>
