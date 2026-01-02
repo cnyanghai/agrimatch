@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { createCustomProduct, getProductTree, type ProductNode } from '../api/product'
 
@@ -17,6 +17,8 @@ const tree = ref<ProductNode[]>([])
 
 // el-cascader value: [level1Id, level2Id]
 const cascaderValue = ref<number[] | undefined>(undefined)
+const cascaderRef = ref<any>(null)
+const filterText = ref('')
 
 const cascaderOptions = computed(() =>
   tree.value
@@ -60,6 +62,23 @@ async function refresh() {
   }
 }
 
+// 父组件更新 v-model 后，需要同步回显到 cascaderValue（否则“选模板后不显示二级品类”）
+watch(
+  () => props.modelValue?.id,
+  (id) => {
+    if (!id) {
+      cascaderValue.value = undefined
+      return
+    }
+    const parent = findParentId(tree.value, id)
+    if (parent != null && parent > 0) {
+      cascaderValue.value = [parent, id]
+      return
+    }
+    // 树还没加载/没找到：交给 refresh() 的回显逻辑兜底
+  }
+)
+
 function findParentId(list: ProductNode[], childId: number): number | null {
   for (const n of list) {
     if (n.id === childId) return n.parentId ?? 0
@@ -97,15 +116,80 @@ function onCascaderChange(v: number[] | undefined) {
   emit('update:modelValue', { id, name })
 }
 
-function openCustom() {
-  const p = cascaderValue.value?.[0]
-  if (!p) {
-    ElMessage.warning('请先选择一级品类')
+function findNodeById(list: ProductNode[], id: number): ProductNode | null {
+  for (const n of list) {
+    if (n.id === id) return n
+    if (n.children?.length) {
+      const r = findNodeById(n.children, id)
+      if (r) return r
+    }
+  }
+  return null
+}
+
+function hasSecondLevelMatch(parentId: number, keyword: string) {
+  const p = findNodeById(tree.value, parentId)
+  if (!p?.children?.length) return false
+  const kw = keyword.trim().toLowerCase()
+  if (!kw) return true
+  return p.children.some((c) => (c.name ?? '').toLowerCase().includes(kw))
+}
+
+let inputEl: HTMLInputElement | null = null
+let onInput: ((e: Event) => void) | null = null
+let onKeyDown: ((e: KeyboardEvent) => void) | null = null
+
+function detachListeners() {
+  if (inputEl && onInput) inputEl.removeEventListener('input', onInput)
+  if (inputEl && onKeyDown) inputEl.removeEventListener('keydown', onKeyDown)
+  inputEl = null
+  onInput = null
+  onKeyDown = null
+}
+
+async function attachListeners() {
+  await nextTick()
+  const root: HTMLElement | null = cascaderRef.value?.$el ?? null
+  const el = root?.querySelector('input') as HTMLInputElement | null
+  if (!el) return
+
+  inputEl = el
+  onInput = () => {
+    filterText.value = inputEl?.value ?? ''
+  }
+  onKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== 'Enter') return
+    const kw = (filterText.value || '').trim()
+    if (!kw) return
+
+    const parentId = cascaderValue.value?.[0]
+    if (!parentId) {
+      ElMessage.warning('请先选择一级品类')
+      return
+    }
+
+    // 若当前一级品类下无匹配二级，则自动弹出创建弹窗（无按钮）
+    if (!hasSecondLevelMatch(parentId, kw)) {
+      e.preventDefault()
+      e.stopPropagation()
+      customName.value = kw
+      customParentId.value = parentId
+      customDialogOpen.value = true
+    }
+  }
+
+  inputEl.addEventListener('input', onInput)
+  inputEl.addEventListener('keydown', onKeyDown)
+}
+
+function onVisibleChange(visible: boolean) {
+  if (!visible) {
+    detachListeners()
+    filterText.value = ''
     return
   }
-  customName.value = ''
-  customParentId.value = p
-  customDialogOpen.value = true
+  // 打开下拉后再绑定输入监听（用于“无匹配回车创建”）
+  attachListeners()
 }
 
 async function submitCustom() {
@@ -137,12 +221,14 @@ async function submitCustom() {
 }
 
 onMounted(refresh)
+onBeforeUnmount(detachListeners)
 </script>
 
 <template>
-  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+  <div class="flex flex-wrap items-center gap-2">
     <el-cascader
-      style="width: 360px;"
+      ref="cascaderRef"
+      class="w-full md:w-[360px]"
       :model-value="cascaderValue"
       :options="cascaderOptions"
       :props="{ expandTrigger: 'hover', emitPath: true }"
@@ -152,10 +238,12 @@ onMounted(refresh)
       :loading="loading"
       placeholder="一级 hover 展开二级"
       @update:model-value="onCascaderChange"
+      @visible-change="onVisibleChange"
     />
 
-    <el-input :model-value="currentLabel" disabled placeholder="已选二级品类" style="width: 220px;" />
-    <el-button :loading="loading" @click="openCustom">自定义二级</el-button>
+    <div v-if="currentLabel" class="px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-800 truncate max-w-full md:max-w-[220px]">
+      {{ currentLabel }}
+    </div>
   </div>
 
   <el-dialog v-model="customDialogOpen" title="自定义二级品类" width="520px">

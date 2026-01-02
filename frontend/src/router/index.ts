@@ -17,6 +17,7 @@ const router = createRouter({
     { path: '/console', name: 'console', component: () => import('../views/ConsoleHomeView.vue') },
     { path: '/profile', name: 'profile', component: () => import('../views/ProfileView.vue') },
     { path: '/requirements', name: 'requirements', component: () => import('../views/RequirementDemoView.vue') },
+    { path: '/requirements/published', name: 'requirements-published', component: () => import('../views/RequirementPublishedView.vue') },
     { path: '/requirement-browse', name: 'requirement-browse', component: () => import('../views/RequirementBrowseView.vue') },
     { path: '/supply', name: 'supply', component: () => import('../views/SupplyView.vue') },
     { path: '/supply-browse', name: 'supply-browse', component: () => import('../views/SupplyBrowseView.vue') },

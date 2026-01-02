@@ -4,6 +4,16 @@
 
 :root {
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, 'Microsoft YaHei', sans-serif;
+
+  /* Element Plus：全站 primary 统一为 Emerald（消除默认扎眼蓝） */
+  --el-color-primary: #059669; /* emerald-600 */
+  --el-color-primary-rgb: 5, 150, 105;
+  --el-color-primary-dark-2: #047857; /* emerald-700 */
+  --el-color-primary-light-3: #34d399; /* emerald-400 */
+  --el-color-primary-light-5: #6ee7b7; /* emerald-300 */
+  --el-color-primary-light-7: #a7f3d0; /* emerald-200 */
+  --el-color-primary-light-8: #d1fae5; /* emerald-100 */
+  --el-color-primary-light-9: #ecfdf5; /* emerald-50 */
 }
 
 html,
