@@ -77,13 +77,25 @@ public class DealServiceImpl implements DealService {
 
         BusSupply s = supplyMapper.selectById(req.getSupplyId());
         if (s == null) throw new ApiException(ResultCode.NOT_FOUND.getCode(), "供应不存在");
-        if (s.getStatus() != null && s.getStatus() == 1) {
-            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "该供应已下架");
+        // 2=已下架，3=全部成交
+        if (s.getStatus() != null && (s.getStatus() == 2 || s.getStatus() == 3)) {
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "该供应不可成交（已下架或已全部成交）");
+        }
+        if (s.getQuantity() == null) {
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "该供应未填写总数量，暂不支持多次成交");
         }
         if (StringUtils.hasText(r.getCategoryName()) && StringUtils.hasText(s.getCategoryName())) {
             if (!r.getCategoryName().trim().equalsIgnoreCase(s.getCategoryName().trim())) {
                 throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "供应品类与需求品类不一致");
             }
+        }
+
+        // supply remaining quantity check (avoid oversell)
+        BigDecimal sumS0 = dealMapper.sumConfirmedQuantityBySupplyId(s.getId());
+        if (sumS0 == null) sumS0 = BigDecimal.ZERO;
+        BigDecimal remainingS = s.getQuantity().subtract(sumS0);
+        if (remainingS.compareTo(req.getQuantity()) < 0) {
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "成交数量超过供应剩余量，剩余：" + remainingS);
         }
 
         BigDecimal sum = dealMapper.sumConfirmedQuantityByRequirementId(r.getId());
@@ -143,6 +155,17 @@ public class DealServiceImpl implements DealService {
         up.setUserId(buyerUserId);
         up.setStatus(newStatus);
         requirementMapper.update(up);
+
+        // update supply status: 0发布中, 1部分成交, 2下架, 3全部成交
+        BigDecimal sumS = dealMapper.sumConfirmedQuantityBySupplyId(s.getId());
+        if (sumS == null) sumS = BigDecimal.ZERO;
+        // supply.quantity 已在上方保证非空
+        int newSupplyStatus = sumS.compareTo(s.getQuantity()) >= 0 ? 3 : 1;
+        BusSupply supUp = new BusSupply();
+        supUp.setId(s.getId());
+        supUp.setUserId(s.getUserId());
+        supUp.setStatus(newSupplyStatus);
+        supplyMapper.update(supUp);
 
         return d.getId();
     }

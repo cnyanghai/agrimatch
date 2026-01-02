@@ -22,9 +22,14 @@ public class SupplyResponse {
     private String priceRulesJson;
     private String paramsJson;
     /**
-     * 状态（0上架 1下架）
+     * 状态（0发布中 1部分成交 2已下架 3全部成交）
      */
     private Integer status;
+    /**
+     * 剩余数量（支持多次成交）：remaining = quantity - sum(deal.quantity)
+     * - 若 quantity 为空，则 remaining 为空
+     */
+    private BigDecimal remainingQuantity;
     private Integer expireMinutes;
     private LocalDateTime expireTime;
     private String remark;
@@ -181,6 +186,14 @@ public class SupplyResponse {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public BigDecimal getRemainingQuantity() {
+        return remainingQuantity;
+    }
+
+    public void setRemainingQuantity(BigDecimal remainingQuantity) {
+        this.remainingQuantity = remainingQuantity;
     }
 
     public Integer getExpireMinutes() {

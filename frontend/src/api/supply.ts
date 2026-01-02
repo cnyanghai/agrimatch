@@ -19,11 +19,17 @@ export interface SupplyCreateRequest {
 
 export interface SupplyUpdateRequest {
   categoryName?: string
+  origin?: string
+  quantity?: number
   exFactoryPrice?: number
   shipAddress?: string
   deliveryMode?: string
+  packaging?: string
+  storageMethod?: string
   priceRulesJson?: string
   paramsJson?: string
+  remark?: string
+  expireMinutes?: number
   status?: number
 }
 
@@ -38,6 +44,7 @@ export interface SupplyResponse {
   supplyNo?: string
   origin?: string
   quantity?: number
+  remainingQuantity?: number
   exFactoryPrice: number
   shipAddress?: string
   deliveryMode?: string
@@ -65,6 +72,7 @@ export async function listSupplies(params: {
   userId?: number
   categoryName?: string
   status?: number
+  activeOnly?: boolean
   includeExpired?: boolean
   orderBy?: string
   order?: string

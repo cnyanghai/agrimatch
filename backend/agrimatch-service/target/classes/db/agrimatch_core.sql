@@ -151,7 +151,7 @@ CREATE TABLE IF NOT EXISTS `bus_supply` (
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
   `expire_minutes` int DEFAULT NULL COMMENT '发布时效（分钟）',
   `expire_time` datetime(3) DEFAULT NULL COMMENT '过期时间',
-  `status` tinyint NOT NULL DEFAULT 0 COMMENT '状态（0上架 1下架）',
+  `status` tinyint NOT NULL DEFAULT 0 COMMENT '状态（0发布中 1部分成交 2已下架 3全部成交）',
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除（0否 1是）',
   `create_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `update_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
@@ -166,7 +166,7 @@ CREATE TABLE IF NOT EXISTS `bus_supply` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='供应发布表';
 
 ALTER TABLE `bus_supply` ADD COLUMN `params_json` longtext COMMENT '产品参数/指标JSON（下拉选择+自定义）';
-ALTER TABLE `bus_supply` ADD COLUMN `status` tinyint NOT NULL DEFAULT 0 COMMENT '状态（0上架 1下架）';
+ALTER TABLE `bus_supply` ADD COLUMN `status` tinyint NOT NULL DEFAULT 0 COMMENT '状态（0发布中 1部分成交 2已下架 3全部成交）';
 ALTER TABLE `bus_supply` ADD COLUMN `supply_no` varchar(64) DEFAULT NULL COMMENT '供应编号/单号（后端生成或前端传入）';
 ALTER TABLE `bus_supply` ADD COLUMN `origin` varchar(128) DEFAULT NULL COMMENT '产地/来源地';
 ALTER TABLE `bus_supply` ADD COLUMN `quantity` decimal(18,3) DEFAULT NULL COMMENT '供应数量（吨/件等）';

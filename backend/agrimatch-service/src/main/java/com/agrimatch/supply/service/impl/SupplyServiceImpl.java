@@ -4,6 +4,7 @@ import com.agrimatch.common.api.ResultCode;
 import com.agrimatch.common.exception.ApiException;
 import com.agrimatch.company.domain.BusCompany;
 import com.agrimatch.company.mapper.CompanyMapper;
+import com.agrimatch.deal.mapper.DealMapper;
 import com.agrimatch.supply.domain.BusSupply;
 import com.agrimatch.supply.dto.SupplyCreateRequest;
 import com.agrimatch.supply.dto.SupplyQuery;
@@ -31,14 +32,16 @@ public class SupplyServiceImpl implements SupplyService {
     private final SupplyMapper supplyMapper;
     private final UserMapper userMapper;
     private final CompanyMapper companyMapper;
+    private final DealMapper dealMapper;
 
     @Value("${agrimatch.freight.rate-per-ton-km:0.8}")
     private BigDecimal freightRatePerTonKm;
 
-    public SupplyServiceImpl(SupplyMapper supplyMapper, UserMapper userMapper, CompanyMapper companyMapper) {
+    public SupplyServiceImpl(SupplyMapper supplyMapper, UserMapper userMapper, CompanyMapper companyMapper, DealMapper dealMapper) {
         this.supplyMapper = supplyMapper;
         this.userMapper = userMapper;
         this.companyMapper = companyMapper;
+        this.dealMapper = dealMapper;
     }
 
     @Override
@@ -97,12 +100,8 @@ public class SupplyServiceImpl implements SupplyService {
     public List<SupplyResponse> list(Long viewerUserId, SupplyQuery query) {
         if (viewerUserId == null) throw new ApiException(401, "未登录");
         normalizeQuery(query);
-        // 过期自动撤下（status=1）
+        // 过期自动撤下（status=2）
         supplyMapper.expireDownShelf();
-        // 默认只展示“上架”
-        if (query != null && query.getStatus() == null) {
-            query.setStatus(0);
-        }
         List<BusSupply> list = supplyMapper.selectList(query);
 
         // viewer company coords
@@ -115,6 +114,14 @@ public class SupplyServiceImpl implements SupplyService {
         List<SupplyResponse> out = new ArrayList<>();
         for (BusSupply s : list) {
             SupplyResponse r = toResponse(s);
+
+            // remaining quantity（用于管理端/成交态展示）
+            if (s.getQuantity() != null) {
+                BigDecimal sum = dealMapper.sumConfirmedQuantityBySupplyId(s.getId());
+                if (sum == null) sum = BigDecimal.ZERO;
+                r.setRemainingQuantity(s.getQuantity().subtract(sum));
+            }
+
             // compute distance & delivered price (Beta)
             if (viewerCompany != null && viewerCompany.getLat() != null && viewerCompany.getLng() != null) {
                 BusCompany sc = companyMapper.selectById(s.getCompanyId());
@@ -154,11 +161,27 @@ public class SupplyServiceImpl implements SupplyService {
         s.setId(id);
         s.setUserId(userId);
         s.setCategoryName(emptyToNull(req.getCategoryName()));
+        s.setOrigin(emptyToNull(req.getOrigin()));
+        s.setQuantity(req.getQuantity());
         s.setExFactoryPrice(req.getExFactoryPrice());
         s.setShipAddress(emptyToNull(req.getShipAddress()));
         s.setDeliveryMode(emptyToNull(req.getDeliveryMode()));
+        s.setPackaging(emptyToNull(req.getPackaging()));
+        s.setStorageMethod(emptyToNull(req.getStorageMethod()));
         s.setPriceRulesJson(emptyToNull(req.getPriceRulesJson()));
         s.setParamsJson(emptyToNull(req.getParamsJson()));
+        s.setRemark(emptyToNull(req.getRemark()));
+
+        // expire: minutes -> expireTime（管理端可重置有效期/再次发布）
+        if (req.getExpireMinutes() != null) {
+            Integer m = normalizeExpireMinutes(req.getExpireMinutes());
+            s.setExpireMinutes(m);
+            if (m == null) {
+                s.setExpireTime(null);
+            } else {
+                s.setExpireTime(LocalDateTime.now().plusMinutes(m));
+            }
+        }
         s.setStatus(req.getStatus());
 
         int rows = supplyMapper.update(s);

@@ -124,7 +124,7 @@ function onDrawerClosed() {
 async function loadSupplies() {
   listLoading.value = true
   try {
-    const res = await listSupplies({ status: 0, includeExpired: false, orderBy: 'create_time', order: 'desc' })
+    const res = await listSupplies({ activeOnly: true, includeExpired: false, orderBy: 'create_time', order: 'desc' })
     if (res.code !== 0) throw new Error(res.message)
     supplies.value = res.data || []
   } catch {

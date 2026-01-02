@@ -19,8 +19,14 @@ export interface RequirementCreateRequest {
 export interface RequirementUpdateRequest {
   categoryName?: string
   quantity?: number
+  expectedPrice?: number
   packaging?: string
+  invoiceType?: string
   paymentMethod?: string
+  deliveryMethod?: string
+  paramsJson?: string
+  remark?: string
+  expireMinutes?: number
   purchaseAddress?: string
   status?: number
 }
@@ -62,6 +68,7 @@ export async function listRequirements(params: {
   userId?: number
   categoryName?: string
   status?: number
+  includeExpired?: boolean
   orderBy?: string
   order?: string
 }) {

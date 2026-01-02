@@ -81,6 +81,14 @@
           AND d.status = 1
     </select>
 
+    <select id="sumConfirmedQuantityBySupplyId" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(d.quantity), 0)
+        FROM bus_deal d
+        WHERE d.supply_id = #{supplyId}
+          AND d.is_deleted = 0
+          AND d.status = 1
+    </select>
+
 </mapper>
 
 

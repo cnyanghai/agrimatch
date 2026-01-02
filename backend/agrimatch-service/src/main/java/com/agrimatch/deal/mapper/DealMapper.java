@@ -14,6 +14,8 @@ public interface DealMapper {
     List<BusDeal> selectByRequirementId(@Param("requirementId") Long requirementId);
 
     BigDecimal sumConfirmedQuantityByRequirementId(@Param("requirementId") Long requirementId);
+
+    BigDecimal sumConfirmedQuantityBySupplyId(@Param("supplyId") Long supplyId);
 }
 
 

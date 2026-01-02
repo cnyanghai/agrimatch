@@ -60,6 +60,7 @@ public class RequirementController {
             @RequestParam(value = "userId", required = false) Long userId,
             @RequestParam(value = "categoryName", required = false) String categoryName,
             @RequestParam(value = "status", required = false) Integer status,
+            @RequestParam(value = "includeExpired", required = false) Boolean includeExpired,
             @RequestParam(value = "orderBy", required = false) String orderBy,
             @RequestParam(value = "order", required = false) String order
     ) {
@@ -69,6 +70,7 @@ public class RequirementController {
         q.setUserId(userId);
         q.setCategoryName(categoryName);
         q.setStatus(status);
+        q.setIncludeExpired(includeExpired);
         q.setOrderBy(orderBy);
         q.setOrder(order);
         return Result.success(requirementService.list(viewerUserId, q));

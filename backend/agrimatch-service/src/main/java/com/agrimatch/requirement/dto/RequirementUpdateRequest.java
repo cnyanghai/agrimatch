@@ -10,13 +10,29 @@ public class RequirementUpdateRequest {
 
     private BigDecimal quantity;
 
+    private BigDecimal expectedPrice;
+
     @Size(max = 20)
     private String packaging;
 
     @Size(max = 20)
+    private String invoiceType;
+
+    @Size(max = 20)
     private String paymentMethod;
 
+    @Size(max = 20)
+    private String deliveryMethod;
+
     private String paramsJson;
+
+    @Size(max = 255)
+    private String remark;
+
+    /**
+     * 发布有效期（分钟）；空/<=0 表示长期有效（后端会做上限保护）
+     */
+    private Integer expireMinutes;
 
     private BigDecimal purchaseLat;
     private BigDecimal purchaseLng;
@@ -42,12 +58,28 @@ public class RequirementUpdateRequest {
         this.quantity = quantity;
     }
 
+    public BigDecimal getExpectedPrice() {
+        return expectedPrice;
+    }
+
+    public void setExpectedPrice(BigDecimal expectedPrice) {
+        this.expectedPrice = expectedPrice;
+    }
+
     public String getPackaging() {
         return packaging;
     }
 
     public void setPackaging(String packaging) {
         this.packaging = packaging;
+    }
+
+    public String getInvoiceType() {
+        return invoiceType;
+    }
+
+    public void setInvoiceType(String invoiceType) {
+        this.invoiceType = invoiceType;
     }
 
     public String getPaymentMethod() {
@@ -58,12 +90,36 @@ public class RequirementUpdateRequest {
         this.paymentMethod = paymentMethod;
     }
 
+    public String getDeliveryMethod() {
+        return deliveryMethod;
+    }
+
+    public void setDeliveryMethod(String deliveryMethod) {
+        this.deliveryMethod = deliveryMethod;
+    }
+
     public String getParamsJson() {
         return paramsJson;
     }
 
     public void setParamsJson(String paramsJson) {
         this.paramsJson = paramsJson;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public Integer getExpireMinutes() {
+        return expireMinutes;
+    }
+
+    public void setExpireMinutes(Integer expireMinutes) {
+        this.expireMinutes = expireMinutes;
     }
 
     public BigDecimal getPurchaseLat() {

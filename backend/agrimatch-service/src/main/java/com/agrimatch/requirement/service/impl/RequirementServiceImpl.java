@@ -150,9 +150,24 @@ public class RequirementServiceImpl implements RequirementService {
         r.setUserId(userId);
         r.setCategoryName(emptyToNull(req.getCategoryName()));
         r.setQuantity(req.getQuantity());
+        r.setExpectedPrice(req.getExpectedPrice());
         r.setPackaging(emptyToNull(req.getPackaging()));
+        r.setInvoiceType(emptyToNull(req.getInvoiceType()));
         r.setPaymentMethod(emptyToNull(req.getPaymentMethod()));
+        r.setDeliveryMethod(emptyToNull(req.getDeliveryMethod()));
         r.setParamsJson(emptyToNull(req.getParamsJson()));
+        r.setRemark(emptyToNull(req.getRemark()));
+
+        // expire: minutes -> expireTime（管理端可重置有效期/再次发布）
+        if (req.getExpireMinutes() != null) {
+            Integer m = normalizeExpireMinutes(req.getExpireMinutes());
+            r.setExpireMinutes(m);
+            if (m == null) {
+                r.setExpireTime(null);
+            } else {
+                r.setExpireTime(LocalDateTime.now().plusMinutes(m));
+            }
+        }
         r.setPurchaseLat(req.getPurchaseLat());
         r.setPurchaseLng(req.getPurchaseLng());
         r.setPurchaseAddress(emptyToNull(req.getPurchaseAddress()));

@@ -33,7 +33,7 @@ const followedSupplies = ref<SupplyResponse[]>([
     shipAddress: '山东省济南市历城区',
     paramsJson: JSON.stringify({ '水分': '12%', '杂质': '0.5%', '容重': '780g/L' }),
     createTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    status: 1
+    status: 0
   },
   {
     id: 102,
@@ -51,7 +51,7 @@ const followedSupplies = ref<SupplyResponse[]>([
     shipAddress: '黑龙江省哈尔滨市道里区',
     paramsJson: JSON.stringify({ '水分': '14%', '霉变': '1%', '杂质': '1%' }),
     createTime: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-    status: 1
+    status: 0
   },
   {
     id: 103,
@@ -69,7 +69,7 @@ const followedSupplies = ref<SupplyResponse[]>([
     shipAddress: '河南省郑州市金水区',
     paramsJson: JSON.stringify({ '蛋白质': '40%', '水分': '13%', '杂质': '0.3%' }),
     createTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    status: 1
+    status: 0
   }
 ])
 
@@ -196,8 +196,10 @@ async function loadSupplies() {
   loading.value = true
   try {
     const r = await listSupplies({
-      status: 1,
-      includeExpired: false
+      activeOnly: true,
+      includeExpired: false,
+      orderBy: 'create_time',
+      order: 'desc'
     })
     if (r.code === 0) {
       rawSupplies.value = r.data || []
@@ -254,7 +256,8 @@ function parseParams(paramsJson?: string): Array<{name: string; value: string}> 
   if (!paramsJson) return []
   try {
     const obj = JSON.parse(paramsJson)
-    return Object.entries(obj).map(([name, value]) => ({
+    const target = obj?.custom && typeof obj.custom === 'object' ? obj.custom : obj
+    return Object.entries(target).map(([name, value]) => ({
       name,
       value: String(value)
     }))

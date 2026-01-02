@@ -20,6 +20,7 @@ const router = createRouter({
     { path: '/requirements/published', name: 'requirements-published', component: () => import('../views/RequirementPublishedView.vue') },
     { path: '/requirement-browse', name: 'requirement-browse', component: () => import('../views/RequirementBrowseView.vue') },
     { path: '/supply', name: 'supply', component: () => import('../views/SupplyView.vue') },
+    { path: '/supply/published', name: 'supply-published', component: () => import('../views/SupplyPublishedView.vue') },
     { path: '/supply-browse', name: 'supply-browse', component: () => import('../views/SupplyBrowseView.vue') },
     { path: '/map', name: 'map', component: () => import('../views/MapView.vue') },
     { path: '/contracts', name: 'contracts', component: () => import('../views/ContractView.vue') },

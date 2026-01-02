@@ -4,14 +4,14 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, RefreshCcw, Pencil, Ban, RotateCcw, X } from 'lucide-vue-next'
 import PageHeader from '../components/PageHeader.vue'
-import { listRequirements, updateRequirement, type RequirementResponse, type RequirementUpdateRequest } from '../api/requirement'
+import { listSupplies, updateSupply, type SupplyResponse, type SupplyUpdateRequest } from '../api/supply'
 import { useAuthStore } from '../store/auth'
 
 const router = useRouter()
 const auth = useAuthStore()
 const loading = ref(false)
 
-const requirements = ref<RequirementResponse[]>([])
+const supplies = ref<SupplyResponse[]>([])
 
 // 分页相关
 const pagination = reactive({
@@ -38,35 +38,35 @@ const activeFilterSummary = computed(() => {
   return parts.length ? parts.join(' · ') : '全部'
 })
 
-const pagedRequirements = computed(() => {
+const pagedSupplies = computed(() => {
   const start = (pagination.page - 1) * pagination.size
   const end = start + pagination.size
-  return requirements.value.slice(start, end)
+  return supplies.value.slice(start, end)
 })
 
-async function loadRequirements() {
+async function loadSupplies() {
   loading.value = true
   try {
     const companyId = auth.me?.companyId
     if (!companyId) {
-      requirements.value = []
+      supplies.value = []
       pagination.total = 0
       return
     }
-    const r = await listRequirements({
+    const r = await listSupplies({
       companyId,
       categoryName: filters.categoryName || undefined,
       status: filters.status,
       includeExpired: true
     })
     if (r.code === 0) {
-      requirements.value = r.data || []
-      pagination.total = requirements.value.length
+      supplies.value = r.data || []
+      pagination.total = supplies.value.length
     } else {
       throw new Error(r.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '加载需求列表失败')
+    ElMessage.error(e?.message || '加载供应列表失败')
   } finally {
     loading.value = false
   }
@@ -74,7 +74,7 @@ async function loadRequirements() {
 
 function handleFilter() {
   pagination.page = 1
-  loadRequirements()
+  loadSupplies()
 }
 
 function clearFilters() {
@@ -103,7 +103,7 @@ function formatDate(s?: string) {
 }
 
 function formatPrice(v?: number) {
-  if (v == null) return '面议'
+  if (v == null) return '—'
   return `¥${Number(v).toLocaleString('zh-CN')}/吨`
 }
 
@@ -126,32 +126,34 @@ function getParamsSummary(paramsJson?: string) {
 
 const editOpen = ref(false)
 const saving = ref(false)
-const editing = ref<RequirementResponse | null>(null)
-const editForm = reactive<RequirementUpdateRequest>({
+const editing = ref<SupplyResponse | null>(null)
+const editForm = reactive<SupplyUpdateRequest>({
+  origin: undefined,
   quantity: undefined,
-  expectedPrice: undefined,
+  exFactoryPrice: undefined,
+  shipAddress: undefined,
+  deliveryMode: undefined,
   packaging: undefined,
-  invoiceType: undefined,
-  paymentMethod: undefined,
-  deliveryMethod: undefined,
+  storageMethod: undefined,
   expireMinutes: undefined,
-  purchaseAddress: undefined,
   paramsJson: undefined,
+  priceRulesJson: undefined,
   remark: undefined
 })
 
-function openEdit(req: RequirementResponse) {
-  editing.value = req
-  editForm.quantity = req.quantity
-  editForm.expectedPrice = req.expectedPrice
-  editForm.packaging = req.packaging
-  editForm.invoiceType = req.invoiceType
-  editForm.paymentMethod = req.paymentMethod
-  editForm.deliveryMethod = req.deliveryMethod
-  editForm.expireMinutes = req.expireMinutes
-  editForm.purchaseAddress = req.purchaseAddress
-  editForm.paramsJson = req.paramsJson
-  editForm.remark = req.remark
+function openEdit(s: SupplyResponse) {
+  editing.value = s
+  editForm.origin = s.origin
+  editForm.quantity = s.quantity
+  editForm.exFactoryPrice = s.exFactoryPrice
+  editForm.shipAddress = s.shipAddress
+  editForm.deliveryMode = s.deliveryMode
+  editForm.packaging = s.packaging
+  editForm.storageMethod = s.storageMethod
+  editForm.expireMinutes = s.expireMinutes
+  editForm.paramsJson = s.paramsJson
+  editForm.priceRulesJson = s.priceRulesJson
+  editForm.remark = s.remark
   editOpen.value = true
 }
 
@@ -159,22 +161,23 @@ async function saveEdit() {
   if (!editing.value?.id) return
   saving.value = true
   try {
-    const r = await updateRequirement(editing.value.id, {
+    const r = await updateSupply(editing.value.id, {
+      origin: editForm.origin,
       quantity: editForm.quantity,
-      expectedPrice: editForm.expectedPrice,
+      exFactoryPrice: editForm.exFactoryPrice,
+      shipAddress: editForm.shipAddress,
+      deliveryMode: editForm.deliveryMode,
       packaging: editForm.packaging,
-      invoiceType: editForm.invoiceType,
-      paymentMethod: editForm.paymentMethod,
-      deliveryMethod: editForm.deliveryMethod,
+      storageMethod: editForm.storageMethod,
       expireMinutes: editForm.expireMinutes,
-      purchaseAddress: editForm.purchaseAddress,
       paramsJson: editForm.paramsJson,
+      priceRulesJson: editForm.priceRulesJson,
       remark: editForm.remark
     })
     if (r.code !== 0) throw new Error(r.message)
     ElMessage.success('已保存')
     editOpen.value = false
-    await loadRequirements()
+    await loadSupplies()
   } catch (e: any) {
     ElMessage.error(e?.message || '保存失败')
   } finally {
@@ -182,36 +185,36 @@ async function saveEdit() {
   }
 }
 
-async function revoke(req: RequirementResponse) {
-  if (!req.id) return
+async function revoke(s: SupplyResponse) {
+  if (!s.id) return
   try {
-    await ElMessageBox.confirm('撤销后该需求将从大厅隐藏，可随时再次发布。', '确认撤销？', {
-      confirmButtonText: '撤销',
+    await ElMessageBox.confirm('下架后该供应将从大厅隐藏，可随时再次发布。', '确认下架？', {
+      confirmButtonText: '下架',
       cancelButtonText: '取消',
       type: 'warning'
     })
-    const r = await updateRequirement(req.id, { status: 2 })
+    const r = await updateSupply(s.id, { status: 2 })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已撤销')
-    await loadRequirements()
+    ElMessage.success('已下架')
+    await loadSupplies()
   } catch (e: any) {
     if (e === 'cancel' || e === 'close') return
     ElMessage.error(e?.message || '操作失败')
   }
 }
 
-async function republish(req: RequirementResponse) {
-  if (!req.id) return
+async function republish(s: SupplyResponse) {
+  if (!s.id) return
   try {
-    await ElMessageBox.confirm('将该需求重新发布到大厅，并按有效期重新计时（如有）。', '再次发布？', {
+    await ElMessageBox.confirm('将该供应重新发布到大厅，并按有效期重新计时（如有）。', '再次发布？', {
       confirmButtonText: '发布',
       cancelButtonText: '取消',
       type: 'info'
     })
-    const r = await updateRequirement(req.id, { status: 0, expireMinutes: req.expireMinutes ?? undefined })
+    const r = await updateSupply(s.id, { status: 0, expireMinutes: s.expireMinutes ?? undefined })
     if (r.code !== 0) throw new Error(r.message)
     ElMessage.success('已再次发布')
-    await loadRequirements()
+    await loadSupplies()
   } catch (e: any) {
     if (e === 'cancel' || e === 'close') return
     ElMessage.error(e?.message || '操作失败')
@@ -219,32 +222,32 @@ async function republish(req: RequirementResponse) {
 }
 
 onMounted(() => {
-  loadRequirements()
+  loadSupplies()
 })
 </script>
 
 <template>
   <div class="bg-gray-50 text-gray-900 min-h-screen">
     <div class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-      <PageHeader title="已发布采购" subtitle="管理您已发布的采购需求列表">
+      <PageHeader title="已发布供应" subtitle="管理您已发布的供应信息列表">
         <template #right>
-          <el-button class="!rounded-xl transition-all active:scale-95" :loading="loading" @click="loadRequirements">
+          <el-button class="!rounded-xl transition-all active:scale-95" :loading="loading" @click="loadSupplies">
             <span class="inline-flex items-center gap-2">
               <RefreshCcw class="w-4 h-4" />
               刷新
             </span>
           </el-button>
-          <el-button class="!rounded-xl transition-all active:scale-95" @click="router.push('/requirements')">
+          <el-button class="!rounded-xl transition-all active:scale-95" @click="router.push('/supply')">
             返回发布
           </el-button>
           <el-button
             type="primary"
             class="!rounded-xl !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 transition-all active:scale-95"
-            @click="router.push('/requirements')"
+            @click="router.push('/supply')"
           >
             <span class="inline-flex items-center gap-2">
               <Plus class="w-4 h-4" />
-              发布新需求
+              发布新供应
             </span>
           </el-button>
         </template>
@@ -254,8 +257,8 @@ onMounted(() => {
         <div class="p-6 border-b border-gray-100 flex items-center justify-between gap-4">
           <div>
             <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">LIST</div>
-            <div class="text-lg font-bold text-gray-900 mt-1">采购需求列表</div>
-            <div class="text-sm text-gray-500 mt-1">筛选 · 编辑 · 撤销 · 再次发布</div>
+            <div class="text-lg font-bold text-gray-900 mt-1">供应列表</div>
+            <div class="text-sm text-gray-500 mt-1">筛选 · 编辑 · 下架 · 再次发布</div>
             <div class="text-xs text-gray-400 mt-1">
               当前筛选：<span class="font-medium text-gray-600">{{ activeFilterSummary }}</span>
             </div>
@@ -329,124 +332,124 @@ onMounted(() => {
             </div>
           </div>
 
-          <div v-if="requirements.length === 0" class="text-center py-12 text-gray-500">
-            暂无采购需求
+          <div v-if="supplies.length === 0" class="text-center py-12 text-gray-500">
+            暂无供应信息
           </div>
           <div v-else class="space-y-4">
             <div
-              v-for="req in pagedRequirements"
-              :key="req.id"
+              v-for="s in pagedSupplies"
+              :key="s.id"
               class="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow"
             >
               <div class="min-w-0">
-                  <div class="flex items-center gap-2">
-                    <h3 class="text-lg font-bold text-gray-900 truncate">{{ req.categoryName }}</h3>
-                    <span
-                      class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border"
-                      :class="req.status === 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                        req.status === 1 ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                        req.status === 2 ? 'bg-gray-50 text-gray-600 border-gray-100' :
-                        'bg-emerald-50 text-emerald-700 border-emerald-100'"
+                <div class="flex items-center gap-2">
+                  <h3 class="text-lg font-bold text-gray-900 truncate">{{ s.categoryName }}</h3>
+                  <span
+                    class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border"
+                    :class="s.status === 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                      s.status === 1 ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                      s.status === 2 ? 'bg-gray-50 text-gray-600 border-gray-100' :
+                      'bg-emerald-50 text-emerald-700 border-emerald-100'"
+                  >
+                    {{ getStatusText(s.status) }}
+                  </span>
+                  <span v-if="s.supplyNo" class="text-xs text-gray-400 truncate">
+                    · {{ s.supplyNo }}
+                  </span>
+                </div>
+
+                <div class="mt-2 grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                      {{ s.status === 1 ? '数量/剩余' : '数量' }}
+                    </div>
+                    <div class="mt-1 font-bold text-gray-900">
+                      {{ s.quantity ?? '-' }} 吨
+                      <span v-if="s.status === 1 && s.remainingQuantity != null" class="text-sm text-gray-500 font-medium"> · 剩余 {{ s.remainingQuantity }} 吨</span>
+                    </div>
+                  </div>
+                  <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">出厂价</div>
+                    <div class="mt-1 font-bold text-gray-900">{{ formatPrice(s.exFactoryPrice) }}</div>
+                  </div>
+                  <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">发货地</div>
+                    <div class="mt-1 font-bold text-gray-900 truncate">{{ s.shipAddress || '—' }}</div>
+                  </div>
+                </div>
+
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <span v-if="s.origin" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-100 text-gray-700">
+                    产地：{{ s.origin }}
+                  </span>
+                  <span v-if="s.packaging" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-100 text-gray-700">
+                    包装：{{ s.packaging }}
+                  </span>
+                  <span v-if="s.storageMethod" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-100 text-gray-700">
+                    储存：{{ s.storageMethod }}
+                  </span>
+                  <span v-if="s.deliveryMode" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-100 text-gray-700">
+                    交付：{{ s.deliveryMode }}
+                  </span>
+                  <span v-if="s.expireTime || s.expireMinutes != null" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-100 text-gray-700">
+                    有效期：{{ s.expireTime ? formatDate(s.expireTime) : '长期有效' }}
+                  </span>
+                  <span v-if="getParamsSummary(s.paramsJson) !== '无'" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 border border-emerald-100 text-emerald-700">
+                    指标：{{ getParamsSummary(s.paramsJson) }}
+                  </span>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  <div class="text-xs text-gray-400">
+                    创建：{{ formatDate(s.createTime) }} · 更新：{{ formatDate(s.updateTime) }}
+                  </div>
+
+                  <div class="flex flex-wrap items-center gap-2 md:justify-end">
+                    <template v-if="s.status === 3">
+                      <el-tooltip content="全部成交的供应建议保留为历史记录" placement="top">
+                        <span>
+                          <el-button class="!rounded-xl transition-all active:scale-95" disabled>
+                            <span class="inline-flex items-center gap-2">
+                              <Pencil class="w-4 h-4" />
+                              编辑
+                            </span>
+                          </el-button>
+                        </span>
+                      </el-tooltip>
+                    </template>
+                    <template v-else>
+                      <el-button class="!rounded-xl transition-all active:scale-95" @click="openEdit(s)">
+                        <span class="inline-flex items-center gap-2">
+                          <Pencil class="w-4 h-4" />
+                          编辑
+                        </span>
+                      </el-button>
+                    </template>
+
+                    <el-button
+                      v-if="s.status === 0 || s.status === 1"
+                      class="!rounded-xl transition-all active:scale-95 !text-red-600 hover:!bg-red-50"
+                      @click="revoke(s)"
                     >
-                      {{ getStatusText(req.status) }}
-                    </span>
-                    <span v-if="req.contractNo" class="text-xs text-gray-400 truncate">
-                      · {{ req.contractNo }}
-                    </span>
+                      <span class="inline-flex items-center gap-2">
+                        <Ban class="w-4 h-4" />
+                        下架
+                      </span>
+                    </el-button>
+
+                    <el-button
+                      v-else-if="s.status === 2"
+                      type="primary"
+                      class="!rounded-xl transition-all active:scale-95"
+                      @click="republish(s)"
+                    >
+                      <span class="inline-flex items-center gap-2">
+                        <RotateCcw class="w-4 h-4" />
+                        再次发布
+                      </span>
+                    </el-button>
                   </div>
-
-                  <div class="mt-2 grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
-                      <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                        {{ req.status === 1 ? '数量/剩余' : '数量' }}
-                      </div>
-                      <div class="mt-1 font-bold text-gray-900">
-                        {{ req.quantity ?? '-' }} 吨
-                        <span v-if="req.status === 1 && req.remainingQuantity != null" class="text-sm text-gray-500 font-medium"> · 剩余 {{ req.remainingQuantity }} 吨</span>
-                      </div>
-                    </div>
-                    <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
-                      <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">意向价</div>
-                      <div class="mt-1 font-bold text-gray-900">{{ formatPrice(req.expectedPrice) }}</div>
-                    </div>
-                    <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
-                      <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">交付地</div>
-                      <div class="mt-1 font-bold text-gray-900 truncate">{{ req.purchaseAddress || '—' }}</div>
-                    </div>
-                  </div>
-
-                  <div class="mt-3 flex flex-wrap gap-2">
-                    <span v-if="req.packaging" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-100 text-gray-700">
-                      包装：{{ req.packaging }}
-                    </span>
-                    <span v-if="req.paymentMethod" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-100 text-gray-700">
-                      付款：{{ req.paymentMethod }}
-                    </span>
-                    <span v-if="req.invoiceType" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-100 text-gray-700">
-                      发票：{{ req.invoiceType }}
-                    </span>
-                    <span v-if="req.deliveryMethod" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-100 text-gray-700">
-                      交付：{{ req.deliveryMethod }}
-                    </span>
-                    <span v-if="req.expireTime || req.expireMinutes != null" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-100 text-gray-700">
-                      有效期：{{ req.expireTime ? formatDate(req.expireTime) : '长期有效' }}
-                    </span>
-                    <span v-if="getParamsSummary(req.paramsJson) !== '无'" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 border border-emerald-100 text-emerald-700">
-                      指标：{{ getParamsSummary(req.paramsJson) }}
-                    </span>
-                  </div>
-
-                  <div class="mt-4 pt-4 border-t border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div class="text-xs text-gray-400">
-                      创建：{{ formatDate(req.createTime) }} · 更新：{{ formatDate(req.updateTime) }}
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-2 md:justify-end">
-                      <template v-if="req.status === 3">
-                        <el-tooltip content="全部成交的需求建议保留为历史记录" placement="top">
-                          <span>
-                            <el-button class="!rounded-xl transition-all active:scale-95" disabled>
-                              <span class="inline-flex items-center gap-2">
-                                <Pencil class="w-4 h-4" />
-                                编辑
-                              </span>
-                            </el-button>
-                          </span>
-                        </el-tooltip>
-                      </template>
-                      <template v-else>
-                        <el-button class="!rounded-xl transition-all active:scale-95" @click="openEdit(req)">
-                          <span class="inline-flex items-center gap-2">
-                            <Pencil class="w-4 h-4" />
-                            编辑
-                          </span>
-                        </el-button>
-                      </template>
-
-                      <el-button
-                        v-if="req.status === 0 || req.status === 1"
-                        class="!rounded-xl transition-all active:scale-95 !text-red-600 hover:!bg-red-50"
-                        @click="revoke(req)"
-                      >
-                        <span class="inline-flex items-center gap-2">
-                          <Ban class="w-4 h-4" />
-                          撤销
-                        </span>
-                      </el-button>
-
-                      <el-button
-                        v-else-if="req.status === 2"
-                        type="primary"
-                        class="!rounded-xl transition-all active:scale-95"
-                        @click="republish(req)"
-                      >
-                        <span class="inline-flex items-center gap-2">
-                          <RotateCcw class="w-4 h-4" />
-                          再次发布
-                        </span>
-                      </el-button>
-                    </div>
-                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -464,47 +467,50 @@ onMounted(() => {
         </div>
       </div>
 
-      <el-dialog v-model="editOpen" width="720px" class="neo-dialog" title="编辑采购需求">
+      <el-dialog v-model="editOpen" width="720px" class="neo-dialog" title="编辑供应信息">
         <div class="p-6">
           <div class="text-xs text-gray-500 mb-4">
-            仅修改本条已发布需求，不影响您的公司/个人档案
+            仅修改本条已发布供应，不影响您的公司/个人档案
           </div>
           <div class="bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-6">
             <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">标的</div>
             <div class="mt-1 font-bold text-gray-900">
               {{ editing?.categoryName || '-' }}
-              <span v-if="editing?.contractNo" class="text-sm text-gray-500 font-medium"> · {{ editing?.contractNo }}</span>
+              <span v-if="editing?.supplyNo" class="text-sm text-gray-500 font-medium"> · {{ editing?.supplyNo }}</span>
             </div>
           </div>
 
           <el-form label-position="top" class="neo-dialog-form">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <el-form-item label="采购数量（吨）">
+              <el-form-item label="供应数量（吨）">
                 <el-input-number v-model="editForm.quantity" class="w-full" :controls="false" :min="0" />
               </el-form-item>
-              <el-form-item label="意向价格（元/吨）">
-                <el-input-number v-model="editForm.expectedPrice" class="w-full" :controls="false" :min="0" />
+              <el-form-item label="出厂价（元/吨）">
+                <el-input-number v-model="editForm.exFactoryPrice" class="w-full" :controls="false" :min="0" />
+              </el-form-item>
+              <el-form-item label="产地">
+                <el-input v-model="editForm.origin" placeholder="例如：山东济南…" />
+              </el-form-item>
+              <el-form-item label="发货地址">
+                <el-input v-model="editForm.shipAddress" placeholder="例如：山东省济南市…" />
+              </el-form-item>
+              <el-form-item label="交付方式">
+                <el-input v-model="editForm.deliveryMode" placeholder="例如：到厂 / 自提" />
               </el-form-item>
               <el-form-item label="包装方式">
                 <el-input v-model="editForm.packaging" placeholder="例如：散装 / 袋装" />
               </el-form-item>
-              <el-form-item label="付款方式">
-                <el-input v-model="editForm.paymentMethod" placeholder="例如：现款 / 账期" />
-              </el-form-item>
-              <el-form-item label="发票类型">
-                <el-input v-model="editForm.invoiceType" placeholder="例如：专票 / 普票 / 不需要" />
-              </el-form-item>
-              <el-form-item label="交货方式">
-                <el-input v-model="editForm.deliveryMethod" placeholder="例如：到厂 / 自提" />
+              <el-form-item label="储存方式">
+                <el-input v-model="editForm.storageMethod" placeholder="例如：常温 / 冷藏" />
               </el-form-item>
               <el-form-item label="发布有效期（分钟，空=长期有效）">
                 <el-input-number v-model="editForm.expireMinutes" class="w-full" :controls="false" :min="0" />
               </el-form-item>
-              <el-form-item label="交付地">
-                <el-input v-model="editForm.purchaseAddress" placeholder="例如：北京市朝阳区…" />
-              </el-form-item>
               <el-form-item class="md:col-span-2" label="指标（JSON，可选）">
                 <el-input v-model="editForm.paramsJson" type="textarea" :autosize="{ minRows: 3, maxRows: 6 }" placeholder='例如：{"custom":{"水分":"≤14%","霉变":"≤1%"}}' />
+              </el-form-item>
+              <el-form-item class="md:col-span-2" label="价格规则（JSON，可选）">
+                <el-input v-model="editForm.priceRulesJson" type="textarea" :autosize="{ minRows: 2, maxRows: 4 }" placeholder='例如：[{"mode":"到厂","price":2800}]' />
               </el-form-item>
               <el-form-item class="md:col-span-2" label="备注">
                 <el-input v-model="editForm.remark" type="textarea" :autosize="{ minRows: 2, maxRows: 5 }" placeholder="补充说明（选填）" />
@@ -551,7 +557,7 @@ onMounted(() => {
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
 }
 
-/* 复用“neo-dialog”弹窗风格（与发布页一致） */
+/* 复用“neo-dialog”弹窗风格（与采购管理一致） */
 :deep(.neo-dialog) {
   border-radius: 32px;
   overflow: hidden;

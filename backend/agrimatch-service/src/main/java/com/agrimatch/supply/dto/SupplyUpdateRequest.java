@@ -8,6 +8,11 @@ public class SupplyUpdateRequest {
     @Size(max = 64)
     private String categoryName;
 
+    @Size(max = 128)
+    private String origin;
+
+    private BigDecimal quantity;
+
     private BigDecimal exFactoryPrice;
 
     @Size(max = 255)
@@ -16,12 +21,26 @@ public class SupplyUpdateRequest {
     @Size(max = 20)
     private String deliveryMode;
 
+    @Size(max = 20)
+    private String packaging;
+
+    @Size(max = 20)
+    private String storageMethod;
+
     private String priceRulesJson;
 
     private String paramsJson;
 
+    @Size(max = 500)
+    private String remark;
+
     /**
-     * 状态（0上架 1下架）
+     * 发布有效期（分钟）；空/<=0 表示长期有效（后端会做上限保护）
+     */
+    private Integer expireMinutes;
+
+    /**
+     * 状态（0发布中 1部分成交 2已下架 3全部成交）
      */
     private Integer status;
 
@@ -31,6 +50,22 @@ public class SupplyUpdateRequest {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
+    public BigDecimal getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(BigDecimal quantity) {
+        this.quantity = quantity;
     }
 
     public BigDecimal getExFactoryPrice() {
@@ -57,6 +92,22 @@ public class SupplyUpdateRequest {
         this.deliveryMode = deliveryMode;
     }
 
+    public String getPackaging() {
+        return packaging;
+    }
+
+    public void setPackaging(String packaging) {
+        this.packaging = packaging;
+    }
+
+    public String getStorageMethod() {
+        return storageMethod;
+    }
+
+    public void setStorageMethod(String storageMethod) {
+        this.storageMethod = storageMethod;
+    }
+
     public String getPriceRulesJson() {
         return priceRulesJson;
     }
@@ -71,6 +122,22 @@ public class SupplyUpdateRequest {
 
     public void setParamsJson(String paramsJson) {
         this.paramsJson = paramsJson;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public Integer getExpireMinutes() {
+        return expireMinutes;
+    }
+
+    public void setExpireMinutes(Integer expireMinutes) {
+        this.expireMinutes = expireMinutes;
     }
 
     public Integer getStatus() {

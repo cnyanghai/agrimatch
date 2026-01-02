@@ -5,6 +5,12 @@ public class RequirementQuery {
     private Long userId;
     private String categoryName;
     private Integer status;
+    /**
+     * 是否包含已过期数据：
+     * - true：管理端可查看（用于“已发布列表/历史”）
+     * - false/null：默认只展示未过期（用于大厅浏览）
+     */
+    private Boolean includeExpired;
     private String orderBy;
     private String order;
 
@@ -38,6 +44,14 @@ public class RequirementQuery {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public Boolean getIncludeExpired() {
+        return includeExpired;
+    }
+
+    public void setIncludeExpired(Boolean includeExpired) {
+        this.includeExpired = includeExpired;
     }
 
     public String getOrderBy() {
