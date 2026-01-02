@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { requireAuth } from '../../utils/requireAuth'
 import PublicTopNav from '../../components/PublicTopNav.vue'
 import ChatDrawer from '../../components/chat/ChatDrawer.vue'
@@ -9,6 +9,7 @@ import { openChatConversation } from '../../api/chat'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
+const route = useRoute()
 
 function go(path: string) {
   router.push(path)
@@ -21,6 +22,50 @@ function onPublishSupply() {
 
 const supplies = ref<SupplyResponse[]>([])
 const listLoading = ref(false)
+const focusedId = ref<number | null>(null)
+const cardEls = new Map<number, HTMLElement>()
+let focusTimer: number | null = null
+
+const focusIdFromRoute = computed(() => {
+  const raw = route.query.focusId
+  const s = Array.isArray(raw) ? raw[0] : raw
+  const n = s ? Number(s) : NaN
+  return Number.isFinite(n) ? n : null
+})
+
+const displaySupplies = computed(() => {
+  // 默认只展示前 10 条；若存在 focusId，则展示完整列表以保证可定位
+  if (focusIdFromRoute.value) return supplies.value
+  return supplies.value.slice(0, 10)
+})
+
+function setCardEl(id: number, el: Element | null) {
+  if (!id) return
+  if (el) cardEls.set(id, el as HTMLElement)
+  else cardEls.delete(id)
+}
+
+async function applyFocusIfNeeded() {
+  const id = focusIdFromRoute.value
+  if (!id) return
+
+  // 等待 DOM 渲染
+  await nextTick()
+  const el = cardEls.get(id)
+  if (!el) return
+
+  focusedId.value = id
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+  // 清掉 query，避免刷新/切换重复触发
+  router.replace({ path: route.path, query: { ...route.query, focusId: undefined } })
+
+  if (focusTimer) window.clearTimeout(focusTimer)
+  focusTimer = window.setTimeout(() => {
+    focusedId.value = null
+    focusTimer = null
+  }, 2500)
+}
 
 const drawerOpen = ref(false)
 const drawerConversationId = ref<number | null>(null)
@@ -86,11 +131,16 @@ async function loadSupplies() {
     supplies.value = []
   } finally {
     listLoading.value = false
+    applyFocusIfNeeded()
   }
 }
 
 onMounted(() => {
   loadSupplies()
+})
+
+watch(focusIdFromRoute, () => {
+  applyFocusIfNeeded()
 })
 </script>
 
@@ -171,9 +221,11 @@ onMounted(() => {
         </div>
 
         <div
-          v-for="s in supplies.slice(0, 10)"
+          v-for="s in displaySupplies"
           :key="s.id"
-          class="supply-card bg-white rounded-xl p-5 border border-gray-100 transition-all"
+          :ref="(el) => setCardEl(Number(s.id), el as any)"
+          class="supply-card bg-white rounded-2xl p-5 border border-gray-100 transition-all"
+          :class="focusedId === s.id ? 'ring-2 ring-emerald-500/60 bg-emerald-50/40' : 'hover:shadow-md hover:border-emerald-100'"
         >
           <div class="flex flex-col lg:flex-row items-center gap-6">
             <div class="w-full lg:w-44 flex items-center gap-3 shrink-0 border-r border-gray-50 pr-4">

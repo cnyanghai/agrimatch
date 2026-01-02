@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { requireAuth } from '../../utils/requireAuth'
 import PublicTopNav from '../../components/PublicTopNav.vue'
 import ChatDrawer from '../../components/chat/ChatDrawer.vue'
@@ -9,6 +9,7 @@ import { openChatConversation } from '../../api/chat'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
+const route = useRoute()
 
 function go(path: string) {
   router.push(path)
@@ -21,6 +22,45 @@ function onPublishNeed() {
 
 const requirements = ref<RequirementResponse[]>([])
 const listLoading = ref(false)
+const focusedId = ref<number | null>(null)
+const cardEls = new Map<number, HTMLElement>()
+let focusTimer: number | null = null
+
+const focusIdFromRoute = computed(() => {
+  const raw = route.query.focusId
+  const s = Array.isArray(raw) ? raw[0] : raw
+  const n = s ? Number(s) : NaN
+  return Number.isFinite(n) ? n : null
+})
+
+const displayRequirements = computed(() => {
+  if (focusIdFromRoute.value) return requirements.value
+  return requirements.value.slice(0, 10)
+})
+
+function setCardEl(id: number, el: Element | null) {
+  if (!id) return
+  if (el) cardEls.set(id, el as HTMLElement)
+  else cardEls.delete(id)
+}
+
+async function applyFocusIfNeeded() {
+  const id = focusIdFromRoute.value
+  if (!id) return
+  await nextTick()
+  const el = cardEls.get(id)
+  if (!el) return
+
+  focusedId.value = id
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  router.replace({ path: route.path, query: { ...route.query, focusId: undefined } })
+
+  if (focusTimer) window.clearTimeout(focusTimer)
+  focusTimer = window.setTimeout(() => {
+    focusedId.value = null
+    focusTimer = null
+  }, 2500)
+}
 
 const drawerOpen = ref(false)
 const drawerConversationId = ref<number | null>(null)
@@ -87,11 +127,16 @@ async function loadRequirements() {
     requirements.value = []
   } finally {
     listLoading.value = false
+    applyFocusIfNeeded()
   }
 }
 
 onMounted(() => {
   loadRequirements()
+})
+
+watch(focusIdFromRoute, () => {
+  applyFocusIfNeeded()
 })
 </script>
 
@@ -170,9 +215,11 @@ onMounted(() => {
         </div>
 
         <div
-          v-for="r in requirements.slice(0, 10)"
+          v-for="r in displayRequirements"
           :key="r.id"
-          class="purchase-card bg-white rounded-xl p-5 border border-gray-100 transition-all"
+          :ref="(el) => setCardEl(Number(r.id), el as any)"
+          class="purchase-card bg-white rounded-2xl p-5 border border-gray-100 transition-all"
+          :class="focusedId === r.id ? 'ring-2 ring-blue-500/50 bg-blue-50/40' : 'hover:shadow-md hover:border-blue-100'"
         >
           <div class="flex flex-col lg:flex-row items-center gap-6">
             <div class="w-full lg:w-44 flex items-center gap-3 shrink-0 border-r border-gray-50 pr-4">

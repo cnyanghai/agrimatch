@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Edit, List, Document, InfoFilled, Operation, Plus, Delete } from '@element-plus/icons-vue'
+import { Edit, List, Document, Plus, Delete } from '@element-plus/icons-vue'
 // import { useAppStore } from '../store/app' // 暂时未使用
 import { createRequirement, listRequirements, getNextRequirementNo, type RequirementCreateRequest, type RequirementResponse } from '../api/requirement'
 import { listMyRequirementTemplates as listRequirementTemplates, createRequirementTemplate, deleteRequirementTemplate, type RequirementTemplateCreateRequest, type RequirementTemplateResponse } from '../api/requirementTemplate'
@@ -442,16 +442,16 @@ const tabs = [
 </script>
 
 <template>
-  <div class="requirement-view">
+  <div class="bg-gray-50 text-gray-900 min-h-screen">
     <PageHeader title="采购管理" subtitle="发布采购需求、保存需求模板、查看需求列表" />
 
     <!-- Tab导航 -->
-    <div class="bg-white rounded-xl shadow-card border border-gray-100 mb-6 overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
       <div class="flex border-b border-gray-100">
         <button
           v-for="tab in tabs"
           :key="tab.key"
-          class="flex-1 py-4 text-center font-medium transition-all relative"
+          class="flex-1 py-4 text-center font-bold transition-all active:scale-[0.99] relative"
           :class="activeTab === tab.key ? 'text-emerald-700 bg-emerald-50/50' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
           @click="activeTab = tab.key"
         >
@@ -465,21 +465,23 @@ const tabs = [
     <div v-show="activeTab === 'publish'" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- 左侧表单区域（2/3） -->
       <div class="lg:col-span-2">
-        <div class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div class="p-6 border-b border-gray-100">
-            <h3 class="text-lg font-semibold text-gray-800">发布采购需求</h3>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">发布</div>
+            <h3 class="text-lg font-bold text-gray-900 mt-1">发布采购需求</h3>
             <p class="text-gray-500 text-sm mt-1">填写以下信息发布您的采购需求</p>
           </div>
           
           <el-form :model="publishForm" label-width="120px" label-position="left" class="p-6">
             <!-- 基本信息卡片 -->
             <div class="space-y-4 mb-6">
-              <h4 class="text-md font-medium text-gray-700 flex items-center">
-                <el-icon class="mr-2 text-primary-600"><InfoFilled /></el-icon>
-                基本信息
-              </h4>
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-6 bg-emerald-600 rounded-full"></span>
+                <h4 class="font-bold text-gray-900">基本信息</h4>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">base</span>
+              </div>
               
-              <div class="bg-gray-50 rounded-lg p-4">
+              <div class="bg-gray-50 rounded-2xl border border-gray-100 p-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <el-form-item label="公司名称">
                     <el-input 
@@ -585,12 +587,13 @@ const tabs = [
             
             <!-- 品类参数卡片 -->
             <div v-if="categoryParams.length > 0" class="space-y-4 mb-6">
-              <h4 class="text-md font-medium text-gray-700 flex items-center">
-                <el-icon class="mr-2 text-primary-600"><Operation /></el-icon>
-                品类参数
-              </h4>
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-6 bg-slate-900 rounded-full"></span>
+                <h4 class="font-bold text-gray-900">品类参数</h4>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">spec</span>
+              </div>
               
-              <div class="bg-gray-50 rounded-lg p-4">
+              <div class="bg-gray-50 rounded-2xl border border-gray-100 p-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div v-for="param in categoryParams" :key="param.id">
                     <el-form-item :label="param.paramName">
@@ -631,12 +634,14 @@ const tabs = [
             
             <div class="flex justify-end space-x-4 pt-4 border-t border-gray-100">
               <el-button 
+                class="!rounded-xl transition-all active:scale-95"
                 @click="saveAsTemplate"
               >
                 保存为模板
               </el-button>
               <el-button 
                 type="primary" 
+                class="!rounded-xl !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 transition-all active:scale-95"
                 :loading="loading" 
                 @click="publishRequirement"
                 size="large"
@@ -650,9 +655,10 @@ const tabs = [
       
       <!-- 右侧预览区域（1/3，sticky） -->
       <div class="lg:col-span-1">
-        <div class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden sticky top-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
           <div class="p-6 border-b border-gray-100">
-            <h3 class="text-lg font-semibold text-gray-800">需求信息预览</h3>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">预览</div>
+            <h3 class="text-lg font-bold text-gray-900 mt-1">需求信息预览</h3>
             <p class="text-gray-500 text-sm mt-1">发布的需求将显示在这里</p>
           </div>
           
@@ -663,7 +669,7 @@ const tabs = [
             </div>
             <div v-else class="space-y-4">
               <div class="text-center mb-6">
-                <h2 class="text-xl font-bold text-gray-800">采购需求信息</h2>
+                <h2 class="text-xl font-bold text-gray-900">采购需求信息</h2>
                 <p class="text-gray-500 text-sm mt-1">合同编号: {{ previewData.contractNo }}</p>
               </div>
               
@@ -700,7 +706,7 @@ const tabs = [
                 <div v-if="previewData.expectedPrice" class="grid grid-cols-2 gap-3">
                   <div>
                     <p class="text-xs text-gray-500 mb-1">期望价格</p>
-                    <p class="text-sm font-medium text-primary-600">¥{{ previewData.expectedPrice }}/吨</p>
+                    <p class="text-sm font-bold text-emerald-600">¥{{ previewData.expectedPrice }}/吨</p>
                   </div>
                 </div>
                 
@@ -752,14 +758,15 @@ const tabs = [
     </div>
 
     <!-- 需求模板区域 -->
-    <div v-show="activeTab === 'templates'" class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden">
+    <div v-show="activeTab === 'templates'" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-lg font-semibold text-gray-800">采购模板</h3>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">templates</div>
+            <h3 class="text-lg font-bold text-gray-900 mt-1">采购模板</h3>
             <p class="text-gray-500 text-sm mt-1">管理您的采购需求模板，快速填充表单</p>
           </div>
-          <el-button type="primary" @click="activeTab = 'publish'">
+          <el-button type="primary" class="!rounded-xl !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 transition-all active:scale-95" @click="activeTab = 'publish'">
             <el-icon class="mr-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg></el-icon>
             创建新模板
           </el-button>
@@ -773,7 +780,7 @@ const tabs = [
           <div 
             v-for="template in templates" 
             :key="template.id" 
-            class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer bg-white"
+            class="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow cursor-pointer"
             @click="applyTemplate(template)"
           >
             <div class="flex justify-between items-start mb-2">
@@ -798,18 +805,19 @@ const tabs = [
     </div>
 
     <!-- 采购列表区域 -->
-    <div v-show="activeTab === 'list'" class="bg-white rounded-xl shadow-card border border-gray-100 overflow-hidden">
+    <div v-show="activeTab === 'list'" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-lg font-semibold text-gray-800">已发布的采购需求</h3>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">list</div>
+            <h3 class="text-lg font-bold text-gray-900 mt-1">已发布的采购需求</h3>
             <p class="text-gray-500 text-sm mt-1">管理您已发布的所有采购需求</p>
           </div>
           <div class="flex items-center gap-3">
-            <el-tag type="info" effect="light" size="large" class="!rounded-lg">
+            <el-tag type="info" effect="light" size="large" class="!rounded-full">
               共 {{ pagination.total }} 条
             </el-tag>
-            <el-button type="primary" @click="activeTab = 'publish'">
+            <el-button type="primary" class="!rounded-xl !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 transition-all active:scale-95" @click="activeTab = 'publish'">
               <el-icon class="mr-1"><Plus /></el-icon>
               发布新需求
             </el-button>
@@ -818,10 +826,10 @@ const tabs = [
       </div>
       <div class="p-6">
         <!-- 筛选条件 -->
-        <div class="flex flex-wrap gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+        <div class="flex flex-wrap gap-4 mb-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
             <div class="flex flex-wrap gap-4">
               <div class="flex items-center gap-2">
-                <span class="text-gray-600">品类:</span>
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">品类</span>
                 <el-input 
                   v-model="filters.categoryName" 
                   placeholder="搜索品类" 
@@ -830,7 +838,7 @@ const tabs = [
                 />
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-gray-600">状态:</span>
+                <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">状态</span>
                 <el-select v-model="filters.status" class="w-32" clearable>
                   <el-option label="全部" :value="undefined" />
                   <el-option label="发布中" :value="0" />
@@ -839,7 +847,7 @@ const tabs = [
                   <el-option label="全部成交" :value="3" />
                 </el-select>
               </div>
-              <el-button type="primary" @click="handleFilter">搜索</el-button>
+              <el-button type="primary" class="!rounded-xl !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 transition-all active:scale-95" @click="handleFilter">搜索</el-button>
             </div>
         </div>
         
@@ -851,17 +859,17 @@ const tabs = [
               <div 
                 v-for="req in requirements" 
                 :key="req.id" 
-                class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-all bg-white"
+                class="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow"
               >
                 <div class="flex justify-between items-start mb-3">
                   <div>
                     <div class="flex items-center gap-2 mb-2">
-                      <h3 class="text-lg font-bold text-gray-800">{{ req.categoryName }}</h3>
+                      <h3 class="text-lg font-bold text-gray-900">{{ req.categoryName }}</h3>
                       <el-tag :type="getStatusType(req.status)" size="small">
                         {{ getStatusText(req.status) }}
                       </el-tag>
                     </div>
-                    <div class="text-gray-600">
+                    <div class="text-sm text-gray-600">
                       数量: {{ req.quantity }} 吨 | 
                       包装: {{ req.packaging }} | 
                       付款: {{ req.paymentMethod }}

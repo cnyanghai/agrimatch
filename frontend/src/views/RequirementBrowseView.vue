@@ -315,7 +315,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="browse-page">
+  <div class="max-w-7xl mx-auto space-y-6">
     <!-- 页面标题 -->
     <div class="page-header">
       <div>
@@ -333,10 +333,10 @@ onMounted(() => {
       ]" size="large" />
       <div class="tab-hint">
         <span v-if="activeTab === 'followed'" class="text-gray-500 text-sm">
-          共 <span class="font-bold text-blue-600">{{ followedRequirements.length }}</span> 条关注商户发布的需求
+          共 <span class="font-bold text-blue-700">{{ followedRequirements.length }}</span> 条关注商户发布的需求
         </span>
         <span v-else class="text-gray-500 text-sm">
-          共 <span class="font-bold text-blue-600">{{ pagination.total }}</span> 条采购需求
+          共 <span class="font-bold text-blue-700">{{ pagination.total }}</span> 条采购需求
         </span>
       </div>
     </div>
@@ -346,7 +346,13 @@ onMounted(() => {
       <el-icon class="empty-followed-icon"><Star /></el-icon>
       <div class="empty-followed-title">暂无关注的商户</div>
       <div class="empty-followed-hint">关注商户后，这里会显示他们发布的最新采购需求</div>
-      <el-button type="primary" @click="activeTab = 'all'">去发现优质采购商</el-button>
+      <el-button
+        type="primary"
+        class="!rounded-xl !bg-slate-900 hover:!bg-slate-800 !border-slate-900 !text-white transition-all active:scale-95"
+        @click="activeTab = 'all'"
+      >
+        去发现优质采购商
+      </el-button>
     </div>
 
     <!-- 关注商户的采购需求列表 -->
@@ -374,13 +380,13 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <el-tag type="primary" size="small" effect="light">采购</el-tag>
+          <el-tag type="info" size="small" effect="plain" class="!bg-blue-50 !text-blue-700 !border-blue-200">采购</el-tag>
         </div>
         
         <!-- 卡片主体 -->
         <div class="card-body">
           <h3 class="product-title">
-            <el-icon class="text-blue-500"><ShoppingCart /></el-icon>
+            <el-icon class="text-blue-700"><ShoppingCart /></el-icon>
             <span>{{ requirement.categoryName }}</span>
           </h3>
           
@@ -432,8 +438,16 @@ onMounted(() => {
             <div class="time">{{ formatTime(requirement.createTime) }}</div>
           </div>
           <div class="actions">
-            <el-button size="small" :icon="View" @click="viewDetail(requirement)">详情</el-button>
-            <el-button type="primary" size="small" :icon="ChatDotRound" @click="startChat(requirement)">报价</el-button>
+            <el-button size="small" class="!rounded-xl transition-all active:scale-95" :icon="View" @click="viewDetail(requirement)">详情</el-button>
+            <el-button
+              type="primary"
+              size="small"
+              class="!rounded-xl !bg-slate-900 hover:!bg-slate-800 !border-slate-900 !text-white transition-all active:scale-95"
+              :icon="ChatDotRound"
+              @click="startChat(requirement)"
+            >
+              报价
+            </el-button>
           </div>
         </div>
       </div>
@@ -452,6 +466,7 @@ onMounted(() => {
           v-for="btn in sortButtons"
           :key="`${btn.field}-${btn.order}`"
           :type="activeSort === `${btn.field}-${btn.order}` ? 'primary' : 'default'"
+          :class="activeSort === `${btn.field}-${btn.order}` ? '!bg-slate-900 hover:!bg-slate-800 !border-slate-900 !text-white' : '!border-gray-200 hover:!bg-gray-50 !text-gray-700'"
           size="small"
           round
           @click="setSort(btn.field, btn.order as 'asc' | 'desc')"
@@ -532,9 +547,9 @@ onMounted(() => {
         </div>
         
         <div class="flex items-center gap-2 ml-auto">
-          <el-button @click="resetFilters">重置</el-button>
+          <el-button class="!rounded-xl transition-all active:scale-95" @click="resetFilters">重置</el-button>
           <el-tag type="info" effect="plain">
-            共 <span class="font-bold text-blue-600">{{ pagination.total }}</span> 条
+            共 <span class="font-bold text-blue-700">{{ pagination.total }}</span> 条
           </el-tag>
         </div>
       </div>
@@ -561,14 +576,14 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <el-tag type="primary" size="small" effect="light">采购</el-tag>
+          <el-tag type="info" size="small" effect="plain" class="!bg-blue-50 !text-blue-700 !border-blue-200">采购</el-tag>
         </div>
         
         <!-- 卡片主体 -->
         <div class="card-body">
           <!-- 品类标题 -->
           <h3 class="product-title">
-            <el-icon class="text-blue-500"><ShoppingCart /></el-icon>
+            <el-icon class="text-blue-700"><ShoppingCart /></el-icon>
             <span>{{ req.categoryName }}</span>
           </h3>
           
@@ -683,11 +698,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.browse-page {
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -701,8 +711,9 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #f3f4f6;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   padding: 16px 20px;
   margin-bottom: 16px;
 }
@@ -714,10 +725,11 @@ onMounted(() => {
 /* 关注商户为空时 */
 .empty-followed {
   background: white;
-  border-radius: 16px;
+  border: 1px solid #f3f4f6;
+  border-radius: 24px;
   padding: 60px 20px;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
 .empty-followed-icon {
@@ -746,8 +758,9 @@ onMounted(() => {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-  color: white;
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fef3c7;
   font-size: 12px;
   padding: 4px 10px;
   border-radius: 20px;
@@ -766,8 +779,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-radius: 12px;
+  background: #f9fafb;
+  border: 1px solid #f3f4f6;
+  border-radius: 16px;
   padding: 12px 16px;
   margin-bottom: 16px;
 }
@@ -775,8 +789,9 @@ onMounted(() => {
 /* 筛选区域 */
 .filter-bar {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid #f3f4f6;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   padding: 16px 20px;
   margin-bottom: 20px;
 }
@@ -825,22 +840,21 @@ onMounted(() => {
 /* 信息卡片 */
 .info-card {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-radius: 24px;
   border: 1px solid #f3f4f6;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   overflow: hidden;
   transition: all 0.3s ease;
 }
 
 .info-card:hover {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
 }
 
 .card-header {
   padding: 16px 20px;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-bottom: 1px solid #bfdbfe;
+  background: #f9fafb;
+  border-bottom: 1px solid #f3f4f6;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -856,14 +870,14 @@ onMounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: #0f172a;
   color: white;
   font-weight: bold;
   font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+  box-shadow: 0 6px 18px rgba(15,23,42,0.12);
 }
 
 .company-detail {
@@ -930,7 +944,7 @@ onMounted(() => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+  background: #1d4ed8;
   border-radius: 3px;
   transition: width 0.3s ease;
 }
@@ -1008,14 +1022,14 @@ onMounted(() => {
 
 .price .currency {
   font-size: 14px;
-  color: #3b82f6;
+  color: #1d4ed8;
   font-weight: 500;
 }
 
 .price .amount {
   font-size: 24px;
   font-weight: bold;
-  color: #3b82f6;
+  color: #1d4ed8;
   margin-left: 2px;
 }
 
@@ -1044,8 +1058,9 @@ onMounted(() => {
 /* 空状态 */
 .empty-state {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border-radius: 24px;
+  border: 1px solid #f3f4f6;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   padding: 60px 20px;
   text-align: center;
 }
