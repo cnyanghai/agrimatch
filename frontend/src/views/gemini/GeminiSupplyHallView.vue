@@ -1,7 +1,12 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { requireAuth } from '../../utils/requireAuth'
 import PublicTopNav from '../../components/PublicTopNav.vue'
+import ChatDrawer from '../../components/chat/ChatDrawer.vue'
+import { listSupplies, type SupplyResponse } from '../../api/supply'
+import { openChatConversation } from '../../api/chat'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 
@@ -14,10 +19,79 @@ function onPublishSupply() {
   go('/supply')
 }
 
-function onConsult() {
-  if (!requireAuth('/chat')) return
-  go('/chat')
+const supplies = ref<SupplyResponse[]>([])
+const listLoading = ref(false)
+
+const drawerOpen = ref(false)
+const drawerConversationId = ref<number | null>(null)
+const drawerPeerName = ref('')
+const drawerSubjectSnapshotJson = ref<string | null>(null)
+const drawerSubjectId = ref<number | null>(null)
+
+function buildSupplySnapshot(s: SupplyResponse) {
+  return JSON.stringify({
+    snapshotTime: new Date().toLocaleString('zh-CN'),
+    title: s.categoryName,
+    categoryName: s.categoryName,
+    companyName: s.companyName,
+    nickName: s.nickName,
+    exFactoryPrice: s.exFactoryPrice,
+    quantity: s.quantity,
+    origin: s.origin,
+    shipAddress: s.shipAddress,
+    deliveryMode: s.deliveryMode,
+    packaging: s.packaging
+  })
 }
+
+async function onConsult(s: SupplyResponse) {
+  if (!requireAuth('/hall/supply')) return
+  if (!s.userId || !s.id) {
+    ElMessage.warning('该条信息暂不支持咨询')
+    return
+  }
+  try {
+    const res = await openChatConversation({
+      peerUserId: s.userId,
+      subjectType: 'SUPPLY',
+      subjectId: s.id,
+      subjectSnapshotJson: buildSupplySnapshot(s)
+    })
+    if (res.code !== 0 || !res.data) throw new Error(res.message)
+
+    drawerConversationId.value = res.data
+    drawerPeerName.value = s.nickName || s.userName || s.companyName || '对方'
+    drawerSubjectId.value = s.id
+    drawerSubjectSnapshotJson.value = buildSupplySnapshot(s)
+    drawerOpen.value = true
+  } catch (e: any) {
+    ElMessage.error(e?.message || '发起咨询失败')
+  }
+}
+
+function onDrawerClosed() {
+  drawerConversationId.value = null
+  drawerSubjectSnapshotJson.value = null
+  drawerSubjectId.value = null
+  drawerPeerName.value = ''
+}
+
+async function loadSupplies() {
+  listLoading.value = true
+  try {
+    const res = await listSupplies({ status: 0, includeExpired: false, orderBy: 'create_time', order: 'desc' })
+    if (res.code !== 0) throw new Error(res.message)
+    supplies.value = res.data || []
+  } catch {
+    supplies.value = []
+  } finally {
+    listLoading.value = false
+  }
+}
+
+onMounted(() => {
+  loadSupplies()
+})
 </script>
 
 <template>
@@ -92,15 +166,25 @@ function onConsult() {
     <!-- 列表区（先按设计稿静态，后续二期接接口替换） -->
     <main class="max-w-7xl mx-auto px-4 py-8">
       <div class="space-y-4">
-        <div class="supply-card bg-white rounded-xl p-5 border border-gray-100 transition-all">
+        <div v-if="listLoading" class="bg-white rounded-2xl border border-gray-100 p-8 text-gray-400 text-sm">
+          正在加载货源...
+        </div>
+
+        <div
+          v-for="s in supplies.slice(0, 10)"
+          :key="s.id"
+          class="supply-card bg-white rounded-xl p-5 border border-gray-100 transition-all"
+        >
           <div class="flex flex-col lg:flex-row items-center gap-6">
             <div class="w-full lg:w-44 flex items-center gap-3 shrink-0 border-r border-gray-50 pr-4">
-              <div class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center text-xl font-bold shrink-0">泰</div>
+              <div class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center text-xl font-bold shrink-0">
+                {{ (s.companyName || s.nickName || s.userName || '供')[0] }}
+              </div>
               <div class="overflow-hidden">
-                <div class="text-sm font-bold text-gray-900 truncate">泰达粮油有限公司</div>
+                <div class="text-sm font-bold text-gray-900 truncate">{{ s.companyName || '未填写公司' }}</div>
                 <div class="flex items-center gap-1 mt-1">
-                  <span class="bg-blue-50 text-blue-600 text-[10px] px-1 py-0.5 rounded">实名</span>
-                  <span class="text-[10px] text-yellow-600 font-bold">★ 5.0</span>
+                  <span class="bg-blue-50 text-blue-600 text-[10px] px-1 py-0.5 rounded">供应</span>
+                  <span class="text-[10px] text-gray-400">{{ s.nickName || s.userName || '' }}</span>
                 </div>
               </div>
             </div>
@@ -108,38 +192,45 @@ function onConsult() {
             <div class="w-full lg:w-64 shrink-0">
               <div class="flex items-center gap-2 mb-1">
                 <span class="bg-orange-100 text-orange-600 text-[10px] px-1.5 py-0.5 rounded font-bold">现货</span>
-                <span class="text-gray-400 text-[10px]">编号: S24126</span>
+                <span class="text-gray-400 text-[10px]">ID: {{ s.id }}</span>
               </div>
-              <h3 class="text-lg font-bold text-gray-900 truncate">24年新季东北二等玉米</h3>
-              <div class="mt-1 text-xl font-black text-red-600 italic">¥2350 <span class="text-xs font-normal text-gray-400 not-italic">元/吨</span></div>
+              <h3 class="text-lg font-bold text-gray-900 truncate">{{ s.categoryName }}</h3>
+              <div class="mt-1 text-xl font-black text-red-600 italic">
+                ¥{{ s.exFactoryPrice }}
+                <span class="text-xs font-normal text-gray-400 not-italic">元/吨</span>
+              </div>
             </div>
 
             <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs py-2 bg-gray-50/50 rounded-lg px-4">
               <div>
                 <div class="text-gray-400 mb-0.5">水分/容重</div>
-                <div class="font-semibold text-gray-700">14.5% / 710g</div>
+                <div class="font-semibold text-gray-700 truncate">详见参数</div>
               </div>
               <div>
                 <div class="text-gray-400 mb-0.5">产地/发货地</div>
-                <div class="font-semibold text-gray-700">吉林 / 锦州港</div>
+                <div class="font-semibold text-gray-700 truncate">{{ s.origin || '-' }} / {{ s.shipAddress || '-' }}</div>
               </div>
               <div>
                 <div class="text-gray-400 mb-0.5">起订/库存</div>
-                <div class="font-semibold text-gray-700">30吨 / 500吨</div>
+                <div class="font-semibold text-gray-700 truncate">- / {{ s.quantity ?? '-' }}吨</div>
               </div>
               <div>
                 <div class="text-gray-400 mb-0.5">物流方式</div>
-                <div class="font-semibold text-gray-700">火运/汽运</div>
+                <div class="font-semibold text-gray-700 truncate">{{ s.deliveryMode || '-' }}</div>
               </div>
             </div>
 
             <div class="shrink-0 flex flex-col items-center gap-2">
-              <button class="px-8 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-md shadow-emerald-50 hover:bg-emerald-700 transition-all active:scale-95" @click="onConsult">
+              <button class="px-8 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-md shadow-emerald-50 hover:bg-emerald-700 transition-all active:scale-95" @click="onConsult(s)">
                 立即咨询
               </button>
               <span class="text-[10px] text-gray-400">今日已有 12 人咨询</span>
             </div>
           </div>
+        </div>
+
+        <div v-if="!listLoading && supplies.length === 0" class="bg-white rounded-2xl border border-gray-100 p-8 text-gray-400 text-sm">
+          暂无货源数据（后续会继续完善筛选与排序）
         </div>
       </div>
 
@@ -157,6 +248,16 @@ function onConsult() {
         <p class="text-xs text-gray-400">© 2024 AgriMatch - 饲料原料全产业链高效撮合平台</p>
       </div>
     </footer>
+
+    <ChatDrawer
+      v-model="drawerOpen"
+      :conversation-id="drawerConversationId"
+      :peer-display-name="drawerPeerName"
+      subject-type="SUPPLY"
+      :subject-id="drawerSubjectId"
+      :subject-snapshot-json="drawerSubjectSnapshotJson"
+      @closed="onDrawerClosed"
+    />
   </div>
 </template>
 

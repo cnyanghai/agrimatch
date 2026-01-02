@@ -130,7 +130,7 @@ function openTipDialog() {
     return
   }
   // 不能打赏自己
-  if (post.value.userId === auth.me?.id) {
+  if (post.value.userId === auth.me?.userId) {
     ElMessage.info('不能打赏自己的话题哦')
     return
   }

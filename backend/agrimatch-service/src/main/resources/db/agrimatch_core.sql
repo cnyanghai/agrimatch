@@ -354,6 +354,26 @@ CREATE TABLE IF NOT EXISTS `bus_notify` (
 -- ============================================================
 -- Chat (即时聊天)
 -- ============================================================
+CREATE TABLE IF NOT EXISTS `bus_chat_conversation` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '会话ID（按标的线程）',
+  `a_user_id` bigint NOT NULL COMMENT '参与者A用户ID（小的那个）',
+  `b_user_id` bigint NOT NULL COMMENT '参与者B用户ID（大的那个）',
+  `subject_type` varchar(20) NOT NULL COMMENT '标的类型（SUPPLY/NEED）',
+  `subject_id` bigint NOT NULL COMMENT '标的ID（供应/采购ID）',
+  `subject_snapshot_json` longtext COMMENT '标的快照JSON（用于聊天置顶卡片）',
+  `last_msg_id` bigint DEFAULT NULL COMMENT '最后一条消息ID',
+  `last_content` varchar(2000) DEFAULT NULL COMMENT '最后一条消息内容（便于列表展示）',
+  `last_time` datetime(3) DEFAULT NULL COMMENT '最后活跃时间',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除（0否 1是）',
+  `create_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `update_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_chat_conv_ab_subject` (`a_user_id`, `b_user_id`, `subject_type`, `subject_id`),
+  KEY `idx_chat_conv_a` (`a_user_id`),
+  KEY `idx_chat_conv_b` (`b_user_id`),
+  KEY `idx_chat_conv_last_time` (`last_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='即时聊天会话表（按标的线程）';
+
 CREATE TABLE IF NOT EXISTS `bus_chat_message` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '消息ID',
   `from_user_id` bigint NOT NULL COMMENT '发送者用户ID',
@@ -368,5 +388,10 @@ CREATE TABLE IF NOT EXISTS `bus_chat_message` (
   KEY `idx_chat_to` (`to_user_id`),
   KEY `idx_chat_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='即时聊天消息表';
+
+ALTER TABLE `bus_chat_message` ADD COLUMN `conversation_id` bigint DEFAULT NULL COMMENT '会话ID（bus_chat_conversation.id）';
+ALTER TABLE `bus_chat_message` ADD COLUMN `msg_type` varchar(20) NOT NULL DEFAULT 'TEXT' COMMENT '消息类型（TEXT/QUOTE/SYSTEM/ATTACHMENT）';
+ALTER TABLE `bus_chat_message` ADD COLUMN `payload_json` longtext COMMENT '结构化负载JSON（报价卡/附件等）';
+ALTER TABLE `bus_chat_message` ADD KEY `idx_chat_conv_time` (`conversation_id`, `create_time`, `id`);
 
 

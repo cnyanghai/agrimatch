@@ -1,6 +1,7 @@
 package com.agrimatch.chat.service;
 
 import com.agrimatch.chat.dto.ChatMessageResponse;
+import com.agrimatch.chat.dto.ChatConversationResponse;
 import com.agrimatch.chat.dto.ChatPeerResponse;
 
 import java.util.List;
@@ -13,6 +14,16 @@ public interface ChatService {
     List<ChatPeerResponse> peers(Long userId);
 
     void markRead(Long userId, Long peerUserId);
+
+    Long openConversation(Long userId, Long peerUserId, String subjectType, Long subjectId, String subjectSnapshotJson);
+
+    List<ChatConversationResponse> conversations(Long userId);
+
+    List<ChatMessageResponse> conversationMessages(Long userId, Long conversationId, Integer limit);
+
+    void markConversationRead(Long userId, Long conversationId);
+
+    ChatMessageResponse sendToConversation(Long fromUserId, Long conversationId, String msgType, String content, String payloadJson);
 }
 
 

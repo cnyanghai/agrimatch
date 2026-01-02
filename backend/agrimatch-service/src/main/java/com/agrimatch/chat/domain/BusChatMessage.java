@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 public class BusChatMessage {
     private Long id;
+    private Long conversationId;
     private Long fromUserId;
     private Long toUserId;
 
@@ -12,7 +13,9 @@ public class BusChatMessage {
     private String fromNickName;
     private String toUserName;
     private String toNickName;
+    private String msgType;
     private String content;
+    private String payloadJson;
     private Integer isRead;
     private Integer isDeleted;
     private LocalDateTime createTime;
@@ -24,6 +27,14 @@ public class BusChatMessage {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getConversationId() {
+        return conversationId;
+    }
+
+    public void setConversationId(Long conversationId) {
+        this.conversationId = conversationId;
     }
 
     public Long getFromUserId() {
@@ -42,12 +53,28 @@ public class BusChatMessage {
         this.toUserId = toUserId;
     }
 
+    public String getMsgType() {
+        return msgType;
+    }
+
+    public void setMsgType(String msgType) {
+        this.msgType = msgType;
+    }
+
     public String getContent() {
         return content;
     }
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getPayloadJson() {
+        return payloadJson;
+    }
+
+    public void setPayloadJson(String payloadJson) {
+        this.payloadJson = payloadJson;
     }
 
     public Integer getIsRead() {

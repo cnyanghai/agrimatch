@@ -22,10 +22,11 @@ const followedRequirements = ref<RequirementResponse[]>([
     categoryName: '小麦',
     companyName: '北京粮油贸易公司',
     companyId: 10,
+    userId: 20001,
     nickName: '赵采购',
     quantity: 500,
     expectedPrice: 2900,
-    deliveryAddress: '北京市朝阳区',
+    purchaseAddress: '北京市朝阳区',
     paymentMethod: '现款',
     deliveryMethod: '送货上门',
     paramsJson: JSON.stringify({ '水分': '≤13%', '杂质': '≤1%', '容重': '≥760g/L' }),
@@ -37,10 +38,11 @@ const followedRequirements = ref<RequirementResponse[]>([
     categoryName: '玉米',
     companyName: '上海食品加工厂',
     companyId: 11,
+    userId: 20002,
     nickName: '钱经理',
     quantity: 1000,
     expectedPrice: 2650,
-    deliveryAddress: '上海市浦东新区',
+    purchaseAddress: '上海市浦东新区',
     paymentMethod: '账期',
     deliveryMethod: '物流',
     paramsJson: JSON.stringify({ '水分': '≤14%', '霉变': '≤2%' }),
@@ -52,10 +54,11 @@ const followedRequirements = ref<RequirementResponse[]>([
     categoryName: '大豆',
     companyName: '江苏食品集团',
     companyId: 12,
+    userId: 20003,
     nickName: '孙总监',
     quantity: 300,
     expectedPrice: 4700,
-    deliveryAddress: '江苏省南京市',
+    purchaseAddress: '江苏省南京市',
     paymentMethod: '承兑',
     deliveryMethod: '自提',
     paramsJson: JSON.stringify({ '蛋白质': '≥38%', '水分': '≤13%' }),
@@ -267,7 +270,7 @@ function startChat(requirement: RequirementResponse) {
 }
 
 // 收藏
-function toggleFavorite(requirement: RequirementResponse) {
+function toggleFavorite(_requirement: RequirementResponse) {
   ElMessage.success('收藏功能开发中...')
 }
 
@@ -295,7 +298,7 @@ function formatTime(timeStr?: string): string {
   if (hours < 24) return `${hours}小时前`
   const days = Math.floor(hours / 24)
   if (days < 7) return `${days}天前`
-  return timeStr.split('T')[0]
+  return timeStr.split('T')[0] ?? timeStr
 }
 
 // 计算剩余数量百分比
@@ -402,7 +405,7 @@ onMounted(() => {
 
           <div class="address-row">
             <el-icon class="text-gray-400"><Location /></el-icon>
-            <span>{{ requirement.deliveryAddress || '交货地址未指定' }}</span>
+            <span>{{ requirement.purchaseAddress || '交货地址未指定' }}</span>
           </div>
           
           <div v-if="parseParams(requirement.paramsJson).length > 0" class="params-tags">

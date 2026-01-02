@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Edit, List, Document, InfoFilled, Operation, Plus, Delete } from '@element-plus/icons-vue'
 // import { useAppStore } from '../store/app' // 暂时未使用
@@ -36,21 +36,6 @@ const publishForm = reactive({
 
 // 公司信息
 const company = ref<CompanyResponse | null>(null)
-
-// 模板表单
-const templateForm = reactive({
-  templateName: '',
-  categoryId: undefined as number | undefined,
-  categoryName: '',
-  quantity: undefined as number | undefined,
-  packaging: '散装',
-  paymentMethod: '现款',
-  paramsJson: '{}',
-  expireMinutes: 4320,
-  purchaseLat: undefined as number | undefined,
-  purchaseLng: undefined as number | undefined,
-  purchaseAddress: ''
-})
 
 // 列表数据
 const requirements = ref<RequirementResponse[]>([])

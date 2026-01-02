@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { useAuthStore } from '../store/auth'
-import { Plus, Search, Document, Check, Clock, Warning, Edit, View, Download } from '@element-plus/icons-vue'
-
-const auth = useAuthStore()
+import { Plus, Search, Document, Check, Edit, View, Download } from '@element-plus/icons-vue'
 const loading = ref(false)
 const activeTab = ref('all')
 const showCreateDialog = ref(false)
@@ -44,17 +41,6 @@ const contractForm = reactive({
   paymentMethod: '',
   terms: ''
 })
-
-// 合同状态
-const statusOptions = [
-  { value: '', label: '全部状态' },
-  { value: 'draft', label: '草稿' },
-  { value: 'pending', label: '待签署' },
-  { value: 'signed', label: '已签署' },
-  { value: 'executing', label: '履行中' },
-  { value: 'completed', label: '已完成' },
-  { value: 'cancelled', label: '已取消' }
-]
 
 // 筛选后的合同
 const filteredContracts = computed(() => {
@@ -240,7 +226,7 @@ async function signContract(contract: any) {
 }
 
 // 下载合同
-function downloadContract(contract: any) {
+function downloadContract(_contract: any) {
   ElMessage.info('合同下载功能开发中...')
 }
 

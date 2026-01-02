@@ -1,7 +1,12 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { requireAuth } from '../../utils/requireAuth'
 import PublicTopNav from '../../components/PublicTopNav.vue'
+import ChatDrawer from '../../components/chat/ChatDrawer.vue'
+import { listRequirements, type RequirementResponse } from '../../api/requirement'
+import { openChatConversation } from '../../api/chat'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 
@@ -14,10 +19,80 @@ function onPublishNeed() {
   go('/requirements')
 }
 
-function onQuote() {
-  if (!requireAuth('/chat')) return
-  go('/chat')
+const requirements = ref<RequirementResponse[]>([])
+const listLoading = ref(false)
+
+const drawerOpen = ref(false)
+const drawerConversationId = ref<number | null>(null)
+const drawerPeerName = ref('')
+const drawerSubjectSnapshotJson = ref<string | null>(null)
+const drawerSubjectId = ref<number | null>(null)
+
+function buildNeedSnapshot(r: RequirementResponse) {
+  return JSON.stringify({
+    snapshotTime: new Date().toLocaleString('zh-CN'),
+    title: r.categoryName,
+    categoryName: r.categoryName,
+    companyName: r.companyName,
+    nickName: r.nickName,
+    expectedPrice: r.expectedPrice,
+    quantity: r.quantity,
+    remainingQuantity: r.remainingQuantity,
+    purchaseAddress: r.purchaseAddress,
+    paymentMethod: r.paymentMethod,
+    deliveryMethod: r.deliveryMethod,
+    packaging: r.packaging
+  })
 }
+
+async function onQuote(r: RequirementResponse) {
+  if (!requireAuth('/hall/need')) return
+  if (!r.userId || !r.id) {
+    ElMessage.warning('该条需求暂不支持报价')
+    return
+  }
+  try {
+    const res = await openChatConversation({
+      peerUserId: r.userId,
+      subjectType: 'NEED',
+      subjectId: r.id,
+      subjectSnapshotJson: buildNeedSnapshot(r)
+    })
+    if (res.code !== 0 || !res.data) throw new Error(res.message)
+
+    drawerConversationId.value = res.data
+    drawerPeerName.value = r.nickName || r.userName || r.companyName || '对方'
+    drawerSubjectId.value = r.id
+    drawerSubjectSnapshotJson.value = buildNeedSnapshot(r)
+    drawerOpen.value = true
+  } catch (e: any) {
+    ElMessage.error(e?.message || '发起报价失败')
+  }
+}
+
+function onDrawerClosed() {
+  drawerConversationId.value = null
+  drawerSubjectSnapshotJson.value = null
+  drawerSubjectId.value = null
+  drawerPeerName.value = ''
+}
+
+async function loadRequirements() {
+  listLoading.value = true
+  try {
+    const res = await listRequirements({ status: 0, orderBy: 'create_time', order: 'desc' })
+    if (res.code !== 0) throw new Error(res.message)
+    requirements.value = res.data || []
+  } catch {
+    requirements.value = []
+  } finally {
+    listLoading.value = false
+  }
+}
+
+onMounted(() => {
+  loadRequirements()
+})
 </script>
 
 <template>
@@ -90,15 +165,25 @@ function onQuote() {
     <!-- 列表区（先按设计稿静态，后续二期接接口替换） -->
     <main class="max-w-7xl mx-auto px-4 py-8">
       <div class="space-y-4">
-        <div class="purchase-card bg-white rounded-xl p-5 border border-gray-100 transition-all">
+        <div v-if="listLoading" class="bg-white rounded-2xl border border-gray-100 p-8 text-gray-400 text-sm">
+          正在加载需求...
+        </div>
+
+        <div
+          v-for="r in requirements.slice(0, 10)"
+          :key="r.id"
+          class="purchase-card bg-white rounded-xl p-5 border border-gray-100 transition-all"
+        >
           <div class="flex flex-col lg:flex-row items-center gap-6">
             <div class="w-full lg:w-44 flex items-center gap-3 shrink-0 border-r border-gray-50 pr-4">
-              <div class="w-12 h-12 bg-blue-50 text-blue-700 rounded-lg flex items-center justify-center text-xl font-bold shrink-0">大</div>
+              <div class="w-12 h-12 bg-blue-50 text-blue-700 rounded-lg flex items-center justify-center text-xl font-bold shrink-0">
+                {{ (r.companyName || r.nickName || r.userName || '采')[0] }}
+              </div>
               <div class="overflow-hidden">
-                <div class="text-sm font-bold text-gray-900 truncate">大北农(华北)集团</div>
+                <div class="text-sm font-bold text-gray-900 truncate">{{ r.companyName || '未填写公司' }}</div>
                 <div class="flex items-center gap-1 mt-1">
                   <span class="bg-blue-50 text-blue-600 text-[10px] px-1 py-0.5 rounded">企业用户</span>
-                  <span class="text-[10px] text-gray-400">近期 5 采</span>
+                  <span class="text-[10px] text-gray-400">{{ r.nickName || r.userName || '' }}</span>
                 </div>
               </div>
             </div>
@@ -106,33 +191,37 @@ function onQuote() {
             <div class="w-full lg:w-64 shrink-0">
               <div class="flex items-center gap-2 mb-1">
                 <span class="bg-red-100 text-red-600 text-[10px] px-1.5 py-0.5 rounded font-bold">急需</span>
-                <span class="text-gray-400 text-[10px]">编号: B24991</span>
+                <span class="text-gray-400 text-[10px]">ID: {{ r.id }}</span>
               </div>
-              <h3 class="text-lg font-bold text-gray-900 truncate">长期求购东北一等玉米</h3>
-              <div class="mt-1 text-xl font-black text-emerald-600 italic">意向: ¥2400 <span class="text-xs font-normal text-gray-400 not-italic">元/吨</span></div>
+              <h3 class="text-lg font-bold text-gray-900 truncate">{{ r.categoryName }}</h3>
+              <div class="mt-1 text-xl font-black text-emerald-600 italic">
+                <span v-if="r.expectedPrice != null">意向: ¥{{ r.expectedPrice }}</span>
+                <span v-else>面议 / 基差报价</span>
+                <span class="text-xs font-normal text-gray-400 not-italic">元/吨</span>
+              </div>
             </div>
 
             <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs py-2 bg-gray-50/50 rounded-lg px-4">
               <div>
                 <div class="text-gray-400 mb-0.5">需求数量</div>
-                <div class="font-semibold text-gray-700">2000 吨</div>
+                <div class="font-semibold text-gray-700">{{ r.quantity ?? '-' }} 吨</div>
               </div>
               <div>
                 <div class="text-gray-400 mb-0.5">收货地</div>
-                <div class="font-semibold text-gray-700">河北秦皇岛</div>
+                <div class="font-semibold text-gray-700 truncate">{{ r.purchaseAddress || '-' }}</div>
               </div>
               <div>
                 <div class="text-gray-400 mb-0.5">指标要求</div>
-                <div class="font-semibold text-gray-700">水分≤14%, 霉变≤1%</div>
+                <div class="font-semibold text-gray-700 truncate">详见参数</div>
               </div>
               <div>
                 <div class="text-gray-400 mb-0.5">最晚到货</div>
-                <div class="font-semibold text-red-500">2025-01-10</div>
+                <div class="font-semibold text-red-500">-</div>
               </div>
             </div>
 
             <div class="shrink-0 flex flex-col items-center gap-2">
-              <button class="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-sm hover:bg-slate-800 transition-all active:scale-95" @click="onQuote">
+              <button class="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-sm hover:bg-slate-800 transition-all active:scale-95" @click="onQuote(r)">
                 立即报价
               </button>
               <div class="w-24 bg-gray-200 h-1.5 rounded-full overflow-hidden">
@@ -141,6 +230,10 @@ function onQuote() {
               <span class="text-[10px] text-gray-400">已有 8 家参与竞价</span>
             </div>
           </div>
+        </div>
+
+        <div v-if="!listLoading && requirements.length === 0" class="bg-white rounded-2xl border border-gray-100 p-8 text-gray-400 text-sm">
+          暂无需求数据（后续会继续完善筛选与排序）
         </div>
       </div>
 
@@ -157,6 +250,16 @@ function onQuote() {
         <p class="text-xs text-gray-400">© 2024 AgriMatch - 饲料原料全产业链高效撮合平台 | 采购大厅</p>
       </div>
     </footer>
+
+    <ChatDrawer
+      v-model="drawerOpen"
+      :conversation-id="drawerConversationId"
+      :peer-display-name="drawerPeerName"
+      subject-type="NEED"
+      :subject-id="drawerSubjectId"
+      :subject-snapshot-json="drawerSubjectSnapshotJson"
+      @closed="onDrawerClosed"
+    />
   </div>
 </template>
 

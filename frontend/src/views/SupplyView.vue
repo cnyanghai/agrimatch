@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Box, List, InfoFilled, Operation, Plus } from '@element-plus/icons-vue'
+import { Box, List, InfoFilled, Plus } from '@element-plus/icons-vue'
 // import { useAppStore } from '../store/app' // 暂时未使用
 import { createSupply, listSupplies, updateSupply, getNextSupplyNo, type SupplyCreateRequest, type SupplyResponse, type SupplyUpdateRequest } from '../api/supply'
 import { getProductTree, getProductParams, addProductParamOption, type ProductNode, type ProductParamResponse } from '../api/product'
@@ -149,6 +149,27 @@ async function loadSupplies() {
   } finally {
     loading.value = false
   }
+}
+
+function resetPublishForm() {
+  Object.assign(publishForm, {
+    categoryId: undefined,
+    categoryName: '',
+    exFactoryPrice: undefined,
+    origin: '',
+    quantity: undefined,
+    packaging: '',
+    storageMethod: '',
+    shipAddress: '',
+    deliveryMode: '到厂',
+    expireMinutes: 4320,
+    priceRulesJson: '{}',
+    paramsJson: '{}',
+    remark: ''
+  })
+  categoryParams.value = []
+  dynamicParams.value = {}
+  loadNextSupplyNo()
 }
 
 async function onCategoryChange(category: { id: number; name: string } | null) {
@@ -530,26 +551,7 @@ const tabs = [
             </div>
             
             <div class="flex justify-end space-x-4 pt-4 border-t border-gray-100">
-              <el-button @click="() => {
-                Object.assign(publishForm, {
-                  categoryId: undefined,
-                  categoryName: '',
-                  exFactoryPrice: undefined,
-                  origin: '',
-                  quantity: undefined,
-                  packaging: '',
-                  storageMethod: '',
-                  shipAddress: '',
-                  deliveryMode: '到厂',
-                  expireMinutes: 4320,
-                  priceRulesJson: '{}',
-                  paramsJson: '{}',
-                  remark: ''
-                })
-                categoryParams.value = []
-                dynamicParams.value = {}
-                loadNextSupplyNo()
-              }">
+              <el-button @click="resetPublishForm">
                 重置
               </el-button>
               <el-button 

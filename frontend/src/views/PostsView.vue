@@ -165,7 +165,7 @@ function openTipDialog(row: PostResponse) {
     return
   }
   // 不能打赏自己
-  if (row.userId === auth.me?.id) {
+  if (row.userId === auth.me?.userId) {
     ElMessage.info('不能打赏自己的帖子哦')
     return
   }

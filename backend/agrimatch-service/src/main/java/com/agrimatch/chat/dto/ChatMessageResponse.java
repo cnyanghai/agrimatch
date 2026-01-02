@@ -4,13 +4,16 @@ import java.time.LocalDateTime;
 
 public class ChatMessageResponse {
     private Long id;
+    private Long conversationId;
     private Long fromUserId;
     private String fromUserName;
     private String fromNickName;
     private Long toUserId;
     private String toUserName;
     private String toNickName;
+    private String msgType;
     private String content;
+    private String payloadJson;
     private boolean read;
     private LocalDateTime createTime;
 
@@ -20,6 +23,14 @@ public class ChatMessageResponse {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getConversationId() {
+        return conversationId;
+    }
+
+    public void setConversationId(Long conversationId) {
+        this.conversationId = conversationId;
     }
 
     public Long getFromUserId() {
@@ -76,6 +87,22 @@ public class ChatMessageResponse {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getMsgType() {
+        return msgType;
+    }
+
+    public void setMsgType(String msgType) {
+        this.msgType = msgType;
+    }
+
+    public String getPayloadJson() {
+        return payloadJson;
+    }
+
+    public void setPayloadJson(String payloadJson) {
+        this.payloadJson = payloadJson;
     }
 
     public boolean isRead() {

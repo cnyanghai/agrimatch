@@ -8,6 +8,7 @@
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/eval/dto/EvalResponse.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/post/dto/PostQuery.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/eval/dto/EvalCreateRequest.java
+/home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/chat/dto/ChatConversationOpenRequest.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/AgriMatchApplication.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/product/dto/ProductCreateRequest.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/deal/dto/DealCreateRequest.java
@@ -65,6 +66,7 @@
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/requirement/mapper/RequirementMapper.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/post/dto/PostResponse.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/points/dto/PointsRedeemRequest.java
+/home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/chat/domain/BusChatConversation.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/notify/service/NotifyService.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/supply/dto/SupplyUpdateRequest.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/map/dto/MapCompanyMarkerResponse.java
@@ -126,6 +128,7 @@
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/user/dto/UserRoleUpdateRequest.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/chat/mapper/ChatMapper.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/controller/HomeController.java
+/home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/chat/dto/ChatConversationResponse.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/config/WebCorsConfig.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/chat/ws/ChatWebSocketConfig.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/company/service/CompanyService.java

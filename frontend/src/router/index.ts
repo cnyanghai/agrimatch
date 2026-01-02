@@ -1,51 +1,31 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import GeminiLandingView from '../views/gemini/GeminiLandingView.vue'
-import GeminiSupplyHallView from '../views/gemini/GeminiSupplyHallView.vue'
-import GeminiNeedHallView from '../views/gemini/GeminiNeedHallView.vue'
-import GeminiTalksView from '../views/gemini/GeminiTalksView.vue'
-import GeminiInsightsView from '../views/gemini/GeminiInsightsView.vue'
-import GeminiTalksPublishView from '../views/gemini/GeminiTalksPublishView.vue'
-import GeminiTalkDetailView from '../views/gemini/GeminiTalkDetailView.vue'
-import LoginView from '../views/LoginView.vue'
-import ProfileView from '../views/ProfileView.vue'
-import RequirementDemoView from '../views/RequirementDemoView.vue'
-import RequirementBrowseView from '../views/RequirementBrowseView.vue'
-import SupplyView from '../views/SupplyView.vue'
-import SupplyBrowseView from '../views/SupplyBrowseView.vue'
-import PostsView from '../views/PostsView.vue'
-import PointsView from '../views/PointsView.vue'
-import NotifyView from '../views/NotifyView.vue'
-import ChatView from '../views/ChatView.vue'
-import MapView from '../views/MapView.vue'
-import ContractView from '../views/ContractView.vue'
 import { useAuthStore } from '../store/auth'
 import { useUiStore } from '../store/ui'
-import ConsoleHomeView from '../views/ConsoleHomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/login', name: 'login', component: LoginView, meta: { public: true, minimal: true } },
-    { path: '/', name: 'landing', component: GeminiLandingView, meta: { public: true, minimal: true } },
-    { path: '/hall/supply', name: 'hall-supply', component: GeminiSupplyHallView, meta: { public: true, minimal: true } },
-    { path: '/hall/need', name: 'hall-need', component: GeminiNeedHallView, meta: { public: true, minimal: true } },
-    { path: '/talks', name: 'talks', component: GeminiTalksView, meta: { public: true, minimal: true } },
-    { path: '/talks/:id', name: 'talk-detail', component: GeminiTalkDetailView, meta: { public: true, minimal: true } },
-    { path: '/insights', name: 'insights', component: GeminiInsightsView, meta: { public: true, minimal: true } },
-    { path: '/talks/publish', name: 'talks-publish', component: GeminiTalksPublishView, meta: { minimal: true, requiresAuth: true } },
+    { path: '/login', name: 'login', component: () => import('../views/LoginView.vue'), meta: { public: true, minimal: true } },
+    { path: '/', name: 'landing', component: () => import('../views/gemini/GeminiLandingView.vue'), meta: { public: true, minimal: true } },
+    { path: '/hall/supply', name: 'hall-supply', component: () => import('../views/gemini/GeminiSupplyHallView.vue'), meta: { public: true, minimal: true } },
+    { path: '/hall/need', name: 'hall-need', component: () => import('../views/gemini/GeminiNeedHallView.vue'), meta: { public: true, minimal: true } },
+    { path: '/talks', name: 'talks', component: () => import('../views/gemini/GeminiTalksView.vue'), meta: { public: true, minimal: true } },
+    { path: '/talks/:id', name: 'talk-detail', component: () => import('../views/gemini/GeminiTalkDetailView.vue'), meta: { public: true, minimal: true } },
+    { path: '/insights', name: 'insights', component: () => import('../views/gemini/GeminiInsightsView.vue'), meta: { public: true, minimal: true } },
+    { path: '/talks/publish', name: 'talks-publish', component: () => import('../views/gemini/GeminiTalksPublishView.vue'), meta: { minimal: true, requiresAuth: true } },
 
-    { path: '/console', name: 'console', component: ConsoleHomeView },
-    { path: '/profile', name: 'profile', component: ProfileView },
-    { path: '/requirements', name: 'requirements', component: RequirementDemoView },
-    { path: '/requirement-browse', name: 'requirement-browse', component: RequirementBrowseView },
-    { path: '/supply', name: 'supply', component: SupplyView },
-    { path: '/supply-browse', name: 'supply-browse', component: SupplyBrowseView },
-    { path: '/map', name: 'map', component: MapView },
-    { path: '/contracts', name: 'contracts', component: ContractView },
-    { path: '/posts', name: 'posts', component: PostsView },
-    { path: '/points', name: 'points', component: PointsView },
-    { path: '/notify', name: 'notify', component: NotifyView },
-    { path: '/chat', name: 'chat', component: ChatView }
+    { path: '/console', name: 'console', component: () => import('../views/ConsoleHomeView.vue') },
+    { path: '/profile', name: 'profile', component: () => import('../views/ProfileView.vue') },
+    { path: '/requirements', name: 'requirements', component: () => import('../views/RequirementDemoView.vue') },
+    { path: '/requirement-browse', name: 'requirement-browse', component: () => import('../views/RequirementBrowseView.vue') },
+    { path: '/supply', name: 'supply', component: () => import('../views/SupplyView.vue') },
+    { path: '/supply-browse', name: 'supply-browse', component: () => import('../views/SupplyBrowseView.vue') },
+    { path: '/map', name: 'map', component: () => import('../views/MapView.vue') },
+    { path: '/contracts', name: 'contracts', component: () => import('../views/ContractView.vue') },
+    { path: '/posts', name: 'posts', component: () => import('../views/PostsView.vue') },
+    { path: '/points', name: 'points', component: () => import('../views/PointsView.vue') },
+    { path: '/notify', name: 'notify', component: () => import('../views/NotifyView.vue') },
+    { path: '/chat', name: 'chat', component: () => import('../views/ChatView.vue') }
   ]
 })
 

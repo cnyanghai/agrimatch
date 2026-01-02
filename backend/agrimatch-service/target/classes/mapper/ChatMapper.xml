@@ -6,13 +6,16 @@
 
     <resultMap id="MsgMap" type="com.agrimatch.chat.domain.BusChatMessage">
         <id column="id" property="id"/>
+        <result column="conversation_id" property="conversationId"/>
         <result column="from_user_id" property="fromUserId"/>
         <result column="to_user_id" property="toUserId"/>
         <result column="from_user_name" property="fromUserName"/>
         <result column="from_nick_name" property="fromNickName"/>
         <result column="to_user_name" property="toUserName"/>
         <result column="to_nick_name" property="toNickName"/>
+        <result column="msg_type" property="msgType"/>
         <result column="content" property="content"/>
+        <result column="payload_json" property="payloadJson"/>
         <result column="is_read" property="isRead"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="create_time" property="createTime"/>
@@ -22,19 +25,19 @@
     <insert id="insertMessage" parameterType="com.agrimatch.chat.domain.BusChatMessage"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO bus_chat_message
-        (from_user_id, to_user_id, content, is_read, is_deleted, create_time, update_time)
+        (conversation_id, from_user_id, to_user_id, msg_type, content, payload_json, is_read, is_deleted, create_time, update_time)
         VALUES
-        (#{fromUserId}, #{toUserId}, #{content}, 0, 0, NOW(3), NOW(3))
+        (#{conversationId}, #{fromUserId}, #{toUserId}, #{msgType}, #{content}, #{payloadJson}, 0, 0, NOW(3), NOW(3))
     </insert>
 
     <select id="selectHistory" resultMap="MsgMap">
         SELECT
-            m.id, m.from_user_id, m.to_user_id,
+            m.id, m.conversation_id, m.from_user_id, m.to_user_id,
             fu.user_name AS from_user_name,
             fu.nick_name AS from_nick_name,
             tu.user_name AS to_user_name,
             tu.nick_name AS to_nick_name,
-            m.content, m.is_read, m.is_deleted, m.create_time, m.update_time
+            m.msg_type, m.content, m.payload_json, m.is_read, m.is_deleted, m.create_time, m.update_time
         FROM bus_chat_message m
         LEFT JOIN sys_user fu ON fu.user_id = m.from_user_id AND fu.del_flag = '0'
         LEFT JOIN sys_user tu ON tu.user_id = m.to_user_id AND tu.del_flag = '0'
@@ -91,6 +94,116 @@
         LEFT JOIN sys_user pu ON pu.user_id = t.peer_user_id AND pu.del_flag = '0'
         LEFT JOIN bus_company pc ON pc.id = pu.company_id AND (pc.is_deleted IS NULL OR pc.is_deleted = 0)
         ORDER BY t.last_time DESC
+    </select>
+
+    <select id="selectConversationId" resultType="long">
+        SELECT id
+        FROM bus_chat_conversation
+        WHERE is_deleted = 0
+          AND a_user_id = #{aUserId}
+          AND b_user_id = #{bUserId}
+          AND subject_type = #{subjectType}
+          AND subject_id = #{subjectId}
+        LIMIT 1
+    </select>
+
+    <insert id="insertConversation" parameterType="com.agrimatch.chat.domain.BusChatConversation"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_chat_conversation
+        (a_user_id, b_user_id, subject_type, subject_id, subject_snapshot_json, last_msg_id, last_content, last_time, is_deleted, create_time, update_time)
+        VALUES
+        (#{aUserId}, #{bUserId}, #{subjectType}, #{subjectId}, #{subjectSnapshotJson}, NULL, NULL, NULL, 0, NOW(3), NOW(3))
+    </insert>
+
+    <update id="updateConversationSnapshot">
+        UPDATE bus_chat_conversation
+        SET subject_snapshot_json = #{subjectSnapshotJson},
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
+    <update id="updateConversationLast">
+        UPDATE bus_chat_conversation
+        SET last_msg_id = #{lastMsgId},
+            last_content = #{lastContent},
+            last_time = NOW(3),
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
+    <select id="selectConversations" resultType="com.agrimatch.chat.mapper.ChatMapper$ConversationRow">
+        SELECT
+            t.id,
+            t.peer_user_id AS peerUserId,
+            pu.user_name AS peerUserName,
+            pu.nick_name AS peerNickName,
+            pc.company_name AS peerCompanyName,
+            t.subject_type AS subjectType,
+            t.subject_id AS subjectId,
+            t.subject_snapshot_json AS subjectSnapshotJson,
+            t.last_content AS lastContent,
+            t.last_time AS lastTime,
+            IFNULL(u.unread_count, 0) AS unreadCount
+        FROM (
+            SELECT
+                c.*,
+                CASE WHEN c.a_user_id = #{userId} THEN c.b_user_id ELSE c.a_user_id END AS peer_user_id
+            FROM bus_chat_conversation c
+            WHERE c.is_deleted = 0
+              AND (c.a_user_id = #{userId} OR c.b_user_id = #{userId})
+        ) t
+        LEFT JOIN sys_user pu ON pu.user_id = t.peer_user_id AND pu.del_flag = '0'
+        LEFT JOIN bus_company pc ON pc.id = pu.company_id AND (pc.is_deleted IS NULL OR pc.is_deleted = 0)
+        LEFT JOIN (
+            SELECT conversation_id, COUNT(1) AS unread_count
+            FROM bus_chat_message
+            WHERE to_user_id = #{userId}
+              AND is_deleted = 0
+              AND is_read = 0
+              AND conversation_id IS NOT NULL
+            GROUP BY conversation_id
+        ) u ON u.conversation_id = t.id
+        ORDER BY t.last_time DESC, t.id DESC
+    </select>
+
+    <select id="selectConversationMessages" resultMap="MsgMap">
+        SELECT
+            m.id, m.conversation_id, m.from_user_id, m.to_user_id,
+            fu.user_name AS from_user_name,
+            fu.nick_name AS from_nick_name,
+            tu.user_name AS to_user_name,
+            tu.nick_name AS to_nick_name,
+            m.msg_type, m.content, m.payload_json, m.is_read, m.is_deleted, m.create_time, m.update_time
+        FROM bus_chat_message m
+        LEFT JOIN sys_user fu ON fu.user_id = m.from_user_id AND fu.del_flag = '0'
+        LEFT JOIN sys_user tu ON tu.user_id = m.to_user_id AND tu.del_flag = '0'
+        WHERE m.is_deleted = 0
+          AND m.conversation_id = #{conversationId}
+        ORDER BY m.create_time DESC, m.id DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <update id="markReadInConversation">
+        UPDATE bus_chat_message
+        SET is_read = 1,
+            update_time = NOW(3)
+        WHERE conversation_id = #{conversationId}
+          AND to_user_id = #{toUserId}
+          AND is_deleted = 0
+          AND is_read = 0
+    </update>
+
+    <select id="selectConversationUserPair" resultType="com.agrimatch.chat.mapper.ChatMapper$ConversationUserPair">
+        SELECT a_user_id AS aUserId,
+               b_user_id AS bUserId
+        FROM bus_chat_conversation
+        WHERE id = #{conversationId}
+          AND is_deleted = 0
+        LIMIT 1
     </select>
 
 </mapper>

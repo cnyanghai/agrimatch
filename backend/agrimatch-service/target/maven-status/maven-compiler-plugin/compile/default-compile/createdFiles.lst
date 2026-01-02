@@ -12,6 +12,7 @@ com/agrimatch/chat/dto/ChatSendRequest.class
 com/agrimatch/auth/service/AuthService.class
 com/agrimatch/auth/service/SmsCodeService$Entry.class
 com/agrimatch/home/mapper/StatsMapper.class
+com/agrimatch/chat/dto/ChatConversationResponse.class
 com/agrimatch/deal/dto/DealCreateRequest.class
 com/agrimatch/file/service/FileStorageService.class
 com/agrimatch/eval/dto/EvalResponse.class
@@ -30,6 +31,7 @@ com/agrimatch/chat/ws/ChatWebSocketHandler.class
 com/agrimatch/security/JwtTokenUtil.class
 com/agrimatch/points/dto/PointsMeResponse.class
 com/agrimatch/security/JwtAuthFilter.class
+com/agrimatch/chat/mapper/ChatMapper$ConversationUserPair.class
 com/agrimatch/notify/dto/NotifyResponse.class
 com/agrimatch/company/dto/CompanyUpdateRequest.class
 com/agrimatch/points/service/impl/PointsServiceImpl.class
@@ -50,6 +52,7 @@ com/agrimatch/auth/dto/MeResponse.class
 com/agrimatch/map/mapper/MapCompanyMapper.class
 com/agrimatch/requirement/dto/RequirementQuery.class
 com/agrimatch/post_social/service/PostSocialService.class
+com/agrimatch/chat/dto/ChatConversationOpenRequest.class
 com/agrimatch/requirement_template/domain/BusRequirementTemplate.class
 com/agrimatch/supply/controller/SupplyController.class
 com/agrimatch/geo/service/AmapGeocodeService.class
@@ -119,6 +122,7 @@ com/agrimatch/product_param/mapper/ProductParamMapper.class
 com/agrimatch/AgriMatchApplication.class
 com/agrimatch/product/mapper/ProductMapper.class
 com/agrimatch/requirement/controller/RequirementController.class
+com/agrimatch/chat/mapper/ChatMapper$ConversationRow.class
 com/agrimatch/auth/dto/LoginResponse.class
 com/agrimatch/supply/mapper/SupplyMapper.class
 com/agrimatch/user/dto/UserBriefResponse.class
@@ -130,6 +134,7 @@ com/agrimatch/post/dto/PostCreateRequest.class
 com/agrimatch/home/dto/StatsResponse.class
 com/agrimatch/company/controller/CompanyController.class
 com/agrimatch/points/controller/PointsController.class
+com/agrimatch/chat/domain/BusChatConversation.class
 com/agrimatch/requirement_template/service/impl/RequirementTemplateServiceImpl.class
 com/agrimatch/post/service/impl/PostServiceImpl.class
 com/agrimatch/auth/service/impl/AuthServiceImpl.class

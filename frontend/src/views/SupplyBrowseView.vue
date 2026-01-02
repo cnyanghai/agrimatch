@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Search, ChatDotRound, View, Star, Phone, Location, Box, Sort, Refresh, Money, Van, Timer, TrendCharts } from '@element-plus/icons-vue'
+import { Search, ChatDotRound, View, Star, Phone, Location, Box, Sort, Refresh } from '@element-plus/icons-vue'
 import { listSupplies, type SupplyResponse } from '../api/supply'
 import { getProductTree, type ProductNode } from '../api/product'
 
@@ -22,6 +22,7 @@ const followedSupplies = ref<SupplyResponse[]>([
     categoryName: '优质小麦',
     companyName: '山东粮食集团',
     companyId: 1,
+    userId: 10001,
     nickName: '张经理',
     quantity: 200,
     exFactoryPrice: 2850,
@@ -39,6 +40,7 @@ const followedSupplies = ref<SupplyResponse[]>([
     categoryName: '东北玉米',
     companyName: '黑龙江优农合作社',
     companyId: 2,
+    userId: 10002,
     nickName: '李总',
     quantity: 500,
     exFactoryPrice: 2520,
@@ -56,6 +58,7 @@ const followedSupplies = ref<SupplyResponse[]>([
     categoryName: '河南大豆',
     companyName: '河南农业发展公司',
     companyId: 3,
+    userId: 10003,
     nickName: '王主任',
     quantity: 150,
     exFactoryPrice: 4680,
@@ -272,13 +275,13 @@ function startChat(supply: SupplyResponse) {
     query: {
       type: 'supply',
       id: supply.id,
-      companyName: supply.companyName
+      companyName: supply.companyName ?? ''
     }
   })
 }
 
 // 收藏
-function toggleFavorite(supply: SupplyResponse) {
+function toggleFavorite(_supply: SupplyResponse) {
   ElMessage.success('收藏功能开发中...')
 }
 
@@ -306,7 +309,7 @@ function formatTime(timeStr?: string): string {
   if (hours < 24) return `${hours}小时前`
   const days = Math.floor(hours / 24)
   if (days < 7) return `${days}天前`
-  return timeStr.split('T')[0]
+  return timeStr.split('T')[0] ?? timeStr
 }
 
 onMounted(() => {

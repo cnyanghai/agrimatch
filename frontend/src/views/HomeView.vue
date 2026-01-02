@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { 
-  Search, ArrowRight, User, ShoppingCart, Document, ChatDotRound,
+  Search, ArrowRight, ShoppingCart, ChatDotRound,
   Bowl, Coin, Apple, Grape, Box, Tools,
-  UserFilled, Lock, Present, Star
+  UserFilled, Lock, Present
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
