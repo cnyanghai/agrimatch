@@ -14,6 +14,7 @@ public class ChatMessageResponse {
     private String msgType;
     private String content;
     private String payloadJson;
+    private String quoteStatus;
     private boolean read;
     private LocalDateTime createTime;
 
@@ -103,6 +104,14 @@ public class ChatMessageResponse {
 
     public void setPayloadJson(String payloadJson) {
         this.payloadJson = payloadJson;
+    }
+
+    public String getQuoteStatus() {
+        return quoteStatus;
+    }
+
+    public void setQuoteStatus(String quoteStatus) {
+        this.quoteStatus = quoteStatus;
     }
 
     public boolean isRead() {

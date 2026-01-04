@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.contract.mapper.ContractMapper">
+
+    <resultMap id="BusContractMap" type="com.agrimatch.contract.domain.BusContract">
+        <id column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="user_id" property="userId"/>
+        <result column="contract_no" property="contractNo"/>
+        <result column="contract_type" property="contractType"/>
+        <result column="title" property="title"/>
+        <result column="party_a" property="partyA"/>
+        <result column="party_b" property="partyB"/>
+        <result column="product_name" property="productName"/>
+        <result column="quantity" property="quantity"/>
+        <result column="unit" property="unit"/>
+        <result column="unit_price" property="unitPrice"/>
+        <result column="total_amount" property="totalAmount"/>
+        <result column="delivery_date" property="deliveryDate"/>
+        <result column="delivery_address" property="deliveryAddress"/>
+        <result column="payment_method" property="paymentMethod"/>
+        <result column="terms" property="terms"/>
+        <result column="status" property="status"/>
+        <result column="sign_time" property="signTime"/>
+        <result column="pdf_hash" property="pdfHash"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.agrimatch.contract.domain.BusContract"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_contract
+        (company_id, user_id, contract_no, contract_type, title, party_a, party_b,
+         product_name, quantity, unit, unit_price, total_amount,
+         delivery_date, delivery_address, payment_method, terms,
+         status, sign_time, pdf_hash, is_deleted, create_time, update_time)
+        VALUES
+        (#{companyId}, #{userId}, #{contractNo}, #{contractType}, #{title}, #{partyA}, #{partyB},
+         #{productName}, #{quantity}, #{unit}, #{unitPrice}, #{totalAmount},
+         #{deliveryDate}, #{deliveryAddress}, #{paymentMethod}, #{terms},
+         #{status}, #{signTime}, #{pdfHash}, 0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="selectById" resultMap="BusContractMap">
+        SELECT *
+        FROM bus_contract
+        WHERE id = #{id}
+          AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectList" resultMap="BusContractMap">
+        SELECT *
+        FROM bus_contract
+        <where>
+            is_deleted = 0
+            <if test="q != null and q.companyId != null">
+                AND company_id = #{q.companyId}
+            </if>
+            <if test="q != null and q.userId != null">
+                AND user_id = #{q.userId}
+            </if>
+            <if test="q != null and q.status != null and q.status != '' and q.status != 'all'">
+                AND status = #{q.status}
+            </if>
+            <if test="q != null and q.keyword != null and q.keyword != ''">
+                AND (
+                    contract_no LIKE CONCAT('%', #{q.keyword}, '%')
+                    OR title LIKE CONCAT('%', #{q.keyword}, '%')
+                    OR party_a LIKE CONCAT('%', #{q.keyword}, '%')
+                    OR party_b LIKE CONCAT('%', #{q.keyword}, '%')
+                    OR product_name LIKE CONCAT('%', #{q.keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY
+        <choose>
+            <when test="q != null and q.orderBy == 'create_time'">
+                create_time
+            </when>
+            <when test="q != null and q.orderBy == 'update_time'">
+                update_time
+            </when>
+            <otherwise>
+                create_time
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="q != null and q.order == 'asc'">
+                ASC
+            </when>
+            <otherwise>
+                DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <update id="update" parameterType="com.agrimatch.contract.domain.BusContract">
+        UPDATE bus_contract
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="contractType != null">contract_type = #{contractType},</if>
+            <if test="partyA != null">party_a = #{partyA},</if>
+            <if test="partyB != null">party_b = #{partyB},</if>
+            <if test="productName != null">product_name = #{productName},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="unitPrice != null">unit_price = #{unitPrice},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="deliveryDate != null">delivery_date = #{deliveryDate},</if>
+            <if test="deliveryAddress != null">delivery_address = #{deliveryAddress},</if>
+            <if test="paymentMethod != null">payment_method = #{paymentMethod},</if>
+            <if test="terms != null">terms = #{terms},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="signTime != null">sign_time = #{signTime},</if>
+            update_time = NOW(3)
+        </set>
+        WHERE id = #{id}
+          AND user_id = #{userId}
+          AND is_deleted = 0
+    </update>
+
+    <update id="logicalDelete">
+        UPDATE bus_contract
+        SET is_deleted = 1,
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND user_id = #{userId}
+          AND is_deleted = 0
+    </update>
+
+    <update id="updatePdfHash">
+        UPDATE bus_contract
+        SET pdf_hash = #{pdfHash},
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND user_id = #{userId}
+          AND is_deleted = 0
+    </update>
+
+</mapper>
+
+

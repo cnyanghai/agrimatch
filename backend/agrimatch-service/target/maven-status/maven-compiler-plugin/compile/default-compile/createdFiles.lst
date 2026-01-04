@@ -3,6 +3,7 @@ com/agrimatch/chat/service/impl/ChatServiceImpl.class
 com/agrimatch/eval/domain/BusOrderEval.class
 com/agrimatch/user/dto/UserCreateRequest.class
 com/agrimatch/requirement/service/impl/RequirementServiceImpl.class
+com/agrimatch/contract/dto/ContractUpdateRequest.class
 com/agrimatch/product_param/service/ProductParamService.class
 com/agrimatch/company/mapper/CompanyMapper.class
 com/agrimatch/notify/mapper/NotifyMapper.class
@@ -58,6 +59,7 @@ com/agrimatch/supply/controller/SupplyController.class
 com/agrimatch/geo/service/AmapGeocodeService.class
 com/agrimatch/post_social/service/impl/PostSocialServiceImpl.class
 com/agrimatch/auth/dto/LoginRequest.class
+com/agrimatch/contract/dto/ContractQuery.class
 com/agrimatch/security/LoginUser.class
 com/agrimatch/company/dto/CompanyResponse.class
 com/agrimatch/post_social/mapper/PostCommentMapper$PostIdCountRow.class
@@ -70,8 +72,10 @@ com/agrimatch/controller/HomeController.class
 com/agrimatch/product/controller/ProductController.class
 com/agrimatch/supply/service/impl/SupplyServiceImpl.class
 com/agrimatch/user/dto/UserResponse.class
+com/agrimatch/contract/service/impl/ContractServiceImpl.class
 com/agrimatch/company/dto/CompanyBriefResponse.class
 com/agrimatch/requirement_template/mapper/RequirementTemplateMapper.class
+com/agrimatch/chat/event/OfferUpdatedEvent.class
 com/agrimatch/requirement/domain/BusRequirement.class
 com/agrimatch/points/mapper/PointsMapper.class
 com/agrimatch/product_param/dto/ProductParamOptionAddRequest.class
@@ -112,6 +116,8 @@ com/agrimatch/eval/controller/EvalController.class
 com/agrimatch/map/dto/MapCompanyMarkerResponse.class
 com/agrimatch/deal/mapper/DealMapper.class
 com/agrimatch/post_social/dto/PostCommentCreateRequest.class
+com/agrimatch/contract/domain/BusContract.class
+com/agrimatch/contract/controller/ContractController.class
 com/agrimatch/deal/controller/DealController.class
 com/agrimatch/geo/dto/GeoPoint.class
 com/agrimatch/chat/domain/BusChatMessage.class
@@ -124,6 +130,7 @@ com/agrimatch/product/mapper/ProductMapper.class
 com/agrimatch/requirement/controller/RequirementController.class
 com/agrimatch/chat/mapper/ChatMapper$ConversationRow.class
 com/agrimatch/auth/dto/LoginResponse.class
+com/agrimatch/contract/mapper/ContractMapper.class
 com/agrimatch/supply/mapper/SupplyMapper.class
 com/agrimatch/user/dto/UserBriefResponse.class
 com/agrimatch/company/mapper/CompanyMapper$IdNameRow.class
@@ -140,7 +147,9 @@ com/agrimatch/post/service/impl/PostServiceImpl.class
 com/agrimatch/auth/service/impl/AuthServiceImpl.class
 com/agrimatch/requirement/mapper/RequirementMapper.class
 com/agrimatch/company/dto/CompanyCreateRequest.class
+com/agrimatch/contract/service/ContractService.class
 com/agrimatch/user/mapper/UserMapper.class
+com/agrimatch/contract/dto/ContractCreateRequest.class
 com/agrimatch/auth/controller/AuthController.class
 com/agrimatch/post_social/mapper/PostLikeMapper$PostIdCountRow.class
 com/agrimatch/post/service/PostService.class
@@ -152,4 +161,5 @@ com/agrimatch/chat/dto/ChatPeerResponse.class
 com/agrimatch/eval/dto/EvalCreateRequest.class
 com/agrimatch/supply/dto/SupplyQuery.class
 com/agrimatch/post/dto/PostResponse.class
+com/agrimatch/contract/dto/ContractResponse.class
 com/agrimatch/home/controller/StatsController.class

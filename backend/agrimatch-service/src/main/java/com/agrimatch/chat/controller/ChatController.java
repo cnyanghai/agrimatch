@@ -86,6 +86,12 @@ public class ChatController {
         chatService.markConversationRead(userId, conversationId);
         return Result.success();
     }
+
+    @PostMapping("/messages/{id}/confirm")
+    public Result<ChatMessageResponse> confirmOffer(Authentication authentication, @PathVariable("id") Long messageId) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        return Result.success(chatService.confirmOffer(userId, messageId));
+    }
 }
 
 

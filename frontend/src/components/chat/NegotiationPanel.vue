@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
+import { computed, reactive, watch, onMounted } from 'vue'
 
 export type QuoteFields = {
   price?: string
@@ -9,11 +9,17 @@ export type QuoteFields = {
   paymentMethod?: string
   validUntil?: string
   remark?: string
+  invoiceType?: string
+  packaging?: string
+  deliveryMethod?: string
+  // 存储动态技术指标
+  dynamicParams?: Record<string, string>
 }
 
 const props = defineProps<{
   disabled?: boolean
   peerLatestQuote?: QuoteFields | null
+  subjectSnapshotJson?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -27,8 +33,50 @@ const form = reactive<QuoteFields>({
   arrivalDate: '',
   paymentMethod: '',
   validUntil: '',
-  remark: ''
+  remark: '',
+  invoiceType: '',
+  packaging: '',
+  deliveryMethod: '',
+  dynamicParams: {}
 })
+
+// 解析标的快照并填充默认值
+function initFromSnapshot() {
+  if (!props.subjectSnapshotJson) return
+  try {
+    const s = JSON.parse(props.subjectSnapshotJson)
+    
+    // 基础字段映射
+    form.price = String(s.exFactoryPrice ?? s.expectedPrice ?? s.price ?? '')
+    form.quantity = String(s.remainingQuantity ?? s.quantity ?? '')
+    form.deliveryMethod = s.deliveryMode ?? s.deliveryMethod ?? ''
+    form.deliveryPlace = s.shipAddress ?? s.purchaseAddress ?? ''
+    form.paymentMethod = s.paymentMethod ?? ''
+    form.invoiceType = s.invoiceType ?? ''
+    form.packaging = s.packaging ?? ''
+
+    // 解析动态参数
+    if (s.paramsJson) {
+      const p = JSON.parse(s.paramsJson)
+      const params = p.params || {}
+      const dynamic: Record<string, string> = {}
+      Object.entries(params).forEach(([k, v]) => {
+        if (typeof v === 'object' && v !== null && 'name' in v) {
+          dynamic[(v as any).name] = String((v as any).value)
+        } else {
+          dynamic[k] = String(v)
+        }
+      })
+      form.dynamicParams = dynamic
+    }
+  } catch (e) {
+    console.error('Failed to parse subject snapshot', e)
+  }
+}
+
+watch(() => props.subjectSnapshotJson, () => {
+  initFromSnapshot()
+}, { immediate: true })
 
 function clean(v?: string) {
   const s = (v ?? '').trim()
@@ -43,28 +91,49 @@ const normalized = computed(() => {
     arrivalDate: clean(form.arrivalDate),
     paymentMethod: clean(form.paymentMethod),
     validUntil: clean(form.validUntil),
-    remark: clean(form.remark)
+    remark: clean(form.remark),
+    invoiceType: clean(form.invoiceType),
+    packaging: clean(form.packaging),
+    deliveryMethod: clean(form.deliveryMethod),
+    dynamicParams: { ...form.dynamicParams }
   }
   return out
 })
 
 const canSend = computed(() => {
   const v = normalized.value
-  return !!(v.price || v.quantity || v.deliveryPlace || v.arrivalDate || v.paymentMethod || v.validUntil || v.remark)
+  return !!(v.price || v.quantity)
 })
 
 const diff = computed(() => {
   const peer = props.peerLatestQuote || {}
   const mine = normalized.value
-  const keys: Array<keyof QuoteFields> = ['price', 'quantity', 'deliveryPlace', 'arrivalDate', 'paymentMethod', 'validUntil', 'remark']
-  const changed: Array<{ k: keyof QuoteFields; mine?: string; peer?: string }> = []
+  const keys: Array<keyof QuoteFields> = [
+    'price', 'quantity', 'deliveryPlace', 'arrivalDate', 
+    'paymentMethod', 'validUntil', 'remark',
+    'invoiceType', 'packaging', 'deliveryMethod'
+  ]
+  const changed: Array<{ k: string; mine?: string; peer?: string }> = []
+  
+  // 检查基础字段
   for (const k of keys) {
-    const mv = mine[k]
-    const pv = peer[k]
+    const mv = mine[k as keyof QuoteFields] as string
+    const pv = peer[k as keyof QuoteFields] as string
     if ((mv || '') !== (pv || '')) {
-      if (mv || pv) changed.push({ k, mine: mv, peer: pv })
+      if (mv || pv) changed.push({ k: labelOf(k as any), mine: mv, peer: pv })
     }
   }
+
+  // 检查动态字段
+  const mDyn = mine.dynamicParams || {}
+  const pDyn = peer.dynamicParams || {}
+  const allDynKeys = new Set([...Object.keys(mDyn), ...Object.keys(pDyn)])
+  for (const dk of allDynKeys) {
+    if ((mDyn[dk] || '') !== (pDyn[dk] || '')) {
+      changed.push({ k: dk, mine: mDyn[dk], peer: pDyn[dk] })
+    }
+  }
+
   return changed
 })
 
@@ -77,6 +146,9 @@ function labelOf(k: keyof QuoteFields) {
   if (k === 'arrivalDate') return '到货期'
   if (k === 'paymentMethod') return '结算方式'
   if (k === 'validUntil') return '有效期'
+  if (k === 'invoiceType') return '发票类型'
+  if (k === 'packaging') return '包装方式'
+  if (k === 'deliveryMethod') return '交货方式'
   return '备注'
 }
 
@@ -84,10 +156,6 @@ function buildSummary(v: QuoteFields) {
   const parts: string[] = []
   if (v.price) parts.push(`¥${v.price}`)
   if (v.quantity) parts.push(`${v.quantity}`)
-  if (v.deliveryPlace) parts.push(`交付:${v.deliveryPlace}`)
-  if (v.arrivalDate) parts.push(`到货:${v.arrivalDate}`)
-  if (v.paymentMethod) parts.push(`结算:${v.paymentMethod}`)
-  if (v.validUntil) parts.push(`有效:${v.validUntil}`)
   return parts.length ? parts.join(' · ') : '报价卡'
 }
 
@@ -99,6 +167,12 @@ function clear() {
   form.paymentMethod = ''
   form.validUntil = ''
   form.remark = ''
+  form.invoiceType = ''
+  form.packaging = ''
+  form.deliveryMethod = ''
+  form.dynamicParams = {}
+  // 清空后重新根据快照初始化默认值
+  initFromSnapshot()
 }
 
 function send() {
@@ -115,87 +189,99 @@ function send() {
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl border border-gray-100 p-4">
-    <div class="flex items-start justify-between gap-4">
+  <div class="bg-white rounded-[32px] border border-gray-100 p-5 shadow-2xl">
+    <div class="flex items-center justify-between mb-5">
       <div>
-        <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">结构化议价</div>
-        <div class="mt-1 font-bold text-gray-900">报价草稿</div>
+        <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Double Confirmation</div>
+        <div class="mt-0.5 font-bold text-gray-900 text-lg">正式交易报价单</div>
       </div>
-      <div class="flex items-center gap-2 shrink-0">
+      <div class="flex items-center gap-2">
         <button
-          class="px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold transition-all active:scale-95 disabled:opacity-50"
           :disabled="disabled"
           @click="clear"
         >
-          清空
+          重置默认
         </button>
         <button
-          class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-6 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-lg shadow-emerald-100 transition-all active:scale-95 disabled:opacity-50"
           :disabled="disabled || !canSend"
           @click="send"
         >
-          发送报价卡
+          发送报价
         </button>
       </div>
     </div>
 
-    <div class="mt-4 grid grid-cols-2 gap-3">
+    <!-- 3/4 列紧凑布局 -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      <!-- 核心交易项 -->
       <div class="space-y-1">
-        <div class="text-xs text-gray-500">单价（元/吨）</div>
-        <input v-model="form.price" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" placeholder="如 2350" />
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">意向单价 (元/吨)</div>
+        <input v-model="form.price" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold text-emerald-600 focus:border-emerald-500 outline-none transition-all" placeholder="必填" />
       </div>
       <div class="space-y-1">
-        <div class="text-xs text-gray-500">数量</div>
-        <input v-model="form.quantity" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" placeholder="如 300 吨" />
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">意向数量</div>
+        <input v-model="form.quantity" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold text-gray-900 focus:border-emerald-500 outline-none transition-all" placeholder="必填" />
+      </div>
+
+      <!-- 物流与商务项 -->
+      <div class="space-y-1">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">交货方式</div>
+        <input v-model="form.deliveryMethod" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
       </div>
       <div class="space-y-1">
-        <div class="text-xs text-gray-500">交付地</div>
-        <input v-model="form.deliveryPlace" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" placeholder="如 锦州港" />
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">交付地点</div>
+        <input v-model="form.deliveryPlace" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
       </div>
       <div class="space-y-1">
-        <div class="text-xs text-gray-500">到货期</div>
-        <input v-model="form.arrivalDate" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" placeholder="如 2026-01-10" />
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">到货日期</div>
+        <input v-model="form.arrivalDate" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" placeholder="YYYY-MM-DD" />
       </div>
       <div class="space-y-1">
-        <div class="text-xs text-gray-500">结算方式</div>
-        <input v-model="form.paymentMethod" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" placeholder="如 现款/账期" />
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">结算方式</div>
+        <input v-model="form.paymentMethod" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
       </div>
       <div class="space-y-1">
-        <div class="text-xs text-gray-500">有效期</div>
-        <input v-model="form.validUntil" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" placeholder="如 24小时 / 2026-01-03" />
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">发票要求</div>
+        <input v-model="form.invoiceType" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
       </div>
+      <div class="space-y-1">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">包装要求</div>
+        <input v-model="form.packaging" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
+      </div>
+      <div class="space-y-1">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">报价有效期</div>
+        <input v-model="form.validUntil" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
+      </div>
+
+      <!-- 动态技术指标 -->
+      <div v-for="(v, name) in form.dynamicParams" :key="name" class="space-y-1">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{{ name }}</div>
+        <input v-model="form.dynamicParams![name]" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
+      </div>
+
+      <!-- 备注（独占两列或更多） -->
       <div class="col-span-2 space-y-1">
-        <div class="text-xs text-gray-500">备注</div>
-        <textarea v-model="form.remark" :disabled="disabled" rows="2" class="w-full resize-none border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" placeholder="补充说明（可选）" />
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">备注信息</div>
+        <textarea v-model="form.remark" :disabled="disabled" rows="1" class="w-full resize-none border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" placeholder="如有其他特殊约定请在此说明" />
       </div>
     </div>
 
-    <div class="mt-4" v-if="hasPeerQuote">
-      <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">对方最新报价</div>
-      <div class="bg-gray-50 rounded-2xl border border-gray-100 p-3 text-sm text-gray-700">
-        <div class="grid grid-cols-2 gap-2">
-          <div v-for="(v, k) in peerLatestQuote" :key="k" class="truncate">
-            <span class="text-xs text-gray-500">{{ labelOf(k as any) }}：</span>
-            <span class="font-semibold">{{ v || '-' }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="mt-4" v-if="diff.length">
-      <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">差异对比</div>
-      <div class="space-y-2">
-        <div v-for="d in diff" :key="d.k" class="bg-white rounded-xl border border-gray-100 px-3 py-2">
-          <div class="flex items-center justify-between gap-3">
-            <div class="text-xs text-gray-500">{{ labelOf(d.k) }}</div>
-            <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
-              已变更
-            </div>
-          </div>
-          <div class="mt-1 text-sm text-gray-800">
-            <span class="text-gray-400">对方：</span><b class="font-semibold">{{ d.peer || '-' }}</b>
-            <span class="mx-2 text-gray-300">→</span>
-            <span class="text-gray-400">我方：</span><b class="font-semibold">{{ d.mine || '-' }}</b>
+    <!-- 差异对比 -->
+    <div class="mt-5 pt-5 border-t border-gray-50" v-if="diff.length">
+      <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">参数变更预览</div>
+      <div class="flex flex-wrap gap-2">
+        <div v-for="d in diff" :key="d.k" class="bg-emerald-50/50 border border-emerald-100/50 rounded-xl px-3 py-1.5 text-xs flex items-center gap-1.5">
+          <span class="text-gray-500 font-medium">{{ d.k }}：</span>
+          <div class="flex items-center gap-1.5">
+            <template v-if="d.peer">
+              <span class="text-gray-400 line-through">{{ d.peer }}</span>
+              <span class="text-emerald-400 font-bold">→</span>
+            </template>
+            <span :class="[d.mine ? 'text-emerald-700 font-black' : 'text-red-400 italic font-medium']">
+              {{ d.mine || '[已清空]' }}
+            </span>
           </div>
         </div>
       </div>

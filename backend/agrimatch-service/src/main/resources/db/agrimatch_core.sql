@@ -194,6 +194,41 @@ CREATE TABLE IF NOT EXISTS `bus_contract_template` (
   KEY `idx_tpl_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='合同模板表';
 
+-- ============================================================
+-- Contract (合同) - 工作台/预览/下载 PDF（MVP）
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `bus_contract` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '合同ID',
+  `company_id` bigint NOT NULL COMMENT '所属公司ID（bus_company.id）',
+  `user_id` bigint NOT NULL COMMENT '创建用户ID（sys_user.user_id）',
+  `contract_no` varchar(64) NOT NULL COMMENT '合同编号（展示用）',
+  `contract_type` varchar(20) NOT NULL COMMENT '合同类型（purchase/supply）',
+  `title` varchar(255) NOT NULL COMMENT '合同标题',
+  `party_a` varchar(255) NOT NULL COMMENT '甲方',
+  `party_b` varchar(255) NOT NULL COMMENT '乙方',
+  `product_name` varchar(128) DEFAULT NULL COMMENT '产品名称',
+  `quantity` decimal(18,3) DEFAULT NULL COMMENT '数量',
+  `unit` varchar(20) DEFAULT NULL COMMENT '单位（吨/公斤等）',
+  `unit_price` decimal(18,2) DEFAULT NULL COMMENT '单价（元/单位）',
+  `total_amount` decimal(18,2) DEFAULT NULL COMMENT '总金额（元）',
+  `delivery_date` date DEFAULT NULL COMMENT '交付日期',
+  `delivery_address` varchar(255) DEFAULT NULL COMMENT '交付地址',
+  `payment_method` varchar(100) DEFAULT NULL COMMENT '付款方式',
+  `terms` longtext COMMENT '合同条款/正文（文本）',
+  `status` varchar(20) NOT NULL DEFAULT 'draft' COMMENT '状态（draft/pending/signed/executing/completed/cancelled）',
+  `sign_time` datetime(3) DEFAULT NULL COMMENT '签署时间（signed 时写入）',
+  `pdf_hash` varchar(80) DEFAULT NULL COMMENT 'PDF 存证 Hash（SHA256:...）',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除（0否 1是）',
+  `create_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `update_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_contract_no` (`contract_no`),
+  KEY `idx_contract_company` (`company_id`),
+  KEY `idx_contract_user` (`user_id`),
+  KEY `idx_contract_status` (`status`),
+  KEY `idx_contract_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='合同表';
+
 -- Table structure for bus_order_eval
 CREATE TABLE IF NOT EXISTS `bus_order_eval` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '评价ID',
@@ -392,6 +427,7 @@ CREATE TABLE IF NOT EXISTS `bus_chat_message` (
 ALTER TABLE `bus_chat_message` ADD COLUMN `conversation_id` bigint DEFAULT NULL COMMENT '会话ID（bus_chat_conversation.id）';
 ALTER TABLE `bus_chat_message` ADD COLUMN `msg_type` varchar(20) NOT NULL DEFAULT 'TEXT' COMMENT '消息类型（TEXT/QUOTE/SYSTEM/ATTACHMENT）';
 ALTER TABLE `bus_chat_message` ADD COLUMN `payload_json` longtext COMMENT '结构化负载JSON（报价卡/附件等）';
+ALTER TABLE `bus_chat_message` ADD COLUMN `quote_status` varchar(20) DEFAULT NULL COMMENT '报价状态(OFFERED/ACCEPTED/REJECTED/EXPIRED)';
 ALTER TABLE `bus_chat_message` ADD KEY `idx_chat_conv_time` (`conversation_id`, `create_time`, `id`);
 
 

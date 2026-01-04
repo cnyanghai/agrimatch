@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/auth'
 import { Search, Picture, Document, Position, Present, ChatDotRound } from '@element-plus/icons-vue'
 import { giftPoints } from '../api/points'
 import { useRoute, useRouter } from 'vue-router'
-import { getConversationMessages, listChatConversations, markConversationRead, type ChatConversationResponse, type ChatMessageResponse } from '../api/chat'
+import { getConversationMessages, listChatConversations, markConversationRead, confirmChatOffer, type ChatConversationResponse, type ChatMessageResponse } from '../api/chat'
 import NegotiationPanel, { type QuoteFields } from '../components/chat/NegotiationPanel.vue'
 import ChatSubjectCard from '../components/chat/ChatSubjectCard.vue'
 import { buildChatWsUrl } from '../utils/chatWs'
@@ -30,6 +30,7 @@ type UiMessage = {
   msgType?: string
   content: string
   payloadJson?: string
+  quoteStatus?: string
   time?: string
   status?: 'pending' | 'sent'
   fromUserId?: number
@@ -65,6 +66,7 @@ function cleanupWs() {
 
 // Layout: desktop side panel + mobile drawer
 const sidePanelOpen = ref(true)
+const quotePopoverVisible = ref(false)
 const negotiationDrawerOpen = ref(false)
 const isDesktopXl = ref(false)
 const subjectDialogOpen = ref(false)
@@ -165,6 +167,10 @@ function connectWs() {
           onWsMessage(payload.conversationId, payload.message as ChatMessageResponse)
           return
         }
+        if (payload?.type === 'OFFER_UPDATED' && payload?.message) {
+          onOfferUpdated(payload.conversationId, payload.message as ChatMessageResponse)
+          return
+        }
         if (payload?.type === 'SENT') {
           onWsSent(payload?.tempId, payload?.id, payload?.conversationId)
         }
@@ -219,6 +225,47 @@ function onWsMessage(conversationId: number, msg: ChatMessageResponse) {
   nextTick().then(scrollToBottom)
 }
 
+function onOfferUpdated(conversationId: number, msg: ChatMessageResponse) {
+  if (activeConversationId.value !== conversationId) return
+  
+  // 查找并更新现有消息
+  const idx = messages.value.findIndex(m => m.id === msg.id)
+  if (idx >= 0) {
+    const old = messages.value[idx]
+    messages.value[idx] = { ...old, ...mapApiMessageToUi(msg) }
+  } else {
+    // 如果本地没找到（比如刚进入会话），则直接插入（或者忽略，因为 loadMessages 会处理）
+    messages.value.push(mapApiMessageToUi(msg))
+  }
+
+  // 同时也可能需要让其他同一会话的 OFFERED 消息变为 EXPIRED（如果后端已经处理并广播了，这里会自动匹配）
+  // 简单起见，如果收到的是 ACCEPTED，我们可以本地把其他 OFFERED 且是该会话的改为 EXPIRED
+  if (msg.quoteStatus === 'ACCEPTED') {
+    messages.value.forEach(m => {
+      if (m.id !== msg.id && m.msgType === 'QUOTE' && m.quoteStatus === 'OFFERED') {
+        m.quoteStatus = 'EXPIRED'
+      }
+    })
+  }
+
+  nextTick().then(scrollToBottom)
+}
+
+async function handleConfirmOffer(msgId: number | string) {
+  if (typeof msgId !== 'number') return
+  try {
+    const res = await confirmChatOffer(msgId)
+    if (res.code === 0) {
+      ElMessage.success('报价已确认，交易达成！')
+      // 后端会通过 WS 广播通知，所以这里其实不用手动更新本地状态，等推送即可
+    } else {
+      ElMessage.error(res.message || '确认失败')
+    }
+  } catch (e: any) {
+    ElMessage.error(e.message || '确认失败')
+  }
+}
+
 function onWsSent(tempId?: string, id?: number, conversationId?: number) {
   if (!tempId) return
   const idx = messages.value.findIndex(m => m.id === tempId)
@@ -251,6 +298,7 @@ function mapApiMessageToUi(m: ChatMessageResponse): UiMessage {
     msgType: mt,
     content: mt === 'TEXT' ? (m.content || '') : mt === 'QUOTE' ? (m.content || '[报价]') : mt === 'ATTACHMENT' ? '[附件]' : (m.content || ''),
     payloadJson: m.payloadJson,
+    quoteStatus: m.quoteStatus,
     time: formatTime(m.createTime),
     fromUserId: m.fromUserId,
     toUserId: m.toUserId
@@ -278,6 +326,16 @@ const peerLatestQuote = computed<QuoteFields | null>(() => {
     return parseQuoteFields(m.payloadJson) || null
   }
   return null
+})
+
+const hasAcceptedQuote = computed(() => {
+  return messages.value.some(m => m.msgType === 'QUOTE' && m.quoteStatus === 'ACCEPTED')
+})
+
+const transactionStep = computed(() => {
+  if (hasAcceptedQuote.value) return 2 // 达成意向
+  if (messages.value.some(m => m.msgType === 'QUOTE')) return 1 // 议价中
+  return 0 // 建立联系
 })
 
 // 加载会话列表
@@ -318,6 +376,48 @@ function subjectBadge(c: ChatConversationResponse) {
   if (st === 'SUPPLY') return { label: '供应', cls: 'bg-emerald-50 text-emerald-700 border-emerald-100' }
   if (st === 'NEED') return { label: '采购', cls: 'bg-blue-50 text-blue-700 border-blue-200' }
   return { label: '会话', cls: 'bg-gray-50 text-gray-600 border-gray-200' }
+}
+
+function quoteStatusBadge(status?: string) {
+  if (status === 'OFFERED') return { label: '待确认', cls: 'bg-blue-50 text-blue-600 border-blue-100' }
+  if (status === 'ACCEPTED') return { label: '已达成', cls: 'bg-emerald-50 text-emerald-600 border-emerald-100' }
+  if (status === 'EXPIRED') return { label: '已失效', cls: 'bg-gray-50 text-gray-400 border-gray-100' }
+  if (status === 'REJECTED') return { label: '已拒绝', cls: 'bg-red-50 text-red-600 border-red-100' }
+  return null
+}
+
+const QUOTE_LABEL_MAP: Record<string, string> = {
+  price: '单价(元/吨)',
+  quantity: '数量',
+  deliveryMethod: '交货方式',
+  deliveryPlace: '交付地',
+  arrivalDate: '到货期',
+  paymentMethod: '结算方式',
+  invoiceType: '发票类型',
+  packaging: '包装方式',
+  validUntil: '有效期',
+  remark: '备注'
+}
+
+function getQuoteDisplayFields(payloadJson?: string) {
+  const fields = parseQuoteFields(payloadJson)
+  if (!fields) return []
+  const display: Array<{ label: string; value: any }> = []
+  
+  // 基础字段
+  Object.entries(fields)
+    .filter(([k, v]) => v && QUOTE_LABEL_MAP[k])
+    .forEach(([k, v]) => {
+      display.push({ label: QUOTE_LABEL_MAP[k], value: v })
+    })
+
+  // 动态字段
+  const dynamic = fields.dynamicParams || {}
+  Object.entries(dynamic).forEach(([k, v]) => {
+    if (v) display.push({ label: k, value: v })
+  })
+
+  return display
 }
 
 // 选择会话
@@ -413,6 +513,7 @@ async function sendQuote(payload: any, summary: string) {
     ElMessage.warning('请先选择会话')
     return
   }
+  quotePopoverVisible.value = false
   if (!ws.value || ws.value.readyState !== WebSocket.OPEN) {
     ElMessage.warning('实时连接未就绪，正在重连…')
     connectWs()
@@ -637,33 +738,30 @@ onBeforeUnmount(() => {
 
       <!-- 右侧聊天区域 -->
       <div class="flex-1 flex flex-col min-w-0">
-        <!-- 顶部信息栏 -->
-        <div v-if="currentConversation" class="px-6 py-4 border-b border-gray-100 bg-white">
+        <!-- 顶部信息栏简化 -->
+        <div v-if="currentConversation" class="px-6 py-3 border-b border-gray-100 bg-white">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-bold">
+              <div class="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-bold shrink-0">
                 {{ avatarText(currentConversation.peerNickName || currentConversation.peerUserName || currentConversation.peerCompanyName) }}
               </div>
               <div>
-                <div class="font-bold text-gray-900">{{ peerDisplayName }}</div>
-                <div class="text-xs text-gray-400 flex items-center gap-2">
-                  <span>{{ wsConnected ? '实时连接已就绪' : '连接中…' }}</span>
-                  <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                  <span class="truncate">会话 #{{ currentConversation.id }}</span>
-                  <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                  <span class="truncate">标的 #{{ currentConversation.subjectId ?? '-' }}</span>
+                <div class="font-bold text-gray-900 leading-tight">{{ peerDisplayName }}</div>
+                <div class="text-[10px] flex items-center gap-1.5 mt-0.5">
+                  <span :class="wsConnected ? 'text-emerald-500' : 'text-gray-400'">
+                    ● {{ wsConnected ? '在线' : '连接中…' }}
+                  </span>
+                  <span class="text-gray-300">|</span>
+                  <span class="text-gray-400 truncate">{{ currentConversation.peerCompanyName || '个人用户' }}</span>
                 </div>
               </div>
             </div>
             
-            <!-- 操作按钮 -->
             <div class="flex items-center gap-2">
-              <el-button size="small" class="!rounded-xl transition-all active:scale-95" @click="viewLinkedInfo">标的详情</el-button>
-              <el-button size="small" class="!rounded-xl transition-all active:scale-95" @click="toggleNegotiationPanel">
-                {{ negotiationBtnLabel }}
+              <el-button size="small" circle :icon="Present" @click="openGiftDialog" title="赠送积分" />
+              <el-button size="small" class="!rounded-xl !bg-slate-900 !text-white transition-all active:scale-95" @click="initiateContract">
+                起草合同
               </el-button>
-              <el-button size="small" class="!rounded-xl transition-all active:scale-95" :icon="Present" @click="openGiftDialog">赠送积分</el-button>
-              <el-button size="small" class="!rounded-xl !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 !text-white transition-all active:scale-95" @click="initiateContract">发起合同</el-button>
             </div>
           </div>
         </div>
@@ -671,107 +769,163 @@ onBeforeUnmount(() => {
         <!-- 主体：消息区 + 右侧议价栏（桌面端） -->
         <div class="flex-1 min-h-0 flex">
           <!-- 主聊天列 -->
-          <div class="flex-1 min-w-0 flex flex-col">
+          <div class="flex-1 min-w-0 flex flex-col relative">
+            <!-- 常驻标的摘要 -->
+            <ChatSubjectCard
+              v-if="currentConversation"
+              is-mini
+              class="sticky top-0 z-10"
+              :subject-type="currentConversation.subjectType"
+              :subject-id="currentConversation.subjectId"
+              :subject-snapshot-json="currentConversation.subjectSnapshotJson"
+            >
+              <template #action>
+                <button class="text-xs text-emerald-600 font-bold hover:text-emerald-700 transition-colors" @click="viewLinkedInfo">
+                  详情 >
+                </button>
+              </template>
+            </ChatSubjectCard>
+
             <!-- 消息区域 -->
             <div
               ref="chatContainerRef"
               class="flex-1 overflow-y-auto p-6 bg-gray-50"
               v-loading="loading"
             >
-              <div v-if="activeConversationId" class="space-y-4">
+              <div v-if="activeConversationId" class="space-y-6">
                 <div
-                  v-for="msg in messages"
+                  v-for="(msg, idx) in messages"
                   :key="msg.id"
-                  class="flex"
-                  :class="msg.type === 'sent' ? 'justify-end' : msg.type === 'system' ? 'justify-center' : 'justify-start'"
+                  class="flex flex-col"
                 >
-              <!-- 系统消息 -->
-              <div v-if="msg.type === 'system'" class="px-4 py-1.5 bg-gray-200 text-gray-500 text-xs rounded-full">
-                {{ msg.content }}
-              </div>
-              
-              <!-- 接收的消息 -->
-              <div v-else-if="msg.type === 'received'" class="flex items-start gap-3 max-w-[70%]">
-                <div class="w-9 h-9 rounded-2xl bg-slate-900 flex items-center justify-center text-white text-sm font-bold shrink-0">
-                  {{ avatarText(currentConversation?.peerNickName || currentConversation?.peerUserName || currentConversation?.peerCompanyName) }}
-                </div>
-                <div>
-                  <div v-if="(msg.msgType || '').toUpperCase() === 'QUOTE'" class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-100">
-                    <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">报价卡</div>
-                    <div class="mt-1 font-bold text-gray-900">{{ msg.content || '[报价]' }}</div>
-                    <div class="mt-3 grid grid-cols-2 gap-2 text-sm" v-if="parseQuoteFields(msg.payloadJson)">
-                      <div class="text-gray-700 truncate" v-for="(v, k) in (parseQuoteFields(msg.payloadJson) as any)" :key="k">
-                        <span class="text-xs text-gray-500">{{ k }}：</span>
-                        <span class="font-semibold">{{ v || '-' }}</span>
+                  <!-- 只有间隔较长或第一条显示时间 -->
+                  <div v-if="idx === 0 || msg.time !== messages[idx-1].time" class="self-center my-2">
+                    <span class="text-[10px] text-gray-400 bg-gray-200/50 px-2 py-0.5 rounded-full">{{ msg.time }}</span>
+                  </div>
+
+                  <div class="flex" :class="msg.type === 'sent' ? 'justify-end' : msg.type === 'system' ? 'justify-center' : 'justify-start'">
+                    <!-- 系统消息 -->
+                    <div v-if="msg.type === 'system'" class="px-4 py-1.5 bg-gray-200/80 text-gray-500 text-[11px] rounded-full max-w-[80%] text-center">
+                      {{ msg.content }}
+                    </div>
+                    
+                    <!-- 接收的消息 -->
+                    <div v-else-if="msg.type === 'received'" class="flex items-start gap-3 max-w-[85%] lg:max-w-[70%]">
+                      <div class="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                        {{ avatarText(currentConversation?.peerNickName || currentConversation?.peerUserName || currentConversation?.peerCompanyName) }}
+                      </div>
+                      <div>
+                        <div v-if="(msg.msgType || '').toUpperCase() === 'QUOTE'" class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-100">
+                          <div class="flex items-center justify-between mb-2">
+                            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">电子报价单</div>
+                            <div v-if="quoteStatusBadge(msg.quoteStatus)" 
+                                 :class="['text-[10px] px-1.5 py-0.5 rounded-full border font-bold', quoteStatusBadge(msg.quoteStatus)?.cls]">
+                              {{ quoteStatusBadge(msg.quoteStatus)?.label }}
+                            </div>
+                          </div>
+                          <div class="mt-1 font-bold text-gray-900 border-b pb-2 mb-3">{{ msg.content || '[报价]' }}</div>
+                          <div class="space-y-2">
+                            <div v-for="field in getQuoteDisplayFields(msg.payloadJson)" :key="field.label" class="flex justify-between text-xs">
+                              <span class="text-gray-400">{{ field.label }}</span>
+                              <span class="text-gray-700 font-medium">{{ field.value }}</span>
+                            </div>
+                          </div>
+                          <!-- 确认下单按钮 -->
+                          <div v-if="msg.quoteStatus === 'OFFERED'" class="mt-4 pt-3 border-t border-gray-50 flex justify-end">
+                            <el-button 
+                              size="small" 
+                              type="primary" 
+                              class="!rounded-xl !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 !text-white transition-all active:scale-95"
+                              @click="handleConfirmOffer(msg.id)"
+                            >
+                              确认成交
+                            </el-button>
+                          </div>
+                        </div>
+                        <div v-else class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-100 text-sm text-gray-800">
+                          {{ msg.content }}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- 发送的消息 -->
+                    <div v-else class="flex items-start gap-3 max-w-[85%] lg:max-w-[70%] flex-row-reverse">
+                      <div class="w-8 h-8 rounded-xl bg-emerald-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                        {{ (auth.me?.nickName || 'U')[0] }}
+                      </div>
+                      <div class="flex flex-col items-end">
+                        <div v-if="(msg.msgType || '').toUpperCase() === 'QUOTE'" class="bg-emerald-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm">
+                          <div class="flex items-center justify-between mb-2 gap-4">
+                            <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-100">电子报价单</div>
+                            <div v-if="quoteStatusBadge(msg.quoteStatus)" 
+                                 class="text-[10px] px-1.5 py-0.5 rounded-full border border-emerald-400 bg-emerald-500/50 font-bold text-white">
+                              {{ quoteStatusBadge(msg.quoteStatus)?.label }}
+                            </div>
+                          </div>
+                          <div class="mt-1 font-bold border-b border-emerald-500 pb-2 mb-3">{{ msg.content || '[报价]' }}</div>
+                          <div class="space-y-2">
+                            <div v-for="field in getQuoteDisplayFields(msg.payloadJson)" :key="field.label" class="flex justify-between text-xs">
+                              <span class="text-emerald-100/80">{{ field.label }}</span>
+                              <span class="text-white font-medium">{{ field.value }}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div v-else class="bg-emerald-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm text-sm">
+                          {{ msg.content }}
+                        </div>
+                        <div v-if="msg.status === 'pending'" class="text-[10px] text-gray-400 mt-1">发送中…</div>
                       </div>
                     </div>
                   </div>
-                  <div v-else class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
-                    <div class="text-gray-800">{{ msg.content }}</div>
-                  </div>
-                  <div class="text-xs text-gray-400 mt-1 ml-1">{{ msg.time }}</div>
                 </div>
               </div>
-              
-              <!-- 发送的消息 -->
-              <div v-else class="flex items-start gap-3 max-w-[70%] flex-row-reverse">
-                <div class="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center text-white text-sm shrink-0">
-                  {{ (auth.me?.nickName || 'U')[0] }}
-                </div>
-                <div>
-                  <div v-if="(msg.msgType || '').toUpperCase() === 'QUOTE'" class="bg-emerald-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm">
-                    <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-100">报价卡</div>
-                    <div class="mt-1 font-bold">{{ msg.content || '[报价]' }}</div>
-                    <div class="mt-3 grid grid-cols-2 gap-2 text-sm text-emerald-50" v-if="parseQuoteFields(msg.payloadJson)">
-                      <div class="truncate" v-for="(v, k) in (parseQuoteFields(msg.payloadJson) as any)" :key="k">
-                        <span class="text-emerald-100">{{ k }}：</span>
-                        <span class="font-semibold">{{ v || '-' }}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div v-else class="bg-emerald-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm">
-                    <div>{{ msg.content }}</div>
-                  </div>
-                  <div class="text-xs text-gray-400 mt-1 mr-1 text-right">
-                    <span v-if="msg.status === 'pending'">发送中…</span>
-                    <span v-else>{{ msg.time }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
               <div v-else class="h-full flex items-center justify-center text-gray-400">
                 <div class="text-center">
                   <el-icon class="mx-auto mb-4 text-gray-300" :size="64"><ChatDotRound /></el-icon>
-                  <p>选择一个会话开始聊天</p>
+                  <p class="text-sm font-medium">选择一个会话开始聊天</p>
                 </div>
               </div>
             </div>
 
             <!-- 输入区域 -->
             <div v-if="activeConversationId" class="p-4 border-t border-gray-100 bg-white">
-              <div class="flex items-end gap-3">
-                <!-- 工具栏 -->
-                <div class="flex items-center gap-1 shrink-0">
-                  <el-tooltip content="发送图片">
-                    <el-button :icon="Picture" circle size="small" />
-                  </el-tooltip>
-                  <el-tooltip content="发送文件">
-                    <el-button :icon="Document" circle size="small" />
-                  </el-tooltip>
-                  <el-tooltip content="赠送积分">
-                    <el-button :icon="Present" circle size="small" @click="openGiftDialog" />
-                  </el-tooltip>
-                </div>
+              <!-- 输入框上方的小工具栏 -->
+              <div class="flex items-center gap-4 mb-3 px-1">
+                <el-popover placement="top-start" :width="700" trigger="click" v-model:visible="quotePopoverVisible" popper-class="!p-0 !rounded-[32px] !border-none !shadow-2xl">
+                  <template #reference>
+                    <button class="flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
+                      <Position class="w-3.5 h-3.5" /> 修改价格/发报价
+                    </button>
+                  </template>
+                  <div class="p-0">
+                    <NegotiationPanel
+                      :disabled="!activeConversationId"
+                      :peer-latest-quote="peerLatestQuote"
+                      :subject-snapshot-json="currentConversation?.subjectSnapshotJson"
+                      @send="({ payload, summary }) => sendQuote(payload, summary)"
+                    />
+                  </div>
+                </el-popover>
+                <button class="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors" @click="openGiftDialog">
+                  <Present class="w-3.5 h-3.5" /> 赠送积分
+                </button>
+                <button class="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors">
+                  <Picture class="w-3.5 h-3.5" /> 图片
+                </button>
+                <button class="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors">
+                  <Document class="w-3.5 h-3.5" /> 附件
+                </button>
+              </div>
 
+              <div class="flex items-end gap-3">
                 <!-- 输入框 -->
                 <div class="flex-1">
                   <el-input
                     v-model="messageInput"
                     type="textarea"
                     :rows="2"
-                    placeholder="输入消息..."
+                    placeholder="按回车发送消息..."
                     resize="none"
                     @keydown.enter.prevent="sendMessage"
                   />
@@ -779,8 +933,8 @@ onBeforeUnmount(() => {
 
                 <!-- 发送按钮 -->
                 <el-button
-                  :icon="Position"
-                  class="shrink-0 !rounded-xl !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 !text-white transition-all active:scale-95"
+                  type="primary"
+                  class="shrink-0 !h-12 !px-6 !rounded-xl !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 !text-white transition-all active:scale-95"
                   :disabled="!messageInput.trim()"
                   @click="sendMessage"
                 >
@@ -790,58 +944,39 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <!-- 右侧议价栏（桌面端，≥xl） -->
+          <!-- 右侧边栏：交易轨迹 -->
           <div
             v-if="currentConversation && sidePanelOpen"
-            class="hidden xl:flex w-[360px] shrink-0 border-l border-gray-100 bg-white"
+            class="hidden xl:flex w-64 shrink-0 border-l border-gray-100 bg-white flex-col p-6"
           >
-            <div class="w-full p-4 space-y-4 overflow-y-auto">
-              <!-- 标的摘要 -->
-              <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                <div class="flex items-start justify-between gap-4">
-                  <div class="min-w-0">
-                    <div class="flex items-center gap-2">
-                      <span
-                        class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border"
-                        :class="subjectBadge(currentConversation).cls"
-                      >
-                        {{ subjectBadge(currentConversation).label }}
-                      </span>
-                      <span class="text-xs text-gray-400">标的ID：{{ currentConversation.subjectId ?? '-' }}</span>
-                    </div>
-                    <div class="mt-1 font-bold text-gray-900 truncate">
-                      {{ currentConversation.subjectSnapshotJson ? '已附带标的快照' : '未附带标的快照（建议从大厅入口带上）' }}
-                    </div>
-                    <div class="mt-2 flex items-center gap-2">
-                      <span class="text-xs text-gray-400">未读：</span>
-                      <span class="font-bold text-gray-900">{{ currentConversation.unreadCount || 0 }}</span>
-                    </div>
-                  </div>
-                  <el-button size="small" class="!rounded-xl transition-all active:scale-95" @click="viewLinkedInfo">
-                    查看
-                  </el-button>
-                </div>
-              </div>
+            <div class="flex items-center justify-between mb-8">
+              <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">交易轨迹</div>
+              <button class="text-gray-400 hover:text-gray-600 transition-colors" @click="sidePanelOpen = false">
+                <X class="w-4 h-4" />
+              </button>
+            </div>
 
-              <!-- 结构化议价 -->
-              <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-                <div class="flex items-center justify-between mb-3">
-                  <div>
-                    <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">结构化议价</div>
-                    <div class="font-bold text-gray-900">报价草稿</div>
-                  </div>
-                  <button
-                    class="text-xs font-bold text-gray-400 hover:text-gray-600 transition-all active:scale-95"
-                    @click="sidePanelOpen = false"
-                  >
-                    收起
-                  </button>
+            <el-steps direction="vertical" :active="transactionStep" finish-status="success" class="flex-1 transaction-steps">
+              <el-step title="建立联系" description="双方正在初步沟通" />
+              <el-step title="议价中" :description="peerLatestQuote ? '已有报价，待确认' : '正在商讨细节'" />
+              <el-step title="达成意向" :description="hasAcceptedQuote ? '已达成交易意向' : '待确认报价'" />
+              <el-step title="签署合同" description="由意向生成正式合同" />
+              <el-step title="履约完成" />
+            </el-steps>
+
+            <div class="mt-8 pt-6 border-t border-gray-50">
+              <div v-if="hasAcceptedQuote" class="space-y-3">
+                <div class="bg-emerald-50 text-emerald-700 p-3 rounded-xl text-xs font-medium leading-relaxed">
+                  🎉 意向已达成！建议立即起草电子合同以保障双方权益。
                 </div>
-                <NegotiationPanel
-                  :disabled="!activeConversationId"
-                  :peer-latest-quote="peerLatestQuote"
-                  @send="({ payload, summary }) => sendQuote(payload, summary)"
-                />
+                <el-button type="primary" class="w-full !rounded-xl !bg-slate-900 !border-slate-900" @click="initiateContract">
+                  起草合同
+                </el-button>
+              </div>
+              <div v-else class="text-center">
+                <p class="text-[10px] text-gray-400 leading-relaxed px-2">
+                  双方达成一致后，点击报价单上的“确认下单”即可推进至下一步。
+                </p>
               </div>
             </div>
           </div>
@@ -1072,5 +1207,21 @@ onBeforeUnmount(() => {
 .quick-amounts .label {
   font-size: 13px;
   color: #6b7280;
+}
+
+:deep(.transaction-steps .el-step__title) {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+:deep(.transaction-steps .el-step__description) {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+:deep(.transaction-steps .el-step__icon) {
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
 }
 </style>

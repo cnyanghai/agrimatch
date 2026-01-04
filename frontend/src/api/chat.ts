@@ -22,8 +22,14 @@ export interface ChatMessageResponse {
   msgType?: 'TEXT' | 'QUOTE' | 'SYSTEM' | 'ATTACHMENT' | string
   content: string
   payloadJson?: string
+  quoteStatus?: 'OFFERED' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED' | string
   read: boolean
   createTime?: string
+}
+
+export async function confirmChatOffer(messageId: number) {
+  const { data } = await http.post<Result<ChatMessageResponse>>(`/api/chat/messages/${messageId}/confirm`)
+  return data
 }
 
 export interface ChatConversationResponse {

@@ -16,6 +16,7 @@
         <result column="msg_type" property="msgType"/>
         <result column="content" property="content"/>
         <result column="payload_json" property="payloadJson"/>
+        <result column="quote_status" property="quoteStatus"/>
         <result column="is_read" property="isRead"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="create_time" property="createTime"/>
@@ -25,10 +26,24 @@
     <insert id="insertMessage" parameterType="com.agrimatch.chat.domain.BusChatMessage"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO bus_chat_message
-        (conversation_id, from_user_id, to_user_id, msg_type, content, payload_json, is_read, is_deleted, create_time, update_time)
+        (conversation_id, from_user_id, to_user_id, msg_type, content, payload_json, quote_status, is_read, is_deleted, create_time, update_time)
         VALUES
-        (#{conversationId}, #{fromUserId}, #{toUserId}, #{msgType}, #{content}, #{payloadJson}, 0, 0, NOW(3), NOW(3))
+        (#{conversationId}, #{fromUserId}, #{toUserId}, #{msgType}, #{content}, #{payloadJson}, #{quoteStatus}, 0, 0, NOW(3), NOW(3))
     </insert>
+
+    <select id="selectMessageById" resultMap="MsgMap">
+        SELECT
+            m.id, m.conversation_id, m.from_user_id, m.to_user_id,
+            fu.user_name AS from_user_name,
+            fu.nick_name AS from_nick_name,
+            tu.user_name AS to_user_name,
+            tu.nick_name AS to_nick_name,
+            m.msg_type, m.content, m.payload_json, m.quote_status, m.is_read, m.is_deleted, m.create_time, m.update_time
+        FROM bus_chat_message m
+        LEFT JOIN sys_user fu ON fu.user_id = m.from_user_id AND fu.del_flag = '0'
+        LEFT JOIN sys_user tu ON tu.user_id = m.to_user_id AND tu.del_flag = '0'
+        WHERE m.id = #{id}
+    </select>
 
     <select id="selectHistory" resultMap="MsgMap">
         SELECT
@@ -37,7 +52,7 @@
             fu.nick_name AS from_nick_name,
             tu.user_name AS to_user_name,
             tu.nick_name AS to_nick_name,
-            m.msg_type, m.content, m.payload_json, m.is_read, m.is_deleted, m.create_time, m.update_time
+            m.msg_type, m.content, m.payload_json, m.quote_status, m.is_read, m.is_deleted, m.create_time, m.update_time
         FROM bus_chat_message m
         LEFT JOIN sys_user fu ON fu.user_id = m.from_user_id AND fu.del_flag = '0'
         LEFT JOIN sys_user tu ON tu.user_id = m.to_user_id AND tu.del_flag = '0'
@@ -49,6 +64,25 @@
             LIMIT #{limit}
         </if>
     </select>
+
+    <update id="updateQuoteStatus">
+        UPDATE bus_chat_message
+        SET quote_status = #{status},
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
+    <update id="expireOldQuotes">
+        UPDATE bus_chat_message
+        SET quote_status = 'EXPIRED',
+            update_time = NOW(3)
+        WHERE conversation_id = #{conversationId}
+          AND msg_type = 'QUOTE'
+          AND quote_status = 'OFFERED'
+          AND id != #{exceptId}
+          AND is_deleted = 0
+    </update>
 
     <update id="markReadFromPeer">
         UPDATE bus_chat_message
@@ -175,7 +209,7 @@
             fu.nick_name AS from_nick_name,
             tu.user_name AS to_user_name,
             tu.nick_name AS to_nick_name,
-            m.msg_type, m.content, m.payload_json, m.is_read, m.is_deleted, m.create_time, m.update_time
+            m.msg_type, m.content, m.payload_json, m.quote_status, m.is_read, m.is_deleted, m.create_time, m.update_time
         FROM bus_chat_message m
         LEFT JOIN sys_user fu ON fu.user_id = m.from_user_id AND fu.del_flag = '0'
         LEFT JOIN sys_user tu ON tu.user_id = m.to_user_id AND tu.del_flag = '0'

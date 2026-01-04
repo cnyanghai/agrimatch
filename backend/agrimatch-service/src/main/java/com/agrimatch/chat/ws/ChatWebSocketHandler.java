@@ -1,10 +1,13 @@
 package com.agrimatch.chat.ws;
 
+import com.agrimatch.chat.dto.ChatMessageResponse;
+import com.agrimatch.chat.event.OfferUpdatedEvent;
 import com.agrimatch.chat.service.ChatService;
 import com.agrimatch.security.JwtTokenUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
@@ -107,6 +110,38 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         Object uidObj = session.getAttributes().get("userId");
         if (uidObj instanceof Long) {
             sessions.remove((Long) uidObj);
+        }
+    }
+
+    @EventListener
+    public void onOfferUpdated(OfferUpdatedEvent event) {
+        broadcastOfferUpdate(event.getConversationId(), event.getAUserId(), event.getBUserId(), event.getMessage());
+    }
+
+    public void broadcastOfferUpdate(Long conversationId, Long aUserId, Long bUserId, ChatMessageResponse updatedMessage) {
+        String payload;
+        try {
+            payload = objectMapper.writeValueAsString(objectMapper.createObjectNode()
+                    .put("type", "OFFER_UPDATED")
+                    .put("conversationId", conversationId)
+                    .set("message", objectMapper.valueToTree(updatedMessage))
+            );
+        } catch (Exception e) {
+            return;
+        }
+
+        TextMessage textMessage = new TextMessage(payload);
+        sendToUser(aUserId, textMessage);
+        sendToUser(bUserId, textMessage);
+    }
+
+    private void sendToUser(Long userId, TextMessage message) {
+        WebSocketSession session = sessions.get(userId);
+        if (session != null && session.isOpen()) {
+            try {
+                session.sendMessage(message);
+            } catch (Exception ignore) {
+            }
         }
     }
 

@@ -5,10 +5,12 @@ import com.agrimatch.chat.domain.BusChatMessage;
 import com.agrimatch.chat.dto.ChatConversationResponse;
 import com.agrimatch.chat.dto.ChatMessageResponse;
 import com.agrimatch.chat.dto.ChatPeerResponse;
+import com.agrimatch.chat.event.OfferUpdatedEvent;
 import com.agrimatch.chat.mapper.ChatMapper;
 import com.agrimatch.chat.service.ChatService;
 import com.agrimatch.common.api.ResultCode;
 import com.agrimatch.common.exception.ApiException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -21,9 +23,11 @@ import java.util.List;
 @Service
 public class ChatServiceImpl implements ChatService {
     private final ChatMapper chatMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public ChatServiceImpl(ChatMapper chatMapper) {
+    public ChatServiceImpl(ChatMapper chatMapper, ApplicationEventPublisher eventPublisher) {
         this.chatMapper = chatMapper;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -64,6 +68,7 @@ public class ChatServiceImpl implements ChatService {
             r.setMsgType(m.getMsgType());
             r.setContent(m.getContent());
             r.setPayloadJson(m.getPayloadJson());
+            r.setQuoteStatus(m.getQuoteStatus());
             r.setRead(m.getIsRead() != null && m.getIsRead() == 1);
             r.setCreateTime(m.getCreateTime());
             out.add(r);
@@ -170,6 +175,7 @@ public class ChatServiceImpl implements ChatService {
             r.setMsgType(m.getMsgType());
             r.setContent(m.getContent());
             r.setPayloadJson(m.getPayloadJson());
+            r.setQuoteStatus(m.getQuoteStatus());
             r.setRead(m.getIsRead() != null && m.getIsRead() == 1);
             r.setCreateTime(m.getCreateTime());
             out.add(r);
@@ -199,6 +205,11 @@ public class ChatServiceImpl implements ChatService {
         String safeContent = StringUtils.hasText(content) ? content.trim() : "";
         if (safeContent.length() > 2000) throw new ApiException(400, "消息过长");
 
+        if ("QUOTE".equals(mt)) {
+            // 新报价发出，将会话中旧的待确认报价置为失效
+            chatMapper.expireOldQuotes(conversationId, null);
+        }
+
         BusChatMessage m = new BusChatMessage();
         m.setConversationId(conversationId);
         m.setFromUserId(fromUserId);
@@ -206,6 +217,9 @@ public class ChatServiceImpl implements ChatService {
         m.setMsgType(mt);
         m.setContent(safeContent);
         m.setPayloadJson(StringUtils.hasText(payloadJson) ? payloadJson : null);
+        if ("QUOTE".equals(mt)) {
+            m.setQuoteStatus("OFFERED");
+        }
 
         int rows = chatMapper.insertMessage(m);
         if (rows != 1 || m.getId() == null) throw new ApiException(ResultCode.SERVER_ERROR);
@@ -226,8 +240,52 @@ public class ChatServiceImpl implements ChatService {
         r.setMsgType(mt);
         r.setContent(safeContent);
         r.setPayloadJson(m.getPayloadJson());
+        r.setQuoteStatus(m.getQuoteStatus());
         r.setRead(false);
         r.setCreateTime(LocalDateTime.now());
+        return r;
+    }
+
+    @Override
+    @Transactional
+    public ChatMessageResponse confirmOffer(Long userId, Long messageId) {
+        if (userId == null || messageId == null) throw new ApiException(ResultCode.PARAM_ERROR);
+        BusChatMessage m = chatMapper.selectMessageById(messageId);
+        if (m == null || m.getIsDeleted() == 1) throw new ApiException(ResultCode.NOT_FOUND);
+
+        // 只有报价卡可以被确认
+        if (!"QUOTE".equals(m.getMsgType())) throw new ApiException(400, "只有报价消息可以被确认");
+        // 只有接收方可以确认
+        if (!userId.equals(m.getToUserId())) throw new ApiException(403, "只有接收方可以确认报价");
+        // 只有 OFFERED 状态可以被确认
+        if (!"OFFERED".equals(m.getQuoteStatus())) throw new ApiException(400, "该报价已生效或已失效");
+
+        // 更新当前报价状态
+        chatMapper.updateQuoteStatus(messageId, "ACCEPTED");
+        // 会话中其他待确认报价置为失效
+        chatMapper.expireOldQuotes(m.getConversationId(), messageId);
+
+        // 插入系统消息通知
+        sendToConversation(m.getFromUserId(), m.getConversationId(), "SYSTEM", "对方已确认您的报价，交易达成！", null);
+
+        // 返回更新后的消息
+        BusChatMessage updated = chatMapper.selectMessageById(messageId);
+        ChatMessageResponse r = new ChatMessageResponse();
+        r.setId(updated.getId());
+        r.setConversationId(updated.getConversationId());
+        r.setFromUserId(updated.getFromUserId());
+        r.setToUserId(updated.getToUserId());
+        r.setMsgType(updated.getMsgType());
+        r.setContent(updated.getContent());
+        r.setPayloadJson(updated.getPayloadJson());
+        r.setQuoteStatus(updated.getQuoteStatus());
+        r.setRead(updated.getIsRead() != null && updated.getIsRead() == 1);
+        r.setCreateTime(updated.getCreateTime());
+
+        // 发布事件通知 WebSocket 广播
+        ChatMapper.ConversationUserPair pair = requireConversationMember(userId, m.getConversationId());
+        eventPublisher.publishEvent(new OfferUpdatedEvent(this, m.getConversationId(), pair.getAUserId(), pair.getBUserId(), r));
+
         return r;
     }
 

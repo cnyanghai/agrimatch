@@ -8,10 +8,16 @@ import java.util.List;
 
 public interface ChatMapper {
     int insertMessage(BusChatMessage m);
+    
+    BusChatMessage selectMessageById(@Param("id") Long id);
 
     List<BusChatMessage> selectHistory(@Param("a") Long a, @Param("b") Long b, @Param("limit") Integer limit);
 
     int markReadFromPeer(@Param("toUserId") Long toUserId, @Param("fromUserId") Long fromUserId);
+
+    int updateQuoteStatus(@Param("id") Long id, @Param("status") String status);
+
+    int expireOldQuotes(@Param("conversationId") Long conversationId, @Param("exceptId") Long exceptId);
 
     List<PeerRow> selectPeers(@Param("userId") Long userId);
 

@@ -16,6 +16,7 @@ public class BusChatMessage {
     private String msgType;
     private String content;
     private String payloadJson;
+    private String quoteStatus;
     private Integer isRead;
     private Integer isDeleted;
     private LocalDateTime createTime;
@@ -75,6 +76,14 @@ public class BusChatMessage {
 
     public void setPayloadJson(String payloadJson) {
         this.payloadJson = payloadJson;
+    }
+
+    public String getQuoteStatus() {
+        return quoteStatus;
+    }
+
+    public void setQuoteStatus(String quoteStatus) {
+        this.quoteStatus = quoteStatus;
     }
 
     public Integer getIsRead() {

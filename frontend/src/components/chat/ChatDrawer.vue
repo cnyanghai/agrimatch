@@ -39,6 +39,7 @@ type UiMessage = {
 const loading = ref(false)
 const messageInput = ref('')
 const messages = ref<UiMessage[]>([])
+const quotePopoverVisible = ref(false)
 const ws = ref<WebSocket | null>(null)
 const wsConnected = ref(false)
 let wsReconnectTimer: number | null = null
@@ -183,6 +184,47 @@ const peerLatestQuote = computed<QuoteFields | null>(() => {
   return null
 })
 
+function quoteStatusBadge(status?: string) {
+  if (status === 'OFFERED') return { label: '待确认', cls: 'bg-blue-50 text-blue-600 border-blue-100' }
+  if (status === 'ACCEPTED') return { label: '已达成', cls: 'bg-green-50 text-green-600 border-green-100' }
+  if (status === 'EXPIRED') return { label: '已失效', cls: 'bg-gray-50 text-gray-400 border-gray-100' }
+  return null
+}
+
+const QUOTE_LABEL_MAP: Record<string, string> = {
+  price: '单价(元/吨)',
+  quantity: '数量',
+  deliveryMethod: '交货方式',
+  deliveryPlace: '交付地',
+  arrivalDate: '到货期',
+  paymentMethod: '结算方式',
+  invoiceType: '发票类型',
+  packaging: '包装方式',
+  validUntil: '有效期',
+  remark: '备注'
+}
+
+function getQuoteDisplayFields(payloadJson?: string) {
+  const fields = parseQuoteFields(payloadJson)
+  if (!fields) return []
+  const display: Array<{ label: string; value: any }> = []
+  
+  // 基础字段
+  Object.entries(fields)
+    .filter(([k, v]) => v && QUOTE_LABEL_MAP[k])
+    .forEach(([k, v]) => {
+      display.push({ label: QUOTE_LABEL_MAP[k], value: v })
+    })
+
+  // 动态字段
+  const dynamic = fields.dynamicParams || {}
+  Object.entries(dynamic).forEach(([k, v]) => {
+    if (v) display.push({ label: k, value: v })
+  })
+
+  return display
+}
+
 function onWsSent(tempId?: string, id?: number) {
   if (!tempId) return
   const idx = messages.value.findIndex(m => m.id === tempId)
@@ -254,6 +296,7 @@ async function sendMessage() {
 
 async function sendQuote(payload: any, summary: string) {
   if (!props.conversationId) return
+  quotePopoverVisible.value = false
   if (!ws.value || ws.value.readyState !== WebSocket.OPEN) {
     ElMessage.warning('实时连接未就绪，正在重连…')
     connectWs()
@@ -344,88 +387,92 @@ onBeforeUnmount(() => {
     @close="close"
   >
     <div class="h-full flex flex-col bg-gray-50">
-      <!-- header -->
-      <div class="px-5 py-4 bg-white border-b border-gray-100 flex items-center justify-between gap-4">
+      <!-- header simplified -->
+      <div class="px-5 py-3 bg-white border-b border-gray-100 flex items-center justify-between gap-4">
         <div class="min-w-0">
-          <div class="font-bold text-gray-900 truncate">{{ title }}</div>
-          <div class="text-xs text-gray-400 flex items-center gap-2">
-            <span>{{ wsConnected ? '实时连接已就绪' : '连接中…' }}</span>
-            <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-            <span class="truncate">会话 #{{ conversationId ?? '-' }}</span>
+          <div class="font-bold text-gray-900 truncate leading-tight">{{ title }}</div>
+          <div class="text-[10px] text-gray-400 mt-0.5">
+            {{ wsConnected ? '● 在线' : '连接中…' }}
           </div>
         </div>
         <div class="flex items-center gap-2 shrink-0">
           <button
-            class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-all active:scale-95"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all active:scale-95"
             @click="goToChatCenter"
           >
             转入沟通中心
-            <ArrowUpRight class="w-4 h-4" />
+            <ArrowUpRight class="w-3.5 h-3.5" />
           </button>
-          <button class="p-2 rounded-xl hover:bg-gray-100 transition-all active:scale-95" @click="close" aria-label="close">
+          <button class="p-1.5 rounded-xl hover:bg-gray-100 transition-all active:scale-95" @click="close">
             <X class="w-5 h-5 text-gray-500" />
           </button>
         </div>
       </div>
 
-      <!-- subject -->
-      <div class="p-5">
-        <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">本次咨询标的</div>
-        <ChatSubjectCard
-          :subject-type="subjectType"
-          :subject-id="subjectId"
-          :subject-snapshot-json="subjectSnapshotJson"
-        />
-
-        <div class="mt-4">
-          <NegotiationPanel
-            :disabled="!conversationId"
-            :peer-latest-quote="peerLatestQuote"
-            @send="({ payload, summary }) => sendQuote(payload, summary)"
-          />
-        </div>
-      </div>
+      <!-- 常驻标的摘要 -->
+      <ChatSubjectCard
+        is-mini
+        class="sticky top-0 z-10"
+        :subject-type="subjectType"
+        :subject-id="subjectId"
+        :subject-snapshot-json="subjectSnapshotJson"
+      />
 
       <!-- messages -->
-      <div id="chat-drawer-scroll" class="flex-1 overflow-y-auto px-5 pb-4 space-y-4" v-loading="loading">
+      <div id="chat-drawer-scroll" class="flex-1 overflow-y-auto px-5 py-4 space-y-6" v-loading="loading">
         <template v-if="conversationId">
-          <div v-for="m in messages" :key="m.id" class="flex" :class="m.type === 'sent' ? 'justify-end' : m.type === 'system' ? 'justify-center' : 'justify-start'">
-            <div v-if="m.type === 'system'" class="px-4 py-1.5 bg-gray-200 text-gray-500 text-xs rounded-full">
-              {{ m.content }}
+          <div v-for="(m, idx) in messages" :key="m.id" class="flex flex-col">
+            <!-- 简化时间显示 -->
+            <div v-if="idx === 0 || m.time !== messages[idx-1].time" class="self-center my-2">
+              <span class="text-[10px] text-gray-400">{{ m.time }}</span>
             </div>
-            <div v-else-if="m.type === 'received'" class="max-w-[78%]">
-              <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'" class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 border border-gray-100">
-                <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">报价卡</div>
-                <div class="mt-1 font-bold text-gray-900">{{ m.content || '[报价]' }}</div>
-                <div class="mt-3 grid grid-cols-2 gap-2 text-sm" v-if="parseQuoteFields(m.payloadJson)">
-                  <div class="text-gray-700 truncate" v-for="(v, k) in (parseQuoteFields(m.payloadJson) as any)" :key="k">
-                    <span class="text-xs text-gray-500">{{ k }}：</span>
-                    <span class="font-semibold">{{ v || '-' }}</span>
+
+            <div class="flex" :class="m.type === 'sent' ? 'justify-end' : m.type === 'system' ? 'justify-center' : 'justify-start'">
+              <div v-if="m.type === 'system'" class="px-4 py-1.5 bg-gray-200/80 text-gray-500 text-[10px] rounded-full">
+                {{ m.content }}
+              </div>
+              <div v-else-if="m.type === 'received'" class="max-w-[85%]">
+                <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'" class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 border border-gray-100 shadow-sm">
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">电子报价单</div>
+                    <div v-if="quoteStatusBadge(m.quoteStatus)" 
+                         :class="['text-[10px] px-1.5 py-0.5 rounded-full border font-bold', quoteStatusBadge(m.quoteStatus)?.cls]">
+                      {{ quoteStatusBadge(m.quoteStatus)?.label }}
+                    </div>
+                  </div>
+                  <div class="mt-1 font-bold text-gray-900 text-sm border-b pb-2 mb-3">{{ m.content || '[报价]' }}</div>
+                  <div class="space-y-2">
+                    <div v-for="field in getQuoteDisplayFields(m.payloadJson)" :key="field.label" class="flex justify-between text-[11px]">
+                      <span class="text-gray-400">{{ field.label }}</span>
+                      <span class="text-gray-700 font-medium">{{ field.value }}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div v-else class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 border border-gray-100">
-                <div class="text-gray-800">{{ m.content }}</div>
-              </div>
-              <div class="text-xs text-gray-400 mt-1 ml-1">{{ m.time }}</div>
-            </div>
-            <div v-else class="max-w-[78%]">
-              <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'" class="bg-emerald-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm">
-                <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-100">报价卡</div>
-                <div class="mt-1 font-bold">{{ m.content || '[报价]' }}</div>
-                <div class="mt-3 grid grid-cols-2 gap-2 text-sm text-emerald-50" v-if="parseQuoteFields(m.payloadJson)">
-                  <div class="truncate" v-for="(v, k) in (parseQuoteFields(m.payloadJson) as any)" :key="k">
-                    <span class="text-emerald-100">{{ k }}：</span>
-                    <span class="font-semibold">{{ v || '-' }}</span>
-                  </div>
+                <div v-else class="bg-white rounded-2xl rounded-tl-sm px-4 py-2.5 border border-gray-100 shadow-sm text-sm text-gray-800">
+                  {{ m.content }}
                 </div>
               </div>
-              <div v-else class="bg-emerald-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm">
-                <div>{{ m.content }}</div>
-              </div>
-              <div class="text-xs text-gray-400 mt-1 mr-1 text-right">
-                <span v-if="m.status === 'pending'">发送中…</span>
-                <span v-else>{{ m.time }}</span>
+              <div v-else class="max-w-[85%] flex flex-col items-end">
+                <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'" class="bg-emerald-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm">
+                  <div class="flex items-center justify-between mb-2 gap-4">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-100">电子报价单</div>
+                    <div v-if="quoteStatusBadge(m.quoteStatus)" 
+                         class="text-[10px] px-1.5 py-0.5 rounded-full border border-emerald-400 bg-emerald-500/50 font-bold text-white">
+                      {{ quoteStatusBadge(m.quoteStatus)?.label }}
+                    </div>
+                  </div>
+                  <div class="mt-1 font-bold text-sm border-b border-emerald-500 pb-2 mb-3">{{ m.content || '[报价]' }}</div>
+                  <div class="space-y-2">
+                    <div v-for="field in getQuoteDisplayFields(m.payloadJson)" :key="field.label" class="flex justify-between text-[11px]">
+                      <span class="text-emerald-100/80">{{ field.label }}</span>
+                      <span class="text-white font-medium">{{ field.value }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div v-else class="bg-emerald-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-sm text-sm">
+                  {{ m.content }}
+                </div>
+                <div v-if="m.status === 'pending'" class="text-[10px] text-gray-400 mt-1">发送中…</div>
               </div>
             </div>
           </div>
@@ -435,18 +482,33 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- composer -->
+      <!-- composer simplified -->
       <div class="p-4 bg-white border-t border-gray-100">
+        <div class="flex items-center gap-4 mb-3">
+          <el-popover placement="top-start" :width="600" trigger="click" v-model:visible="quotePopoverVisible" popper-class="!p-0 !rounded-[32px] !border-none !shadow-2xl">
+            <template #reference>
+              <button class="text-xs font-bold text-emerald-600">修改价格/报价</button>
+            </template>
+            <NegotiationPanel
+              :disabled="!conversationId"
+              :peer-latest-quote="peerLatestQuote"
+              :subject-snapshot-json="subjectSnapshotJson"
+              @send="({ payload, summary }) => sendQuote(payload, summary)"
+            />
+          </el-popover>
+          <button class="text-xs font-bold text-gray-400">图片</button>
+          <button class="text-xs font-bold text-gray-400">附件</button>
+        </div>
         <div class="flex items-end gap-3">
           <textarea
             v-model="messageInput"
-            rows="2"
+            rows="1"
             placeholder="输入消息…"
             class="flex-1 resize-none border-2 border-gray-100 rounded-xl px-3 py-2 text-sm outline-none focus:border-emerald-500 transition-all"
             @keydown.enter.prevent="sendMessage"
           />
           <button
-            class="px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50"
             :disabled="!messageInput.trim() || !conversationId"
             @click="sendMessage"
           >
