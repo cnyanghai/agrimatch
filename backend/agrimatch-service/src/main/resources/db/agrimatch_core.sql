@@ -430,4 +430,16 @@ ALTER TABLE `bus_chat_message` ADD COLUMN `payload_json` longtext COMMENT '结�
 ALTER TABLE `bus_chat_message` ADD COLUMN `quote_status` varchar(20) DEFAULT NULL COMMENT '报价状态(OFFERED/ACCEPTED/REJECTED/EXPIRED)';
 ALTER TABLE `bus_chat_message` ADD KEY `idx_chat_conv_time` (`conversation_id`, `create_time`, `id`);
 
+-- ============================================================
+-- User Follow (用户关注) - 关注商户功能
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `bus_user_follow` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '关注ID',
+  `user_id` bigint NOT NULL COMMENT '关注者ID（sys_user.user_id）',
+  `follow_user_id` bigint NOT NULL COMMENT '被关注者ID（sys_user.user_id）',
+  `create_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_follow` (`user_id`, `follow_user_id`),
+  KEY `idx_follow_user` (`follow_user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户关注关系表';
 

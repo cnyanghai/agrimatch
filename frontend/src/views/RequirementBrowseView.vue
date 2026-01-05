@@ -1,290 +1,177 @@
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Search, ChatDotRound, View, Star, Phone, Location, ShoppingCart, Sort, Refresh, Money, TrendCharts, Timer, Box, Document } from '@element-plus/icons-vue'
-import { listRequirements, type RequirementResponse } from '../api/requirement'
-import { getProductTree, type ProductNode } from '../api/product'
+import { ChatDotRound, View, Location, ShoppingCart, Plus, UserFilled, Refresh } from '@element-plus/icons-vue'
+import { getFollowedUsers, getFollowedRequirements, unfollowUser, type FollowedUser } from '../api/follow'
+import { type RequirementResponse } from '../api/requirement'
+import { requireAuth } from '../utils/requireAuth'
+import { openChatConversation } from '../api/chat'
+import ChatDrawer from '../components/chat/ChatDrawer.vue'
 
 const router = useRouter()
 const loading = ref(false)
 
-// Tab 切换：followed - 关注商户，all - 全部信息
-const activeTab = ref('followed')
+// 关注的用户列表
+const followedUsers = ref<FollowedUser[]>([])
 
-// 原始采购需求列表
-const rawRequirements = ref<RequirementResponse[]>([])
+// 关注用户发布的采购需求
+const requirements = ref<RequirementResponse[]>([])
 
-// 关注商户的采购需求（模拟数据）
-const followedRequirements = ref<RequirementResponse[]>([
-  {
-    id: 201,
-    categoryName: '小麦',
-    companyName: '北京粮油贸易公司',
-    companyId: 10,
-    userId: 20001,
-    nickName: '赵采购',
-    quantity: 500,
-    expectedPrice: 2900,
-    purchaseAddress: '北京市朝阳区',
-    paymentMethod: '现款',
-    deliveryMethod: '送货上门',
-    paramsJson: JSON.stringify({ '水分': '≤13%', '杂质': '≤1%', '容重': '≥760g/L' }),
-    createTime: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-    status: 1
-  },
-  {
-    id: 202,
-    categoryName: '玉米',
-    companyName: '上海食品加工厂',
-    companyId: 11,
-    userId: 20002,
-    nickName: '钱经理',
-    quantity: 1000,
-    expectedPrice: 2650,
-    purchaseAddress: '上海市浦东新区',
-    paymentMethod: '账期',
-    deliveryMethod: '物流',
-    paramsJson: JSON.stringify({ '水分': '≤14%', '霉变': '≤2%' }),
-    createTime: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-    status: 1
-  },
-  {
-    id: 203,
-    categoryName: '大豆',
-    companyName: '江苏食品集团',
-    companyId: 12,
-    userId: 20003,
-    nickName: '孙总监',
-    quantity: 300,
-    expectedPrice: 4700,
-    purchaseAddress: '江苏省南京市',
-    paymentMethod: '承兑',
-    deliveryMethod: '自提',
-    paramsJson: JSON.stringify({ '蛋白质': '≥38%', '水分': '≤13%' }),
-    createTime: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-    status: 1
-  }
-])
+// 选中的用户筛选（null 表示显示全部）
+const selectedUserId = ref<number | null>(null)
 
-// 品类树
-const categoryTree = ref<ProductNode[]>([])
+// ChatDrawer 状态
+const drawerOpen = ref(false)
+const drawerConversationId = ref<number | null>(null)
+const drawerPeerName = ref('')
+const drawerSubjectSnapshotJson = ref<string | null>(null)
+const drawerSubjectId = ref<number | null>(null)
 
-// 筛选条件
-const filters = reactive({
-  keyword: '',
-  categoryName: '',
-  minQuantity: undefined as number | undefined,
-  maxQuantity: undefined as number | undefined,
-  paymentMethod: '',
-  deliveryMethod: ''
-})
-
-// 分页
-const pagination = reactive({
-  page: 1,
-  size: 12,
-  total: 0
-})
-
-// 排序配置
-const sortConfig = reactive({
-  field: 'createTime',
-  order: 'desc' as 'asc' | 'desc'
-})
-
-// 快捷排序按钮
-const sortButtons = [
-  { field: 'expectedPrice', order: 'desc', label: '期望价最高', icon: 'Money' },
-  { field: 'expectedPrice', order: 'asc', label: '期望价最低', icon: 'TrendCharts' },
-  { field: 'createTime', order: 'desc', label: '最新发布', icon: 'Timer' },
-  { field: 'quantity', order: 'desc', label: '需求量最大', icon: 'Box' },
-  { field: 'quantity', order: 'asc', label: '需求量最小', icon: 'Document' },
-]
-
-// icon 字符串映射为真实组件，避免 <component :is="btn.icon" /> 找不到组件
-const iconMap: Record<string, any> = {
-  Money,
-  TrendCharts,
-  Timer,
-  Box,
-  Document
-}
-
-// 付款方式选项
-const paymentMethods = ['现款', '账期', '承兑', '预付款']
-
-// 交货方式选项
-const deliveryMethods = ['送货上门', '自提', '物流']
-
-// 当前激活的排序按钮
-const activeSort = computed(() => `${sortConfig.field}-${sortConfig.order}`)
-
-// 设置排序
-function setSort(field: string, order: 'asc' | 'desc') {
-  sortConfig.field = field
-  sortConfig.order = order
-  pagination.page = 1
-}
-
-// 排序后的列表
-const sortedRequirements = computed(() => {
-  const list = [...rawRequirements.value]
-  
-  return list.sort((a, b) => {
-    let valA: any = a[sortConfig.field as keyof RequirementResponse]
-    let valB: any = b[sortConfig.field as keyof RequirementResponse]
-    
-    // 处理日期排序
-    if (sortConfig.field === 'createTime') {
-      valA = valA ? new Date(valA).getTime() : 0
-      valB = valB ? new Date(valB).getTime() : 0
-    }
-    
-    // 处理数值排序
-    if (typeof valA === 'number' || typeof valB === 'number') {
-      valA = valA ?? 0
-      valB = valB ?? 0
-    }
-    
-    if (sortConfig.order === 'asc') {
-      return valA > valB ? 1 : -1
-    } else {
-      return valA < valB ? 1 : -1
-    }
-  })
-})
-
-// 筛选后的列表
+// 筛选后的需求列表
 const filteredRequirements = computed(() => {
-  let result = sortedRequirements.value
-  
-  // 关键词搜索
-  if (filters.keyword) {
-    const kw = filters.keyword.toLowerCase()
-    result = result.filter(r => 
-      r.categoryName?.toLowerCase().includes(kw) ||
-      r.companyName?.toLowerCase().includes(kw) ||
-      r.purchaseAddress?.toLowerCase().includes(kw)
-    )
-  }
-  
-  // 品类筛选
-  if (filters.categoryName) {
-    result = result.filter(r => r.categoryName === filters.categoryName)
-  }
-  
-  // 数量筛选
-  if (filters.minQuantity !== undefined) {
-    result = result.filter(r => (r.quantity || 0) >= filters.minQuantity!)
-  }
-  if (filters.maxQuantity !== undefined) {
-    result = result.filter(r => (r.quantity || 0) <= filters.maxQuantity!)
-  }
-  
-  // 付款方式筛选
-  if (filters.paymentMethod) {
-    result = result.filter(r => r.paymentMethod === filters.paymentMethod)
-  }
-  
-  // 交货方式筛选
-  if (filters.deliveryMethod) {
-    result = result.filter(r => r.deliveryMethod === filters.deliveryMethod)
-  }
-  
-  pagination.total = result.length
-  
-  // 分页
-  const start = (pagination.page - 1) * pagination.size
-  return result.slice(start, start + pagination.size)
+  if (!selectedUserId.value) return requirements.value
+  return requirements.value.filter(r => r.userId === selectedUserId.value)
 })
 
-// 加载采购需求列表
-async function loadRequirements() {
-  loading.value = true
+// 加载关注用户列表
+async function loadFollowedUsers() {
   try {
-    const r = await listRequirements({
-      status: 1
-    })
+    const r = await getFollowedUsers()
     if (r.code === 0) {
-      rawRequirements.value = r.data || []
-      pagination.total = rawRequirements.value.length
+      followedUsers.value = r.data || []
     }
   } catch (e) {
-    ElMessage.error('加载采购需求失败')
+    console.error('加载关注列表失败', e)
+  }
+}
+
+// 加载关注用户的采购需求
+async function loadFollowedRequirements() {
+  loading.value = true
+  try {
+    const r = await getFollowedRequirements()
+    if (r.code === 0) {
+      requirements.value = r.data || []
+    }
+  } catch (e) {
+    console.error('加载采购需求失败', e)
   } finally {
     loading.value = false
   }
 }
 
-// 加载品类树
-async function loadCategoryTree() {
-  try {
-    const r = await getProductTree()
-    if (r.code === 0) {
-      categoryTree.value = r.data || []
-    }
-  } catch (e) {
-    // 静默失败
+// 刷新数据
+async function refreshData() {
+  await Promise.all([loadFollowedUsers(), loadFollowedRequirements()])
+  ElMessage.success('数据已刷新')
+}
+
+// 选择/取消选择用户筛选
+function toggleUserFilter(userId: number) {
+  if (selectedUserId.value === userId) {
+    selectedUserId.value = null
+  } else {
+    selectedUserId.value = userId
   }
 }
 
-// 获取所有品类名称
-const allCategories = computed(() => {
-  const categories = new Set<string>()
-  rawRequirements.value.forEach(r => {
-    if (r.categoryName) categories.add(r.categoryName)
+// 取消关注
+async function handleUnfollow(user: FollowedUser) {
+  try {
+    const r = await unfollowUser(user.userId)
+    if (r.code === 0) {
+      ElMessage.success(`已取消关注 ${user.nickName || user.userName}`)
+      await refreshData()
+      if (selectedUserId.value === user.userId) {
+        selectedUserId.value = null
+      }
+    }
+  } catch (e) {
+    ElMessage.error('取消关注失败')
+  }
+}
+
+// 构建需求快照
+function buildNeedSnapshot(r: RequirementResponse) {
+  return JSON.stringify({
+    snapshotTime: new Date().toLocaleString('zh-CN'),
+    title: r.categoryName,
+    categoryName: r.categoryName,
+    companyName: r.companyName,
+    nickName: r.nickName,
+    expectedPrice: r.expectedPrice,
+    quantity: r.quantity,
+    remainingQuantity: r.remainingQuantity,
+    purchaseAddress: r.purchaseAddress,
+    paymentMethod: r.paymentMethod,
+    deliveryMethod: r.deliveryMethod,
+    packaging: r.packaging,
+    paramsJson: r.paramsJson
   })
-  return Array.from(categories)
-})
+}
+
+// 发起报价
+async function onQuote(r: RequirementResponse) {
+  if (!requireAuth('/browse/need')) return
+  if (!r.userId || !r.id) {
+    ElMessage.warning('该条需求暂不支持报价')
+    return
+  }
+  try {
+    const res = await openChatConversation({
+      peerUserId: r.userId,
+      subjectType: 'NEED',
+      subjectId: r.id,
+      subjectSnapshotJson: buildNeedSnapshot(r)
+    })
+    if (res.code !== 0 || !res.data) throw new Error(res.message)
+
+    drawerConversationId.value = res.data
+    drawerPeerName.value = r.nickName || r.userName || r.companyName || '对方'
+    drawerSubjectId.value = r.id
+    drawerSubjectSnapshotJson.value = buildNeedSnapshot(r)
+    drawerOpen.value = true
+  } catch (e: any) {
+    ElMessage.error(e?.message || '发起报价失败')
+  }
+}
+
+function onDrawerClosed() {
+  drawerConversationId.value = null
+  drawerSubjectSnapshotJson.value = null
+  drawerSubjectId.value = null
+  drawerPeerName.value = ''
+}
+
+// 查看详情
+function viewDetail(requirement: RequirementResponse) {
+  router.push({ path: '/hall/need', query: { focusId: requirement.id } })
+}
+
+// 跳转采购大厅
+function goToHall() {
+  router.push('/hall/need')
+}
 
 // 解析参数 JSON
 function parseParams(paramsJson?: string): Array<{name: string; value: string}> {
   if (!paramsJson) return []
   try {
     const obj = JSON.parse(paramsJson)
-    return Object.entries(obj).map(([name, value]) => ({
-      name,
-      value: String(value)
-    }))
+    // 支持 { params: {...} } 或直接 {...} 格式
+    const params = obj.params || obj
+    return Object.entries(params).map(([key, val]) => {
+      // 新格式：{ name, value } 对象 - 优先使用对象内的 name 字段
+      if (typeof val === 'object' && val !== null && 'name' in val && 'value' in val) {
+        return { name: String((val as any).name), value: String((val as any).value) }
+      }
+      // 旧格式：键名是参数名，值是参数值
+      return { name: key, value: String(val) }
+    })
   } catch {
     return []
   }
-}
-
-// 查看详情
-function viewDetail(requirement: RequirementResponse) {
-  ElMessage.info(`查看采购详情：${requirement.categoryName}`)
-}
-
-// 发起聊天/报价
-function startChat(requirement: RequirementResponse) {
-  router.push({
-    path: '/chat',
-    query: {
-      type: 'requirement',
-      id: requirement.id,
-      companyName: requirement.companyName
-    }
-  })
-}
-
-// 收藏
-function toggleFavorite(_requirement: RequirementResponse) {
-  ElMessage.success('收藏功能开发中...')
-}
-
-// 重置筛选
-function resetFilters() {
-  filters.keyword = ''
-  filters.categoryName = ''
-  filters.minQuantity = undefined
-  filters.maxQuantity = undefined
-  filters.paymentMethod = ''
-  filters.deliveryMethod = ''
-  sortConfig.field = 'createTime'
-  sortConfig.order = 'desc'
-  pagination.page = 1
 }
 
 // 格式化时间
@@ -297,820 +184,290 @@ function formatTime(timeStr?: string): string {
   if (hours < 1) return '刚刚'
   if (hours < 24) return `${hours}小时前`
   const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}天前`
+  if (days < 30) return `${days}天前`
   return timeStr.split('T')[0] ?? timeStr
 }
 
-// 计算剩余数量百分比
-function getRemainingPercent(req: RequirementResponse): number {
-  if (!req.quantity) return 100
-  const remaining = req.remainingQuantity ?? req.quantity
-  return Math.round((remaining / req.quantity) * 100)
+// 获取用户头像文字
+function getAvatarText(user: FollowedUser): string {
+  return (user.nickName || user.userName || '?')[0]
+}
+
+// 获取需求发布者头像
+function getRequirementAvatar(r: RequirementResponse): string {
+  return (r.nickName || r.companyName || '?')[0]
 }
 
 onMounted(() => {
-  loadCategoryTree()
-  loadRequirements()
+  loadFollowedUsers()
+  loadFollowedRequirements()
 })
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto space-y-6">
-    <!-- 页面标题 -->
-    <div class="page-header">
+  <div class="space-y-6">
+    <!-- 页面头部 -->
+    <div class="flex items-end justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-gray-800">采购浏览</h1>
-        <p class="text-gray-500 mt-1">浏览采购商发布的原料采购需求，寻找商机</p>
+        <h1 class="text-2xl font-bold text-gray-900">我的关注</h1>
+        <p class="text-gray-500 mt-1">追踪您关注的采购商最新动态</p>
       </div>
-      <el-button :icon="Refresh" :loading="loading" @click="loadRequirements">刷新数据</el-button>
-    </div>
-
-    <!-- Tab 切换 -->
-    <div class="tab-bar">
-      <el-segmented v-model="activeTab" :options="[
-        { label: '⭐ 关注商户', value: 'followed' },
-        { label: '📋 全部信息', value: 'all' }
-      ]" size="large" />
-      <div class="tab-hint">
-        <span v-if="activeTab === 'followed'" class="text-gray-500 text-sm">
-          共 <span class="font-bold text-blue-700">{{ followedRequirements.length }}</span> 条关注商户发布的需求
-        </span>
-        <span v-else class="text-gray-500 text-sm">
-          共 <span class="font-bold text-blue-700">{{ pagination.total }}</span> 条采购需求
-        </span>
+      <div class="flex items-center gap-3">
+        <button 
+          class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all active:scale-95"
+          @click="refreshData"
+        >
+          <Refresh class="w-4 h-4" />
+          刷新
+        </button>
+        <button 
+          class="bg-slate-900 text-white px-5 py-2 rounded-xl font-bold hover:bg-slate-800 transition-all active:scale-95 flex items-center gap-2"
+          @click="goToHall"
+        >
+          <ShoppingCart class="w-4 h-4" />
+          采购大厅
+        </button>
       </div>
     </div>
 
-    <!-- 关注商户为空时的提示 -->
-    <div v-if="activeTab === 'followed' && followedRequirements.length === 0" class="empty-followed">
-      <el-icon class="empty-followed-icon"><Star /></el-icon>
-      <div class="empty-followed-title">暂无关注的商户</div>
-      <div class="empty-followed-hint">关注商户后，这里会显示他们发布的最新采购需求</div>
-      <el-button
-        type="primary"
-        class="!rounded-xl !bg-slate-900 hover:!bg-slate-800 !border-slate-900 !text-white transition-all active:scale-95"
-        @click="activeTab = 'all'"
-      >
-        去发现优质采购商
-      </el-button>
-    </div>
+    <!-- 关注商户头像列表 -->
+    <section>
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">关注的采购商</span>
+        <span class="text-xs text-gray-400">{{ followedUsers.length }} 人</span>
+      </div>
 
-    <!-- 关注商户的采购需求列表 -->
-    <div v-if="activeTab === 'followed' && followedRequirements.length > 0" class="card-grid">
-      <div
-        v-for="requirement in followedRequirements"
-        :key="requirement.id"
-        class="info-card followed-card"
-      >
-        <!-- 关注标记 -->
-        <div class="followed-badge">
-          <el-icon><Star /></el-icon> 已关注
+      <div v-if="followedUsers.length > 0" class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+        <!-- 全部按钮 -->
+        <button
+          class="flex flex-col items-center gap-2 shrink-0 group"
+          @click="selectedUserId = null"
+        >
+          <div 
+            class="w-16 h-16 rounded-full flex items-center justify-center transition-all border-2"
+            :class="selectedUserId === null 
+              ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-200' 
+              : 'bg-gray-100 text-gray-500 border-gray-200 group-hover:border-blue-300'"
+          >
+            <UserFilled class="w-6 h-6" />
+          </div>
+          <span class="text-xs font-medium text-gray-600">全部</span>
+        </button>
+
+        <!-- 用户头像列表 -->
+        <div 
+          v-for="user in followedUsers" 
+          :key="user.userId"
+          class="flex flex-col items-center gap-2 shrink-0 group relative"
+        >
+          <button
+            class="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold transition-all border-2"
+            :class="selectedUserId === user.userId 
+              ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-300' 
+              : 'bg-white text-slate-700 border-gray-200 group-hover:border-blue-300 group-hover:shadow-md'"
+            @click="toggleUserFilter(user.userId)"
+          >
+            {{ getAvatarText(user) }}
+          </button>
+          <div class="text-center max-w-[64px]">
+            <div class="text-xs font-medium text-gray-700 truncate">{{ user.nickName || user.userName }}</div>
+            <div v-if="user.companyName" class="text-[10px] text-gray-400 truncate">{{ user.companyName }}</div>
+          </div>
+          
+          <!-- 取消关注按钮（悬停显示） -->
+          <button
+            class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-600"
+            @click.stop="handleUnfollow(user)"
+            title="取消关注"
+          >
+            ×
+          </button>
         </div>
-        <!-- 卡片头部 -->
-        <div class="card-header">
-          <div class="company-info">
-            <div class="avatar">
-              {{ (requirement.companyName || '未')[0] }}
-            </div>
-            <div class="company-detail">
-              <div class="company-name">{{ requirement.companyName || '未知公司' }}</div>
-              <div class="contact">
-                <el-icon :size="12"><Phone /></el-icon>
-                <span>{{ requirement.nickName || requirement.userName || '联系人' }}</span>
+
+        <!-- 添加更多按钮 -->
+        <button
+          class="flex flex-col items-center gap-2 shrink-0 group"
+          @click="goToHall"
+        >
+          <div class="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 group-hover:border-blue-400 group-hover:text-blue-500 transition-all">
+            <Plus class="w-6 h-6" />
+          </div>
+          <span class="text-xs font-medium text-gray-400 group-hover:text-blue-500">发现更多</span>
+        </button>
+      </div>
+
+      <!-- 未关注任何人时的提示 -->
+      <div v-else class="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <UserFilled class="w-10 h-10 text-gray-300" />
+        </div>
+        <h3 class="text-lg font-bold text-gray-900 mb-2">还没有关注任何采购商</h3>
+        <p class="text-sm text-gray-500 mb-6">前往采购大厅，发现优质采购商并关注他们</p>
+        <button 
+          class="px-6 py-2.5 bg-slate-900 text-white rounded-full font-bold hover:bg-slate-800 transition-all active:scale-95"
+          @click="goToHall"
+        >
+          去采购大厅看看
+        </button>
+      </div>
+    </section>
+
+    <!-- 采购需求信息流 -->
+    <section v-if="followedUsers.length > 0">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">最新采购需求</span>
+          <span v-if="selectedUserId" class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+            已筛选
+          </span>
+        </div>
+        <span class="text-xs text-gray-400">{{ filteredRequirements.length }} 条</span>
+      </div>
+
+      <div v-loading="loading" class="min-h-[200px]">
+        <!-- 需求卡片网格 -->
+        <div v-if="filteredRequirements.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div
+            v-for="req in filteredRequirements"
+            :key="req.id"
+            class="group bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all hover:shadow-xl hover:border-blue-100"
+          >
+            <!-- 卡片头部 -->
+            <div class="p-5 bg-gradient-to-br from-blue-50/50 to-white border-b border-gray-50">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-lg">
+                  {{ getRequirementAvatar(req) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-gray-900 truncate">{{ req.nickName || req.userName || '采购商' }}</span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                      BUYER
+                    </span>
+                  </div>
+                  <div class="text-xs text-gray-500 truncate mt-0.5">{{ req.companyName || '个人商户' }}</div>
+                </div>
               </div>
             </div>
-          </div>
-          <el-tag type="info" size="small" effect="plain" class="!bg-blue-50 !text-blue-700 !border-blue-200">采购</el-tag>
-        </div>
-        
-        <!-- 卡片主体 -->
-        <div class="card-body">
-          <h3 class="product-title">
-            <el-icon class="text-blue-700"><ShoppingCart /></el-icon>
-            <span>{{ requirement.categoryName }}</span>
-          </h3>
-          
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="label">需求量</span>
-              <span class="value highlight">{{ requirement.quantity || '-' }} 吨</span>
-            </div>
-            <div class="info-item">
-              <span class="label">期望价</span>
-              <span class="value highlight">¥{{ requirement.expectedPrice?.toLocaleString() || '-' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">付款方式</span>
-              <span class="value">{{ requirement.paymentMethod || '-' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">交货方式</span>
-              <span class="value">{{ requirement.deliveryMethod || '-' }}</span>
-            </div>
-          </div>
 
-          <div class="address-row">
-            <el-icon class="text-gray-400"><Location /></el-icon>
-            <span>{{ requirement.purchaseAddress || '交货地址未指定' }}</span>
-          </div>
-          
-          <div v-if="parseParams(requirement.paramsJson).length > 0" class="params-tags">
-            <el-tag
-              v-for="param in parseParams(requirement.paramsJson).slice(0, 3)"
-              :key="param.name"
-              size="small"
-              type="info"
-              effect="plain"
-            >
-              {{ param.name }}: {{ param.value }}
-            </el-tag>
-          </div>
-        </div>
-        
-        <!-- 卡片底部 -->
-        <div class="card-footer">
-          <div class="price-section">
-            <div class="price">
-              <span class="currency">¥</span>
-              <span class="amount">{{ requirement.expectedPrice?.toLocaleString() || '-' }}</span>
-              <span class="unit">/吨</span>
-            </div>
-            <div class="time">{{ formatTime(requirement.createTime) }}</div>
-          </div>
-          <div class="actions">
-            <el-button size="small" class="!rounded-xl transition-all active:scale-95" :icon="View" @click="viewDetail(requirement)">详情</el-button>
-            <el-button
-              type="primary"
-              size="small"
-              class="!rounded-xl !bg-slate-900 hover:!bg-slate-800 !border-slate-900 !text-white transition-all active:scale-95"
-              :icon="ChatDotRound"
-              @click="startChat(requirement)"
-            >
-              报价
-            </el-button>
-          </div>
-        </div>
-      </div>
-    </div>
+            <!-- 卡片主体 -->
+            <div class="p-5">
+              <!-- 品类与价格 -->
+              <div class="flex items-start justify-between mb-4">
+                <div>
+                  <div class="flex items-center gap-2 mb-1">
+                    <ShoppingCart class="w-4 h-4 text-blue-600" />
+                    <h3 class="text-xl font-black text-gray-900">{{ req.categoryName }}</h3>
+                  </div>
+                  <div class="text-xs text-gray-400">#{{ req.id }} · {{ formatTime(req.createTime) }}</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">期望单价</div>
+                  <div v-if="req.expectedPrice" class="text-xl font-black text-emerald-600">
+                    ¥{{ req.expectedPrice }}
+                    <span class="text-xs font-normal text-gray-400">/吨</span>
+                  </div>
+                  <div v-else class="text-lg font-bold text-gray-400 italic">面议</div>
+                </div>
+              </div>
 
-    <!-- 全部信息部分 -->
-    <template v-if="activeTab === 'all'">
-      <!-- 快捷排序按钮 -->
-    <div class="sort-bar">
-      <div class="flex items-center gap-2 text-sm text-gray-500 mr-4">
-        <el-icon><Sort /></el-icon>
-        <span>排序方式：</span>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <el-button
-          v-for="btn in sortButtons"
-          :key="`${btn.field}-${btn.order}`"
-          :type="activeSort === `${btn.field}-${btn.order}` ? 'primary' : 'default'"
-          :class="activeSort === `${btn.field}-${btn.order}` ? '!bg-slate-900 hover:!bg-slate-800 !border-slate-900 !text-white' : '!border-gray-200 hover:!bg-gray-50 !text-gray-700'"
-          size="small"
-          round
-          @click="setSort(btn.field, btn.order as 'asc' | 'desc')"
-        >
-          <el-icon class="mr-1"><component :is="iconMap[String(btn.icon)] ?? btn.icon" /></el-icon>
-          {{ btn.label }}
-        </el-button>
-      </div>
-    </div>
+              <!-- 关键信息网格 -->
+              <div class="grid grid-cols-2 gap-3 mb-4 bg-gray-50/50 rounded-xl p-4 border border-gray-100/50">
+                <div>
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">需求量</div>
+                  <div class="text-sm font-bold text-gray-900">{{ req.quantity || '-' }} <span class="text-xs font-normal text-gray-500">吨</span></div>
+                </div>
+                <div>
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">结算方式</div>
+                  <div class="text-sm font-medium text-gray-700">{{ req.paymentMethod || '面议' }}</div>
+                </div>
+                <div>
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">交货方式</div>
+                  <div class="text-sm font-medium text-gray-700">{{ req.deliveryMethod || '自提' }}</div>
+                </div>
+                <div>
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">包装要求</div>
+                  <div class="text-sm font-medium text-gray-700">{{ req.packaging || '不限' }}</div>
+                </div>
+              </div>
 
-    <!-- 筛选区域 -->
-    <div class="filter-bar">
-      <div class="filter-row">
-        <!-- 关键词搜索 -->
-        <el-input
-          v-model="filters.keyword"
-          placeholder="搜索品类/公司/地址"
-          :prefix-icon="Search"
-          clearable
-          class="filter-input"
-          @keyup.enter="pagination.page = 1"
-        />
-        
-        <!-- 品类筛选 -->
-        <el-select
-          v-model="filters.categoryName"
-          placeholder="选择品类"
-          clearable
-          class="filter-select"
-          @change="pagination.page = 1"
-        >
-          <el-option v-for="cat in allCategories" :key="cat" :label="cat" :value="cat" />
-        </el-select>
-        
-        <!-- 付款方式 -->
-        <el-select
-          v-model="filters.paymentMethod"
-          placeholder="付款方式"
-          clearable
-          class="filter-select"
-          @change="pagination.page = 1"
-        >
-          <el-option v-for="m in paymentMethods" :key="m" :label="m" :value="m" />
-        </el-select>
+              <!-- 收货地址 -->
+              <div class="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                <Location class="w-4 h-4 text-gray-400 shrink-0" />
+                <span class="truncate">{{ req.purchaseAddress || '收货地址未指定' }}</span>
+              </div>
 
-        <!-- 交货方式 -->
-        <el-select
-          v-model="filters.deliveryMethod"
-          placeholder="交货方式"
-          clearable
-          class="filter-select-sm"
-          @change="pagination.page = 1"
-        >
-          <el-option v-for="d in deliveryMethods" :key="d" :label="d" :value="d" />
-        </el-select>
-      </div>
-      
-      <div class="filter-row">
-        <!-- 数量区间 -->
-        <div class="quantity-range">
-          <span class="text-sm text-gray-500 mr-2">需求量：</span>
-          <el-input-number
-            v-model="filters.minQuantity"
-            placeholder="最小"
-            :min="0"
-            :controls="false"
-            class="quantity-input"
-          />
-          <span class="text-gray-400 mx-2">—</span>
-          <el-input-number
-            v-model="filters.maxQuantity"
-            placeholder="最大"
-            :min="0"
-            :controls="false"
-            class="quantity-input"
-          />
-          <span class="text-sm text-gray-500 ml-1">吨</span>
-        </div>
-        
-        <div class="flex items-center gap-2 ml-auto">
-          <el-button class="!rounded-xl transition-all active:scale-95" @click="resetFilters">重置</el-button>
-          <el-tag type="info" effect="plain">
-            共 <span class="font-bold text-blue-700">{{ pagination.total }}</span> 条
-          </el-tag>
-        </div>
-      </div>
-    </div>
-
-    <!-- 卡片列表 -->
-    <div v-loading="loading" class="card-grid">
-      <div
-        v-for="req in filteredRequirements"
-        :key="req.id"
-        class="info-card"
-      >
-        <!-- 卡片头部 -->
-        <div class="card-header">
-          <div class="company-info">
-            <div class="avatar">
-              {{ (req.companyName || '未')[0] }}
-            </div>
-            <div class="company-detail">
-              <div class="company-name">{{ req.companyName || '未知公司' }}</div>
-              <div class="contact">
-                <el-icon :size="12"><Phone /></el-icon>
-                <span>{{ req.nickName || req.userName || '联系人' }}</span>
+              <!-- 指标参数 -->
+              <div v-if="parseParams(req.paramsJson).length > 0" class="flex flex-wrap gap-2">
+                <span
+                  v-for="param in parseParams(req.paramsJson).slice(0, 4)"
+                  :key="param.name"
+                  class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-lg"
+                >
+                  {{ param.name }}: {{ param.value }}
+                </span>
+                <span
+                  v-if="parseParams(req.paramsJson).length > 4"
+                  class="text-xs bg-gray-100 text-gray-400 px-2 py-1 rounded-lg"
+                >
+                  +{{ parseParams(req.paramsJson).length - 4 }}
+                </span>
               </div>
             </div>
-          </div>
-          <el-tag type="info" size="small" effect="plain" class="!bg-blue-50 !text-blue-700 !border-blue-200">采购</el-tag>
-        </div>
-        
-        <!-- 卡片主体 -->
-        <div class="card-body">
-          <!-- 品类标题 -->
-          <h3 class="product-title">
-            <el-icon class="text-blue-700"><ShoppingCart /></el-icon>
-            <span>{{ req.categoryName }}</span>
-          </h3>
-          
-          <!-- 采购数量进度条 -->
-          <div class="quantity-progress">
-            <div class="progress-header">
-              <span class="label">采购数量</span>
-              <span class="value">{{ req.quantity || '-' }} 吨</span>
-            </div>
-            <div class="progress-bar">
-              <div 
-                class="progress-fill"
-                :style="{ width: getRemainingPercent(req) + '%' }"
-              ></div>
-            </div>
-            <div class="progress-hint">剩余 {{ req.remainingQuantity ?? req.quantity }} 吨</div>
-          </div>
-          
-          <!-- 关键信息 -->
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="label">包装</span>
-              <span class="value">{{ req.packaging || '-' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">付款</span>
-              <span class="value">{{ req.paymentMethod || '-' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">发票</span>
-              <span class="value">{{ req.invoiceType || '-' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">交货</span>
-              <span class="value">{{ req.deliveryMethod || '-' }}</span>
-            </div>
-          </div>
 
-          <!-- 地址 -->
-          <div class="address-row">
-            <el-icon class="text-gray-400"><Location /></el-icon>
-            <span>{{ req.purchaseAddress || '交货地址未指定' }}</span>
-          </div>
-          
-          <!-- 参数标签 -->
-          <div v-if="parseParams(req.paramsJson).length > 0" class="params-tags">
-            <el-tag
-              v-for="param in parseParams(req.paramsJson).slice(0, 3)"
-              :key="param.name"
-              size="small"
-              type="info"
-              effect="plain"
-            >
-              {{ param.name }}: {{ param.value }}
-            </el-tag>
-            <el-tag
-              v-if="parseParams(req.paramsJson).length > 3"
-              size="small"
-              type="info"
-              effect="plain"
-            >
-              +{{ parseParams(req.paramsJson).length - 3 }}
-            </el-tag>
+            <!-- 卡片底部 -->
+            <div class="px-5 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3">
+              <button 
+                class="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition-all active:scale-95 flex items-center gap-2"
+                @click="viewDetail(req)"
+              >
+                <View class="w-4 h-4" />
+                详情
+              </button>
+              <button 
+                class="px-6 py-2 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all active:scale-95 flex items-center gap-2"
+                @click="onQuote(req)"
+              >
+                <ChatDotRound class="w-4 h-4" />
+                立即报价
+              </button>
+            </div>
           </div>
         </div>
-        
-        <!-- 卡片底部 -->
-        <div class="card-footer">
-          <div class="price-section">
-            <div class="price-label">期望价格</div>
-            <div v-if="req.expectedPrice" class="price">
-              <span class="currency">¥</span>
-              <span class="amount">{{ req.expectedPrice?.toLocaleString() }}</span>
-              <span class="unit">/吨</span>
-            </div>
-            <div v-else class="price-negotiable">面议</div>
-            <div class="time">{{ formatTime(req.createTime) }}</div>
+
+        <!-- 空状态 -->
+        <div v-else-if="!loading" class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+          <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShoppingCart class="w-8 h-8 text-gray-300" />
           </div>
-          <div class="actions">
-            <el-tooltip content="收藏">
-              <el-button :icon="Star" circle size="small" @click="toggleFavorite(req)" />
-            </el-tooltip>
-            <el-button size="small" :icon="View" @click="viewDetail(req)">详情</el-button>
-            <el-button type="primary" size="small" :icon="ChatDotRound" @click="startChat(req)">报价</el-button>
-          </div>
+          <h3 class="text-lg font-bold text-gray-900 mb-2">暂无采购需求</h3>
+          <p class="text-sm text-gray-500">
+            {{ selectedUserId ? '该用户暂未发布采购需求' : '您关注的采购商暂未发布新的需求' }}
+          </p>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- 空状态 -->
-    <div v-if="!loading && filteredRequirements.length === 0" class="empty-state">
-      <div class="empty-icon">
-        <el-icon :size="48" class="text-gray-300"><ShoppingCart /></el-icon>
-      </div>
-      <div class="empty-text">暂无采购需求</div>
-      <div class="empty-hint">请调整筛选条件或稍后再试</div>
-    </div>
-
-    <!-- 分页 -->
-    <div v-if="pagination.total > pagination.size" class="pagination-bar">
-      <el-pagination
-        v-model:current-page="pagination.page"
-        v-model:page-size="pagination.size"
-        :total="pagination.total"
-        :page-sizes="[12, 24, 48]"
-        layout="total, sizes, prev, pager, next"
-        background
-      />
-    </div>
-    </template>
+    <!-- 议价抽屉 -->
+    <ChatDrawer
+      v-model="drawerOpen"
+      :conversation-id="drawerConversationId"
+      :peer-display-name="drawerPeerName"
+      subject-type="NEED"
+      :subject-id="drawerSubjectId"
+      :subject-snapshot-json="drawerSubjectSnapshotJson"
+      @closed="onDrawerClosed"
+    />
   </div>
 </template>
 
 <style scoped>
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
+/* 隐藏滚动条但保持滚动功能 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
-
-/* Tab 切换栏 */
-.tab-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: white;
-  border: 1px solid #f3f4f6;
-  border-radius: 16px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-  padding: 16px 20px;
-  margin-bottom: 16px;
-}
-
-.tab-hint {
-  padding-left: 16px;
-}
-
-/* 关注商户为空时 */
-.empty-followed {
-  background: white;
-  border: 1px solid #f3f4f6;
-  border-radius: 24px;
-  padding: 60px 20px;
-  text-align: center;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-}
-
-.empty-followed-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-
-.empty-followed-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 8px;
-}
-
-.empty-followed-hint {
-  color: #9ca3af;
-  margin-bottom: 24px;
-}
-
-/* 关注卡片特殊样式 */
-.followed-card {
-  position: relative;
-}
-
-.followed-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #fffbeb;
-  color: #b45309;
-  border: 1px solid #fef3c7;
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  z-index: 1;
-}
-
-.followed-card .card-header {
-  padding-right: 100px;
-}
-
-/* 排序按钮栏 */
-.sort-bar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  background: #f9fafb;
-  border: 1px solid #f3f4f6;
-  border-radius: 16px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-}
-
-/* 筛选区域 */
-.filter-bar {
-  background: white;
-  border: 1px solid #f3f4f6;
-  border-radius: 16px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-  padding: 16px 20px;
-  margin-bottom: 20px;
-}
-
-.filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-}
-
-.filter-row + .filter-row {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed #e5e7eb;
-}
-
-.filter-input {
-  width: 240px;
-}
-
-.filter-select {
-  width: 140px;
-}
-
-.filter-select-sm {
-  width: 120px;
-}
-
-.quantity-range {
-  display: flex;
-  align-items: center;
-}
-
-.quantity-input {
-  width: 100px;
-}
-
-/* 卡片网格 */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 20px;
-}
-
-/* 信息卡片 */
-.info-card {
-  background: white;
-  border-radius: 24px;
-  border: 1px solid #f3f4f6;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.info-card:hover {
-  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-}
-
-.card-header {
-  padding: 16px 20px;
-  background: #f9fafb;
-  border-bottom: 1px solid #f3f4f6;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.company-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: #0f172a;
-  color: white;
-  font-weight: bold;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 18px rgba(15,23,42,0.12);
-}
-
-.company-detail {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.company-name {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 15px;
-}
-
-.contact {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: #6b7280;
-  font-size: 12px;
-}
-
-.card-body {
-  padding: 20px;
-}
-
-.product-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 16px;
-}
-
-/* 数量进度条 */
-.quantity-progress {
-  margin-bottom: 16px;
-}
-
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  margin-bottom: 6px;
-}
-
-.progress-header .label {
-  color: #9ca3af;
-}
-
-.progress-header .value {
-  color: #374151;
-  font-weight: 600;
-}
-
-.progress-bar {
-  height: 6px;
-  background: #e5e7eb;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: #1d4ed8;
-  border-radius: 3px;
-  transition: width 0.3s ease;
-}
-
-.progress-hint {
-  font-size: 11px;
-  color: #9ca3af;
-  margin-top: 4px;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px 16px;
-  margin-bottom: 12px;
-}
-
-.info-item {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-}
-
-.info-item .label {
-  color: #9ca3af;
-}
-
-.info-item .value {
-  color: #374151;
-  font-weight: 500;
-}
-
-.address-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  color: #6b7280;
-  margin-bottom: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.params-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.card-footer {
-  padding: 16px 20px;
-  background: #f9fafb;
-  border-top: 1px solid #f3f4f6;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.price-section {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.price-label {
-  font-size: 12px;
-  color: #9ca3af;
-}
-
-.price {
-  display: flex;
-  align-items: baseline;
-}
-
-.price .currency {
-  font-size: 14px;
-  color: #1d4ed8;
-  font-weight: 500;
-}
-
-.price .amount {
-  font-size: 24px;
-  font-weight: bold;
-  color: #1d4ed8;
-  margin-left: 2px;
-}
-
-.price .unit {
-  font-size: 12px;
-  color: #9ca3af;
-  margin-left: 2px;
-}
-
-.price-negotiable {
-  font-size: 18px;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.time {
-  font-size: 12px;
-  color: #9ca3af;
-}
-
-.actions {
-  display: flex;
-  gap: 8px;
-}
-
-/* 空状态 */
-.empty-state {
-  background: white;
-  border-radius: 24px;
-  border: 1px solid #f3f4f6;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-  padding: 60px 20px;
-  text-align: center;
-}
-
-.empty-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 16px;
-  background: #f3f4f6;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.empty-text {
-  color: #6b7280;
-  font-size: 16px;
-  margin-bottom: 8px;
-}
-
-.empty-hint {
-  color: #9ca3af;
-  font-size: 14px;
-}
-
-/* 分页 */
-.pagination-bar {
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
-}
-
-/* 响应式 */
-@media (max-width: 768px) {
-  .card-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .filter-input {
-    width: 100%;
-  }
-  
-  .filter-select,
-  .filter-select-sm {
-    width: 100%;
-  }
-  
-  .quantity-range {
-    flex-wrap: wrap;
-  }
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 </style>

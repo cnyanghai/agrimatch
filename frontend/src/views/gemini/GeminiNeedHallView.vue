@@ -6,7 +6,11 @@ import PublicTopNav from '../../components/PublicTopNav.vue'
 import ChatDrawer from '../../components/chat/ChatDrawer.vue'
 import { listRequirements, type RequirementResponse } from '../../api/requirement'
 import { openChatConversation } from '../../api/chat'
+import { followUser, unfollowUser, checkFollowStatus } from '../../api/follow'
 import { ElMessage } from 'element-plus'
+import { useAuthStore } from '../../store/auth'
+
+const authStore = useAuthStore()
 
 const router = useRouter()
 const route = useRoute()
@@ -25,6 +29,55 @@ const listLoading = ref(false)
 const focusedId = ref<number | null>(null)
 const cardEls = new Map<number, HTMLElement>()
 let focusTimer: number | null = null
+
+// 关注状态 Map: userId -> isFollowing
+const followingMap = ref<Map<number, boolean>>(new Map())
+
+// 检查并加载关注状态
+async function loadFollowStatus(userIds: number[]) {
+  if (!authStore.isLoggedIn) return
+  for (const userId of userIds) {
+    if (!followingMap.value.has(userId)) {
+      try {
+        const r = await checkFollowStatus(userId)
+        if (r.code === 0) {
+          followingMap.value.set(userId, r.data || false)
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+}
+
+// 关注/取消关注
+async function toggleFollow(r: RequirementResponse) {
+  if (!requireAuth('/hall/need')) return
+  if (!r.userId) {
+    ElMessage.warning('无法关注该用户')
+    return
+  }
+
+  const isFollowing = followingMap.value.get(r.userId) || false
+  try {
+    if (isFollowing) {
+      await unfollowUser(r.userId)
+      followingMap.value.set(r.userId, false)
+      ElMessage.success(`已取消关注 ${r.nickName || r.companyName || '该用户'}`)
+    } else {
+      await followUser(r.userId)
+      followingMap.value.set(r.userId, true)
+      ElMessage.success(`已关注 ${r.nickName || r.companyName || '该用户'}`)
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.message || '操作失败')
+  }
+}
+
+function isFollowingUser(userId?: number): boolean {
+  if (!userId) return false
+  return followingMap.value.get(userId) || false
+}
 
 const focusIdFromRoute = computed(() => {
   const raw = route.query.focusId
@@ -123,6 +176,11 @@ async function loadRequirements() {
     const res = await listRequirements({ status: 0, orderBy: 'create_time', order: 'desc' })
     if (res.code !== 0) throw new Error(res.message)
     requirements.value = res.data || []
+    
+    // 加载关注状态
+    const userIds = requirements.value.map(r => r.userId).filter(Boolean) as number[]
+    const uniqueUserIds = [...new Set(userIds)]
+    loadFollowStatus(uniqueUserIds)
   } catch {
     requirements.value = []
   } finally {
@@ -254,17 +312,28 @@ function parseParams(paramsJson?: string): string {
           :class="focusedId === r.id ? 'ring-2 ring-blue-500/50 bg-blue-50/40' : 'hover:shadow-md hover:border-blue-100'"
         >
           <div class="flex flex-col lg:flex-row lg:flex-wrap items-start gap-6 mx-0">
-            <div class="w-full lg:w-44 flex items-center gap-3 shrink-0 border-r border-gray-50 pr-4">
+            <div class="w-full lg:w-52 flex items-center gap-3 shrink-0 border-r border-gray-50 pr-4">
               <div class="w-12 h-12 bg-blue-50 text-blue-700 rounded-lg flex items-center justify-center text-xl font-bold shrink-0">
                 {{ (r.companyName || r.nickName || r.userName || '采')[0] }}
               </div>
-              <div class="overflow-hidden">
+              <div class="overflow-hidden flex-1">
                 <div class="text-sm font-bold text-gray-900 truncate">{{ r.companyName || '未填写公司' }}</div>
                 <div class="flex items-center gap-1 mt-1">
                   <span class="bg-blue-50 text-blue-600 text-[10px] px-1 py-0.5 rounded">企业用户</span>
                   <span class="text-[10px] text-gray-400">{{ r.nickName || r.userName || '' }}</span>
                 </div>
               </div>
+              <!-- 关注按钮 -->
+              <button
+                v-if="authStore.isLoggedIn && r.userId"
+                class="shrink-0 text-xs px-2 py-1 rounded-full border transition-all active:scale-95"
+                :class="isFollowingUser(r.userId) 
+                  ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100' 
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300 hover:text-blue-600'"
+                @click.stop="toggleFollow(r)"
+              >
+                {{ isFollowingUser(r.userId) ? '已关注' : '+ 关注' }}
+              </button>
             </div>
 
             <div class="w-full lg:w-[120px] shrink-0">

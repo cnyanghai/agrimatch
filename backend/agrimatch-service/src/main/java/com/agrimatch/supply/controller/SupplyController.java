@@ -54,7 +54,8 @@ public class SupplyController {
 
     @GetMapping
     public Result<List<SupplyResponse>> list(Authentication authentication, SupplyQuery query) {
-        Long userId = SecurityUtil.requireUserId(authentication);
+        // 允许匿名访问（大厅页面）
+        Long userId = SecurityUtil.getUserIdOrNull(authentication);
         return Result.success(supplyService.list(userId, query));
     }
 

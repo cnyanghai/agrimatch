@@ -2,10 +2,11 @@
 import { ref, reactive, computed, onMounted, nextTick, onBeforeUnmount, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../store/auth'
-import { Search, Picture, Document, Position, Present, ChatDotRound } from '@element-plus/icons-vue'
+import { Search, Picture, Document, Position, Present, ChatDotRound, Star, StarFilled } from '@element-plus/icons-vue'
 import { giftPoints } from '../api/points'
 import { useRoute, useRouter } from 'vue-router'
 import { getConversationMessages, listChatConversations, markConversationRead, confirmChatOffer, type ChatConversationResponse, type ChatMessageResponse } from '../api/chat'
+import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
 import NegotiationPanel, { type QuoteFields } from '../components/chat/NegotiationPanel.vue'
 import ChatSubjectCard from '../components/chat/ChatSubjectCard.vue'
 import { buildChatWsUrl } from '../utils/chatWs'
@@ -117,6 +118,53 @@ const peerDisplayName = computed(() => {
   if (c.peerCompanyName) return `${name} · ${c.peerCompanyName}`
   return name
 })
+
+// 关注状态
+const isFollowingPeer = ref(false)
+const followLoading = ref(false)
+
+// 检查当前聊天对象的关注状态
+async function checkPeerFollowStatus() {
+  const c = currentConversation.value
+  if (!c || !c.peerUserId) {
+    isFollowingPeer.value = false
+    return
+  }
+  try {
+    const r = await checkFollowStatus(c.peerUserId)
+    if (r.code === 0) {
+      isFollowingPeer.value = r.data || false
+    }
+  } catch {
+    isFollowingPeer.value = false
+  }
+}
+
+// 关注/取消关注当前聊天对象
+async function toggleFollowPeer() {
+  const c = currentConversation.value
+  if (!c || !c.peerUserId) {
+    ElMessage.warning('无法关注该用户')
+    return
+  }
+  
+  followLoading.value = true
+  try {
+    if (isFollowingPeer.value) {
+      await unfollowUser(c.peerUserId)
+      isFollowingPeer.value = false
+      ElMessage.success(`已取消关注 ${peerDisplayName.value}`)
+    } else {
+      await followUser(c.peerUserId)
+      isFollowingPeer.value = true
+      ElMessage.success(`已关注 ${peerDisplayName.value}`)
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.message || '操作失败')
+  } finally {
+    followLoading.value = false
+  }
+}
 
 function formatTime(ts?: string) {
   if (!ts) return ''
@@ -432,7 +480,10 @@ async function selectConversation(c: ChatConversationResponse) {
     // ignore
   }
 
-  // 同步 URL（便于“转入沟通中心”/刷新保留）
+  // 检查关注状态
+  checkPeerFollowStatus()
+
+  // 同步 URL（便于"转入沟通中心"/刷新保留）
   router.replace({ path: '/chat', query: { conversationId: String(c.id) } })
 }
 
@@ -758,6 +809,20 @@ onBeforeUnmount(() => {
             </div>
             
             <div class="flex items-center gap-2">
+              <!-- 关注按钮 -->
+              <el-button 
+                size="small" 
+                :loading="followLoading"
+                :type="isFollowingPeer ? 'warning' : 'default'"
+                class="!rounded-xl transition-all active:scale-95"
+                @click="toggleFollowPeer"
+              >
+                <template #icon>
+                  <StarFilled v-if="isFollowingPeer" class="w-4 h-4" />
+                  <Star v-else class="w-4 h-4" />
+                </template>
+                {{ isFollowingPeer ? '已关注' : '关注' }}
+              </el-button>
               <el-button size="small" circle :icon="Present" @click="openGiftDialog" title="赠送积分" />
               <el-button size="small" class="!rounded-xl !bg-slate-900 !text-white transition-all active:scale-95" @click="initiateContract">
                 起草合同

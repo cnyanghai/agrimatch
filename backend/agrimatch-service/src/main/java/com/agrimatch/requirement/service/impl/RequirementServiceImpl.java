@@ -92,14 +92,17 @@ public class RequirementServiceImpl implements RequirementService {
 
     @Override
     public List<RequirementResponse> list(Long viewerUserId, RequirementQuery query) {
-        if (viewerUserId == null) throw new ApiException(401, "未登录");
+        // 允许匿名访问（大厅页面）
         normalizeQuery(query);
         List<BusRequirement> list = requirementMapper.selectList(query);
 
+        // viewer company coords (仅登录用户可用)
         BusCompany viewerCompany = null;
-        SysUser viewer = userMapper.selectById(viewerUserId);
-        if (viewer != null && viewer.getCompanyId() != null) {
-            viewerCompany = companyMapper.selectById(viewer.getCompanyId());
+        if (viewerUserId != null) {
+            SysUser viewer = userMapper.selectById(viewerUserId);
+            if (viewer != null && viewer.getCompanyId() != null) {
+                viewerCompany = companyMapper.selectById(viewer.getCompanyId());
+            }
         }
 
         List<RequirementResponse> out = new ArrayList<>();

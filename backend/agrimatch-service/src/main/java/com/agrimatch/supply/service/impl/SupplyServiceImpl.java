@@ -98,17 +98,19 @@ public class SupplyServiceImpl implements SupplyService {
 
     @Override
     public List<SupplyResponse> list(Long viewerUserId, SupplyQuery query) {
-        if (viewerUserId == null) throw new ApiException(401, "未登录");
+        // 允许匿名访问（大厅页面）
         normalizeQuery(query);
         // 过期自动撤下（status=2）
         supplyMapper.expireDownShelf();
         List<BusSupply> list = supplyMapper.selectList(query);
 
-        // viewer company coords
+        // viewer company coords (仅登录用户可用)
         BusCompany viewerCompany = null;
-        SysUser viewer = userMapper.selectById(viewerUserId);
-        if (viewer != null && viewer.getCompanyId() != null) {
-            viewerCompany = companyMapper.selectById(viewer.getCompanyId());
+        if (viewerUserId != null) {
+            SysUser viewer = userMapper.selectById(viewerUserId);
+            if (viewer != null && viewer.getCompanyId() != null) {
+                viewerCompany = companyMapper.selectById(viewer.getCompanyId());
+            }
         }
 
         List<SupplyResponse> out = new ArrayList<>();

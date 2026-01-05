@@ -6,10 +6,13 @@ import PublicTopNav from '../../components/PublicTopNav.vue'
 import ChatDrawer from '../../components/chat/ChatDrawer.vue'
 import { listSupplies, type SupplyResponse } from '../../api/supply'
 import { openChatConversation } from '../../api/chat'
+import { followUser, unfollowUser, checkFollowStatus } from '../../api/follow'
 import { ElMessage } from 'element-plus'
+import { useAuthStore } from '../../store/auth'
 
 const router = useRouter()
 const route = useRoute()
+const authStore = useAuthStore()
 
 function go(path: string) {
   router.push(path)
@@ -25,6 +28,55 @@ const listLoading = ref(false)
 const focusedId = ref<number | null>(null)
 const cardEls = new Map<number, HTMLElement>()
 let focusTimer: number | null = null
+
+// 关注状态 Map: userId -> isFollowing
+const followingMap = ref<Map<number, boolean>>(new Map())
+
+// 检查并加载关注状态
+async function loadFollowStatus(userIds: number[]) {
+  if (!authStore.isLoggedIn) return
+  for (const userId of userIds) {
+    if (followingMap.value.has(userId)) continue
+    try {
+      const r = await checkFollowStatus(userId)
+      if (r.code === 0) {
+        followingMap.value.set(userId, r.data || false)
+      }
+    } catch {
+      // 忽略单个检查失败
+    }
+  }
+}
+
+// 关注/取消关注
+async function toggleFollow(s: SupplyResponse) {
+  if (!requireAuth('/hall/supply')) return
+  if (!s.userId) {
+    ElMessage.warning('无法关注该用户')
+    return
+  }
+
+  const isFollowing = followingMap.value.get(s.userId) || false
+  try {
+    if (isFollowing) {
+      await unfollowUser(s.userId)
+      followingMap.value.set(s.userId, false)
+      ElMessage.success(`已取消关注 ${s.nickName || s.companyName || '该用户'}`)
+    } else {
+      await followUser(s.userId)
+      followingMap.value.set(s.userId, true)
+      ElMessage.success(`已关注 ${s.nickName || s.companyName || '该用户'}`)
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.message || '操作失败')
+  }
+}
+
+// 获取用户关注状态
+function isFollowingUser(userId?: number): boolean {
+  if (!userId) return false
+  return followingMap.value.get(userId) || false
+}
 
 const focusIdFromRoute = computed(() => {
   const raw = route.query.focusId
@@ -127,6 +179,11 @@ async function loadSupplies() {
     const res = await listSupplies({ activeOnly: true, includeExpired: false, orderBy: 'create_time', order: 'desc' })
     if (res.code !== 0) throw new Error(res.message)
     supplies.value = res.data || []
+    
+    // 加载关注状态
+    const userIds = supplies.value.map(s => s.userId).filter(Boolean) as number[]
+    const uniqueUserIds = [...new Set(userIds)]
+    loadFollowStatus(uniqueUserIds)
   } catch {
     supplies.value = []
   } finally {
@@ -260,17 +317,28 @@ function parseParams(paramsJson?: string): string {
           :class="focusedId === s.id ? 'ring-2 ring-emerald-500/60 bg-emerald-50/40' : 'hover:shadow-md hover:border-emerald-100'"
         >
           <div class="flex flex-col lg:flex-row lg:flex-wrap items-start gap-6 mx-0">
-            <div class="w-full lg:w-44 flex items-center gap-3 shrink-0 border-r border-gray-50 pr-4">
+            <div class="w-full lg:w-52 flex items-center gap-3 shrink-0 border-r border-gray-50 pr-4">
               <div class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center text-xl font-bold shrink-0">
                 {{ (s.companyName || s.nickName || s.userName || '供')[0] }}
               </div>
-              <div class="overflow-hidden">
+              <div class="overflow-hidden flex-1 min-w-0">
                 <div class="text-sm font-bold text-gray-900 truncate">{{ s.companyName || '未填写公司' }}</div>
                 <div class="flex items-center gap-1 mt-1">
-                  <span class="bg-blue-50 text-blue-600 text-[10px] px-1 py-0.5 rounded">供应</span>
+                  <span class="bg-emerald-50 text-emerald-600 text-[10px] px-1 py-0.5 rounded">供应</span>
                   <span class="text-[10px] text-gray-400">{{ s.nickName || s.userName || '' }}</span>
                 </div>
               </div>
+              <!-- 关注按钮 -->
+              <button
+                v-if="authStore.isLoggedIn && s.userId"
+                class="shrink-0 text-xs px-2 py-1 rounded-full border transition-all active:scale-95"
+                :class="isFollowingUser(s.userId)
+                  ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-emerald-300 hover:text-emerald-600'"
+                @click.stop="toggleFollow(s)"
+              >
+                {{ isFollowingUser(s.userId) ? '已关注' : '+ 关注' }}
+              </button>
             </div>
 
             <div class="w-full lg:w-[120px] shrink-0">

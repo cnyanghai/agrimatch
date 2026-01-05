@@ -64,7 +64,8 @@ public class RequirementController {
             @RequestParam(value = "orderBy", required = false) String orderBy,
             @RequestParam(value = "order", required = false) String order
     ) {
-        Long viewerUserId = SecurityUtil.requireUserId(authentication);
+        // 允许匿名访问（大厅页面）
+        Long viewerUserId = SecurityUtil.getUserIdOrNull(authentication);
         RequirementQuery q = new RequirementQuery();
         q.setCompanyId(companyId);
         q.setUserId(userId);
