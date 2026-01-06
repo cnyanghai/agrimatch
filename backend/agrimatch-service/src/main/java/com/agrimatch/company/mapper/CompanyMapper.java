@@ -19,6 +19,12 @@ public interface CompanyMapper {
 
     List<CompanyBriefResponse> search(@Param("keyword") String keyword, @Param("limit") Integer limit);
 
+    /** 查询有地址但缺少坐标的公司（用于启动时自动补全） */
+    List<BusCompany> selectMissingCoords();
+
+    /** 仅更新坐标（内部使用，不校验 ownerUserId） */
+    int updateCoords(@Param("id") Long id, @Param("lat") java.math.BigDecimal lat, @Param("lng") java.math.BigDecimal lng);
+
     class IdNameRow {
         private Long id;
         private String companyName;

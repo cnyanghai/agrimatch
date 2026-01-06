@@ -1,0 +1,732 @@
+/**
+ * AgriMatch 统一动画样式
+ * 基于 cursorrules 规范：动画时长 150-300ms，缓动函数优先 ease-out
+ */
+
+/* ============================================
+   基础过渡类
+   ============================================ */
+
+/* 淡入淡出 */
+.fade-enter-active {
+  transition: opacity 0.25s ease-out;
+}
+.fade-leave-active {
+  transition: opacity 0.2s ease-in;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* 缩放淡入 */
+.zoom-fade-enter-active {
+  transition: all 0.25s ease-out;
+}
+.zoom-fade-leave-active {
+  transition: all 0.2s ease-in;
+}
+.zoom-fade-enter-from,
+.zoom-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+/* 上滑淡入 */
+.slide-up-enter-active {
+  transition: all 0.25s ease-out;
+}
+.slide-up-leave-active {
+  transition: all 0.2s ease-in;
+}
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* 下滑淡入 */
+.slide-down-enter-active {
+  transition: all 0.25s ease-out;
+}
+.slide-down-leave-active {
+  transition: all 0.2s ease-in;
+}
+.slide-down-enter-from {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* 左滑淡入 */
+.slide-left-enter-active {
+  transition: all 0.25s ease-out;
+}
+.slide-left-leave-active {
+  transition: all 0.2s ease-in;
+}
+.slide-left-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+.slide-left-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+/* 右滑淡入 */
+.slide-right-enter-active {
+  transition: all 0.25s ease-out;
+}
+.slide-right-leave-active {
+  transition: all 0.2s ease-in;
+}
+.slide-right-enter-from {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+.slide-right-leave-to {
+  opacity: 0;
+  transform: translateX(10px);
+}
+
+/* ============================================
+   关键帧动画
+   ============================================ */
+
+/* 弹入动画 */
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-zoom-in {
+  animation: zoom-in 0.25s ease-out;
+}
+
+/* 弹出动画 */
+@keyframes zoom-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+}
+
+.animate-zoom-out {
+  animation: zoom-out 0.2s ease-in forwards;
+}
+
+/* 脉动动画（用于加载等待） */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* 弹跳动画（用于成功提示） */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+/* 抖动动画（用于错误提示） */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* 旋转加载动画 */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* 交错淡入动画（用于列表） */
+@keyframes stagger-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-stagger-in {
+  animation: stagger-fade-in 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-stagger-in:nth-child(1) { animation-delay: 0ms; }
+.animate-stagger-in:nth-child(2) { animation-delay: 50ms; }
+.animate-stagger-in:nth-child(3) { animation-delay: 100ms; }
+.animate-stagger-in:nth-child(4) { animation-delay: 150ms; }
+.animate-stagger-in:nth-child(5) { animation-delay: 200ms; }
+.animate-stagger-in:nth-child(6) { animation-delay: 250ms; }
+.animate-stagger-in:nth-child(7) { animation-delay: 300ms; }
+.animate-stagger-in:nth-child(8) { animation-delay: 350ms; }
+
+/* ============================================
+   骨架屏动画
+   ============================================ */
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================
+   微交互效果
+   ============================================ */
+
+/* 按钮悬停上浮效果 */
+.hover-lift {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.hover-lift:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* 卡片悬停效果 */
+.hover-card {
+  transition: all 0.2s ease-out;
+}
+
+.hover-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* 输入框聚焦效果 */
+.focus-glow:focus {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+/* 图标悬停旋转 */
+.hover-rotate {
+  transition: transform 0.3s ease-out;
+}
+
+.hover-rotate:hover {
+  transform: rotate(15deg);
+}
+
+/* 渐变边框动画 */
+@keyframes gradient-border {
+  0%, 100% {
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    border-color: rgba(16, 185, 129, 0.6);
+  }
+}
+
+.animate-gradient-border {
+  animation: gradient-border 2s ease-in-out infinite;
+}
+
+/* ============================================
+   数字递增动画（用于统计卡片）
+   ============================================ */
+
+.count-up {
+  display: inline-block;
+  transition: transform 0.2s ease-out;
+}
+
+.count-up:hover {
+  transform: scale(1.05);
+}
+
+/* ============================================
+   通知动画
+   ============================================ */
+
+/* 从右侧滑入 */
+@keyframes notification-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.notification-enter {
+  animation: notification-in 0.3s ease-out;
+}
+
+/* 向右滑出 */
+@keyframes notification-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+.notification-leave {
+  animation: notification-out 0.2s ease-in forwards;
+}
+
+/* ============================================
+   Element Plus 全局组件样式覆盖
+   使其与项目设计系统保持一致
+   ============================================ */
+
+/* MessageBox 确认框 */
+.el-message-box {
+  border-radius: 24px !important;
+  border: 1px solid rgb(243 244 246) !important;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.el-message-box__header {
+  padding: 20px 24px !important;
+  border-bottom: 1px solid rgb(243 244 246) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.el-message-box__title {
+  font-weight: 800 !important;
+  font-size: 18px !important;
+  color: rgb(17 24 39) !important;
+}
+
+.el-message-box__content {
+  padding: 24px !important;
+  color: rgb(75 85 99) !important;
+  font-size: 14px !important;
+}
+
+.el-message-box__message {
+  color: rgb(75 85 99) !important;
+}
+
+.el-message-box__btns {
+  padding: 16px 24px !important;
+  border-top: 1px solid rgb(243 244 246) !important;
+  background: rgb(249 250 251) !important;
+}
+
+.el-message-box__btns .el-button {
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  padding: 10px 20px !important;
+  transition: all 0.15s ease !important;
+}
+
+.el-message-box__btns .el-button:active {
+  transform: scale(0.95) !important;
+}
+
+.el-message-box__btns .el-button--default {
+  background-color: rgb(243 244 246) !important;
+  border-color: rgb(243 244 246) !important;
+  color: rgb(55 65 81) !important;
+}
+
+.el-message-box__btns .el-button--default:hover {
+  background-color: rgb(229 231 235) !important;
+  border-color: rgb(229 231 235) !important;
+}
+
+.el-message-box__btns .el-button--primary {
+  background-color: #059669 !important;
+  border-color: #059669 !important;
+  color: white !important;
+}
+
+.el-message-box__btns .el-button--primary:hover {
+  background-color: #047857 !important;
+  border-color: #047857 !important;
+}
+
+/* 警告类型的 MessageBox */
+.el-message-box--warning .el-message-box__status {
+  color: #f59e0b !important;
+}
+
+/* 错误类型的 MessageBox */
+.el-message-box--error .el-message-box__status {
+  color: #ef4444 !important;
+}
+
+/* 信息类型的 MessageBox */
+.el-message-box--info .el-message-box__status {
+  color: #059669 !important;
+}
+
+/* MessageBox 遮罩层 */
+.el-overlay.is-message-box {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* Dialog 对话框 */
+.el-dialog {
+  border-radius: 24px !important;
+  border: 1px solid rgb(243 244 246) !important;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25) !important;
+  overflow: hidden !important;
+}
+
+.el-dialog__header {
+  padding: 20px 24px !important;
+  border-bottom: 1px solid rgb(243 244 246) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(12px) !important;
+  margin-right: 0 !important;
+}
+
+.el-dialog__title {
+  font-weight: 800 !important;
+  font-size: 18px !important;
+  color: rgb(17 24 39) !important;
+}
+
+.el-dialog__headerbtn {
+  top: 20px !important;
+  right: 20px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  transition: all 0.15s ease !important;
+}
+
+.el-dialog__headerbtn:hover {
+  background-color: rgb(243 244 246) !important;
+}
+
+.el-dialog__body {
+  padding: 24px !important;
+}
+
+.el-dialog__footer {
+  padding: 16px 24px !important;
+  border-top: 1px solid rgb(243 244 246) !important;
+  background: rgb(249 250 251) !important;
+}
+
+/* Message 消息提示 */
+.el-message {
+  border-radius: 12px !important;
+  border: 1px solid rgb(243 244 246) !important;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1) !important;
+  padding: 12px 20px !important;
+}
+
+.el-message--success {
+  background-color: rgb(236 253 245) !important;
+  border-color: rgb(167 243 208) !important;
+}
+
+.el-message--success .el-message__content {
+  color: rgb(6 95 70) !important;
+}
+
+.el-message--warning {
+  background-color: rgb(255 251 235) !important;
+  border-color: rgb(253 230 138) !important;
+}
+
+.el-message--warning .el-message__content {
+  color: rgb(146 64 14) !important;
+}
+
+.el-message--error {
+  background-color: rgb(254 242 242) !important;
+  border-color: rgb(254 202 202) !important;
+}
+
+.el-message--error .el-message__content {
+  color: rgb(153 27 27) !important;
+}
+
+.el-message--info {
+  background-color: rgb(249 250 251) !important;
+  border-color: rgb(229 231 235) !important;
+}
+
+.el-message--info .el-message__content {
+  color: rgb(55 65 81) !important;
+}
+
+/* Notification 通知 */
+.el-notification {
+  border-radius: 16px !important;
+  border: 1px solid rgb(243 244 246) !important;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15) !important;
+  padding: 16px 20px !important;
+}
+
+.el-notification__title {
+  font-weight: 700 !important;
+  color: rgb(17 24 39) !important;
+}
+
+.el-notification__content {
+  color: rgb(107 114 128) !important;
+}
+
+/* Tooltip 工具提示 */
+.el-tooltip__trigger:focus-visible {
+  outline: none !important;
+}
+
+.el-popper.is-dark {
+  background: rgb(30 41 59) !important;
+  border-radius: 8px !important;
+  border: none !important;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.2) !important;
+}
+
+.el-popper.is-dark .el-popper__arrow::before {
+  background: rgb(30 41 59) !important;
+  border: none !important;
+}
+
+/* Popover 弹出框 */
+.el-popover.el-popper {
+  border-radius: 12px !important;
+  border: 1px solid rgb(243 244 246) !important;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1) !important;
+}
+
+/* Dropdown 下拉菜单 */
+.el-dropdown__popper.el-popper {
+  border-radius: 12px !important;
+  border: 1px solid rgb(243 244 246) !important;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1) !important;
+  overflow: hidden !important;
+}
+
+.el-dropdown-menu__item {
+  padding: 10px 16px !important;
+  font-size: 14px !important;
+  transition: all 0.15s ease !important;
+}
+
+.el-dropdown-menu__item:hover {
+  background-color: rgb(243 244 246) !important;
+  color: rgb(17 24 39) !important;
+}
+
+/* Select 下拉选择器 */
+.el-select-dropdown {
+  border-radius: 12px !important;
+  border: 1px solid rgb(243 244 246) !important;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1) !important;
+  overflow: hidden !important;
+}
+
+.el-select-dropdown__item {
+  padding: 10px 16px !important;
+  font-size: 14px !important;
+  transition: all 0.15s ease !important;
+}
+
+.el-select-dropdown__item.is-hovering {
+  background-color: rgb(243 244 246) !important;
+}
+
+.el-select-dropdown__item.is-selected {
+  background-color: rgb(236 253 245) !important;
+  color: #059669 !important;
+  font-weight: 600 !important;
+}
+
+/* DatePicker 日期选择器 */
+.el-date-picker {
+  border-radius: 16px !important;
+  border: 1px solid rgb(243 244 246) !important;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1) !important;
+}
+
+.el-date-picker__header {
+  border-bottom: 1px solid rgb(243 244 246) !important;
+}
+
+.el-date-table td.current:not(.disabled) .el-date-table-cell__text {
+  background-color: #059669 !important;
+}
+
+.el-date-table td.today .el-date-table-cell__text {
+  color: #059669 !important;
+}
+
+/* Pagination 分页 */
+.el-pagination .el-pager li {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.15s ease !important;
+}
+
+.el-pagination .el-pager li:hover {
+  color: #059669 !important;
+}
+
+.el-pagination .el-pager li.is-active {
+  background-color: #059669 !important;
+  color: white !important;
+}
+
+.el-pagination .btn-prev,
+.el-pagination .btn-next {
+  border-radius: 8px !important;
+}
+
+/* Loading 加载 */
+.el-loading-mask {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+.el-loading-spinner .circular {
+  width: 42px !important;
+  height: 42px !important;
+}
+
+.el-loading-spinner .path {
+  stroke: #059669 !important;
+}
+
+/* Cascader 级联选择器 */
+.el-cascader__dropdown {
+  border-radius: 12px !important;
+  border: 1px solid rgb(243 244 246) !important;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1) !important;
+  overflow: hidden !important;
+}
+
+.el-cascader-panel {
+  border-radius: 12px !important;
+}
+
+.el-cascader-menu {
+  border-right-color: rgb(243 244 246) !important;
+  min-width: 180px !important;
+}
+
+.el-cascader-menu:last-child {
+  border-right: none !important;
+}
+
+.el-cascader-menu__wrap {
+  padding: 6px 0 !important;
+}
+
+.el-cascader-node {
+  padding: 10px 16px !important;
+  font-size: 14px !important;
+  transition: all 0.15s ease !important;
+}
+
+.el-cascader-node:hover,
+.el-cascader-node:focus {
+  background-color: rgb(243 244 246) !important;
+}
+
+.el-cascader-node.is-active,
+.el-cascader-node.in-active-path {
+  background-color: rgb(236 253 245) !important;
+  color: #059669 !important;
+  font-weight: 600 !important;
+}
+
+.el-cascader-node__label {
+  padding-right: 10px !important;
+}
+
+.el-cascader-node__postfix {
+  color: rgb(156 163 175) !important;
+}
+
+.el-cascader-node.is-active .el-cascader-node__postfix,
+.el-cascader-node.in-active-path .el-cascader-node__postfix {
+  color: #059669 !important;
+}
+

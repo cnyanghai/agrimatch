@@ -2,10 +2,11 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
-import { X, Building2, ShieldCheck, Phone, KeyRound, User, MapPin, Briefcase } from 'lucide-vue-next'
+import { Building2, ShieldCheck, Phone, KeyRound, User, MapPin, Briefcase } from 'lucide-vue-next'
 import { useAuthStore } from '../store/auth'
 import { useUiStore } from '../store/ui'
 import { updateCompany, type CompanyType } from '../api/company'
+import { BaseModal, BaseButton } from './ui'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -181,36 +182,26 @@ async function onRegister() {
     loading.value = false
   }
 }
-
-function onClose() {
-  ui.closeAuthDialog()
-}
 </script>
 
 <template>
-  <el-dialog
+  <BaseModal
     v-model="visible"
-    width="560px"
-    :close-on-click-modal="false"
-    :show-close="false"
-    class="auth-dialog"
-    @close="onClose"
+    size="xl"
+    :show-footer="false"
+    :close-on-overlay="false"
   >
-    <template #header>
-      <div class="flex items-start justify-between gap-4">
-        <div class="flex items-start gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
-            <ShieldCheck :size="18" :stroke-width="2" />
-          </div>
-          <div class="leading-tight">
-            <div class="text-lg font-bold text-gray-900">登录 / 注册</div>
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">AgriMatch 供需协作平台</div>
-          </div>
-        </div>
-        <button class="p-2 rounded-full hover:bg-gray-50/50 transition-all active:scale-95 text-gray-400" @click="onClose">
-          <X :size="18" :stroke-width="2" />
-        </button>
+    <!-- 头部图标 -->
+    <template #icon>
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+        <ShieldCheck :size="20" :stroke-width="2" />
       </div>
+    </template>
+    
+    <!-- 标题 -->
+    <template #title>
+      <div class="text-xl font-bold text-gray-900">登录 / 注册</div>
+      <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">AgriMatch 供需协作平台</div>
     </template>
 
     <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
@@ -246,9 +237,14 @@ function onClose() {
                   <el-input v-model="loginForm.smsCode" placeholder="验证码" class="flex-1">
                     <template #prefix><ShieldCheck class="text-gray-400" :size="16" :stroke-width="2" /></template>
                   </el-input>
-                  <el-button class="!rounded-xl transition-all active:scale-95" :disabled="smsCountdown > 0" :loading="smsLoading" @click="sendLoginSms">
+                  <BaseButton 
+                    type="secondary"
+                    :disabled="smsCountdown > 0"
+                    :loading="smsLoading"
+                    @click="sendLoginSms"
+                  >
                     {{ smsCountdown > 0 ? `${smsCountdown}s` : '发送验证码' }}
-                  </el-button>
+                  </BaseButton>
                 </div>
                 <div class="text-xs text-gray-400 mt-2">开发期支持固定验证码：<span class="font-bold">000000</span></div>
               </template>
@@ -257,14 +253,13 @@ function onClose() {
                 <button class="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-all active:scale-95" @click="activeTab = 'register'">
                   没有账号？去注册
                 </button>
-                <el-button
+                <BaseButton 
                   type="primary"
-                  class="!rounded-xl !bg-emerald-600 !border-emerald-600 hover:!bg-emerald-700 transition-all active:scale-95"
                   :loading="loading"
                   @click="onLogin"
                 >
                   登录
-                </el-button>
+                </BaseButton>
               </div>
             </div>
           </div>
@@ -286,9 +281,14 @@ function onClose() {
                 <el-input v-model="registerForm.smsCode" placeholder="验证码" class="flex-1">
                   <template #prefix><ShieldCheck class="text-gray-400" :size="16" :stroke-width="2" /></template>
                 </el-input>
-                <el-button class="!rounded-xl transition-all active:scale-95" :disabled="smsCountdown > 0" :loading="smsLoading" @click="sendRegisterSms">
+                <BaseButton 
+                  type="secondary"
+                  :disabled="smsCountdown > 0"
+                  :loading="smsLoading"
+                  @click="sendRegisterSms"
+                >
                   {{ smsCountdown > 0 ? `${smsCountdown}s` : '发送验证码' }}
-                </el-button>
+                </BaseButton>
               </div>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <el-input v-model="registerForm.contacts" placeholder="联系人姓名（必填）">
@@ -347,21 +347,20 @@ function onClose() {
                 <button class="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-all active:scale-95" @click="activeTab = 'login'">
                   已有账号？去登录
                 </button>
-                <el-button
+                <BaseButton 
                   type="primary"
-                  class="!rounded-xl !bg-emerald-600 !border-emerald-600 hover:!bg-emerald-700 transition-all active:scale-95"
                   :loading="loading"
                   @click="onRegister"
                 >
                   注册并登录
-                </el-button>
+                </BaseButton>
               </div>
             </div>
           </div>
         </el-tab-pane>
       </el-tabs>
     </div>
-  </el-dialog>
+  </BaseModal>
 </template>
 
 <style scoped>
@@ -369,28 +368,11 @@ function onClose() {
   margin-bottom: 16px;
 }
 
-.auth-dialog :deep(.el-dialog) {
-  border-radius: 16px;
-  --el-color-primary: #059669;
-  --el-color-primary-light-3: #34d399;
-  --el-color-primary-light-5: #6ee7b7;
-  --el-color-primary-light-7: #a7f3d0;
-  --el-color-primary-light-8: #d1fae5;
-  --el-color-primary-light-9: #ecfdf5;
-}
-.auth-dialog :deep(.el-dialog__header) {
-  margin: 0;
-  padding: 20px 20px 12px 20px;
-}
-.auth-dialog :deep(.el-dialog__body) {
-  padding: 0 20px 20px 20px;
-}
-
-/* Tabs 更像“胶囊切换”，去掉默认底边 */
-.auth-dialog :deep(.el-tabs__nav-wrap::after) {
+/* Tabs 更像"胶囊切换"，去掉默认底边 */
+.auth-tabs :deep(.el-tabs__nav-wrap::after) {
   display: none;
 }
-.auth-dialog :deep(.el-tabs__item) {
+.auth-tabs :deep(.el-tabs__item) {
   height: 32px;
   line-height: 32px;
   padding: 0 14px;
@@ -399,101 +381,88 @@ function onClose() {
   font-size: 12px;
   color: #6b7280;
 }
-.auth-dialog :deep(.el-tabs__item.is-active) {
+.auth-tabs :deep(.el-tabs__item.is-active) {
   background: #ecfdf5;
   color: #059669;
 }
-.auth-dialog :deep(.el-tabs__item:hover) {
+.auth-tabs :deep(.el-tabs__item:hover) {
   color: #065f46;
 }
-.auth-dialog :deep(.el-tabs__active-bar) {
+.auth-tabs :deep(.el-tabs__active-bar) {
   display: none;
 }
 
 /* 输入框统一风格：灰底、细边框、圆角、focus 主色 */
-.auth-dialog :deep(.el-input__wrapper),
-.auth-dialog :deep(.el-textarea__inner) {
+:deep(.el-input__wrapper),
+:deep(.el-textarea__inner) {
   box-shadow: none !important;
   background: #f9fafb !important;
   border: 1px solid #e5e7eb !important;
   border-radius: 12px !important;
 }
-.auth-dialog :deep(.el-input__wrapper.is-focus) {
+:deep(.el-input__wrapper.is-focus) {
   border-color: #34d399 !important;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
 }
-.auth-dialog :deep(.el-select .el-input__wrapper) {
+:deep(.el-select .el-input__wrapper) {
   border-radius: 12px !important;
 }
 
 /* Segmented（密码/验证码）统一为 Emerald 胶囊 */
-.auth-dialog :deep(.el-segmented) {
+:deep(.el-segmented) {
   background: #f3f4f6;
   border-radius: 9999px;
   padding: 4px;
 }
-.auth-dialog :deep(.el-segmented .el-segmented__item) {
+:deep(.el-segmented .el-segmented__item) {
   border-radius: 9999px !important;
   font-weight: 800 !important;
   background: transparent !important;
 }
-.auth-dialog :deep(.el-segmented .el-segmented__item .el-segmented__item-label) {
+:deep(.el-segmented .el-segmented__item .el-segmented__item-label) {
   color: #6b7280 !important;
 }
-.auth-dialog :deep(.el-segmented .el-segmented__item:hover) {
+:deep(.el-segmented .el-segmented__item:hover) {
   background: #ecfdf5 !important;
 }
-.auth-dialog :deep(.el-segmented .el-segmented__item:hover .el-segmented__item-label) {
+:deep(.el-segmented .el-segmented__item:hover .el-segmented__item-label) {
   color: #047857 !important;
 }
-.auth-dialog :deep(.el-segmented .el-segmented__item.is-selected) {
+:deep(.el-segmented .el-segmented__item.is-selected) {
   background: #059669 !important;
 }
-.auth-dialog :deep(.el-segmented .el-segmented__item.is-selected .el-segmented__item-label) {
+:deep(.el-segmented .el-segmented__item.is-selected .el-segmented__item-label) {
   color: #ffffff !important;
 }
 
 /* RadioButton（身份）统一 */
-.auth-dialog :deep(.el-radio-button__inner) {
+:deep(.el-radio-button__inner) {
   border-radius: 9999px;
   font-weight: 700;
   border: 1px solid #e5e7eb;
   color: #6b7280;
   background: #ffffff;
 }
-.auth-dialog :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
+:deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
   background: #059669;
   border-color: #059669;
   color: #ffffff;
   box-shadow: none;
 }
-.auth-dialog :deep(.el-radio-button__inner:hover) {
+:deep(.el-radio-button__inner:hover) {
   background: #ecfdf5;
   border-color: #a7f3d0;
   color: #047857;
 }
 
 /* Checkbox 统一主色 */
-.auth-dialog :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
   background-color: #059669;
   border-color: #059669;
 }
-.auth-dialog :deep(.el-checkbox__label) {
+:deep(.el-checkbox__label) {
   color: #374151;
   font-weight: 600;
   font-size: 12px;
 }
-
-/* Text button/Link（例如“去注册/去登录”） */
-.auth-dialog :deep(.el-button.is-text) {
-  font-weight: 800;
-  color: #059669;
-}
-.auth-dialog :deep(.el-button.is-text:hover) {
-  color: #047857;
-  background: #ecfdf5;
-  border-radius: 12px;
-}
 </style>
-
-

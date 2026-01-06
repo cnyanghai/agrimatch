@@ -39,9 +39,9 @@ app:
 
 amap:
   # 高德地图：Web服务 Key（用于后端地理编码：地址->经纬度）
-  web-key: ${AMAP_WEB_KEY:}
-  # 高德地图：JS API Key（前端加载地图脚本用；也可只放前端 VITE_AMAP_JS_KEY）
-  js-key: ${AMAP_JS_KEY:}
+  web-key: ${AMAP_WEB_KEY:930f93c17c0c8e2151c4ee557280044d}
+  # 高德地图：JS API Key（前端加载地图脚本用）
+  js-key: ${AMAP_JS_KEY:82642c209bb02d3e16b276221c35c5c3}
 
 agrimatch:
   freight:

@@ -8,6 +8,7 @@ com/agrimatch/company/service/CompanyService.class
 com/agrimatch/follow/domain/BusUserFollow.class
 com/agrimatch/auth/service/AuthService.class
 com/agrimatch/home/mapper/StatsMapper.class
+com/agrimatch/home/controller/DashboardController.class
 com/agrimatch/file/controller/FileController.class
 com/agrimatch/post_social/mapper/PostLikeMapper.class
 com/agrimatch/user/dto/UserUpdateRequest.class
@@ -69,10 +70,12 @@ com/agrimatch/geo/dto/GeoPoint.class
 com/agrimatch/chat/ws/ChatWebSocketConfig.class
 com/agrimatch/contract/dto/SealCreateRequest.class
 com/agrimatch/AgriMatchApplication.class
+com/agrimatch/home/dto/DashboardResponse.class
 com/agrimatch/chat/mapper/ChatMapper$ConversationRow.class
 com/agrimatch/auth/dto/LoginResponse.class
 com/agrimatch/contract/mapper/ContractMapper.class
 com/agrimatch/user/dto/UserBriefResponse.class
+com/agrimatch/geo/service/GeocodeFillRunner.class
 com/agrimatch/post_social/domain/BusPostComment.class
 com/agrimatch/post/domain/BusPost.class
 com/agrimatch/post/dto/PostCreateRequest.class
@@ -93,6 +96,7 @@ com/agrimatch/product/service/ProductService.class
 com/agrimatch/contract/dto/ContractFromQuoteRequest.class
 com/agrimatch/post/mapper/PostMapper.class
 com/agrimatch/points/domain/BusPointsAccount.class
+com/agrimatch/home/service/DashboardService.class
 com/agrimatch/chat/dto/ChatPeerResponse.class
 com/agrimatch/eval/dto/EvalCreateRequest.class
 com/agrimatch/post/dto/PostResponse.class
@@ -177,6 +181,7 @@ com/agrimatch/deal/mapper/DealMapper.class
 com/agrimatch/post_social/dto/PostCommentCreateRequest.class
 com/agrimatch/contract/domain/BusContract.class
 com/agrimatch/deal/controller/DealController.class
+com/agrimatch/home/mapper/DashboardMapper.class
 com/agrimatch/chat/domain/BusChatMessage.class
 com/agrimatch/notify/service/NotifyService.class
 com/agrimatch/points/dto/PointsRedeemRequest.class

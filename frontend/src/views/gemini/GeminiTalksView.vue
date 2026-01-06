@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { requireAuth } from '../../utils/requireAuth'
 import { listPosts, type PostResponse } from '../../api/post'
+import { useAuthStore } from '../../store/auth'
 import PublicTopNav from '../../components/PublicTopNav.vue'
 
 const router = useRouter()
+const auth = useAuthStore()
+
+// 用户信息
+const isLoggedIn = computed(() => !!auth.me)
+const displayName = computed(() => auth.me?.nickName || auth.me?.userName || '游客')
 
 const loading = ref(false)
 const posts = ref<PostResponse[]>([])
@@ -164,7 +170,7 @@ onMounted(() => {
                 </div>
               </div>
               <h3 
-                class="text-xl font-bold text-gray-900 mb-3 hover:text-indigo-600 transition-colors cursor-pointer"
+                class="text-xl font-bold text-gray-900 mb-3 hover:text-emerald-600 transition-colors cursor-pointer"
                 @click.stop="go(`/talks/${post.id}`)"
               >
                 {{ post.title }}
@@ -175,7 +181,7 @@ onMounted(() => {
               <div class="mt-6 flex items-center justify-between">
                 <div class="flex items-center gap-4">
                   <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold">
+                    <div class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
                       {{ (post.nickName || post.userName || '?')[0] }}
                     </div>
                     <span class="text-xs text-gray-500 truncate">
@@ -205,47 +211,37 @@ onMounted(() => {
 
         <!-- 右侧 -->
         <div class="lg:col-span-4 space-y-8">
-          <div class="bg-indigo-900 rounded-3xl p-6 text-white shadow-xl">
+          <!-- 用户卡片 - 显示真实登录信息 -->
+          <div class="bg-emerald-900 rounded-3xl p-6 text-white shadow-xl">
             <div class="flex items-center gap-4 mb-6">
-              <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center font-bold text-white ring-2 ring-white/10">我</div>
+              <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center font-bold text-white ring-2 ring-white/10">
+                {{ displayName[0] || '我' }}
+              </div>
               <div>
-                <h4 class="font-bold">游客_7291</h4>
-                <p class="text-[10px] text-indigo-300">活跃等级：青铜</p>
+                <h4 class="font-bold">{{ displayName }}</h4>
+                <p class="text-[10px] text-emerald-300">
+                  {{ isLoggedIn ? '欢迎回来' : '登录后参与讨论' }}
+                </p>
               </div>
             </div>
-            <div class="grid grid-cols-2 gap-3 mb-6">
-              <div class="bg-white/10 p-3 rounded-2xl text-center border border-white/5">
-                <p class="text-lg font-bold">12</p>
-                <p class="text-[8px] text-indigo-200 uppercase tracking-tighter">关注话题</p>
-              </div>
-              <div class="bg-white/10 p-3 rounded-2xl text-center border border-white/5">
-                <p class="text-lg font-bold">350</p>
-                <p class="text-[8px] text-indigo-200 uppercase tracking-tighter">累计积分</p>
-              </div>
-            </div>
-            <button class="w-full py-3 bg-white text-indigo-900 rounded-xl text-xs font-bold hover:bg-indigo-50 transition-colors shadow-sm" @click="onEnterMy">
-              进入我的讨论
+            <button 
+              v-if="isLoggedIn"
+              class="w-full py-3 bg-white text-emerald-900 rounded-xl text-xs font-bold hover:bg-emerald-50 transition-colors shadow-sm" 
+              @click="onEnterMy"
+            >
+              进入控制台
+            </button>
+            <button 
+              v-else
+              class="w-full py-3 bg-white text-emerald-900 rounded-xl text-xs font-bold hover:bg-emerald-50 transition-colors shadow-sm" 
+              @click="go('/login')"
+            >
+              立即登录
             </button>
           </div>
 
-          <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
-            <div class="flex justify-between items-center mb-6">
-              <h3 class="font-bold text-gray-900 flex items-center gap-2">贡献榜</h3>
-              <span class="text-[10px] text-indigo-600 font-bold">周榜</span>
-            </div>
-            <div class="space-y-6">
-              <div class="flex items-center justify-between group cursor-pointer">
-                <div class="flex items-center gap-3">
-                  <span class="text-sm font-black text-amber-500 w-4">1</span>
-                  <div class="w-8 h-8 rounded-full bg-gray-100 overflow-hidden"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" /></div>
-                  <span class="text-xs font-bold group-hover:text-indigo-600 transition-colors">老王谈粮</span>
-                </div>
-                <span class="text-[10px] text-gray-400">8.2k 讨论</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl p-6 text-white relative overflow-hidden shadow-lg group">
+          <!-- 积分兑换卡片 -->
+          <div class="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-3xl p-6 text-white relative overflow-hidden shadow-lg group">
             <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform">
               <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clip-rule="evenodd"></path>
@@ -253,13 +249,9 @@ onMounted(() => {
               </svg>
             </div>
             <div class="relative z-10">
-              <h4 class="font-bold mb-1">积分换礼品卡</h4>
-              <p class="text-[10px] text-indigo-100 mb-4 italic">当前有 3 件奖品可兑换</p>
-              <div class="flex items-center gap-2 mb-4">
-                <span class="text-2xl font-black">JD卡</span>
-                <span class="text-xs bg-white/20 px-2 py-0.5 rounded">￥1000</span>
-              </div>
-              <button class="text-xs font-bold underline hover:text-white" @click="go('/points')">立即前往商城 →</button>
+              <h4 class="font-bold mb-1">发布话题赚积分</h4>
+              <p class="text-[10px] text-emerald-100 mb-4 italic">分享您的见解，积分可兑换好礼</p>
+              <button class="text-xs font-bold underline hover:text-white" @click="onPublishTalk">发布话题 →</button>
             </div>
           </div>
         </div>

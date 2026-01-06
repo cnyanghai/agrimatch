@@ -29,6 +29,18 @@ const focusedId = ref<number | null>(null)
 const cardEls = new Map<number, HTMLElement>()
 let focusTimer: number | null = null
 
+// 筛选条件
+const searchKeyword = ref('')
+const selectedCategory = ref<string | null>(null)
+
+// 分页
+const currentPage = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+
+// 品种列表
+const categoryOptions = ['玉米', '豆粕', '棉粕', '菜粕', 'DDGS', '赖氨酸', '蛋氨酸', '磷酸氢钙']
+
 // 关注状态 Map: userId -> isFollowing
 const followingMap = ref<Map<number, boolean>>(new Map())
 
@@ -86,9 +98,11 @@ const focusIdFromRoute = computed(() => {
 })
 
 const displaySupplies = computed(() => {
-  // 默认只展示前 10 条；若存在 focusId，则展示完整列表以保证可定位
+  // 若存在 focusId，则展示完整列表以保证可定位
   if (focusIdFromRoute.value) return supplies.value
-  return supplies.value.slice(0, 10)
+  // 前端分页（后端暂不支持分页参数）
+  const start = (currentPage.value - 1) * pageSize.value
+  return supplies.value.slice(start, start + pageSize.value)
 })
 
 function setCardEl(id: number, el: Element | null) {
@@ -176,9 +190,36 @@ function onDrawerClosed() {
 async function loadSupplies() {
   listLoading.value = true
   try {
-    const res = await listSupplies({ activeOnly: true, includeExpired: false, orderBy: 'create_time', order: 'desc' })
+    const params: any = { 
+      activeOnly: true, 
+      includeExpired: false, 
+      orderBy: 'create_time', 
+      order: 'desc' 
+    }
+    
+    // 应用筛选条件
+    if (selectedCategory.value) {
+      params.categoryName = selectedCategory.value
+    }
+    
+    const res = await listSupplies(params)
     if (res.code !== 0) throw new Error(res.message)
-    supplies.value = res.data || []
+    
+    let result = res.data || []
+    
+    // 前端搜索过滤（关键词搜索）
+    if (searchKeyword.value.trim()) {
+      const kw = searchKeyword.value.toLowerCase()
+      result = result.filter(s => 
+        s.categoryName?.toLowerCase().includes(kw) ||
+        s.companyName?.toLowerCase().includes(kw) ||
+        s.shipAddress?.toLowerCase().includes(kw) ||
+        s.nickName?.toLowerCase().includes(kw)
+      )
+    }
+    
+    supplies.value = result
+    total.value = result.length
     
     // 加载关注状态
     const userIds = supplies.value.map(s => s.userId).filter(Boolean) as number[]
@@ -186,10 +227,31 @@ async function loadSupplies() {
     loadFollowStatus(uniqueUserIds)
   } catch {
     supplies.value = []
+    total.value = 0
   } finally {
     listLoading.value = false
     applyFocusIfNeeded()
   }
+}
+
+// 选择品种筛选
+function selectCategory(cat: string | null) {
+  selectedCategory.value = selectedCategory.value === cat ? null : cat
+  currentPage.value = 1 // 重置分页
+  loadSupplies()
+}
+
+// 搜索
+function onSearch() {
+  currentPage.value = 1 // 重置分页
+  loadSupplies()
+}
+
+// 分页变更
+function handlePageChange(page: number) {
+  currentPage.value = page
+  // 滚动到列表顶部
+  window.scrollTo({ top: 400, behavior: 'smooth' })
 }
 
 onMounted(() => {
@@ -262,40 +324,40 @@ function parseParams(paramsJson?: string): string {
         <div class="flex flex-col md:flex-row gap-4 mb-6">
           <div class="flex-1 relative">
             <input
+              v-model="searchKeyword"
               type="text"
               placeholder="搜索品种、产地、指标或公司..."
               class="w-full border-2 border-gray-100 rounded-xl py-2.5 px-10 focus:border-emerald-500 outline-none transition-all"
+              @keyup.enter="onSearch"
             />
             <svg class="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </div>
-          <button class="px-8 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all active:scale-95">查询信息</button>
+          <button 
+            class="px-8 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all active:scale-95"
+            @click="onSearch"
+          >
+            查询信息
+          </button>
         </div>
 
         <div class="space-y-4">
           <div class="flex items-start gap-4 text-xs">
             <span class="text-gray-400 shrink-0 mt-1.5 font-medium">常见品种:</span>
             <div class="flex flex-wrap gap-2">
-              <button class="filter-tag active px-3 py-1 border rounded-full">全部</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">玉米</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">豆粕</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">棉粕</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">菜粕</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">DDGS</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">赖氨酸</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">蛋氨酸</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">磷酸氢钙</button>
-            </div>
-          </div>
-          <div class="flex items-start gap-4 text-xs">
-            <span class="text-gray-400 shrink-0 mt-1.5 font-medium">物流区域:</span>
-            <div class="flex flex-wrap gap-2">
-              <button class="filter-tag px-3 py-1 border rounded-full">东北区</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">华北区</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">华中区</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">华东沿海</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">华南沿海</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">西南区</button>
-              <button class="filter-tag px-3 py-1 border rounded-full">西北区</button>
+              <button 
+                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === null ? 'bg-emerald-600 text-white border-emerald-600' : 'border-gray-200 hover:border-emerald-500 hover:text-emerald-600']"
+                @click="selectCategory(null)"
+              >
+                全部
+              </button>
+              <button 
+                v-for="cat in categoryOptions" 
+                :key="cat"
+                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === cat ? 'bg-emerald-600 text-white border-emerald-600' : 'border-gray-200 hover:border-emerald-500 hover:text-emerald-600']"
+                @click="selectCategory(cat)"
+              >
+                {{ cat }}
+              </button>
             </div>
           </div>
         </div>
@@ -378,22 +440,34 @@ function parseParams(paramsJson?: string): string {
               <button class="px-8 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-md shadow-emerald-50 hover:bg-emerald-700 transition-all active:scale-95" @click="onConsult(s)">
                 立即咨询
               </button>
-              <span class="text-[10px] text-gray-400">今日已有 12 人咨询</span>
             </div>
           </div>
         </div>
 
-        <div v-if="!listLoading && supplies.length === 0" class="bg-white rounded-2xl border border-gray-100 p-8 text-gray-400 text-sm">
-          暂无货源数据（后续会继续完善筛选与排序）
+        <div v-if="!listLoading && supplies.length === 0" class="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+          <div class="text-gray-400 text-sm mb-2">暂无货源数据</div>
+          <div class="text-xs text-gray-300">
+            {{ selectedCategory ? `没有找到「${selectedCategory}」相关的供应信息` : '请尝试调整筛选条件' }}
+          </div>
         </div>
       </div>
 
-      <div class="flex justify-center mt-10 gap-2">
-        <button class="px-4 py-2 bg-white border rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition-colors">上一页</button>
-        <button class="px-4 py-2 bg-emerald-600 text-white border-emerald-600 rounded-lg text-sm font-bold">1</button>
-        <button class="px-4 py-2 bg-white border rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition-colors">2</button>
-        <button class="px-4 py-2 bg-white border rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition-colors">3</button>
-        <button class="px-4 py-2 bg-white border rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition-colors">下一页</button>
+      <!-- 分页 -->
+      <div v-if="total > pageSize" class="flex justify-center mt-10">
+        <el-pagination
+          v-model:current-page="currentPage"
+          :page-size="pageSize"
+          :total="total"
+          layout="prev, pager, next"
+          background
+          @current-change="handlePageChange"
+        />
+      </div>
+      
+      <!-- 数据统计 -->
+      <div v-if="total > 0" class="text-center mt-4 text-xs text-gray-400">
+        共 {{ total }} 条供应信息
+        <span v-if="selectedCategory" class="ml-2">· 当前筛选：{{ selectedCategory }}</span>
       </div>
     </main>
 

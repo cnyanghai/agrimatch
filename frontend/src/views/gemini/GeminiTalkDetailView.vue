@@ -209,7 +209,7 @@ onMounted(() => {
       <!-- 话题内容 -->
       <div v-if="post" class="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm mb-6">
         <div class="flex items-center gap-3 mb-6">
-          <div class="w-12 h-12 rounded-full bg-indigo-500 text-white flex items-center justify-center text-lg font-bold">
+          <div class="w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center text-lg font-bold">
             {{ (post.nickName || post.userName || '?')[0] }}
           </div>
           <div class="flex-1">
@@ -270,12 +270,12 @@ onMounted(() => {
           <textarea
             v-model="commentText"
             placeholder="写下你的评论..."
-            class="w-full h-24 p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+            class="w-full h-24 p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
             :disabled="commenting"
           ></textarea>
           <div class="flex justify-end mt-4">
             <button
-              class="px-6 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all disabled:opacity-50"
+              class="px-6 py-2 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all disabled:opacity-50"
               :disabled="!commentText.trim() || commenting"
               @click="onAddComment"
             >
@@ -295,7 +295,7 @@ onMounted(() => {
             :key="comment.id"
             class="flex gap-4 pb-6 border-b border-gray-50 last:border-b-0"
           >
-            <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
+            <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
               {{ (comment.nickName || comment.userName || '?')[0] }}
             </div>
             <div class="flex-1 min-w-0">

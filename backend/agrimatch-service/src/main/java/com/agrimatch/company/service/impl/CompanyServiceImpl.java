@@ -41,17 +41,19 @@ public class CompanyServiceImpl implements CompanyService {
         c.setCity(req.getCity());
         c.setDistrict(req.getDistrict());
         c.setAddress(req.getAddress());
-        c.setLat(req.getLat());
-        c.setLng(req.getLng());
         c.setLocationsJson(req.getLocationsJson());
         c.setBankInfoJson(req.getBankInfoJson());
 
-        // 自动地理编码：仅当用户未手填坐标但提供了地址
-        if ((c.getLat() == null || c.getLng() == null) && StringUtils.hasText(c.getAddress())) {
-            GeoPoint p = amapGeocodeService.geocode(c.getAddress(), c.getCity(), c.getCompanyName());
-            if (p != null) {
-                c.setLat(p.getLat());
-                c.setLng(p.getLng());
+        // 自动地理编码（用户无感知）：只要有地址就自动解析坐标
+        if (StringUtils.hasText(c.getAddress())) {
+            try {
+                GeoPoint p = amapGeocodeService.geocode(c.getAddress(), c.getCity(), c.getCompanyName());
+                if (p != null) {
+                    c.setLat(p.getLat());
+                    c.setLng(p.getLng());
+                }
+            } catch (Exception ignored) {
+                // 解析失败不阻塞保存，静默处理
             }
         }
 
@@ -78,7 +80,6 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public void update(Long ownerUserId, Long id, CompanyUpdateRequest req) {
         if (ownerUserId == null) throw new ApiException(401, "未登录");
-        // 取旧数据，用于“自动补坐标”判断
         BusCompany old = companyMapper.selectById(id);
         if (old == null) throw new ApiException(ResultCode.NOT_FOUND);
         if (!ownerUserId.equals(old.getOwnerUserId())) throw new ApiException(ResultCode.NOT_FOUND);
@@ -97,22 +98,31 @@ public class CompanyServiceImpl implements CompanyService {
         c.setCity(emptyToNull(req.getCity()));
         c.setDistrict(emptyToNull(req.getDistrict()));
         c.setAddress(emptyToNull(req.getAddress()));
-        c.setLat(req.getLat());
-        c.setLng(req.getLng());
         c.setLocationsJson(emptyToNull(req.getLocationsJson()));
         c.setBankInfoJson(emptyToNull(req.getBankInfoJson()));
 
-        // 自动地理编码：仅当本次没有提供坐标，且旧数据也没有坐标，且地址在本次或旧数据存在
-        boolean noLatLngProvided = (c.getLat() == null || c.getLng() == null);
-        boolean oldMissingLatLng = (old.getLat() == null || old.getLng() == null);
-        String addr = c.getAddress() != null ? c.getAddress() : old.getAddress();
-        String city = c.getCity() != null ? c.getCity() : old.getCity();
-        if (noLatLngProvided && oldMissingLatLng && StringUtils.hasText(addr)) {
-            String cname = c.getCompanyName() != null ? c.getCompanyName() : old.getCompanyName();
-            GeoPoint p = amapGeocodeService.geocode(addr, city, cname);
-            if (p != null) {
-                c.setLat(p.getLat());
-                c.setLng(p.getLng());
+        // 自动地理编码逻辑（用户无感知）
+        // 1. 获取最终地址（本次提交的 > 旧数据的）
+        String finalAddress = c.getAddress() != null ? c.getAddress() : old.getAddress();
+        String finalCity = c.getCity() != null ? c.getCity() : old.getCity();
+        String finalName = c.getCompanyName() != null ? c.getCompanyName() : old.getCompanyName();
+        
+        // 2. 判断地址是否变更
+        boolean addressChanged = c.getAddress() != null && !c.getAddress().equals(old.getAddress());
+        
+        // 3. 判断当前是否缺少坐标
+        boolean missingCoords = old.getLat() == null || old.getLng() == null;
+        
+        // 4. 地址变更 或 缺少坐标时，自动解析
+        if (StringUtils.hasText(finalAddress) && (addressChanged || missingCoords)) {
+            try {
+                GeoPoint p = amapGeocodeService.geocode(finalAddress, finalCity, finalName);
+                if (p != null) {
+                    c.setLat(p.getLat());
+                    c.setLng(p.getLng());
+                }
+            } catch (Exception ignored) {
+                // 解析失败不阻塞保存，静默处理
             }
         }
 

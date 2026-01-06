@@ -11,7 +11,8 @@ const router = createRouter({
     { path: '/hall/need', name: 'hall-need', component: () => import('../views/gemini/GeminiNeedHallView.vue'), meta: { public: true, minimal: true } },
     { path: '/talks', name: 'talks', component: () => import('../views/gemini/GeminiTalksView.vue'), meta: { public: true, minimal: true } },
     { path: '/talks/:id', name: 'talk-detail', component: () => import('../views/gemini/GeminiTalkDetailView.vue'), meta: { public: true, minimal: true } },
-    { path: '/insights', name: 'insights', component: () => import('../views/gemini/GeminiInsightsView.vue'), meta: { public: true, minimal: true } },
+    // 见闻页面暂时下线（功能未完善），重定向到话题广场
+    { path: '/insights', redirect: '/talks' },
     { path: '/talks/publish', name: 'talks-publish', component: () => import('../views/gemini/GeminiTalksPublishView.vue'), meta: { minimal: true, requiresAuth: true } },
 
     { path: '/console', name: 'console', component: () => import('../views/ConsoleHomeView.vue') },

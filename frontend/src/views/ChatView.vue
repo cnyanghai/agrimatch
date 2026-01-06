@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, nextTick, onBeforeUnmount, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAuthStore } from '../store/auth'
 import { Search, Picture, Document, Position, Present, ChatDotRound, Star, StarFilled, Loading } from '@element-plus/icons-vue'
 import { giftPoints } from '../api/points'
@@ -25,8 +25,179 @@ const chatContainerRef = ref<HTMLElement | null>(null)
 // 当前选中的会话
 const activeConversationId = ref<number | null>(null)
 
+// 当前选中的联系人 ID
+const activePeerId = ref<number | null>(null)
+
 // 会话列表
 const conversations = ref<ChatConversationResponse[]>([])
+
+// 已归档的会话 ID 列表（存储在 localStorage）
+const archivedConversationIds = ref<Set<number>>(new Set())
+const ARCHIVED_STORAGE_KEY = 'chat_archived_conversations'
+
+// 加载已归档会话列表
+function loadArchivedConversations() {
+  try {
+    const stored = localStorage.getItem(ARCHIVED_STORAGE_KEY)
+    if (stored) {
+      const ids = JSON.parse(stored) as number[]
+      archivedConversationIds.value = new Set(ids)
+    }
+  } catch {
+    archivedConversationIds.value = new Set()
+  }
+}
+
+// 保存已归档会话列表
+function saveArchivedConversations() {
+  try {
+    const ids = Array.from(archivedConversationIds.value)
+    localStorage.setItem(ARCHIVED_STORAGE_KEY, JSON.stringify(ids))
+  } catch {
+    // ignore
+  }
+}
+
+// 归档会话
+function archiveConversation(conversationId: number) {
+  archivedConversationIds.value.add(conversationId)
+  saveArchivedConversations()
+  
+  // 如果归档的是当前会话，切换到下一个
+  if (activeConversationId.value === conversationId) {
+    const remaining = currentPeerConversations.value.filter(c => c.id !== conversationId)
+    if (remaining.length > 0) {
+      switchConversation(remaining[0].id)
+    } else {
+      // 该联系人没有其他会话了，切换到下一个联系人
+      activeConversationId.value = null
+      const otherPeers = groupedByPeer.value.filter(p => p.peerUserId !== activePeerId.value)
+      if (otherPeers.length > 0) {
+        selectPeer(otherPeers[0])
+      } else {
+        activePeerId.value = null
+        messages.value = []
+      }
+    }
+  }
+  
+  ElMessage.success('会话已归档')
+}
+
+// 恢复归档的会话
+function restoreConversation(conversationId: number) {
+  archivedConversationIds.value.delete(conversationId)
+  saveArchivedConversations()
+  ElMessage.success('会话已恢复')
+}
+
+// 显示已归档会话的弹窗
+const showArchivedModal = ref(false)
+
+// 已归档的会话列表（用于弹窗显示）
+const archivedConversations = computed(() => {
+  return conversations.value.filter(c => archivedConversationIds.value.has(c.id))
+})
+
+// 活跃的会话列表（过滤掉已归档的）
+const activeConversations = computed(() => {
+  return conversations.value.filter(c => !archivedConversationIds.value.has(c.id))
+})
+
+// 联系人聚合类型
+interface PeerGroup {
+  peerUserId: number
+  peerUserName?: string
+  peerNickName?: string
+  peerCompanyName?: string
+  conversations: ChatConversationResponse[]
+  totalUnread: number
+  lastTime: string
+  lastContent: string
+}
+
+// 按联系人聚合会话（只聚合活跃的会话，排除已归档的）
+const groupedByPeer = computed<PeerGroup[]>(() => {
+  const map = new Map<number, PeerGroup>()
+  
+  activeConversations.value.forEach(c => {
+    const existing = map.get(c.peerUserId)
+    if (existing) {
+      existing.conversations.push(c)
+      existing.totalUnread += c.unreadCount || 0
+      if (c.lastTime && c.lastTime > existing.lastTime) {
+        existing.lastTime = c.lastTime
+        existing.lastContent = c.lastContent || ''
+      }
+    } else {
+      map.set(c.peerUserId, {
+        peerUserId: c.peerUserId,
+        peerUserName: c.peerUserName,
+        peerNickName: c.peerNickName,
+        peerCompanyName: c.peerCompanyName,
+        conversations: [c],
+        totalUnread: c.unreadCount || 0,
+        lastTime: c.lastTime || '',
+        lastContent: c.lastContent || ''
+      })
+    }
+  })
+  
+  return Array.from(map.values())
+    .sort((a, b) => (b.lastTime || '').localeCompare(a.lastTime || ''))
+})
+
+// 按时间分组
+interface TimeGroup {
+  label: string
+  peers: PeerGroup[]
+}
+
+const timeGroupedPeers = computed<TimeGroup[]>(() => {
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
+  const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+  
+  const groups: TimeGroup[] = [
+    { label: '今天', peers: [] },
+    { label: '昨天', peers: [] },
+    { label: '本周', peers: [] },
+    { label: '更早', peers: [] }
+  ]
+  
+  // 如果有搜索关键词，先过滤
+  let peers = groupedByPeer.value
+  if (searchKeyword.value) {
+    const kw = searchKeyword.value.toLowerCase()
+    peers = peers.filter(p =>
+      `${p.peerCompanyName || ''}${p.peerNickName || ''}${p.peerUserName || ''}`.toLowerCase().includes(kw) ||
+      `${p.lastContent || ''}`.toLowerCase().includes(kw)
+    )
+  }
+  
+  peers.forEach(peer => {
+    const d = peer.lastTime ? new Date(peer.lastTime) : new Date(0)
+    if (d >= today) {
+      groups[0].peers.push(peer)
+    } else if (d >= yesterday) {
+      groups[1].peers.push(peer)
+    } else if (d >= thisWeek) {
+      groups[2].peers.push(peer)
+    } else {
+      groups[3].peers.push(peer)
+    }
+  })
+  
+  return groups.filter(g => g.peers.length > 0)
+})
+
+// 当前选中联系人的会话列表
+const currentPeerConversations = computed(() => {
+  if (!activePeerId.value) return []
+  const peer = groupedByPeer.value.find(p => p.peerUserId === activePeerId.value)
+  return peer?.conversations || []
+})
 
 // 消息列表
 type UiMessage = {
@@ -114,13 +285,9 @@ const uploading = ref(false)
 const uploadProgress = ref(0)
 const uploadType = ref<'image' | 'attachment'>('image')
 
-const filteredConversations = computed(() => {
-  if (!searchKeyword.value) return conversations.value
-  const kw = searchKeyword.value.toLowerCase()
-  return conversations.value.filter(c =>
-    `${c.peerCompanyName || ''}${c.peerNickName || ''}${c.peerUserName || ''}`.toLowerCase().includes(kw) ||
-    `${c.lastContent || ''}`.toLowerCase().includes(kw)
-  )
+// 当前联系人信息（聚合后）
+const currentPeer = computed(() => {
+  return groupedByPeer.value.find(p => p.peerUserId === activePeerId.value) || null
 })
 
 const currentConversation = computed(() => {
@@ -187,6 +354,37 @@ function formatTime(ts?: string) {
   const d = new Date(ts)
   if (Number.isNaN(d.getTime())) return ts
   return d.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+}
+
+// 格式化相对时间（用于会话列表）
+function formatRelativeTime(ts?: string) {
+  if (!ts) return ''
+  const d = new Date(ts)
+  if (Number.isNaN(d.getTime())) return ''
+  
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
+  
+  if (d >= today) {
+    return d.toLocaleString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  } else if (d >= yesterday) {
+    return '昨天'
+  } else {
+    return d.toLocaleString('zh-CN', { month: 'numeric', day: 'numeric' })
+  }
+}
+
+// 获取标的简称
+function getSubjectShortName(c: ChatConversationResponse): string {
+  try {
+    if (c.subjectSnapshotJson) {
+      const obj = JSON.parse(c.subjectSnapshotJson)
+      return obj.productName || obj.title || ''
+    }
+  } catch {}
+  const st = (c.subjectType || '').toUpperCase()
+  return st === 'SUPPLY' ? '供应' : st === 'NEED' ? '采购' : '会话'
 }
 
 function wsUrl() {
@@ -344,12 +542,36 @@ async function handleConfirmOffer(msgId: number | string) {
     if (res.code === 0) {
       ElMessage.success('报价已确认，交易达成！')
       // 后端会通过 WS 广播通知，所以这里其实不用手动更新本地状态，等推送即可
+      
+      // 延迟一点后询问是否起草合同，让状态有时间更新
+      setTimeout(() => {
+        promptContractDraft()
+      }, 800)
     } else {
       ElMessage.error(res.message || '确认失败')
     }
   } catch (e: any) {
     ElMessage.error(e.message || '确认失败')
   }
+}
+
+// 提示用户是否起草合同
+function promptContractDraft() {
+  ElMessageBox.confirm(
+    '交易意向已达成，是否立即起草电子合同？',
+    '起草合同',
+    {
+      confirmButtonText: '立即起草',
+      cancelButtonText: '稍后处理',
+      type: 'success',
+      center: true
+    }
+  ).then(() => {
+    initiateContract()
+  }).catch(() => {
+    // 用户选择稍后处理
+    ElMessage.info('您可以随时点击右侧「起草合同」按钮来创建合同')
+  })
 }
 
 function onWsSent(tempId?: string, id?: number, conversationId?: number) {
@@ -440,11 +662,13 @@ async function loadConversations() {
       return
     }
 
-    if (conversations.value.length > 0 && !activeConversationId.value) {
-      const first = conversations.value[0]
-      if (first) await selectConversation(first)
+    // 选择第一个联系人
+    if (groupedByPeer.value.length > 0 && !activePeerId.value) {
+      const firstPeer = groupedByPeer.value[0]
+      if (firstPeer) await selectPeer(firstPeer)
     } else if (conversations.value.length === 0) {
       activeConversationId.value = null
+      activePeerId.value = null
       messages.value = []
     }
   } finally {
@@ -455,6 +679,35 @@ async function loadConversations() {
 function avatarText(name?: string) {
   const s = (name || '').trim()
   return s ? s[0] : 'A'
+}
+
+// 头像渐变色方案 - 根据用户名生成个性化渐变
+const AVATAR_GRADIENTS = [
+  'from-violet-500 to-purple-600',      // 紫罗兰
+  'from-emerald-500 to-teal-600',       // 翡翠绿
+  'from-sky-500 to-blue-600',           // 天蓝
+  'from-orange-400 to-rose-500',        // 珊瑚橙
+  'from-pink-500 to-fuchsia-600',       // 品红
+  'from-cyan-500 to-blue-500',          // 青蓝
+  'from-amber-500 to-orange-600',       // 琥珀
+  'from-indigo-500 to-violet-600',      // 靛蓝
+  'from-rose-500 to-pink-600',          // 玫瑰
+  'from-teal-500 to-emerald-600',       // 青绿
+]
+
+function avatarGradient(name?: string): string {
+  const s = (name || '').trim()
+  if (!s) return AVATAR_GRADIENTS[0]
+  
+  // 使用名字的字符码之和来确定渐变色
+  let hash = 0
+  for (let i = 0; i < s.length; i++) {
+    hash = ((hash << 5) - hash) + s.charCodeAt(i)
+    hash = hash & hash // Convert to 32bit integer
+  }
+  
+  const index = Math.abs(hash) % AVATAR_GRADIENTS.length
+  return AVATAR_GRADIENTS[index]
 }
 
 function subjectBadge(c: ChatConversationResponse) {
@@ -594,9 +847,24 @@ function downloadAttachment(url: string, fileName: string) {
   document.body.removeChild(link)
 }
 
-// 选择会话
+// 选择联系人
+async function selectPeer(peer: PeerGroup) {
+  activePeerId.value = peer.peerUserId
+  
+  // 默认选择该联系人最新的会话
+  const latestConversation = peer.conversations.sort((a, b) => 
+    (b.lastTime || '').localeCompare(a.lastTime || '')
+  )[0]
+  
+  if (latestConversation) {
+    await selectConversation(latestConversation)
+  }
+}
+
+// 选择会话（在已选中联系人内切换标的）
 async function selectConversation(c: ChatConversationResponse) {
   activeConversationId.value = c.id
+  activePeerId.value = c.peerUserId
   c.unreadCount = 0
 
   await loadMessages(c.id)
@@ -611,6 +879,14 @@ async function selectConversation(c: ChatConversationResponse) {
 
   // 同步 URL（便于"转入沟通中心"/刷新保留）
   router.replace({ path: '/chat', query: { conversationId: String(c.id) } })
+}
+
+// 切换同一联系人的不同标的会话
+async function switchConversation(conversationId: number) {
+  const c = conversations.value.find(c => c.id === conversationId)
+  if (c) {
+    await selectConversation(c)
+  }
 }
 
 // 加载消息（conversation 维度）
@@ -1004,6 +1280,7 @@ async function uploadAndSendFile(file: File, type: 'image' | 'attachment') {
 }
 
 onMounted(() => {
+  loadArchivedConversations()
   if (canRealtime.value) connectWs()
   loadConversations()
   xlMql = window.matchMedia('(min-width: 1280px)')
@@ -1032,73 +1309,126 @@ onBeforeUnmount(() => {
 <template>
   <div class="chat-view h-full">
     <div class="flex h-full bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <!-- 左侧会话列表 -->
-      <div class="w-80 border-r border-gray-100 flex flex-col">
+      <!-- 左侧联系人列表（聚合后） -->
+      <div class="w-80 border-r border-gray-100 flex flex-col bg-white">
         <!-- 搜索栏 -->
         <div class="p-4 border-b border-gray-100">
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索会话"
-            :prefix-icon="Search"
-            clearable
-          />
+          <div class="relative">
+            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              v-model="searchKeyword"
+              type="text"
+              placeholder="搜索联系人..."
+              class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border-2 border-transparent rounded-xl text-sm focus:bg-white focus:border-emerald-500 outline-none transition-all"
+            />
+          </div>
         </div>
 
-        <!-- 会话列表 -->
+        <!-- 联系人列表（按时间分组） -->
         <div class="flex-1 overflow-y-auto">
-          <div
-            v-for="c in filteredConversations"
-            :key="c.id"
-            class="px-4 py-3 cursor-pointer hover:bg-gray-50/50 transition-all border-b border-gray-50"
-            :class="{ 'bg-emerald-50/60': activeConversationId === c.id }"
-            @click="selectConversation(c)"
-          >
-            <div class="flex items-start gap-3">
-              <!-- 头像 -->
-              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold shrink-0 bg-slate-900">
-                {{ avatarText(c.peerNickName || c.peerUserName || c.peerCompanyName) }}
-              </div>
+          <template v-for="group in timeGroupedPeers" :key="group.label">
+            <!-- 时间分组标题 -->
+            <div class="sticky top-0 z-10 px-4 py-2 bg-gray-50/95 backdrop-blur-sm">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">{{ group.label }}</span>
+            </div>
+            
+            <!-- 联系人卡片 -->
+            <div
+              v-for="(peer, peerIdx) in group.peers"
+              :key="peer.peerUserId"
+              class="peer-card relative cursor-pointer transition-all"
+              :class="[
+                activePeerId === peer.peerUserId 
+                  ? 'bg-white shadow-sm' 
+                  : 'hover:bg-gray-50/50'
+              ]"
+              :style="{ animationDelay: `${peerIdx * 50}ms` }"
+              @click="selectPeer(peer)"
+            >
+              <!-- 选中指示条 -->
+              <div 
+                v-if="activePeerId === peer.peerUserId"
+                class="indicator-bar absolute left-0 top-3 bottom-3 w-1 bg-emerald-500 rounded-r-full"
+              ></div>
               
-              <!-- 会话信息 -->
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-gray-900 truncate">
-                    {{ c.peerNickName || c.peerUserName || '对方' }}
-                  </span>
-                  <span class="text-xs text-gray-400 shrink-0 ml-2">{{ formatTime(c.lastTime) }}</span>
+              <div class="px-4 py-3 flex items-start gap-3">
+                <!-- 头像 + 在线状态 -->
+                <div class="relative shrink-0">
+                  <div 
+                    class="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold bg-gradient-to-br shadow-lg"
+                    :class="avatarGradient(peer.peerNickName || peer.peerUserName || peer.peerCompanyName)"
+                  >
+                    {{ avatarText(peer.peerNickName || peer.peerUserName || peer.peerCompanyName) }}
+                  </div>
+                  <!-- 在线状态指示器 -->
+                  <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></div>
                 </div>
-                <div class="text-sm text-gray-500 truncate mt-1">{{ c.lastContent || '暂无消息' }}</div>
-                <!-- 关联信息标签 -->
-                <div class="mt-2 flex items-center gap-2">
-                  <span class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border"
-                        :class="subjectBadge(c).cls">
-                    {{ subjectBadge(c).label }}
-                  </span>
-                  <span class="text-xs text-gray-400 truncate" v-if="c.peerCompanyName">{{ c.peerCompanyName }}</span>
+                
+                <!-- 联系人信息 -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-gray-900 truncate">
+                      {{ peer.peerNickName || peer.peerUserName || '对方' }}
+                    </span>
+                    <span class="text-[10px] text-gray-400 shrink-0 ml-2">{{ formatRelativeTime(peer.lastTime) }}</span>
+                  </div>
+                  <div class="text-xs text-gray-500 truncate mt-1">{{ peer.lastContent || '暂无消息' }}</div>
+                  <!-- 标的标签（多个会话时显示数量） -->
+                  <div class="mt-2 flex items-center gap-2">
+                    <span 
+                      v-if="peer.conversations.length === 1"
+                      class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border"
+                      :class="subjectBadge(peer.conversations[0]).cls"
+                    >
+                      {{ getSubjectShortName(peer.conversations[0]) || subjectBadge(peer.conversations[0]).label }}
+                    </span>
+                    <span 
+                      v-else
+                      class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600"
+                    >
+                      {{ peer.conversations.length }} 个话题
+                    </span>
+                    <span class="text-[10px] text-gray-400 truncate" v-if="peer.peerCompanyName">{{ peer.peerCompanyName }}</span>
+                  </div>
                 </div>
-              </div>
-              
-              <!-- 未读标记 -->
-              <div v-if="(c.unreadCount || 0) > 0" class="min-w-5 h-5 px-1 rounded-full bg-red-500 text-white text-xs flex items-center justify-center shrink-0">
-                {{ c.unreadCount }}
+                
+                <!-- 未读角标 -->
+                <div 
+                  v-if="peer.totalUnread > 0" 
+                  class="unread-badge min-w-5 h-5 px-1.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center shrink-0"
+                >
+                  {{ peer.totalUnread > 99 ? '99+' : peer.totalUnread }}
+                </div>
               </div>
             </div>
-          </div>
+          </template>
 
-          <div v-if="filteredConversations.length === 0" class="py-12 text-center text-gray-400">
-            暂无会话
+          <!-- 空状态 -->
+          <div v-if="timeGroupedPeers.length === 0" class="py-16 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 flex items-center justify-center">
+              <ChatDotRound class="w-8 h-8 text-gray-300" />
+            </div>
+            <p class="text-sm font-medium text-gray-500">暂无会话</p>
+            <p class="text-xs text-gray-400 mt-1">从供应/需求大厅发起沟通</p>
           </div>
         </div>
       </div>
 
       <!-- 右侧聊天区域 -->
       <div class="flex-1 flex flex-col min-w-0">
-        <!-- 顶部信息栏简化 -->
-        <div v-if="currentConversation" class="px-6 py-3 border-b border-gray-100 bg-white">
-          <div class="flex items-center justify-between">
+        <!-- 顶部信息栏 + 标的切换器 -->
+        <div v-if="currentConversation" class="border-b border-gray-100 bg-white">
+          <!-- 联系人信息 -->
+          <div class="px-6 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-bold shrink-0">
-                {{ avatarText(currentConversation.peerNickName || currentConversation.peerUserName || currentConversation.peerCompanyName) }}
+              <div class="relative">
+                <div 
+                  class="w-10 h-10 rounded-2xl bg-gradient-to-br flex items-center justify-center text-white font-bold shrink-0 shadow-md"
+                  :class="avatarGradient(currentConversation.peerNickName || currentConversation.peerUserName || currentConversation.peerCompanyName)"
+                >
+                  {{ avatarText(currentConversation.peerNickName || currentConversation.peerUserName || currentConversation.peerCompanyName) }}
+                </div>
+                <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></div>
               </div>
               <div>
                 <div class="font-bold text-gray-900 leading-tight">{{ peerDisplayName }}</div>
@@ -1114,23 +1444,105 @@ onBeforeUnmount(() => {
             
             <div class="flex items-center gap-2">
               <!-- 关注按钮 -->
-              <el-button 
-                size="small" 
-                :loading="followLoading"
-                :type="isFollowingPeer ? 'warning' : 'default'"
-                class="!rounded-xl transition-all active:scale-95"
+              <button 
+                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1"
+                :class="isFollowingPeer 
+                  ? 'bg-amber-50 text-amber-600 hover:bg-amber-100' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                :disabled="followLoading"
                 @click="toggleFollowPeer"
               >
-                <template #icon>
-                  <StarFilled v-if="isFollowingPeer" class="w-4 h-4" />
-                  <Star v-else class="w-4 h-4" />
-                </template>
+                <StarFilled v-if="isFollowingPeer" class="w-3.5 h-3.5" />
+                <Star v-else class="w-3.5 h-3.5" />
                 {{ isFollowingPeer ? '已关注' : '关注' }}
-              </el-button>
-              <el-button size="small" circle :icon="Present" @click="openGiftDialog" title="赠送积分" />
-              <el-button size="small" class="!rounded-xl !bg-slate-900 !text-white transition-all active:scale-95" @click="initiateContract">
+              </button>
+              <button 
+                class="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-all active:scale-95"
+                @click="openGiftDialog" 
+                title="赠送积分"
+              >
+                <Present class="w-4 h-4 text-gray-600" />
+              </button>
+              <button 
+                class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold transition-all active:scale-95 shadow-md shadow-emerald-500/20"
+                @click="initiateContract"
+              >
                 起草合同
-              </el-button>
+              </button>
+            </div>
+          </div>
+          
+          <!-- 标的切换器（多个会话时显示） -->
+          <div 
+            v-if="currentPeerConversations.length > 1" 
+            class="px-6 py-2 border-t border-gray-50 bg-gray-50/50 flex items-center gap-2 overflow-x-auto"
+          >
+            <span class="text-[10px] text-gray-400 shrink-0">话题：</span>
+            <div
+              v-for="conv in currentPeerConversations"
+              :key="conv.id"
+              class="subject-tab group relative flex items-center gap-1 px-3 py-1.5 pr-7 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0 cursor-pointer"
+              :class="activeConversationId === conv.id 
+                ? 'bg-emerald-600 text-white shadow-sm' 
+                : 'bg-white border border-gray-200 text-gray-600 hover:border-emerald-300 hover:text-emerald-600'"
+              @click="switchConversation(conv.id)"
+            >
+              <span 
+                class="w-1.5 h-1.5 rounded-full shrink-0"
+                :class="(conv.subjectType || '').toUpperCase() === 'SUPPLY' ? 'bg-emerald-400' : 'bg-blue-400'"
+              ></span>
+              <span>{{ getSubjectShortName(conv) || subjectBadge(conv).label }}</span>
+              <!-- 关闭按钮 -->
+              <button
+                class="absolute right-1 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+                :class="activeConversationId === conv.id 
+                  ? 'hover:bg-white/20 text-white' 
+                  : 'hover:bg-gray-200 text-gray-400'"
+                @click.stop="archiveConversation(conv.id)"
+                title="归档此话题"
+              >
+                <span class="text-[10px] font-bold">×</span>
+              </button>
+            </div>
+            
+            <!-- 已归档入口 -->
+            <button
+              v-if="archivedConversations.length > 0"
+              class="flex items-center gap-1 px-2 py-1 text-[10px] text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+              @click="showArchivedModal = true"
+            >
+              <span>📦</span>
+              <span>已归档 ({{ archivedConversations.length }})</span>
+            </button>
+          </div>
+          
+          <!-- 单个会话时也显示关闭按钮 -->
+          <div 
+            v-else-if="currentPeerConversations.length === 1" 
+            class="px-6 py-2 border-t border-gray-50 bg-gray-50/50 flex items-center justify-between"
+          >
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] text-gray-400">话题：</span>
+              <span class="text-xs font-medium text-gray-700">
+                {{ getSubjectShortName(currentPeerConversations[0]) || subjectBadge(currentPeerConversations[0]).label }}
+              </span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                class="px-2 py-1 text-[10px] text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
+                @click="archiveConversation(currentPeerConversations[0].id)"
+                title="归档此话题"
+              >
+                归档
+              </button>
+              <button
+                v-if="archivedConversations.length > 0"
+                class="flex items-center gap-1 px-2 py-1 text-[10px] text-gray-400 hover:text-gray-600 transition-colors"
+                @click="showArchivedModal = true"
+              >
+                <span>📦</span>
+                <span>已归档 ({{ archivedConversations.length }})</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1179,8 +1591,11 @@ onBeforeUnmount(() => {
                     </div>
                     
                     <!-- 接收的消息 -->
-                    <div v-else-if="msg.type === 'received'" class="flex items-start gap-3 max-w-[85%] lg:max-w-[70%]">
-                      <div class="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                    <div v-else-if="msg.type === 'received'" class="message-received flex items-start gap-3 max-w-[85%] lg:max-w-[70%]">
+                      <div 
+                        class="w-8 h-8 rounded-xl bg-gradient-to-br flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm"
+                        :class="avatarGradient(currentConversation?.peerNickName || currentConversation?.peerUserName || currentConversation?.peerCompanyName)"
+                      >
                         {{ avatarText(currentConversation?.peerNickName || currentConversation?.peerUserName || currentConversation?.peerCompanyName) }}
                       </div>
                       <div>
@@ -1267,7 +1682,7 @@ onBeforeUnmount(() => {
                     </div>
                     
                     <!-- 发送的消息 -->
-                    <div v-else class="flex items-start gap-3 max-w-[85%] lg:max-w-[70%] flex-row-reverse">
+                    <div v-else class="message-sent flex items-start gap-3 max-w-[85%] lg:max-w-[70%] flex-row-reverse">
                       <div class="w-8 h-8 rounded-xl bg-emerald-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
                         {{ (auth.me?.nickName || 'U')[0] }}
                       </div>
@@ -1454,7 +1869,7 @@ onBeforeUnmount(() => {
                 <div class="bg-emerald-50 text-emerald-700 p-3 rounded-xl text-xs font-medium leading-relaxed">
                   🎉 意向已达成！建议立即起草电子合同以保障双方权益。
                 </div>
-                <el-button type="primary" class="w-full !rounded-xl !bg-slate-900 !border-slate-900" @click="initiateContract">
+                <el-button type="primary" class="w-full !rounded-xl !bg-gradient-to-r !from-emerald-600 !to-teal-600 hover:!from-emerald-700 hover:!to-teal-700 !border-transparent !shadow-md !shadow-emerald-500/20" @click="initiateContract">
                   起草合同
                 </el-button>
               </div>
@@ -1560,7 +1975,7 @@ onBeforeUnmount(() => {
               </div>
               <div class="flex items-center gap-2 shrink-0">
                 <el-button size="small" class="!rounded-xl transition-all active:scale-95" @click="copySubjectId">复制ID</el-button>
-                <el-button size="small" class="!rounded-xl !bg-slate-900 hover:!bg-slate-800 !border-slate-900 !text-white transition-all active:scale-95" @click="openSubjectOrigin">
+                <el-button size="small" class="!rounded-xl !bg-gradient-to-r !from-emerald-600 !to-teal-600 hover:!from-emerald-700 hover:!to-teal-700 !border-transparent !text-white transition-all active:scale-95 !shadow-md" @click="openSubjectOrigin">
                   打开原始发布
                 </el-button>
               </div>
@@ -1599,7 +2014,10 @@ onBeforeUnmount(() => {
         <!-- 接收人信息卡片 -->
         <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold text-lg shrink-0">
+            <div 
+              class="w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-md"
+              :class="avatarGradient(currentConversation?.peerNickName || currentConversation?.peerUserName || currentConversation?.peerCompanyName)"
+            >
               {{ avatarText(currentConversation?.peerNickName || currentConversation?.peerUserName || currentConversation?.peerCompanyName) }}
             </div>
             <div class="flex-1 min-w-0">
@@ -1696,6 +2114,84 @@ onBeforeUnmount(() => {
       @signed="onContractSigned"
     />
 
+    <!-- 已归档会话弹窗 -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div 
+          v-if="showArchivedModal" 
+          class="fixed inset-0 z-[9998] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+          @click.self="showArchivedModal = false"
+        >
+          <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden animate-zoom-in">
+            <!-- 头部 -->
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <div>
+                <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">会话管理</div>
+                <h2 class="text-lg font-bold text-gray-900">已归档的会话</h2>
+              </div>
+              <button 
+                class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95"
+                @click="showArchivedModal = false"
+              >
+                <span class="text-gray-500 text-sm">✕</span>
+              </button>
+            </div>
+            
+            <!-- 内容 -->
+            <div class="max-h-[60vh] overflow-y-auto">
+              <div v-if="archivedConversations.length === 0" class="py-12 text-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 flex items-center justify-center">
+                  <span class="text-3xl">📦</span>
+                </div>
+                <p class="text-sm font-medium text-gray-500">暂无归档会话</p>
+                <p class="text-xs text-gray-400 mt-1">归档的会话将显示在这里</p>
+              </div>
+              
+              <div v-else class="divide-y divide-gray-50">
+                <div 
+                  v-for="conv in archivedConversations" 
+                  :key="conv.id"
+                  class="px-6 py-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div class="flex items-center justify-between gap-4">
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2">
+                        <span 
+                          class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border"
+                          :class="subjectBadge(conv).cls"
+                        >
+                          {{ subjectBadge(conv).label }}
+                        </span>
+                        <span class="text-sm font-bold text-gray-900 truncate">
+                          {{ getSubjectShortName(conv) || '未命名话题' }}
+                        </span>
+                      </div>
+                      <div class="mt-1 text-xs text-gray-500 truncate">
+                        {{ conv.peerNickName || conv.peerUserName || '对方' }} · {{ conv.lastContent || '暂无消息' }}
+                      </div>
+                    </div>
+                    <button 
+                      class="shrink-0 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-xs font-bold rounded-lg transition-all active:scale-95"
+                      @click="restoreConversation(conv.id)"
+                    >
+                      恢复
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 底部 -->
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+              <p class="text-[10px] text-gray-400 text-center">
+                归档的会话不会显示在列表中，但聊天记录会保留
+              </p>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- 图片预览弹窗 -->
     <Teleport to="body">
       <Transition name="fade">
@@ -1739,7 +2235,6 @@ onBeforeUnmount(() => {
   border-radius: 12px;
 }
 
-
 :deep(.transaction-steps .el-step__title) {
   font-size: 13px;
   font-weight: 700;
@@ -1754,5 +2249,101 @@ onBeforeUnmount(() => {
   width: 20px;
   height: 20px;
   font-size: 10px;
+}
+
+/* 联系人列表入场动画 */
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 联系人卡片悬停效果 */
+.peer-card {
+  animation: slide-in-left 0.3s ease-out backwards;
+}
+
+/* 选中指示条动画 */
+.indicator-bar {
+  transition: all 0.2s ease-out;
+}
+
+/* 未读角标脉冲动画 */
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+.unread-badge {
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+/* 标的切换器标签过渡 */
+.subject-tab {
+  transition: all 0.2s ease-out;
+}
+
+.subject-tab:hover {
+  transform: translateY(-1px);
+}
+
+/* 消息气泡入场动画 */
+@keyframes message-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes message-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.message-received {
+  animation: message-in-left 0.25s ease-out;
+}
+
+.message-sent {
+  animation: message-in-right 0.25s ease-out;
+}
+
+/* 滚动条美化 */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
 }
 </style>

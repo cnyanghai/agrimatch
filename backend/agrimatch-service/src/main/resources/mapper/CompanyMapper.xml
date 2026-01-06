@@ -111,6 +111,22 @@
         LIMIT #{limit}
     </select>
 
+    <!-- 查询有地址但缺少坐标的公司 -->
+    <select id="selectMissingCoords" resultMap="BusCompanyMap">
+        SELECT * FROM bus_company
+        WHERE is_deleted = 0
+          AND (lat IS NULL OR lng IS NULL)
+          AND address IS NOT NULL AND address != ''
+        ORDER BY id
+    </select>
+
+    <!-- 仅更新坐标 -->
+    <update id="updateCoords">
+        UPDATE bus_company
+        SET lat = #{lat}, lng = #{lng}, update_time = NOW(3)
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
 </mapper>
 
 
