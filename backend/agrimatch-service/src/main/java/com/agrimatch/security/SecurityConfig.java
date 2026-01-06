@@ -37,7 +37,8 @@ public class SecurityConfig {
                 .requestMatchers("/", "/error", "/api/health", "/api/auth/**",
                         "/api/products/tree", "/api/products/search", "/api/products/*/params",
                         "/api/posts", "/api/posts/*/comments",
-                        "/api/supplies", "/api/requirements").permitAll()
+                        "/api/supplies", "/api/requirements",
+                        "/api/files/download", "/uploads/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
         );

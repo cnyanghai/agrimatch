@@ -2,13 +2,17 @@
 import { ref, reactive, computed, onMounted, nextTick, onBeforeUnmount, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../store/auth'
-import { Search, Picture, Document, Position, Present, ChatDotRound, Star, StarFilled } from '@element-plus/icons-vue'
+import { Search, Picture, Document, Position, Present, ChatDotRound, Star, StarFilled, Loading } from '@element-plus/icons-vue'
 import { giftPoints } from '../api/points'
+import { uploadImage, uploadAttachment, formatFileSize, type ImagePayload, type AttachmentPayload } from '../api/file'
 import { useRoute, useRouter } from 'vue-router'
 import { getConversationMessages, listChatConversations, markConversationRead, confirmChatOffer, type ChatConversationResponse, type ChatMessageResponse } from '../api/chat'
 import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
 import NegotiationPanel, { type QuoteFields } from '../components/chat/NegotiationPanel.vue'
 import ChatSubjectCard from '../components/chat/ChatSubjectCard.vue'
+import ContractDraftModal from '../components/contract/ContractDraftModal.vue'
+import ContractCard from '../components/chat/ContractCard.vue'
+import ContractSignModal from '../components/contract/ContractSignModal.vue'
 import { buildChatWsUrl } from '../utils/chatWs'
 
 const auth = useAuthStore()
@@ -97,6 +101,18 @@ const giftForm = reactive({
   remark: ''
 })
 const giftLoading = ref(false)
+
+// 起草合同弹窗
+const contractDraftVisible = ref(false)
+const draftQuoteMessageId = ref<number | null>(null)
+const draftQuoteData = ref<QuoteFields | null>(null)
+
+// 文件上传
+const imageInputRef = ref<HTMLInputElement | null>(null)
+const attachmentInputRef = ref<HTMLInputElement | null>(null)
+const uploading = ref(false)
+const uploadProgress = ref(0)
+const uploadType = ref<'image' | 'attachment'>('image')
 
 const filteredConversations = computed(() => {
   if (!searchKeyword.value) return conversations.value
@@ -468,6 +484,94 @@ function getQuoteDisplayFields(payloadJson?: string) {
   return display
 }
 
+// 解析图片消息 payload
+function parseImagePayload(payloadJson?: string): ImagePayload | null {
+  if (!payloadJson) return null
+  try {
+    return JSON.parse(payloadJson) as ImagePayload
+  } catch {
+    return null
+  }
+}
+
+// 解析附件消息 payload
+function parseAttachmentPayload(payloadJson?: string): AttachmentPayload | null {
+  if (!payloadJson) return null
+  try {
+    return JSON.parse(payloadJson) as AttachmentPayload
+  } catch {
+    return null
+  }
+}
+
+// 合同消息 payload 类型
+interface ContractPayload {
+  contractId: number
+  contractNo: string
+  productName: string
+  quantity: number | string
+  unit: string
+  unitPrice: number | string
+  totalAmount: number | string
+  buyerCompanyId: number
+  buyerCompanyName: string
+  sellerCompanyId: number
+  sellerCompanyName: string
+  status: number
+  buyerSigned: boolean
+  sellerSigned: boolean
+}
+
+// 解析合同消息 payload
+function parseContractPayload(payloadJson?: string): ContractPayload | null {
+  if (!payloadJson) return null
+  try {
+    return JSON.parse(payloadJson) as ContractPayload
+  } catch {
+    return null
+  }
+}
+
+// 签署弹窗相关
+const signModalVisible = ref(false)
+const signContractId = ref<number | null>(null)
+
+// 查看合同详情
+function handleViewContract(contractId: number) {
+  router.push(`/contracts/${contractId}`)
+}
+
+// 打开签署弹窗
+function handleSignContract(contractId: number) {
+  signContractId.value = contractId
+  signModalVisible.value = true
+}
+
+// 图片预览相关
+const imagePreviewVisible = ref(false)
+const imagePreviewUrl = ref('')
+
+function openImagePreview(url: string) {
+  imagePreviewUrl.value = url
+  imagePreviewVisible.value = true
+}
+
+function closeImagePreview() {
+  imagePreviewVisible.value = false
+  imagePreviewUrl.value = ''
+}
+
+// 下载附件
+function downloadAttachment(url: string, fileName: string) {
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  link.target = '_blank'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
 // 选择会话
 async function selectConversation(c: ChatConversationResponse) {
   activeConversationId.value = c.id
@@ -646,7 +750,19 @@ function openSubjectOrigin() {
 // 发起合同
 function initiateContract() {
   if (!currentConversation.value) return
-  ElMessage.success('正在生成合同...')
+  
+  // 找到已确认的报价消息
+  const acceptedQuote = messages.value.find(
+    m => m.msgType === 'QUOTE' && m.quoteStatus === 'ACCEPTED' && typeof m.id === 'number'
+  )
+  
+  if (!acceptedQuote) {
+    ElMessage.warning('请先在报价单上确认成交')
+    return
+  }
+  
+  // 调用已有的打开弹窗函数
+  openContractDraft(acceptedQuote)
 }
 
 // 打开赠送积分对话框
@@ -658,6 +774,44 @@ function openGiftDialog() {
   giftForm.points = 10
   giftForm.remark = ''
   giftDialogVisible.value = true
+}
+
+// 打开起草合同弹窗
+function openContractDraft(msg: UiMessage) {
+  if (typeof msg.id !== 'number') return
+  draftQuoteMessageId.value = msg.id
+  draftQuoteData.value = parseQuoteFields(msg.payloadJson)
+  contractDraftVisible.value = true
+}
+
+// 从标的快照获取产品名称
+function getSubjectProductName(): string {
+  try {
+    const json = currentConversation.value?.subjectSnapshotJson
+    if (!json) return ''
+    const obj = JSON.parse(json)
+    return obj.productName || obj.title || ''
+  } catch {
+    return ''
+  }
+}
+
+// 合同创建成功
+function onContractCreated(contractId: number) {
+  ElMessage.success('合同创建成功')
+  // 刷新消息列表以显示合同卡片
+  if (activeConversationId.value) {
+    loadMessages(activeConversationId.value)
+  }
+}
+
+// 合同签署成功后刷新
+function onContractSigned() {
+  ElMessage.success('签署成功')
+  // 刷新消息列表
+  if (activeConversationId.value) {
+    loadMessages(activeConversationId.value)
+  }
 }
 
 // 提交赠送积分
@@ -696,6 +850,134 @@ async function submitGiftPoints() {
     ElMessage.error(e?.message || '赠送积分失败，请稍后重试')
   } finally {
     giftLoading.value = false
+  }
+}
+
+// 打开图片选择
+function openImagePicker() {
+  if (!activeConversationId.value) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
+  imageInputRef.value?.click()
+}
+
+// 打开附件选择
+function openAttachmentPicker() {
+  if (!activeConversationId.value) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
+  attachmentInputRef.value?.click()
+}
+
+// 处理图片选择
+async function handleImageSelect(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  
+  // 重置 input 以便可以再次选择同一文件
+  input.value = ''
+  
+  await uploadAndSendFile(file, 'image')
+}
+
+// 处理附件选择
+async function handleAttachmentSelect(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  
+  input.value = ''
+  
+  await uploadAndSendFile(file, 'attachment')
+}
+
+// 上传并发送文件消息
+async function uploadAndSendFile(file: File, type: 'image' | 'attachment') {
+  if (!activeConversationId.value) {
+    ElMessage.warning('请先选择会话')
+    return
+  }
+  
+  if (!ws.value || ws.value.readyState !== WebSocket.OPEN) {
+    ElMessage.warning('实时连接未就绪，正在重连…')
+    connectWs()
+    return
+  }
+  
+  uploading.value = true
+  uploadProgress.value = 0
+  uploadType.value = type
+  
+  try {
+    const res = type === 'image' 
+      ? await uploadImage(file, (p) => { uploadProgress.value = p })
+      : await uploadAttachment(file, (p) => { uploadProgress.value = p })
+    
+    if (res.code !== 0) {
+      throw new Error(res.message || '上传失败')
+    }
+    
+    const fileData = res.data
+    const msgType = type === 'image' ? 'IMAGE' : 'ATTACHMENT'
+    const payload: ImagePayload | AttachmentPayload = {
+      fileId: fileData.fileId,
+      fileName: fileData.fileName,
+      fileUrl: fileData.fileUrl,
+      size: fileData.size,
+      mimeType: fileData.mimeType
+    }
+    
+    const summary = type === 'image' ? '[图片]' : `[文件] ${fileData.fileName}`
+    const nowIso = new Date().toISOString()
+    const tempId = `f_${Date.now()}_${Math.random().toString(16).slice(2)}`
+    
+    // 更新会话列表摘要
+    const cidx = conversations.value.findIndex(c => c.id === activeConversationId.value)
+    if (cidx >= 0) {
+      const c = conversations.value[cidx]
+      if (c) {
+        c.lastContent = summary
+        c.lastTime = nowIso
+        c.unreadCount = 0
+        conversations.value.splice(cidx, 1)
+        conversations.value.unshift(c)
+      }
+    }
+    
+    // 本地插入消息
+    messages.value.push({
+      id: tempId,
+      conversationId: activeConversationId.value,
+      type: 'sent',
+      msgType,
+      content: summary,
+      payloadJson: JSON.stringify(payload),
+      status: 'pending',
+      time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    })
+    
+    await nextTick()
+    scrollToBottom()
+    
+    // 通过 WebSocket 发送
+    ws.value.send(JSON.stringify({
+      type: 'SEND',
+      conversationId: activeConversationId.value,
+      msgType,
+      content: summary,
+      payload,
+      tempId
+    }))
+    
+    ElMessage.success(type === 'image' ? '图片已发送' : '附件已发送')
+  } catch (e: any) {
+    ElMessage.error(e?.message || '上传失败，请重试')
+  } finally {
+    uploading.value = false
+    uploadProgress.value = 0
   }
 }
 
@@ -880,6 +1162,7 @@ onBeforeUnmount(() => {
                         {{ avatarText(currentConversation?.peerNickName || currentConversation?.peerUserName || currentConversation?.peerCompanyName) }}
                       </div>
                       <div>
+                        <!-- 报价消息 -->
                         <div v-if="(msg.msgType || '').toUpperCase() === 'QUOTE'" class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-100">
                           <div class="flex items-center justify-between mb-2">
                             <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">电子报价单</div>
@@ -906,7 +1189,55 @@ onBeforeUnmount(() => {
                               确认成交
                             </el-button>
                           </div>
+                          <!-- 已成交：起草合同按钮 -->
+                          <div v-else-if="msg.quoteStatus === 'ACCEPTED'" class="mt-4 pt-3 border-t border-gray-50 flex justify-end">
+                            <button 
+                              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all active:scale-95 flex items-center gap-1.5"
+                              @click="openContractDraft(msg)"
+                            >
+                              <Document class="w-4 h-4" />
+                              起草合同
+                            </button>
+                          </div>
                         </div>
+                        <!-- 图片消息 -->
+                        <div v-else-if="(msg.msgType || '').toUpperCase() === 'IMAGE'" class="bg-white rounded-2xl rounded-tl-sm p-2 shadow-sm border border-gray-100">
+                          <img 
+                            v-if="parseImagePayload(msg.payloadJson)?.fileUrl"
+                            :src="parseImagePayload(msg.payloadJson)?.fileUrl"
+                            :alt="parseImagePayload(msg.payloadJson)?.fileName || '图片'"
+                            class="max-w-[280px] max-h-[200px] rounded-xl cursor-pointer hover:opacity-90 transition-opacity object-cover"
+                            @click="openImagePreview(parseImagePayload(msg.payloadJson)?.fileUrl || '')"
+                          />
+                          <div v-else class="text-sm text-gray-500">[图片加载失败]</div>
+                        </div>
+                        <!-- 附件消息 -->
+                        <div v-else-if="(msg.msgType || '').toUpperCase() === 'ATTACHMENT'" class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-100">
+                          <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                              <Document class="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div class="flex-1 min-w-0">
+                              <div class="text-sm font-medium text-gray-900 truncate">{{ parseAttachmentPayload(msg.payloadJson)?.fileName || '附件' }}</div>
+                              <div class="text-xs text-gray-400">{{ formatFileSize(parseAttachmentPayload(msg.payloadJson)?.size || 0) }}</div>
+                            </div>
+                            <button 
+                              class="shrink-0 px-3 py-1.5 bg-blue-50 text-blue-600 text-xs font-bold rounded-lg hover:bg-blue-100 transition-all active:scale-95"
+                              @click="downloadAttachment(parseAttachmentPayload(msg.payloadJson)?.fileUrl || '', parseAttachmentPayload(msg.payloadJson)?.fileName || 'file')"
+                            >
+                              下载
+                            </button>
+                          </div>
+                        </div>
+                        <!-- 合同消息 -->
+                        <ContractCard
+                          v-else-if="(msg.msgType || '').toUpperCase() === 'CONTRACT' && parseContractPayload(msg.payloadJson)"
+                          :payload="parseContractPayload(msg.payloadJson)!"
+                          :is-sent="false"
+                          @view="handleViewContract"
+                          @sign="handleSignContract"
+                        />
+                        <!-- 普通文本消息 -->
                         <div v-else class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-100 text-sm text-gray-800">
                           {{ msg.content }}
                         </div>
@@ -919,6 +1250,7 @@ onBeforeUnmount(() => {
                         {{ (auth.me?.nickName || 'U')[0] }}
                       </div>
                       <div class="flex flex-col items-end">
+                        <!-- 报价消息 -->
                         <div v-if="(msg.msgType || '').toUpperCase() === 'QUOTE'" class="bg-emerald-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm">
                           <div class="flex items-center justify-between mb-2 gap-4">
                             <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-100">电子报价单</div>
@@ -935,6 +1267,44 @@ onBeforeUnmount(() => {
                             </div>
                           </div>
                         </div>
+                        <!-- 图片消息 -->
+                        <div v-else-if="(msg.msgType || '').toUpperCase() === 'IMAGE'" class="bg-emerald-600 rounded-2xl rounded-tr-sm p-2 shadow-sm">
+                          <img 
+                            v-if="parseImagePayload(msg.payloadJson)?.fileUrl"
+                            :src="parseImagePayload(msg.payloadJson)?.fileUrl"
+                            :alt="parseImagePayload(msg.payloadJson)?.fileName || '图片'"
+                            class="max-w-[280px] max-h-[200px] rounded-xl cursor-pointer hover:opacity-90 transition-opacity object-cover"
+                            @click="openImagePreview(parseImagePayload(msg.payloadJson)?.fileUrl || '')"
+                          />
+                          <div v-else class="text-sm text-white/80">[图片加载失败]</div>
+                        </div>
+                        <!-- 附件消息 -->
+                        <div v-else-if="(msg.msgType || '').toUpperCase() === 'ATTACHMENT'" class="bg-emerald-600 rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm">
+                          <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                              <Document class="w-5 h-5 text-white" />
+                            </div>
+                            <div class="flex-1 min-w-0">
+                              <div class="text-sm font-medium text-white truncate">{{ parseAttachmentPayload(msg.payloadJson)?.fileName || '附件' }}</div>
+                              <div class="text-xs text-emerald-100/80">{{ formatFileSize(parseAttachmentPayload(msg.payloadJson)?.size || 0) }}</div>
+                            </div>
+                            <button 
+                              class="shrink-0 px-3 py-1.5 bg-white/20 text-white text-xs font-bold rounded-lg hover:bg-white/30 transition-all active:scale-95"
+                              @click="downloadAttachment(parseAttachmentPayload(msg.payloadJson)?.fileUrl || '', parseAttachmentPayload(msg.payloadJson)?.fileName || 'file')"
+                            >
+                              下载
+                            </button>
+                          </div>
+                        </div>
+                        <!-- 合同消息 -->
+                        <ContractCard
+                          v-else-if="(msg.msgType || '').toUpperCase() === 'CONTRACT' && parseContractPayload(msg.payloadJson)"
+                          :payload="parseContractPayload(msg.payloadJson)!"
+                          :is-sent="true"
+                          @view="handleViewContract"
+                          @sign="handleSignContract"
+                        />
+                        <!-- 普通文本消息 -->
                         <div v-else class="bg-emerald-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm text-sm">
                           {{ msg.content }}
                         </div>
@@ -975,12 +1345,40 @@ onBeforeUnmount(() => {
                 <button class="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors" @click="openGiftDialog">
                   <Present class="w-3.5 h-3.5" /> 赠送积分
                 </button>
-                <button class="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors">
-                  <Picture class="w-3.5 h-3.5" /> 图片
+                <button 
+                  class="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors"
+                  :disabled="uploading"
+                  @click="openImagePicker"
+                >
+                  <Loading v-if="uploading && uploadType === 'image'" class="w-3.5 h-3.5 animate-spin" />
+                  <Picture v-else class="w-3.5 h-3.5" />
+                  {{ uploading && uploadType === 'image' ? `${uploadProgress}%` : '图片' }}
                 </button>
-                <button class="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors">
-                  <Document class="w-3.5 h-3.5" /> 附件
+                <button 
+                  class="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors"
+                  :disabled="uploading"
+                  @click="openAttachmentPicker"
+                >
+                  <Loading v-if="uploading && uploadType === 'attachment'" class="w-3.5 h-3.5 animate-spin" />
+                  <Document v-else class="w-3.5 h-3.5" />
+                  {{ uploading && uploadType === 'attachment' ? `${uploadProgress}%` : '附件' }}
                 </button>
+                
+                <!-- 隐藏的文件选择器 -->
+                <input 
+                  ref="imageInputRef"
+                  type="file" 
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  class="hidden"
+                  @change="handleImageSelect"
+                />
+                <input 
+                  ref="attachmentInputRef"
+                  type="file" 
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.rar,.txt"
+                  class="hidden"
+                  @change="handleAttachmentSelect"
+                />
               </div>
 
               <div class="flex items-end gap-3">
@@ -1150,68 +1548,166 @@ onBeforeUnmount(() => {
       </div>
     </el-dialog>
 
-    <!-- 赠送积分对话框 -->
+    <!-- 赠送积分对话框 (Soft Glass 风格) -->
     <el-dialog 
       v-model="giftDialogVisible" 
-      title="赠送积分" 
-      width="400px"
+      width="420px"
       :close-on-click-modal="false"
+      :show-close="false"
+      align-center
+      modal-class="bg-slate-900/60 backdrop-blur-sm"
+      class="!rounded-[32px] overflow-hidden !border-none"
     >
-      <div class="gift-dialog-content">
-        <div class="recipient-info">
-          <div class="avatar bg-slate-900">
-            {{ avatarText(currentConversation?.peerNickName || currentConversation?.peerUserName || currentConversation?.peerCompanyName) }}
+      <template #header>
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">积分赠送</div>
+            <div class="text-xl font-bold text-gray-900">赠送积分</div>
           </div>
-          <div class="info">
-            <div class="name">{{ peerDisplayName }}</div>
-            <div class="hint">积分将直接转入对方账户</div>
+          <button 
+            class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95"
+            @click="giftDialogVisible = false"
+          >
+            <span class="text-gray-500 text-sm">✕</span>
+          </button>
+        </div>
+      </template>
+
+      <div class="space-y-5">
+        <!-- 接收人信息卡片 -->
+        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold text-lg shrink-0">
+              {{ avatarText(currentConversation?.peerNickName || currentConversation?.peerUserName || currentConversation?.peerCompanyName) }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-gray-900 truncate">{{ peerDisplayName }}</div>
+              <div class="text-xs text-gray-400 mt-0.5">积分将直接转入对方账户</div>
+            </div>
           </div>
         </div>
         
-        <el-form label-position="top" class="mt-4">
-          <el-form-item label="赠送数量">
-            <el-input-number 
-              v-model="giftForm.points" 
-              :min="1" 
-              :max="10000" 
-              :step="10"
-              style="width: 100%"
-            />
-          </el-form-item>
-          <el-form-item label="赠送留言（可选）">
-            <el-input 
-              v-model="giftForm.remark" 
-              placeholder="感谢合作..." 
-              maxlength="100" 
-              show-word-limit
-            />
-          </el-form-item>
-        </el-form>
+        <!-- 积分数量 -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">赠送数量</label>
+          <el-input-number 
+            v-model="giftForm.points" 
+            :min="1" 
+            :max="10000" 
+            :step="10"
+            class="!w-full"
+            size="large"
+          />
+        </div>
+
+        <!-- 留言输入 -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">赠送留言 <span class="text-gray-400 font-normal">(可选)</span></label>
+          <el-input 
+            v-model="giftForm.remark" 
+            placeholder="感谢合作，期待下次合作..." 
+            maxlength="100" 
+            show-word-limit
+            class="!rounded-xl"
+          />
+        </div>
         
-        <div class="quick-amounts">
-          <span class="label">快捷选择：</span>
-          <el-button size="small" @click="giftForm.points = 10">10积分</el-button>
-          <el-button size="small" @click="giftForm.points = 50">50积分</el-button>
-          <el-button size="small" @click="giftForm.points = 100">100积分</el-button>
-          <el-button size="small" @click="giftForm.points = 500">500积分</el-button>
+        <!-- 快捷选择 -->
+        <div class="pt-4 border-t border-gray-100">
+          <div class="text-xs text-gray-400 mb-3">快捷选择</div>
+          <div class="flex flex-wrap gap-2">
+            <button 
+              v-for="amt in [10, 50, 100, 500]" 
+              :key="amt"
+              class="px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95"
+              :class="giftForm.points === amt 
+                ? 'bg-emerald-600 text-white' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+              @click="giftForm.points = amt"
+            >
+              {{ amt }} 积分
+            </button>
+          </div>
         </div>
       </div>
       
       <template #footer>
-        <el-button @click="giftDialogVisible = false">取消</el-button>
-        <el-button 
-          type="primary" 
-          :loading="giftLoading"
-          @click="submitGiftPoints"
-        >
-          确认赠送 {{ giftForm.points }} 积分
-        </el-button>
+        <div class="flex gap-3">
+          <el-button 
+            class="flex-1 !rounded-xl !h-11 transition-all active:scale-95" 
+            @click="giftDialogVisible = false"
+          >
+            取消
+          </el-button>
+          <el-button 
+            type="primary" 
+            class="flex-1 !rounded-xl !h-11 !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 transition-all active:scale-95"
+            :loading="giftLoading"
+            @click="submitGiftPoints"
+          >
+            确认赠送 {{ giftForm.points }} 积分
+          </el-button>
+        </div>
       </template>
     </el-dialog>
+
+    <!-- 起草合同弹窗 -->
+    <ContractDraftModal
+      v-model="contractDraftVisible"
+      :quote-message-id="draftQuoteMessageId || 0"
+      :party-a="currentConversation?.peerCompanyName || currentConversation?.peerNickName || ''"
+      :party-b="auth.me?.nickName || auth.me?.userName || ''"
+      :product-name="getSubjectProductName()"
+      :quantity="draftQuoteData?.quantity || ''"
+      :unit="'吨'"
+      :unit-price="draftQuoteData?.price || ''"
+      :delivery-place="draftQuoteData?.deliveryPlace || ''"
+      :arrival-date="draftQuoteData?.arrivalDate || ''"
+      :payment-method="draftQuoteData?.paymentMethod || ''"
+      @success="onContractCreated"
+    />
+    
+    <!-- 签署合同弹窗 -->
+    <ContractSignModal
+      v-model="signModalVisible"
+      :contract-id="signContractId"
+      @signed="onContractSigned"
+    />
+
+    <!-- 图片预览弹窗 -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div 
+          v-if="imagePreviewVisible" 
+          class="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center"
+          @click="closeImagePreview"
+        >
+          <button 
+            class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
+            @click="closeImagePreview"
+          >
+            <span class="text-white text-xl">✕</span>
+          </button>
+          <img 
+            :src="imagePreviewUrl" 
+            class="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl"
+            @click.stop
+          />
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 .chat-view {
   height: calc(100vh - 140px);
   min-height: 500px;
@@ -1221,58 +1717,6 @@ onBeforeUnmount(() => {
   border-radius: 12px;
 }
 
-/* 赠送积分对话框 */
-.gift-dialog-content {
-  padding: 8px 0;
-}
-
-.recipient-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: #f9fafb;
-  border: 1px solid #f3f4f6;
-  border-radius: 16px;
-}
-
-.recipient-info .avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  color: white;
-  font-weight: bold;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.recipient-info .info .name {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 16px;
-}
-
-.recipient-info .info .hint {
-  font-size: 12px;
-  color: #9ca3af;
-  margin-top: 2px;
-}
-
-.quick-amounts {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px dashed #e5e7eb;
-}
-
-.quick-amounts .label {
-  font-size: 13px;
-  color: #6b7280;
-}
 
 :deep(.transaction-steps .el-step__title) {
   font-size: 13px;

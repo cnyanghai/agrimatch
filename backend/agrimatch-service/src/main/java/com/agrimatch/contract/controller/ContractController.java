@@ -1,10 +1,7 @@
 package com.agrimatch.contract.controller;
 
 import com.agrimatch.common.api.Result;
-import com.agrimatch.contract.dto.ContractCreateRequest;
-import com.agrimatch.contract.dto.ContractQuery;
-import com.agrimatch.contract.dto.ContractResponse;
-import com.agrimatch.contract.dto.ContractUpdateRequest;
+import com.agrimatch.contract.dto.*;
 import com.agrimatch.contract.service.ContractService;
 import com.agrimatch.util.NoUtil;
 import com.agrimatch.util.SecurityUtil;
@@ -44,6 +41,15 @@ public class ContractController {
         return Result.success(contractService.create(userId, req));
     }
 
+    /**
+     * 从已确认的报价单创建合同草稿
+     */
+    @PostMapping("/from-quote")
+    public Result<Long> createFromQuote(Authentication authentication, @Valid @RequestBody ContractFromQuoteRequest req) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        return Result.success(contractService.createFromQuote(userId, req));
+    }
+
     @GetMapping("/{id}")
     public Result<ContractResponse> getById(Authentication authentication, @PathVariable("id") @NotNull Long id) {
         Long userId = SecurityUtil.requireUserId(authentication);
@@ -69,6 +75,28 @@ public class ContractController {
     public Result<Void> delete(Authentication authentication, @PathVariable("id") @NotNull Long id) {
         Long userId = SecurityUtil.requireUserId(authentication);
         contractService.delete(userId, id);
+        return Result.success();
+    }
+
+    /**
+     * 发送合同给对方签署
+     */
+    @PostMapping("/{id}/send")
+    public Result<Void> sendForSigning(Authentication authentication, @PathVariable("id") @NotNull Long id) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        contractService.sendForSigning(userId, id);
+        return Result.success();
+    }
+
+    /**
+     * 签署合同
+     */
+    @PostMapping("/{id}/sign")
+    public Result<Void> sign(Authentication authentication, 
+                             @PathVariable("id") @NotNull Long id,
+                             @Valid @RequestBody ContractSignRequest req) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        contractService.sign(userId, id, req);
         return Result.success();
     }
 

@@ -342,64 +342,107 @@ onMounted(() => {
     </el-space>
   </el-dialog>
 
-  <!-- 打赏对话框 -->
+  <!-- 打赏对话框 (Soft Glass 风格) -->
   <el-dialog 
     v-model="tipDialogOpen" 
-    title="打赏作者" 
     width="420px"
     :close-on-click-modal="false"
+    :show-close="false"
+    align-center
+    modal-class="bg-slate-900/60 backdrop-blur-sm"
+    class="!rounded-[32px] overflow-hidden !border-none"
   >
-    <div class="tip-dialog-content">
-      <!-- 帖子信息 -->
-      <div class="post-info">
-        <div class="post-title">{{ currentTipPost?.title }}</div>
-        <div class="post-author">
-          <div class="avatar bg-blue-500">
+    <template #header>
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">积分打赏</div>
+          <div class="text-xl font-bold text-gray-900">打赏作者</div>
+        </div>
+        <button 
+          class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95"
+          @click="tipDialogOpen = false"
+        >
+          <span class="text-gray-500 text-sm">✕</span>
+        </button>
+      </div>
+    </template>
+
+    <div class="space-y-5">
+      <!-- 帖子信息卡片 -->
+      <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+        <div class="font-bold text-gray-900 line-clamp-2 mb-3">{{ currentTipPost?.title }}</div>
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold shrink-0">
             {{ (currentTipPost?.nickName || currentTipPost?.userName || '?')[0] }}
           </div>
-          <span>{{ currentTipPost?.nickName || currentTipPost?.userName || '作者' }}</span>
-          <el-tag v-if="currentTipPost?.companyName" size="small" type="info">{{ currentTipPost?.companyName }}</el-tag>
+          <div class="flex-1 min-w-0">
+            <div class="font-medium text-gray-700 truncate">{{ currentTipPost?.nickName || currentTipPost?.userName || '作者' }}</div>
+            <div v-if="currentTipPost?.companyName" class="text-xs text-gray-400 truncate">{{ currentTipPost?.companyName }}</div>
+          </div>
         </div>
       </div>
       
-      <el-form label-position="top" class="mt-4">
-        <el-form-item label="打赏积分">
-          <el-input-number 
-            v-model="tipForm.points" 
-            :min="1" 
-            :max="10000" 
-            :step="10"
-            style="width: 100%"
-          />
-        </el-form-item>
-        <el-form-item label="打赏留言（可选）">
-          <el-input 
-            v-model="tipForm.remark" 
-            placeholder="写得好！支持一下..." 
-            maxlength="100" 
-            show-word-limit
-          />
-        </el-form-item>
-      </el-form>
+      <!-- 积分数量 -->
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">打赏积分</label>
+        <el-input-number 
+          v-model="tipForm.points" 
+          :min="1" 
+          :max="10000" 
+          :step="10"
+          class="!w-full"
+          size="large"
+        />
+      </div>
+
+      <!-- 留言输入 -->
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">打赏留言 <span class="text-gray-400 font-normal">(可选)</span></label>
+        <el-input 
+          v-model="tipForm.remark" 
+          placeholder="写得好！支持一下..." 
+          maxlength="100" 
+          show-word-limit
+          class="!rounded-xl"
+        />
+      </div>
       
-      <div class="quick-amounts">
-        <span class="label">快捷选择：</span>
-        <el-button size="small" @click="tipForm.points = 5">5积分</el-button>
-        <el-button size="small" @click="tipForm.points = 10">10积分</el-button>
-        <el-button size="small" @click="tipForm.points = 50">50积分</el-button>
-        <el-button size="small" @click="tipForm.points = 100">100积分</el-button>
+      <!-- 快捷选择 -->
+      <div class="pt-4 border-t border-gray-100">
+        <div class="text-xs text-gray-400 mb-3">快捷选择</div>
+        <div class="flex flex-wrap gap-2">
+          <button 
+            v-for="amt in [5, 10, 50, 100]" 
+            :key="amt"
+            class="px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95"
+            :class="tipForm.points === amt 
+              ? 'bg-emerald-600 text-white' 
+              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+            @click="tipForm.points = amt"
+          >
+            {{ amt }} 积分
+          </button>
+        </div>
       </div>
     </div>
     
     <template #footer>
-      <el-button @click="tipDialogOpen = false">取消</el-button>
-      <el-button 
-        type="warning" 
-        :loading="tipping"
-        @click="submitTip"
-      >
-        确认打赏 {{ tipForm.points }} 积分
-      </el-button>
+      <div class="flex gap-3">
+        <el-button 
+          class="flex-1 !rounded-xl !h-11 transition-all active:scale-95" 
+          @click="tipDialogOpen = false"
+        >
+          取消
+        </el-button>
+        <el-button 
+          type="primary" 
+          class="flex-1 !rounded-xl !h-11 !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 transition-all active:scale-95"
+          :loading="tipping"
+          @click="submitTip"
+        >
+          确认打赏 {{ tipForm.points }} 积分
+        </el-button>
+      </div>
     </template>
   </el-dialog>
 </template>
@@ -412,56 +455,4 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/* 打赏对话框 */
-.tip-dialog-content {
-  padding: 8px 0;
-}
-
-.post-info {
-  padding: 16px;
-  background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
-  border-radius: 12px;
-}
-
-.post-title {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 16px;
-  margin-bottom: 12px;
-  line-height: 1.5;
-}
-
-.post-author {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #6b7280;
-}
-
-.post-author .avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  color: white;
-  font-weight: 500;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.quick-amounts {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px dashed #e5e7eb;
-}
-
-.quick-amounts .label {
-  font-size: 13px;
-  color: #6b7280;
-}
 </style>

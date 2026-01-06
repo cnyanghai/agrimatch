@@ -311,40 +311,109 @@ onMounted(() => {
       </div>
     </main>
 
-    <!-- 打赏对话框 -->
+    <!-- 打赏对话框 (Soft Glass 风格) -->
     <el-dialog
       v-model="tipDialogOpen"
-      title="打赏作者"
-      width="400px"
+      width="420px"
       :close-on-click-modal="false"
+      :show-close="false"
+      align-center
+      modal-class="bg-slate-900/60 backdrop-blur-sm"
+      class="!rounded-[32px] overflow-hidden !border-none"
     >
-      <div v-if="post" class="space-y-4">
-        <div class="text-sm text-gray-600">
-          打赏给：<span class="font-bold">{{ post.nickName || post.userName || '作者' }}</span>
+      <template #header>
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">积分打赏</div>
+            <div class="text-xl font-bold text-gray-900">打赏作者</div>
+          </div>
+          <button 
+            class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95"
+            @click="tipDialogOpen = false"
+          >
+            <span class="text-gray-500 text-sm">✕</span>
+          </button>
         </div>
-        <el-form-item label="积分数量">
+      </template>
+
+      <div v-if="post" class="space-y-5">
+        <!-- 作者信息卡片 -->
+        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold text-lg shrink-0">
+              {{ (post.nickName || post.userName || '?')[0] }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-gray-900 truncate">{{ post.nickName || post.userName || '作者' }}</div>
+              <div v-if="post.companyName" class="text-xs text-gray-400 truncate mt-0.5">{{ post.companyName }}</div>
+              <div class="text-xs text-gray-400 mt-0.5">积分将直接转入对方账户</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 积分数量 -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">打赏积分</label>
           <el-input-number
             v-model="tipForm.points"
             :min="1"
             :max="1000"
             :step="10"
-            class="w-full"
+            class="!w-full"
+            size="large"
           />
-        </el-form-item>
-        <el-form-item label="备注（可选）">
+        </div>
+
+        <!-- 留言输入 -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">打赏留言 <span class="text-gray-400 font-normal">(可选)</span></label>
           <el-input
             v-model="tipForm.remark"
             type="textarea"
-            :rows="3"
+            :rows="2"
             placeholder="给作者留言..."
             maxlength="200"
             show-word-limit
+            class="!rounded-xl"
           />
-        </el-form-item>
+        </div>
+        
+        <!-- 快捷选择 -->
+        <div class="pt-4 border-t border-gray-100">
+          <div class="text-xs text-gray-400 mb-3">快捷选择</div>
+          <div class="flex flex-wrap gap-2">
+            <button 
+              v-for="amt in [5, 10, 50, 100]" 
+              :key="amt"
+              class="px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95"
+              :class="tipForm.points === amt 
+                ? 'bg-emerald-600 text-white' 
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+              @click="tipForm.points = amt"
+            >
+              {{ amt }} 积分
+            </button>
+          </div>
+        </div>
       </div>
+      
       <template #footer>
-        <el-button @click="tipDialogOpen = false">取消</el-button>
-        <el-button type="primary" :loading="tipping" @click="submitTip">确认打赏</el-button>
+        <div class="flex gap-3">
+          <el-button 
+            class="flex-1 !rounded-xl !h-11 transition-all active:scale-95" 
+            @click="tipDialogOpen = false"
+          >
+            取消
+          </el-button>
+          <el-button 
+            type="primary" 
+            class="flex-1 !rounded-xl !h-11 !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 transition-all active:scale-95"
+            :loading="tipping"
+            @click="submitTip"
+          >
+            确认打赏 {{ tipForm.points }} 积分
+          </el-button>
+        </div>
       </template>
     </el-dialog>
   </div>

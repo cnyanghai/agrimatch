@@ -1,6 +1,7 @@
 package com.agrimatch.chat.ws;
 
 import com.agrimatch.chat.dto.ChatMessageResponse;
+import com.agrimatch.chat.event.ContractMessageEvent;
 import com.agrimatch.chat.event.OfferUpdatedEvent;
 import com.agrimatch.chat.service.ChatService;
 import com.agrimatch.security.JwtTokenUtil;
@@ -116,6 +117,31 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     @EventListener
     public void onOfferUpdated(OfferUpdatedEvent event) {
         broadcastOfferUpdate(event.getConversationId(), event.getAUserId(), event.getBUserId(), event.getMessage());
+    }
+
+    @EventListener
+    public void onContractMessage(ContractMessageEvent event) {
+        broadcastContractMessage(event.getConversationId(), event.getAUserId(), event.getBUserId(), event.getMessage());
+    }
+
+    /**
+     * 广播合同消息给双方用户
+     */
+    public void broadcastContractMessage(Long conversationId, Long aUserId, Long bUserId, ChatMessageResponse message) {
+        String payload;
+        try {
+            payload = objectMapper.writeValueAsString(objectMapper.createObjectNode()
+                    .put("type", "MESSAGE")
+                    .put("conversationId", conversationId)
+                    .set("message", objectMapper.valueToTree(message))
+            );
+        } catch (Exception e) {
+            return;
+        }
+
+        TextMessage textMessage = new TextMessage(payload);
+        sendToUser(aUserId, textMessage);
+        sendToUser(bUserId, textMessage);
     }
 
     public void broadcastOfferUpdate(Long conversationId, Long aUserId, Long bUserId, ChatMessageResponse updatedMessage) {

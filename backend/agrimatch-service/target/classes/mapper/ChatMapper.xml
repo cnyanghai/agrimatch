@@ -148,6 +148,16 @@
         VALUES
         (#{aUserId}, #{bUserId}, #{subjectType}, #{subjectId}, #{subjectSnapshotJson}, NULL, NULL, NULL, 0, NOW(3), NOW(3))
     </insert>
+    
+    <select id="selectConversationById" resultType="com.agrimatch.chat.domain.BusChatConversation">
+        SELECT id, a_user_id AS aUserId, b_user_id AS bUserId, 
+               subject_type AS subjectType, subject_id AS subjectId, 
+               subject_snapshot_json AS subjectSnapshotJson,
+               last_msg_id AS lastMsgId, last_content AS lastContent, last_time AS lastTime,
+               is_deleted AS isDeleted, create_time AS createTime, update_time AS updateTime
+        FROM bus_chat_conversation
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
 
     <update id="updateConversationSnapshot">
         UPDATE bus_chat_conversation

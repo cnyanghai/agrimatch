@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.contract.mapper.ContractSignatureMapper">
+
+    <resultMap id="SignatureMap" type="com.agrimatch.contract.domain.BusContractSignature">
+        <id column="id" property="id"/>
+        <result column="contract_id" property="contractId"/>
+        <result column="user_id" property="userId"/>
+        <result column="company_id" property="companyId"/>
+        <result column="party_type" property="partyType"/>
+        <result column="sign_type" property="signType"/>
+        <result column="seal_id" property="sealId"/>
+        <result column="seal_url" property="sealUrl"/>
+        <result column="signature_url" property="signatureUrl"/>
+        <result column="signer_name" property="signerName"/>
+        <result column="signer_title" property="signerTitle"/>
+        <result column="sign_ip" property="signIp"/>
+        <result column="sign_time" property="signTime"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.agrimatch.contract.domain.BusContractSignature"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_contract_signature
+        (contract_id, user_id, company_id, party_type, sign_type, seal_id, seal_url, signature_url,
+         signer_name, signer_title, sign_ip, sign_time, is_deleted, create_time)
+        VALUES
+        (#{contractId}, #{userId}, #{companyId}, #{partyType}, #{signType}, #{sealId}, #{sealUrl}, #{signatureUrl},
+         #{signerName}, #{signerTitle}, #{signIp}, NOW(3), 0, NOW(3))
+    </insert>
+
+    <select id="selectByContractId" resultMap="SignatureMap">
+        SELECT * FROM bus_contract_signature
+        WHERE contract_id = #{contractId} AND is_deleted = 0
+        ORDER BY sign_time ASC
+    </select>
+
+    <select id="selectByContractAndParty" resultMap="SignatureMap">
+        SELECT * FROM bus_contract_signature
+        WHERE contract_id = #{contractId} AND party_type = #{partyType} AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="countByContractId" resultType="int">
+        SELECT COUNT(*) FROM bus_contract_signature
+        WHERE contract_id = #{contractId} AND is_deleted = 0
+    </select>
+
+</mapper>
+

@@ -4,62 +4,93 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * 合同实体类 - 匹配数据库 bus_contract 表结构
+ */
 public class BusContract {
     private Long id;
-    private Long companyId;
-    private Long userId;
-
     private String contractNo;
-    private String contractType;
-    private String title;
-    private String partyA;
-    private String partyB;
-
+    
+    // 关联字段
+    private Long dealId;
+    private Long negotiationId;
+    private Long quoteId;
+    private Long quoteMessageId;      // 关联报价消息ID
+    private Long conversationId;       // 关联会话ID
+    
+    // 买卖双方公司
+    private Long buyerCompanyId;
+    private Long sellerCompanyId;
+    
+    // 产品信息
     private String productName;
+    private String categoryName;
     private BigDecimal quantity;
     private String unit;
     private BigDecimal unitPrice;
     private BigDecimal totalAmount;
-
-    private LocalDate deliveryDate;
+    
+    // 交付信息
     private String deliveryAddress;
+    private LocalDate deliveryDate;
     private String paymentMethod;
-    private String terms;
-
-    private String status;
-    private LocalDateTime signTime;
+    private String deliveryMode;
+    
+    // 条款和参数
+    private String termsJson;          // JSON格式的条款
+    private String paramsJson;         // 产品参数JSON
+    
+    // 状态 (0=草稿, 1=待签署, 2=已签署, 3=履约中, 4=已完成, 5=已取消)
+    private Integer status;
+    
+    // 签署信息
+    private LocalDateTime buyerSignTime;
+    private LocalDateTime sellerSignTime;
+    private String buyerSignature;
+    private String sellerSignature;
+    
+    // PDF
+    private String pdfUrl;
     private String pdfHash;
-
+    
+    private Long templateId;
     private Integer isDeleted;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
-    public Long getCompanyId() { return companyId; }
-    public void setCompanyId(Long companyId) { this.companyId = companyId; }
-
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
 
     public String getContractNo() { return contractNo; }
     public void setContractNo(String contractNo) { this.contractNo = contractNo; }
 
-    public String getContractType() { return contractType; }
-    public void setContractType(String contractType) { this.contractType = contractType; }
+    public Long getDealId() { return dealId; }
+    public void setDealId(Long dealId) { this.dealId = dealId; }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public Long getNegotiationId() { return negotiationId; }
+    public void setNegotiationId(Long negotiationId) { this.negotiationId = negotiationId; }
 
-    public String getPartyA() { return partyA; }
-    public void setPartyA(String partyA) { this.partyA = partyA; }
+    public Long getQuoteId() { return quoteId; }
+    public void setQuoteId(Long quoteId) { this.quoteId = quoteId; }
 
-    public String getPartyB() { return partyB; }
-    public void setPartyB(String partyB) { this.partyB = partyB; }
+    public Long getQuoteMessageId() { return quoteMessageId; }
+    public void setQuoteMessageId(Long quoteMessageId) { this.quoteMessageId = quoteMessageId; }
+
+    public Long getConversationId() { return conversationId; }
+    public void setConversationId(Long conversationId) { this.conversationId = conversationId; }
+
+    public Long getBuyerCompanyId() { return buyerCompanyId; }
+    public void setBuyerCompanyId(Long buyerCompanyId) { this.buyerCompanyId = buyerCompanyId; }
+
+    public Long getSellerCompanyId() { return sellerCompanyId; }
+    public void setSellerCompanyId(Long sellerCompanyId) { this.sellerCompanyId = sellerCompanyId; }
 
     public String getProductName() { return productName; }
     public void setProductName(String productName) { this.productName = productName; }
+
+    public String getCategoryName() { return categoryName; }
+    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
 
     public BigDecimal getQuantity() { return quantity; }
     public void setQuantity(BigDecimal quantity) { this.quantity = quantity; }
@@ -73,26 +104,47 @@ public class BusContract {
     public BigDecimal getTotalAmount() { return totalAmount; }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
 
-    public LocalDate getDeliveryDate() { return deliveryDate; }
-    public void setDeliveryDate(LocalDate deliveryDate) { this.deliveryDate = deliveryDate; }
-
     public String getDeliveryAddress() { return deliveryAddress; }
     public void setDeliveryAddress(String deliveryAddress) { this.deliveryAddress = deliveryAddress; }
+
+    public LocalDate getDeliveryDate() { return deliveryDate; }
+    public void setDeliveryDate(LocalDate deliveryDate) { this.deliveryDate = deliveryDate; }
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
 
-    public String getTerms() { return terms; }
-    public void setTerms(String terms) { this.terms = terms; }
+    public String getDeliveryMode() { return deliveryMode; }
+    public void setDeliveryMode(String deliveryMode) { this.deliveryMode = deliveryMode; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public String getTermsJson() { return termsJson; }
+    public void setTermsJson(String termsJson) { this.termsJson = termsJson; }
 
-    public LocalDateTime getSignTime() { return signTime; }
-    public void setSignTime(LocalDateTime signTime) { this.signTime = signTime; }
+    public String getParamsJson() { return paramsJson; }
+    public void setParamsJson(String paramsJson) { this.paramsJson = paramsJson; }
+
+    public Integer getStatus() { return status; }
+    public void setStatus(Integer status) { this.status = status; }
+
+    public LocalDateTime getBuyerSignTime() { return buyerSignTime; }
+    public void setBuyerSignTime(LocalDateTime buyerSignTime) { this.buyerSignTime = buyerSignTime; }
+
+    public LocalDateTime getSellerSignTime() { return sellerSignTime; }
+    public void setSellerSignTime(LocalDateTime sellerSignTime) { this.sellerSignTime = sellerSignTime; }
+
+    public String getBuyerSignature() { return buyerSignature; }
+    public void setBuyerSignature(String buyerSignature) { this.buyerSignature = buyerSignature; }
+
+    public String getSellerSignature() { return sellerSignature; }
+    public void setSellerSignature(String sellerSignature) { this.sellerSignature = sellerSignature; }
+
+    public String getPdfUrl() { return pdfUrl; }
+    public void setPdfUrl(String pdfUrl) { this.pdfUrl = pdfUrl; }
 
     public String getPdfHash() { return pdfHash; }
     public void setPdfHash(String pdfHash) { this.pdfHash = pdfHash; }
+
+    public Long getTemplateId() { return templateId; }
+    public void setTemplateId(Long templateId) { this.templateId = templateId; }
 
     public Integer getIsDeleted() { return isDeleted; }
     public void setIsDeleted(Integer isDeleted) { this.isDeleted = isDeleted; }
@@ -103,5 +155,3 @@ public class BusContract {
     public LocalDateTime getUpdateTime() { return updateTime; }
     public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
 }
-
-

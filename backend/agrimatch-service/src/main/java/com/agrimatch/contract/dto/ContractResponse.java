@@ -6,59 +6,77 @@ import java.time.LocalDateTime;
 
 public class ContractResponse {
     private Long id;
-    private Long companyId;
-    private Long userId;
-
+    private Long quoteMessageId;
+    private Long conversationId;
     private String contractNo;
-    private String contractType;
-    private String title;
-    private String partyA;
-    private String partyB;
 
+    // 买卖双方
+    private Long buyerCompanyId;
+    private Long sellerCompanyId;
+    private String buyerCompanyName;
+    private String sellerCompanyName;
+
+    // 产品信息
     private String productName;
+    private String categoryName;
     private BigDecimal quantity;
     private String unit;
     private BigDecimal unitPrice;
+    private String paramsJson;
     private BigDecimal totalAmount;
 
+    // 交付信息
     private LocalDate deliveryDate;
     private String deliveryAddress;
     private String paymentMethod;
-    private String terms;
+    private String deliveryMode;
+    private String termsJson;
 
-    private String status;
-    private LocalDateTime signTime;
+    // 状态 (0=草稿, 1=待签署, 2=已签署, 3=履约中, 4=已完成, 5=已取消)
+    private Integer status;
+    
+    // 签署信息
+    private LocalDateTime buyerSignTime;
+    private LocalDateTime sellerSignTime;
+    private Boolean buyerSigned;
+    private Boolean sellerSigned;
+    
     private String pdfHash;
+    private String pdfUrl;
 
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public Long getCompanyId() { return companyId; }
-    public void setCompanyId(Long companyId) { this.companyId = companyId; }
+    public Long getQuoteMessageId() { return quoteMessageId; }
+    public void setQuoteMessageId(Long quoteMessageId) { this.quoteMessageId = quoteMessageId; }
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public Long getConversationId() { return conversationId; }
+    public void setConversationId(Long conversationId) { this.conversationId = conversationId; }
 
     public String getContractNo() { return contractNo; }
     public void setContractNo(String contractNo) { this.contractNo = contractNo; }
 
-    public String getContractType() { return contractType; }
-    public void setContractType(String contractType) { this.contractType = contractType; }
+    public Long getBuyerCompanyId() { return buyerCompanyId; }
+    public void setBuyerCompanyId(Long buyerCompanyId) { this.buyerCompanyId = buyerCompanyId; }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public Long getSellerCompanyId() { return sellerCompanyId; }
+    public void setSellerCompanyId(Long sellerCompanyId) { this.sellerCompanyId = sellerCompanyId; }
 
-    public String getPartyA() { return partyA; }
-    public void setPartyA(String partyA) { this.partyA = partyA; }
+    public String getBuyerCompanyName() { return buyerCompanyName; }
+    public void setBuyerCompanyName(String buyerCompanyName) { this.buyerCompanyName = buyerCompanyName; }
 
-    public String getPartyB() { return partyB; }
-    public void setPartyB(String partyB) { this.partyB = partyB; }
+    public String getSellerCompanyName() { return sellerCompanyName; }
+    public void setSellerCompanyName(String sellerCompanyName) { this.sellerCompanyName = sellerCompanyName; }
 
     public String getProductName() { return productName; }
     public void setProductName(String productName) { this.productName = productName; }
+
+    public String getCategoryName() { return categoryName; }
+    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
 
     public BigDecimal getQuantity() { return quantity; }
     public void setQuantity(BigDecimal quantity) { this.quantity = quantity; }
@@ -68,6 +86,9 @@ public class ContractResponse {
 
     public BigDecimal getUnitPrice() { return unitPrice; }
     public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
+
+    public String getParamsJson() { return paramsJson; }
+    public void setParamsJson(String paramsJson) { this.paramsJson = paramsJson; }
 
     public BigDecimal getTotalAmount() { return totalAmount; }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
@@ -81,17 +102,32 @@ public class ContractResponse {
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
 
-    public String getTerms() { return terms; }
-    public void setTerms(String terms) { this.terms = terms; }
+    public String getDeliveryMode() { return deliveryMode; }
+    public void setDeliveryMode(String deliveryMode) { this.deliveryMode = deliveryMode; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public String getTermsJson() { return termsJson; }
+    public void setTermsJson(String termsJson) { this.termsJson = termsJson; }
 
-    public LocalDateTime getSignTime() { return signTime; }
-    public void setSignTime(LocalDateTime signTime) { this.signTime = signTime; }
+    public Integer getStatus() { return status; }
+    public void setStatus(Integer status) { this.status = status; }
+
+    public LocalDateTime getBuyerSignTime() { return buyerSignTime; }
+    public void setBuyerSignTime(LocalDateTime buyerSignTime) { this.buyerSignTime = buyerSignTime; }
+
+    public LocalDateTime getSellerSignTime() { return sellerSignTime; }
+    public void setSellerSignTime(LocalDateTime sellerSignTime) { this.sellerSignTime = sellerSignTime; }
+
+    public Boolean getBuyerSigned() { return buyerSigned; }
+    public void setBuyerSigned(Boolean buyerSigned) { this.buyerSigned = buyerSigned; }
+
+    public Boolean getSellerSigned() { return sellerSigned; }
+    public void setSellerSigned(Boolean sellerSigned) { this.sellerSigned = sellerSigned; }
 
     public String getPdfHash() { return pdfHash; }
     public void setPdfHash(String pdfHash) { this.pdfHash = pdfHash; }
+
+    public String getPdfUrl() { return pdfUrl; }
+    public void setPdfUrl(String pdfUrl) { this.pdfUrl = pdfUrl; }
 
     public LocalDateTime getCreateTime() { return createTime; }
     public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
@@ -99,5 +135,3 @@ public class ContractResponse {
     public LocalDateTime getUpdateTime() { return updateTime; }
     public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
 }
-
-

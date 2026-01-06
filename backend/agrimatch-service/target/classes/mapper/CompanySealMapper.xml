@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.contract.mapper.CompanySealMapper">
+
+    <resultMap id="SealMap" type="com.agrimatch.contract.domain.BusCompanySeal">
+        <id column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="user_id" property="userId"/>
+        <result column="seal_type" property="sealType"/>
+        <result column="seal_name" property="sealName"/>
+        <result column="seal_url" property="sealUrl"/>
+        <result column="is_generated" property="isGenerated"/>
+        <result column="is_default" property="isDefault"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.agrimatch.contract.domain.BusCompanySeal"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_company_seal
+        (company_id, user_id, seal_type, seal_name, seal_url, is_generated, is_default, is_deleted, create_time, update_time)
+        VALUES
+        (#{companyId}, #{userId}, #{sealType}, #{sealName}, #{sealUrl}, #{isGenerated}, #{isDefault}, 0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="selectById" resultMap="SealMap">
+        SELECT * FROM bus_company_seal
+        WHERE id = #{id} AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectByCompanyId" resultMap="SealMap">
+        SELECT * FROM bus_company_seal
+        WHERE company_id = #{companyId} AND is_deleted = 0
+        ORDER BY is_default DESC, create_time DESC
+    </select>
+
+    <select id="selectDefaultByCompanyId" resultMap="SealMap">
+        SELECT * FROM bus_company_seal
+        WHERE company_id = #{companyId} AND is_default = 1 AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <update id="update" parameterType="com.agrimatch.contract.domain.BusCompanySeal">
+        UPDATE bus_company_seal
+        <set>
+            <if test="sealName != null">seal_name = #{sealName},</if>
+            <if test="sealUrl != null">seal_url = #{sealUrl},</if>
+            <if test="isDefault != null">is_default = #{isDefault},</if>
+            update_time = NOW(3)
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="clearDefault">
+        UPDATE bus_company_seal
+        SET is_default = 0, update_time = NOW(3)
+        WHERE company_id = #{companyId} AND is_deleted = 0
+    </update>
+
+    <update id="logicalDelete">
+        UPDATE bus_company_seal
+        SET is_deleted = 1, update_time = NOW(3)
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+</mapper>
+

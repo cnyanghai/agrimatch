@@ -196,7 +196,7 @@ public class ChatServiceImpl implements ChatService {
         long toUserId = fromUserId.equals(pair.getAUserId()) ? pair.getBUserId() : pair.getAUserId();
 
         String mt = (StringUtils.hasText(msgType) ? msgType.trim().toUpperCase() : "TEXT");
-        if (!"TEXT".equals(mt) && !"QUOTE".equals(mt) && !"SYSTEM".equals(mt) && !"ATTACHMENT".equals(mt)) {
+        if (!"TEXT".equals(mt) && !"QUOTE".equals(mt) && !"SYSTEM".equals(mt) && !"ATTACHMENT".equals(mt) && !"IMAGE".equals(mt) && !"CONTRACT".equals(mt)) {
             throw new ApiException(400, "msgType 不支持");
         }
         if ("TEXT".equals(mt) && !StringUtils.hasText(content)) {
@@ -227,6 +227,7 @@ public class ChatServiceImpl implements ChatService {
         String lastContent = safeContent;
         if (!"TEXT".equals(mt) && !StringUtils.hasText(lastContent)) {
             if ("QUOTE".equals(mt)) lastContent = "[报价]";
+            else if ("IMAGE".equals(mt)) lastContent = "[图片]";
             else if ("ATTACHMENT".equals(mt)) lastContent = "[附件]";
             else lastContent = "[系统]";
         }

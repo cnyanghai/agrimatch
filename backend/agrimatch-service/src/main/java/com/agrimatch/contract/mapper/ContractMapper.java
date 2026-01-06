@@ -12,14 +12,16 @@ public interface ContractMapper {
     int insert(BusContract c);
 
     BusContract selectById(@Param("id") Long id);
+    
+    BusContract selectByQuoteMessageId(@Param("quoteMessageId") Long quoteMessageId);
 
     List<BusContract> selectList(@Param("q") ContractQuery q);
 
     int update(BusContract c);
+    
+    int updateStatus(@Param("id") Long id, @Param("status") Integer status);
 
-    int logicalDelete(@Param("id") Long id, @Param("userId") Long userId);
-
-    int updatePdfHash(@Param("id") Long id, @Param("userId") Long userId, @Param("pdfHash") String pdfHash);
+    int logicalDelete(@Param("id") Long id);
+    
+    String selectMaxContractNoForToday(@Param("datePrefix") String datePrefix);
 }
-
-

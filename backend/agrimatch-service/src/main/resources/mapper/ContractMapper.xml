@@ -6,25 +6,34 @@
 
     <resultMap id="BusContractMap" type="com.agrimatch.contract.domain.BusContract">
         <id column="id" property="id"/>
-        <result column="company_id" property="companyId"/>
-        <result column="user_id" property="userId"/>
         <result column="contract_no" property="contractNo"/>
-        <result column="contract_type" property="contractType"/>
-        <result column="title" property="title"/>
-        <result column="party_a" property="partyA"/>
-        <result column="party_b" property="partyB"/>
+        <result column="deal_id" property="dealId"/>
+        <result column="negotiation_id" property="negotiationId"/>
+        <result column="quote_id" property="quoteId"/>
+        <result column="quote_message_id" property="quoteMessageId"/>
+        <result column="conversation_id" property="conversationId"/>
+        <result column="buyer_company_id" property="buyerCompanyId"/>
+        <result column="seller_company_id" property="sellerCompanyId"/>
         <result column="product_name" property="productName"/>
+        <result column="category_name" property="categoryName"/>
         <result column="quantity" property="quantity"/>
         <result column="unit" property="unit"/>
         <result column="unit_price" property="unitPrice"/>
         <result column="total_amount" property="totalAmount"/>
-        <result column="delivery_date" property="deliveryDate"/>
         <result column="delivery_address" property="deliveryAddress"/>
+        <result column="delivery_date" property="deliveryDate"/>
         <result column="payment_method" property="paymentMethod"/>
-        <result column="terms" property="terms"/>
+        <result column="delivery_mode" property="deliveryMode"/>
+        <result column="terms_json" property="termsJson"/>
+        <result column="params_json" property="paramsJson"/>
         <result column="status" property="status"/>
-        <result column="sign_time" property="signTime"/>
+        <result column="buyer_sign_time" property="buyerSignTime"/>
+        <result column="seller_sign_time" property="sellerSignTime"/>
+        <result column="buyer_signature" property="buyerSignature"/>
+        <result column="seller_signature" property="sellerSignature"/>
+        <result column="pdf_url" property="pdfUrl"/>
         <result column="pdf_hash" property="pdfHash"/>
+        <result column="template_id" property="templateId"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
@@ -33,15 +42,17 @@
     <insert id="insert" parameterType="com.agrimatch.contract.domain.BusContract"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO bus_contract
-        (company_id, user_id, contract_no, contract_type, title, party_a, party_b,
-         product_name, quantity, unit, unit_price, total_amount,
-         delivery_date, delivery_address, payment_method, terms,
-         status, sign_time, pdf_hash, is_deleted, create_time, update_time)
+        (contract_no, deal_id, negotiation_id, quote_id, quote_message_id, conversation_id,
+         buyer_company_id, seller_company_id, product_name, category_name,
+         quantity, unit, unit_price, total_amount,
+         delivery_address, delivery_date, payment_method, delivery_mode,
+         terms_json, params_json, status, is_deleted, create_time, update_time)
         VALUES
-        (#{companyId}, #{userId}, #{contractNo}, #{contractType}, #{title}, #{partyA}, #{partyB},
-         #{productName}, #{quantity}, #{unit}, #{unitPrice}, #{totalAmount},
-         #{deliveryDate}, #{deliveryAddress}, #{paymentMethod}, #{terms},
-         #{status}, #{signTime}, #{pdfHash}, 0, NOW(3), NOW(3))
+        (#{contractNo}, #{dealId}, #{negotiationId}, #{quoteId}, #{quoteMessageId}, #{conversationId},
+         #{buyerCompanyId}, #{sellerCompanyId}, #{productName}, #{categoryName},
+         #{quantity}, #{unit}, #{unitPrice}, #{totalAmount},
+         #{deliveryAddress}, #{deliveryDate}, #{paymentMethod}, #{deliveryMode},
+         #{termsJson}, #{paramsJson}, #{status}, 0, NOW(3), NOW(3))
     </insert>
 
     <select id="selectById" resultMap="BusContractMap">
@@ -57,21 +68,21 @@
         FROM bus_contract
         <where>
             is_deleted = 0
+            <if test="q != null and q.buyerCompanyId != null">
+                AND buyer_company_id = #{q.buyerCompanyId}
+            </if>
+            <if test="q != null and q.sellerCompanyId != null">
+                AND seller_company_id = #{q.sellerCompanyId}
+            </if>
             <if test="q != null and q.companyId != null">
-                AND company_id = #{q.companyId}
+                AND (buyer_company_id = #{q.companyId} OR seller_company_id = #{q.companyId})
             </if>
-            <if test="q != null and q.userId != null">
-                AND user_id = #{q.userId}
-            </if>
-            <if test="q != null and q.status != null and q.status != '' and q.status != 'all'">
+            <if test="q != null and q.status != null">
                 AND status = #{q.status}
             </if>
             <if test="q != null and q.keyword != null and q.keyword != ''">
                 AND (
                     contract_no LIKE CONCAT('%', #{q.keyword}, '%')
-                    OR title LIKE CONCAT('%', #{q.keyword}, '%')
-                    OR party_a LIKE CONCAT('%', #{q.keyword}, '%')
-                    OR party_b LIKE CONCAT('%', #{q.keyword}, '%')
                     OR product_name LIKE CONCAT('%', #{q.keyword}, '%')
                 )
             </if>
@@ -97,29 +108,49 @@
             </otherwise>
         </choose>
     </select>
+    
+    <!-- 根据报价消息ID查询合同 -->
+    <select id="selectByQuoteMessageId" resultMap="BusContractMap">
+        SELECT * FROM bus_contract
+        WHERE quote_message_id = #{quoteMessageId}
+          AND is_deleted = 0
+        LIMIT 1
+    </select>
 
     <update id="update" parameterType="com.agrimatch.contract.domain.BusContract">
         UPDATE bus_contract
         <set>
-            <if test="title != null">title = #{title},</if>
-            <if test="contractType != null">contract_type = #{contractType},</if>
-            <if test="partyA != null">party_a = #{partyA},</if>
-            <if test="partyB != null">party_b = #{partyB},</if>
             <if test="productName != null">product_name = #{productName},</if>
+            <if test="categoryName != null">category_name = #{categoryName},</if>
             <if test="quantity != null">quantity = #{quantity},</if>
             <if test="unit != null">unit = #{unit},</if>
             <if test="unitPrice != null">unit_price = #{unitPrice},</if>
             <if test="totalAmount != null">total_amount = #{totalAmount},</if>
-            <if test="deliveryDate != null">delivery_date = #{deliveryDate},</if>
             <if test="deliveryAddress != null">delivery_address = #{deliveryAddress},</if>
+            <if test="deliveryDate != null">delivery_date = #{deliveryDate},</if>
             <if test="paymentMethod != null">payment_method = #{paymentMethod},</if>
-            <if test="terms != null">terms = #{terms},</if>
+            <if test="deliveryMode != null">delivery_mode = #{deliveryMode},</if>
+            <if test="termsJson != null">terms_json = #{termsJson},</if>
+            <if test="paramsJson != null">params_json = #{paramsJson},</if>
             <if test="status != null">status = #{status},</if>
-            <if test="signTime != null">sign_time = #{signTime},</if>
+            <if test="buyerSignTime != null">buyer_sign_time = #{buyerSignTime},</if>
+            <if test="sellerSignTime != null">seller_sign_time = #{sellerSignTime},</if>
+            <if test="buyerSignature != null">buyer_signature = #{buyerSignature},</if>
+            <if test="sellerSignature != null">seller_signature = #{sellerSignature},</if>
+            <if test="pdfUrl != null">pdf_url = #{pdfUrl},</if>
+            <if test="pdfHash != null">pdf_hash = #{pdfHash},</if>
             update_time = NOW(3)
         </set>
         WHERE id = #{id}
-          AND user_id = #{userId}
+          AND is_deleted = 0
+    </update>
+    
+    <!-- 更新合同状态 -->
+    <update id="updateStatus">
+        UPDATE bus_contract
+        SET status = #{status},
+            update_time = NOW(3)
+        WHERE id = #{id}
           AND is_deleted = 0
     </update>
 
@@ -128,19 +159,15 @@
         SET is_deleted = 1,
             update_time = NOW(3)
         WHERE id = #{id}
-          AND user_id = #{userId}
           AND is_deleted = 0
     </update>
-
-    <update id="updatePdfHash">
-        UPDATE bus_contract
-        SET pdf_hash = #{pdfHash},
-            update_time = NOW(3)
-        WHERE id = #{id}
-          AND user_id = #{userId}
-          AND is_deleted = 0
-    </update>
+    
+    <!-- 生成下一个合同编号 -->
+    <select id="selectMaxContractNoForToday" resultType="java.lang.String">
+        SELECT contract_no FROM bus_contract
+        WHERE contract_no LIKE CONCAT('HT', #{datePrefix}, '%')
+        ORDER BY contract_no DESC
+        LIMIT 1
+    </select>
 
 </mapper>
-
-
