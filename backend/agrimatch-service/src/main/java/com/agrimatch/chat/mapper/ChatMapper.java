@@ -45,6 +45,12 @@ public interface ChatMapper {
 
     ConversationUserPair selectConversationUserPair(@Param("conversationId") Long conversationId);
 
+    /** 更新消息的 payloadJson */
+    int updateMessagePayload(@Param("id") Long id, @Param("payloadJson") String payloadJson);
+
+    /** 根据合同ID查找CONTRACT类型消息 */
+    BusChatMessage selectContractMessageByContractId(@Param("contractId") Long contractId);
+
     class PeerRow {
         private Long peerUserId;
         private String peerUserName;

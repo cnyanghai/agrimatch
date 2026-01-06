@@ -12,6 +12,7 @@ com/agrimatch/file/controller/FileController.class
 com/agrimatch/post_social/mapper/PostLikeMapper.class
 com/agrimatch/user/dto/UserUpdateRequest.class
 com/agrimatch/contract/service/impl/SealServiceImpl.class
+com/agrimatch/chat/event/MessageUpdateEvent.class
 com/agrimatch/post_social/domain/BusPostLike.class
 com/agrimatch/company/domain/BusCompany.class
 com/agrimatch/chat/ws/ChatWebSocketHandler.class
@@ -39,6 +40,7 @@ com/agrimatch/product/controller/ProductController.class
 com/agrimatch/requirement_template/mapper/RequirementTemplateMapper.class
 com/agrimatch/product_param/dto/ProductParamOptionAddRequest.class
 com/agrimatch/company/service/impl/CompanyServiceImpl.class
+com/agrimatch/contract/dto/ContractCancelRequest.class
 com/agrimatch/product/dto/ProductCreateRequest.class
 com/agrimatch/user/controller/UserController.class
 com/agrimatch/requirement_template/dto/RequirementTemplateResponse.class

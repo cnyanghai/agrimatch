@@ -2,8 +2,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { FileText, Search, Eye, Pen, Trash2, RefreshCw } from 'lucide-vue-next'
-import { listContracts, deleteContract, type ContractResponse, type ContractQuery } from '../api/contract'
+import { FileText, Search, Eye, Pen, Trash2, RefreshCw, XCircle } from 'lucide-vue-next'
+import { listContracts, deleteContract, cancelContract, type ContractResponse, type ContractQuery } from '../api/contract'
 import ContractSignModal from '../components/contract/ContractSignModal.vue'
 
 const router = useRouter()
@@ -100,6 +100,29 @@ async function handleDelete(contract: ContractResponse) {
     }
   } catch (e: any) {
     ElMessage.error(e.message || '删除失败')
+  }
+}
+
+// 取消合同
+async function handleCancel(contract: ContractResponse) {
+  if (contract.status !== 0 && contract.status !== 1) {
+    ElMessage.warning('只有草稿或待签署状态的合同可以取消')
+    return
+  }
+  
+  const reason = prompt('请输入取消原因（可选）：')
+  if (reason === null) return // 用户点击了取消按钮
+  
+  try {
+    const res = await cancelContract(contract.id, reason || undefined)
+    if (res.code === 0) {
+      ElMessage.success('合同已取消')
+      loadContracts()
+    } else {
+      ElMessage.error(res.message || '取消失败')
+    }
+  } catch (e: any) {
+    ElMessage.error(e.message || '取消失败')
   }
 }
 
@@ -262,6 +285,14 @@ onMounted(() => {
                         @click="handleDelete(contract)"
                       >
                         <Trash2 class="w-4 h-4 text-red-500" />
+                      </button>
+                      <button
+                        v-if="contract.status === 0 || contract.status === 1"
+                        class="p-2 bg-amber-50 hover:bg-amber-100 rounded-lg transition-all"
+                        title="取消合同"
+                        @click="handleCancel(contract)"
+                      >
+                        <XCircle class="w-4 h-4 text-amber-600" />
                       </button>
                     </div>
                   </div>

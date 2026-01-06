@@ -250,6 +250,34 @@
         LIMIT 1
     </select>
 
+    <!-- 更新消息的 payloadJson -->
+    <update id="updateMessagePayload">
+        UPDATE bus_chat_message
+        SET payload_json = #{payloadJson},
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
+    <!-- 根据合同ID查找CONTRACT类型消息 -->
+    <select id="selectContractMessageByContractId" resultMap="MsgMap">
+        SELECT
+            m.id, m.conversation_id, m.from_user_id, m.to_user_id,
+            fu.user_name AS from_user_name,
+            fu.nick_name AS from_nick_name,
+            tu.user_name AS to_user_name,
+            tu.nick_name AS to_nick_name,
+            m.msg_type, m.content, m.payload_json, m.quote_status, m.is_read, m.is_deleted, m.create_time, m.update_time
+        FROM bus_chat_message m
+        LEFT JOIN sys_user fu ON fu.user_id = m.from_user_id AND fu.del_flag = '0'
+        LEFT JOIN sys_user tu ON tu.user_id = m.to_user_id AND tu.del_flag = '0'
+        WHERE m.is_deleted = 0
+          AND m.msg_type = 'CONTRACT'
+          AND m.payload_json LIKE CONCAT('%"contractId":', #{contractId}, '%')
+        ORDER BY m.create_time DESC
+        LIMIT 1
+    </select>
+
 </mapper>
 
 

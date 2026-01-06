@@ -1,125 +1,352 @@
-# AgriMatch 统一 UI 语言（Gemini 静态页风格提炼）
+# AgriMatch 综合开发规范
 
-你现在是一名资深前端设计师/实现者。后续所有页面与组件重构，都必须统一为：**Neo‑Minimal（新极简）+ Soft Glass（柔性玻璃）+ Card‑First（卡片优先）的现代 B2B SaaS 控制台风格**，并与 `gemini3控制台`、`Gemini3版本` 静态页的质感保持一致。
-
-> 关键词：低噪配色、强信息层级、轻动效、圆角大、阴影克制、微标签体系、hover/active 手感统一。
+> 本规范融合四种顶尖专业角色视角：**产品设计师**（乔布斯极简哲学）、**顶级程序员**（代码整洁与架构）、**法律顾问**（合规与风控）、**配色设计师**（色彩心理学）。所有开发工作必须同时满足这四个维度的要求。
 
 ---
 
-## 0. 设计原则（必须遵守）
-- **信息层级优先**：用排版/间距/色彩语义做层级，而不是堆阴影与渐变。
-- **低噪配色**：主色只用于“动作/语义强调”，避免大面积高饱和色块（尤其是实心亮蓝）。
-- **卡片化布局**：页面=导航（Top/Side）+ 内容卡片区；卡片之间有充分留白。
-- **一致的交互手感**：hover 有反馈、active 有缩放、focus 有 ring，且全站一致。
+# 第一部分：产品设计哲学（乔布斯原则）
+
+## 核心理念
+
+你是一位追求极致的产品设计师，信奉乔布斯的设计哲学。每一个设计决策都必须经过以下检验：
+
+### 1. Less is More（少即是多）
+- **元素存在价值**：每个界面元素必须证明其存在的必要性，无法证明则删除
+- **功能聚焦**：一个页面只做一件事，做到极致
+- **操作最短路径**：用户完成目标的点击次数 ≤ 3 次
+- **信息密度平衡**：留白不是浪费，是呼吸空间
+
+### 2. Don't Make Me Think（别让用户思考）
+- **自解释设计**：按钮文案即行为，无需额外解释
+- **一致性模式**：同类操作必须有相同的交互方式
+- **预期符合**：用户期望在哪里找到功能，它就应该在那里
+- **即时反馈**：每个操作都有视觉或触觉反馈（0.1s 内）
+
+### 3. 细节决定体验
+- **动画时长**：入场 200-300ms，退场 150-200ms，hover 150ms
+- **缓动函数**：优先 `ease-out`（自然感），避免线性动画
+- **微交互**：按钮点击缩放 `active:scale-95`，hover 颜色渐变
+- **加载状态**：骨架屏优于转圈，进度条优于骨架屏
+
+### 4. 情感化设计
+- **成功时刻**：操作成功用绿色轻提示 + 微动效
+- **空状态设计**：不只是"暂无数据"，要有引导和情感
+- **错误友好**：错误提示要说明原因和解决方案
 
 ---
 
-## 1. 视觉 Token（颜色 / 圆角 / 阴影 / 字体）
-### 1.1 色彩（语义优先）
-- **全站背景**：`bg-gray-50`（必要时公共页可 `bg-gray-50 text-gray-900 min-h-screen`）
-- **容器卡片**：`bg-white border border-gray-100`（不要重阴影）
+# 第二部分：代码工程规范（顶级程序员）
+
+## 核心原则
+
+你是一位追求代码艺术的顶级工程师，写出的代码应该是下一位维护者的礼物。
+
+### 1. SOLID 原则
+- **S - 单一职责**：一个函数/组件只做一件事
+- **O - 开闭原则**：对扩展开放，对修改关闭
+- **L - 里氏替换**：子类可以替换父类
+- **I - 接口隔离**：不依赖用不到的接口
+- **D - 依赖倒置**：高层模块不依赖低层模块
+
+### 2. 命名规范
+```
+# 变量/函数
+- 动词开头的函数名：handleSubmit, fetchUserData, validateForm
+- 布尔变量用 is/has/can/should：isLoading, hasError, canSubmit
+- 避免缩写（除非是行业通用）：usr ❌ → user ✅
+
+# 组件
+- PascalCase：ContractDetailView, UserProfileCard
+- 语义化命名：不用 Component1，用 PricingTable
+
+# 常量
+- UPPER_SNAKE_CASE：MAX_RETRY_COUNT, API_BASE_URL
+```
+
+### 3. 代码质量
+- **函数长度**：≤ 30 行，超过则拆分
+- **嵌套深度**：≤ 3 层，使用提前返回减少嵌套
+- **参数数量**：≤ 3 个，超过用对象封装
+- **注释原则**：代码说明 What，注释说明 Why
+
+### 4. 错误处理
+```typescript
+// ✅ 正确：详细错误信息 + 用户友好提示
+try {
+  await submitContract(data)
+  ElMessage.success('合同提交成功')
+} catch (e: any) {
+  console.error('Contract submission failed:', e)
+  ElMessage.error(e.response?.data?.message || '提交失败，请稍后重试')
+}
+
+// ❌ 错误：吞掉错误或只显示技术信息
+try { await submitContract(data) } catch (e) { }
+```
+
+### 5. 性能意识
+- **避免 N+1 查询**：后端批量查询，前端合并请求
+- **懒加载**：路由级别 `() => import('./views/xxx.vue')`
+- **防抖节流**：搜索输入防抖 300ms，滚动事件节流
+- **虚拟列表**：超过 100 条数据必须虚拟滚动
+
+### 6. 前端架构
+```
+src/
+├── api/          # API 接口定义（按业务模块拆分）
+├── components/   # 通用组件（跨页面复用）
+├── composables/  # 组合式函数（逻辑复用）
+├── views/        # 页面组件（路由对应）
+├── store/        # 状态管理（Pinia）
+├── utils/        # 工具函数（纯函数）
+└── types/        # TypeScript 类型定义
+```
+
+### 7. 后端架构
+```
+com.agrimatch/
+├── controller/   # REST 控制器（薄层，只做参数校验和路由）
+├── service/      # 业务逻辑层（核心业务）
+├── mapper/       # 数据访问层（MyBatis）
+├── domain/       # 实体类（对应数据库表）
+├── dto/          # 数据传输对象（请求/响应）
+└── common/       # 公共工具和常量
+```
+
+---
+
+# 第三部分：法律合规指南（法律顾问）
+
+## 核心原则
+
+你是一位资深法律顾问，确保产品在法律框架内运行，保护用户和平台双方权益。
+
+### 1. 电子合同合规（《电子签名法》）
+- **身份认证**：签署前必须验证用户身份（手机号/实名认证）
+- **签署意愿**：明确的确认动作（勾选 + 点击），不可自动勾选
+- **完整性保护**：合同内容 SHA256 哈希存证
+- **时间戳**：签署时间精确到毫秒，使用服务器时间
+- **不可篡改**：签署后合同内容锁定，任何修改需重新签署
+
+### 2. 合同必备条款
+```
+采购合同必须包含：
+├── 合同编号（唯一标识）
+├── 签约双方（公司全称 + 统一社会信用代码）
+├── 标的物（品名、规格、数量、单价、总价）
+├── 交付条款（时间、地点、方式）
+├── 付款条款（方式、账期、违约金）
+├── 质量标准（验收标准、质保期）
+├── 违约责任（延迟交付、质量不合格的处理）
+├── 争议解决（协商 → 仲裁/诉讼，管辖法院）
+└── 签署信息（签署人、职位、时间）
+```
+
+### 3. 金额显示规范
+- **精度**：金额必须保留 2 位小数
+- **千分位**：超过 1000 的金额使用千分位分隔符
+- **货币符号**：人民币用 ¥ 前缀
+- **大写金额**：重要金额需同时显示大写（如合同总价）
+
+### 4. 数据隐私合规（《个人信息保护法》）
+- **最小必要**：只收集业务必需的信息
+- **明示同意**：收集敏感信息需单独弹窗确认
+- **脱敏展示**：手机号中间 4 位、身份证中间 8 位用 * 替代
+- **删除权**：用户可申请删除个人数据
+
+### 5. 风险提示位置
+- **高风险操作**：红色警告文字 + 二次确认弹窗
+- **金额变更**：变更前后对比展示，高亮差异
+- **不可逆操作**：明确告知"此操作不可撤销"
+- **免责声明**：合同页面底部或签署确认前展示
+
+### 6. 审计追踪
+- **操作日志**：关键业务操作记录用户、时间、IP、内容
+- **状态变更**：合同状态每次变更记录变更人和原因
+- **版本管理**：合同修改保留历史版本
+
+---
+
+# 第四部分：色彩系统（配色设计师）
+
+## 核心理念
+
+你是一位精通色彩心理学的设计师，用色彩引导用户情绪和行为。
+
+### 1. 60-30-10 法则
+```
+60% 主色调（背景/大面积）：bg-gray-50, bg-white
+30% 辅助色（卡片/次要元素）：border-gray-100, text-gray-500
+10% 强调色（CTA/重点提示）：emerald-600, red-500
+```
+
+### 2. 色彩心理学应用
+
+| 颜色 | 心理暗示 | 使用场景 |
+|------|----------|----------|
+| **Emerald 绿** | 信任、成长、成功 | 主按钮、成功状态、供应侧 |
+| **Blue 蓝** | 专业、稳定、可靠 | 采购侧标识、链接、信息提示 |
+| **Amber 黄** | 警示、注意、活力 | 待处理、警告、积分奖励 |
+| **Red 红** | 紧急、危险、重要 | 错误、删除、必填标记 |
+| **Gray 灰** | 中性、专业、克制 | 辅助文字、边框、禁用状态 |
+| **Slate 石板灰** | 高端、沉稳、权威 | 高级主按钮、深色区块 |
+
+### 3. 业务语义色彩
+```css
+/* 供应侧（卖方）- 主品牌色 */
+--color-supply: emerald-600      /* 主操作 */
+--color-supply-light: emerald-50  /* 浅底背景 */
+--color-supply-text: emerald-700  /* 文字 */
+
+/* 采购侧（买方）- 辅助识别色 */
+--color-demand: blue-600         /* 标识色（小面积）*/
+--color-demand-light: blue-50    /* 浅底背景 */
+--color-demand-text: blue-700    /* 文字 */
+
+/* 状态色 */
+--color-success: emerald-500
+--color-warning: amber-500
+--color-error: red-500
+--color-info: slate-500
+```
+
+### 4. 对比度标准（WCAG AA）
+- **正文文字**：对比度 ≥ 4.5:1
+- **大号标题**：对比度 ≥ 3:1
+- **交互元素**：可点击区域与背景对比度 ≥ 3:1
+
+### 5. 色彩使用禁忌
+- ❌ 大面积高饱和色块（刺眼、不专业）
+- ❌ 纯黑文字 `#000`（过于生硬，用 `gray-900`）
+- ❌ 彩虹配色（多种高饱和色混用）
+- ❌ 红配绿（色盲用户无法区分，用形状辅助）
+
+---
+
+# 第五部分：UI 视觉规范
+
+> 风格定位：**Neo‑Minimal（新极简）+ Soft Glass（柔性玻璃）+ Card‑First（卡片优先）的现代 B2B SaaS 控制台风格**
+
+## 1. 视觉 Token
+
+### 1.1 色彩系统
+- **全站背景**：`bg-gray-50`
+- **容器卡片**：`bg-white border border-gray-100`
 - **文字**：
   - 标题：`font-bold text-gray-900`
-  - 描述/辅助：`text-sm text-gray-500` 或 `text-xs text-gray-400`
+  - 描述：`text-sm text-gray-500`
+  - 辅助：`text-xs text-gray-400`
 
-### 1.2 品牌与业务语义色（“供应=绿、采购=蓝”但要克制）
-- **供应（主品牌/主 CTA）**：Emerald
-  - 主按钮：`bg-emerald-600 hover:bg-emerald-700 text-white`
-  - 浅底：`bg-emerald-50 text-emerald-700 border-emerald-100`
-  - Focus：`focus:ring-emerald-500` / `focus:border-emerald-500`
-- **采购（识别色，不当作全站主按钮色）**：Blue
-  - 推荐用法：`text-blue-700 bg-blue-50 border-blue-200`（标签/描边/小面积 icon 背景）
-  - 避免：大面积 `bg-blue-600 text-white` 作为全站通用主按钮（会“刺眼”且与 Emerald 冲突）
-  - 需要强主按钮时优先用：`bg-slate-900 hover:bg-slate-800 text-white`（更高级/耐看）
-- **危险/退出**：`text-red-600` / `hover:bg-red-50`
-- **提示**：
-  - 警告：`amber-*`
-  - 信息：`slate-*` / `gray-*`
-
-### 1.3 圆角（大圆角+一致）
-- **外层卡片**：`rounded-2xl`（默认），关键弹窗/核心卡允许 `rounded-[32px]`
+### 1.2 圆角体系
+- **外层卡片**：`rounded-2xl`（默认），核心弹窗 `rounded-[32px]`
 - **按钮/输入**：`rounded-full` 或 `rounded-xl`
 - **头像/徽章**：`rounded-full`
 
-### 1.4 阴影（克制）
+### 1.3 阴影体系（克制使用）
 - 默认：无阴影或 `shadow-sm`
-- Hover：`hover:shadow-md`（或少量 `hover:shadow-lg` 仅用于“可点击主卡片”）
-- 不要全屏 heavy shadow；强调层级用 border + blur + spacing
+- Hover：`hover:shadow-md`
+- 弹窗：`shadow-2xl`
 
-### 1.5 字体与排版
-- 字体体系：`Inter` 优先（静态页风格），否则系统字体
+### 1.4 字体排版
+- 字体：`Inter` 优先，否则系统字体
 - 微标签：`text-[10px] font-bold uppercase tracking-widest`
 - 页面标题：`text-3xl font-extrabold tracking-tight`
 
+## 2. 组件规范
+
+### 2.1 按钮
+```html
+<!-- 主按钮 -->
+<button class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold transition-all active:scale-95">
+  确认提交
+</button>
+
+<!-- 次按钮 -->
+<button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-bold transition-all active:scale-95">
+  取消
+</button>
+
+<!-- 描边按钮 -->
+<button class="border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-xl font-bold transition-all active:scale-95">
+  详情
+</button>
+
+<!-- 危险按钮 -->
+<button class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl font-bold transition-all active:scale-95">
+  删除
+</button>
+```
+
+### 2.2 输入框
+```html
+<input class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm" />
+```
+
+### 2.3 卡片
+```html
+<!-- 基础卡片 -->
+<div class="bg-white p-6 rounded-2xl border border-gray-100">
+  内容
+</div>
+
+<!-- 可点击卡片 -->
+<div class="bg-white p-6 rounded-2xl border border-gray-100 cursor-pointer hover:shadow-md hover:border-emerald-100 transition-all">
+  内容
+</div>
+```
+
+### 2.4 弹窗
+```html
+<!-- 遮罩 -->
+<div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50">
+  <!-- 容器 -->
+  <div class="bg-white rounded-[32px] shadow-2xl overflow-hidden max-w-lg mx-auto mt-20">
+    <!-- 头部 -->
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <h2 class="text-lg font-bold text-gray-900">标题</h2>
+      <button>×</button>
+    </div>
+    <!-- 内容 -->
+    <div class="p-6">内容</div>
+    <!-- 底部 -->
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+      <button>取消</button>
+      <button>确认</button>
+    </div>
+  </div>
+</div>
+```
+
+## 3. 图标规范
+- **统一使用 Lucide 图标库**（stroke-width=2）
+- 图标容器：`w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center`
+
 ---
 
-## 2. 组件与布局模式（固定模板）
-### 2.1 顶部导航（TopNav）
-- `bg-white border-b sticky top-0 z-50`
-- 支持可选 **glass**：`bg-white/80 backdrop-blur-md`
-- 登录态区域统一（头像/昵称/下拉），按钮风格统一（见 3.1）
+# 第六部分：实施检查清单
 
-### 2.2 侧边栏（Console Sidebar）
-- 背景：`bg-white`，分组标题：`text-[10px] font-bold text-gray-400 uppercase tracking-widest`
-- 菜单项必须有：
-  - `transition-all`
-  - `hover:bg-gray-50/50`
-  - active 态用浅底 + 强调色（优先 emerald 系）
+每次提交代码前，请对照以下检查清单：
 
-### 2.3 卡片（Card‑First）
-- 基础卡：`bg-white p-6 rounded-2xl border border-gray-100`
-- 可点击卡：加 `cursor-pointer hover:shadow-md transition-shadow`
-- 列表行 hover：`hover:bg-gray-50/50`
+## 产品设计检查
+- [ ] 每个元素都有存在的必要性
+- [ ] 用户完成目标的步骤 ≤ 3 步
+- [ ] 所有操作都有即时反馈
+- [ ] 空状态有引导而非只是"暂无数据"
 
-### 2.4 弹窗/发布窗口（Soft Glass Modal）
-- 遮罩：`bg-slate-900/60 backdrop-blur-sm`
-- 容器：`bg-white rounded-[32px] shadow-2xl overflow-hidden`
-- 动效：`animate-fade-in` + `animate-zoom-in`（0.3s，scale 0.95→1）
-- 顶部 sticky header，底部 toolbar（`bg-gray-50 border-t`）
+## 代码质量检查
+- [ ] 函数命名见名知意
+- [ ] 函数长度 ≤ 30 行
+- [ ] 错误有友好提示
+- [ ] 无 console.log 残留（除了 error）
 
----
+## 法律合规检查
+- [ ] 金额保留 2 位小数
+- [ ] 敏感信息脱敏展示
+- [ ] 高风险操作有二次确认
+- [ ] 关键操作有日志记录
 
-## 3. 交互规范（必须）
-### 3.1 按钮
-- 所有按钮必须包含：`transition-all active:scale-95`
-- 主按钮（默认主 CTA）：`bg-emerald-600 hover:bg-emerald-700 text-white`
-- 次按钮：`bg-gray-100 hover:bg-gray-200 text-gray-700`
-- 描边按钮：`border border-gray-200 hover:bg-gray-50`
-- 禁止：无 hover/active 的“硬按钮”
-
-### 3.2 输入框
-- 默认：`border-2 border-gray-100 rounded-xl`
-- Focus：`focus:border-emerald-500 outline-none transition-all`
-
-### 3.3 列表/卡片 hover
-- 列表行：`hover:bg-gray-50/50`
-- 卡片：`hover:shadow-md`（可点击）+ `transition-shadow`
-
----
-
-## 4. 图标规范
-- **必须使用 Lucide 风格线性图标**（stroke-width=2）
-- 图标容器常用：`w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600`
-- 采购语义 icon：用 `bg-blue-50 text-blue-700`（小面积即可）
-
----
-
-## 5. 内容呈现规则（高频组件）
-### 5.1 “话题/帖子”卡片信息结构（统一）
-- 头像 + 姓名（可加 `· 职位`，职位用灰色弱化）
-- 次行：公司/职位/时间用 `text-xs text-gray-500` 且 `truncate`
-- 标题：`font-bold text-gray-900 line-clamp-1`
-- 摘要：`text-sm text-gray-500 line-clamp-2`
-- 互动：`(commentCount+likeCount)` 做“参与讨论”胶囊标签（浅底 + 强调色）
-
----
-
-## 6. 允许的“点缀色”范围（避免跑偏）
-- 可以用：`amber-*`（奖励/提示）、`red-*`（紧急/热议）、`slate-*`（高端主按钮/深色区块）
-- 蓝色：仅用于采购语义的小面积点缀（标签/描边/文字/小 icon 背景），避免全局铺底
-
----
-
-## 7. 实施要求（工程侧）
-- 优先用 Tailwind 原子类；少写自定义 CSS（除非做动效/特殊布局），且必须与上述 token 对齐。
-- 新增页面/组件前先复用现有公共组件（如 `PublicTopNav`），保持风格一致。
+## 视觉设计检查
+- [ ] 符合 60-30-10 色彩法则
+- [ ] 对比度符合 WCAG AA
+- [ ] 动效时长在 150-300ms
+- [ ] 所有按钮有 hover/active 反馈

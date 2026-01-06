@@ -33,7 +33,12 @@ public interface ContractService {
     /**
      * 检查合同是否双方都已签署，如果是则更新状态为 signed
      */
-    void checkAndUpdateSignStatus(Long contractId);
+    void checkAndUpdateSignStatus(Long contractId, Long userId);
+    
+    /**
+     * 取消合同（仅草稿或待签署状态可取消）
+     */
+    void cancel(Long userId, Long contractId, String reason);
 
     byte[] generatePdf(Long viewerUserId, Long id);
 }

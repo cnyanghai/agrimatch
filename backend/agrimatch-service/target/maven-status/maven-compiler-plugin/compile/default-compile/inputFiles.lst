@@ -27,6 +27,7 @@
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/company/dto/CompanyBriefResponse.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/follow/service/impl/FollowServiceImpl.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/product/controller/ProductController.java
+/home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/contract/dto/ContractCancelRequest.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/contract/mapper/ContractChangeLogMapper.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/auth/dto/RegisterRequest.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/auth/dto/LoginBySmsRequest.java
@@ -58,6 +59,7 @@
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/user/service/impl/UserServiceImpl.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/requirement/dto/RequirementQuery.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/chat/event/ContractMessageEvent.java
+/home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/chat/event/MessageUpdateEvent.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/post_social/controller/PostSocialController.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/eval/service/EvalService.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/deal/controller/DealController.java

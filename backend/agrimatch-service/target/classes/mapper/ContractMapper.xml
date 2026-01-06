@@ -62,6 +62,30 @@
           AND is_deleted = 0
         LIMIT 1
     </select>
+    
+    <!-- 查询合同详情，关联公司信息 -->
+    <select id="selectDetailById" resultType="java.util.Map">
+        SELECT 
+            c.*,
+            bc_buyer.company_name AS buyer_company_name,
+            bc_buyer.license_no AS buyer_license_no,
+            bc_buyer.contacts AS buyer_contacts,
+            bc_buyer.phone AS buyer_phone,
+            CONCAT(IFNULL(bc_buyer.province,''), IFNULL(bc_buyer.city,''), IFNULL(bc_buyer.district,''), IFNULL(bc_buyer.address,'')) AS buyer_address,
+            bc_buyer.bank_info_json AS buyer_bank_info,
+            bc_seller.company_name AS seller_company_name,
+            bc_seller.license_no AS seller_license_no,
+            bc_seller.contacts AS seller_contacts,
+            bc_seller.phone AS seller_phone,
+            CONCAT(IFNULL(bc_seller.province,''), IFNULL(bc_seller.city,''), IFNULL(bc_seller.district,''), IFNULL(bc_seller.address,'')) AS seller_address,
+            bc_seller.bank_info_json AS seller_bank_info
+        FROM bus_contract c
+        LEFT JOIN bus_company bc_buyer ON c.buyer_company_id = bc_buyer.id
+        LEFT JOIN bus_company bc_seller ON c.seller_company_id = bc_seller.id
+        WHERE c.id = #{id}
+          AND c.is_deleted = 0
+        LIMIT 1
+    </select>
 
     <select id="selectList" resultMap="BusContractMap">
         SELECT *

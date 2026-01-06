@@ -4,6 +4,7 @@ import com.agrimatch.chat.domain.BusChatConversation;
 import com.agrimatch.chat.domain.BusChatMessage;
 import com.agrimatch.chat.dto.ChatMessageResponse;
 import com.agrimatch.chat.event.ContractMessageEvent;
+import com.agrimatch.chat.event.MessageUpdateEvent;
 import com.agrimatch.chat.mapper.ChatMapper;
 import com.agrimatch.common.api.ResultCode;
 import com.agrimatch.common.exception.ApiException;
@@ -316,20 +317,25 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public ContractResponse getById(Long viewerUserId, Long id) {
         if (viewerUserId == null) throw new ApiException(401, "未登录");
-        BusContract c = contractMapper.selectById(id);
-        if (c == null) throw new ApiException(ResultCode.NOT_FOUND);
+        
+        // 使用详情查询，关联公司信息
+        Map<String, Object> detail = contractMapper.selectDetailById(id);
+        if (detail == null) throw new ApiException(ResultCode.NOT_FOUND);
         
         // 检查权限
         SysUser viewer = userMapper.selectById(viewerUserId);
         if (viewer == null) throw new ApiException(401, "未登录");
         
+        Long buyerCompanyId = getLongValue(detail, "buyer_company_id");
+        Long sellerCompanyId = getLongValue(detail, "seller_company_id");
+        
         Long viewerCompanyId = viewer.getCompanyId();
         if (viewerCompanyId == null || 
-            (!viewerCompanyId.equals(c.getBuyerCompanyId()) && !viewerCompanyId.equals(c.getSellerCompanyId()))) {
+            (!viewerCompanyId.equals(buyerCompanyId) && !viewerCompanyId.equals(sellerCompanyId))) {
             throw new ApiException(403, "无权查看此合同");
         }
         
-        return toResponse(c, viewerUserId);
+        return toDetailResponse(detail, viewerUserId);
     }
 
     @Override
@@ -398,6 +404,41 @@ public class ContractServiceImpl implements ContractService {
         
         int rows = contractMapper.logicalDelete(id);
         if (rows != 1) throw new ApiException(ResultCode.NOT_FOUND);
+    }
+
+    @Override
+    @Transactional
+    public void cancel(Long userId, Long contractId, String reason) {
+        if (userId == null) throw new ApiException(401, "未登录");
+        
+        BusContract c = contractMapper.selectById(contractId);
+        if (c == null) throw new ApiException(ResultCode.NOT_FOUND);
+        
+        // 权限校验：通过会话验证用户是否为参与者
+        if (c.getConversationId() != null) {
+            BusChatConversation conversation = chatMapper.selectConversationById(c.getConversationId());
+            if (conversation != null) {
+                boolean isParticipant = userId.equals(conversation.getAUserId()) || userId.equals(conversation.getBUserId());
+                if (!isParticipant) {
+                    throw new ApiException(403, "无权操作此合同");
+                }
+            }
+        }
+        
+        // 状态校验：只有草稿(0)或待签署(1)状态可以取消
+        Integer status = c.getStatus();
+        if (status == null || (status != 0 && status != 1)) {
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "只有草稿或待签署状态的合同可以取消");
+        }
+        
+        String beforeStatus = String.valueOf(status);
+        contractMapper.updateStatus(contractId, 5); // 5 = 已取消
+        
+        String desc = "取消合同";
+        if (reason != null && !reason.isBlank()) {
+            desc += "，原因：" + reason;
+        }
+        logChange(contractId, "STATUS", desc, beforeStatus, "5", userId);
     }
 
     @Override
@@ -483,17 +524,100 @@ public class ContractServiceImpl implements ContractService {
         logChange(contractId, "SIGN", partyType + " 签署合同", null, null, userId);
         
         // 检查是否双方都已签署
-        checkAndUpdateSignStatus(contractId);
+        checkAndUpdateSignStatus(contractId, userId);
+        
+        // 更新聊天消息中的合同状态
+        updateContractMessageStatus(contractId);
     }
 
     @Override
     @Transactional
-    public void checkAndUpdateSignStatus(Long contractId) {
+    public void checkAndUpdateSignStatus(Long contractId, Long userId) {
         int signCount = signatureMapper.countByContractId(contractId);
         if (signCount >= 2) {
             // 双方都已签署，更新状态为已签署
             contractMapper.updateStatus(contractId, 2); // 2 = 已签署
-            logChange(contractId, "STATUS", "双方签署完成，合同生效", "1", "2", null);
+            logChange(contractId, "STATUS", "双方签署完成，合同生效", "1", "2", userId);
+        }
+    }
+
+    /**
+     * 更新聊天消息中的合同状态，并广播给双方用户
+     */
+    private void updateContractMessageStatus(Long contractId) {
+        try {
+            // 查找该合同对应的 CONTRACT 消息
+            BusChatMessage msg = chatMapper.selectContractMessageByContractId(contractId);
+            if (msg == null) {
+                log.warn("updateContractMessageStatus: No CONTRACT message found for contract {}", contractId);
+                return;
+            }
+            
+            // 获取最新的合同数据
+            BusContract contract = contractMapper.selectById(contractId);
+            if (contract == null) {
+                log.warn("updateContractMessageStatus: Contract {} not found", contractId);
+                return;
+            }
+            
+            // 获取签署状态
+            BusContractSignature sigBuyer = signatureMapper.selectByContractAndParty(contractId, "buyer");
+            BusContractSignature sigSeller = signatureMapper.selectByContractAndParty(contractId, "seller");
+            boolean buyerSigned = sigBuyer != null;
+            boolean sellerSigned = sigSeller != null;
+            
+            // 获取公司名称
+            String buyerName = "买方";
+            String sellerName = "卖方";
+            if (contract.getBuyerCompanyId() != null) {
+                BusCompany buyer = companyMapper.selectById(contract.getBuyerCompanyId());
+                if (buyer != null) buyerName = buyer.getCompanyName();
+            }
+            if (contract.getSellerCompanyId() != null) {
+                BusCompany seller = companyMapper.selectById(contract.getSellerCompanyId());
+                if (seller != null) sellerName = seller.getCompanyName();
+            }
+            
+            // 构建更新后的 payloadJson
+            Map<String, Object> payload = new LinkedHashMap<>();
+            payload.put("contractId", contract.getId());
+            payload.put("contractNo", contract.getContractNo());
+            payload.put("productName", contract.getProductName());
+            payload.put("quantity", contract.getQuantity());
+            payload.put("unit", contract.getUnit());
+            payload.put("unitPrice", contract.getUnitPrice());
+            payload.put("totalAmount", contract.getTotalAmount());
+            payload.put("buyerCompanyId", contract.getBuyerCompanyId());
+            payload.put("buyerCompanyName", buyerName);
+            payload.put("sellerCompanyId", contract.getSellerCompanyId());
+            payload.put("sellerCompanyName", sellerName);
+            payload.put("status", contract.getStatus());
+            payload.put("buyerSigned", buyerSigned);
+            payload.put("sellerSigned", sellerSigned);
+            
+            String payloadJson = objectMapper.writeValueAsString(payload);
+            
+            // 更新消息
+            chatMapper.updateMessagePayload(msg.getId(), payloadJson);
+            log.info("updateContractMessageStatus: Updated message {} payload for contract {}", msg.getId(), contractId);
+            
+            // 获取会话双方用户
+            BusChatConversation conversation = chatMapper.selectConversationById(msg.getConversationId());
+            if (conversation != null) {
+                // 发布消息更新事件
+                eventPublisher.publishEvent(new MessageUpdateEvent(
+                    this,
+                    msg.getId(),
+                    msg.getConversationId(),
+                    conversation.getAUserId(),
+                    conversation.getBUserId(),
+                    payloadJson
+                ));
+                log.info("updateContractMessageStatus: Published MessageUpdateEvent for message {}", msg.getId());
+            }
+            
+        } catch (Exception e) {
+            log.error("updateContractMessageStatus failed for contract {}: {}", contractId, e.getMessage(), e);
         }
     }
 
@@ -755,6 +879,303 @@ public class ContractServiceImpl implements ContractService {
         try (Formatter f = new Formatter()) {
             for (byte b : dig) f.format("%02x", b);
             return f.toString();
+        }
+    }
+    
+    // ==================== Detail Response Helpers ====================
+    
+    /**
+     * 将关联查询结果转换为详情响应（包含公司详细信息、产品参数、格式化条款）
+     */
+    private ContractResponse toDetailResponse(Map<String, Object> detail, Long viewerUserId) {
+        ContractResponse o = new ContractResponse();
+        
+        // 基本信息
+        o.setId(getLongValue(detail, "id"));
+        o.setQuoteMessageId(getLongValue(detail, "quote_message_id"));
+        o.setConversationId(getLongValue(detail, "conversation_id"));
+        o.setContractNo(getStringValue(detail, "contract_no"));
+        
+        // 买方基本信息
+        o.setBuyerCompanyId(getLongValue(detail, "buyer_company_id"));
+        o.setBuyerCompanyName(getStringValue(detail, "buyer_company_name"));
+        
+        // 买方详细信息
+        o.setBuyerLicenseNo(getStringValue(detail, "buyer_license_no"));
+        o.setBuyerContacts(getStringValue(detail, "buyer_contacts"));
+        o.setBuyerPhone(getStringValue(detail, "buyer_phone"));
+        o.setBuyerAddress(getStringValue(detail, "buyer_address"));
+        o.setBuyerBankInfo(getStringValue(detail, "buyer_bank_info"));
+        
+        // 卖方基本信息
+        o.setSellerCompanyId(getLongValue(detail, "seller_company_id"));
+        o.setSellerCompanyName(getStringValue(detail, "seller_company_name"));
+        
+        // 卖方详细信息
+        o.setSellerLicenseNo(getStringValue(detail, "seller_license_no"));
+        o.setSellerContacts(getStringValue(detail, "seller_contacts"));
+        o.setSellerPhone(getStringValue(detail, "seller_phone"));
+        o.setSellerAddress(getStringValue(detail, "seller_address"));
+        o.setSellerBankInfo(getStringValue(detail, "seller_bank_info"));
+        
+        // 产品信息
+        o.setProductName(getStringValue(detail, "product_name"));
+        o.setCategoryName(getStringValue(detail, "category_name"));
+        o.setQuantity(getBigDecimalValue(detail, "quantity"));
+        o.setUnit(getStringValue(detail, "unit"));
+        o.setUnitPrice(getBigDecimalValue(detail, "unit_price"));
+        o.setParamsJson(getStringValue(detail, "params_json"));
+        o.setTotalAmount(getBigDecimalValue(detail, "total_amount"));
+        
+        // 解析产品参数
+        o.setProductParams(parseProductParams(o.getParamsJson()));
+        
+        // 交付信息
+        o.setDeliveryDate(getLocalDateValue(detail, "delivery_date"));
+        o.setDeliveryAddress(getStringValue(detail, "delivery_address"));
+        o.setPaymentMethod(getStringValue(detail, "payment_method"));
+        o.setDeliveryMode(getStringValue(detail, "delivery_mode"));
+        o.setTermsJson(getStringValue(detail, "terms_json"));
+        
+        // 生成格式化条款
+        o.setFormattedTerms(generateFormattedTerms(o));
+        
+        // 状态
+        o.setStatus(getIntValue(detail, "status"));
+        o.setBuyerSignTime(getLocalDateTimeValue(detail, "buyer_sign_time"));
+        o.setSellerSignTime(getLocalDateTimeValue(detail, "seller_sign_time"));
+        o.setPdfHash(getStringValue(detail, "pdf_hash"));
+        o.setPdfUrl(getStringValue(detail, "pdf_url"));
+        o.setCreateTime(getLocalDateTimeValue(detail, "create_time"));
+        o.setUpdateTime(getLocalDateTimeValue(detail, "update_time"));
+        
+        // 查询签署状态
+        Long contractId = o.getId();
+        if (contractId != null) {
+            BusContractSignature sigBuyer = signatureMapper.selectByContractAndParty(contractId, "buyer");
+            BusContractSignature sigSeller = signatureMapper.selectByContractAndParty(contractId, "seller");
+            o.setBuyerSigned(sigBuyer != null);
+            o.setSellerSigned(sigSeller != null);
+        }
+        
+        return o;
+    }
+    
+    /**
+     * 解析产品参数 JSON 为结构化列表
+     */
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> parseProductParams(String paramsJson) {
+        if (!StringUtils.hasText(paramsJson)) return Collections.emptyList();
+        
+        try {
+            JsonNode root = objectMapper.readTree(paramsJson);
+            List<Map<String, Object>> params = new ArrayList<>();
+            
+            if (root.isArray()) {
+                // 数组格式: [{"label": "水分", "value": "14%"}, ...]
+                for (JsonNode item : root) {
+                    Map<String, Object> param = new LinkedHashMap<>();
+                    if (item.has("label")) param.put("label", item.get("label").asText());
+                    if (item.has("name")) param.put("label", item.get("name").asText());
+                    if (item.has("value")) param.put("value", item.get("value").asText());
+                    if (!param.isEmpty()) params.add(param);
+                }
+            } else if (root.isObject()) {
+                // 对象格式: {"水分": "14%", "杂质": "1%"}
+                Iterator<Map.Entry<String, JsonNode>> fields = root.fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = fields.next();
+                    Map<String, Object> param = new LinkedHashMap<>();
+                    param.put("label", entry.getKey());
+                    param.put("value", entry.getValue().asText());
+                    params.add(param);
+                }
+            }
+            
+            return params;
+        } catch (Exception e) {
+            log.warn("parseProductParams failed: {}", e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+    
+    /**
+     * 生成格式化的合同条款文本
+     */
+    private String generateFormattedTerms(ContractResponse c) {
+        StringBuilder sb = new StringBuilder();
+        
+        // 合同标题
+        sb.append("【农产品采购合同】\n\n");
+        sb.append("合同编号：").append(nvl(c.getContractNo(), "____")).append("\n");
+        sb.append("签订日期：").append(c.getCreateTime() != null ? 
+            c.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")) : "____年__月__日").append("\n\n");
+        
+        // 第一条：合同主体
+        sb.append("第一条  合同主体\n");
+        sb.append("甲方（买方）：").append(nvl(c.getBuyerCompanyName(), "____")).append("\n");
+        sb.append("统一社会信用代码：").append(nvl(c.getBuyerLicenseNo(), "____")).append("\n");
+        sb.append("联系人：").append(nvl(c.getBuyerContacts(), "____")).append("  电话：").append(nvl(c.getBuyerPhone(), "____")).append("\n");
+        sb.append("地址：").append(nvl(c.getBuyerAddress(), "____")).append("\n\n");
+        
+        sb.append("乙方（卖方）：").append(nvl(c.getSellerCompanyName(), "____")).append("\n");
+        sb.append("统一社会信用代码：").append(nvl(c.getSellerLicenseNo(), "____")).append("\n");
+        sb.append("联系人：").append(nvl(c.getSellerContacts(), "____")).append("  电话：").append(nvl(c.getSellerPhone(), "____")).append("\n");
+        sb.append("地址：").append(nvl(c.getSellerAddress(), "____")).append("\n\n");
+        
+        // 第二条：标的物
+        sb.append("第二条  标的物\n");
+        sb.append("产品名称：").append(nvl(c.getProductName(), "____")).append("\n");
+        sb.append("产品类目：").append(nvl(c.getCategoryName(), "____")).append("\n");
+        sb.append("数量：").append(c.getQuantity() != null ? c.getQuantity().toPlainString() : "____");
+        sb.append(" ").append(nvl(c.getUnit(), "吨")).append("\n");
+        sb.append("单价：人民币 ").append(c.getUnitPrice() != null ? c.getUnitPrice().toPlainString() : "____");
+        sb.append(" 元/").append(nvl(c.getUnit(), "吨")).append("\n");
+        sb.append("总金额：人民币 ").append(c.getTotalAmount() != null ? c.getTotalAmount().toPlainString() : "____").append(" 元\n\n");
+        
+        // 质量标准
+        sb.append("第三条  质量标准\n");
+        sb.append("产品质量符合国家相关标准及双方约定的技术指标：\n");
+        List<Map<String, Object>> params = c.getProductParams();
+        if (params != null && !params.isEmpty()) {
+            for (Map<String, Object> param : params) {
+                sb.append("  • ").append(param.get("label")).append("：").append(param.get("value")).append("\n");
+            }
+        } else {
+            sb.append("  （按国家标准执行）\n");
+        }
+        sb.append("\n");
+        
+        // 第四条：交付条款
+        sb.append("第四条  交付条款\n");
+        sb.append("交付地点：").append(nvl(c.getDeliveryAddress(), "____")).append("\n");
+        sb.append("交付日期：").append(c.getDeliveryDate() != null ? 
+            c.getDeliveryDate().format(DateTimeFormatter.ofPattern("yyyy年MM月dd日")) : "____年__月__日").append("\n");
+        sb.append("交付方式：").append(nvl(c.getDeliveryMode(), "____")).append("\n");
+        sb.append("运输及风险：货物在交付前的风险由卖方承担，交付后由买方承担。\n\n");
+        
+        // 第五条：付款条款
+        sb.append("第五条  付款条款\n");
+        sb.append("付款方式：").append(getPaymentMethodText(c.getPaymentMethod())).append("\n");
+        sb.append("发票类型：增值税专用发票\n\n");
+        
+        // 第六条：验收条款
+        sb.append("第六条  验收条款\n");
+        sb.append("1. 买方应在收货后 3 个工作日内完成验收。\n");
+        sb.append("2. 如发现质量问题，应在验收期内书面通知卖方，逾期视为验收合格。\n");
+        sb.append("3. 验收以到货检验结果为准，双方对检验结果有异议的，可委托第三方检测机构进行仲裁检测。\n\n");
+        
+        // 第七条：违约责任
+        sb.append("第七条  违约责任\n");
+        sb.append("1. 卖方逾期交货的，每逾期一日，按合同总金额的 0.05% 向买方支付违约金。\n");
+        sb.append("2. 买方逾期付款的，每逾期一日，按未付金额的 0.05% 向卖方支付违约金。\n");
+        sb.append("3. 卖方交付的产品质量不符合约定的，买方有权要求换货、退货或相应减少价款。\n\n");
+        
+        // 第八条：争议解决
+        sb.append("第八条  争议解决\n");
+        sb.append("本合同发生争议，双方应友好协商解决；协商不成的，任何一方均可向甲方（买方）所在地人民法院提起诉讼。\n\n");
+        
+        // 第九条：不可抗力
+        sb.append("第九条  不可抗力\n");
+        sb.append("因地震、台风、洪水、战争等不可抗力因素导致合同无法履行的，受影响方应及时通知对方，并在合理期限内提供相关证明。双方可协商解除合同或延期履行，均不承担违约责任。\n\n");
+        
+        // 第十条：其他条款
+        sb.append("第十条  其他条款\n");
+        sb.append("1. 本合同未尽事宜，双方可另行协商并签订补充协议。\n");
+        sb.append("2. 本合同一式贰份，甲乙双方各执壹份，具有同等法律效力。\n");
+        sb.append("3. 本合同自双方签字（或盖章）之日起生效。\n\n");
+        
+        // 签署区
+        sb.append("【签署区】\n\n");
+        sb.append("甲方（盖章）：____________________    乙方（盖章）：____________________\n\n");
+        sb.append("法定代表人（或授权代表）：________    法定代表人（或授权代表）：________\n\n");
+        sb.append("签署日期：____年__月__日            签署日期：____年__月__日\n");
+        
+        return sb.toString();
+    }
+    
+    /**
+     * 将付款方式代码转换为文本
+     */
+    private String getPaymentMethodText(String code) {
+        if (code == null) return "____";
+        return switch (code) {
+            case "01", "款到发货" -> "款到发货";
+            case "02", "货到付款" -> "货到付款";
+            case "03", "账期30天" -> "账期30天（货到后30天内付款）";
+            case "04", "账期60天" -> "账期60天（货到后60天内付款）";
+            case "05", "分期付款" -> "分期付款（按约定分期支付）";
+            case "06", "预付定金" -> "预付定金（签约时支付30%定金，交货时付清余款）";
+            default -> code;
+        };
+    }
+    
+    // ==================== Map Value Helpers ====================
+    
+    private Long getLongValue(Map<String, Object> map, String key) {
+        Object val = map.get(key);
+        if (val == null) return null;
+        if (val instanceof Long l) return l;
+        if (val instanceof Number n) return n.longValue();
+        try {
+            return Long.parseLong(val.toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    private Integer getIntValue(Map<String, Object> map, String key) {
+        Object val = map.get(key);
+        if (val == null) return null;
+        if (val instanceof Integer i) return i;
+        if (val instanceof Number n) return n.intValue();
+        try {
+            return Integer.parseInt(val.toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    private String getStringValue(Map<String, Object> map, String key) {
+        Object val = map.get(key);
+        if (val == null) return null;
+        return val.toString();
+    }
+    
+    private BigDecimal getBigDecimalValue(Map<String, Object> map, String key) {
+        Object val = map.get(key);
+        if (val == null) return null;
+        if (val instanceof BigDecimal bd) return bd;
+        if (val instanceof Number n) return new BigDecimal(n.toString());
+        try {
+            return new BigDecimal(val.toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    private LocalDate getLocalDateValue(Map<String, Object> map, String key) {
+        Object val = map.get(key);
+        if (val == null) return null;
+        if (val instanceof LocalDate ld) return ld;
+        if (val instanceof java.sql.Date d) return d.toLocalDate();
+        try {
+            return LocalDate.parse(val.toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    private LocalDateTime getLocalDateTimeValue(Map<String, Object> map, String key) {
+        Object val = map.get(key);
+        if (val == null) return null;
+        if (val instanceof LocalDateTime ldt) return ldt;
+        if (val instanceof java.sql.Timestamp ts) return ts.toLocalDateTime();
+        try {
+            return LocalDateTime.parse(val.toString());
+        } catch (Exception e) {
+            return null;
         }
     }
 }

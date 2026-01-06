@@ -101,6 +101,19 @@ public class ContractController {
     }
 
     /**
+     * 取消合同（仅草稿或待签署状态可取消）
+     */
+    @PostMapping("/{id}/cancel")
+    public Result<Void> cancel(Authentication authentication, 
+                               @PathVariable("id") @NotNull Long id,
+                               @RequestBody(required = false) ContractCancelRequest req) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        String reason = req != null ? req.getReason() : null;
+        contractService.cancel(userId, id, reason);
+        return Result.success();
+    }
+
+    /**
      * 下载 PDF（MVP：后端生成简单 PDF，响应头附带存证 hash）
      */
     @GetMapping("/{id}/pdf")

@@ -235,6 +235,10 @@ function connectWs() {
           onOfferUpdated(payload.conversationId, payload.message as ChatMessageResponse)
           return
         }
+        if (payload?.type === 'MESSAGE_UPDATE' && payload?.messageId) {
+          onMessageUpdate(payload.conversationId, payload.messageId, payload.payload)
+          return
+        }
         if (payload?.type === 'SENT') {
           onWsSent(payload?.tempId, payload?.id, payload?.conversationId)
         }
@@ -313,6 +317,24 @@ function onOfferUpdated(conversationId: number, msg: ChatMessageResponse) {
   }
 
   nextTick().then(scrollToBottom)
+}
+
+/**
+ * 处理消息更新事件（用于合同签署状态同步）
+ */
+function onMessageUpdate(conversationId: number, messageId: number, payload: any) {
+  if (activeConversationId.value !== conversationId) return
+  
+  // 查找并更新现有消息的 payloadJson
+  const idx = messages.value.findIndex(m => m.id === messageId)
+  if (idx >= 0) {
+    const old = messages.value[idx]
+    messages.value[idx] = {
+      ...old,
+      payloadJson: JSON.stringify(payload)
+    }
+    console.log('[ChatView] Message updated:', messageId, payload)
+  }
 }
 
 async function handleConfirmOffer(msgId: number | string) {

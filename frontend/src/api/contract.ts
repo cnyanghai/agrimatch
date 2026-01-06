@@ -8,16 +8,37 @@ export type ContractType = 'purchase' | 'supply'
 
 // ==================== Types ====================
 
+export interface ProductParam {
+  label: string
+  value: string
+}
+
 export interface ContractResponse {
   id: number
   quoteMessageId?: number
   conversationId?: number
   contractNo: string
-  // 买卖双方
+  
+  // 买方基本信息
   buyerCompanyId?: number
-  sellerCompanyId?: number
   buyerCompanyName?: string
+  // 买方详细信息
+  buyerLicenseNo?: string      // 营业执照号
+  buyerContacts?: string       // 联系人
+  buyerPhone?: string          // 电话
+  buyerAddress?: string        // 详细地址
+  buyerBankInfo?: string       // 银行信息 JSON
+  
+  // 卖方基本信息
+  sellerCompanyId?: number
   sellerCompanyName?: string
+  // 卖方详细信息
+  sellerLicenseNo?: string
+  sellerContacts?: string
+  sellerPhone?: string
+  sellerAddress?: string
+  sellerBankInfo?: string
+  
   // 产品信息
   productName?: string
   categoryName?: string
@@ -26,12 +47,18 @@ export interface ContractResponse {
   unitPrice?: number
   paramsJson?: string
   totalAmount?: number
+  // 产品参数（解析后的结构化数据）
+  productParams?: ProductParam[]
+  
   // 交付信息
   deliveryDate?: string
   deliveryAddress?: string
   paymentMethod?: string
   deliveryMode?: string
   termsJson?: string
+  // 格式化合同条款
+  formattedTerms?: string
+  
   // 状态 (0=草稿, 1=待签署, 2=已签署, 3=履约中, 4=已完成, 5=已取消)
   status: number
   // 签署信息
@@ -43,6 +70,74 @@ export interface ContractResponse {
   pdfUrl?: string
   createTime: string
   updateTime: string
+}
+
+// ==================== 数据字典映射 ====================
+
+/** 付款方式映射 */
+export const paymentMethodMap: Record<string, string> = {
+  '01': '款到发货',
+  '02': '货到付款',
+  '03': '账期30天',
+  '04': '账期60天',
+  '05': '分期付款',
+  '06': '预付定金',
+  '款到发货': '款到发货',
+  '货到付款': '货到付款',
+  '账期30天': '账期30天',
+  '账期60天': '账期60天',
+  '分期付款': '分期付款',
+  '预付定金': '预付定金',
+}
+
+/** 获取付款方式文本 */
+export function getPaymentMethodText(code?: string): string {
+  if (!code) return '-'
+  return paymentMethodMap[code] || code
+}
+
+/** 交付方式映射 */
+export const deliveryModeMap: Record<string, string> = {
+  '01': '送货上门',
+  '02': '自提',
+  '03': '物流配送',
+  '04': '快递',
+  '送货上门': '送货上门',
+  '自提': '自提',
+  '物流配送': '物流配送',
+  '快递': '快递',
+}
+
+/** 获取交付方式文本 */
+export function getDeliveryModeText(code?: string): string {
+  if (!code) return '-'
+  return deliveryModeMap[code] || code
+}
+
+/** 合同状态映射 */
+export const contractStatusMap: Record<number, { label: string; color: string; bgColor: string }> = {
+  0: { label: '草稿', color: 'text-gray-600', bgColor: 'bg-gray-100' },
+  1: { label: '待签署', color: 'text-amber-600', bgColor: 'bg-amber-50' },
+  2: { label: '已签署', color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
+  3: { label: '履约中', color: 'text-blue-600', bgColor: 'bg-blue-50' },
+  4: { label: '已完成', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
+  5: { label: '已取消', color: 'text-red-500', bgColor: 'bg-red-50' },
+}
+
+/** 解析银行信息 JSON */
+export interface BankInfo {
+  bankName?: string
+  accountName?: string
+  accountNo?: string
+}
+
+export function parseBankInfo(json?: string): BankInfo | null {
+  if (!json) return null
+  try {
+    return JSON.parse(json)
+  } catch {
+    return null
+  }
 }
 
 export interface ContractFromQuoteRequest {
@@ -210,6 +305,11 @@ export async function sendContractForSigning(id: number): Promise<Result<void>> 
 
 export async function signContract(id: number, req: ContractSignRequest): Promise<Result<void>> {
   const res = await http.post(`/api/contracts/${id}/sign`, req)
+  return res.data
+}
+
+export async function cancelContract(id: number, reason?: string): Promise<Result<void>> {
+  const res = await http.post(`/api/contracts/${id}/cancel`, { reason })
   return res.data
 }
 

@@ -2,6 +2,7 @@ package com.agrimatch.chat.ws;
 
 import com.agrimatch.chat.dto.ChatMessageResponse;
 import com.agrimatch.chat.event.ContractMessageEvent;
+import com.agrimatch.chat.event.MessageUpdateEvent;
 import com.agrimatch.chat.event.OfferUpdatedEvent;
 import com.agrimatch.chat.service.ChatService;
 import com.agrimatch.security.JwtTokenUtil;
@@ -124,6 +125,12 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         broadcastContractMessage(event.getConversationId(), event.getAUserId(), event.getBUserId(), event.getMessage());
     }
 
+    @EventListener
+    public void onMessageUpdate(MessageUpdateEvent event) {
+        broadcastMessageUpdate(event.getConversationId(), event.getAUserId(), event.getBUserId(), 
+                              event.getMessageId(), event.getPayloadJson());
+    }
+
     /**
      * 广播合同消息给双方用户
      */
@@ -151,6 +158,28 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                     .put("type", "OFFER_UPDATED")
                     .put("conversationId", conversationId)
                     .set("message", objectMapper.valueToTree(updatedMessage))
+            );
+        } catch (Exception e) {
+            return;
+        }
+
+        TextMessage textMessage = new TextMessage(payload);
+        sendToUser(aUserId, textMessage);
+        sendToUser(bUserId, textMessage);
+    }
+
+    /**
+     * 广播消息更新给双方用户（用于合同签署状态更新等）
+     */
+    public void broadcastMessageUpdate(Long conversationId, Long aUserId, Long bUserId, 
+                                       Long messageId, String payloadJson) {
+        String payload;
+        try {
+            payload = objectMapper.writeValueAsString(objectMapper.createObjectNode()
+                    .put("type", "MESSAGE_UPDATE")
+                    .put("conversationId", conversationId)
+                    .put("messageId", messageId)
+                    .set("payload", objectMapper.readTree(payloadJson))
             );
         } catch (Exception e) {
             return;
