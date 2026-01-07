@@ -5,6 +5,8 @@ import { requireAuth } from '../../utils/requireAuth'
 import { getProductTree, type ProductNode } from '../../api/product'
 import { listPosts, type PostResponse } from '../../api/post'
 import PublicTopNav from '../../components/PublicTopNav.vue'
+import PublicFooter from '../../components/PublicFooter.vue'
+import { MessageCircle, FileText, MapPin, Zap, Gift, ArrowRight } from 'lucide-vue-next'
 
 const router = useRouter()
 
@@ -16,7 +18,7 @@ let onResize: any = null
 const categoryTree = ref<ProductNode[]>([])
 const categoryLoading = ref(false)
 
-// 首页热门话题（动态 Top2）
+// 首页热门话题（动态 Top4）
 const hotTopicsLoading = ref(false)
 const hotTopics = ref<PostResponse[]>([])
 
@@ -85,7 +87,7 @@ function formatTime(timeStr: string | undefined) {
 async function loadHotTopics() {
   hotTopicsLoading.value = true
   try {
-    const r = await listPosts({ orderBy: 'hot_7d', recentDays: 7, limit: 2 })
+    const r = await listPosts({ orderBy: 'hot_7d', recentDays: 7, limit: 4 })
     if (r.code === 0) hotTopics.value = r.data ?? []
     else hotTopics.value = []
   } catch {
@@ -217,8 +219,11 @@ onBeforeUnmount(() => {
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-20 flex flex-col md:flex-row gap-12 md:gap-60">
         <!-- 左侧悬浮菜单 -->
-        <div class="w-64 glass-card rounded-xl p-2 self-start">
-          <div class="p-3 font-bold border-b border-white/10 mb-2">全部分类</div>
+        <div class="w-64 glass-card rounded-xl p-2 self-start hidden lg:block">
+          <div class="p-3 font-bold border-b border-white/10 mb-2 flex items-center gap-2">
+            <Zap :size="16" class="text-emerald-400" />
+            全部分类
+          </div>
           <div class="space-y-1 relative">
             <!-- 加载提示 -->
             <div v-if="categoryLoading" class="p-3 text-sm text-white/70">正在加载分类...</div>
@@ -267,14 +272,14 @@ onBeforeUnmount(() => {
 
         <!-- 文案区 -->
         <div class="flex-1 flex flex-col justify-center items-center md:items-start md:pl-8 text-center md:text-left">
-          <h1 class="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
+          <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tight">
             连接饲料人，<br /><span class="text-emerald-400">交易更透明</span>
           </h1>
-          <p class="text-xl text-gray-300 mb-10 max-w-xl">
+          <p class="text-xl text-gray-300 mb-10 max-w-xl leading-relaxed">
             采购经理与期货大佬观点碰撞。全产业链真实交易数据，让每一份合约都胸有成竹。
           </p>
           <div class="flex flex-wrap gap-4 justify-center md:justify-start">
-            <button class="btn-primary px-10 py-4 rounded-xl text-xl font-bold" @click="onPublishSupply">发布供应</button>
+            <button class="btn-primary px-10 py-4 rounded-xl text-xl font-bold shadow-lg shadow-emerald-500/20" @click="onPublishSupply">发布供应</button>
             <button class="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 px-10 py-4 rounded-xl text-xl font-bold transition-all" @click="onPublishNeed">
               发布采购
             </button>
@@ -283,194 +288,160 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <!-- 行业洞察与社区精选 -->
-    <section class="max-w-7xl mx-auto px-4 py-20">
-      <div class="grid md:grid-cols-3 gap-8">
-        <div>
-          <div class="flex items-center gap-2 mb-6">
-            <div class="w-1 h-6 bg-emerald-600"></div>
-            <h3 class="text-xl font-bold">热门话题</h3>
-          </div>
-          <div class="space-y-4">
-            <div v-if="hotTopicsLoading" class="bg-white p-6 rounded-2xl border border-gray-100">
-              <div class="text-sm text-gray-500">正在加载热门话题...</div>
-            </div>
-            <div v-else-if="hotTopics.length === 0" class="bg-white p-6 rounded-2xl border border-gray-100">
-              <div class="text-sm text-gray-500">暂无热门话题</div>
-              <button class="mt-3 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-all active:scale-95" @click="go('/talks')">
-                去话题广场看看 →
-              </button>
-            </div>
-            <div
-              v-else
-              v-for="(post, idx) in hotTopics"
-              :key="post.id"
-              class="bg-white p-6 rounded-2xl border border-gray-100 hover:shadow-md transition-shadow cursor-pointer"
-              @click="go(`/talks/${post.id}`)"
-            >
-              <div class="flex items-center gap-3 mb-3">
-                <div
-                  class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
-                  :class="idx % 2 === 0 ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'"
-                >
-                  {{ avatarText(post) }}
-                </div>
-                <div class="min-w-0">
-                  <div class="font-bold text-sm truncate">{{ displayName(post) }}</div>
-                  <div class="text-xs text-gray-500 truncate">
-                    {{ post.companyName || '个人' }} · {{ post.position || '暂无职位' }} · {{ formatTime(post.createTime) }}
-                  </div>
-                </div>
-              </div>
-              <h4 class="text-sm font-bold text-gray-900 mb-2 line-clamp-1">
-                {{ post.title }}
-              </h4>
-              <p v-if="post.content" class="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-2">
-                {{ post.content }}
-              </p>
-              <p v-else class="text-sm text-gray-400 leading-relaxed mb-4 italic">
-                暂无摘要
-              </p>
-              <div
-                class="flex items-center text-xs font-semibold w-max px-2 py-1 rounded"
-                :class="idx % 2 === 0 ? 'text-emerald-600 bg-emerald-50' : 'text-blue-600 bg-blue-50'"
-              >
-                {{ (post.commentCount ?? 0) + (post.likeCount ?? 0) }} 人参与讨论
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <div class="flex items-center gap-2 mb-6">
-            <div class="w-1 h-6 bg-slate-900"></div>
-            <h3 class="text-xl font-bold">大咖观点</h3>
-          </div>
-          <div class="space-y-4">
-            <div class="bg-slate-900 text-white p-5 rounded-2xl relative overflow-hidden">
-              <div class="absolute top-0 right-0 p-2">
-                <span class="text-[10px] bg-yellow-500 text-black px-2 py-1 rounded-full font-bold">V 认证</span>
-              </div>
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-full bg-gray-700 overflow-hidden">
-                  <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" />
-                </div>
-                <div>
-                  <div class="font-bold text-sm">期货冠军李华</div>
-                  <div class="text-xs text-gray-400">大连商报特约专家</div>
-                </div>
-              </div>
-              <h4 class="font-bold text-lg mb-3">“豆粕主力合约一周走势预测”</h4>
-              <p class="text-gray-400 text-sm mb-4">基于南美干旱预测及国内压榨厂库存数据，我认为...</p>
-              <div class="flex justify-between items-center">
-                <span class="text-xs text-emerald-400">528人参与讨论</span>
-                <button class="text-xs underline hover:text-emerald-400" @click="go('/insights')">查看全文</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <div class="flex items-center gap-2 mb-6">
-            <div class="w-1 h-6 bg-red-600"></div>
-            <h3 class="text-xl font-bold">官方资讯</h3>
-          </div>
-          <div class="bg-gray-100 rounded-2xl p-6">
-            <ul class="space-y-4">
-              <li class="group cursor-pointer" @click="go('/insights')">
-                <div class="text-xs text-gray-400 mb-1">2024.12.26</div>
-                <h4 class="font-medium group-hover:text-emerald-600 transition-colors">《2024年小麦市场行情展望与年度白皮书》</h4>
-              </li>
-              <li class="group cursor-pointer border-t pt-4" @click="go('/insights')">
-                <div class="text-xs text-gray-400 mb-1">2024.12.25</div>
-                <h4 class="font-medium group-hover:text-emerald-600 transition-colors">全国主要饲料原料价格日报 (第48周)</h4>
-              </li>
-              <li class="group cursor-pointer border-t pt-4" @click="go('/insights')">
-                <div class="text-xs text-gray-400 mb-1">2024.12.24</div>
-                <h4 class="font-medium group-hover:text-emerald-600 transition-colors">新版饲料添加剂安全准则发布...</h4>
-              </li>
-            </ul>
-            <button class="w-full mt-6 py-2 border border-gray-300 rounded-lg text-sm hover:bg-white transition-all" @click="go('/insights')">查看更多数据</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 流程 -->
-    <section class="bg-white py-24 relative overflow-hidden">
-      <div class="max-w-7xl mx-auto px-4 text-center">
-        <h2 class="text-3xl font-extrabold mb-2">在这里，交流就是价值</h2>
-        <p class="text-gray-500 mb-16">打破信息孤岛，每一句对话、每一个观点都在沉淀财富</p>
-
-        <div class="relative flex flex-col md:flex-row justify-between items-start gap-12 px-10">
-          <div class="hidden md:block step-line"></div>
-
-          <div class="relative z-10 flex-1 flex flex-col items-center">
-            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-lg">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-            </div>
-            <h4 class="font-bold mb-2">聊生意</h4>
-            <p class="text-xs text-gray-500">在线直聊，保护隐私</p>
-          </div>
-
-          <div class="relative z-10 flex-1 flex flex-col items-center">
-            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-lg">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            </div>
-            <h4 class="font-bold mb-2">签合同</h4>
-            <p class="text-xs text-gray-500">电子签约，法律保障</p>
-          </div>
-
-          <div class="relative z-10 flex-1 flex flex-col items-center">
-            <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-lg">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 20l-5.447-2.724A2 2 0 013 15.488V5.112a2 2 0 011.176-1.815l7-3.111a2 2 0 011.648 0l7 3.111A2 2 0 0121 5.112v10.376a2 2 0 01-1.176 1.815L14.382 20a2 2 0 01-1.764 0L9 20z"></path></svg>
-            </div>
-            <h4 class="font-bold mb-2">全域地图</h4>
-            <p class="text-xs text-gray-500">地图找商，近距离寻货</p>
-          </div>
-
-          <div class="relative z-10 flex-1 flex flex-col items-center">
-            <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-lg">
-              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
-            <h4 class="font-bold mb-2">得积分/赏金</h4>
-            <p class="text-xs text-gray-500">发帖、打赏获收益</p>
-          </div>
-
-          <div class="relative z-10 flex-1 flex flex-col items-center group">
-            <div class="w-20 h-20 bg-emerald-600 text-white rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-xl transform group-hover:scale-110 transition-transform cursor-pointer">
-              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-            </div>
-            <h4 class="font-bold mb-2 text-emerald-600">换好礼</h4>
-            <p class="text-xs text-gray-500">iPhone、京东卡等你拿</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 py-16">
+    <!-- 平台价值核心区域 -->
+    <section class="py-24 bg-white">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-8">
-          <div>
-            <span class="text-2xl font-bold text-white mb-4 block">AgriMatch</span>
-            <p class="text-sm">© 2024 AgriMatch 饲料人交易社区. All rights reserved.</p>
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">为什么选择 AgriMatch</h2>
+          <p class="text-gray-500 max-w-2xl mx-auto">打破行业信息壁垒，构建饲料原料交易新生态</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-12">
+          <!-- 价值1 -->
+          <div class="flex flex-col items-center text-center group">
+            <div class="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <MessageCircle :size="32" :stroke-width="2" />
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">高效沟通</h3>
+            <p class="text-sm text-gray-500 leading-relaxed">
+              内置专业即时通讯系统，支持询价、报价、改价一键完成，所有沟通记录留档备查。
+            </p>
           </div>
 
-          <div class="flex gap-8 items-center">
-            <div class="text-right">
-              <p class="text-white font-medium">APP 聊天更方便</p>
-              <p class="text-xs">随时随地 掌握商机</p>
+          <!-- 价值2 -->
+          <div class="flex flex-col items-center text-center group">
+            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <FileText :size="32" :stroke-width="2" />
             </div>
-            <div class="w-24 h-24 bg-white p-2 rounded-lg">
-              <div class="w-full h-full bg-slate-800 rounded flex items-center justify-center">
-                <svg class="w-12 h-12 text-white/50" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm13 0h5v2h-5v-2zm0 3h2v5h-2v-5zm3 0h2v2h-2v-2zm0 3h2v2h-2v-2z"></path></svg>
-              </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">电子签约</h3>
+            <p class="text-sm text-gray-500 leading-relaxed">
+              基于《电子签名法》的专业合同系统，支持印章管理与在线签署，具备完整法律效力。
+            </p>
+          </div>
+
+          <!-- 价值3 -->
+          <div class="flex flex-col items-center text-center group">
+            <div class="w-20 h-20 bg-purple-50 text-purple-600 rounded-3xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <MapPin :size="32" :stroke-width="2" />
             </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">全域地图</h3>
+            <p class="text-sm text-gray-500 leading-relaxed">
+              直观展示全国供应商分布与货源动态，支持地理位置搜索，帮助您寻找最近、最合适的货源。
+            </p>
           </div>
         </div>
       </div>
-    </footer>
+    </section>
+
+    <!-- 热门话题区域 - 占据更宽幅面 -->
+    <section class="max-w-7xl mx-auto px-4 py-24 border-t border-gray-100">
+      <div class="flex items-center justify-between mb-12">
+        <div class="flex items-center gap-3">
+          <div class="w-1.5 h-8 bg-emerald-600 rounded-full"></div>
+          <h2 class="text-3xl font-extrabold text-gray-900">社区热门讨论</h2>
+        </div>
+        <button class="flex items-center gap-2 text-emerald-600 font-bold hover:gap-3 transition-all" @click="go('/talks')">
+          进入话题广场
+          <ArrowRight :size="20" />
+        </button>
+      </div>
+
+      <div v-if="hotTopicsLoading" class="grid md:grid-cols-2 gap-8">
+        <div v-for="i in 4" :key="i" class="bg-white p-8 rounded-3xl border border-gray-100 animate-pulse h-48"></div>
+      </div>
+      <div v-else-if="hotTopics.length === 0" class="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+        <p class="text-gray-400">暂无热门话题</p>
+      </div>
+      <div v-else class="grid md:grid-cols-2 gap-8">
+        <div
+          v-for="(post, idx) in hotTopics"
+          :key="post.id"
+          class="bg-white p-8 rounded-3xl border border-gray-100 hover:shadow-xl hover:border-emerald-100 transition-all cursor-pointer flex flex-col"
+          @click="go(`/talks/${post.id}`)"
+        >
+          <div class="flex items-center gap-4 mb-6">
+            <div
+              class="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-white shadow-sm"
+              :class="idx % 2 === 0 ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-blue-500 to-indigo-600'"
+            >
+              {{ avatarText(post) }}
+            </div>
+            <div class="min-w-0">
+              <div class="font-bold text-gray-900 truncate">{{ displayName(post) }}</div>
+              <div class="text-xs text-gray-400 truncate">
+                {{ post.companyName || '行业同仁' }} · {{ formatTime(post.createTime) }}
+              </div>
+            </div>
+            <div class="ml-auto flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+              <Zap :size="12" />
+              热议中
+            </div>
+          </div>
+          
+          <h3 class="text-xl font-bold text-gray-900 mb-4 line-clamp-1 group-hover:text-emerald-600 transition-colors">
+            {{ post.title }}
+          </h3>
+          <p class="text-gray-500 text-sm leading-relaxed mb-6 line-clamp-2">
+            {{ post.content || '暂无内容摘要' }}
+          </p>
+          
+          <div class="mt-auto flex items-center justify-between pt-6 border-t border-gray-50">
+            <div class="flex items-center gap-4 text-xs text-gray-400 font-medium">
+              <span>{{ post.commentCount ?? 0 }} 评论</span>
+              <span>{{ post.likeCount ?? 0 }} 赞</span>
+            </div>
+            <span class="text-xs font-bold text-emerald-600 flex items-center gap-1">
+              查看详情
+              <ArrowRight :size="14" />
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 底部流程引导 -->
+    <section class="bg-slate-900 py-24 relative overflow-hidden">
+      <div class="max-w-7xl mx-auto px-4 text-center">
+        <h2 class="text-3xl font-extrabold text-white mb-4">开启您的专业交易之旅</h2>
+        <p class="text-gray-400 mb-16 max-w-xl mx-auto">从发现商机到合约履行，AgriMatch 为您提供全流程保障</p>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div class="flex flex-col items-center">
+            <div class="w-16 h-16 bg-white/5 border border-white/10 text-emerald-400 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-xl">
+              <span class="text-2xl font-black">01</span>
+            </div>
+            <h4 class="font-bold text-white mb-2">发布/发现</h4>
+            <p class="text-[10px] text-gray-500 px-4">精准匹配海量供需信息</p>
+          </div>
+
+          <div class="flex flex-col items-center">
+            <div class="w-16 h-16 bg-white/5 border border-white/10 text-blue-400 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-xl">
+              <span class="text-2xl font-black">02</span>
+            </div>
+            <h4 class="font-bold text-white mb-2">洽谈议价</h4>
+            <p class="text-[10px] text-gray-500 px-4">在线直聊，快速达成意向</p>
+          </div>
+
+          <div class="flex flex-col items-center">
+            <div class="w-16 h-16 bg-white/5 border border-white/10 text-purple-400 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-xl">
+              <span class="text-2xl font-black">03</span>
+            </div>
+            <h4 class="font-bold text-white mb-2">电子签约</h4>
+            <p class="text-[10px] text-gray-500 px-4">合法合规，保障双方权益</p>
+          </div>
+
+          <div class="flex flex-col items-center">
+            <div class="w-16 h-16 bg-emerald-600 text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-600/20">
+              <Gift :size="28" />
+            </div>
+            <h4 class="font-bold text-white mb-2">履约/奖励</h4>
+            <p class="text-[10px] text-gray-500 px-4">完成交易，赢取丰厚积分</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <PublicFooter />
   </div>
 </template>
 
@@ -495,15 +466,6 @@ onBeforeUnmount(() => {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
-.step-line {
-  position: absolute;
-  top: 2rem;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  background: #d1d5db;
-  z-index: 0;
-}
 .btn-primary {
   background: #10b981;
   transition: all 0.3s ease;
@@ -514,5 +476,3 @@ onBeforeUnmount(() => {
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 </style>
-
-

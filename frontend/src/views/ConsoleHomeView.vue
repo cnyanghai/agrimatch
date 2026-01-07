@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
 import { getDashboard, type DashboardResponse } from '../api/dashboard'
 import { ArrowRight, ShoppingCart, Box, ChatDotRound, Location, DocumentChecked, Bell, Clock } from '@element-plus/icons-vue'
+import ProfileGuideCard from '../components/ProfileGuideCard.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -156,30 +157,36 @@ onMounted(() => {
   <div class="min-h-screen bg-slate-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       
-      <!-- 欢迎区域 -->
-      <section class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-1">
-              {{ greeting }}，{{ auth.me?.nickName || auth.me?.userName || '用户' }}
-            </h2>
-            <p class="text-sm text-gray-500">
-              <template v-if="totalPending > 0">
-                您有 <span class="text-amber-600 font-bold">{{ totalPending }}</span> 项待处理事务
-              </template>
-              <template v-else>
-                {{ isBuyer ? '今日有新供应信息等待您查看' : '今日有新采购需求等待您报价' }}
-              </template>
-            </p>
+      <!-- 欢迎区域 + 资料引导 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- 欢迎卡片 -->
+        <section class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-2xl font-bold text-gray-800 mb-1">
+                {{ greeting }}，{{ auth.me?.nickName || auth.me?.userName || '用户' }}
+              </h2>
+              <p class="text-sm text-gray-500">
+                <template v-if="totalPending > 0">
+                  您有 <span class="text-amber-600 font-bold">{{ totalPending }}</span> 项待处理事务
+                </template>
+                <template v-else>
+                  {{ isBuyer ? '今日有新供应信息等待您查看' : '今日有新采购需求等待您报价' }}
+                </template>
+              </p>
+            </div>
+            <span 
+              class="text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider"
+              :class="isBuyer ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'"
+            >
+              {{ isBuyer ? '采购商' : '供应商' }}
+            </span>
           </div>
-          <span 
-            class="text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider"
-            :class="isBuyer ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'"
-          >
-            {{ isBuyer ? '采购商' : '供应商' }}
-          </span>
-        </div>
-      </section>
+        </section>
+
+        <!-- 资料完善引导卡片 -->
+        <ProfileGuideCard />
+      </div>
 
       <!-- 待办事项（核心模块） -->
       <section v-if="pendingItems.length > 0" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

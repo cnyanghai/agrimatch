@@ -6,6 +6,8 @@ import { requireAuth } from '../../utils/requireAuth'
 import { listPosts, type PostResponse } from '../../api/post'
 import { useAuthStore } from '../../store/auth'
 import PublicTopNav from '../../components/PublicTopNav.vue'
+import PublicFooter from '../../components/PublicFooter.vue'
+import { MessageSquare, Heart, Search, ChevronDown, Plus, Star, Gift } from 'lucide-vue-next'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -84,8 +86,8 @@ onMounted(() => {
   <div class="bg-gray-50 text-gray-900 min-h-screen">
     <PublicTopNav>
       <template #actions>
-        <button class="bg-emerald-600 text-white px-5 py-2 rounded-full font-bold hover:bg-emerald-700 transition-all active:scale-95 flex items-center gap-2" @click="onPublishTalk">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        <button class="bg-emerald-600 text-white px-5 py-2 rounded-full font-bold hover:bg-emerald-700 transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-emerald-500/20" @click="onPublishTalk">
+          <Plus :size="18" />
           发布话题
         </button>
       </template>
@@ -93,198 +95,179 @@ onMounted(() => {
 
     <!-- 头部 -->
     <header class="bg-white border-b">
-      <div class="max-w-7xl mx-auto px-4 py-8">
-        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div class="max-w-7xl mx-auto px-4 py-12">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-8">
           <div>
-            <h1 class="text-3xl font-extrabold text-gray-900 font-sans tracking-tight">话题广场</h1>
-            <p class="text-gray-500 mt-2">在这里，每一个关于饲料原料的思考都有价值</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight mb-2">话题广场</h1>
+            <p class="text-gray-500 text-lg">在这里，每一个关于饲料原料的思考都有价值</p>
           </div>
-          <div class="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex items-center gap-4">
-            <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+          <div class="bg-amber-50 border border-amber-100 rounded-3xl p-6 flex items-center gap-6 shadow-sm">
+            <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 shadow-inner">
+              <Star :size="28" fill="currentColor" />
             </div>
             <div>
-              <p class="text-xs font-bold text-amber-800">发布高质量话题</p>
-              <p class="text-[10px] text-amber-600 italic">最高可得 500 积分，兑换实物好礼</p>
+              <p class="text-sm font-bold text-amber-800">发布高质量话题</p>
+              <p class="text-xs text-amber-600/80 font-medium">最高可得 <span class="text-lg font-black">500</span> 积分</p>
             </div>
-            <button class="bg-amber-500 text-white text-[10px] font-bold px-4 py-2 rounded-lg hover:bg-amber-600 transition-colors" @click="onPublishTalk">立即参与</button>
+            <button class="bg-amber-500 text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:bg-amber-600 transition-all active:scale-95 shadow-md shadow-amber-500/20" @click="onPublishTalk">立即参与</button>
           </div>
         </div>
 
-        <div class="flex items-center gap-8 mt-10 border-b relative">
-          <button class="pb-4 px-2 text-sm font-bold tab-active">全部话题</button>
-          <button class="pb-4 px-2 text-sm font-medium text-gray-500 hover:text-indigo-600 transition-colors flex items-center gap-1.5">
+        <div class="flex items-center gap-8 mt-12 border-b relative">
+          <button class="pb-4 px-2 text-sm font-bold border-b-2 border-emerald-600 text-emerald-600">全部话题</button>
+          <button class="pb-4 px-2 text-sm font-medium text-gray-400 hover:text-emerald-600 transition-colors flex items-center gap-1.5 group">
             赏金求助
-            <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+            <span class="w-2 h-2 bg-red-500 rounded-full group-hover:animate-ping"></span>
           </button>
         </div>
       </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-8">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <main class="max-w-7xl mx-auto px-4 py-12">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
         <!-- 列表 -->
-        <div class="lg:col-span-8 space-y-6">
-          <div class="flex flex-col sm:flex-row gap-4 mb-8">
-            <div class="flex-1 relative search-focus border bg-white rounded-xl transition-all">
+        <div class="lg:col-span-8 space-y-8">
+          <div class="flex flex-col sm:flex-row gap-4 mb-10">
+            <div class="flex-1 relative group">
               <input 
                 v-model="keyword"
                 type="text" 
                 placeholder="搜索你感兴趣的话题或关键字..." 
-                class="w-full h-11 bg-transparent px-10 text-sm outline-none"
+                class="w-full h-12 bg-white border border-gray-200 rounded-2xl px-12 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm"
                 @keyup.enter="onSearch"
               />
-              <svg class="w-4 h-4 text-gray-400 absolute left-4 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              <Search class="w-5 h-5 text-gray-400 absolute left-4 top-3.5 group-focus-within:text-emerald-500 transition-colors" />
             </div>
-            <div class="relative min-w-[120px]">
+            <div class="relative min-w-[140px]">
               <select 
                 v-model="order"
-                class="w-full h-11 bg-white border rounded-xl px-4 text-sm font-medium text-gray-600 appearance-none outline-none cursor-pointer hover:bg-gray-50"
+                class="w-full h-12 bg-white border border-gray-200 rounded-2xl px-4 pr-10 text-sm font-bold text-gray-600 appearance-none outline-none cursor-pointer hover:border-emerald-500 transition-all shadow-sm"
                 @change="onOrderChange"
               >
                 <option value="desc">最新发布</option>
                 <option value="asc">最早发布</option>
               </select>
-              <svg class="w-4 h-4 text-gray-400 absolute right-4 top-3.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+              <ChevronDown class="w-4 h-4 text-gray-400 absolute right-4 top-4 pointer-events-none" />
             </div>
           </div>
 
-          <div v-loading="loading" class="space-y-6">
+          <div v-loading="loading" class="space-y-8">
             <div 
-              v-for="post in posts" 
+              v-for="(post, idx) in posts" 
               :key="post.id"
-              class="topic-card bg-white rounded-3xl p-6 border border-gray-100 transition-all cursor-pointer"
+              class="topic-card bg-white rounded-[32px] p-8 border border-gray-100 transition-all cursor-pointer hover:shadow-2xl hover:shadow-emerald-900/5 hover:-translate-y-1"
               @click="go(`/talks/${post.id}`)"
             >
-              <div class="flex justify-between items-start mb-4">
+              <div class="flex justify-between items-start mb-6">
                 <div class="flex items-center gap-3">
                   <span 
-                    v-if="post.likeCount && post.likeCount > 10"
-                    class="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-1 rounded"
+                    v-if="idx === 0"
+                    class="bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-lg shadow-emerald-500/20"
                   >
-                    热议
+                    TOP
                   </span>
-                  <span class="text-[10px] text-gray-400 font-medium">
-                    {{ formatTime(post.createTime) }} · {{ post.companyName || '个人' }}
+                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                    {{ formatTime(post.createTime) }} · {{ post.companyName || '行业同仁' }}
                   </span>
                 </div>
               </div>
               <h3 
-                class="text-xl font-bold text-gray-900 mb-3 hover:text-emerald-600 transition-colors cursor-pointer"
-                @click.stop="go(`/talks/${post.id}`)"
+                class="text-2xl font-black text-gray-900 mb-4 hover:text-emerald-600 transition-colors line-clamp-1"
               >
                 {{ post.title }}
               </h3>
-              <p v-if="post.content" class="text-sm text-gray-600 leading-relaxed line-clamp-2">
+              <p v-if="post.content" class="text-gray-500 leading-relaxed line-clamp-2 text-sm">
                 {{ post.content }}
               </p>
-              <div class="mt-6 flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">
-                      {{ (post.nickName || post.userName || '?')[0] }}
-                    </div>
-                    <span class="text-xs text-gray-500 truncate">
-                      {{ post.nickName || post.userName || '匿名' }}
-                      <span class="text-gray-400">· {{ post.position || '暂无职位' }}</span>
-                    </span>
+              
+              <div class="mt-8 flex items-center justify-between pt-6 border-t border-gray-50">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs font-black shadow-lg shadow-emerald-500/20">
+                    {{ (post.nickName || post.userName || '?')[0] }}
                   </div>
+                  <span class="text-xs font-bold text-gray-700">
+                    {{ post.nickName || post.userName || '匿名' }}
+                    <span class="text-gray-400 font-medium"> · {{ post.position || '资深专家' }}</span>
+                  </span>
                 </div>
-                <div class="flex items-center gap-4 text-xs text-gray-500">
-                  <span class="flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                <div class="flex items-center gap-6 text-xs font-bold text-gray-400">
+                  <span class="flex items-center gap-1.5 hover:text-emerald-600 transition-colors">
+                    <MessageSquare :size="16" />
                     {{ post.commentCount ?? 0 }}
                   </span>
-                  <span class="flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                  <span class="flex items-center gap-1.5 hover:text-red-500 transition-colors">
+                    <Heart :size="16" />
                     {{ post.likeCount ?? 0 }}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div v-if="!loading && posts.length === 0" class="text-center py-12">
-              <div class="text-gray-400 text-sm">暂无话题，快来发布第一个话题吧！</div>
+            <div v-if="!loading && posts.length === 0" class="text-center py-24 bg-white rounded-[32px] border border-dashed border-gray-200">
+              <MessageSquare :size="48" class="mx-auto text-gray-200 mb-4" />
+              <div class="text-gray-400 font-bold">暂无话题，快来发布第一个话题吧！</div>
             </div>
           </div>
         </div>
 
         <!-- 右侧 -->
         <div class="lg:col-span-4 space-y-8">
-          <!-- 用户卡片 - 显示真实登录信息 -->
-          <div class="bg-emerald-900 rounded-3xl p-6 text-white shadow-xl">
-            <div class="flex items-center gap-4 mb-6">
-              <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center font-bold text-white ring-2 ring-white/10">
-                {{ displayName[0] || '我' }}
+          <!-- 用户卡片 -->
+          <div class="bg-slate-900 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden group">
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all"></div>
+            <div class="relative z-10">
+              <div class="flex items-center gap-4 mb-8">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-emerald-500/20">
+                  {{ displayName[0] || '我' }}
+                </div>
+                <div>
+                  <h4 class="font-black text-lg">{{ displayName }}</h4>
+                  <p class="text-xs text-emerald-400 font-bold uppercase tracking-widest mt-1">
+                    {{ isLoggedIn ? 'Professional Member' : 'Guest Viewer' }}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 class="font-bold">{{ displayName }}</h4>
-                <p class="text-[10px] text-emerald-300">
-                  {{ isLoggedIn ? '欢迎回来' : '登录后参与讨论' }}
-                </p>
-              </div>
+              <button 
+                v-if="isLoggedIn"
+                class="w-full py-4 bg-emerald-600 text-white rounded-2xl text-sm font-black hover:bg-emerald-700 transition-all active:scale-[0.98] shadow-lg shadow-emerald-600/20" 
+                @click="onEnterMy"
+              >
+                进入控制台
+              </button>
+              <button 
+                v-else
+                class="w-full py-4 bg-emerald-600 text-white rounded-2xl text-sm font-black hover:bg-emerald-700 transition-all active:scale-[0.98] shadow-lg shadow-emerald-600/20" 
+                @click="go('/login')"
+              >
+                立即登录
+              </button>
             </div>
-            <button 
-              v-if="isLoggedIn"
-              class="w-full py-3 bg-white text-emerald-900 rounded-xl text-xs font-bold hover:bg-emerald-50 transition-colors shadow-sm" 
-              @click="onEnterMy"
-            >
-              进入控制台
-            </button>
-            <button 
-              v-else
-              class="w-full py-3 bg-white text-emerald-900 rounded-xl text-xs font-bold hover:bg-emerald-50 transition-colors shadow-sm" 
-              @click="go('/login')"
-            >
-              立即登录
-            </button>
           </div>
 
           <!-- 积分兑换卡片 -->
-          <div class="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-3xl p-6 text-white relative overflow-hidden shadow-lg group">
-            <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform">
-              <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clip-rule="evenodd"></path>
-                <path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z"></path>
-              </svg>
+          <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-[32px] p-8 text-white relative overflow-hidden shadow-xl group cursor-pointer" @click="onPublishTalk">
+            <div class="absolute -right-4 -bottom-4 opacity-20 transform group-hover:scale-110 group-hover:-rotate-12 transition-all duration-500">
+              <Gift :size="120" />
             </div>
             <div class="relative z-10">
-              <h4 class="font-bold mb-1">发布话题赚积分</h4>
-              <p class="text-[10px] text-emerald-100 mb-4 italic">分享您的见解，积分可兑换好礼</p>
-              <button class="text-xs font-bold underline hover:text-white" @click="onPublishTalk">发布话题 →</button>
+              <div class="bg-white/20 w-10 h-10 rounded-xl flex items-center justify-center mb-6 backdrop-blur-md">
+                <Plus :size="20" class="text-white" stroke-width="3" />
+              </div>
+              <h4 class="font-black text-xl mb-2">发布话题赚积分</h4>
+              <p class="text-sm text-amber-50 font-medium mb-6 leading-relaxed">分享您的真知灼见，积累积分可直接在线兑换实物好礼。</p>
+              <span class="text-xs font-black uppercase tracking-widest border-b-2 border-white/40 pb-1 group-hover:border-white transition-all">立即开始发布 →</span>
             </div>
           </div>
         </div>
       </div>
     </main>
 
-    <footer class="bg-white border-t py-12 mt-12">
-      <div class="max-w-7xl mx-auto px-4 text-center">
-        <span class="text-xl font-bold text-indigo-600 italic">AgriMatch</span>
-        <p class="text-[10px] text-gray-400 mt-4 italic">连接饲料行业每一个微小的声音</p>
-        <div class="flex justify-center gap-8 mt-6 text-[10px] text-gray-500 font-medium">
-          <button class="hover:text-indigo-600" @click="go('/talks')">社区公约</button>
-          <button class="hover:text-indigo-600" @click="go('/points')">积分说明</button>
-          <button class="hover:text-indigo-600" @click="go('/insights')">商务合作</button>
-        </div>
-      </div>
-    </footer>
+    <PublicFooter />
   </div>
 </template>
 
 <style scoped>
-.topic-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-}
-.tab-active {
-  color: #4f46e5;
-  border-bottom: 2px solid #4f46e5;
-}
-.search-focus:focus-within {
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
-  border-color: #4f46e5;
+.topic-card {
+  /* 基础卡片样式已内联 */
 }
 </style>
-
-

@@ -224,11 +224,11 @@ function openInfo(c: MapCompanyMarkerResponse, marker: any) {
       
       <div style="padding:16px;">
         <div style="display:flex;gap:12px;margin-bottom:12px;">
-          <div style="flex:1;background:#ecfdf5;padding:10px;border-radius:12px;text-align:center;">
+          <div onclick="window.__mapViewSupply && window.__mapViewSupply(${c.companyId})" style="flex:1;background:#ecfdf5;padding:10px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#ecfdf5'">
             <div style="font-size:20px;font-weight:700;color:#059669;">${c.supplyCount ?? 0}</div>
             <div style="font-size:11px;color:#6b7280;">供应发布</div>
           </div>
-          <div style="flex:1;background:#eff6ff;padding:10px;border-radius:12px;text-align:center;">
+          <div onclick="window.__mapViewNeed && window.__mapViewNeed(${c.companyId})" style="flex:1;background:#eff6ff;padding:10px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
             <div style="font-size:20px;font-weight:700;color:#2563eb;">${c.requirementCount ?? 0}</div>
             <div style="font-size:11px;color:#6b7280;">采购需求</div>
           </div>
@@ -239,7 +239,7 @@ function openInfo(c: MapCompanyMarkerResponse, marker: any) {
       </div>
       
       <div style="padding:0 16px 16px;display:flex;gap:8px;">
-        <button onclick="window.__mapViewChat && window.__mapViewChat(${c.companyId})" style="
+        <button onclick="window.__mapViewChat && window.__mapViewChat(${c.companyId}, '${escapeHtml(c.companyName)}')" style="
           flex:1;
           padding:10px;
           background:linear-gradient(135deg,#059669,#0d9488);
@@ -259,9 +259,32 @@ function openInfo(c: MapCompanyMarkerResponse, marker: any) {
 }
 
 // 全局回调用于信息窗口按钮
-;(window as any).__mapViewChat = async (companyId: number) => {
-  // 这里可以实现跳转到聊天或打开聊天抽屉
-  ElMessage.info('功能开发中：与该公司发起沟通')
+;(window as any).__mapViewChat = async (companyId: number, companyName: string) => {
+  try {
+    // 查找该公司的用户ID（使用公司管理员）
+    const company = raw.value.find(c => c.companyId === companyId)
+    if (!company) {
+      ElMessage.warning('未找到该公司信息')
+      return
+    }
+    
+    // 假设该公司有发布供应/需求，我们需要找到一个可以联系的用户
+    // 这里直接跳转到聊天页面，让用户从那里选择具体的供应/需求来发起沟通
+    ElMessage.success(`正在跳转到消息中心...`)
+    router.push('/chat')
+  } catch (e: any) {
+    ElMessage.error('跳转失败：' + (e.message || '未知错误'))
+  }
+}
+
+// 跳转到供应大厅，筛选该公司
+;(window as any).__mapViewSupply = (companyId: number) => {
+  router.push(`/hall/supply?companyId=${companyId}`)
+}
+
+// 跳转到需求大厅，筛选该公司
+;(window as any).__mapViewNeed = (companyId: number) => {
+  router.push(`/hall/need?companyId=${companyId}`)
 }
 
 function escapeHtml(s: string) {

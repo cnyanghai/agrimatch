@@ -15,6 +15,7 @@ import {
 import { giftPoints } from '../../api/points'
 import { useAuthStore } from '../../store/auth'
 import { requireAuth } from '../../utils/requireAuth'
+import PublicFooter from '../../components/PublicFooter.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -416,6 +417,8 @@ onMounted(() => {
         </div>
       </template>
     </el-dialog>
+
+    <PublicFooter />
   </div>
 </template>
 

@@ -23,6 +23,8 @@
                    GROUP_CONCAT(DISTINCT category_name ORDER BY category_name SEPARATOR ',') AS cats
             FROM bus_supply
             WHERE is_deleted = 0
+              AND status = 0
+              AND (expire_time IS NULL OR expire_time &gt; NOW(3))
             GROUP BY company_id
         ) s ON s.company_id = c.id
         LEFT JOIN (

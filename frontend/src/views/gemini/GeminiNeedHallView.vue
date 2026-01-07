@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { requireAuth } from '../../utils/requireAuth'
 import PublicTopNav from '../../components/PublicTopNav.vue'
+import PublicFooter from '../../components/PublicFooter.vue'
 import ChatDrawer from '../../components/chat/ChatDrawer.vue'
 import { listRequirements, type RequirementResponse } from '../../api/requirement'
 import { openChatConversation } from '../../api/chat'
@@ -33,6 +34,14 @@ let focusTimer: number | null = null
 // 筛选条件
 const searchKeyword = ref('')
 const selectedCategory = ref<string | null>(null)
+
+// 从 URL 读取公司筛选参数
+const companyIdFilter = computed(() => {
+  const raw = route.query.companyId
+  const s = Array.isArray(raw) ? raw[0] : raw
+  const n = s ? Number(s) : NaN
+  return Number.isFinite(n) ? n : null
+})
 
 // 分页
 const currentPage = ref(1)
@@ -198,6 +207,11 @@ async function loadRequirements() {
       params.categoryName = selectedCategory.value
     }
     
+    // 应用公司筛选（从地图跳转）
+    if (companyIdFilter.value) {
+      params.companyId = companyIdFilter.value
+    }
+    
     const res = await listRequirements(params)
     if (res.code !== 0) throw new Error(res.message)
     
@@ -250,6 +264,12 @@ function handlePageChange(page: number) {
 }
 
 onMounted(() => {
+  loadRequirements()
+})
+
+// 监听 companyId 筛选变化
+watch(companyIdFilter, () => {
+  currentPage.value = 1
   loadRequirements()
 })
 
@@ -312,6 +332,24 @@ function parseParams(paramsJson?: string): string {
         </button>
       </template>
     </PublicTopNav>
+
+    <!-- 公司筛选提示 -->
+    <div v-if="companyIdFilter" class="bg-blue-50 border-b border-blue-100">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-2 text-blue-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+          <span class="text-sm font-medium">
+            正在查看该公司的采购需求
+          </span>
+        </div>
+        <button 
+          class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-all"
+          @click="router.push('/hall/need')"
+        >
+          查看全部需求
+        </button>
+      </div>
+    </div>
 
     <!-- 筛选区 -->
     <section class="bg-white border-b shadow-sm">
@@ -469,11 +507,7 @@ function parseParams(paramsJson?: string): string {
       </div>
     </main>
 
-    <footer class="bg-white border-t py-8 mt-12">
-      <div class="max-w-7xl mx-auto px-4 text-center">
-        <p class="text-xs text-gray-400">© 2024 AgriMatch - 饲料原料全产业链高效撮合平台 | 采购大厅</p>
-      </div>
-    </footer>
+    <PublicFooter />
 
     <ChatDrawer
       v-model="drawerOpen"

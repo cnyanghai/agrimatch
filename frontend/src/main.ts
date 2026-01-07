@@ -1,9 +1,10 @@
 import { createApp } from 'vue'
 import './style.css'
-import './assets/animations.css'
 import App from './App.vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+// 全局覆盖样式需放在第三方组件库样式之后，保证生效
+import './assets/animations.css'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
