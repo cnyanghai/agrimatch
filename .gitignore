@@ -1,0 +1,23 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Maven
+target/
+backend/*/target/
+*.jar
+*.war
+
+# Node
+node_modules/
+frontend/dist/
+frontend/node_modules/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+

@@ -283,6 +283,8 @@ async function publishSupply() {
     if (r.code === 0) {
       ElMessage.success('发布成功')
       router.push('/supply/published')
+    } else {
+      ElMessage.error(r.message || '发布失败')
     }
   } catch (e: any) {
     ElMessage.error(e?.message || '发布失败')
@@ -418,7 +420,7 @@ async function applyTemplate(template: SupplyTemplate) {
           <List class="w-4 h-4" />
           已发布
         </BaseButton>
-        <BaseButton type="primary" size="sm" :disabled="!canPublish" :loading="loading" @click="publishSupply">
+        <BaseButton type="primary" size="sm" :loading="loading" @click="publishSupply">
           <Send class="w-4 h-4" />
           发布
         </BaseButton>
@@ -594,7 +596,7 @@ async function applyTemplate(template: SupplyTemplate) {
                 <Save class="w-4 h-4" />
                 保存为模板
               </BaseButton>
-              <BaseButton type="primary" :disabled="!canPublish" :loading="loading" @click="publishSupply">
+              <BaseButton type="primary" :loading="loading" @click="publishSupply">
                 <Send class="w-4 h-4" />
                 发布供应
               </BaseButton>

@@ -149,8 +149,10 @@ function detachListeners() {
 
 async function attachListeners() {
   await nextTick()
-  const root: HTMLElement | null = cascaderRef.value?.$el ?? null
-  const el = root?.querySelector('input') as HTMLInputElement | null
+  const root = cascaderRef.value?.$el
+  // 确保 root 是有效的 DOM 元素（生产环境中可能不是）
+  if (!(root instanceof HTMLElement)) return
+  const el = root.querySelector('input') as HTMLInputElement | null
   if (!el) return
 
   inputEl = el

@@ -373,6 +373,8 @@ async function publishRequirement() {
       categoryParams.value = []
       dynamicParams.value = {}
       await loadNextContractNo()
+    } else {
+      ElMessage.error(r.message || '发布失败')
     }
   } catch (e: any) {
     ElMessage.error(e?.message || '发布失败')
@@ -532,7 +534,6 @@ async function applyTemplate(template: RequirementTemplateResponse) {
           <el-button
             type="primary"
             class="!rounded-xl !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 transition-all active:scale-95"
-            :disabled="!canPublish"
             :loading="loading"
             @click="publishRequirement"
           >
@@ -690,7 +691,6 @@ async function applyTemplate(template: RequirementTemplateResponse) {
               <el-button
                 type="primary"
                 class="!rounded-xl !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 transition-all active:scale-95"
-                :disabled="!canPublish"
                 :loading="loading"
                 @click="publishRequirement"
                 size="large"

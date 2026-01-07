@@ -82,22 +82,33 @@ const totalPending = computed(() => {
          (dashboard.value.pendingMilestoneCount || 0)
 })
 
-// 快捷操作配置 - 根据角色显示不同图标颜色
+// 快捷操作配置 - 根据角色显示图标颜色
 const quickActions = computed(() => {
+  const actions = []
+  
+  // 采购商操作
   if (isBuyer.value) {
-    return [
+    actions.push(
       { title: '发布采购', desc: '快速发布采购需求', icon: ShoppingCart, path: '/requirements', color: 'orange' },
-      { title: '发现供应', desc: '查找优质供应商', icon: Box, path: '/supply-browse', color: 'emerald' },
-      { title: '地图找商', desc: '附近供应商地图', icon: Location, path: '/map', color: 'slate' },
-      { title: '查看消息', desc: '在线沟通洽谈', icon: ChatDotRound, path: '/chat', color: 'emerald' }
-    ]
+      { title: '发现供应', desc: '查找优质供应商', icon: Box, path: '/supply-browse', color: 'emerald' }
+    )
   }
-  return [
-    { title: '发布供应', desc: '展示您的产品', icon: Box, path: '/supply', color: 'emerald' },
-    { title: '发现采购', desc: '查找采购商', icon: ShoppingCart, path: '/requirement-browse', color: 'orange' },
-    { title: '地图展示', desc: '让客户找到您', icon: Location, path: '/map', color: 'slate' },
+  
+  // 供应商操作
+  if (isSeller.value) {
+    actions.push(
+      { title: '发布供应', desc: '展示您的产品', icon: Box, path: '/supply', color: 'emerald' },
+      { title: '发现采购', desc: '查找采购商', icon: ShoppingCart, path: '/requirement-browse', color: 'orange' }
+    )
+  }
+  
+  // 通用操作
+  actions.push(
+    { title: '地图找商', desc: '附近合作伙伴地图', icon: Location, path: '/map', color: 'slate' },
     { title: '查看消息', desc: '在线沟通洽谈', icon: ChatDotRound, path: '/chat', color: 'emerald' }
-  ]
+  )
+  
+  return actions.slice(0, 4) // 限制显示 4 项，保持排版整齐
 })
 
 // 获取图标容器的样式类
