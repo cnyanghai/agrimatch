@@ -7,6 +7,7 @@ import com.agrimatch.auth.dto.MeResponse;
 import com.agrimatch.auth.dto.RegisterRequest;
 import com.agrimatch.auth.dto.SmsSendRequest;
 import com.agrimatch.auth.service.AuthService;
+import com.agrimatch.auth.service.CaptchaService;
 import com.agrimatch.auth.service.SmsCodeService;
 import com.agrimatch.common.api.Result;
 import com.agrimatch.security.LoginUser;
@@ -28,18 +29,32 @@ public class AuthController {
 
     private final AuthService authService;
     private final SmsCodeService smsCodeService;
+    private final CaptchaService captchaService;
     private final long jwtExpireMs;
 
     public AuthController(AuthService authService,
                           SmsCodeService smsCodeService,
+                          CaptchaService captchaService,
                           @Value("${security.jwt.expire-ms:604800000}") long jwtExpireMs) {
         this.authService = authService;
         this.smsCodeService = smsCodeService;
+        this.captchaService = captchaService;
         this.jwtExpireMs = jwtExpireMs;
+    }
+
+    /**
+     * 获取图形验证码
+     */
+    @GetMapping("/captcha")
+    public Result<CaptchaService.CaptchaResult> getCaptcha() {
+        return Result.success(captchaService.generate());
     }
 
     @PostMapping("/login")
     public Result<LoginResponse> login(@Valid @RequestBody LoginRequest req, HttpServletResponse response) {
+        // 验证图形验证码
+        captchaService.validateOrThrow(req.getCaptchaKey(), req.getCaptchaCode());
+        
         LoginResponse r = authService.login(req.getUserName(), req.getPassword());
         setTokenCookie(response, r.getToken());
         return Result.success(r);
@@ -62,6 +77,9 @@ public class AuthController {
 
     @PostMapping("/register")
     public Result<LoginResponse> register(@Valid @RequestBody RegisterRequest req, HttpServletResponse response) {
+        // 验证图形验证码（替代短信验证码）
+        captchaService.validateOrThrow(req.getCaptchaKey(), req.getCaptchaCode());
+        
         LoginResponse r = authService.register(req);
         setTokenCookie(response, r.getToken());
         return Result.success(r);

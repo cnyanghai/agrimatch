@@ -33,12 +33,14 @@ com/agrimatch/geo/service/AmapGeocodeService.class
 com/agrimatch/chat/event/ContractMessageEvent.class
 com/agrimatch/company/dto/CompanyResponse.class
 com/agrimatch/post_social/mapper/PostCommentMapper$PostIdCountRow.class
+com/agrimatch/auth/service/CaptchaService.class
 com/agrimatch/product_param/domain/NhtProductParam.class
 com/agrimatch/common/migration/ParamsMigrationRunner.class
 com/agrimatch/points/dto/PointsRechargeRequest.class
 com/agrimatch/controller/HomeController.class
 com/agrimatch/file/service/FileStorageService$FileInfo.class
 com/agrimatch/product/controller/ProductController.class
+com/agrimatch/auth/service/CaptchaService$CaptchaEntry.class
 com/agrimatch/requirement_template/mapper/RequirementTemplateMapper.class
 com/agrimatch/product_param/dto/ProductParamOptionAddRequest.class
 com/agrimatch/company/service/impl/CompanyServiceImpl.class
@@ -59,6 +61,7 @@ com/agrimatch/user/domain/SysUser.class
 com/agrimatch/contract/domain/BusContractMilestone.class
 com/agrimatch/deal/service/impl/DealServiceImpl.class
 com/agrimatch/supply/dto/SupplyResponse.class
+com/agrimatch/auth/service/CaptchaService$CaptchaResult.class
 com/agrimatch/security/SecurityConfig.class
 com/agrimatch/requirement/dto/RequirementResponse.class
 com/agrimatch/notify/service/impl/NotifyServiceImpl.class

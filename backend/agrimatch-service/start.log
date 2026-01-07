@@ -12,7 +12,7 @@
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.11.0:compile[m [1m(default-compile)[m @ [36magrimatch-service[0;1m ---[m
 [[1;34mINFO[m] Changes detected - recompiling the module! :source
-[[1;34mINFO[m] Compiling 196 source files with javac [debug target 17] to target/classes
+[[1;34mINFO[m] Compiling 197 source files with javac [debug target 17] to target/classes
 [[1;34mINFO[m] 
 [[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:testResources[m [1m(default-testResources)[m @ [36magrimatch-service[0;1m ---[m
 [[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
@@ -36,32 +36,35 @@ Standard Commons Logging discovery in action with spring-jcl: please remove comm
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.5)
 
-2026-01-07T11:33:01.129+08:00  INFO 244412 --- [agrimatch-service] [           main] com.agrimatch.AgriMatchApplication       : Starting AgriMatchApplication using Java 17.0.17 with PID 244412 (/home/cnyanghai/nongV1/backend/agrimatch-service/target/classes started by cnyanghai in /home/cnyanghai/nongV1/backend/agrimatch-service)
-2026-01-07T11:33:01.131+08:00  INFO 244412 --- [agrimatch-service] [           main] com.agrimatch.AgriMatchApplication       : No active profile set, falling back to 1 default profile: "default"
-2026-01-07T11:33:02.438+08:00  INFO 244412 --- [agrimatch-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2026-01-07T11:33:02.450+08:00  INFO 244412 --- [agrimatch-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-01-07T11:33:02.450+08:00  INFO 244412 --- [agrimatch-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.20]
-2026-01-07T11:33:02.503+08:00  INFO 244412 --- [agrimatch-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-01-07T11:33:02.504+08:00  INFO 244412 --- [agrimatch-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1326 ms
+2026-01-07T15:52:06.585+08:00  INFO 248650 --- [agrimatch-service] [           main] com.agrimatch.AgriMatchApplication       : Starting AgriMatchApplication using Java 17.0.17 with PID 248650 (/home/cnyanghai/nongV1/backend/agrimatch-service/target/classes started by cnyanghai in /home/cnyanghai/nongV1/backend/agrimatch-service)
+2026-01-07T15:52:06.587+08:00  INFO 248650 --- [agrimatch-service] [           main] com.agrimatch.AgriMatchApplication       : No active profile set, falling back to 1 default profile: "default"
+2026-01-07T15:52:07.728+08:00  INFO 248650 --- [agrimatch-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-01-07T15:52:07.737+08:00  INFO 248650 --- [agrimatch-service] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-01-07T15:52:07.738+08:00  INFO 248650 --- [agrimatch-service] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-01-07T15:52:07.778+08:00  INFO 248650 --- [agrimatch-service] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-01-07T15:52:07.779+08:00  INFO 248650 --- [agrimatch-service] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1140 ms
 Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
-2026-01-07T11:33:03.035+08:00  INFO 244412 --- [agrimatch-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-01-07T11:33:03.205+08:00  INFO 244412 --- [agrimatch-service] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5e50df2e
-2026-01-07T11:33:03.207+08:00  INFO 244412 --- [agrimatch-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-01-07T11:33:04.352+08:00  WARN 244412 --- [agrimatch-service] [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+2026-01-07T15:52:08.210+08:00  INFO 248650 --- [agrimatch-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-01-07T15:52:08.328+08:00  INFO 248650 --- [agrimatch-service] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5e50df2e
+2026-01-07T15:52:08.330+08:00  INFO 248650 --- [agrimatch-service] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-01-07T15:52:09.283+08:00  WARN 248650 --- [agrimatch-service] [           main] .s.s.UserDetailsServiceAutoConfiguration : 
 
-Using generated security password: 0fd297dd-77e8-4a69-b17b-0ad9ca3a1a22
+Using generated security password: af25aaab-22d5-41b1-9701-67a1579d325e
 
 This generated password is for development use only. Your security configuration must be updated before running your application in production.
 
-2026-01-07T11:33:04.618+08:00  INFO 244412 --- [agrimatch-service] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@589dfa6f, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@43588265, org.springframework.security.web.context.SecurityContextHolderFilter@56da96b3, org.springframework.security.web.header.HeaderWriterFilter@2cbe455c, org.springframework.web.filter.CorsFilter@6f8667bb, org.springframework.security.web.authentication.logout.LogoutFilter@743bb39a, com.agrimatch.security.JwtAuthFilter@100d0218, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@632241f5, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@426710f0, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@5c5a91b4, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@2774dcf4, org.springframework.security.web.session.SessionManagementFilter@4d0e1a9a, org.springframework.security.web.access.ExceptionTranslationFilter@2fba0dac, org.springframework.security.web.access.intercept.AuthorizationFilter@23b71d24]
-2026-01-07T11:33:04.786+08:00  INFO 244412 --- [agrimatch-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
-2026-01-07T11:33:04.796+08:00  INFO 244412 --- [agrimatch-service] [           main] com.agrimatch.AgriMatchApplication       : Started AgriMatchApplication in 4.102 seconds (process running for 4.411)
-2026-01-07T11:33:04.798+08:00  INFO 244412 --- [agrimatch-service] [           main] c.a.c.migration.ParamsMigrationRunner    : [Migration] 开始执行参数 JSON 标准化迁移...
-2026-01-07T11:33:04.817+08:00  INFO 244412 --- [agrimatch-service] [           main] c.a.c.migration.ParamsMigrationRunner    : [Migration] 已加载 214 条参数映射关系
-2026-01-07T11:33:04.857+08:00  INFO 244412 --- [agrimatch-service] [           main] c.a.c.migration.ParamsMigrationRunner    : [Migration] 表 bus_supply 迁移完成，更新 2 条记录
-2026-01-07T11:33:04.909+08:00  INFO 244412 --- [agrimatch-service] [           main] c.a.c.migration.ParamsMigrationRunner    : [Migration] 表 bus_requirement 迁移完成，更新 9 条记录
-2026-01-07T11:33:04.912+08:00  INFO 244412 --- [agrimatch-service] [           main] c.a.c.migration.ParamsMigrationRunner    : [Migration] 表 bus_contract 迁移完成，更新 0 条记录
-2026-01-07T11:33:04.912+08:00  INFO 244412 --- [agrimatch-service] [           main] c.a.c.migration.ParamsMigrationRunner    : [Migration] 参数 JSON 标准化迁移完成。
-2026-01-07T11:33:04.935+08:00  INFO 244412 --- [agrimatch-service] [           main] c.a.geo.service.GeocodeFillRunner        : [Geocode] 所有公司都已有坐标，无需补全
-2026-01-07T11:33:39.497+08:00  INFO 244412 --- [agrimatch-service] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2026-01-07T11:33:39.511+08:00  INFO 244412 --- [agrimatch-service] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-01-07T15:52:09.503+08:00  INFO 248650 --- [agrimatch-service] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@6f8667bb, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@100d0218, org.springframework.security.web.context.SecurityContextHolderFilter@426710f0, org.springframework.security.web.header.HeaderWriterFilter@7be38eba, org.springframework.web.filter.CorsFilter@2774dcf4, org.springframework.security.web.authentication.logout.LogoutFilter@3f3c8b60, com.agrimatch.security.JwtAuthFilter@20b829d5, org.springframework.security.web.authentication.www.BasicAuthenticationFilter@577bfadb, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@5e37fb82, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@59ec7020, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7c5f29c6, org.springframework.security.web.session.SessionManagementFilter@bf2aa32, org.springframework.security.web.access.ExceptionTranslationFilter@2cbe455c, org.springframework.security.web.access.intercept.AuthorizationFilter@4c56644f]
+2026-01-07T15:52:09.681+08:00  INFO 248650 --- [agrimatch-service] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
+2026-01-07T15:52:09.690+08:00  INFO 248650 --- [agrimatch-service] [           main] com.agrimatch.AgriMatchApplication       : Started AgriMatchApplication in 3.485 seconds (process running for 3.755)
+2026-01-07T15:52:09.723+08:00  INFO 248650 --- [agrimatch-service] [           main] c.a.geo.service.GeocodeFillRunner        : [Geocode] 所有公司都已有坐标，无需补全
+2026-01-07T15:52:09.723+08:00  INFO 248650 --- [agrimatch-service] [           main] c.a.c.migration.ParamsMigrationRunner    : [Migration] 开始执行参数 JSON 标准化迁移...
+2026-01-07T15:52:09.732+08:00  INFO 248650 --- [agrimatch-service] [           main] c.a.c.migration.ParamsMigrationRunner    : [Migration] 已加载 214 条参数映射关系
+2026-01-07T15:52:09.749+08:00  INFO 248650 --- [agrimatch-service] [           main] c.a.c.migration.ParamsMigrationRunner    : [Migration] 表 bus_supply 迁移完成，更新 0 条记录
+2026-01-07T15:52:09.760+08:00  INFO 248650 --- [agrimatch-service] [           main] c.a.c.migration.ParamsMigrationRunner    : [Migration] 表 bus_requirement 迁移完成，更新 9 条记录
+2026-01-07T15:52:09.762+08:00  INFO 248650 --- [agrimatch-service] [           main] c.a.c.migration.ParamsMigrationRunner    : [Migration] 表 bus_contract 迁移完成，更新 0 条记录
+2026-01-07T15:52:09.775+08:00  INFO 248650 --- [agrimatch-service] [           main] c.a.c.migration.ParamsMigrationRunner    : [Migration] 聊天消息迁移完成，更新 10 条报价记录
+2026-01-07T15:52:09.775+08:00  INFO 248650 --- [agrimatch-service] [           main] c.a.c.migration.ParamsMigrationRunner    : [Migration] 参数 JSON 标准化迁移完成。
+2026-01-07T15:52:40.001+08:00  INFO 248650 --- [agrimatch-service] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-07T15:52:40.001+08:00  INFO 248650 --- [agrimatch-service] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-01-07T15:52:40.002+08:00  INFO 248650 --- [agrimatch-service] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-01-07T15:54:56.580+08:00  WARN 248650 --- [agrimatch-service] [nio-8080-exec-7] c.a.c.exception.GlobalExceptionHandler   : ApiException: code=409, message=账号已存在

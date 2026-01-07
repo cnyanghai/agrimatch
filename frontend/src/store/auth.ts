@@ -25,13 +25,20 @@ export interface MeResponse {
 
 export interface RegisterRequest {
   phone: string
-  smsCode: string
   password: string
+  // 图形验证码
+  captchaKey: string
+  captchaCode: string
   // 系统不强制昵称：前端可用联系人姓名/手机号代替
   nickName?: string
   userType: 'buyer' | 'seller'
   companyName?: string
   companyType?: 'feed_factory' | 'trader' | 'grain_depot' | 'processor' | 'logistics' | 'other'
+}
+
+export interface CaptchaResponse {
+  captchaKey: string
+  captchaImage: string
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -77,42 +84,27 @@ export const useAuthStore = defineStore('auth', {
         this.clear()
       }
     },
-    
-    // 发送短信验证码
-    async sendSmsCode(phone: string, type: number) {
-      // type: 1-注册, 2-登录, 3-找回密码
-      const { data } = await http.post<Result<void>>('/api/auth/sms/send', { phone, type })
-      if (data.code !== 0) throw new Error(data.message)
+
+    // 获取图形验证码
+    async getCaptcha(): Promise<CaptchaResponse> {
+      const { data } = await http.get<Result<CaptchaResponse>>('/api/auth/captcha')
+      if (data.code !== 0 || !data.data) throw new Error(data.message || '获取验证码失败')
+      return data.data
     },
-    
-    // 密码登录（兼容旧方式，使用手机号作为用户名）
-    async loginByPassword(phone: string, password: string) {
-      const { data } = await http.post<Result<LoginResponse>>('/api/auth/login', { 
-        userName: phone, 
-        password 
+
+    // 密码登录（使用手机号作为用户名，需要图形验证码）
+    async loginByPassword(phone: string, password: string, captchaKey: string, captchaCode: string) {
+      const { data } = await http.post<Result<LoginResponse>>('/api/auth/login', {
+        userName: phone,
+        password,
+        captchaKey,
+        captchaCode
       })
       if (data.code !== 0 || !data.data?.token) throw new Error(data.message)
       this.setToken(data.data.token)
     },
-    
-    // 验证码登录
-    async loginBySms(phone: string, smsCode: string) {
-      const { data } = await http.post<Result<LoginResponse>>('/api/auth/login/sms', { 
-        phone, 
-        smsCode 
-      })
-      if (data.code !== 0 || !data.data?.token) throw new Error(data.message)
-      this.setToken(data.data.token)
-    },
-    
-    // 旧版登录方法（兼容）
-    async login(userName: string, password: string) {
-      const { data } = await http.post<Result<LoginResponse>>('/api/auth/login', { userName, password })
-      if (data.code !== 0 || !data.data?.token) throw new Error(data.message)
-      this.setToken(data.data.token)
-    },
-    
-    // 新版注册
+
+    // 注册（使用图形验证码）
     async register(req: RegisterRequest) {
       const { data } = await http.post<Result<LoginResponse>>('/api/auth/register', {
         userName: req.phone,
@@ -121,21 +113,22 @@ export const useAuthStore = defineStore('auth', {
         nickName: req.nickName || req.phone,
         companyName: req.companyName,
         companyType: req.companyType,
-        smsCode: req.smsCode,
+        captchaKey: req.captchaKey,
+        captchaCode: req.captchaCode,
         isBuyer: req.userType === 'buyer' ? 1 : 0,
         isSeller: req.userType === 'seller' ? 1 : 0
       })
       if (data.code !== 0 || !data.data?.token) throw new Error(data.message)
       this.setToken(data.data.token)
     },
-    
+
     // 获取当前用户信息
     async fetchMe() {
       const { data } = await http.get<Result<MeResponse>>('/api/auth/me')
       if (data.code !== 0) throw new Error(data.message)
       this.me = data.data ?? null
     },
-    
+
     // 更新用户身份
     async updateUserType(userType: 'buyer' | 'seller') {
       const { data } = await http.put<Result<void>>('/api/users/me/roles', {

@@ -167,6 +167,7 @@
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/contract/dto/MilestoneSubmitRequest.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/requirement/domain/BusRequirement.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/contract/domain/BusContractChangeLog.java
+/home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/auth/service/CaptchaService.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/contract/service/MilestoneService.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/company/domain/BusCompany.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/eval/service/impl/EvalServiceImpl.java

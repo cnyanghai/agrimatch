@@ -34,17 +34,17 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户基础信息表（农汇通）';
 
 -- Extend Table: sys_user (增补字段)
-ALTER TABLE `sys_user` ADD COLUMN `wechat` varchar(50) DEFAULT NULL COMMENT '微信号';
-ALTER TABLE `sys_user` ADD COLUMN `company_id` bigint DEFAULT NULL COMMENT '公司ID（关联 bus_company.id）';
-ALTER TABLE `sys_user` ADD COLUMN `is_buyer` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否采购商（0否 1是）';
-ALTER TABLE `sys_user` ADD COLUMN `is_seller` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否供应商（0否 1是）';
-ALTER TABLE `sys_user` ADD COLUMN `pay_info_json` longtext COMMENT '收付款信息（银行卡/三方账户）JSON';
-ALTER TABLE `sys_user` ADD COLUMN `position` varchar(50) DEFAULT NULL COMMENT '职位/岗位（如采购经理/交易员等）';
-ALTER TABLE `sys_user` ADD COLUMN `birth_date` date DEFAULT NULL COMMENT '出生年月（取当月1号）';
-ALTER TABLE `sys_user` ADD COLUMN `gender` tinyint(1) DEFAULT NULL COMMENT '性别（1男 2女）';
-ALTER TABLE `sys_user` ADD COLUMN `bio` varchar(500) DEFAULT NULL COMMENT '个人介绍';
-ALTER TABLE `sys_user` ADD COLUMN `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除（0否 1是）';
-ALTER TABLE `sys_user` ADD COLUMN `password` varchar(100) DEFAULT '' COMMENT '密码(BCrypt)';
+-- ALTER TABLE `sys_user` ADD COLUMN `wechat` varchar(50) DEFAULT NULL COMMENT '微信号';
+-- ALTER TABLE `sys_user` ADD COLUMN `company_id` bigint DEFAULT NULL COMMENT '公司ID（关联 bus_company.id）';
+-- ALTER TABLE `sys_user` ADD COLUMN `is_buyer` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否采购商（0否 1是）';
+-- ALTER TABLE `sys_user` ADD COLUMN `is_seller` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否供应商（0否 1是）';
+-- ALTER TABLE `sys_user` ADD COLUMN `pay_info_json` longtext COMMENT '收付款信息（银行卡/三方账户）JSON';
+-- ALTER TABLE `sys_user` ADD COLUMN `position` varchar(50) DEFAULT NULL COMMENT '职位/岗位（如采购经理/交易员等）';
+-- ALTER TABLE `sys_user` ADD COLUMN `birth_date` date DEFAULT NULL COMMENT '出生年月（取当月1号）';
+-- ALTER TABLE `sys_user` ADD COLUMN `gender` tinyint(1) DEFAULT NULL COMMENT '性别（1男 2女）';
+-- ALTER TABLE `sys_user` ADD COLUMN `bio` varchar(500) DEFAULT NULL COMMENT '个人介绍';
+-- ALTER TABLE `sys_user` ADD COLUMN `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除（0否 1是）';
+-- ALTER TABLE `sys_user` ADD COLUMN `password` varchar(100) DEFAULT '' COMMENT '密码(BCrypt)';
 
 -- Table structure for bus_company
 CREATE TABLE IF NOT EXISTS `bus_company` (

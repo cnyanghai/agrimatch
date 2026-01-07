@@ -26,6 +26,10 @@ public class RegisterRequest {
 
     private String smsCode;
 
+    // 图形验证码相关
+    private String captchaKey;
+    private String captchaCode;
+
     private Integer isBuyer;
 
     private Integer isSeller;
@@ -100,6 +104,22 @@ public class RegisterRequest {
 
     public void setIsSeller(Integer isSeller) {
         this.isSeller = isSeller;
+    }
+
+    public String getCaptchaKey() {
+        return captchaKey;
+    }
+
+    public void setCaptchaKey(String captchaKey) {
+        this.captchaKey = captchaKey;
+    }
+
+    public String getCaptchaCode() {
+        return captchaCode;
+    }
+
+    public void setCaptchaCode(String captchaCode) {
+        this.captchaCode = captchaCode;
     }
 }
 

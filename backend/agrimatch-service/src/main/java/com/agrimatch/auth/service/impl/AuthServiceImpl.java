@@ -84,8 +84,7 @@ public class AuthServiceImpl implements AuthService {
         } else {
             nickName = nickName.trim();
         }
-        // 注册必须校验短信验证码（type=1 注册）；开发期支持固定码 000000
-        smsCodeService.verifyOrThrow(phone, 1, req.getSmsCode());
+        // 图形验证码已在 Controller 层校验，这里不再校验短信验证码
 
         SysUser existed = userMapper.selectByUserName(userName);
         if (existed != null) {
