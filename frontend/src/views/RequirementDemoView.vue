@@ -304,16 +304,13 @@ async function addParamOption(paramId: number, optionValue: string) {
 
 function buildParamsJson() {
   const params: Record<string, any> = {}
-  const custom: Record<string, any> = {}
-  
   categoryParams.value.forEach(param => {
     const value = dynamicParams.value[param.id]
     if (value !== undefined && value !== '') {
-      params[param.id] = value
+      params[param.paramName] = value
     }
   })
-  
-  return JSON.stringify({ params, custom })
+  return JSON.stringify(params)
 }
 
 async function publishRequirement() {
@@ -487,8 +484,19 @@ async function applyTemplate(template: RequirementTemplateResponse) {
     if (data.paramsJson) {
       try {
         const paramsData = JSON.parse(data.paramsJson)
-        if (paramsData.params) {
-          Object.entries(paramsData.params).forEach(([paramId, value]) => {
+        // 支持新格式 {"参数名": "值"} 和旧格式 {"params": {"ID": "值"}}
+        const isNewFormat = !paramsData.params && !paramsData.custom
+        
+        if (isNewFormat) {
+          // 新格式：通过名称找 ID
+          Object.entries(paramsData).forEach(([name, value]) => {
+            const param = categoryParams.value.find(p => p.paramName === name)
+            if (param) dynamicParams.value[param.id] = value
+          })
+        } else {
+          // 旧格式兼容
+          const oldParams = paramsData.params || {}
+          Object.entries(oldParams).forEach(([paramId, value]) => {
             dynamicParams.value[Number(paramId)] = value
           })
         }

@@ -972,24 +972,50 @@ public class ContractServiceImpl implements ContractService {
             JsonNode root = objectMapper.readTree(paramsJson);
             List<Map<String, Object>> params = new ArrayList<>();
             
-            if (root.isArray()) {
-                // 数组格式: [{"label": "水分", "value": "14%"}, ...]
-                for (JsonNode item : root) {
-                    Map<String, Object> param = new LinkedHashMap<>();
-                    if (item.has("label")) param.put("label", item.get("label").asText());
-                    if (item.has("name")) param.put("label", item.get("name").asText());
-                    if (item.has("value")) param.put("value", item.get("value").asText());
-                    if (!param.isEmpty()) params.add(param);
+            // 如果是嵌套格式 {"params": {...}, "custom": {...}}，先展开
+            if (root.isObject() && (root.has("params") || root.has("custom"))) {
+                if (root.has("params") && root.get("params").isObject()) {
+                    JsonNode pNode = root.get("params");
+                    pNode.fields().forEachRemaining(entry -> {
+                        Map<String, Object> p = new LinkedHashMap<>();
+                        String key = entry.getKey();
+                        JsonNode val = entry.getValue();
+                        if (val.isObject() && val.has("name") && val.has("value")) {
+                            p.put("label", val.get("name").asText());
+                            p.put("value", val.get("value").asText());
+                        } else {
+                            p.put("label", key);
+                            p.put("value", val.asText());
+                        }
+                        params.add(p);
+                    });
+                }
+                if (root.has("custom") && root.get("custom").isObject()) {
+                    root.get("custom").fields().forEachRemaining(entry -> {
+                        Map<String, Object> p = new LinkedHashMap<>();
+                        p.put("label", entry.getKey());
+                        p.put("value", entry.getValue().asText());
+                        params.add(p);
+                    });
                 }
             } else if (root.isObject()) {
-                // 对象格式: {"水分": "14%", "杂质": "1%"}
-                Iterator<Map.Entry<String, JsonNode>> fields = root.fields();
-                while (fields.hasNext()) {
-                    Map.Entry<String, JsonNode> entry = fields.next();
-                    Map<String, Object> param = new LinkedHashMap<>();
-                    param.put("label", entry.getKey());
-                    param.put("value", entry.getValue().asText());
-                    params.add(param);
+                // 标准格式: {"参数名": "值"}
+                root.fields().forEachRemaining(entry -> {
+                    Map<String, Object> p = new LinkedHashMap<>();
+                    p.put("label", entry.getKey());
+                    p.put("value", entry.getValue().asText());
+                    params.add(p);
+                });
+            } else if (root.isArray()) {
+                // 数组格式: [{"label": "水分", "value": "14%"}, ...]
+                for (JsonNode item : root) {
+                    Map<String, Object> p = new LinkedHashMap<>();
+                    if (item.has("label")) p.put("label", item.get("label").asText());
+                    else if (item.has("name")) p.put("label", item.get("name").asText());
+                    
+                    if (item.has("value")) p.put("value", item.get("value").asText());
+                    
+                    if (!p.isEmpty()) params.add(p);
                 }
             }
             

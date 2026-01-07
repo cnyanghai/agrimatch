@@ -277,31 +277,35 @@ watch(focusIdFromRoute, () => {
   applyFocusIfNeeded()
 })
 
-// 解析品类参数 JSON，提取关键参数显示（兼容新旧格式）
+// 解析品类参数 JSON，提取关键参数显示（极致精简版，支持标准化格式）
 function parseParams(paramsJson?: string): string {
   if (!paramsJson) return '暂无参数'
   try {
     const data = JSON.parse(paramsJson)
-    const params = data?.params || {}
-    const entries = Object.entries(params)
+    // 兼容逻辑：标准格式是 {"参数名": "参数值"}
+    let flatParams: Record<string, any> = {}
+
+    if (data.params || data.custom) {
+      if (data.params) {
+        Object.entries(data.params).forEach(([k, v]) => {
+          const name = (typeof v === 'object' && v !== null && (v as any).name) ? (v as any).name : k
+          const val = (typeof v === 'object' && v !== null && 'value' in (v as any)) ? (v as any).value : v
+          flatParams[name] = val
+        })
+      }
+      if (data.custom) Object.assign(flatParams, data.custom)
+    } else if (typeof data === 'object' && data !== null) {
+      flatParams = data
+    }
+
+    const entries = Object.entries(flatParams)
     if (entries.length === 0) return '暂无参数'
-    // 取前3个参数显示，兼容新格式 { name, value } 和旧格式（直接值）
+    
     return entries
       .slice(0, 3)
       .map(([k, v]) => {
-        // 新格式：{ name, value }
-        if (typeof v === 'object' && v !== null && 'name' in v && 'value' in v) {
-          const name = (v as any).name || k
-          const value = (v as any).value
-          return `${name}:${value}`
-        }
-
-        // 旧格式：键=参数名，值=参数值
-        const raw = String(v ?? '')
-        if (!raw) return `${k}:-`
-        // 若值本身已经是 "参数名:参数值" 形式，则直接复用，避免重复
-        if (raw.startsWith(`${k}:`)) return raw
-        return `${k}:${raw}`
+        if (/^\d+$/.test(k)) return String(v)
+        return `${k}:${v}`
       })
       .join(' / ')
   } catch {

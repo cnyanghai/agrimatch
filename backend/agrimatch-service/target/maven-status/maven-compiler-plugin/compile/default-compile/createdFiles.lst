@@ -34,6 +34,7 @@ com/agrimatch/chat/event/ContractMessageEvent.class
 com/agrimatch/company/dto/CompanyResponse.class
 com/agrimatch/post_social/mapper/PostCommentMapper$PostIdCountRow.class
 com/agrimatch/product_param/domain/NhtProductParam.class
+com/agrimatch/common/migration/ParamsMigrationRunner.class
 com/agrimatch/points/dto/PointsRechargeRequest.class
 com/agrimatch/controller/HomeController.class
 com/agrimatch/file/service/FileStorageService$FileInfo.class

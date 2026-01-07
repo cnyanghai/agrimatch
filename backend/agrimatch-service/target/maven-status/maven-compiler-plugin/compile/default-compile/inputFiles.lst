@@ -95,6 +95,7 @@
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/follow/controller/FollowController.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/chat/ws/ChatWebSocketConfig.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/contract/dto/ContractResponse.java
+/home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/common/migration/ParamsMigrationRunner.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/deal/service/DealService.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/product_param/service/ProductParamService.java
 /home/cnyanghai/nongV1/backend/agrimatch-service/src/main/java/com/agrimatch/points/domain/BusPointsAccount.java
