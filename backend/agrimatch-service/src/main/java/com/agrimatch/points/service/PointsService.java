@@ -13,6 +13,21 @@ public interface PointsService {
     PointsMeResponse redeem(Long userId, Long points);
 
     List<PointsTxResponse> myTx(Long userId);
+
+    /**
+     * 获取用户当前积分余额
+     */
+    Long getBalance(Long userId);
+
+    /**
+     * 扣除积分（用于赏金求助发布）
+     */
+    void deduct(Long userId, Long points, String remark);
+
+    /**
+     * 增加积分（用于赏金采纳发放）
+     */
+    void add(Long userId, Long points, String remark);
 }
 
 

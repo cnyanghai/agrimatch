@@ -104,6 +104,57 @@ public class PointsServiceImpl implements PointsService {
         return out;
     }
 
+    @Override
+    public Long getBalance(Long userId) {
+        if (userId == null) return 0L;
+        ensureAccount(userId);
+        BusPointsAccount a = pointsMapper.selectAccountByUserId(userId);
+        return a == null || a.getPointsBalance() == null ? 0L : a.getPointsBalance();
+    }
+
+    @Override
+    @Transactional
+    public void deduct(Long userId, Long points, String remark) {
+        if (points == null || points <= 0) throw new ApiException(ResultCode.PARAM_ERROR);
+        ensureAccount(userId);
+
+        BusPointsAccount a = pointsMapper.selectAccountByUserIdForUpdate(userId);
+        long cur = a.getPointsBalance() == null ? 0 : a.getPointsBalance();
+        if (cur < points) throw new ApiException(400, "积分不足");
+
+        long newPoints = cur - points;
+        int rows = pointsMapper.updateAccountBalance(userId, newPoints, a.getCnyBalance());
+        if (rows != 1) throw new ApiException(ResultCode.SERVER_ERROR);
+
+        BusPointsTx tx = new BusPointsTx();
+        tx.setUserId(userId);
+        tx.setTxType("BOUNTY_DEDUCT");
+        tx.setPointsDelta(-points);
+        tx.setCnyDelta(BigDecimal.ZERO);
+        tx.setRemark(remark);
+        pointsMapper.insertTx(tx);
+    }
+
+    @Override
+    @Transactional
+    public void add(Long userId, Long points, String remark) {
+        if (points == null || points <= 0) throw new ApiException(ResultCode.PARAM_ERROR);
+        ensureAccount(userId);
+
+        BusPointsAccount a = pointsMapper.selectAccountByUserIdForUpdate(userId);
+        long newPoints = safeAdd(a.getPointsBalance(), points);
+        int rows = pointsMapper.updateAccountBalance(userId, newPoints, a.getCnyBalance());
+        if (rows != 1) throw new ApiException(ResultCode.SERVER_ERROR);
+
+        BusPointsTx tx = new BusPointsTx();
+        tx.setUserId(userId);
+        tx.setTxType("BOUNTY_REWARD");
+        tx.setPointsDelta(points);
+        tx.setCnyDelta(BigDecimal.ZERO);
+        tx.setRemark(remark);
+        pointsMapper.insertTx(tx);
+    }
+
     private void ensureAccount(Long userId) {
         if (userId == null) throw new ApiException(401, "未登录");
         BusPointsAccount existed = pointsMapper.selectAccountByUserId(userId);

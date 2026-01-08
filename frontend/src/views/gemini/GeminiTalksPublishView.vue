@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { createPost } from '../../api/post'
+import { getPointsMe } from '../../api/points'
 import { useAuthStore } from '../../store/auth'
 import { requireAuth } from '../../utils/requireAuth'
 
@@ -17,10 +18,23 @@ const content = ref('')
 const submitting = ref(false)
 
 const bountyPoints = ref(50)
+const myPoints = ref(0)
 const showBounty = computed(() => postType.value === 'bounty')
+const pointsEnough = computed(() => myPoints.value >= bountyPoints.value)
 
 function close() {
   router.back()
+}
+
+async function loadMyPoints() {
+  try {
+    const r = await getPointsMe()
+    if (r.code === 0 && r.data) {
+      myPoints.value = r.data.pointsBalance ?? 0
+    }
+  } catch {
+    // ignore
+  }
 }
 
 async function submit() {
@@ -32,12 +46,31 @@ async function submit() {
     ElMessage.warning('请先登录后再发布话题')
     return
   }
+
+  // 赏金类型需要确认
+  if (postType.value === 'bounty') {
+    if (myPoints.value < bountyPoints.value) {
+      ElMessage.warning(`积分不足，当前余额：${myPoints.value}，需要：${bountyPoints.value}`)
+      return
+    }
+    try {
+      await ElMessageBox.confirm(
+        `发布后将扣除 ${bountyPoints.value} 积分，采纳回答后积分将发放给被采纳者。`,
+        '确认发布赏金求助',
+        { confirmButtonText: '确认发布', cancelButtonText: '取消', type: 'warning' }
+      )
+    } catch {
+      return // 用户取消
+    }
+  }
   
   submitting.value = true
   try {
     const r = await createPost({ 
       title: title.value.trim(), 
-      content: content.value.trim() || undefined 
+      content: content.value.trim() || undefined,
+      postType: postType.value,
+      bountyPoints: postType.value === 'bounty' ? bountyPoints.value : undefined
     })
     if (r.code !== 0) throw new Error(r.message)
     ElMessage.success('发布成功！')
@@ -57,6 +90,7 @@ async function submit() {
 onMounted(() => {
   // 检查登录状态
   if (!auth.me) requireAuth('/talks/publish')
+  loadMyPoints()
 })
 </script>
 
@@ -123,7 +157,16 @@ onMounted(() => {
               <span class="text-xl font-black text-amber-600">{{ bountyPoints }} pts</span>
             </div>
             <input v-model="bountyPoints" type="range" min="10" max="500" class="w-full h-2 bg-amber-200 rounded-lg appearance-none cursor-pointer accent-amber-500" />
-            <p class="text-[10px] text-amber-700 mt-4 leading-relaxed">* 悬赏积分将增加曝光率，吸引专家回答。</p>
+            <div class="flex items-center justify-between mt-4">
+              <p class="text-[10px] text-amber-700 leading-relaxed">* 发布后积分将被扣除，采纳回答后发放给被采纳者。</p>
+              <span 
+                class="text-xs font-bold px-2 py-1 rounded-lg"
+                :class="pointsEnough ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'"
+              >
+                当前余额: {{ myPoints }} pts
+              </span>
+            </div>
+            <p v-if="!pointsEnough" class="text-xs text-red-500 mt-2 font-bold">积分不足，请先充值或降低悬赏额度</p>
           </div>
         </div>
 

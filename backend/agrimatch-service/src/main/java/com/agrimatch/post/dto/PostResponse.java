@@ -13,6 +13,10 @@ public class PostResponse {
     private String title;
     private String content;
     private String imagesJson;
+    private String postType;
+    private Integer bountyPoints;
+    private Integer bountyStatus;
+    private Long acceptedCommentId;
     private LocalDateTime createTime;
     private Integer likeCount;
     private Integer commentCount;
@@ -128,6 +132,38 @@ public class PostResponse {
 
     public void setLikedByMe(Boolean likedByMe) {
         this.likedByMe = likedByMe;
+    }
+
+    public String getPostType() {
+        return postType;
+    }
+
+    public void setPostType(String postType) {
+        this.postType = postType;
+    }
+
+    public Integer getBountyPoints() {
+        return bountyPoints;
+    }
+
+    public void setBountyPoints(Integer bountyPoints) {
+        this.bountyPoints = bountyPoints;
+    }
+
+    public Integer getBountyStatus() {
+        return bountyStatus;
+    }
+
+    public void setBountyStatus(Integer bountyStatus) {
+        this.bountyStatus = bountyStatus;
+    }
+
+    public Long getAcceptedCommentId() {
+        return acceptedCommentId;
+    }
+
+    public void setAcceptedCommentId(Long acceptedCommentId) {
+        this.acceptedCommentId = acceptedCommentId;
     }
 }
 

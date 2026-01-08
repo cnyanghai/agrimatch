@@ -13,6 +13,7 @@ public class BusPostComment {
     private String userName;
     private String nickName;
     private String content;
+    private Integer isAccepted;
     private Integer isDeleted;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
@@ -103,6 +104,14 @@ public class BusPostComment {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
+    }
+
+    public Integer getIsAccepted() {
+        return isAccepted;
+    }
+
+    public void setIsAccepted(Integer isAccepted) {
+        this.isAccepted = isAccepted;
     }
 }
 

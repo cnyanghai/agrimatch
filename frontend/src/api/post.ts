@@ -4,6 +4,8 @@ export interface PostCreateRequest {
   title: string
   content?: string
   imagesJson?: string
+  postType?: 'general' | 'bounty' | 'poll'
+  bountyPoints?: number
 }
 
 export interface PostResponse {
@@ -17,6 +19,10 @@ export interface PostResponse {
   title: string
   content?: string
   imagesJson?: string
+  postType?: 'general' | 'bounty' | 'poll'
+  bountyPoints?: number
+  bountyStatus?: number // 0=进行中, 1=已采纳, 2=已过期
+  acceptedCommentId?: number
   createTime?: string
   likeCount?: number
   commentCount?: number
@@ -27,6 +33,7 @@ export interface PostQuery {
   companyId?: number
   userId?: number
   keyword?: string
+  postType?: string
   orderBy?: string
   order?: string
   recentDays?: number
@@ -67,6 +74,7 @@ export interface PostCommentResponse {
   userName?: string
   nickName?: string
   content: string
+  isAccepted?: number
   createTime?: string
 }
 
@@ -82,6 +90,11 @@ export async function listPostComments(postId: number) {
 
 export async function createPostComment(postId: number, content: string) {
   const { data } = await http.post<Result<number>>(`/api/posts/${postId}/comments`, { content })
+  return data
+}
+
+export async function acceptAnswer(postId: number, commentId: number) {
+  const { data } = await http.post<Result<void>>(`/api/posts/${postId}/accept/${commentId}`)
   return data
 }
 

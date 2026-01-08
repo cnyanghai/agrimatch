@@ -15,6 +15,10 @@ public class BusPost {
     private String title;
     private String content;
     private String imagesJson;
+    private String postType;          // 帖子类型: general/bounty/poll
+    private Integer bountyPoints;     // 悬赏积分
+    private Integer bountyStatus;     // 悬赏状态: 0=进行中, 1=已采纳, 2=已过期
+    private Long acceptedCommentId;   // 被采纳的评论ID
     private Integer isDeleted;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
@@ -121,6 +125,38 @@ public class BusPost {
 
     public void setPosition(String position) {
         this.position = position;
+    }
+
+    public String getPostType() {
+        return postType;
+    }
+
+    public void setPostType(String postType) {
+        this.postType = postType;
+    }
+
+    public Integer getBountyPoints() {
+        return bountyPoints;
+    }
+
+    public void setBountyPoints(Integer bountyPoints) {
+        this.bountyPoints = bountyPoints;
+    }
+
+    public Integer getBountyStatus() {
+        return bountyStatus;
+    }
+
+    public void setBountyStatus(Integer bountyStatus) {
+        this.bountyStatus = bountyStatus;
+    }
+
+    public Long getAcceptedCommentId() {
+        return acceptedCommentId;
+    }
+
+    public void setAcceptedCommentId(Long acceptedCommentId) {
+        this.acceptedCommentId = acceptedCommentId;
     }
 }
 

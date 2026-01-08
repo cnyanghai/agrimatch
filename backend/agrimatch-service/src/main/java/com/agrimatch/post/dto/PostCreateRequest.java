@@ -12,6 +12,9 @@ public class PostCreateRequest {
     private String content;
 
     private String imagesJson;
+    
+    private String postType;      // general/bounty/poll
+    private Integer bountyPoints; // 悬赏积分
 
     public String getTitle() {
         return title;
@@ -35,6 +38,22 @@ public class PostCreateRequest {
 
     public void setImagesJson(String imagesJson) {
         this.imagesJson = imagesJson;
+    }
+
+    public String getPostType() {
+        return postType;
+    }
+
+    public void setPostType(String postType) {
+        this.postType = postType;
+    }
+
+    public Integer getBountyPoints() {
+        return bountyPoints;
+    }
+
+    public void setBountyPoints(Integer bountyPoints) {
+        this.bountyPoints = bountyPoints;
     }
 }
 

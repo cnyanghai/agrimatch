@@ -8,9 +8,13 @@ import java.util.List;
 public interface PostCommentMapper {
     int insert(BusPostComment c);
 
+    BusPostComment selectById(@Param("id") Long id);
+
     List<BusPostComment> selectByPostId(@Param("postId") Long postId);
 
     int countByPostId(@Param("postId") Long postId);
+
+    int updateAccepted(@Param("id") Long id);
 
     List<PostIdCountRow> countByPostIds(@Param("postIds") List<Long> postIds);
 

@@ -4,6 +4,7 @@ public class PostQuery {
     private Long companyId;
     private Long userId;
     private String keyword;
+    private String postType; // general/bounty/poll
     private String orderBy; // create_time
     private String order; // asc/desc
     private Integer recentDays; // 用于 hot_7d：仅查询最近 N 天内发布的帖子
@@ -72,6 +73,14 @@ public class PostQuery {
 
     public void setViewerUserId(Long viewerUserId) {
         this.viewerUserId = viewerUserId;
+    }
+
+    public String getPostType() {
+        return postType;
+    }
+
+    public void setPostType(String postType) {
+        this.postType = postType;
     }
 }
 

@@ -9,6 +9,7 @@ import {
   togglePostLike, 
   listPostComments, 
   createPostComment,
+  acceptAnswer,
   type PostResponse,
   type PostCommentResponse 
 } from '../../api/post'
@@ -36,6 +37,12 @@ const tipForm = reactive({
   remark: ''
 })
 const tipping = ref(false)
+const accepting = ref(false)
+
+// 是否是赏金帖且可以采纳
+const isBountyPost = () => post.value?.postType === 'bounty'
+const canAccept = () => isBountyPost() && post.value?.bountyStatus === 0 && post.value?.userId === auth.me?.userId
+const isAccepted = (comment: PostCommentResponse) => comment.isAccepted === 1 || comment.id === post.value?.acceptedCommentId
 
 async function loadPost() {
   if (!postId.value) {
@@ -174,6 +181,25 @@ async function submitTip() {
   }
 }
 
+async function onAcceptAnswer(commentId: number) {
+  if (!postId.value || !post.value) return
+  if (accepting.value) return
+  
+  accepting.value = true
+  try {
+    const r = await acceptAnswer(postId.value, commentId)
+    if (r.code !== 0) throw new Error(r.message)
+    ElMessage.success('采纳成功！积分已发放给回答者')
+    // 刷新帖子和评论
+    await loadPost()
+    await loadComments()
+  } catch (e: any) {
+    ElMessage.error(e?.message ?? '采纳失败')
+  } finally {
+    accepting.value = false
+  }
+}
+
 function formatTime(timeStr: string | undefined) {
   if (!timeStr) return '未知时间'
   const date = new Date(timeStr)
@@ -219,7 +245,31 @@ onMounted(() => {
           </div>
         </div>
 
-        <h1 class="text-3xl font-extrabold text-gray-900 mb-6">{{ post.title }}</h1>
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-4">{{ post.title }}</h1>
+        
+        <!-- 赏金信息 -->
+        <div v-if="isBountyPost()" class="mb-6">
+          <div 
+            v-if="post.bountyStatus === 1"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="font-bold">已采纳最佳答案</span>
+            <span class="text-emerald-600">+{{ post.bountyPoints }} 积分已发放</span>
+          </div>
+          <div 
+            v-else
+            class="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-amber-700"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span class="font-bold">悬赏 {{ post.bountyPoints }} 积分</span>
+            <span class="text-amber-600">等待采纳</span>
+          </div>
+        </div>
         
         <div v-if="post.content" class="prose max-w-none mb-8">
           <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ post.content }}</p>
@@ -295,17 +345,45 @@ onMounted(() => {
             v-for="comment in comments"
             :key="comment.id"
             class="flex gap-4 pb-6 border-b border-gray-50 last:border-b-0"
+            :class="{ 'bg-emerald-50/50 -mx-4 px-4 py-4 rounded-2xl border border-emerald-200': isAccepted(comment) }"
           >
-            <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
+            <div 
+              class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+              :class="isAccepted(comment) ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-600'"
+            >
               {{ (comment.nickName || comment.userName || '?')[0] }}
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-2">
                 <span class="font-bold text-gray-900">{{ comment.nickName || comment.userName || '匿名用户' }}</span>
+                <!-- 已采纳标记 -->
+                <span 
+                  v-if="isAccepted(comment)"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-bold rounded-lg"
+                >
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  最佳答案
+                </span>
                 <span class="text-xs text-gray-400">{{ formatTime(comment.createTime) }}</span>
                 <span v-if="comment.companyName" class="text-xs text-gray-400">· {{ comment.companyName }}</span>
               </div>
               <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ comment.content }}</p>
+              
+              <!-- 采纳按钮 -->
+              <div v-if="canAccept() && !isAccepted(comment) && comment.userId !== auth.me?.userId" class="mt-3">
+                <button
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-xs font-bold hover:bg-amber-200 transition-all disabled:opacity-50"
+                  :disabled="accepting"
+                  @click="onAcceptAnswer(comment.id)"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  {{ accepting ? '采纳中...' : '采纳此回答' }}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -7,7 +7,7 @@ import { listPosts, type PostResponse } from '../../api/post'
 import { useAuthStore } from '../../store/auth'
 import PublicTopNav from '../../components/PublicTopNav.vue'
 import PublicFooter from '../../components/PublicFooter.vue'
-import { MessageSquare, Heart, Search, ChevronDown, Plus, Star, Gift } from 'lucide-vue-next'
+import { MessageSquare, Heart, Search, ChevronDown, Plus, Star, Gift, Coins, CheckCircle } from 'lucide-vue-next'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -21,6 +21,7 @@ const posts = ref<PostResponse[]>([])
 const keyword = ref('')
 const orderBy = ref('create_time')
 const order = ref<'asc' | 'desc'>('desc')
+const activeTab = ref<'all' | 'bounty'>('all')
 
 function go(path: string) {
   router.push(path)
@@ -41,6 +42,7 @@ async function loadPosts() {
   try {
     const r = await listPosts({ 
       keyword: keyword.value.trim() || undefined, 
+      postType: activeTab.value === 'bounty' ? 'bounty' : undefined,
       orderBy: orderBy.value, 
       order: order.value 
     })
@@ -51,6 +53,11 @@ async function loadPosts() {
   } finally {
     loading.value = false
   }
+}
+
+function onTabChange(tab: 'all' | 'bounty') {
+  activeTab.value = tab
+  loadPosts()
 }
 
 function onSearch() {
@@ -114,8 +121,16 @@ onMounted(() => {
         </div>
 
         <div class="flex items-center gap-8 mt-12 border-b relative">
-          <button class="pb-4 px-2 text-sm font-bold border-b-2 border-emerald-600 text-emerald-600">全部话题</button>
-          <button class="pb-4 px-2 text-sm font-medium text-gray-400 hover:text-emerald-600 transition-colors flex items-center gap-1.5 group">
+          <button 
+            class="pb-4 px-2 text-sm font-bold transition-colors"
+            :class="activeTab === 'all' ? 'border-b-2 border-emerald-600 text-emerald-600' : 'text-gray-400 hover:text-emerald-600'"
+            @click="onTabChange('all')"
+          >全部话题</button>
+          <button 
+            class="pb-4 px-2 text-sm font-medium transition-colors flex items-center gap-1.5 group"
+            :class="activeTab === 'bounty' ? 'font-bold border-b-2 border-amber-500 text-amber-600' : 'text-gray-400 hover:text-amber-500'"
+            @click="onTabChange('bounty')"
+          >
             赏金求助
             <span class="w-2 h-2 bg-red-500 rounded-full group-hover:animate-ping"></span>
           </button>
@@ -168,6 +183,23 @@ onMounted(() => {
                   </span>
                   <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                     {{ formatTime(post.createTime) }} · {{ post.companyName || '行业同仁' }}
+                  </span>
+                </div>
+                <!-- 赏金标签 -->
+                <div v-if="post.postType === 'bounty'" class="flex items-center gap-2">
+                  <span 
+                    v-if="post.bountyStatus === 1"
+                    class="flex items-center gap-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-lg"
+                  >
+                    <CheckCircle :size="12" />
+                    已采纳
+                  </span>
+                  <span 
+                    v-else
+                    class="flex items-center gap-1 bg-amber-100 text-amber-700 text-[10px] font-bold px-2.5 py-1 rounded-lg animate-pulse"
+                  >
+                    <Coins :size="12" />
+                    {{ post.bountyPoints }} 积分
                   </span>
                 </div>
               </div>

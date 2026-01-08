@@ -15,6 +15,10 @@
         <result column="title" property="title"/>
         <result column="content" property="content"/>
         <result column="images_json" property="imagesJson"/>
+        <result column="post_type" property="postType"/>
+        <result column="bounty_points" property="bountyPoints"/>
+        <result column="bounty_status" property="bountyStatus"/>
+        <result column="accepted_comment_id" property="acceptedCommentId"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
@@ -23,9 +27,9 @@
     <insert id="insert" parameterType="com.agrimatch.post.domain.BusPost"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO bus_post
-        (company_id, user_id, title, content, images_json, is_deleted, create_time, update_time)
+        (company_id, user_id, title, content, images_json, post_type, bounty_points, bounty_status, is_deleted, create_time, update_time)
         VALUES
-        (#{companyId}, #{userId}, #{title}, #{content}, #{imagesJson}, 0, NOW(3), NOW(3))
+        (#{companyId}, #{userId}, #{title}, #{content}, #{imagesJson}, #{postType}, #{bountyPoints}, #{bountyStatus}, 0, NOW(3), NOW(3))
     </insert>
 
     <select id="selectById" resultMap="PostMap">
@@ -35,7 +39,9 @@
             u.user_name AS user_name,
             u.nick_name AS nick_name,
             u.position AS position,
-            p.title, p.content, p.images_json, p.is_deleted, p.create_time, p.update_time
+            p.title, p.content, p.images_json,
+            p.post_type, p.bounty_points, p.bounty_status, p.accepted_comment_id,
+            p.is_deleted, p.create_time, p.update_time
         FROM bus_post p
         LEFT JOIN bus_company c ON c.id = p.company_id AND (c.is_deleted IS NULL OR c.is_deleted = 0)
         LEFT JOIN sys_user u ON u.user_id = p.user_id AND u.del_flag = '0'
@@ -51,7 +57,9 @@
             u.user_name AS user_name,
             u.nick_name AS nick_name,
             u.position AS position,
-            p.title, p.content, p.images_json, p.is_deleted, p.create_time, p.update_time
+            p.title, p.content, p.images_json,
+            p.post_type, p.bounty_points, p.bounty_status, p.accepted_comment_id,
+            p.is_deleted, p.create_time, p.update_time
         FROM bus_post p
         LEFT JOIN bus_company c ON c.id = p.company_id AND (c.is_deleted IS NULL OR c.is_deleted = 0)
         LEFT JOIN sys_user u ON u.user_id = p.user_id AND u.del_flag = '0'
@@ -87,6 +95,9 @@
                 AND (p.title LIKE CONCAT('%', #{q.keyword}, '%')
                 OR p.content LIKE CONCAT('%', #{q.keyword}, '%'))
             </if>
+            <if test="q != null and q.postType != null and q.postType != ''">
+                AND p.post_type = #{q.postType}
+            </if>
         </where>
         ORDER BY
         <choose>
@@ -116,6 +127,17 @@
             update_time = NOW(3)
         WHERE id = #{id}
           AND is_deleted = 0
+    </update>
+
+    <update id="updateBountyAccepted">
+        UPDATE bus_post
+        SET bounty_status = 1,
+            accepted_comment_id = #{acceptedCommentId},
+            update_time = NOW(3)
+        WHERE id = #{postId}
+          AND is_deleted = 0
+          AND post_type = 'bounty'
+          AND bounty_status = 0
     </update>
 
 </mapper>
