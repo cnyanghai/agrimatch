@@ -20,7 +20,7 @@ public class ChatWebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(@NonNull WebSocketHandlerRegistry registry) {
         registry.addHandler(handler, "/ws/chat")
-                .setAllowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*");
+                .setAllowedOriginPatterns("*"); // 生产环境允许所有来源，或根据需要配置具体域名
     }
 }
 

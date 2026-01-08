@@ -134,19 +134,57 @@ public class ContractServiceImpl implements ContractService {
         // 解析报价单 payloadJson
         QuoteData quoteData = parseQuotePayload(quoteMsg.getPayloadJson());
         
-        // 从会话标的快照中获取产品名称和分类名称
+        // 从会话标的快照中获取产品信息作为备选
         BusChatConversation conversation = chatMapper.selectConversationById(quoteMsg.getConversationId());
         if (conversation != null && conversation.getSubjectSnapshotJson() != null) {
             try {
                 JsonNode snapshot = objectMapper.readTree(conversation.getSubjectSnapshotJson());
+                // 产品名称
                 if (quoteData.productName == null && snapshot.has("productName")) {
                     quoteData.productName = snapshot.get("productName").asText();
                 }
                 if (quoteData.productName == null && snapshot.has("categoryName")) {
                     quoteData.productName = snapshot.get("categoryName").asText();
                 }
+                if (quoteData.productName == null && snapshot.has("title")) {
+                    quoteData.productName = snapshot.get("title").asText();
+                }
+                // 分类名称
                 if (quoteData.categoryName == null && snapshot.has("categoryName")) {
                     quoteData.categoryName = snapshot.get("categoryName").asText();
+                }
+                // 数量（从标的快照补充）
+                if (quoteData.quantity == null && snapshot.has("quantity") && !snapshot.get("quantity").isNull()) {
+                    try {
+                        quoteData.quantity = new BigDecimal(snapshot.get("quantity").asText());
+                    } catch (Exception ignored) {}
+                }
+                // 价格（从标的快照补充，exFactoryPrice 或 expectedPrice）
+                if (quoteData.unitPrice == null) {
+                    if (snapshot.has("exFactoryPrice") && !snapshot.get("exFactoryPrice").isNull()) {
+                        try {
+                            quoteData.unitPrice = new BigDecimal(snapshot.get("exFactoryPrice").asText());
+                        } catch (Exception ignored) {}
+                    } else if (snapshot.has("expectedPrice") && !snapshot.get("expectedPrice").isNull()) {
+                        try {
+                            quoteData.unitPrice = new BigDecimal(snapshot.get("expectedPrice").asText());
+                        } catch (Exception ignored) {}
+                    }
+                }
+                // 交付地址
+                if (quoteData.deliveryPlace == null && snapshot.has("shipAddress")) {
+                    quoteData.deliveryPlace = snapshot.get("shipAddress").asText();
+                }
+                if (quoteData.deliveryPlace == null && snapshot.has("purchaseAddress")) {
+                    quoteData.deliveryPlace = snapshot.get("purchaseAddress").asText();
+                }
+                // 交付方式
+                if (quoteData.deliveryMode == null && snapshot.has("deliveryMode")) {
+                    quoteData.deliveryMode = snapshot.get("deliveryMode").asText();
+                }
+                // 产品参数
+                if (quoteData.paramsJson == null && snapshot.has("paramsJson")) {
+                    quoteData.paramsJson = snapshot.get("paramsJson").asText();
                 }
             } catch (Exception ignored) {}
         }
@@ -170,9 +208,29 @@ public class ContractServiceImpl implements ContractService {
         Long fromCompanyId = fromUser.getCompanyId();
         Long toCompanyId = toUser.getCompanyId();
 
+        // 校验双方公司信息是否完整
+        if (fromCompanyId == null) {
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), 
+                "报价方尚未完善公司信息，无法创建合同");
+        }
+        if (toCompanyId == null) {
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), 
+                "您尚未完善公司信息，请先前往个人中心完善资料");
+        }
+
         // 确定买卖双方（假设：接收报价并确认的一方是买方）
-        Long buyerCompanyId = toCompanyId != null ? toCompanyId : currentUser.getCompanyId();
+        Long buyerCompanyId = toCompanyId;
         Long sellerCompanyId = fromCompanyId;
+
+        // 校验报价单必填字段
+        if (quoteData.quantity == null || quoteData.quantity.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), 
+                "报价单中缺少数量信息，无法创建合同");
+        }
+        if (quoteData.unitPrice == null || quoteData.unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), 
+                "报价单中缺少价格信息，无法创建合同");
+        }
 
         // 生成合同编号
         String contractNo = generateContractNo();

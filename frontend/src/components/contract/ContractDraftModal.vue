@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { FileText, Building2, Package, Calendar, MapPin, CreditCard, FileEdit } from 'lucide-vue-next'
 import { createContractFromQuote, type ContractFromQuoteRequest } from '../../api/contract'
 import { BaseModal, BaseButton } from '../ui'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const props = defineProps<{
   modelValue: boolean
@@ -113,12 +116,36 @@ async function handleSubmit() {
       emit('success', res.data)
       emit('update:modelValue', false)
     } else {
-      ElMessage.error(res.message || '创建失败')
+      handleCreateError(res.message || '创建失败')
     }
   } catch (err: any) {
-    ElMessage.error(err.message || '创建失败')
+    handleCreateError(err.message || '创建失败')
   } finally {
     loading.value = false
+  }
+}
+
+// 处理创建合同错误，提供友好提示
+function handleCreateError(message: string) {
+  // 检查是否是公司信息缺失的错误
+  if (message.includes('公司信息') || message.includes('公司档案') || message.includes('完善资料')) {
+    ElMessageBox.confirm(
+      message,
+      '无法创建合同',
+      {
+        confirmButtonText: '前往完善资料',
+        cancelButtonText: '稍后再说',
+        type: 'warning',
+        confirmButtonClass: '!bg-emerald-600 !border-emerald-600 hover:!bg-emerald-700',
+      }
+    ).then(() => {
+      emit('update:modelValue', false)
+      router.push('/profile')
+    }).catch(() => {
+      // 用户选择稍后再说
+    })
+  } else {
+    ElMessage.error(message)
   }
 }
 </script>

@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Delete } from '@element-plus/icons-vue'
-// import { useAppStore } from '../store/app' // 暂时未使用
 import { createRequirement, getNextRequirementNo, type RequirementCreateRequest } from '../api/requirement'
 import { listMyRequirementTemplates as listRequirementTemplates, createRequirementTemplate, deleteRequirementTemplate, type RequirementTemplateCreateRequest, type RequirementTemplateResponse } from '../api/requirementTemplate'
 import { getProductTree, getProductParams, addProductParamOption, type ProductNode, type ProductParamResponse } from '../api/product'
 import { getMyCompany, type CompanyResponse } from '../api/company'
 import { getMe, type UserResponse } from '../api/user'
 import TwoLevelCategoryPicker from '../components/TwoLevelCategoryPicker.vue'
-import PageHeader from '../components/PageHeader.vue'
+import { BaseButton, BaseModal, EmptyState } from '../components/ui'
+import { FileText, Save, List, Send, Package, MapPin, Clock, FileCheck, CreditCard, Trash2 } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
 
-// const app = useAppStore() // 暂时未使用
 const router = useRouter()
 const auth = useAuthStore()
 const loading = ref(false)
@@ -101,23 +99,6 @@ function formatPrice(p?: number) {
   if (!p && p !== 0) return '面议'
   if (Number.isNaN(n)) return '面议'
   return `¥${n}/吨`
-}
-
-function templateParamsSummary(d: TemplateJsonData) {
-  if (!d.paramsJson) return '无特殊指标'
-  try {
-    const payload = JSON.parse(d.paramsJson) as any
-    const custom = payload?.custom && typeof payload.custom === 'object' ? payload.custom : null
-    if (custom && Object.keys(custom).length) {
-      const parts = Object.entries(custom).slice(0, 6).map(([k, v]) => `${k}:${String(v)}`)
-      return parts.join('; ')
-    }
-    const params = payload?.params && typeof payload.params === 'object' ? payload.params : null
-    const cnt = params ? Object.keys(params).length : 0
-    return cnt ? `已设置 ${cnt} 项指标` : '无特殊指标'
-  } catch {
-    return '无特殊指标'
-  }
 }
 
 function formatDate(dateStr?: string) {
@@ -518,392 +499,396 @@ async function applyTemplate(template: RequirementTemplateResponse) {
 </script>
 
 <template>
-  <div class="bg-gray-50 text-gray-900 min-h-screen">
-    <div class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-      <PageHeader title="发布采购需求">
-        <template #right>
-          <el-button class="!rounded-xl transition-all active:scale-95" @click="templatePickerOpen = true">
-            选择模板
-          </el-button>
-          <el-button class="!rounded-xl transition-all active:scale-95" @click="saveAsTemplate">
-            保存为模板
-          </el-button>
-          <el-button class="!rounded-xl transition-all active:scale-95" @click="router.push('/requirements/published')">
-            已发布
-          </el-button>
-          <el-button
-            type="primary"
-            class="!rounded-xl !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 transition-all active:scale-95"
-            :loading="loading"
-            @click="publishRequirement"
-          >
-            发布
-          </el-button>
-        </template>
-      </PageHeader>
+  <div class="space-y-6">
+    <!-- 页面标题 -->
+    <div class="flex items-center justify-between flex-wrap gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">发布采购需求</h1>
+        <p class="text-sm text-gray-500 mt-1">填写采购信息并发布到大厅</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <BaseButton type="secondary" size="sm" @click="templatePickerOpen = true">
+          <FileText class="w-4 h-4" />
+          选择模板
+        </BaseButton>
+        <BaseButton type="secondary" size="sm" @click="saveAsTemplate">
+          <Save class="w-4 h-4" />
+          保存模板
+        </BaseButton>
+        <BaseButton type="outline" size="sm" @click="router.push('/requirements/published')">
+          <List class="w-4 h-4" />
+          已发布
+        </BaseButton>
+        <BaseButton type="primary" size="sm" :loading="loading" @click="publishRequirement">
+          <Send class="w-4 h-4" />
+          发布
+        </BaseButton>
+      </div>
+    </div>
 
-      <!-- 发布采购区域 - 双栏布局 -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- 左侧表单区域（2/3） -->
-      <div class="lg:col-span-2">
-        <el-form :model="publishForm" label-position="top" class="neo-form space-y-6">
-          <!-- 发布信息（合并进同一个大 Form） -->
-          <section class="bg-white p-6 md:p-8 rounded-[32px] border border-gray-100 shadow-sm space-y-5">
-            <div class="flex items-center gap-2 border-b pb-4">
-              <div class="w-1.5 h-6 bg-slate-900 rounded-full"></div>
-              <h2 class="font-bold text-lg text-gray-800">发布信息</h2>
-            </div>
-
+    <!-- 双栏布局 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- 左侧表单区域 -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- 发布信息 -->
+        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-gray-100 flex items-center gap-2">
+            <div class="w-1.5 h-5 bg-slate-900 rounded-full"></div>
+            <h2 class="font-bold text-gray-900">发布信息</h2>
+          </div>
+          <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="bg-slate-50 rounded-2xl border border-gray-100 p-4">
-                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">公司（仅本次）</div>
-                <el-input v-model="publishForm.companyName" placeholder="默认使用公司名称，可临时修改" />
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">公司名称</label>
+                <input
+                  v-model="publishForm.companyName"
+                  type="text"
+                  placeholder="默认使用公司名称"
+                  class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                />
               </div>
-              <div class="bg-slate-50 rounded-2xl border border-gray-100 p-4">
-                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">采购人（仅本次）</div>
-                <el-input v-model="purchaserNameInput" placeholder="默认使用个人信息，可临时修改" />
-              </div>
-              <div class="bg-slate-50 rounded-2xl border border-gray-100 p-4 md:col-span-2">
-                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">交付地（默认公司地址，可修改）</div>
-                <el-input v-model="publishForm.purchaseAddress" placeholder="请输入交付/收货地址" />
-              </div>
-              <div class="md:col-span-2 text-xs text-gray-400">
-                说明：以上信息仅用于本次发布与模板复用，不会修改您的公司/个人资料。
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">采购人</label>
+                <input
+                  v-model="purchaserNameInput"
+                  type="text"
+                  placeholder="默认使用个人信息"
+                  class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                />
               </div>
             </div>
-          </section>
-
-          <!-- 1) 基础信息 -->
-          <section class="bg-white p-6 md:p-8 rounded-[32px] border border-gray-100 shadow-sm space-y-5">
-            <div class="flex items-center gap-2 border-b pb-4">
-              <div class="w-1.5 h-6 bg-emerald-600 rounded-full"></div>
-              <h2 class="font-bold text-lg text-gray-800">基础信息</h2>
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">交付地址</label>
+              <input
+                v-model="publishForm.purchaseAddress"
+                type="text"
+                placeholder="请输入交付/收货地址"
+                class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              />
             </div>
+            <p class="text-xs text-gray-400">以上信息仅用于本次发布，不会修改您的公司/个人资料</p>
+          </div>
+        </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <el-form-item label="品类选择" required>
+        <!-- 基础信息 -->
+        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in" style="animation-delay: 50ms">
+          <div class="p-5 border-b border-gray-100 flex items-center gap-2">
+            <div class="w-1.5 h-5 bg-emerald-600 rounded-full"></div>
+            <h2 class="font-bold text-gray-900">基础信息</h2>
+          </div>
+          <div class="p-5 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  品类选择 <span class="text-red-500">*</span>
+                </label>
                 <TwoLevelCategoryPicker v-model="pickedCategory" />
-              </el-form-item>
-
-              <el-form-item label="采购数量(吨)" required>
-                <el-input-number v-model="publishForm.quantity" :min="0" :step="1" :controls="false" />
-              </el-form-item>
-
-              <el-form-item label="期望价格(元/吨)">
-                <el-input-number v-model="publishForm.expectedPrice" :min="0" :step="10" :controls="false" />
-              </el-form-item>
-            </div>
-          </section>
-
-          <!-- 2) 规格参数 -->
-          <section class="bg-white p-6 md:p-8 rounded-[32px] border border-gray-100 shadow-sm space-y-5">
-            <div class="flex items-center justify-between gap-4 border-b pb-4">
-              <div class="flex items-center gap-2">
-                <div class="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
-                <h2 class="font-bold text-lg text-gray-800">规格参数</h2>
               </div>
-              <span class="text-[10px] text-gray-400 font-medium">支持自定义添加指标</span>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  采购数量（吨）<span class="text-red-500">*</span>
+                </label>
+                <el-input-number v-model="publishForm.quantity" :min="0" :step="1" :controls="false" class="w-full neo-input-number" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">期望价格（元/吨）</label>
+                <el-input-number v-model="publishForm.expectedPrice" :min="0" :step="10" :controls="false" class="w-full neo-input-number" />
+              </div>
             </div>
+          </div>
+        </div>
 
-            <div v-if="categoryParams.length === 0" class="text-sm text-gray-500 bg-slate-50 border border-gray-100 rounded-2xl p-4">
-              选择品类后，会自动加载对应的指标参数
+        <!-- 规格参数 -->
+        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in" style="animation-delay: 100ms">
+          <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-1.5 h-5 bg-emerald-500 rounded-full"></div>
+              <h2 class="font-bold text-gray-900">规格参数</h2>
             </div>
-
+            <span class="text-xs text-gray-400">选择品类后自动加载</span>
+          </div>
+          <div class="p-5">
+            <div v-if="categoryParams.length === 0" class="py-8">
+              <EmptyState
+                type="folder"
+                title="暂无参数"
+                description="选择品类后，会自动加载对应的指标参数"
+                size="sm"
+              />
+            </div>
             <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div v-for="param in categoryParams" :key="param.id">
-                <el-form-item :label="param.paramName">
-                  <el-select
-                    v-if="param.paramType === 1"
-                    v-model="dynamicParams[param.id]"
-                    :placeholder="`请选择${param.paramName}`"
-                    allow-create
-                    filterable
-                    @visible-change="(visible: boolean) => {
-                      if (!visible && dynamicParams[param.id] && !param.options?.includes(dynamicParams[param.id])) {
-                        addParamOption(param.id, dynamicParams[param.id])
-                      }
-                    }"
-                  >
-                    <el-option v-for="option in param.options" :key="option" :label="option" :value="option" />
-                  </el-select>
-                  <el-input v-else v-model="dynamicParams[param.id]" :placeholder="`请输入${param.paramName}`" />
-                </el-form-item>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ param.paramName }}</label>
+                <el-select
+                  v-if="param.paramType === 1"
+                  v-model="dynamicParams[param.id]"
+                  :placeholder="`请选择${param.paramName}`"
+                  allow-create
+                  filterable
+                  class="w-full neo-select"
+                  @visible-change="(visible: boolean) => {
+                    if (!visible && dynamicParams[param.id] && !param.options?.includes(dynamicParams[param.id])) {
+                      addParamOption(param.id, dynamicParams[param.id])
+                    }
+                  }"
+                >
+                  <el-option v-for="option in param.options" :key="option" :label="option" :value="option" />
+                </el-select>
+                <input
+                  v-else
+                  v-model="dynamicParams[param.id]"
+                  type="text"
+                  :placeholder="`请输入${param.paramName}`"
+                  class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                />
               </div>
             </div>
-          </section>
+          </div>
+        </div>
 
-          <!-- 3) 物流交付 -->
-          <section class="bg-white p-6 md:p-8 rounded-[32px] border border-gray-100 shadow-sm space-y-5">
-            <div class="flex items-center gap-2 border-b pb-4">
-              <div class="w-1.5 h-6 bg-amber-500 rounded-full"></div>
-              <h2 class="font-bold text-lg text-gray-800">物流与交付</h2>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <el-form-item label="发布有效期">
-                <el-select v-model="publishForm.expireMinutes" clearable>
+        <!-- 物流与交付 -->
+        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in" style="animation-delay: 150ms">
+          <div class="p-5 border-b border-gray-100 flex items-center gap-2">
+            <div class="w-1.5 h-5 bg-amber-500 rounded-full"></div>
+            <h2 class="font-bold text-gray-900">物流与交付</h2>
+          </div>
+          <div class="p-5 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发布有效期</label>
+                <el-select v-model="publishForm.expireMinutes" clearable class="w-full neo-select">
                   <el-option label="1小时" :value="60" />
                   <el-option label="1天" :value="1440" />
                   <el-option label="3天" :value="4320" />
                   <el-option label="7天" :value="10080" />
                   <el-option label="30天" :value="43200" />
                 </el-select>
-              </el-form-item>
-
-              <el-form-item label="包装方式">
-                <el-select v-model="publishForm.packaging">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">包装方式</label>
+                <el-select v-model="publishForm.packaging" class="w-full neo-select">
                   <el-option label="散装" value="散装" />
                   <el-option label="袋装" value="袋装" />
                   <el-option label="箱装" value="箱装" />
                 </el-select>
-              </el-form-item>
-
-              <el-form-item label="付款方式">
-                <el-select v-model="publishForm.paymentMethod">
-                  <el-option label="现款" value="现款" />
-                  <el-option label="账期" value="账期" />
-                </el-select>
-              </el-form-item>
-
-              <el-form-item label="发票类型">
-                <el-select v-model="publishForm.invoiceType" clearable>
-                  <el-option label="普通发票" value="普通发票" />
-                  <el-option label="增值税发票" value="增值税发票" />
-                  <el-option label="不需要发票" value="不需要发票" />
-                </el-select>
-              </el-form-item>
-
-              <el-form-item label="交货方式">
-                <el-select v-model="publishForm.deliveryMethod" clearable>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">交货方式</label>
+                <el-select v-model="publishForm.deliveryMethod" clearable class="w-full neo-select">
                   <el-option label="到厂" value="到厂" />
                   <el-option label="自提" value="自提" />
                   <el-option label="物流配送" value="物流配送" />
                 </el-select>
-              </el-form-item>
-
-              <el-form-item label="补充说明" class="md:col-span-2">
-                <el-input v-model="publishForm.remark" type="textarea" :rows="3" placeholder="备注（可选）" />
-              </el-form-item>
+              </div>
             </div>
-
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">付款方式</label>
+                <el-select v-model="publishForm.paymentMethod" class="w-full neo-select">
+                  <el-option label="现款" value="现款" />
+                  <el-option label="账期" value="账期" />
+                </el-select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发票类型</label>
+                <el-select v-model="publishForm.invoiceType" clearable class="w-full neo-select">
+                  <el-option label="普通发票" value="普通发票" />
+                  <el-option label="增值税发票" value="增值税发票" />
+                  <el-option label="不需要发票" value="不需要发票" />
+                </el-select>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">补充说明</label>
+              <textarea
+                v-model="publishForm.remark"
+                rows="3"
+                placeholder="备注（可选）"
+                class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all resize-none"
+              ></textarea>
+            </div>
             <div class="flex justify-end gap-3 pt-2">
-              <el-button class="!rounded-xl transition-all active:scale-95" @click="saveAsTemplate">保存为模板</el-button>
-              <el-button
-                type="primary"
-                class="!rounded-xl !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 transition-all active:scale-95"
-                :loading="loading"
-                @click="publishRequirement"
-                size="large"
-              >
+              <BaseButton type="secondary" @click="saveAsTemplate">
+                <Save class="w-4 h-4" />
+                保存为模板
+              </BaseButton>
+              <BaseButton type="primary" :loading="loading" @click="publishRequirement">
+                <Send class="w-4 h-4" />
                 发布采购需求
-              </el-button>
+              </BaseButton>
             </div>
-          </section>
-        </el-form>
+          </div>
+        </div>
       </div>
       
-      <!-- 右侧预览区域（1/3，sticky） -->
+      <!-- 右侧预览区域 -->
       <div class="lg:col-span-1">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
-          <div class="p-6 border-b border-gray-100">
+        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden sticky top-24 animate-fade-in" style="animation-delay: 200ms">
+          <div class="p-5 border-b border-gray-100">
             <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">summary</div>
-            <h3 class="text-lg font-bold text-gray-900 mt-1">发布前确认</h3>
-            <p class="text-gray-500 text-sm mt-1">只展示关键字段，避免重复信息</p>
+            <h3 class="font-bold text-gray-900 mt-1">发布前确认</h3>
           </div>
           
-          <div class="p-6 max-h-[70vh] overflow-y-auto">
-            <div v-if="!publishForm.categoryName" class="text-center py-12 text-gray-500 text-sm">
-              填写左侧信息，这里会显示关键确认项
+          <div class="p-5 max-h-[70vh] overflow-y-auto">
+            <div v-if="!publishForm.categoryName" class="py-8">
+              <EmptyState
+                type="folder"
+                title="暂无内容"
+                description="填写左侧信息后显示"
+                size="sm"
+              />
             </div>
             <div v-else class="space-y-3">
               <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
+                <div class="bg-gray-50 rounded-xl p-3">
                   <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">公司</div>
-                  <div class="mt-1 font-bold text-gray-900 truncate">{{ publishForm.companyName || (company?.companyName || previewData.companyName) }}</div>
+                  <div class="mt-1 font-bold text-gray-900 truncate text-sm">{{ publishForm.companyName || '未指定' }}</div>
                 </div>
-                <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
+                <div class="bg-gray-50 rounded-xl p-3">
                   <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">采购人</div>
-                  <div class="mt-1 font-bold text-gray-900 truncate">{{ purchaserNameInput || purchaserName }}</div>
+                  <div class="mt-1 font-bold text-gray-900 truncate text-sm">{{ purchaserNameInput || purchaserName }}</div>
                 </div>
               </div>
-              <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
-                <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">品类</div>
-                <div class="mt-1 font-bold text-gray-900 truncate">{{ previewData.categoryName }}</div>
+              <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-600">
+                  <Package class="w-3 h-3" />
+                  品类
+                </div>
+                <div class="mt-1 font-bold text-emerald-700">{{ previewData.categoryName }}</div>
               </div>
               <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
+                <div class="bg-gray-50 rounded-xl p-3">
                   <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">数量</div>
                   <div class="mt-1 font-bold text-gray-900">{{ previewData.quantity }} 吨</div>
                 </div>
-                <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">意向价</div>
+                <div class="bg-gray-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">期望价</div>
                   <div class="mt-1 font-bold text-emerald-600">
                     <span v-if="previewData.expectedPrice != null">¥{{ previewData.expectedPrice }}/吨</span>
                     <span v-else class="text-gray-500">面议</span>
                   </div>
                 </div>
               </div>
-              <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
-                <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">交付地</div>
-                <div class="mt-1 font-bold text-gray-900 truncate">{{ previewData.purchaseAddress }}</div>
+              <div class="bg-gray-50 rounded-xl p-3">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                  <MapPin class="w-3 h-3" />
+                  交付地址
+                </div>
+                <div class="mt-1 font-bold text-gray-900 text-sm">{{ previewData.purchaseAddress }}</div>
               </div>
               <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">付款</div>
+                <div class="bg-gray-50 rounded-xl p-3">
+                  <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                    <CreditCard class="w-3 h-3" />
+                    付款
+                  </div>
                   <div class="mt-1 font-bold text-gray-900">{{ publishForm.paymentMethod || '现款' }}</div>
                 </div>
-                <div class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">有效期</div>
+                <div class="bg-gray-50 rounded-xl p-3">
+                  <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                    <Clock class="w-3 h-3" />
+                    有效期
+                  </div>
                   <div class="mt-1 font-bold text-gray-900">{{ previewData.expireText }}</div>
                 </div>
               </div>
-              <div v-if="previewData.paramsText !== '无'" class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
-                <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">指标</div>
+              <div v-if="previewData.paramsText !== '无'" class="bg-gray-50 rounded-xl p-3">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                  <FileCheck class="w-3 h-3" />
+                  指标
+                </div>
                 <div class="mt-1 text-sm text-gray-700 whitespace-pre-wrap">{{ previewData.paramsText }}</div>
               </div>
-              <div v-if="previewData.remark" class="bg-gray-50 rounded-2xl border border-gray-100 px-4 py-3">
+              <div v-if="previewData.remark" class="bg-gray-50 rounded-xl p-3">
                 <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">备注</div>
                 <div class="mt-1 text-sm text-gray-700">{{ previewData.remark }}</div>
               </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-      </div>
-    </div>
 
     <!-- 模板选择弹窗 -->
-    <el-dialog v-model="templatePickerOpen" title="选择采购模板" width="920px" align-center>
-      <div v-if="templates.length === 0" class="text-center py-10 text-gray-500">
-        暂无模板，可在发布表单中点击“保存为模板”创建
+    <BaseModal v-model="templatePickerOpen" title="选择采购模板" size="lg">
+      <div v-if="templates.length === 0" class="py-8">
+        <EmptyState
+          type="folder"
+          title="暂无模板"
+          description="可在发布表单中点击【保存为模板】创建"
+          size="md"
+        />
       </div>
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div
           v-for="template in templates"
           :key="template.id"
-          class="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md hover:border-gray-200 transition-all active:scale-[0.99] cursor-pointer"
+          class="bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md hover:border-emerald-100 transition-all cursor-pointer"
           @click="applyTemplate(template)"
         >
-          <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start justify-between gap-3 mb-3">
             <div class="min-w-0">
-              <div class="flex items-center gap-2">
-                <div class="font-bold text-gray-900 truncate">{{ template.templateName }}</div>
-                <span class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border border-emerald-100 bg-emerald-50 text-emerald-700">
-                  {{ getTemplateJson(template).categoryName || '未分类' }}
-                </span>
-              </div>
-              <div class="text-xs text-gray-500 mt-1 truncate">
-                <span v-if="getTemplateJson(template).companyName || getTemplateJson(template).purchaserName">
-                  {{ getTemplateJson(template).companyName || '—' }}
-                  <span v-if="getTemplateJson(template).purchaserName"> · {{ getTemplateJson(template).purchaserName }}</span>
-                </span>
-                <span v-else>—</span>
-              </div>
+              <div class="font-bold text-gray-900 truncate">{{ template.templateName }}</div>
+              <div class="text-xs text-gray-500 mt-0.5">{{ getTemplateJson(template).categoryName || '未分类' }}</div>
             </div>
-            <el-button
-              type="danger"
-              size="small"
-              circle
-              class="shrink-0 !rounded-xl transition-all active:scale-95"
+            <button
+              class="p-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-all"
               @click.stop="deleteTemplate(template.id)"
             >
-              <el-icon><Delete /></el-icon>
-            </el-button>
+              <Trash2 class="w-4 h-4" />
+            </button>
           </div>
-
-          <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
-            <div class="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2">
-              <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">数量</div>
-              <div class="mt-0.5 font-bold text-gray-900">{{ getTemplateJson(template).quantity || 0 }} 吨</div>
+          <div class="grid grid-cols-2 gap-2 text-sm">
+            <div class="bg-gray-50 rounded-lg px-2.5 py-1.5">
+              <div class="text-[10px] text-gray-400">数量</div>
+              <div class="font-bold text-gray-900">{{ getTemplateJson(template).quantity || 0 }} 吨</div>
             </div>
-            <div class="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2">
-              <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">意向价</div>
-              <div class="mt-0.5 font-bold text-emerald-700">{{ formatPrice(getTemplateJson(template).expectedPrice) }}</div>
-            </div>
-            <div class="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 col-span-2">
-              <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">交付地</div>
-              <div class="mt-0.5 font-bold text-gray-900 truncate">{{ getTemplateJson(template).purchaseAddress || '未设置' }}</div>
-            </div>
-            <div class="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 col-span-2">
-              <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">有效期</div>
-              <div class="mt-0.5 font-bold text-gray-900">{{ formatExpireMinutes(getTemplateJson(template).expireMinutes) }}</div>
+            <div class="bg-gray-50 rounded-lg px-2.5 py-1.5">
+              <div class="text-[10px] text-gray-400">期望价</div>
+              <div class="font-bold text-emerald-600">{{ formatPrice(getTemplateJson(template).expectedPrice) }}</div>
             </div>
           </div>
-
-          <div class="mt-3 flex flex-wrap gap-2 text-xs">
-            <span class="px-2 py-1 rounded-full border border-gray-200 bg-white text-gray-700">
-              <span class="text-gray-400">包装</span> {{ getTemplateJson(template).packaging || '散装' }}
-            </span>
-            <span class="px-2 py-1 rounded-full border border-gray-200 bg-white text-gray-700">
-              <span class="text-gray-400">付款</span> {{ getTemplateJson(template).paymentMethod || '现款' }}
-            </span>
-            <span class="px-2 py-1 rounded-full border border-gray-200 bg-white text-gray-700">
-              <span class="text-gray-400">发票</span> {{ getTemplateJson(template).invoiceType || '未指定' }}
-            </span>
-            <span class="px-2 py-1 rounded-full border border-gray-200 bg-white text-gray-700">
-              <span class="text-gray-400">交货</span> {{ getTemplateJson(template).deliveryMethod || '未指定' }}
-            </span>
-          </div>
-
-          <div class="mt-3 text-xs text-gray-600 line-clamp-1">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mr-2">指标</span>
-            {{ templateParamsSummary(getTemplateJson(template)) }}
-          </div>
-
-          <div class="mt-3 flex items-center justify-between text-xs text-gray-400">
-            <span>{{ formatDate(template.createTime) }}</span>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-gray-300">点击使用</span>
+          <div class="mt-2 text-xs text-gray-400">
+            {{ formatDate(template.createTime) }} · 点击使用
           </div>
         </div>
       </div>
       <template #footer>
-        <div class="flex justify-end">
-          <el-button class="!rounded-xl transition-all active:scale-95" @click="templatePickerOpen = false">关闭</el-button>
-        </div>
+        <BaseButton type="secondary" @click="templatePickerOpen = false">关闭</BaseButton>
       </template>
-    </el-dialog>
+    </BaseModal>
 
-    <!-- 保存为模板对话框 -->
-    <el-dialog v-model="saveTemplateDialogVisible" title="保存为模板" width="420px" class="neo-dialog">
-      <div class="p-6">
-        <div class="text-xs text-gray-500 mb-4">
-          用于一键复用本次发布的品类、条款与指标配置
+    <!-- 保存为模板弹窗 -->
+    <BaseModal v-model="saveTemplateDialogVisible" title="保存为模板" size="sm">
+      <div class="space-y-4">
+        <p class="text-xs text-gray-500">用于一键复用本次发布的品类、条款与指标配置</p>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+            模板名称 <span class="text-red-500">*</span>
+          </label>
+          <input
+            v-model="templateNameInput"
+            type="text"
+            placeholder="例如：玉米到厂-现款-常规指标"
+            class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+            @keyup.enter="confirmSaveTemplate"
+          />
         </div>
-        <el-form label-position="top" class="neo-dialog-form">
-          <el-form-item label="模板名称" required>
-            <el-input
-              v-model="templateNameInput"
-              placeholder="例如：玉米到厂-现款-常规指标"
-              @keyup.enter="confirmSaveTemplate"
-            />
-          </el-form-item>
-        </el-form>
       </div>
       <template #footer>
-        <div class="flex items-center justify-end gap-3 px-6 py-4">
-          <el-button class="!rounded-xl transition-all active:scale-95" @click="saveTemplateDialogVisible = false">取消</el-button>
-          <el-button type="primary" class="!rounded-xl transition-all active:scale-95" @click="confirmSaveTemplate">保存</el-button>
+        <div class="flex items-center gap-3">
+          <BaseButton type="secondary" @click="saveTemplateDialogVisible = false">取消</BaseButton>
+          <BaseButton type="primary" @click="confirmSaveTemplate">保存</BaseButton>
         </div>
       </template>
-    </el-dialog>
+    </BaseModal>
   </div>
 </template>
 
 <style scoped>
-/* label 统一成“微标签”风格（限定在 neo-form 内） */
-:deep(.neo-form .el-form-item__label) {
-  font-weight: 800;
-  font-size: 12px;
-  color: rgb(107 114 128); /* gray-500 */
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-/* 本页表单：Element Plus 输入控件统一为 Neo-Minimal 低噪风格（限定在 .neo-form 内，避免影响全站） */
-:deep(.neo-form .el-input__wrapper),
-:deep(.neo-form .el-select__wrapper),
-:deep(.neo-form .el-textarea__inner),
-:deep(.neo-form .el-cascader .el-input__wrapper) {
+/* Neo-Minimal 风格：输入控件 */
+:deep(.neo-input-number .el-input__wrapper),
+:deep(.neo-select .el-select__wrapper) {
   border: 2px solid rgb(243 244 246); /* gray-100 */
   border-radius: 12px; /* rounded-xl */
   box-shadow: none;
@@ -911,74 +896,19 @@ async function applyTemplate(template: RequirementTemplateResponse) {
   transition: all 0.15s ease;
 }
 
-:deep(.neo-form .el-input__wrapper.is-focus),
-:deep(.neo-form .el-select__wrapper.is-focus),
-:deep(.neo-form .el-cascader .el-input__wrapper.is-focus),
-:deep(.neo-form .el-textarea__inner:focus) {
+:deep(.neo-input-number .el-input__wrapper.is-focus),
+:deep(.neo-select .el-select__wrapper.is-focus) {
   border-color: rgb(16 185 129); /* emerald-500 */
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
 }
 
-:deep(.neo-form .el-input__wrapper:hover),
-:deep(.neo-form .el-select__wrapper:hover),
-:deep(.neo-form .el-cascader .el-input__wrapper:hover),
-:deep(.neo-form .el-textarea__inner:hover) {
+:deep(.neo-input-number .el-input__wrapper:hover),
+:deep(.neo-select .el-select__wrapper:hover) {
   border-color: rgb(229 231 235); /* gray-200 */
 }
 
-:deep(.neo-form .el-input-number),
-:deep(.neo-form .el-select),
-:deep(.neo-form .el-cascader) {
+:deep(.neo-input-number),
+:deep(.neo-select) {
   width: 100%;
-}
-
-/* 保存为模板弹窗：Soft Glass + Card-First */
-:deep(.neo-dialog) {
-  border-radius: 32px;
-  overflow: hidden;
-  border: 1px solid rgb(243 244 246); /* gray-100 */
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-}
-
-:deep(.neo-dialog .el-dialog__header) {
-  padding: 20px 24px;
-  border-bottom: 1px solid rgb(243 244 246);
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-}
-
-:deep(.neo-dialog .el-dialog__title) {
-  font-weight: 800;
-  color: rgb(17 24 39); /* gray-900 */
-}
-
-:deep(.neo-dialog .el-dialog__body) {
-  padding: 0;
-  background: #fff;
-}
-
-:deep(.neo-dialog .el-dialog__footer) {
-  padding: 0;
-  border-top: 1px solid rgb(243 244 246);
-  background: rgb(249 250 251); /* gray-50 */
-}
-
-/* dialog 内输入框保持一致低噪 */
-:deep(.neo-dialog-form .el-form-item__label) {
-  font-weight: 800;
-  font-size: 12px;
-  color: rgb(107 114 128);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-:deep(.neo-dialog-form .el-input__wrapper) {
-  border: 2px solid rgb(243 244 246);
-  border-radius: 12px;
-  box-shadow: none;
-  transition: all 0.15s ease;
-}
-:deep(.neo-dialog-form .el-input__wrapper.is-focus) {
-  border-color: rgb(16 185 129);
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
 }
 </style>
