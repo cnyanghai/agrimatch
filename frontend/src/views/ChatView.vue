@@ -523,15 +523,15 @@ function onOfferUpdated(conversationId: number, msg: ChatMessageResponse) {
 function onMessageUpdate(conversationId: number, messageId: number, payload: any) {
   if (activeConversationId.value !== conversationId) return
   
-  // 查找并更新现有消息的 payloadJson
+  // 使用 splice 确保 Vue 能检测到数组变化
   const idx = messages.value.findIndex(m => m.id === messageId)
   if (idx >= 0) {
-    const old = messages.value[idx]
-    messages.value[idx] = {
-      ...old,
+    const updated = {
+      ...messages.value[idx],
       payloadJson: JSON.stringify(payload)
     }
-    console.log('[ChatView] Message updated:', messageId, payload)
+    messages.value.splice(idx, 1, updated)
+    console.log('[ChatView] Message updated via splice:', messageId, payload)
   }
 }
 
@@ -640,10 +640,51 @@ const hasAcceptedQuote = computed(() => {
   return messages.value.some(m => m.msgType === 'QUOTE' && m.quoteStatus === 'ACCEPTED')
 })
 
+// 检查是否有合同消息及其状态
+const contractStatus = computed(() => {
+  const contractMsg = messages.value.find(m => 
+    (m.msgType || '').toUpperCase() === 'CONTRACT'
+  )
+  if (!contractMsg) return null
+  const payload = parseContractPayload(contractMsg.payloadJson)
+  return payload
+})
+
 const transactionStep = computed(() => {
+  // 检查合同状态
+  const contract = contractStatus.value
+  if (contract) {
+    // status: 0=草稿, 1=待签署, 2=已签署, 3=履约中, 4=已完成
+    if (contract.status >= 3) return 4 // 履约中/已完成
+    if (contract.status === 2 || (contract.buyerSigned && contract.sellerSigned)) return 4 // 已签署
+    if (contract.status === 1 || contract.buyerSigned || contract.sellerSigned) return 3 // 签署中
+    return 3 // 有合同草稿
+  }
+  
   if (hasAcceptedQuote.value) return 2 // 达成意向
   if (messages.value.some(m => m.msgType === 'QUOTE')) return 1 // 议价中
   return 0 // 建立联系
+})
+
+// 签署合同步骤描述
+const contractStepDesc = computed(() => {
+  const contract = contractStatus.value
+  if (!contract) return '由意向生成正式合同'
+  if (contract.buyerSigned && contract.sellerSigned) return '✅ 双方已签署'
+  if (contract.buyerSigned) return '买方已签署，等待卖方'
+  if (contract.sellerSigned) return '卖方已签署，等待买方'
+  if (contract.status === 1) return '待签署'
+  return '合同草稿已创建'
+})
+
+// 履约完成步骤描述
+const fulfillmentStepDesc = computed(() => {
+  const contract = contractStatus.value
+  if (!contract) return ''
+  if (contract.status === 4) return '✅ 交易已完成'
+  if (contract.status === 3) return '履约进行中'
+  if (contract.status === 2 || (contract.buyerSigned && contract.sellerSigned)) return '合同已生效，进入履约'
+  return ''
 })
 
 // 加载会话列表
@@ -1860,8 +1901,8 @@ onBeforeUnmount(() => {
               <el-step title="建立联系" description="双方正在初步沟通" />
               <el-step title="议价中" :description="peerLatestQuote ? '已有报价，待确认' : '正在商讨细节'" />
               <el-step title="达成意向" :description="hasAcceptedQuote ? '已达成交易意向' : '待确认报价'" />
-              <el-step title="签署合同" description="由意向生成正式合同" />
-              <el-step title="履约完成" />
+              <el-step title="签署合同" :description="contractStepDesc" />
+              <el-step title="履约完成" :description="fulfillmentStepDesc" />
             </el-steps>
 
             <div class="mt-8 pt-6 border-t border-gray-50">

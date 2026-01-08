@@ -596,6 +596,80 @@ public class ContractServiceImpl implements ContractService {
             // 双方都已签署，更新状态为已签署
             contractMapper.updateStatus(contractId, 2); // 2 = 已签署
             logChange(contractId, "STATUS", "双方签署完成，合同生效", "1", "2", userId);
+            
+            // 发送签署完成系统消息
+            sendSignCompleteMessage(contractId);
+        }
+    }
+    
+    /**
+     * 发送签署完成系统消息到聊天
+     */
+    private void sendSignCompleteMessage(Long contractId) {
+        try {
+            // 查找该合同对应的 CONTRACT 消息，获取会话信息
+            BusChatMessage contractMsg = chatMapper.selectContractMessageByContractId(contractId);
+            if (contractMsg == null) {
+                log.warn("sendSignCompleteMessage: No CONTRACT message found for contract {}", contractId);
+                return;
+            }
+            
+            BusChatConversation conversation = chatMapper.selectConversationById(contractMsg.getConversationId());
+            if (conversation == null) {
+                log.warn("sendSignCompleteMessage: Conversation not found for contract {}", contractId);
+                return;
+            }
+            
+            BusContract contract = contractMapper.selectById(contractId);
+            if (contract == null) {
+                log.warn("sendSignCompleteMessage: Contract {} not found", contractId);
+                return;
+            }
+            
+            // 创建系统消息
+            String content = "🎉 合同【" + contract.getContractNo() + "】双方签署完成，已正式生效！";
+            
+            BusChatMessage msg = new BusChatMessage();
+            msg.setConversationId(conversation.getId());
+            msg.setFromUserId(0L); // 系统消息使用 0 作为发送者
+            msg.setToUserId(conversation.getAUserId()); // 这里可以是任意一方，实际上是广播给双方
+            msg.setMsgType("SYSTEM");
+            msg.setContent(content);
+            msg.setIsRead(0);
+            
+            int rows = chatMapper.insertMessage(msg);
+            if (rows != 1 || msg.getId() == null) {
+                log.error("sendSignCompleteMessage: insert message failed");
+                return;
+            }
+            
+            // 更新会话最后消息
+            chatMapper.updateConversationLast(conversation.getId(), msg.getId(), content);
+            
+            log.info("sendSignCompleteMessage: sent system message for contract {}", contractId);
+            
+            // 构建 ChatMessageResponse 用于 WebSocket 广播
+            ChatMessageResponse response = new ChatMessageResponse();
+            response.setId(msg.getId());
+            response.setConversationId(conversation.getId());
+            response.setFromUserId(0L);
+            response.setToUserId(conversation.getAUserId());
+            response.setMsgType("SYSTEM");
+            response.setContent(content);
+            response.setRead(false);
+            response.setCreateTime(java.time.LocalDateTime.now());
+            
+            // 发布事件，触发 WebSocket 广播给双方用户
+            eventPublisher.publishEvent(new ContractMessageEvent(
+                this, 
+                conversation.getId(), 
+                conversation.getAUserId(), 
+                conversation.getBUserId(), 
+                response
+            ));
+            
+        } catch (Exception e) {
+            log.error("sendSignCompleteMessage failed for contract {}: {}", contractId, e.getMessage(), e);
         }
     }
 

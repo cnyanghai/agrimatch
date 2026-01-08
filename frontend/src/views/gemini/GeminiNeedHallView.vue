@@ -157,7 +157,10 @@ function buildNeedSnapshot(r: RequirementResponse) {
     purchaseAddress: r.purchaseAddress,
     paymentMethod: r.paymentMethod,
     deliveryMethod: r.deliveryMethod,
-    packaging: r.packaging
+    packaging: r.packaging,
+    invoiceType: r.invoiceType,
+    paramsJson: r.paramsJson,
+    remark: r.remark
   })
 }
 

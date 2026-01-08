@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, watch, onMounted } from 'vue'
+import { computed, reactive, watch, ref } from 'vue'
 
 export type QuoteFields = {
   price?: string
@@ -7,13 +7,22 @@ export type QuoteFields = {
   deliveryPlace?: string
   arrivalDate?: string
   paymentMethod?: string
-  validUntil?: string
   remark?: string
   invoiceType?: string
   packaging?: string
   deliveryMethod?: string
   // 存储动态技术指标
   dynamicParams?: Record<string, string>
+}
+
+// 只读产品信息
+type ProductInfo = {
+  categoryName?: string
+  companyName?: string
+  nickName?: string
+  origin?: string
+  storageMethod?: string
+  remainingQuantity?: string
 }
 
 const props = defineProps<{
@@ -26,13 +35,15 @@ const emit = defineEmits<{
   (e: 'send', payload: { msgType: 'QUOTE'; payload: any; summary: string }): void
 }>()
 
+// 只读产品信息
+const productInfo = ref<ProductInfo>({})
+
 const form = reactive<QuoteFields>({
   price: '',
   quantity: '',
   deliveryPlace: '',
   arrivalDate: '',
   paymentMethod: '',
-  validUntil: '',
   remark: '',
   invoiceType: '',
   packaging: '',
@@ -46,7 +57,17 @@ function initFromSnapshot() {
   try {
     const s = JSON.parse(props.subjectSnapshotJson)
     
-    // 基础字段映射
+    // 只读产品信息
+    productInfo.value = {
+      categoryName: s.categoryName || s.title,
+      companyName: s.companyName,
+      nickName: s.nickName,
+      origin: s.origin,
+      storageMethod: s.storageMethod,
+      remainingQuantity: s.remainingQuantity ? String(s.remainingQuantity) : undefined
+    }
+    
+    // 可编辑字段映射
     form.price = String(s.exFactoryPrice ?? s.expectedPrice ?? s.price ?? '')
     form.quantity = String(s.remainingQuantity ?? s.quantity ?? '')
     form.deliveryMethod = s.deliveryMode ?? s.deliveryMethod ?? ''
@@ -54,16 +75,22 @@ function initFromSnapshot() {
     form.paymentMethod = s.paymentMethod ?? ''
     form.invoiceType = s.invoiceType ?? ''
     form.packaging = s.packaging ?? ''
+    form.remark = s.remark ?? ''
 
-    // 解析动态参数
+    // 解析动态参数（支持新的 {"Name": "Value"} 格式）
     if (s.paramsJson) {
-      const p = JSON.parse(s.paramsJson)
-      const params = p.params || {}
+      const paramsData = JSON.parse(s.paramsJson)
+      // 支持旧格式 { params: {...} } 和新格式 { "Name": "Value" }
+      const params = paramsData?.params || paramsData || {}
       const dynamic: Record<string, string> = {}
       Object.entries(params).forEach(([k, v]) => {
+        // 跳过纯数字键名（旧格式遗留）
+        if (/^\d+$/.test(k)) return
         if (typeof v === 'object' && v !== null && 'name' in v) {
+          // 旧格式: { "1": { name: "xxx", value: "yyy" } }
           dynamic[(v as any).name] = String((v as any).value)
-        } else {
+        } else if (typeof v === 'string' || typeof v === 'number') {
+          // 新格式: { "参数名": "参数值" }
           dynamic[k] = String(v)
         }
       })
@@ -90,7 +117,6 @@ const normalized = computed(() => {
     deliveryPlace: clean(form.deliveryPlace),
     arrivalDate: clean(form.arrivalDate),
     paymentMethod: clean(form.paymentMethod),
-    validUntil: clean(form.validUntil),
     remark: clean(form.remark),
     invoiceType: clean(form.invoiceType),
     packaging: clean(form.packaging),
@@ -110,7 +136,7 @@ const diff = computed(() => {
   const mine = normalized.value
   const keys: Array<keyof QuoteFields> = [
     'price', 'quantity', 'deliveryPlace', 'arrivalDate', 
-    'paymentMethod', 'validUntil', 'remark',
+    'paymentMethod', 'remark',
     'invoiceType', 'packaging', 'deliveryMethod'
   ]
   const changed: Array<{ k: string; mine?: string; peer?: string }> = []
@@ -145,7 +171,6 @@ function labelOf(k: keyof QuoteFields) {
   if (k === 'deliveryPlace') return '交付地'
   if (k === 'arrivalDate') return '到货期'
   if (k === 'paymentMethod') return '结算方式'
-  if (k === 'validUntil') return '有效期'
   if (k === 'invoiceType') return '发票类型'
   if (k === 'packaging') return '包装方式'
   if (k === 'deliveryMethod') return '交货方式'
@@ -165,7 +190,6 @@ function clear() {
   form.deliveryPlace = ''
   form.arrivalDate = ''
   form.paymentMethod = ''
-  form.validUntil = ''
   form.remark = ''
   form.invoiceType = ''
   form.packaging = ''
@@ -213,7 +237,34 @@ function send() {
       </div>
     </div>
 
-    <!-- 3/4 列紧凑布局 -->
+    <!-- 只读产品信息区 -->
+    <div v-if="productInfo.categoryName || productInfo.companyName" class="mb-4 p-3 bg-gray-50 rounded-2xl border border-gray-100">
+      <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">产品信息（只读）</div>
+      <div class="flex flex-wrap gap-3 text-xs">
+        <div v-if="productInfo.categoryName" class="flex items-center gap-1">
+          <span class="text-gray-400">品类:</span>
+          <span class="font-bold text-gray-700">{{ productInfo.categoryName }}</span>
+        </div>
+        <div v-if="productInfo.companyName" class="flex items-center gap-1">
+          <span class="text-gray-400">公司:</span>
+          <span class="font-bold text-gray-700">{{ productInfo.companyName }}</span>
+        </div>
+        <div v-if="productInfo.origin" class="flex items-center gap-1">
+          <span class="text-gray-400">产地:</span>
+          <span class="font-bold text-gray-700">{{ productInfo.origin }}</span>
+        </div>
+        <div v-if="productInfo.storageMethod" class="flex items-center gap-1">
+          <span class="text-gray-400">储存:</span>
+          <span class="font-bold text-gray-700">{{ productInfo.storageMethod }}</span>
+        </div>
+        <div v-if="productInfo.remainingQuantity" class="flex items-center gap-1">
+          <span class="text-gray-400">剩余:</span>
+          <span class="font-bold text-emerald-600">{{ productInfo.remainingQuantity }} 吨</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 可编辑报价字段 -->
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
       <!-- 核心交易项 -->
       <div class="space-y-1">
@@ -249,10 +300,6 @@ function send() {
       <div class="space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">包装要求</div>
         <input v-model="form.packaging" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
-      </div>
-      <div class="space-y-1">
-        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">报价有效期</div>
-        <input v-model="form.validUntil" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
       </div>
 
       <!-- 动态技术指标 -->

@@ -157,10 +157,14 @@ function buildSupplySnapshot(s: SupplyResponse) {
     nickName: s.nickName,
     exFactoryPrice: s.exFactoryPrice,
     quantity: s.quantity,
+    remainingQuantity: s.remainingQuantity,
+    origin: s.origin,
     shipAddress: s.shipAddress,
     deliveryMode: s.deliveryMode,
     packaging: s.packaging,
-    paramsJson: s.paramsJson
+    storageMethod: s.storageMethod,
+    paramsJson: s.paramsJson,
+    remark: s.remark
   })
 }
 

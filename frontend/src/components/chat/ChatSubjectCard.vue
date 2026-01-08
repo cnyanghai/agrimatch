@@ -52,7 +52,8 @@ function pickKV() {
     kv.push({ k, v: String(v) })
   }
 
-  // 这里的 Key 必须全面，覆盖产品详情
+  // 基础信息
+  push('发布公司', s.companyName)
   push('单价/意向', price.value ? `¥${price.value} 元/吨` : '面议')
   push('发布数量', quantity.value ? `${quantity.value} 吨` : null)
   push('剩余数量', s.remainingQuantity ? `${s.remainingQuantity} 吨` : null)
@@ -65,19 +66,28 @@ function pickKV() {
   push('储存方式', s.storageMethod)
   push('开票要求', s.invoiceType)
   
-  // 动态参数处理
+  // 动态参数处理（支持新的 {"Name": "Value"} 格式）
   if (s.paramsJson) {
     try {
-      const params = JSON.parse(s.paramsJson)?.params || {}
+      const paramsData = JSON.parse(s.paramsJson)
+      // 支持旧格式 { params: {...} } 和新格式 { "Name": "Value" }
+      const params = paramsData?.params || paramsData || {}
       Object.entries(params).forEach(([k, v]) => {
+        // 跳过纯数字键名（旧格式遗留）
+        if (/^\d+$/.test(k)) return
         if (typeof v === 'object' && v !== null && 'name' in v) {
+          // 旧格式: { "1": { name: "xxx", value: "yyy" } }
           push((v as any).name, (v as any).value)
-        } else {
+        } else if (typeof v === 'string' || typeof v === 'number') {
+          // 新格式: { "参数名": "参数值" }
           push(k, v)
         }
       })
     } catch { /* ignore */ }
   }
+
+  // 备注放在最后
+  push('备注', s.remark)
 
   return kv
 }
