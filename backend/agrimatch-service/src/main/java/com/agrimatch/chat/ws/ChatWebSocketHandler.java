@@ -78,6 +78,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String msgType = root.path("msgType").asText("TEXT");
         String content = root.path("content").asText("");
         String payloadJson = root.hasNonNull("payload") ? root.get("payload").toString() : null;
+        java.math.BigDecimal basisPrice = root.hasNonNull("basisPrice") ? new java.math.BigDecimal(root.get("basisPrice").asText()) : null;
+        String contractCode = root.hasNonNull("contractCode") ? root.get("contractCode").asText(null) : null;
         String tempId = root.path("tempId").asText(null);
 
         if (conversationId == null) {
@@ -85,7 +87,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        var saved = chatService.sendToConversation(fromUserId, conversationId, msgType, content, payloadJson);
+        var saved = chatService.sendToConversation(fromUserId, conversationId, msgType, content, payloadJson, basisPrice, contractCode);
 
         // 推送给接收方（在线的话）
         WebSocketSession toSession = sessions.get(saved.getToUserId());

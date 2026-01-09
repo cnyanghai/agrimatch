@@ -9,6 +9,8 @@ interface ContractPayload {
   quantity: number | string
   unit: string
   unitPrice: number | string
+  basisPrice?: number | string
+  contractCode?: string
   totalAmount: number | string
   buyerCompanyId: number
   buyerCompanyName: string
@@ -77,14 +79,26 @@ const canSign = computed(() => {
         <div class="text-xs text-gray-500 mb-1">交易标的</div>
         <div class="font-bold text-gray-900">{{ payload.productName }}</div>
         <div class="text-sm text-gray-600 mt-1">
-          {{ payload.quantity }} {{ payload.unit }} × ¥{{ formatAmount(payload.unitPrice) }}
+          <template v-if="payload.basisPrice !== undefined && payload.basisPrice !== null && payload.basisPrice !== ''">
+            {{ payload.quantity }} {{ payload.unit }} · 基差 {{ (Number(payload.basisPrice) > 0 ? '+' : '') + payload.basisPrice }} ({{ payload.contractCode }})
+          </template>
+          <template v-else>
+            {{ payload.quantity }} {{ payload.unit }} × ¥{{ formatAmount(payload.unitPrice) }}
+          </template>
         </div>
       </div>
       
       <!-- 金额 -->
       <div class="flex items-center justify-between">
         <span class="text-xs text-gray-500">合同金额</span>
-        <span class="text-lg font-bold text-emerald-600">¥{{ formatAmount(payload.totalAmount) }}</span>
+        <span class="text-lg font-bold text-emerald-600">
+          <template v-if="payload.basisPrice !== undefined && payload.basisPrice !== null && payload.basisPrice !== ''">
+            待结算
+          </template>
+          <template v-else>
+            ¥{{ formatAmount(payload.totalAmount) }}
+          </template>
+        </span>
       </div>
       
       <!-- 签署状态 -->

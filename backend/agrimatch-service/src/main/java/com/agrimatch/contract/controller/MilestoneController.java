@@ -81,7 +81,7 @@ public class MilestoneController {
     public Result<Void> reject(Authentication authentication,
                                @PathVariable("contractId") @NotNull Long contractId,
                                @PathVariable("milestoneId") @NotNull Long milestoneId,
-                               @RequestParam(required = false) String reason) {
+                               @RequestParam(name = "reason", required = false) String reason) {
         Long userId = SecurityUtil.requireUserId(authentication);
         milestoneService.reject(userId, milestoneId, reason);
         return Result.success();

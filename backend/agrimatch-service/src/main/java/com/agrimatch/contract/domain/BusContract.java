@@ -40,6 +40,10 @@ public class BusContract {
     private String termsJson;          // JSON格式的条款
     private String paramsJson;         // 产品参数JSON
     
+    // 基差报价相关
+    private BigDecimal basisPrice;
+    private String contractCode;
+    
     // 状态 (0=草稿, 1=待签署, 2=已签署, 3=履约中, 4=已完成, 5=已取消)
     private Integer status;
     
@@ -121,6 +125,12 @@ public class BusContract {
 
     public String getParamsJson() { return paramsJson; }
     public void setParamsJson(String paramsJson) { this.paramsJson = paramsJson; }
+
+    public BigDecimal getBasisPrice() { return basisPrice; }
+    public void setBasisPrice(BigDecimal basisPrice) { this.basisPrice = basisPrice; }
+
+    public String getContractCode() { return contractCode; }
+    public void setContractCode(String contractCode) { this.contractCode = contractCode; }
 
     public Integer getStatus() { return status; }
     public void setStatus(Integer status) { this.status = status; }

@@ -38,6 +38,7 @@ public class SecurityConfig {
                         "/api/products/tree", "/api/products/search", "/api/products/*/params",
                         "/api/posts", "/api/posts/*/comments",
                         "/api/supplies", "/api/requirements",
+                        "/api/futures/**",
                         "/api/files/download", "/uploads/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()

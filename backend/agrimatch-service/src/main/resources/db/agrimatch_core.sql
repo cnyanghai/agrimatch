@@ -175,6 +175,72 @@ ALTER TABLE `bus_supply` ADD COLUMN `storage_method` varchar(20) DEFAULT NULL CO
 ALTER TABLE `bus_supply` ADD COLUMN `remark` varchar(500) DEFAULT NULL COMMENT '备注';
 ALTER TABLE `bus_supply` ADD COLUMN `expire_minutes` int DEFAULT NULL COMMENT '发布时效（分钟）';
 ALTER TABLE `bus_supply` ADD COLUMN `expire_time` datetime(3) DEFAULT NULL COMMENT '过期时间';
+ALTER TABLE `bus_supply` ADD COLUMN `price_type` tinyint NOT NULL DEFAULT 0 COMMENT '报价类型（0=现货一口价 1=基差报价）';
+
+-- ============================================================
+-- 期货合约基准表（系统维护）
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `sys_futures_contract` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '合约ID',
+  `exchange_code` varchar(10) NOT NULL COMMENT '交易所代码（DCE大商所/CZCE郑商所/SHFE上期所）',
+  `product_code` varchar(10) NOT NULL COMMENT '品种代码（M豆粕/RM菜粕/Y豆油/OI菜油）',
+  `product_name` varchar(50) NOT NULL COMMENT '品种名称',
+  `contract_code` varchar(20) NOT NULL COMMENT '合约代码（如M2505/M2509）',
+  `contract_name` varchar(50) NOT NULL COMMENT '合约名称（如豆粕2505）',
+  `delivery_month` date NOT NULL COMMENT '交割月份',
+  `last_price` decimal(10,2) DEFAULT NULL COMMENT '最新价格',
+  `prev_close` decimal(10,2) DEFAULT NULL COMMENT '昨收价',
+  `open_price` decimal(10,2) DEFAULT NULL COMMENT '开盘价',
+  `high_price` decimal(10,2) DEFAULT NULL COMMENT '最高价',
+  `low_price` decimal(10,2) DEFAULT NULL COMMENT '最低价',
+  `volume` bigint DEFAULT NULL COMMENT '成交量',
+  `price_update_time` datetime(3) DEFAULT NULL COMMENT '价格更新时间',
+  `is_active` tinyint NOT NULL DEFAULT 1 COMMENT '是否活跃（0否 1是）',
+  `sort_order` int DEFAULT 0 COMMENT '排序',
+  `create_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `update_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_contract_code` (`contract_code`),
+  KEY `idx_product_code` (`product_code`),
+  KEY `idx_exchange_code` (`exchange_code`),
+  KEY `idx_is_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='期货合约基准表';
+
+-- 初始化豆粕主力合约数据
+INSERT INTO `sys_futures_contract` (`exchange_code`, `product_code`, `product_name`, `contract_code`, `contract_name`, `delivery_month`, `is_active`, `sort_order`) VALUES
+('DCE', 'M', '豆粕', 'M2505', '豆粕2505', '2025-05-01', 1, 1),
+('DCE', 'M', '豆粕', 'M2507', '豆粕2507', '2025-07-01', 1, 2),
+('DCE', 'M', '豆粕', 'M2509', '豆粕2509', '2025-09-01', 1, 3),
+('DCE', 'M', '豆粕', 'M2511', '豆粕2511', '2025-11-01', 1, 4),
+('DCE', 'M', '豆粕', 'M2601', '豆粕2601', '2026-01-01', 1, 5),
+('DCE', 'M', '豆粕', 'M2603', '豆粕2603', '2026-03-01', 1, 6)
+ON DUPLICATE KEY UPDATE contract_name = VALUES(contract_name);
+
+-- 初始化菜粕合约数据
+INSERT INTO `sys_futures_contract` (`exchange_code`, `product_code`, `product_name`, `contract_code`, `contract_name`, `delivery_month`, `is_active`, `sort_order`) VALUES
+('CZCE', 'RM', '菜粕', 'RM505', '菜粕505', '2025-05-01', 1, 1),
+('CZCE', 'RM', '菜粕', 'RM507', '菜粕507', '2025-07-01', 1, 2),
+('CZCE', 'RM', '菜粕', 'RM509', '菜粕509', '2025-09-01', 1, 3)
+ON DUPLICATE KEY UPDATE contract_name = VALUES(contract_name);
+
+-- ============================================================
+-- 基差报价明细表（供应关联）
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `bus_supply_basis` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '基差报价ID',
+  `supply_id` bigint NOT NULL COMMENT '关联供应ID（bus_supply.id）',
+  `contract_code` varchar(20) NOT NULL COMMENT '期货合约代码（如M2509）',
+  `basis_price` decimal(10,2) NOT NULL COMMENT '基差（正数=升水 负数=贴水）',
+  `available_qty` decimal(18,3) NOT NULL COMMENT '该合约可售量（吨）',
+  `sold_qty` decimal(18,3) NOT NULL DEFAULT 0 COMMENT '已售量（吨）',
+  `remark` varchar(200) DEFAULT NULL COMMENT '备注',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除（0否 1是）',
+  `create_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `update_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_supply_id` (`supply_id`),
+  KEY `idx_contract_code` (`contract_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='供应基差报价明细表';
 
 -- Table structure for bus_contract_template
 CREATE TABLE IF NOT EXISTS `bus_contract_template` (

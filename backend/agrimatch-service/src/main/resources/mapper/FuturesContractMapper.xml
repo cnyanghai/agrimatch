@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.futures.mapper.FuturesContractMapper">
+
+    <resultMap id="BaseResultMap" type="com.agrimatch.futures.domain.FuturesContract">
+        <id column="id" property="id"/>
+        <result column="exchange_code" property="exchangeCode"/>
+        <result column="product_code" property="productCode"/>
+        <result column="product_name" property="productName"/>
+        <result column="contract_code" property="contractCode"/>
+        <result column="contract_name" property="contractName"/>
+        <result column="delivery_month" property="deliveryMonth"/>
+        <result column="last_price" property="lastPrice"/>
+        <result column="prev_close" property="prevClose"/>
+        <result column="open_price" property="openPrice"/>
+        <result column="high_price" property="highPrice"/>
+        <result column="low_price" property="lowPrice"/>
+        <result column="volume" property="volume"/>
+        <result column="price_update_time" property="priceUpdateTime"/>
+        <result column="is_active" property="isActive"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, exchange_code, product_code, product_name, contract_code, contract_name,
+        delivery_month, last_price, prev_close, open_price, high_price, low_price,
+        volume, price_update_time, is_active, sort_order, create_time, update_time
+    </sql>
+
+    <select id="selectActiveContracts" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM sys_futures_contract
+        WHERE is_active = 1
+        <if test="productCode != null and productCode != ''">
+            AND product_code = #{productCode}
+        </if>
+        ORDER BY product_code, sort_order, contract_code
+    </select>
+
+    <select id="selectByContractCode" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM sys_futures_contract
+        WHERE contract_code = #{contractCode}
+    </select>
+
+    <select id="selectByContractCodes" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM sys_futures_contract
+        WHERE contract_code IN
+        <foreach collection="contractCodes" item="code" open="(" separator="," close=")">
+            #{code}
+        </foreach>
+    </select>
+
+    <update id="updatePrice">
+        UPDATE sys_futures_contract
+        SET last_price = #{lastPrice},
+            prev_close = #{prevClose},
+            open_price = #{openPrice},
+            high_price = #{highPrice},
+            low_price = #{lowPrice},
+            volume = #{volume},
+            price_update_time = #{priceUpdateTime}
+        WHERE contract_code = #{contractCode}
+    </update>
+
+    <select id="selectDistinctProducts" resultMap="BaseResultMap">
+        SELECT DISTINCT product_code, product_name, exchange_code
+        FROM sys_futures_contract
+        WHERE is_active = 1
+        ORDER BY product_code
+    </select>
+
+    <insert id="insert">
+        INSERT INTO sys_futures_contract (
+            exchange_code, product_code, product_name, contract_code, contract_name,
+            delivery_month, last_price, prev_close, open_price, high_price, low_price,
+            volume, price_update_time, is_active, sort_order
+        ) VALUES (
+            #{exchangeCode}, #{productCode}, #{productName}, #{contractCode}, #{contractName},
+            #{deliveryMonth}, #{lastPrice}, #{prevClose}, #{openPrice}, #{highPrice}, #{lowPrice},
+            #{volume}, #{priceUpdateTime}, #{isActive}, #{sortOrder}
+        )
+        ON DUPLICATE KEY UPDATE
+            last_price = VALUES(last_price),
+            prev_close = VALUES(prev_close),
+            open_price = VALUES(open_price),
+            high_price = VALUES(high_price),
+            low_price = VALUES(low_price),
+            volume = VALUES(volume),
+            price_update_time = VALUES(price_update_time)
+    </insert>
+
+</mapper>
+

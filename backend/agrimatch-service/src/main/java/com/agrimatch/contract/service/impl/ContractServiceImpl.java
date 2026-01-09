@@ -222,12 +222,14 @@ public class ContractServiceImpl implements ContractService {
         Long buyerCompanyId = toCompanyId;
         Long sellerCompanyId = fromCompanyId;
 
-        // 校验报价单必填字段
+        // 校验报价单必填字段 (针对基差合同，如果 unitPrice 为空，但 basisPrice 存在，则视为合法)
         if (quoteData.quantity == null || quoteData.quantity.compareTo(BigDecimal.ZERO) <= 0) {
             throw new ApiException(ResultCode.PARAM_ERROR.getCode(), 
                 "报价单中缺少数量信息，无法创建合同");
         }
-        if (quoteData.unitPrice == null || quoteData.unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
+        
+        boolean isBasis = quoteData.basisPrice != null && StringUtils.hasText(quoteData.contractCode);
+        if (!isBasis && (quoteData.unitPrice == null || quoteData.unitPrice.compareTo(BigDecimal.ZERO) <= 0)) {
             throw new ApiException(ResultCode.PARAM_ERROR.getCode(), 
                 "报价单中缺少价格信息，无法创建合同");
         }
@@ -250,6 +252,8 @@ public class ContractServiceImpl implements ContractService {
         contract.setUnit(quoteData.unit != null ? quoteData.unit : "吨");
         contract.setUnitPrice(quoteData.unitPrice);
         contract.setParamsJson(quoteData.paramsJson);
+        contract.setBasisPrice(quoteData.basisPrice);
+        contract.setContractCode(quoteData.contractCode);
         contract.setTotalAmount(calcTotal(quoteData.quantity, quoteData.unitPrice));
 
         // 使用请求中的覆盖值或从报价中获取
@@ -311,6 +315,8 @@ public class ContractServiceImpl implements ContractService {
             payload.put("quantity", contract.getQuantity());
             payload.put("unit", contract.getUnit());
             payload.put("unitPrice", contract.getUnitPrice());
+            payload.put("basisPrice", contract.getBasisPrice());
+            payload.put("contractCode", contract.getContractCode());
             payload.put("totalAmount", contract.getTotalAmount());
             payload.put("buyerCompanyId", contract.getBuyerCompanyId());
             payload.put("buyerCompanyName", buyerName);
@@ -718,6 +724,8 @@ public class ContractServiceImpl implements ContractService {
             payload.put("quantity", contract.getQuantity());
             payload.put("unit", contract.getUnit());
             payload.put("unitPrice", contract.getUnitPrice());
+            payload.put("basisPrice", contract.getBasisPrice());
+            payload.put("contractCode", contract.getContractCode());
             payload.put("totalAmount", contract.getTotalAmount());
             payload.put("buyerCompanyId", contract.getBuyerCompanyId());
             payload.put("buyerCompanyName", buyerName);
@@ -838,6 +846,8 @@ public class ContractServiceImpl implements ContractService {
         String paymentMethod;
         String deliveryMode;
         String paramsJson;
+        BigDecimal basisPrice;
+        String contractCode;
     }
 
     private QuoteData parseQuotePayload(String payloadJson) {
@@ -848,18 +858,16 @@ public class ContractServiceImpl implements ContractService {
             JsonNode root = objectMapper.readTree(payloadJson);
             JsonNode fields = root.has("fields") ? root.get("fields") : root;
 
-            if (fields.has("price")) {
-                String priceStr = fields.get("price").asText();
-                try {
-                    data.unitPrice = new BigDecimal(priceStr.replaceAll("[^\\d.]", ""));
-                } catch (Exception ignored) {}
+            // 1. 解析价格 (优先取 price，基差报价取 referencePrice)
+            data.unitPrice = parseBigDecimal(fields, "price");
+            if (data.unitPrice == null) {
+                data.unitPrice = parseBigDecimal(fields, "referencePrice");
             }
-            if (fields.has("quantity")) {
-                String qtyStr = fields.get("quantity").asText();
-                try {
-                    data.quantity = new BigDecimal(qtyStr.replaceAll("[^\\d.]", ""));
-                } catch (Exception ignored) {}
-            }
+
+            // 2. 解析数量
+            data.quantity = parseBigDecimal(fields, "quantity");
+
+            // 3. 解析其他字段
             if (fields.has("deliveryPlace")) {
                 data.deliveryPlace = fields.get("deliveryPlace").asText();
             }
@@ -875,13 +883,30 @@ public class ContractServiceImpl implements ContractService {
             if (fields.has("deliveryMethod")) {
                 data.deliveryMode = fields.get("deliveryMethod").asText();
             }
+            if (fields.has("basisPrice")) {
+                data.basisPrice = parseBigDecimal(fields, "basisPrice");
+            }
+            if (fields.has("contractCode")) {
+                data.contractCode = fields.get("contractCode").asText();
+            }
             if (fields.has("dynamicParams")) {
                 data.paramsJson = objectMapper.writeValueAsString(fields.get("dynamicParams"));
             }
         } catch (Exception e) {
-            // 解析失败，返回空数据
+            log.warn("parseQuotePayload failed: {}", e.getMessage());
         }
         return data;
+    }
+
+    private BigDecimal parseBigDecimal(JsonNode node, String fieldName) {
+        if (!node.has(fieldName) || node.get(fieldName).isNull()) return null;
+        try {
+            String val = node.get(fieldName).asText().replaceAll("[^\\d.-]", "");
+            if (val.isEmpty()) return null;
+            return new BigDecimal(val);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private String generateContractNo() {
@@ -898,7 +923,10 @@ public class ContractServiceImpl implements ContractService {
                 "name", nvl(c.getProductName(), "____"),
                 "quantity", c.getQuantity() != null ? c.getQuantity().toPlainString() : "____",
                 "unit", nvl(c.getUnit(), "吨"),
-                "unitPrice", c.getUnitPrice() != null ? c.getUnitPrice().toPlainString() : "____"
+                "unitPrice", c.getUnitPrice() != null ? c.getUnitPrice().toPlainString() : "____",
+                "basisPrice", c.getBasisPrice() != null ? c.getBasisPrice().toPlainString() : "",
+                "contractCode", nvl(c.getContractCode(), ""),
+                "params", parseProductParams(c.getParamsJson())
             ));
             terms.put("delivery", Map.of(
                 "address", nvl(c.getDeliveryAddress(), "____"),
@@ -950,6 +978,8 @@ public class ContractServiceImpl implements ContractService {
         o.setUnit(c.getUnit());
         o.setUnitPrice(c.getUnitPrice());
         o.setParamsJson(c.getParamsJson());
+        o.setBasisPrice(c.getBasisPrice());
+        o.setContractCode(c.getContractCode());
         o.setTotalAmount(c.getTotalAmount());
         o.setDeliveryDate(c.getDeliveryDate());
         o.setDeliveryAddress(c.getDeliveryAddress());
@@ -1100,61 +1130,94 @@ public class ContractServiceImpl implements ContractService {
     private List<Map<String, Object>> parseProductParams(String paramsJson) {
         if (!StringUtils.hasText(paramsJson)) return Collections.emptyList();
         
+        // 黑名单：系统元数据、重复展示的业务字段
+        Set<String> blacklist = Set.of(
+            "snapshotTime", "priceType", "id", "categoryName", "title", 
+            "productName", "companyName", "nickName", "exFactoryPrice", "expectedPrice",
+            "remainingQuantity", "unit", "basisQuotes", "basisPrice", 
+            "contractCode", "futuresPrice", "originPrice", "shipAddress", "purchaseAddress",
+            "deliveryMode", "storageMethod", "packaging", "paramsJson"
+        );
+
+        // 字段名映射
+        Map<String, String> fieldMap = Map.of(
+            "origin", "产地",
+            "quantity", "发布量",
+            "remark", "备注",
+            "storageMethod", "存储方式",
+            "packaging", "包装方式",
+            "deliveryMode", "交货方式",
+            "productionDate", "生产日期",
+            "shelfLife", "保质期"
+        );
+        
+        List<Map<String, Object>> result = new ArrayList<>();
+        
         try {
             JsonNode root = objectMapper.readTree(paramsJson);
-            List<Map<String, Object>> params = new ArrayList<>();
             
-            // 如果是嵌套格式 {"params": {...}, "custom": {...}}，先展开
-            if (root.isObject() && (root.has("params") || root.has("custom"))) {
-                if (root.has("params") && root.get("params").isObject()) {
-                    JsonNode pNode = root.get("params");
-                    pNode.fields().forEachRemaining(entry -> {
-                        Map<String, Object> p = new LinkedHashMap<>();
-                        String key = entry.getKey();
-                        JsonNode val = entry.getValue();
-                        if (val.isObject() && val.has("name") && val.has("value")) {
-                            p.put("label", val.get("name").asText());
-                            p.put("value", val.get("value").asText());
-                        } else {
-                            p.put("label", key);
-                            p.put("value", val.asText());
-                        }
-                        params.add(p);
-                    });
-                }
-                if (root.has("custom") && root.get("custom").isObject()) {
-                    root.get("custom").fields().forEachRemaining(entry -> {
-                        Map<String, Object> p = new LinkedHashMap<>();
-                        p.put("label", entry.getKey());
-                        p.put("value", entry.getValue().asText());
-                        params.add(p);
-                    });
-                }
-            } else if (root.isObject()) {
-                // 标准格式: {"参数名": "值"}
-                root.fields().forEachRemaining(entry -> {
-                    Map<String, Object> p = new LinkedHashMap<>();
-                    p.put("label", entry.getKey());
-                    p.put("value", entry.getValue().asText());
-                    params.add(p);
-                });
-            } else if (root.isArray()) {
-                // 数组格式: [{"label": "水分", "value": "14%"}, ...]
-                for (JsonNode item : root) {
-                    Map<String, Object> p = new LinkedHashMap<>();
-                    if (item.has("label")) p.put("label", item.get("label").asText());
-                    else if (item.has("name")) p.put("label", item.get("name").asText());
-                    
-                    if (item.has("value")) p.put("value", item.get("value").asText());
-                    
-                    if (!p.isEmpty()) params.add(p);
-                }
-            }
+            // 内部递归处理函数
+            processNode(root, blacklist, fieldMap, result);
             
-            return params;
+            return result;
         } catch (Exception e) {
             log.warn("parseProductParams failed: {}", e.getMessage());
             return Collections.emptyList();
+        }
+    }
+
+    private void processNode(JsonNode node, Set<String> blacklist, Map<String, String> fieldMap, List<Map<String, Object>> result) {
+        if (node.isObject()) {
+            // 如果是嵌套格式 {"params": {...}, "custom": {...}}，先展开
+            if (node.has("params") || node.has("custom")) {
+                if (node.has("params")) processNode(node.get("params"), blacklist, fieldMap, result);
+                if (node.has("custom")) processNode(node.get("custom"), blacklist, fieldMap, result);
+                return;
+            }
+
+            node.fields().forEachRemaining(entry -> {
+                String key = entry.getKey();
+                JsonNode val = entry.getValue();
+
+                if (blacklist.contains(key) || key.matches("\\d+")) return;
+                
+                // 过滤空值
+                if (val.isNull() || val.asText().equals("null") || val.asText().isBlank()) return;
+
+                // 智能解压 paramsJson 字符串
+                if ("paramsJson".equals(key) && val.isTextual() && val.asText().startsWith("{")) {
+                    try {
+                        JsonNode inner = objectMapper.readTree(val.asText());
+                        processNode(inner, blacklist, fieldMap, result);
+                        return;
+                    } catch (Exception ignored) {}
+                }
+
+                Map<String, Object> p = new LinkedHashMap<>();
+                if (val.isObject() && val.has("name") && val.has("value")) {
+                    p.put("label", val.get("name").asText());
+                    p.put("value", val.get("value").asText());
+                } else {
+                    p.put("label", fieldMap.getOrDefault(key, key));
+                    p.put("value", val.asText());
+                }
+                result.add(p);
+            });
+        } else if (node.isArray()) {
+            for (JsonNode item : node) {
+                if (item.isObject()) {
+                    Map<String, Object> p = new LinkedHashMap<>();
+                    String label = null;
+                    if (item.has("label")) label = item.get("label").asText();
+                    else if (item.has("name")) label = item.get("name").asText();
+                    
+                    if (label != null && !blacklist.contains(label)) {
+                        p.put("label", fieldMap.getOrDefault(label, label));
+                        if (item.has("value")) p.put("value", item.get("value").asText());
+                        if (!p.isEmpty()) result.add(p);
+                    }
+                }
+            }
         }
     }
     
@@ -1188,9 +1251,18 @@ public class ContractServiceImpl implements ContractService {
         sb.append("产品类目：").append(nvl(c.getCategoryName(), "____")).append("\n");
         sb.append("数量：").append(c.getQuantity() != null ? c.getQuantity().toPlainString() : "____");
         sb.append(" ").append(nvl(c.getUnit(), "吨")).append("\n");
-        sb.append("单价：人民币 ").append(c.getUnitPrice() != null ? c.getUnitPrice().toPlainString() : "____");
-        sb.append(" 元/").append(nvl(c.getUnit(), "吨")).append("\n");
-        sb.append("总金额：人民币 ").append(c.getTotalAmount() != null ? c.getTotalAmount().toPlainString() : "____").append(" 元\n\n");
+        
+        if (c.getBasisPrice() != null && c.getContractCode() != null) {
+            sb.append("定价方式：基差定价\n");
+            sb.append("挂钩合约：").append(c.getContractCode()).append("\n");
+            sb.append("基差：").append(c.getBasisPrice().compareTo(BigDecimal.ZERO) > 0 ? "+" : "").append(c.getBasisPrice().toPlainString()).append(" 元/吨\n");
+            sb.append("最终结算单价 = 签署合同时点的期货盘面价 + 基差\n");
+            sb.append("总金额：待结算（签署合同时根据盘面核算）\n\n");
+        } else {
+            sb.append("单价：人民币 ").append(c.getUnitPrice() != null ? c.getUnitPrice().toPlainString() : "____");
+            sb.append(" 元/").append(nvl(c.getUnit(), "吨")).append("\n");
+            sb.append("总金额：人民币 ").append(c.getTotalAmount() != null ? c.getTotalAmount().toPlainString() : "____").append(" 元\n\n");
+        }
         
         // 质量标准
         sb.append("第三条  质量标准\n");

@@ -5,9 +5,10 @@ import { requireAuth } from '../../utils/requireAuth'
 import PublicTopNav from '../../components/PublicTopNav.vue'
 import PublicFooter from '../../components/PublicFooter.vue'
 import ChatDrawer from '../../components/chat/ChatDrawer.vue'
-import { listSupplies, type SupplyResponse } from '../../api/supply'
+import { listSupplies, type SupplyResponse, type BasisQuoteResponse } from '../../api/supply'
 import { openChatConversation } from '../../api/chat'
 import { followUser, unfollowUser, checkFollowStatus } from '../../api/follow'
+import { batchGetFuturesPrices, type FuturesContractResponse } from '../../api/futures'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../../store/auth'
 
@@ -155,7 +156,9 @@ function buildSupplySnapshot(s: SupplyResponse) {
     categoryName: s.categoryName,
     companyName: s.companyName,
     nickName: s.nickName,
+    priceType: s.priceType,
     exFactoryPrice: s.exFactoryPrice,
+    basisQuotes: s.basisQuotes,
     quantity: s.quantity,
     remainingQuantity: s.remainingQuantity,
     origin: s.origin,
@@ -200,6 +203,9 @@ function onDrawerClosed() {
   drawerPeerName.value = ''
 }
 
+// 期货价格缓存
+const futuresPriceCache = ref<Record<string, FuturesContractResponse>>({})
+
 async function loadSupplies() {
   listLoading.value = true
   try {
@@ -243,6 +249,9 @@ async function loadSupplies() {
     const userIds = supplies.value.map(s => s.userId).filter(Boolean) as number[]
     const uniqueUserIds = [...new Set(userIds)]
     loadFollowStatus(uniqueUserIds)
+    
+    // 加载基差报价的期货价格
+    await loadFuturesPrices(result)
   } catch {
     supplies.value = []
     total.value = 0
@@ -250,6 +259,42 @@ async function loadSupplies() {
     listLoading.value = false
     applyFocusIfNeeded()
   }
+}
+
+// 加载基差报价需要的期货价格
+async function loadFuturesPrices(supplyList: SupplyResponse[]) {
+  // 收集所有基差报价中的合约代码
+  const contractCodes = new Set<string>()
+  for (const s of supplyList) {
+    if (s.priceType === 1 && s.basisQuotes) {
+      for (const bq of s.basisQuotes) {
+        if (bq.contractCode) contractCodes.add(bq.contractCode)
+      }
+    }
+  }
+  
+  if (contractCodes.size === 0) return
+  
+  try {
+    const res = await batchGetFuturesPrices([...contractCodes])
+    if (res.code === 0 && res.data) {
+      futuresPriceCache.value = { ...futuresPriceCache.value, ...res.data }
+    }
+  } catch {
+    // 静默失败
+  }
+}
+
+// 获取合约的期货价格
+function getFuturesPrice(contractCode: string): number | null {
+  return futuresPriceCache.value[contractCode]?.lastPrice ?? null
+}
+
+// 计算核算价格（期货价 + 基差）
+function calcReferencePrice(contractCode: string, basisPrice: number): number | null {
+  const futuresPrice = getFuturesPrice(contractCode)
+  if (futuresPrice === null) return null
+  return futuresPrice + basisPrice
 }
 
 // 选择品种筛选
@@ -452,17 +497,50 @@ function parseParams(paramsJson?: string): string {
               </button>
             </div>
 
-            <div class="w-full lg:w-[120px] shrink-0">
+            <div class="w-full lg:w-auto shrink-0" :class="s.priceType === 1 ? 'lg:min-w-[200px]' : 'lg:w-[120px]'">
               <div class="flex items-center gap-2 mb-1">
-                <span class="bg-orange-100 text-orange-600 text-[10px] px-1.5 py-0.5 rounded font-bold">现货</span>
+                <span v-if="s.priceType === 1" class="bg-amber-100 text-amber-600 text-[10px] px-1.5 py-0.5 rounded font-bold">基差</span>
+                <span v-else class="bg-orange-100 text-orange-600 text-[10px] px-1.5 py-0.5 rounded font-bold">现货</span>
                 <span class="text-gray-400 text-[10px]">ID: {{ s.id }}</span>
               </div>
               <h3 class="text-lg font-bold text-gray-900 truncate">{{ s.categoryName }}</h3>
-              <div class="mt-1 text-xl font-black text-red-600 italic">
+              
+              <!-- 现货一口价 -->
+              <div v-if="s.priceType !== 1" class="mt-1 text-xl font-black text-red-600 italic">
                 <span class="whitespace-nowrap inline-flex items-baseline gap-1">
                   <span>¥{{ s.exFactoryPrice }}</span>
                   <span class="text-xs font-normal text-gray-400 not-italic">元/吨</span>
                 </span>
+              </div>
+              
+              <!-- 基差报价 -->
+              <div v-else class="mt-2 space-y-1.5">
+                <div v-for="bq in (s.basisQuotes || []).slice(0, 3)" :key="bq.id" class="bg-amber-50/50 rounded-lg px-2 py-1.5 border border-amber-100">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="text-gray-700 font-bold text-xs">{{ bq.contractName || bq.contractCode }}</span>
+                    <span class="text-[10px] text-gray-400">{{ bq.availableQty }}吨</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-2 mt-0.5">
+                    <div class="flex flex-col">
+                      <span class="text-[10px] text-gray-500 scale-90 origin-left">
+                        期货 ¥{{ getFuturesPrice(bq.contractCode) || '-' }}
+                        <span v-if="futuresPriceCache[bq.contractCode] && !futuresPriceCache[bq.contractCode].isTrading" class="text-gray-400 ml-0.5">(收)</span>
+                      </span>
+                      <span class="font-bold text-[10px] -mt-0.5" :class="bq.basisPrice >= 0 ? 'text-red-500' : 'text-green-500'">
+                        {{ bq.basisPrice >= 0 ? '+' : '' }}{{ bq.basisPrice }}
+                      </span>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-[8px] text-gray-400 font-medium scale-90 origin-right">核算价</div>
+                      <span class="font-black text-emerald-600 text-sm">
+                        ¥{{ calcReferencePrice(bq.contractCode, bq.basisPrice)?.toFixed(0) || '-' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="(s.basisQuotes || []).length > 3" class="text-xs text-gray-400 text-center">
+                  +{{ s.basisQuotes!.length - 3 }} 个合约
+                </div>
               </div>
             </div>
 

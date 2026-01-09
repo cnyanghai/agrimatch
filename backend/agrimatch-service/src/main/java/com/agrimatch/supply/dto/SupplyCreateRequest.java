@@ -1,10 +1,10 @@
 package com.agrimatch.supply.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class SupplyCreateRequest {
     @NotBlank
@@ -12,7 +12,7 @@ public class SupplyCreateRequest {
     private String categoryName;
 
     /**
-     * 品类ID（nht_product.id），用于前端拉取“品类参数”渲染表单；后端可选保存到 paramsJson 中。
+     * 品类ID（nht_product.id），用于前端拉取"品类参数"渲染表单；后端可选保存到 paramsJson 中。
      */
     private Long productId;
 
@@ -27,8 +27,20 @@ public class SupplyCreateRequest {
 
     private BigDecimal quantity;
 
-    @NotNull
+    /**
+     * 报价类型：0=现货一口价（默认），1=基差报价
+     */
+    private Integer priceType = 0;
+
+    /**
+     * 出厂价（现货一口价模式必填，基差模式可为空）
+     */
     private BigDecimal exFactoryPrice;
+
+    /**
+     * 基差报价明细（priceType=1 时必填）
+     */
+    private List<BasisQuoteRequest> basisQuotes;
 
     @Size(max = 255)
     private String shipAddress;
@@ -103,6 +115,22 @@ public class SupplyCreateRequest {
 
     public void setExFactoryPrice(BigDecimal exFactoryPrice) {
         this.exFactoryPrice = exFactoryPrice;
+    }
+
+    public Integer getPriceType() {
+        return priceType;
+    }
+
+    public void setPriceType(Integer priceType) {
+        this.priceType = priceType;
+    }
+
+    public List<BasisQuoteRequest> getBasisQuotes() {
+        return basisQuotes;
+    }
+
+    public void setBasisQuotes(List<BasisQuoteRequest> basisQuotes) {
+        this.basisQuotes = basisQuotes;
     }
 
     public String getShipAddress() {

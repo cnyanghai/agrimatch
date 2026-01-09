@@ -7,7 +7,7 @@ import { updateMe, type UserUpdateRequest } from '../api/user'
 import { getMyCompany, createCompany, updateCompany, type CompanyResponse, type CompanyCreateRequest } from '../api/company'
 import { User, Building2, Lock, Check, Upload, ShoppingCart, Package, AlertTriangle, RefreshCw, Truck, ChevronRight, FileText, X, ZoomIn } from 'lucide-vue-next'
 import { BaseButton } from '../components/ui'
-import { regionData } from 'element-china-area-data'
+import { regionData, codeToText } from 'element-china-area-data'
 import { uploadImage } from '../api/file'
 
 const auth = useAuthStore()
@@ -58,11 +58,46 @@ const companySnapshot = ref({ companyName: '', licenseNo: '', licenseImgUrl: '',
 // 省市区级联选择值
 const regionValue = ref<string[]>([])
 
-// 监听省市区选择变化，同步到 companyForm
+// 查找名称对应的代码（用于回显）
+function findCodesByName(province: string, city: string, district: string): string[] {
+  if (!province) return []
+  
+  // 如果存储的是代码（之前的错误逻辑），直接返回
+  if (/^\d+$/.test(province)) {
+    return [province, city, district].filter(Boolean)
+  }
+
+  const result: string[] = []
+  const p = regionData.find(item => item.label === province)
+  if (p) {
+    result.push(p.value)
+    if (city) {
+      const c = p.children?.find(item => item.label === city)
+      if (c) {
+        result.push(c.value)
+        if (district) {
+          const d = c.children?.find(item => item.label === district)
+          if (d) {
+            result.push(d.value)
+          }
+        }
+      }
+    }
+  }
+  return result
+}
+
+// 监听省市区选择变化，同步到 companyForm (保存中文名称而非代码)
 watch(regionValue, (val) => {
-  companyForm.province = val[0] || ''
-  companyForm.city = val[1] || ''
-  companyForm.district = val[2] || ''
+  if (!val || val.length === 0) {
+    companyForm.province = ''
+    companyForm.city = ''
+    companyForm.district = ''
+    return
+  }
+  companyForm.province = val[0] ? codeToText[val[0]] : ''
+  companyForm.city = val[1] ? codeToText[val[1]] : ''
+  companyForm.district = val[2] ? codeToText[val[2]] : ''
 })
 
 // 营业执照上传
@@ -142,9 +177,9 @@ async function loadCompanyData() {
       companyForm.city = res.data.city || ''
       companyForm.district = res.data.district || ''
       companyForm.address = res.data.address || ''
-      // 初始化省市区级联选择值
+      // 初始化省市区级联选择值（支持代码或名称）
       if (res.data.province) {
-        regionValue.value = [res.data.province, res.data.city || '', res.data.district || ''].filter(Boolean)
+        regionValue.value = findCodesByName(res.data.province, res.data.city || '', res.data.district || '')
       }
     }
     companySnapshot.value = { ...companyForm }

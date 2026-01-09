@@ -16,6 +16,7 @@ public class BusSupply {
     private String supplyNo;
     private String origin;
     private BigDecimal quantity;
+    private Integer priceType;  // 报价类型：0=现货一口价，1=基差报价
     private BigDecimal exFactoryPrice;
     private String shipAddress;
     private String deliveryMode;
@@ -93,6 +94,14 @@ public class BusSupply {
 
     public void setExFactoryPrice(BigDecimal exFactoryPrice) {
         this.exFactoryPrice = exFactoryPrice;
+    }
+
+    public Integer getPriceType() {
+        return priceType;
+    }
+
+    public void setPriceType(Integer priceType) {
+        this.priceType = priceType;
     }
 
     public String getPackaging() {

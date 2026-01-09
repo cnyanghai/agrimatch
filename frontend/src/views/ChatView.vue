@@ -9,6 +9,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getConversationMessages, listChatConversations, markConversationRead, confirmChatOffer, type ChatConversationResponse, type ChatMessageResponse } from '../api/chat'
 import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
 import NegotiationPanel, { type QuoteFields } from '../components/chat/NegotiationPanel.vue'
+import BasisBargainPanel from '../components/chat/BasisBargainPanel.vue'
 import ChatSubjectCard from '../components/chat/ChatSubjectCard.vue'
 import ContractDraftModal from '../components/contract/ContractDraftModal.vue'
 import ContractCard from '../components/chat/ContractCard.vue'
@@ -207,6 +208,8 @@ type UiMessage = {
   content: string
   payloadJson?: string
   quoteStatus?: string
+  basisPrice?: number
+  contractCode?: string
   time?: string
   status?: 'pending' | 'sent'
   fromUserId?: number
@@ -292,6 +295,17 @@ const currentPeer = computed(() => {
 
 const currentConversation = computed(() => {
   return conversations.value.find(c => c.id === activeConversationId.value) || null
+})
+
+const isBasisTrade = computed(() => {
+  try {
+    const json = currentConversation.value?.subjectSnapshotJson
+    if (!json) return false
+    const obj = JSON.parse(json)
+    return obj.priceType === 1
+  } catch {
+    return false
+  }
 })
 
 const peerDisplayName = computed(() => {
@@ -607,6 +621,8 @@ function mapApiMessageToUi(m: ChatMessageResponse): UiMessage {
     content: mt === 'TEXT' ? (m.content || '') : mt === 'QUOTE' ? (m.content || '[报价]') : mt === 'ATTACHMENT' ? '[附件]' : (m.content || ''),
     payloadJson: m.payloadJson,
     quoteStatus: m.quoteStatus,
+    basisPrice: (m as any).basisPrice,
+    contractCode: (m as any).contractCode,
     time: formatTime(m.createTime),
     fromUserId: m.fromUserId,
     toUserId: m.toUserId
@@ -617,6 +633,7 @@ function parseQuoteFields(payloadJson?: string): QuoteFields | null {
   if (!payloadJson) return null
   try {
     const obj = JSON.parse(payloadJson)
+    if (obj?.kind === 'BASIS_QUOTE_V1' && obj?.fields) return obj.fields as any
     if (obj?.kind === 'QUOTE_V1' && obj?.fields) return obj.fields as QuoteFields
     if (obj?.fields) return obj.fields as QuoteFields
     return obj as QuoteFields
@@ -780,8 +797,23 @@ const QUOTE_LABEL_MAP: Record<string, string> = {
 }
 
 function getQuoteDisplayFields(payloadJson?: string) {
-  const fields = parseQuoteFields(payloadJson)
-  if (!fields) return []
+  const payload = parseQuoteFields(payloadJson)
+  if (!payload) return []
+  
+  // 处理基差报价 V1
+  if ((payload as any).kind === 'BASIS_QUOTE_V1' && (payload as any).fields) {
+    const f = (payload as any).fields
+    return [
+      { label: '期货合约', value: f.contractName || f.contractCode },
+      { label: '基差', value: `${f.basisPrice > 0 ? '+' : ''}${f.basisPrice} 元/吨` },
+      { label: '盘面价', value: `¥${f.futuresPrice}` },
+      { label: '核算价', value: `¥${f.referencePrice}` },
+      { label: '数量', value: `${f.quantity} 吨` },
+      { label: '备注', value: f.remark }
+    ].filter(i => i.value !== undefined && i.value !== '')
+  }
+
+  const fields = payload
   const display: Array<{ label: string; value: any }> = []
   
   // 基础字段
@@ -1002,7 +1034,7 @@ async function sendMessage() {
   }))
 }
 
-async function sendQuote(payload: any, summary: string) {
+async function sendQuote(payload: any, summary: string, basisPrice?: number, contractCode?: string) {
   if (!activeConversationId.value) {
     ElMessage.warning('请先选择会话')
     return
@@ -1049,6 +1081,8 @@ async function sendQuote(payload: any, summary: string) {
     msgType: 'QUOTE',
     content: summary || '',
     payload,
+    basisPrice,
+    contractCode,
     tempId
   }))
 }
@@ -1805,14 +1839,21 @@ onBeforeUnmount(() => {
             <div v-if="activeConversationId" class="p-4 border-t border-gray-100 bg-white">
               <!-- 输入框上方的小工具栏 -->
               <div class="flex items-center gap-4 mb-3 px-1">
-                <el-popover placement="top-start" :width="700" trigger="click" v-model:visible="quotePopoverVisible" popper-class="!p-0 !rounded-[32px] !border-none !shadow-2xl">
+                <el-popover placement="top-start" :width="isBasisTrade ? 500 : 700" trigger="click" v-model:visible="quotePopoverVisible" popper-class="!p-0 !rounded-[32px] !border-none !shadow-2xl">
                   <template #reference>
                     <button class="flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
                       <Position class="w-3.5 h-3.5" /> 修改价格/发报价
                     </button>
                   </template>
                   <div class="p-0">
+                    <BasisBargainPanel
+                      v-if="isBasisTrade"
+                      :disabled="!activeConversationId"
+                      :subject-snapshot-json="currentConversation?.subjectSnapshotJson"
+                      @send="({ payload, summary, basisPrice, contractCode }) => sendQuote(payload, summary, basisPrice, contractCode)"
+                    />
                     <NegotiationPanel
+                      v-else
                       :disabled="!activeConversationId"
                       :peer-latest-quote="peerLatestQuote"
                       :subject-snapshot-json="currentConversation?.subjectSnapshotJson"
@@ -1964,9 +2005,17 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+            <BasisBargainPanel
+              v-if="isBasisTrade"
+              :disabled="!activeConversationId"
+              :subject-snapshot-json="currentConversation?.subjectSnapshotJson"
+              @send="({ payload, summary, basisPrice, contractCode }) => sendQuote(payload, summary, basisPrice, contractCode)"
+            />
             <NegotiationPanel
+              v-else
               :disabled="!activeConversationId"
               :peer-latest-quote="peerLatestQuote"
+              :subject-snapshot-json="currentConversation?.subjectSnapshotJson"
               @send="({ payload, summary }) => sendQuote(payload, summary)"
             />
           </div>
@@ -2141,13 +2190,17 @@ onBeforeUnmount(() => {
       :product-name="getSubjectProductName()"
       :quantity="draftQuoteData?.quantity || ''"
       :unit="'吨'"
-      :unit-price="draftQuoteData?.price || ''"
+      :unit-price="draftQuoteData?.price || (draftQuoteData as any)?.referencePrice || ''"
       :delivery-place="draftQuoteData?.deliveryPlace || ''"
       :arrival-date="draftQuoteData?.arrivalDate || ''"
-      :payment-method="draftQuoteData?.paymentMethod || ''"
-      @success="onContractCreated"
+    :payment-method="draftQuoteData?.paymentMethod || ''"
+    :params-json="currentConversation?.subjectSnapshotJson"
+    :basis-price="(draftQuoteData as any)?.basisPrice"
+    :contract-code="(draftQuoteData as any)?.contractCode"
+    :futures-price="(draftQuoteData as any)?.futuresPrice"
+    @success="onContractCreated"
     />
-    
+
     <!-- 签署合同弹窗 -->
     <ContractSignModal
       v-model="signModalVisible"

@@ -2,11 +2,13 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Trash2, FileText, Save, Send, List, RefreshCw, Package, Truck, Clock, FileCheck } from 'lucide-vue-next'
-import { createSupply, getNextSupplyNo, type SupplyCreateRequest } from '../api/supply'
+import { Trash2, FileText, Save, Send, List, RefreshCw, Package, Truck, Clock, FileCheck, TrendingUp, Plus, X } from 'lucide-vue-next'
+import { createSupply, getNextSupplyNo, type SupplyCreateRequest, type BasisQuoteRequest } from '../api/supply'
+import { listFuturesContracts, type FuturesContractResponse } from '../api/futures'
 import { getProductTree, getProductParams, addProductParamOption, type ProductNode, type ProductParamResponse } from '../api/product'
 import { getMyCompany, type CompanyResponse } from '../api/company'
 import { getMe, type UserResponse } from '../api/user'
+import { codeToText } from 'element-china-area-data'
 import TwoLevelCategoryPicker from '../components/TwoLevelCategoryPicker.vue'
 import { BaseButton, BaseModal, EmptyState } from '../components/ui'
 
@@ -25,6 +27,7 @@ const publishForm = reactive({
   categoryId: undefined as number | undefined,
   categoryName: '',
   companyName: '',
+  priceType: 0, // 0=现货一口价, 1=基差报价
   exFactoryPrice: undefined as number | undefined,
   quantity: undefined as number | undefined,
   packaging: '散装',
@@ -35,6 +38,34 @@ const publishForm = reactive({
   paramsJson: '{}',
   remark: ''
 })
+
+// 基差报价相关
+const futuresContracts = ref<FuturesContractResponse[]>([])
+const basisQuotes = ref<{ contractCode: string; basisPrice: number | undefined; availableQty: number | undefined }[]>([])
+
+// 支持基差报价的品类（豆粕、菜粕等）
+const basisSupportedCategories = ['豆粕', '菜粕', '豆油', '菜油']
+const showBasisOption = computed(() => {
+  if (!publishForm.categoryName) return false
+  return basisSupportedCategories.some(c => publishForm.categoryName.includes(c))
+})
+
+// 品类到期货合约代码的映射
+const categoryToProductCode: Record<string, string> = {
+  '豆粕': 'M',
+  '菜粕': 'RM',
+  '豆油': 'Y',
+  '菜油': 'OI'
+}
+
+// 获取当前品类对应的期货品种代码
+function getProductCodeForCategory(): string | null {
+  if (!publishForm.categoryName) return null
+  for (const [cat, code] of Object.entries(categoryToProductCode)) {
+    if (publishForm.categoryName.includes(cat)) return code
+  }
+  return null
+}
 
 // 品类相关
 const categoryTree = ref<ProductNode[]>([])
@@ -125,7 +156,16 @@ function formatDate(dateStr?: string) {
   return d.toLocaleDateString('zh-CN')
 }
 
-const canPublish = computed(() => !!(publishForm.categoryId && publishForm.exFactoryPrice && publishForm.exFactoryPrice > 0))
+const canPublish = computed(() => {
+  if (!publishForm.categoryId) return false
+  if (publishForm.priceType === 1) {
+    // 基差模式：至少有一条有效的基差报价
+    return basisQuotes.value.some(q => q.contractCode && q.basisPrice !== undefined && q.availableQty && q.availableQty > 0)
+  } else {
+    // 现货模式：必须有出厂价
+    return !!(publishForm.exFactoryPrice && publishForm.exFactoryPrice > 0)
+  }
+})
 
 const previewData = computed(() => {
   const expireDays = publishForm.expireMinutes ? Math.floor(publishForm.expireMinutes / 1440) : 0
@@ -168,8 +208,90 @@ const publisherName = computed(() => {
 })
 
 onMounted(async () => {
-  await Promise.all([loadCategoryTree(), loadCompanyInfo(), loadMeUser(), loadTemplates()])
+  await Promise.all([loadCategoryTree(), loadCompanyInfo(), loadMeUser(), loadTemplates(), loadFuturesContracts()])
   await loadNextSupplyNo()
+})
+
+// 加载期货合约列表
+async function loadFuturesContracts() {
+  try {
+    const r = await listFuturesContracts()
+    if (r.code === 0) {
+      futuresContracts.value = r.data || []
+    }
+  } catch { /* silent */ }
+}
+
+// 添加基差报价行
+function addBasisQuote() {
+  basisQuotes.value.push({ contractCode: '', basisPrice: undefined, availableQty: undefined })
+}
+
+// 删除基差报价行
+function removeBasisQuote(index: number) {
+  basisQuotes.value.splice(index, 1)
+}
+
+// 获取合约选项（按品种过滤、过滤已过期、过滤已选择的，限未来24个月内显示未来5档）
+function getAvailableContracts(currentCode: string) {
+  const selectedCodes = basisQuotes.value.map(q => q.contractCode).filter(c => c && c !== currentCode)
+  const productCode = getProductCodeForCategory()
+  const today = new Date()
+  const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1) // 当月1号
+  
+  const filtered = futuresContracts.value
+    .filter(c => {
+      // 1. 过滤已选择的合约
+      if (selectedCodes.includes(c.contractCode)) return false
+      // 2. 按品种过滤（豆粕只显示M系列，菜粕只显示RM系列）
+      if (productCode && c.productCode !== productCode) return false
+      // 3. 过滤已过期合约（交割月 < 当前月）
+      if (c.deliveryMonth) {
+        const deliveryDate = new Date(c.deliveryMonth)
+        if (deliveryDate < currentMonth) return false
+      }
+      return true
+    })
+    .sort((a, b) => {
+      if (!a.deliveryMonth || !b.deliveryMonth) return 0
+      return new Date(a.deliveryMonth).getTime() - new Date(b.deliveryMonth).getTime()
+    })
+
+  // 限制显示未来 5 个活跃月份合约
+  return filtered.slice(0, 5)
+}
+
+// 根据合约代码获取合约信息
+function getContractByCode(code: string): FuturesContractResponse | undefined {
+  return futuresContracts.value.find(c => c.contractCode === code)
+}
+
+// 计算核算价格（期货价 + 基差）
+function calcReferencePrice(contractCode: string, basisPrice: number | undefined): number | null {
+  if (basisPrice === undefined) return null
+  const contract = getContractByCode(contractCode)
+  if (!contract?.lastPrice) return null
+  return contract.lastPrice + basisPrice
+}
+
+// 监听品类变化，自动切换报价类型
+watch(() => publishForm.categoryName, (newName) => {
+  if (newName && basisSupportedCategories.some(c => newName.includes(c))) {
+    // 如果是支持基差的品类，可以选择基差模式
+    // 默认仍为现货模式，用户可以切换
+  } else {
+    // 不支持基差的品类，强制现货模式
+    publishForm.priceType = 0
+    basisQuotes.value = []
+  }
+})
+
+// 监听报价类型变化
+watch(() => publishForm.priceType, (newType) => {
+  if (newType === 1 && basisQuotes.value.length === 0) {
+    // 切换到基差模式时，自动添加一行
+    addBasisQuote()
+  }
 })
 
 async function loadCompanyInfo() {
@@ -178,7 +300,13 @@ async function loadCompanyInfo() {
     if (r.code === 0 && r.data) {
       company.value = r.data
       publishForm.companyName = r.data.companyName || ''
-      const fullAddress = [r.data.province, r.data.city, r.data.district, r.data.address].filter(Boolean).join('')
+      
+      // 提取地址部分，处理可能的代码格式
+      const p = r.data.province && /^\d+$/.test(r.data.province) ? codeToText[r.data.province] : r.data.province
+      const c = r.data.city && /^\d+$/.test(r.data.city) ? codeToText[r.data.city] : r.data.city
+      const d = r.data.district && /^\d+$/.test(r.data.district) ? codeToText[r.data.district] : r.data.district
+      
+      const fullAddress = [p, c, d, r.data.address].filter(Boolean).join('')
       publishForm.shipAddress = fullAddress || ''
     }
   } catch { /* silent */ }
@@ -260,17 +388,42 @@ function buildParamsJson() {
 
 async function publishSupply() {
   if (!publishForm.categoryId) { ElMessage.warning('请选择品类'); return }
-  if (!publishForm.exFactoryPrice) { ElMessage.warning('请输入出厂价'); return }
+  
+  // 验证报价
+  if (publishForm.priceType === 1) {
+    const validQuotes = basisQuotes.value.filter(q => q.contractCode && q.basisPrice !== undefined && q.availableQty && q.availableQty > 0)
+    if (validQuotes.length === 0) {
+      ElMessage.warning('请至少添加一条有效的基差报价')
+      return
+    }
+  } else {
+    if (!publishForm.exFactoryPrice) { ElMessage.warning('请输入出厂价'); return }
+  }
   
   loading.value = true
   try {
     const paramsJson = buildParamsJson()
+    
+    // 构建基差报价明细
+    let basisQuotesData: BasisQuoteRequest[] | undefined
+    if (publishForm.priceType === 1) {
+      basisQuotesData = basisQuotes.value
+        .filter(q => q.contractCode && q.basisPrice !== undefined && q.availableQty && q.availableQty > 0)
+        .map(q => ({
+          contractCode: q.contractCode,
+          basisPrice: q.basisPrice!,
+          availableQty: q.availableQty!
+        }))
+    }
+    
     const req: SupplyCreateRequest = {
       categoryName: publishForm.categoryName,
       supplyNo: supplyNo.value || undefined,
       quantity: publishForm.quantity,
       packaging: publishForm.packaging || undefined,
-      exFactoryPrice: publishForm.exFactoryPrice!,
+      priceType: publishForm.priceType,
+      exFactoryPrice: publishForm.priceType === 0 ? publishForm.exFactoryPrice : 0,
+      basisQuotes: basisQuotesData,
       shipAddress: publishForm.shipAddress || undefined,
       deliveryMode: publishForm.deliveryMode || undefined,
       expireMinutes: publishForm.expireMinutes,
@@ -489,11 +642,155 @@ async function applyTemplate(template: SupplyTemplate) {
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">可供数量（吨）</label>
                 <el-input-number v-model="publishForm.quantity" :min="0" :step="1" :controls="false" class="w-full neo-input-number" />
               </div>
+              <div v-if="showBasisOption">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">报价方式</label>
+                <el-radio-group v-model="publishForm.priceType" class="w-full">
+                  <el-radio-button :value="0" class="flex-1">现货一口价</el-radio-button>
+                  <el-radio-button :value="1" class="flex-1">基差报价</el-radio-button>
+                </el-radio-group>
+              </div>
+              <div v-else>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  出厂价（元/吨）<span class="text-red-500">*</span>
+                </label>
+                <el-input-number v-model="publishForm.exFactoryPrice" :min="0" :step="10" :controls="false" class="w-full neo-input-number" />
+              </div>
+            </div>
+            
+            <!-- 现货一口价输入 -->
+            <div v-if="showBasisOption && publishForm.priceType === 0" class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                   出厂价（元/吨）<span class="text-red-500">*</span>
                 </label>
                 <el-input-number v-model="publishForm.exFactoryPrice" :min="0" :step="10" :controls="false" class="w-full neo-input-number" />
+              </div>
+            </div>
+            
+            <!-- 基差报价输入区域 -->
+            <div v-if="showBasisOption && publishForm.priceType === 1" class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <TrendingUp class="w-4 h-4 text-amber-500" />
+                  <span class="text-sm font-bold text-gray-700">基差报价明细</span>
+                </div>
+                <button
+                  type="button"
+                  class="flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-600 rounded-lg text-sm font-bold hover:bg-amber-100 transition-all"
+                  @click="addBasisQuote"
+                >
+                  <Plus class="w-4 h-4" />
+                  添加合约
+                </button>
+              </div>
+              
+              <div class="bg-amber-50/50 rounded-xl p-4 border border-amber-100">
+                <div v-if="basisQuotes.length === 0" class="text-center py-4 text-gray-500 text-sm">
+                  点击"添加合约"开始配置基差报价
+                </div>
+                <div v-else class="space-y-4">
+                  <div v-for="(quote, index) in basisQuotes" :key="index" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm transition-all hover:shadow-md">
+                    <div class="flex flex-col md:flex-row md:items-start gap-4">
+                      <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="space-y-1">
+                          <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">1. 选择期货合约</label>
+                          <el-select v-model="quote.contractCode" placeholder="选择活跃合约" class="w-full neo-select" filterable>
+                            <el-option
+                              v-for="c in getAvailableContracts(quote.contractCode)"
+                              :key="c.contractCode"
+                              :label="c.contractName"
+                              :value="c.contractCode"
+                            >
+                              <div class="flex items-center justify-between gap-4">
+                                <span>{{ c.contractName }}</span>
+                                <div class="flex items-center gap-2">
+                                  <span v-if="c.lastPrice" class="text-xs font-bold">¥{{ c.lastPrice }}</span>
+                                  <span v-if="c.isTrading" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                  <span v-else class="text-[8px] text-gray-400">已收盘</span>
+                                </div>
+                              </div>
+                            </el-option>
+                          </el-select>
+                        </div>
+                        <div class="space-y-1">
+                          <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">2. 设定基差 (元/吨)</label>
+                          <el-input-number 
+                            v-model="quote.basisPrice" 
+                            :step="5" 
+                            :controls="false" 
+                            placeholder="如 +80 或 -20" 
+                            class="w-full neo-input-number"
+                            :class="(quote.basisPrice || 0) >= 0 ? 'basis-plus' : 'basis-minus'"
+                          />
+                        </div>
+                        <div class="space-y-1">
+                          <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">3. 合约可售量 (吨)</label>
+                          <el-input-number v-model="quote.availableQty" :min="0" :step="100" :controls="false" placeholder="输入分配量" class="w-full neo-input-number" />
+                        </div>
+                        <div class="bg-emerald-50/50 rounded-xl p-3 border border-emerald-100 flex flex-col justify-center">
+                          <label class="block text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">核算远期价 (参考)</label>
+                          <div class="flex items-baseline gap-1">
+                            <template v-if="quote.contractCode && getContractByCode(quote.contractCode)?.lastPrice">
+                              <span class="text-2xl font-black text-emerald-600">
+                                ¥{{ calcReferencePrice(quote.contractCode, quote.basisPrice)?.toFixed(0) || '-' }}
+                              </span>
+                              <span class="text-xs font-bold text-emerald-500">/吨</span>
+                            </template>
+                            <span v-else class="text-sm font-bold text-gray-400 italic">等待选择合约</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <button
+                        type="button"
+                        class="self-end md:self-start p-2.5 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0 active:scale-95 shadow-sm"
+                        title="移除此合约"
+                        @click="removeBasisQuote(index)"
+                      >
+                        <X class="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    <!-- 行情实时面板 -->
+                    <div v-if="quote.contractCode && getContractByCode(quote.contractCode)" class="mt-4 pt-4 border-t border-dashed border-gray-100 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs">
+                      <div class="flex items-center gap-2">
+                        <div 
+                          class="w-1.5 h-1.5 rounded-full" 
+                          :class="getContractByCode(quote.contractCode)?.isTrading ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'"
+                        ></div>
+                        <span class="text-gray-500 font-medium">
+                          {{ getContractByCode(quote.contractCode)?.isTrading ? '期货实时报价' : '盘面参考价' }}:
+                        </span>
+                        <span class="font-black text-gray-900 text-sm italic">¥{{ getContractByCode(quote.contractCode)?.lastPrice || '-' }}</span>
+                        <span v-if="!getContractByCode(quote.contractCode)?.isTrading" class="text-[10px] text-gray-400 font-bold bg-gray-100 px-1.5 py-0.5 rounded ml-1">
+                          {{ getContractByCode(quote.contractCode)?.lastPrice === getContractByCode(quote.contractCode)?.prevClose ? '昨收' : '已收盘' }}
+                        </span>
+                      </div>
+                      
+                      <div v-if="quote.basisPrice !== undefined" class="flex items-center gap-2">
+                        <span class="text-gray-500 font-medium">当前基差:</span>
+                        <span class="font-black px-2 py-0.5 rounded" :class="(quote.basisPrice || 0) >= 0 ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'">
+                          {{ (quote.basisPrice || 0) >= 0 ? '+' : '' }}{{ quote.basisPrice }}
+                        </span>
+                      </div>
+                      
+                      <div v-if="getContractByCode(quote.contractCode)?.priceUpdateTime" class="ml-auto flex items-center gap-1 text-gray-400">
+                        <Clock class="w-3 h-3" />
+                        <span>数据更新: {{ new Date(getContractByCode(quote.contractCode)!.priceUpdateTime!).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4 space-y-2 bg-amber-50 p-4 rounded-2xl border border-amber-100/50">
+                  <div class="flex items-start gap-2 text-xs text-amber-700">
+                    <div class="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1 shrink-0"></div>
+                    <p class="font-medium">核心公式：核算远期价 = 期货盘面报价 + 您设定的基差（升水为正，贴水为负）。</p>
+                  </div>
+                  <div class="flex items-start gap-2 text-xs text-amber-600/80 italic">
+                    <div class="w-1.5 h-1.5 rounded-full bg-amber-400/50 mt-1 shrink-0"></div>
+                    <p>法律提示：基差报价随盘面实时变动，最终结算以成交时点盘面价+基差为准。如遇休盘，最新价将参考前一交易日收盘价。</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -645,11 +942,39 @@ async function applyTemplate(template: SupplyTemplate) {
                   <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">数量</div>
                   <div class="mt-1 font-bold text-gray-900">{{ previewData.quantity }} 吨</div>
                 </div>
-                <div class="bg-gray-50 rounded-xl p-3">
+                <div v-if="publishForm.priceType === 0" class="bg-gray-50 rounded-xl p-3">
                   <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">出厂价</div>
                   <div class="mt-1 font-bold text-emerald-600">
                     <span v-if="previewData.exFactoryPrice != null">¥{{ previewData.exFactoryPrice }}/吨</span>
                     <span v-else class="text-gray-500">面议</span>
+                  </div>
+                </div>
+                <div v-else class="bg-amber-50 rounded-xl p-3 border border-amber-100">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-amber-600">报价方式</div>
+                  <div class="mt-1 font-bold text-amber-700">基差报价</div>
+                </div>
+              </div>
+              <!-- 基差报价预览 -->
+              <div v-if="publishForm.priceType === 1 && basisQuotes.length > 0" class="bg-amber-50/50 rounded-xl p-3 border border-amber-100">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-2">
+                  <TrendingUp class="w-3 h-3" />
+                  基差明细
+                </div>
+                <div class="space-y-2">
+                  <div v-for="(quote, index) in basisQuotes.filter(q => q.contractCode)" :key="index" class="bg-white rounded-lg p-2 border border-amber-100">
+                    <div class="flex items-center justify-between text-sm">
+                      <span class="font-medium text-gray-700">{{ getContractByCode(quote.contractCode)?.contractName || quote.contractCode }}</span>
+                      <span class="font-bold" :class="(quote.basisPrice || 0) >= 0 ? 'text-red-600' : 'text-green-600'">
+                        {{ (quote.basisPrice || 0) >= 0 ? '+' : '' }}{{ quote.basisPrice }}
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-gray-500 mt-1">
+                      <span>
+                        期货 ¥{{ getContractByCode(quote.contractCode)?.lastPrice || '-' }} → 
+                        <span class="font-bold text-emerald-600">核算 ¥{{ calcReferencePrice(quote.contractCode, quote.basisPrice) || '-' }}</span>
+                      </span>
+                      <span>{{ quote.availableQty }}吨</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -785,5 +1110,61 @@ async function applyTemplate(template: SupplyTemplate) {
 :deep(.neo-input-number .el-input__wrapper:hover),
 :deep(.neo-select .el-select__wrapper:hover) {
   border-color: rgb(229 231 235);
+}
+
+/* 小尺寸输入控件 */
+:deep(.neo-input-number-sm .el-input__wrapper),
+:deep(.neo-select-sm .el-select__wrapper) {
+  border: 1px solid rgb(229 231 235);
+  border-radius: 8px;
+  box-shadow: none;
+  background-color: #fff;
+  transition: all 0.15s ease;
+  padding: 4px 8px;
+}
+:deep(.neo-input-number-sm .el-input__wrapper.is-focus),
+:deep(.neo-select-sm .el-select__wrapper.is-focus) {
+  border-color: rgb(245 158 11);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.15);
+}
+
+/* 基差颜色反馈 */
+:deep(.basis-plus .el-input__wrapper) {
+  border-color: rgba(239, 68, 68, 0.15);
+  background-color: rgba(239, 68, 68, 0.02);
+}
+:deep(.basis-plus .el-input__inner) {
+  color: rgb(220, 38, 38);
+  font-weight: 800;
+}
+:deep(.basis-minus .el-input__wrapper) {
+  border-color: rgba(16, 185, 129, 0.15);
+  background-color: rgba(16, 185, 129, 0.02);
+}
+:deep(.basis-minus .el-input__inner) {
+  color: rgb(5, 150, 105);
+  font-weight: 800;
+}
+
+/* 单选按钮组样式 */
+:deep(.el-radio-group) {
+  display: flex;
+  gap: 8px;
+}
+:deep(.el-radio-button__inner) {
+  border: 2px solid rgb(243 244 246) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  font-weight: 600;
+  padding: 8px 16px;
+}
+:deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
+  background-color: rgb(16 185 129) !important;
+  border-color: rgb(16 185 129) !important;
+  color: white !important;
+}
+:deep(.el-radio-button:first-child .el-radio-button__inner),
+:deep(.el-radio-button:last-child .el-radio-button__inner) {
+  border-radius: 10px !important;
 }
 </style>

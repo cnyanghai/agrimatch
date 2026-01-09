@@ -17,6 +17,8 @@ public class BusChatMessage {
     private String content;
     private String payloadJson;
     private String quoteStatus;
+    private java.math.BigDecimal basisPrice;
+    private String contractCode;
     private Integer isRead;
     private Integer isDeleted;
     private LocalDateTime createTime;
@@ -84,6 +86,22 @@ public class BusChatMessage {
 
     public void setQuoteStatus(String quoteStatus) {
         this.quoteStatus = quoteStatus;
+    }
+
+    public java.math.BigDecimal getBasisPrice() {
+        return basisPrice;
+    }
+
+    public void setBasisPrice(java.math.BigDecimal basisPrice) {
+        this.basisPrice = basisPrice;
+    }
+
+    public String getContractCode() {
+        return contractCode;
+    }
+
+    public void setContractCode(String contractCode) {
+        this.contractCode = contractCode;
     }
 
     public Integer getIsRead() {

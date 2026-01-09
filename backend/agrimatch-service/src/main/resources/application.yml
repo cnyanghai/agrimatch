@@ -32,7 +32,7 @@ mybatis:
 
 logging:
   level:
-    com.agrimatch: info
+    com.agrimatch: debug
 
 app:
   upload-dir: uploads

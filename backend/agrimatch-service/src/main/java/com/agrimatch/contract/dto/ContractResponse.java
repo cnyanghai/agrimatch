@@ -39,6 +39,8 @@ public class ContractResponse {
     private String unit;
     private BigDecimal unitPrice;
     private String paramsJson;
+    private BigDecimal basisPrice;
+    private String contractCode;
     private BigDecimal totalAmount;
     
     // 产品参数（解析后的结构化数据）
@@ -143,6 +145,12 @@ public class ContractResponse {
 
     public String getParamsJson() { return paramsJson; }
     public void setParamsJson(String paramsJson) { this.paramsJson = paramsJson; }
+
+    public BigDecimal getBasisPrice() { return basisPrice; }
+    public void setBasisPrice(BigDecimal basisPrice) { this.basisPrice = basisPrice; }
+
+    public String getContractCode() { return contractCode; }
+    public void setContractCode(String contractCode) { this.contractCode = contractCode; }
 
     public BigDecimal getTotalAmount() { return totalAmount; }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.supply.mapper.SupplyBasisMapper">
+
+    <resultMap id="BaseResultMap" type="com.agrimatch.supply.domain.BusSupplyBasis">
+        <id column="id" property="id"/>
+        <result column="supply_id" property="supplyId"/>
+        <result column="contract_code" property="contractCode"/>
+        <result column="basis_price" property="basisPrice"/>
+        <result column="available_qty" property="availableQty"/>
+        <result column="sold_qty" property="soldQty"/>
+        <result column="remark" property="remark"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <!-- 关联字段 -->
+        <result column="contract_name" property="contractName"/>
+        <result column="last_price" property="lastPrice"/>
+        <result column="reference_price" property="referencePrice"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        b.id, b.supply_id, b.contract_code, b.basis_price, b.available_qty, 
+        b.sold_qty, b.remark, b.is_deleted, b.create_time, b.update_time
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO bus_supply_basis (supply_id, contract_code, basis_price, available_qty, sold_qty, remark)
+        VALUES (#{supplyId}, #{contractCode}, #{basisPrice}, #{availableQty}, 0, #{remark})
+    </insert>
+
+    <insert id="batchInsert">
+        INSERT INTO bus_supply_basis (supply_id, contract_code, basis_price, available_qty, sold_qty, remark)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.supplyId}, #{item.contractCode}, #{item.basisPrice}, #{item.availableQty}, 0, #{item.remark})
+        </foreach>
+    </insert>
+
+    <select id="selectBySupplyId" resultMap="BaseResultMap">
+        SELECT 
+            <include refid="Base_Column_List"/>,
+            fc.contract_name,
+            fc.last_price,
+            (fc.last_price + b.basis_price) AS reference_price
+        FROM bus_supply_basis b
+        LEFT JOIN sys_futures_contract fc ON b.contract_code = fc.contract_code
+        WHERE b.supply_id = #{supplyId}
+          AND b.is_deleted = 0
+        ORDER BY fc.sort_order, b.contract_code
+    </select>
+
+    <select id="selectBySupplyIds" resultMap="BaseResultMap">
+        SELECT 
+            <include refid="Base_Column_List"/>,
+            fc.contract_name,
+            fc.last_price,
+            (fc.last_price + b.basis_price) AS reference_price
+        FROM bus_supply_basis b
+        LEFT JOIN sys_futures_contract fc ON b.contract_code = fc.contract_code
+        WHERE b.supply_id IN
+        <foreach collection="supplyIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+          AND b.is_deleted = 0
+        ORDER BY b.supply_id, fc.sort_order, b.contract_code
+    </select>
+
+    <update id="deleteBySupplyId">
+        UPDATE bus_supply_basis SET is_deleted = 1 WHERE supply_id = #{supplyId}
+    </update>
+
+    <update id="updateSoldQty">
+        UPDATE bus_supply_basis SET sold_qty = #{soldQty} WHERE id = #{id}
+    </update>
+
+</mapper>
+

@@ -2,6 +2,7 @@ package com.agrimatch.supply.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class SupplyResponse {
     private Long id;
@@ -14,7 +15,18 @@ public class SupplyResponse {
     private String supplyNo;
     private String origin;
     private BigDecimal quantity;
+
+    /**
+     * 报价类型：0=现货一口价，1=基差报价
+     */
+    private Integer priceType;
+
     private BigDecimal exFactoryPrice;
+
+    /**
+     * 基差报价明细（priceType=1 时有值）
+     */
+    private List<BasisQuoteResponse> basisQuotes;
     private String shipAddress;
     private String deliveryMode;
     private String packaging;
@@ -130,6 +142,22 @@ public class SupplyResponse {
 
     public void setExFactoryPrice(BigDecimal exFactoryPrice) {
         this.exFactoryPrice = exFactoryPrice;
+    }
+
+    public Integer getPriceType() {
+        return priceType;
+    }
+
+    public void setPriceType(Integer priceType) {
+        this.priceType = priceType;
+    }
+
+    public List<BasisQuoteResponse> getBasisQuotes() {
+        return basisQuotes;
+    }
+
+    public void setBasisQuotes(List<BasisQuoteResponse> basisQuotes) {
+        this.basisQuotes = basisQuotes;
     }
 
     public String getShipAddress() {

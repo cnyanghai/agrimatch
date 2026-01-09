@@ -23,7 +23,7 @@ public interface ChatService {
 
     void markConversationRead(Long userId, Long conversationId);
 
-    ChatMessageResponse sendToConversation(Long fromUserId, Long conversationId, String msgType, String content, String payloadJson);
+    ChatMessageResponse sendToConversation(Long fromUserId, Long conversationId, String msgType, String content, String payloadJson, java.math.BigDecimal basisPrice, String contractCode);
 
     ChatMessageResponse confirmOffer(Long userId, Long messageId);
 }

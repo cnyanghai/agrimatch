@@ -69,6 +69,8 @@ public class ChatServiceImpl implements ChatService {
             r.setContent(m.getContent());
             r.setPayloadJson(m.getPayloadJson());
             r.setQuoteStatus(m.getQuoteStatus());
+            r.setBasisPrice(m.getBasisPrice());
+            r.setContractCode(m.getContractCode());
             r.setRead(m.getIsRead() != null && m.getIsRead() == 1);
             r.setCreateTime(m.getCreateTime());
             out.add(r);
@@ -176,6 +178,8 @@ public class ChatServiceImpl implements ChatService {
             r.setContent(m.getContent());
             r.setPayloadJson(m.getPayloadJson());
             r.setQuoteStatus(m.getQuoteStatus());
+            r.setBasisPrice(m.getBasisPrice());
+            r.setContractCode(m.getContractCode());
             r.setRead(m.getIsRead() != null && m.getIsRead() == 1);
             r.setCreateTime(m.getCreateTime());
             out.add(r);
@@ -191,7 +195,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public ChatMessageResponse sendToConversation(Long fromUserId, Long conversationId, String msgType, String content, String payloadJson) {
+    public ChatMessageResponse sendToConversation(Long fromUserId, Long conversationId, String msgType, String content, String payloadJson, java.math.BigDecimal basisPrice, String contractCode) {
         ChatMapper.ConversationUserPair pair = requireConversationMember(fromUserId, conversationId);
         long toUserId = fromUserId.equals(pair.getAUserId()) ? pair.getBUserId() : pair.getAUserId();
 
@@ -217,6 +221,8 @@ public class ChatServiceImpl implements ChatService {
         m.setMsgType(mt);
         m.setContent(safeContent);
         m.setPayloadJson(StringUtils.hasText(payloadJson) ? payloadJson : null);
+        m.setBasisPrice(basisPrice);
+        m.setContractCode(contractCode);
         if ("QUOTE".equals(mt)) {
             m.setQuoteStatus("OFFERED");
         }
@@ -241,6 +247,8 @@ public class ChatServiceImpl implements ChatService {
         r.setMsgType(mt);
         r.setContent(safeContent);
         r.setPayloadJson(m.getPayloadJson());
+        r.setBasisPrice(m.getBasisPrice());
+        r.setContractCode(m.getContractCode());
         r.setQuoteStatus(m.getQuoteStatus());
         r.setRead(false);
         r.setCreateTime(LocalDateTime.now());
@@ -267,7 +275,7 @@ public class ChatServiceImpl implements ChatService {
         chatMapper.expireOldQuotes(m.getConversationId(), messageId);
 
         // 插入系统消息通知
-        sendToConversation(m.getFromUserId(), m.getConversationId(), "SYSTEM", "对方已确认您的报价，交易达成！", null);
+        sendToConversation(m.getFromUserId(), m.getConversationId(), "SYSTEM", "对方已确认您的报价，交易达成！", null, null, null);
 
         // 返回更新后的消息
         BusChatMessage updated = chatMapper.selectMessageById(messageId);
@@ -280,6 +288,8 @@ public class ChatServiceImpl implements ChatService {
         r.setContent(updated.getContent());
         r.setPayloadJson(updated.getPayloadJson());
         r.setQuoteStatus(updated.getQuoteStatus());
+        r.setBasisPrice(updated.getBasisPrice());
+        r.setContractCode(updated.getContractCode());
         r.setRead(updated.getIsRead() != null && updated.getIsRead() == 1);
         r.setCreateTime(updated.getCreateTime());
 

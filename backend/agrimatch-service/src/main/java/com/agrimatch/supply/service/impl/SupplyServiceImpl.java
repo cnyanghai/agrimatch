@@ -6,10 +6,9 @@ import com.agrimatch.company.domain.BusCompany;
 import com.agrimatch.company.mapper.CompanyMapper;
 import com.agrimatch.deal.mapper.DealMapper;
 import com.agrimatch.supply.domain.BusSupply;
-import com.agrimatch.supply.dto.SupplyCreateRequest;
-import com.agrimatch.supply.dto.SupplyQuery;
-import com.agrimatch.supply.dto.SupplyResponse;
-import com.agrimatch.supply.dto.SupplyUpdateRequest;
+import com.agrimatch.supply.domain.BusSupplyBasis;
+import com.agrimatch.supply.dto.*;
+import com.agrimatch.supply.mapper.SupplyBasisMapper;
 import com.agrimatch.supply.mapper.SupplyMapper;
 import com.agrimatch.supply.service.SupplyService;
 import com.agrimatch.user.domain.SysUser;
@@ -18,18 +17,19 @@ import com.agrimatch.util.GeoUtil;
 import com.agrimatch.util.NoUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SupplyServiceImpl implements SupplyService {
     private final SupplyMapper supplyMapper;
+    private final SupplyBasisMapper supplyBasisMapper;
     private final UserMapper userMapper;
     private final CompanyMapper companyMapper;
     private final DealMapper dealMapper;
@@ -37,19 +37,36 @@ public class SupplyServiceImpl implements SupplyService {
     @Value("${agrimatch.freight.rate-per-ton-km:0.8}")
     private BigDecimal freightRatePerTonKm;
 
-    public SupplyServiceImpl(SupplyMapper supplyMapper, UserMapper userMapper, CompanyMapper companyMapper, DealMapper dealMapper) {
+    public SupplyServiceImpl(SupplyMapper supplyMapper, SupplyBasisMapper supplyBasisMapper, 
+                             UserMapper userMapper, CompanyMapper companyMapper, DealMapper dealMapper) {
         this.supplyMapper = supplyMapper;
+        this.supplyBasisMapper = supplyBasisMapper;
         this.userMapper = userMapper;
         this.companyMapper = companyMapper;
         this.dealMapper = dealMapper;
     }
 
     @Override
+    @Transactional
     public Long create(Long userId, SupplyCreateRequest req) {
         if (userId == null) throw new ApiException(401, "未登录");
         SysUser u = userMapper.selectById(userId);
         if (u == null) throw new ApiException(401, "未登录");
         if (u.getCompanyId() == null) throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "请先完善公司档案（绑定公司）");
+
+        // 验证报价类型
+        Integer priceType = req.getPriceType() != null ? req.getPriceType() : 0;
+        if (priceType == 1) {
+            // 基差报价模式，必须有基差明细
+            if (req.getBasisQuotes() == null || req.getBasisQuotes().isEmpty()) {
+                throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "基差报价模式需提供至少一个合约报价");
+            }
+        } else {
+            // 现货模式，必须有出厂价
+            if (req.getExFactoryPrice() == null) {
+                throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "现货报价模式需提供出厂价");
+            }
+        }
 
         BusSupply s = new BusSupply();
         s.setCompanyId(u.getCompanyId());
@@ -58,7 +75,9 @@ public class SupplyServiceImpl implements SupplyService {
         s.setSupplyNo(StringUtils.hasText(req.getSupplyNo()) ? req.getSupplyNo().trim() : NoUtil.gen("GY"));
         s.setOrigin(StringUtils.hasText(req.getOrigin()) ? req.getOrigin().trim() : null);
         s.setQuantity(req.getQuantity());
-        s.setExFactoryPrice(req.getExFactoryPrice());
+        s.setPriceType(priceType);
+        // 基差模式下 exFactoryPrice 可为空或设为0
+        s.setExFactoryPrice(req.getExFactoryPrice() != null ? req.getExFactoryPrice() : BigDecimal.ZERO);
         // 地址：默认公司地址，可被用户覆盖
         String addr = emptyToNull(req.getShipAddress());
         if (addr == null) {
@@ -84,6 +103,22 @@ public class SupplyServiceImpl implements SupplyService {
         if (rows != 1 || s.getId() == null) {
             throw new ApiException(ResultCode.SERVER_ERROR);
         }
+
+        // 如果是基差报价模式，保存基差明细
+        if (priceType == 1 && req.getBasisQuotes() != null && !req.getBasisQuotes().isEmpty()) {
+            List<BusSupplyBasis> basisList = new ArrayList<>();
+            for (BasisQuoteRequest bq : req.getBasisQuotes()) {
+                BusSupplyBasis basis = new BusSupplyBasis();
+                basis.setSupplyId(s.getId());
+                basis.setContractCode(bq.getContractCode());
+                basis.setBasisPrice(bq.getBasisPrice());
+                basis.setAvailableQty(bq.getAvailableQty());
+                basis.setRemark(bq.getRemark());
+                basisList.add(basis);
+            }
+            supplyBasisMapper.batchInsert(basisList);
+        }
+
         return s.getId();
     }
 
@@ -93,7 +128,17 @@ public class SupplyServiceImpl implements SupplyService {
         if (s == null) {
             throw new ApiException(ResultCode.NOT_FOUND);
         }
-        return toResponse(s);
+        SupplyResponse r = toResponse(s);
+        
+        // 如果是基差报价，填充基差明细
+        if (s.getPriceType() != null && s.getPriceType() == 1) {
+            List<BusSupplyBasis> basisList = supplyBasisMapper.selectBySupplyId(id);
+            r.setBasisQuotes(basisList.stream()
+                    .map(SupplyServiceImpl::toBasisQuoteResponse)
+                    .collect(Collectors.toList()));
+        }
+        
+        return r;
     }
 
     @Override
@@ -113,9 +158,30 @@ public class SupplyServiceImpl implements SupplyService {
             }
         }
 
+        // 收集基差报价类型的供应ID
+        List<Long> basisSupplyIds = list.stream()
+                .filter(s -> s.getPriceType() != null && s.getPriceType() == 1)
+                .map(BusSupply::getId)
+                .collect(Collectors.toList());
+
+        // 批量查询基差明细
+        Map<Long, List<BasisQuoteResponse>> basisMap = new HashMap<>();
+        if (!basisSupplyIds.isEmpty()) {
+            List<BusSupplyBasis> allBasis = supplyBasisMapper.selectBySupplyIds(basisSupplyIds);
+            for (BusSupplyBasis basis : allBasis) {
+                basisMap.computeIfAbsent(basis.getSupplyId(), k -> new ArrayList<>())
+                        .add(toBasisQuoteResponse(basis));
+            }
+        }
+
         List<SupplyResponse> out = new ArrayList<>();
         for (BusSupply s : list) {
             SupplyResponse r = toResponse(s);
+
+            // 填充基差明细
+            if (s.getPriceType() != null && s.getPriceType() == 1) {
+                r.setBasisQuotes(basisMap.getOrDefault(s.getId(), new ArrayList<>()));
+            }
 
             // remaining quantity（用于管理端/成交态展示）
             if (s.getQuantity() != null) {
@@ -213,6 +279,7 @@ public class SupplyServiceImpl implements SupplyService {
         o.setSupplyNo(s.getSupplyNo());
         o.setOrigin(s.getOrigin());
         o.setQuantity(s.getQuantity());
+        o.setPriceType(s.getPriceType() != null ? s.getPriceType() : 0);
         o.setExFactoryPrice(s.getExFactoryPrice());
         o.setShipAddress(s.getShipAddress());
         o.setDeliveryMode(s.getDeliveryMode());
@@ -227,6 +294,29 @@ public class SupplyServiceImpl implements SupplyService {
         o.setCreateTime(s.getCreateTime());
         o.setUpdateTime(s.getUpdateTime());
         return o;
+    }
+
+    /**
+     * 将基差明细转换为响应DTO
+     */
+    private static BasisQuoteResponse toBasisQuoteResponse(BusSupplyBasis basis) {
+        BasisQuoteResponse r = new BasisQuoteResponse();
+        r.setId(basis.getId());
+        r.setContractCode(basis.getContractCode());
+        r.setContractName(basis.getContractName());
+        r.setBasisPrice(basis.getBasisPrice());
+        r.setAvailableQty(basis.getAvailableQty());
+        r.setSoldQty(basis.getSoldQty() != null ? basis.getSoldQty() : BigDecimal.ZERO);
+        // 计算剩余量
+        BigDecimal remaining = basis.getAvailableQty();
+        if (basis.getSoldQty() != null) {
+            remaining = remaining.subtract(basis.getSoldQty());
+        }
+        r.setRemainingQty(remaining);
+        r.setLastPrice(basis.getLastPrice());
+        r.setReferencePrice(basis.getReferencePrice());
+        r.setRemark(basis.getRemark());
+        return r;
     }
 
     private static Integer normalizeExpireMinutes(Integer minutes) {

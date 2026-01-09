@@ -26,6 +26,8 @@
         <result column="delivery_mode" property="deliveryMode"/>
         <result column="terms_json" property="termsJson"/>
         <result column="params_json" property="paramsJson"/>
+        <result column="basis_price" property="basisPrice"/>
+        <result column="contract_code" property="contractCode"/>
         <result column="status" property="status"/>
         <result column="buyer_sign_time" property="buyerSignTime"/>
         <result column="seller_sign_time" property="sellerSignTime"/>
@@ -46,13 +48,13 @@
          buyer_company_id, seller_company_id, product_name, category_name,
          quantity, unit, unit_price, total_amount,
          delivery_address, delivery_date, payment_method, delivery_mode,
-         terms_json, params_json, status, is_deleted, create_time, update_time)
+         terms_json, params_json, basis_price, contract_code, status, is_deleted, create_time, update_time)
         VALUES
         (#{contractNo}, #{dealId}, #{negotiationId}, #{quoteId}, #{quoteMessageId}, #{conversationId},
          #{buyerCompanyId}, #{sellerCompanyId}, #{productName}, #{categoryName},
          #{quantity}, #{unit}, #{unitPrice}, #{totalAmount},
          #{deliveryAddress}, #{deliveryDate}, #{paymentMethod}, #{deliveryMode},
-         #{termsJson}, #{paramsJson}, #{status}, 0, NOW(3), NOW(3))
+         #{termsJson}, #{paramsJson}, #{basisPrice}, #{contractCode}, #{status}, 0, NOW(3), NOW(3))
     </insert>
 
     <select id="selectById" resultMap="BusContractMap">
@@ -156,6 +158,8 @@
             <if test="deliveryMode != null">delivery_mode = #{deliveryMode},</if>
             <if test="termsJson != null">terms_json = #{termsJson},</if>
             <if test="paramsJson != null">params_json = #{paramsJson},</if>
+            <if test="basisPrice != null">basis_price = #{basisPrice},</if>
+            <if test="contractCode != null">contract_code = #{contractCode},</if>
             <if test="status != null">status = #{status},</if>
             <if test="buyerSignTime != null">buyer_sign_time = #{buyerSignTime},</if>
             <if test="sellerSignTime != null">seller_sign_time = #{sellerSignTime},</if>
