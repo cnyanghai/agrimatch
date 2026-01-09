@@ -6,6 +6,7 @@ export interface CompanyCreateRequest {
   companyName: string
   companyType?: CompanyType
   licenseNo?: string
+  licenseImgUrl?: string
   contacts?: string
   phone?: string
   wechat?: string

@@ -34,6 +34,7 @@ public class CompanyServiceImpl implements CompanyService {
         c.setCompanyName(req.getCompanyName());
         c.setCompanyType(emptyToNull(req.getCompanyType()));
         c.setLicenseNo(req.getLicenseNo());
+        c.setLicenseImgUrl(req.getLicenseImgUrl());
         c.setContacts(req.getContacts());
         c.setPhone(req.getPhone());
         c.setWechat(req.getWechat());

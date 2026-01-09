@@ -22,6 +22,7 @@ public class BusContractMilestone {
     private Long confirmUserId;
     private LocalDateTime confirmTime;
     private Integer sortOrder;
+    private String vehicleInfoJson;   // 车辆信息JSON
     private Integer isDeleted;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
@@ -71,6 +72,9 @@ public class BusContractMilestone {
 
     public Integer getSortOrder() { return sortOrder; }
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
+
+    public String getVehicleInfoJson() { return vehicleInfoJson; }
+    public void setVehicleInfoJson(String vehicleInfoJson) { this.vehicleInfoJson = vehicleInfoJson; }
 
     public Integer getIsDeleted() { return isDeleted; }
     public void setIsDeleted(Integer isDeleted) { this.isDeleted = isDeleted; }

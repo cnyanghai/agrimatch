@@ -11,6 +11,7 @@ public class MilestoneCreateRequest {
     private String description;      // 节点描述
     private LocalDate expectedDate;  // 预期完成日期
     private Integer sortOrder;       // 排序序号
+    private String vehicleInfoJson;  // 车辆信息JSON (发货节点): {driverName, driverIdCard, plateNumber, driverPhone}
 
     public String getMilestoneType() { return milestoneType; }
     public void setMilestoneType(String milestoneType) { this.milestoneType = milestoneType; }
@@ -26,5 +27,8 @@ public class MilestoneCreateRequest {
 
     public Integer getSortOrder() { return sortOrder; }
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
+
+    public String getVehicleInfoJson() { return vehicleInfoJson; }
+    public void setVehicleInfoJson(String vehicleInfoJson) { this.vehicleInfoJson = vehicleInfoJson; }
 }
 

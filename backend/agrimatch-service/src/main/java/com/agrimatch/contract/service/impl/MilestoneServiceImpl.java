@@ -69,6 +69,7 @@ public class MilestoneServiceImpl implements MilestoneService {
         milestone.setDescription(req.getDescription());
         milestone.setExpectedDate(req.getExpectedDate());
         milestone.setSortOrder(req.getSortOrder() != null ? req.getSortOrder() : 0);
+        milestone.setVehicleInfoJson(req.getVehicleInfoJson());
         milestone.setStatus("pending");
         
         milestoneMapper.insert(milestone);
@@ -253,6 +254,7 @@ public class MilestoneServiceImpl implements MilestoneService {
         r.setConfirmUserId(m.getConfirmUserId());
         r.setConfirmTime(m.getConfirmTime());
         r.setSortOrder(m.getSortOrder());
+        r.setVehicleInfoJson(m.getVehicleInfoJson());
         r.setCreateTime(m.getCreateTime());
         
         // 获取用户名称

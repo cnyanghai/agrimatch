@@ -24,6 +24,7 @@ public class MilestoneResponse {
     private String confirmUserName;
     private LocalDateTime confirmTime;
     private Integer sortOrder;
+    private String vehicleInfoJson;
     private LocalDateTime createTime;
 
     public Long getId() { return id; }
@@ -76,6 +77,9 @@ public class MilestoneResponse {
 
     public Integer getSortOrder() { return sortOrder; }
     public void setSortOrder(Integer sortOrder) { this.sortOrder = sortOrder; }
+
+    public String getVehicleInfoJson() { return vehicleInfoJson; }
+    public void setVehicleInfoJson(String vehicleInfoJson) { this.vehicleInfoJson = vehicleInfoJson; }
 
     public LocalDateTime getCreateTime() { return createTime; }
     public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }

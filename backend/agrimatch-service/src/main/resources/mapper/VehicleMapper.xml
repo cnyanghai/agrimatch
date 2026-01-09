@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.vehicle.mapper.VehicleMapper">
+
+    <resultMap id="VehicleMap" type="com.agrimatch.vehicle.domain.BusVehicle">
+        <id column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="driver_name" property="driverName"/>
+        <result column="driver_id_card" property="driverIdCard"/>
+        <result column="plate_number" property="plateNumber"/>
+        <result column="driver_phone" property="driverPhone"/>
+        <result column="vehicle_type" property="vehicleType"/>
+        <result column="is_default" property="isDefault"/>
+        <result column="remark" property="remark"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.agrimatch.vehicle.domain.BusVehicle"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_vehicle
+        (company_id, driver_name, driver_id_card, plate_number, driver_phone, 
+         vehicle_type, is_default, remark, is_deleted, create_time, update_time)
+        VALUES
+        (#{companyId}, #{driverName}, #{driverIdCard}, #{plateNumber}, #{driverPhone},
+         #{vehicleType}, #{isDefault}, #{remark}, 0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="selectById" resultMap="VehicleMap">
+        SELECT * FROM bus_vehicle
+        WHERE id = #{id} AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectByCompanyId" resultMap="VehicleMap">
+        SELECT * FROM bus_vehicle
+        WHERE company_id = #{companyId} AND is_deleted = 0
+        ORDER BY is_default DESC, create_time DESC
+    </select>
+
+    <update id="update" parameterType="com.agrimatch.vehicle.domain.BusVehicle">
+        UPDATE bus_vehicle
+        SET driver_name = #{driverName},
+            driver_id_card = #{driverIdCard},
+            plate_number = #{plateNumber},
+            driver_phone = #{driverPhone},
+            vehicle_type = #{vehicleType},
+            remark = #{remark},
+            update_time = NOW(3)
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="logicalDelete">
+        UPDATE bus_vehicle
+        SET is_deleted = 1, update_time = NOW(3)
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="clearDefault">
+        UPDATE bus_vehicle
+        SET is_default = 0, update_time = NOW(3)
+        WHERE company_id = #{companyId} AND is_deleted = 0
+    </update>
+
+    <update id="setDefault">
+        UPDATE bus_vehicle
+        SET is_default = 1, update_time = NOW(3)
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+</mapper>
+

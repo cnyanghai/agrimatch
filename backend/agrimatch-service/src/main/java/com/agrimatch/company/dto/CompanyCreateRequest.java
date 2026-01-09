@@ -16,6 +16,9 @@ public class CompanyCreateRequest {
     @Size(max = 64)
     private String licenseNo;
 
+    @Size(max = 500)
+    private String licenseImgUrl;
+
     @Size(max = 50)
     private String contacts;
 
@@ -65,6 +68,14 @@ public class CompanyCreateRequest {
 
     public void setLicenseNo(String licenseNo) {
         this.licenseNo = licenseNo;
+    }
+
+    public String getLicenseImgUrl() {
+        return licenseImgUrl;
+    }
+
+    public void setLicenseImgUrl(String licenseImgUrl) {
+        this.licenseImgUrl = licenseImgUrl;
     }
 
     public String getContacts() {

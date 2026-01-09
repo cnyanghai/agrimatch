@@ -20,6 +20,7 @@
         <result column="confirm_user_id" property="confirmUserId"/>
         <result column="confirm_time" property="confirmTime"/>
         <result column="sort_order" property="sortOrder"/>
+        <result column="vehicle_info_json" property="vehicleInfoJson"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
@@ -28,9 +29,9 @@
     <insert id="insert" parameterType="com.agrimatch.contract.domain.BusContractMilestone"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO bus_contract_milestone
-        (contract_id, milestone_type, milestone_name, description, expected_date, sort_order, status, is_deleted, create_time, update_time)
+        (contract_id, milestone_type, milestone_name, description, expected_date, sort_order, vehicle_info_json, status, is_deleted, create_time, update_time)
         VALUES
-        (#{contractId}, #{milestoneType}, #{milestoneName}, #{description}, #{expectedDate}, #{sortOrder}, 'pending', 0, NOW(3), NOW(3))
+        (#{contractId}, #{milestoneType}, #{milestoneName}, #{description}, #{expectedDate}, #{sortOrder}, #{vehicleInfoJson}, 'pending', 0, NOW(3), NOW(3))
     </insert>
 
     <select id="selectById" resultMap="MilestoneMap">

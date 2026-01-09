@@ -217,6 +217,7 @@ export interface MilestoneResponse {
   confirmUserName?: string
   confirmTime?: string
   sortOrder: number
+  vehicleInfoJson?: string
   createTime: string
 }
 
@@ -226,6 +227,7 @@ export interface MilestoneCreateRequest {
   description?: string
   expectedDate?: string
   sortOrder?: number
+  vehicleInfoJson?: string
 }
 
 export interface MilestoneSubmitRequest {

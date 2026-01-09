@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { useAuthStore } from '../store/auth'
 import { updateMe, type UserUpdateRequest } from '../api/user'
 import { getMyCompany, createCompany, updateCompany, type CompanyResponse, type CompanyCreateRequest } from '../api/company'
-import { User, Building2, Lock, Check, Upload, ShoppingCart, Package, AlertTriangle, RefreshCw } from 'lucide-vue-next'
+import { User, Building2, Lock, Check, Upload, ShoppingCart, Package, AlertTriangle, RefreshCw, Truck, ChevronRight, FileText, X, ZoomIn } from 'lucide-vue-next'
 import { BaseButton } from '../components/ui'
+import { regionData } from 'element-china-area-data'
+import { uploadImage } from '../api/file'
 
 const auth = useAuthStore()
 const loading = ref(false)
@@ -33,6 +35,7 @@ const userForm = reactive({
 const companyForm = reactive({
   companyName: '',
   licenseNo: '',
+  licenseImgUrl: '',
   contacts: '',
   phone: '',
   province: '',
@@ -50,7 +53,58 @@ const passwordForm = reactive({
 
 // 快照
 const userSnapshot = ref({ displayName: '', phonenumber: '', position: '', birthDate: '', gender: 1, bio: '' })
-const companySnapshot = ref({ companyName: '', licenseNo: '', contacts: '', phone: '', province: '', city: '', district: '', address: '' })
+const companySnapshot = ref({ companyName: '', licenseNo: '', licenseImgUrl: '', contacts: '', phone: '', province: '', city: '', district: '', address: '' })
+
+// 省市区级联选择值
+const regionValue = ref<string[]>([])
+
+// 监听省市区选择变化，同步到 companyForm
+watch(regionValue, (val) => {
+  companyForm.province = val[0] || ''
+  companyForm.city = val[1] || ''
+  companyForm.district = val[2] || ''
+})
+
+// 营业执照上传
+const licenseUploading = ref(false)
+const licensePreview = ref(false)
+
+async function handleLicenseUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  
+  // 校验文件类型
+  if (!file.type.startsWith('image/')) {
+    ElMessage.warning('请上传图片格式文件')
+    return
+  }
+  // 校验文件大小（最大 10MB）
+  if (file.size > 10 * 1024 * 1024) {
+    ElMessage.warning('图片大小不能超过 10MB')
+    return
+  }
+  
+  licenseUploading.value = true
+  try {
+    const res = await uploadImage(file)
+    if (res.code === 0 && res.data?.fileUrl) {
+      companyForm.licenseImgUrl = res.data.fileUrl
+      ElMessage.success('营业执照上传成功')
+    } else {
+      ElMessage.error(res.message || '上传失败')
+    }
+  } catch (e: any) {
+    ElMessage.error(e.message || '上传失败')
+  } finally {
+    licenseUploading.value = false
+    input.value = '' // 清空以便重复上传同一文件
+  }
+}
+
+function removeLicenseImage() {
+  companyForm.licenseImgUrl = ''
+}
 
 onMounted(async () => {
   await loadUserData()
@@ -81,12 +135,17 @@ async function loadCompanyData() {
       company.value = res.data
       companyForm.companyName = res.data.companyName || ''
       companyForm.licenseNo = res.data.licenseNo || ''
+      companyForm.licenseImgUrl = res.data.licenseImgUrl || ''
       companyForm.contacts = res.data.contacts || ''
       companyForm.phone = res.data.phone || ''
       companyForm.province = res.data.province || ''
       companyForm.city = res.data.city || ''
       companyForm.district = res.data.district || ''
       companyForm.address = res.data.address || ''
+      // 初始化省市区级联选择值
+      if (res.data.province) {
+        regionValue.value = [res.data.province, res.data.city || '', res.data.district || ''].filter(Boolean)
+      }
     }
     companySnapshot.value = { ...companyForm }
   } catch (e) {
@@ -470,31 +529,15 @@ const tabs = [
               class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
             />
           </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">省份</label>
-            <input
-              v-model="companyForm.province"
-              type="text"
-              placeholder="如：山东省"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">城市</label>
-            <input
-              v-model="companyForm.city"
-              type="text"
-              placeholder="如：济南市"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">区/县</label>
-            <input
-              v-model="companyForm.district"
-              type="text"
-              placeholder="如：历下区"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+          <div class="md:col-span-2">
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">所在地区</label>
+            <el-cascader
+              v-model="regionValue"
+              :options="regionData"
+              :props="{ expandTrigger: 'hover' }"
+              placeholder="请选择省/市/区"
+              class="w-full neo-cascader"
+              clearable
             />
           </div>
         </div>
@@ -507,6 +550,70 @@ const tabs = [
             placeholder="请输入详细地址（街道、门牌号等）"
             class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
           />
+        </div>
+
+        <!-- 营业执照上传 -->
+        <div class="max-w-3xl">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">营业执照</label>
+          <div class="flex items-start gap-4">
+            <!-- 上传区域 -->
+            <div v-if="!companyForm.licenseImgUrl" class="relative">
+              <label 
+                class="flex flex-col items-center justify-center w-40 h-32 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/50 transition-all"
+                :class="{ 'opacity-50 pointer-events-none': licenseUploading }"
+              >
+                <FileText v-if="!licenseUploading" class="w-8 h-8 text-gray-300 mb-2" />
+                <div v-else class="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-2" />
+                <span class="text-xs text-gray-400 font-bold">{{ licenseUploading ? '上传中...' : '点击上传' }}</span>
+                <span class="text-[10px] text-gray-300 mt-1">支持 JPG/PNG</span>
+                <input 
+                  type="file" 
+                  class="hidden" 
+                  accept="image/*"
+                  @change="handleLicenseUpload"
+                />
+              </label>
+            </div>
+            
+            <!-- 已上传预览 -->
+            <div v-else class="relative group">
+              <img 
+                :src="companyForm.licenseImgUrl" 
+                alt="营业执照" 
+                class="w-40 h-32 object-cover rounded-xl border-2 border-gray-100"
+              />
+              <!-- 操作遮罩 -->
+              <div class="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <button 
+                  type="button"
+                  class="w-8 h-8 bg-white/90 rounded-lg flex items-center justify-center hover:bg-white transition-colors"
+                  @click="licensePreview = true"
+                  title="预览"
+                >
+                  <ZoomIn class="w-4 h-4 text-gray-700" />
+                </button>
+                <button 
+                  type="button"
+                  class="w-8 h-8 bg-white/90 rounded-lg flex items-center justify-center hover:bg-white transition-colors"
+                  @click="removeLicenseImage"
+                  title="删除"
+                >
+                  <X class="w-4 h-4 text-red-500" />
+                </button>
+              </div>
+              <!-- 上传成功标记 -->
+              <div class="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+                <Check class="w-3 h-3 text-white" />
+              </div>
+            </div>
+            
+            <!-- 说明文字 -->
+            <div class="flex-1 text-xs text-gray-400 space-y-1 pt-2">
+              <p>• 请上传清晰的营业执照原件照片</p>
+              <p>• 图片大小不超过 10MB</p>
+              <p>• 上传后仅供平台审核使用</p>
+            </div>
+          </div>
         </div>
 
         <!-- 状态提示 -->
@@ -533,6 +640,24 @@ const tabs = [
               {{ company?.id ? '您的公司信息已保存，可以正常使用平台功能' : '请完善公司信息，以便更好地使用平台功能' }}
             </div>
           </div>
+        </div>
+
+        <!-- 快捷管理 -->
+        <div class="pt-6 border-t border-gray-100">
+          <h4 class="font-bold text-gray-900 mb-4">快捷管理</h4>
+          <router-link 
+            to="/vehicles"
+            class="flex items-center gap-4 p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all group"
+          >
+            <div class="w-12 h-12 rounded-xl bg-blue-500 text-white flex items-center justify-center">
+              <Truck class="w-6 h-6" />
+            </div>
+            <div class="flex-1">
+              <div class="font-bold text-gray-900">常用车辆管理</div>
+              <div class="text-sm text-gray-500">管理公司提货车辆信息，方便快速选择</div>
+            </div>
+            <ChevronRight class="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+          </router-link>
         </div>
 
         <!-- 保存按钮 -->
@@ -588,6 +713,24 @@ const tabs = [
         </div>
       </div>
     </div>
+
+    <!-- 营业执照预览弹窗 -->
+    <el-dialog
+      v-model="licensePreview"
+      title="营业执照预览"
+      width="600px"
+      align-center
+      class="!rounded-[24px]"
+    >
+      <div class="flex items-center justify-center">
+        <img 
+          v-if="companyForm.licenseImgUrl"
+          :src="companyForm.licenseImgUrl" 
+          alt="营业执照" 
+          class="max-w-full max-h-[70vh] object-contain rounded-xl"
+        />
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -602,5 +745,21 @@ const tabs = [
 :deep(.neo-picker .el-input__wrapper.is-focus) {
   border-color: rgb(16 185 129);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+}
+
+/* 级联选择器样式 */
+:deep(.neo-cascader .el-input__wrapper) {
+  border: 2px solid rgb(243 244 246);
+  border-radius: 12px;
+  box-shadow: none;
+  transition: all 0.15s ease;
+  padding: 6px 12px;
+}
+:deep(.neo-cascader .el-input__wrapper.is-focus) {
+  border-color: rgb(16 185 129);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+}
+:deep(.neo-cascader .el-input__wrapper:hover) {
+  border-color: rgb(209 213 219);
 }
 </style>

@@ -4,6 +4,8 @@ import { ElMessage } from 'element-plus'
 import { Truck, Package, CreditCard, ClipboardCheck, Settings, Plus } from 'lucide-vue-next'
 import { createMilestone, type MilestoneCreateRequest } from '../../api/contract'
 import { BaseModal, BaseButton } from '../ui'
+import VehiclePicker from '../VehiclePicker.vue'
+import type { VehicleInfo } from '../../api/vehicle'
 
 const props = defineProps<{
   modelValue: boolean
@@ -30,6 +32,17 @@ const form = ref<MilestoneCreateRequest>({
   expectedDate: '',
   sortOrder: 0
 })
+
+// 车辆信息（发货节点用）
+const vehicleInfo = ref<VehicleInfo>({
+  driverName: '',
+  driverIdCard: '',
+  plateNumber: '',
+  driverPhone: ''
+})
+
+// 是否显示车辆信息
+const showVehicle = computed(() => form.value.milestoneType === 'SHIP')
 
 // 节点类型选项
 const typeOptions = [
@@ -58,6 +71,12 @@ function resetForm() {
     expectedDate: '',
     sortOrder: 0
   }
+  vehicleInfo.value = {
+    driverName: '',
+    driverIdCard: '',
+    plateNumber: '',
+    driverPhone: ''
+  }
 }
 
 // 关闭弹窗
@@ -72,15 +91,38 @@ async function handleSubmit() {
     ElMessage.warning('请输入节点名称')
     return
   }
+
+  // 发货节点需要验证车辆信息
+  if (showVehicle.value) {
+    if (!vehicleInfo.value.driverName?.trim()) {
+      ElMessage.warning('请输入司机姓名')
+      return
+    }
+    if (!vehicleInfo.value.plateNumber?.trim()) {
+      ElMessage.warning('请输入车牌号')
+      return
+    }
+    if (!vehicleInfo.value.driverPhone?.trim()) {
+      ElMessage.warning('请输入联系电话')
+      return
+    }
+  }
   
   loading.value = true
   try {
+    // 构建车辆信息 JSON
+    let vehicleInfoJson: string | undefined
+    if (showVehicle.value && vehicleInfo.value.driverName) {
+      vehicleInfoJson = JSON.stringify(vehicleInfo.value)
+    }
+
     const res = await createMilestone(props.contractId, {
       milestoneType: form.value.milestoneType,
       milestoneName: form.value.milestoneName.trim(),
       description: form.value.description?.trim() || undefined,
       expectedDate: form.value.expectedDate || undefined,
-      sortOrder: form.value.sortOrder || 0
+      sortOrder: form.value.sortOrder || 0,
+      vehicleInfoJson
     })
     
     if (res.code === 0) {
@@ -186,6 +228,12 @@ watch(visible, (val) => {
           class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
         />
       </div>
+
+      <!-- 车辆信息（发货节点） -->
+      <VehiclePicker 
+        v-if="showVehicle"
+        v-model="vehicleInfo"
+      />
     </div>
     
     <!-- 底部 -->
