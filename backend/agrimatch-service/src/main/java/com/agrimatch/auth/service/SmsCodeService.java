@@ -1,6 +1,7 @@
 package com.agrimatch.auth.service;
 
 import com.agrimatch.common.exception.ApiException;
+import com.agrimatch.sms.SmsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -12,11 +13,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 开发期短信验证码服务（内存实现）：
- * - 发送：生成 6 位数字验证码并缓存（含过期时间）
+ * 短信验证码服务：
+ * - 发送：生成 6 位数字验证码，通过 SmsProvider 发送
  * - 校验：支持固定码 000000（便于联调），也支持真实发送的验证码
  *
- * 注意：生产环境建议替换为 Redis + 短信通道（阿里云/腾讯云等）
+ * 短信提供商通过 application.yml 配置：
+ * - console：开发模式（验证码打印到控制台）
+ * - aliyun：阿里云短信
+ * - tencent：腾讯云短信
  */
 @Service
 public class SmsCodeService {
@@ -30,6 +34,13 @@ public class SmsCodeService {
     private static final long SEND_COOLDOWN_MS = 60_000L;
     // 过期：5 分钟
     private static final long EXPIRE_MS = 5 * 60_000L;
+
+    private final SmsProvider smsProvider;
+
+    public SmsCodeService(SmsProvider smsProvider) {
+        this.smsProvider = smsProvider;
+        log.info("短信验证码服务初始化，使用提供商: {}", smsProvider.getProviderName());
+    }
 
     public void send(String phone, int type) {
         if (!StringUtils.hasText(phone)) throw new ApiException(400, "手机号不能为空");
@@ -45,8 +56,9 @@ public class SmsCodeService {
         Entry e = new Entry(code, now, now + EXPIRE_MS);
         store.put(key, e);
 
-        // 开发期：打印验证码到日志，便于联调
-        log.info("[SMS_CODE] phone={}, type={}, code={}, expiresInSec={}", phone, type, code, EXPIRE_MS / 1000);
+        // 通过短信提供商发送验证码
+        smsProvider.sendCode(phone, code, type);
+        log.info("验证码已发送: phone={}, type={}, provider={}", phone, type, smsProvider.getProviderName());
     }
 
     public void verifyOrThrow(String phone, int type, String smsCode) {

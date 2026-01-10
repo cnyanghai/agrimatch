@@ -2,6 +2,23 @@
 import { computed, reactive, watch, ref } from 'vue'
 import { InfoFilled } from '@element-plus/icons-vue'
 
+// 结算方式选项
+const paymentMethodOptions = [
+  { value: '现结（款到发货）', label: '现结（款到发货）' },
+  { value: '货到付款', label: '货到付款' },
+  { value: '账期30天', label: '账期30天' },
+  { value: '账期60天', label: '账期60天' },
+  { value: '账期90天', label: '账期90天' },
+  { value: '银行承兑', label: '银行承兑' }
+]
+
+// 发票类型选项
+const invoiceTypeOptions = [
+  { value: '增值税专用发票', label: '增值税专用发票' },
+  { value: '增值税普通发票', label: '增值税普通发票' },
+  { value: '不需要发票', label: '不需要发票' }
+]
+
 export type QuoteFields = {
   price?: string
   quantity?: string
@@ -73,11 +90,15 @@ function initFromSnapshot() {
     form.price = String(s.exFactoryPrice ?? s.expectedPrice ?? s.price ?? '')
     form.quantity = String(s.remainingQuantity ?? s.quantity ?? '')
     form.deliveryMethod = s.deliveryMode ?? s.deliveryMethod ?? ''
-    form.deliveryPlace = s.shipAddress ?? s.purchaseAddress ?? ''
-    form.paymentMethod = s.paymentMethod ?? ''
-    form.invoiceType = s.invoiceType ?? ''
-    form.packaging = s.packaging ?? ''
-    form.remark = s.remark ?? ''
+    form.deliveryPlace = s.shipAddress ?? s.purchaseAddress ?? s.deliveryPlace ?? ''
+    // 结算方式：兼容多种字段名
+    form.paymentMethod = s.paymentMethod ?? s.payment_method ?? s.settlementMethod ?? s.settlement ?? ''
+    // 发票类型：兼容多种字段名
+    form.invoiceType = s.invoiceType ?? s.invoice_type ?? s.invoiceRequirement ?? s.invoice ?? ''
+    form.packaging = s.packaging ?? s.packagingRequirement ?? ''
+    form.remark = s.remark ?? s.note ?? s.notes ?? ''
+    // 到货日期：兼容多种字段名
+    form.arrivalDate = s.arrivalDate ?? s.arrival_date ?? s.deliveryDate ?? s.delivery_date ?? s.expectedDeliveryDate ?? ''
 
     // 解析动态参数（支持新的 {"Name": "Value"} 格式）
     if (s.paramsJson) {
@@ -307,15 +328,50 @@ function send() {
       </div>
       <div class="space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">到货日期</div>
-        <input v-model="form.arrivalDate" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" placeholder="YYYY-MM-DD" />
+        <el-date-picker
+          v-model="form.arrivalDate"
+          type="date"
+          value-format="YYYY-MM-DD"
+          placeholder="选择日期"
+          :disabled="disabled"
+          class="!w-full neo-date-picker"
+        />
       </div>
       <div class="space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">结算方式</div>
-        <input v-model="form.paymentMethod" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
+        <el-select
+          v-model="form.paymentMethod"
+          placeholder="选择结算方式"
+          :disabled="disabled"
+          filterable
+          allow-create
+          class="!w-full neo-select"
+        >
+          <el-option
+            v-for="opt in paymentMethodOptions"
+            :key="opt.value"
+            :label="opt.label"
+            :value="opt.value"
+          />
+        </el-select>
       </div>
       <div class="space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">发票要求</div>
-        <input v-model="form.invoiceType" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
+        <el-select
+          v-model="form.invoiceType"
+          placeholder="选择发票类型"
+          :disabled="disabled"
+          filterable
+          allow-create
+          class="!w-full neo-select"
+        >
+          <el-option
+            v-for="opt in invoiceTypeOptions"
+            :key="opt.value"
+            :label="opt.label"
+            :value="opt.value"
+          />
+        </el-select>
       </div>
       <div class="space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">包装要求</div>
@@ -356,4 +412,38 @@ function send() {
   </div>
 </template>
 
+<style scoped>
+/* 日期选择器样式 */
+.neo-date-picker :deep(.el-input__wrapper) {
+  border: 2px solid rgb(243 244 246);
+  border-radius: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  box-shadow: none;
+  transition: all 0.15s;
+}
 
+.neo-date-picker :deep(.el-input__wrapper:hover),
+.neo-date-picker :deep(.el-input__wrapper.is-focus) {
+  border-color: rgb(16 185 129);
+  box-shadow: none;
+}
+
+/* 下拉选择器样式 */
+.neo-select :deep(.el-input__wrapper) {
+  border: 2px solid rgb(243 244 246);
+  border-radius: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  box-shadow: none;
+  transition: all 0.15s;
+}
+
+.neo-select :deep(.el-input__wrapper:hover),
+.neo-select :deep(.el-input__wrapper.is-focus) {
+  border-color: rgb(16 185 129);
+  box-shadow: none;
+}
+
+.neo-select :deep(.el-input__inner) {
+  font-size: 0.875rem;
+}
+</style>
