@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './store/auth'
+import { useUiStore } from './store/ui'
 import AuthDialog from './components/AuthDialog.vue'
 import { 
   ShoppingCart, Box, HomeFilled, Management, Search, 
@@ -12,6 +13,7 @@ import {
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
+const ui = useUiStore()
 
 const minimal = computed(() => Boolean(route.meta.minimal))
 const isLoggedIn = computed(() => Boolean(auth.me))
@@ -225,7 +227,7 @@ onMounted(async () => {
                   <el-dropdown-item v-if="auth.me" @click="go('/talks')">
                     <Postcard class="w-4 h-4 mr-2" />话题广场
                   </el-dropdown-item>
-                  <el-dropdown-item v-if="!auth.me" @click="go('/login')">去登录/注册</el-dropdown-item>
+                  <el-dropdown-item v-if="!auth.me" @click="ui.openAuthDialog('login')">去登录/注册</el-dropdown-item>
                   <el-dropdown-item divided @click="logout">
                     <SwitchButton class="w-4 h-4 mr-2" />退出登录
                   </el-dropdown-item>

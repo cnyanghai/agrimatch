@@ -5,14 +5,11 @@ import { useUiStore } from '../store/ui'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/login', name: 'login', component: () => import('../views/LoginView.vue'), meta: { public: true, minimal: true } },
     { path: '/', name: 'landing', component: () => import('../views/gemini/GeminiLandingView.vue'), meta: { public: true, minimal: true } },
     { path: '/hall/supply', name: 'hall-supply', component: () => import('../views/gemini/GeminiSupplyHallView.vue'), meta: { public: true, minimal: true } },
     { path: '/hall/need', name: 'hall-need', component: () => import('../views/gemini/GeminiNeedHallView.vue'), meta: { public: true, minimal: true } },
     { path: '/talks', name: 'talks', component: () => import('../views/gemini/GeminiTalksView.vue'), meta: { public: true, minimal: true } },
     { path: '/talks/:id', name: 'talk-detail', component: () => import('../views/gemini/GeminiTalkDetailView.vue'), meta: { public: true, minimal: true } },
-    // 见闻页面暂时下线（功能未完善），重定向到话题广场
-    { path: '/insights', redirect: '/talks' },
     { path: '/talks/publish', name: 'talks-publish', component: () => import('../views/gemini/GeminiTalksPublishView.vue'), meta: { minimal: true, requiresAuth: true } },
 
     { path: '/console', name: 'console', component: () => import('../views/ConsoleHomeView.vue') },
@@ -25,7 +22,6 @@ const router = createRouter({
     { path: '/supply-browse', name: 'supply-browse', component: () => import('../views/SupplyBrowseView.vue') },
     { path: '/map', name: 'map', component: () => import('../views/MapView.vue') },
     { path: '/contracts', name: 'contracts', component: () => import('../views/ContractListView.vue') },
-    { path: '/contracts/old', name: 'contracts-old', component: () => import('../views/ContractView.vue') },
     { path: '/contracts/:id', name: 'contract-detail', component: () => import('../views/ContractDetailView.vue') },
     { path: '/posts', name: 'posts', component: () => import('../views/PostsView.vue') },
     { path: '/points', name: 'points', component: () => import('../views/PointsView.vue') },

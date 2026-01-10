@@ -5,12 +5,14 @@ import { ElMessage } from 'element-plus'
 import { requireAuth } from '../../utils/requireAuth'
 import { listPosts, type PostResponse } from '../../api/post'
 import { useAuthStore } from '../../store/auth'
+import { useUiStore } from '../../store/ui'
 import PublicTopNav from '../../components/PublicTopNav.vue'
 import PublicFooter from '../../components/PublicFooter.vue'
 import { MessageSquare, Heart, Search, ChevronDown, Plus, Star, Gift, Coins, CheckCircle } from 'lucide-vue-next'
 
 const router = useRouter()
 const auth = useAuthStore()
+const ui = useUiStore()
 
 // 用户信息
 const isLoggedIn = computed(() => !!auth.me)
@@ -269,7 +271,7 @@ onMounted(() => {
               <button 
                 v-else
                 class="w-full py-4 bg-emerald-600 text-white rounded-2xl text-sm font-black hover:bg-emerald-700 transition-all active:scale-[0.98] shadow-lg shadow-emerald-600/20" 
-                @click="go('/login')"
+                @click="ui.openAuthDialog('login')"
               >
                 立即登录
               </button>
