@@ -52,7 +52,6 @@ async function onLogout() {
           <button class="hover:text-emerald-600 transition-all active:scale-95" @click="go('/')">首页</button>
           <button class="hover:text-emerald-600 transition-all active:scale-95" @click="go('/hall/supply')">供应大厅</button>
           <button class="hover:text-emerald-600 transition-all active:scale-95" @click="go('/hall/need')">采购大厅</button>
-          <button class="hover:text-emerald-600 transition-all active:scale-95" @click="go('/insights')">观点资讯</button>
           <button class="hover:text-emerald-600 transition-all active:scale-95" @click="go('/talks')">话题广场</button>
         </div>
 
