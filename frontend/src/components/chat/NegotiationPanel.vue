@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, watch, ref } from 'vue'
+import { InfoFilled } from '@element-plus/icons-vue'
 
 export type QuoteFields = {
   price?: string
@@ -37,6 +38,7 @@ const emit = defineEmits<{
 
 // 只读产品信息
 const productInfo = ref<ProductInfo>({})
+const productParams = ref<Record<string, string>>({})
 
 const form = reactive<QuoteFields>({
   price: '',
@@ -79,22 +81,27 @@ function initFromSnapshot() {
 
     // 解析动态参数（支持新的 {"Name": "Value"} 格式）
     if (s.paramsJson) {
-      const paramsData = JSON.parse(s.paramsJson)
-      // 支持旧格式 { params: {...} } 和新格式 { "Name": "Value" }
-      const params = paramsData?.params || paramsData || {}
-      const dynamic: Record<string, string> = {}
-      Object.entries(params).forEach(([k, v]) => {
-        // 跳过纯数字键名（旧格式遗留）
-        if (/^\d+$/.test(k)) return
-        if (typeof v === 'object' && v !== null && 'name' in v) {
-          // 旧格式: { "1": { name: "xxx", value: "yyy" } }
-          dynamic[(v as any).name] = String((v as any).value)
-        } else if (typeof v === 'string' || typeof v === 'number') {
-          // 新格式: { "参数名": "参数值" }
-          dynamic[k] = String(v)
-        }
-      })
-      form.dynamicParams = dynamic
+      try {
+        const paramsData = JSON.parse(s.paramsJson)
+        // 支持旧格式 { params: {...} } 和新格式 { "Name": "Value" }
+        const params = paramsData?.params || paramsData || {}
+        const dynamic: Record<string, string> = {}
+        Object.entries(params).forEach(([k, v]) => {
+          // 跳过纯数字键名（旧格式遗留）
+          if (/^\d+$/.test(k)) return
+          if (typeof v === 'object' && v !== null && 'name' in v) {
+            // 旧格式: { "1": { name: "xxx", value: "yyy" } }
+            dynamic[(v as any).name] = String((v as any).value)
+          } else if (typeof v === 'string' || typeof v === 'number') {
+            // 新格式: { "参数名": "参数值" }
+            dynamic[k] = String(v)
+          }
+        })
+        form.dynamicParams = { ...dynamic }
+        productParams.value = { ...dynamic }
+      } catch (e) {
+        console.error('Failed to parse paramsJson', e)
+      }
     }
   } catch (e) {
     console.error('Failed to parse subject snapshot', e)
@@ -234,6 +241,19 @@ function send() {
         >
           发送报价
         </button>
+      </div>
+    </div>
+
+    <!-- 产品规格参数 (只读) -->
+    <div v-if="Object.keys(productParams).length > 0" class="mb-5 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+      <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-1">
+        产品规格参数 <InfoFilled class="w-3 h-3" />
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div v-for="(v, k) in productParams" :key="k" class="bg-white px-3 py-2 rounded-xl border border-gray-50 flex flex-col gap-0.5 shadow-sm">
+          <span class="text-[10px] text-gray-400 font-medium">{{ k }}</span>
+          <span class="text-xs font-bold text-gray-700 truncate">{{ v }}</span>
+        </div>
       </div>
     </div>
 

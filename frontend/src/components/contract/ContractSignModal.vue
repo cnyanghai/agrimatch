@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Pen, Stamp, Type, Check, FileSignature } from 'lucide-vue-next'
+import { Pen, Stamp, Type, Check, FileSignature, Package } from 'lucide-vue-next'
 import { signContract, getContract, type ContractResponse } from '../../api/contract'
 import { BaseModal, BaseButton } from '../ui'
 import SignaturePad from './SignaturePad.vue'
@@ -30,6 +30,53 @@ const typedName = ref('')
 const signatureImage = ref('')
 const loading = ref(false)
 const contract = ref<ContractResponse | null>(null)
+
+// 质量指标解析
+const qualitySpecs = computed(() => {
+  if (!contract.value) return []
+  if (contract.value.productParams && contract.value.productParams.length > 0) {
+    return contract.value.productParams.map(p => ({ name: p.label, value: p.value }))
+  }
+  if (contract.value.paramsJson) {
+    try {
+      const data = JSON.parse(contract.value.paramsJson)
+      const params = data?.params || data || {}
+      const result: Array<{ name: string; value: string }> = []
+      
+      const BLACKLIST = [
+        'snapshotTime', 'priceType', 'id', 'categoryName', 'title', 
+        'productName', 'companyName', 'nickName', 'exFactoryPrice', 'expectedPrice',
+        'remainingQuantity', 'unit', 'basisQuotes', 'basisPrice', 
+        'contractCode', 'futuresPrice', 'originPrice', 'shipAddress', 'purchaseAddress',
+        'deliveryMode', 'storageMethod', 'packaging'
+      ]
+
+      const process = (k: string, v: any) => {
+        if (BLACKLIST.includes(k) || /^\d+$/.test(k)) return
+        if (v === null || v === undefined || v === '') return
+        if (typeof v === 'object' && v.name && v.value) {
+          result.push({ name: v.name, value: String(v.value) })
+        } else if (typeof v !== 'object') {
+          result.push({ name: k, value: String(v) })
+        }
+      }
+
+      Object.entries(params).forEach(([k, v]) => {
+        if (k === 'paramsJson' && typeof v === 'string') {
+          try {
+            const inner = JSON.parse(v)
+            const nested = inner?.params || inner || {}
+            Object.entries(nested).forEach(([nk, nv]) => process(nk, nv))
+          } catch { /* ignore */ }
+        } else {
+          process(k, v)
+        }
+      })
+      return result
+    } catch { /* ignore */ }
+  }
+  return []
+})
 
 // 加载合同信息
 watch(() => props.modelValue, async (val) => {
@@ -111,9 +158,22 @@ function onSignatureChange(data: string) {
     <div v-if="contract" class="bg-gray-50 rounded-2xl p-4 border border-gray-100 mb-5">
       <div class="text-xs text-gray-500 mb-1">合同编号</div>
       <div class="font-bold text-gray-900">{{ contract.contractNo }}</div>
-      <div class="flex justify-between items-center mt-2">
+      <div class="flex justify-between items-center mt-2 border-b border-gray-100 pb-3 mb-3">
         <span class="text-sm text-gray-600">{{ contract.productName }}</span>
         <span class="text-sm font-bold text-emerald-600">¥{{ contract.totalAmount?.toLocaleString() }}</span>
+      </div>
+
+      <!-- 规格参数摘要 -->
+      <div v-if="qualitySpecs.length > 0" class="space-y-2">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+          <Package class="w-3 h-3" /> 质量标准
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <div v-for="spec in qualitySpecs" :key="spec.name" class="bg-white px-2 py-1 rounded-lg border border-gray-100 text-[10px] flex items-center gap-1.5 shadow-sm">
+            <span class="text-gray-400 font-medium">{{ spec.name }}:</span>
+            <span class="text-gray-700 font-bold">{{ spec.value }}</span>
+          </div>
+        </div>
       </div>
     </div>
     

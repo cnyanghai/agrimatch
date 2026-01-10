@@ -65,7 +65,7 @@ const displayParams = computed(() => {
       'productName', 'companyName', 'nickName', 'exFactoryPrice', 'expectedPrice',
       'remainingQuantity', 'unit', 'basisQuotes', 'basisPrice', 
       'contractCode', 'futuresPrice', 'originPrice', 'shipAddress', 'purchaseAddress',
-      'deliveryMode', 'storageMethod', 'packaging', 'paramsJson'
+      'deliveryMode', 'storageMethod', 'packaging'
     ]
 
     // 智能展开函数
@@ -75,11 +75,12 @@ const displayParams = computed(() => {
       // 过滤空值
       if (value === null || value === undefined || value === '' || value === 'null' || value === 'undefined') return
 
-      // 处理嵌套 paramsJson 字符串
+      // 处理嵌套 paramsJson 字符串（关键：用于递归提取规格参数）
       if (name === 'paramsJson' && typeof value === 'string' && value.startsWith('{')) {
         try {
           const inner = JSON.parse(value)
-          Object.entries(inner).forEach(([k, v]) => processEntry(k, v))
+          const nested = inner?.params || inner || {}
+          Object.entries(nested).forEach(([k, v]) => processEntry(k, v))
           return
         } catch { /* ignore */ }
       }
@@ -100,7 +101,8 @@ const displayParams = computed(() => {
     if (rawParams.paramsJson && typeof rawParams.paramsJson === 'string') {
       try {
         const inner = JSON.parse(rawParams.paramsJson)
-        Object.entries(inner).forEach(([k, v]) => processEntry(k, v))
+        const nested = inner?.params || inner || {}
+        Object.entries(nested).forEach(([k, v]) => processEntry(k, v))
       } catch { /* ignore */ }
     }
 

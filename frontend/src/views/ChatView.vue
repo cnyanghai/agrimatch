@@ -1839,28 +1839,12 @@ onBeforeUnmount(() => {
             <div v-if="activeConversationId" class="p-4 border-t border-gray-100 bg-white">
               <!-- 输入框上方的小工具栏 -->
               <div class="flex items-center gap-4 mb-3 px-1">
-                <el-popover placement="top-start" :width="isBasisTrade ? 500 : 700" trigger="click" v-model:visible="quotePopoverVisible" popper-class="!p-0 !rounded-[32px] !border-none !shadow-2xl">
-                  <template #reference>
-                    <button class="flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
-                      <Position class="w-3.5 h-3.5" /> 修改价格/发报价
-                    </button>
-                  </template>
-                  <div class="p-0">
-                    <BasisBargainPanel
-                      v-if="isBasisTrade"
-                      :disabled="!activeConversationId"
-                      :subject-snapshot-json="currentConversation?.subjectSnapshotJson"
-                      @send="({ payload, summary, basisPrice, contractCode }) => sendQuote(payload, summary, basisPrice, contractCode)"
-                    />
-                    <NegotiationPanel
-                      v-else
-                      :disabled="!activeConversationId"
-                      :peer-latest-quote="peerLatestQuote"
-                      :subject-snapshot-json="currentConversation?.subjectSnapshotJson"
-                      @send="({ payload, summary }) => sendQuote(payload, summary)"
-                    />
-                  </div>
-                </el-popover>
+                <button 
+                  class="flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+                  @click="quotePopoverVisible = true"
+                >
+                  <Position class="w-3.5 h-3.5" /> 修改价格/发报价
+                </button>
                 <button class="flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors" @click="openGiftDialog">
                   <Present class="w-3.5 h-3.5" /> 赠送积分
                 </button>
@@ -1966,6 +1950,33 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
+    <!-- 桌面端：悬浮式议价面板 -->
+    <el-drawer
+      v-model="quotePopoverVisible"
+      direction="rtl"
+      :size="isBasisTrade ? 520 : 720"
+      :with-header="false"
+      class="floating-quote-drawer"
+      :modal-class="'bg-slate-900/10 backdrop-blur-[2px]'"
+    >
+      <!-- pt-0 确保面板紧贴容器顶部（即距离屏幕顶部 10px），px/pb 为阴影留出空间 -->
+      <div class="h-full flex flex-col pt-0 px-4 pb-4 bg-transparent overflow-y-auto">
+        <BasisBargainPanel
+          v-if="isBasisTrade"
+          :disabled="!activeConversationId"
+          :subject-snapshot-json="currentConversation?.subjectSnapshotJson"
+          @send="({ payload, summary, basisPrice, contractCode }) => { sendQuote(payload, summary, basisPrice, contractCode); quotePopoverVisible = false }"
+        />
+        <NegotiationPanel
+          v-else
+          :disabled="!activeConversationId"
+          :peer-latest-quote="peerLatestQuote"
+          :subject-snapshot-json="currentConversation?.subjectSnapshotJson"
+          @send="({ payload, summary }) => { sendQuote(payload, summary); quotePopoverVisible = false }"
+        />
+      </div>
+    </el-drawer>
+
     <!-- 小屏：结构化议价抽屉（<xl） -->
     <el-drawer
       v-model="negotiationDrawerOpen"
@@ -2004,21 +2015,19 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-            <BasisBargainPanel
-              v-if="isBasisTrade"
-              :disabled="!activeConversationId"
-              :subject-snapshot-json="currentConversation?.subjectSnapshotJson"
-              @send="({ payload, summary, basisPrice, contractCode }) => sendQuote(payload, summary, basisPrice, contractCode)"
-            />
-            <NegotiationPanel
-              v-else
-              :disabled="!activeConversationId"
-              :peer-latest-quote="peerLatestQuote"
-              :subject-snapshot-json="currentConversation?.subjectSnapshotJson"
-              @send="({ payload, summary }) => sendQuote(payload, summary)"
-            />
-          </div>
+          <BasisBargainPanel
+            v-if="isBasisTrade"
+            :disabled="!activeConversationId"
+            :subject-snapshot-json="currentConversation?.subjectSnapshotJson"
+            @send="({ payload, summary, basisPrice, contractCode }) => { sendQuote(payload, summary, basisPrice, contractCode); negotiationDrawerOpen = false }"
+          />
+          <NegotiationPanel
+            v-else
+            :disabled="!activeConversationId"
+            :peer-latest-quote="peerLatestQuote"
+            :subject-snapshot-json="currentConversation?.subjectSnapshotJson"
+            @send="({ payload, summary }) => { sendQuote(payload, summary); negotiationDrawerOpen = false }"
+          />
         </div>
       </div>
     </el-drawer>
@@ -2439,5 +2448,32 @@ onBeforeUnmount(() => {
 
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.2);
+}
+</style>
+
+<style>
+/* Popover 内容是 teleport 到 body 的，需使用非 scoped 样式 */
+.chat-quote-popper {
+  max-height: calc(100vh - 140px);
+  overflow: auto;
+}
+
+/* 悬浮式议价面板样式 */
+.floating-quote-drawer {
+  background-color: transparent !important;
+}
+
+.floating-quote-drawer .el-drawer {
+  top: 10px !important;
+  right: 10px !important;
+  bottom: 10px !important;
+  height: calc(100vh - 20px) !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.floating-quote-drawer .el-drawer__body {
+  padding: 0 !important;
+  overflow: visible !important;
 }
 </style>
