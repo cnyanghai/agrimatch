@@ -400,6 +400,41 @@ CREATE TABLE IF NOT EXISTS `bus_points_tx` (
   KEY `idx_points_tx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='积分流水表';
 
+-- 充值订单表
+CREATE TABLE IF NOT EXISTS `bus_recharge_order` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '订单ID',
+  `order_no` varchar(32) NOT NULL COMMENT '订单号',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `amount` decimal(10,2) NOT NULL COMMENT '充值金额（元）',
+  `points` int NOT NULL COMMENT '获得积分',
+  `pay_channel` varchar(16) DEFAULT NULL COMMENT '支付渠道（wechat/alipay）',
+  `status` tinyint NOT NULL DEFAULT 0 COMMENT '状态（0待支付 1已支付 2已关闭）',
+  `pay_time` datetime DEFAULT NULL COMMENT '支付时间',
+  `trade_no` varchar(64) DEFAULT NULL COMMENT '第三方交易号',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  `create_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `update_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_order_no` (`order_no`),
+  KEY `idx_recharge_user` (`user_id`),
+  KEY `idx_recharge_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='充值订单表';
+
+-- 京东卡兑换记录表
+CREATE TABLE IF NOT EXISTS `bus_jd_redeem` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '兑换ID',
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `points_cost` int NOT NULL COMMENT '消耗积分',
+  `face_value` int NOT NULL COMMENT '面额（元）',
+  `card_code` varchar(128) DEFAULT NULL COMMENT '卡密（加密存储）',
+  `status` tinyint NOT NULL DEFAULT 0 COMMENT '状态（0处理中 1成功 2失败）',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除',
+  `create_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `update_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_jd_redeem_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='京东卡兑换记录表';
+
 -- ============================================================
 -- Post Social (评论/点赞)
 -- ============================================================

@@ -76,6 +76,95 @@
         ORDER BY create_time DESC, id DESC
     </select>
 
+    <!-- 充值订单 -->
+    <resultMap id="RechargeOrderMap" type="com.agrimatch.points.domain.BusRechargeOrder">
+        <id column="id" property="id"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="user_id" property="userId"/>
+        <result column="amount" property="amount"/>
+        <result column="points" property="points"/>
+        <result column="pay_channel" property="payChannel"/>
+        <result column="status" property="status"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="trade_no" property="tradeNo"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insertRechargeOrder" parameterType="com.agrimatch.points.domain.BusRechargeOrder"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_recharge_order
+        (order_no, user_id, amount, points, pay_channel, status, is_deleted, create_time, update_time)
+        VALUES
+        (#{orderNo}, #{userId}, #{amount}, #{points}, #{payChannel}, #{status}, 0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="selectRechargeOrderByOrderNo" resultMap="RechargeOrderMap">
+        SELECT id, order_no, user_id, amount, points, pay_channel, status, pay_time, trade_no, is_deleted, create_time, update_time
+        FROM bus_recharge_order
+        WHERE order_no = #{orderNo}
+          AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <update id="updateRechargeOrderStatus">
+        UPDATE bus_recharge_order
+        SET status = #{status},
+            trade_no = #{tradeNo},
+            pay_time = CASE WHEN #{status} = 1 THEN NOW() ELSE pay_time END,
+            update_time = NOW(3)
+        WHERE order_no = #{orderNo}
+          AND is_deleted = 0
+    </update>
+
+    <select id="sumTodayRechargeByUserId" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(points), 0)
+        FROM bus_recharge_order
+        WHERE user_id = #{userId}
+          AND status = 1
+          AND DATE(create_time) = CURDATE()
+          AND is_deleted = 0
+    </select>
+
+    <!-- 京东卡兑换 -->
+    <resultMap id="JdRedeemMap" type="com.agrimatch.points.domain.BusJdRedeem">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="points_cost" property="pointsCost"/>
+        <result column="face_value" property="faceValue"/>
+        <result column="card_code" property="cardCode"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insertJdRedeem" parameterType="com.agrimatch.points.domain.BusJdRedeem"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_jd_redeem
+        (user_id, points_cost, face_value, card_code, status, is_deleted, create_time, update_time)
+        VALUES
+        (#{userId}, #{pointsCost}, #{faceValue}, #{cardCode}, #{status}, 0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="sumTodayJdRedeemByUserId" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(points_cost), 0)
+        FROM bus_jd_redeem
+        WHERE user_id = #{userId}
+          AND status = 1
+          AND DATE(create_time) = CURDATE()
+          AND is_deleted = 0
+    </select>
+
+    <select id="selectJdRedeemListByUserId" resultMap="JdRedeemMap">
+        SELECT id, user_id, points_cost, face_value, card_code, status, is_deleted, create_time, update_time
+        FROM bus_jd_redeem
+        WHERE user_id = #{userId}
+          AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
 </mapper>
 
 
