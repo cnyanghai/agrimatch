@@ -3,7 +3,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Trash2, FileText, Save, Send, List, RefreshCw, Package, Truck, Clock, FileCheck, TrendingUp, Plus, X } from 'lucide-vue-next'
-import { createSupply, getNextSupplyNo, type SupplyCreateRequest, type BasisQuoteRequest } from '../api/supply'
+import { createSupply, getNextSupplyNo, createSupplyTemplate, getMySupplyTemplates, deleteSupplyTemplate, type SupplyCreateRequest, type BasisQuoteRequest, type SupplyTemplateResponse } from '../api/supply'
 import { listFuturesContracts, type FuturesContractResponse } from '../api/futures'
 import { getProductTree, getProductParams, addProductParamOption, type ProductNode, type ProductParamResponse } from '../api/product'
 import { getMyCompany, type CompanyResponse } from '../api/company'
@@ -77,14 +77,8 @@ type PickedCategory = { id: number; name: string } | null
 const pickedCategory = ref<PickedCategory>(null)
 const suspendCategoryWatch = ref(false)
 
-// 模板系统
-interface SupplyTemplate {
-  id: number
-  templateName: string
-  templateJson: string
-  createTime?: string
-}
-const templates = ref<SupplyTemplate[]>([])
+// 模板系统 - 使用 API 响应类型
+const templates = ref<SupplyTemplateResponse[]>([])
 const saveTemplateDialogVisible = ref(false)
 const templateNameInput = ref('')
 
@@ -106,7 +100,7 @@ type TemplateJsonData = {
 
 const templateJsonCache = new Map<number, { json: string; data: TemplateJsonData }>()
 
-function getTemplateJson(template: SupplyTemplate): TemplateJsonData {
+function getTemplateJson(template: SupplyTemplateResponse): TemplateJsonData {
   const key = template.id
   const json = template.templateJson || ''
   const cached = templateJsonCache.get(key)
@@ -335,7 +329,14 @@ async function loadCategoryTree() {
 }
 
 async function loadTemplates() {
-  templates.value = []
+  try {
+    const res = await getMySupplyTemplates()
+    if (res.code === 0) {
+      templates.value = res.data || []
+    }
+  } catch (e) {
+    console.error('加载模板失败', e)
+  }
 }
 
 watch(pickedCategory, async (category) => {
@@ -472,16 +473,19 @@ async function confirmSaveTemplate() {
       remark: publishForm.remark
     })
     
-    templates.value.push({
-      id: Date.now(),
+    const res = await createSupplyTemplate({
       templateName: templateNameInput.value.trim(),
-      templateJson,
-      createTime: new Date().toISOString()
+      templateJson
     })
     
-    ElMessage.success('模板保存成功')
-    saveTemplateDialogVisible.value = false
-    templateNameInput.value = ''
+    if (res.code === 0) {
+      ElMessage.success('模板保存成功')
+      saveTemplateDialogVisible.value = false
+      templateNameInput.value = ''
+      await loadTemplates() // 重新加载模板列表
+    } else {
+      ElMessage.error(res.message || '保存失败')
+    }
   } catch (e: any) {
     ElMessage.error(e?.message || '保存失败')
   } finally {
@@ -491,14 +495,19 @@ async function confirmSaveTemplate() {
 
 async function deleteTemplate(id: number) {
   try {
-    templates.value = templates.value.filter(t => t.id !== id)
-    ElMessage.success('模板删除成功')
+    const res = await deleteSupplyTemplate(id)
+    if (res.code === 0) {
+      templates.value = templates.value.filter(t => t.id !== id)
+      ElMessage.success('模板删除成功')
+    } else {
+      ElMessage.error(res.message || '删除失败')
+    }
   } catch (e: any) {
     ElMessage.error(e?.message || '删除失败')
   }
 }
 
-async function applyTemplate(template: SupplyTemplate) {
+async function applyTemplate(template: SupplyTemplateResponse) {
   try {
     const data = JSON.parse(template.templateJson)
     publishForm.companyName = data.companyName || publishForm.companyName
@@ -808,7 +817,7 @@ async function applyTemplate(template: SupplyTemplate) {
           <div class="p-5">
             <div v-if="categoryParams.length === 0" class="py-8">
               <EmptyState
-                type="folder"
+                type="data"
                 title="暂无参数"
                 description="选择品类后，会自动加载对应的指标参数"
                 size="sm"
@@ -913,7 +922,7 @@ async function applyTemplate(template: SupplyTemplate) {
           <div class="p-5 max-h-[70vh] overflow-y-auto">
             <div v-if="!publishForm.categoryName" class="py-8">
               <EmptyState
-                type="folder"
+                type="data"
                 title="暂无内容"
                 description="填写左侧信息后显示"
                 size="sm"
@@ -1019,7 +1028,7 @@ async function applyTemplate(template: SupplyTemplate) {
     <BaseModal v-model="templatePickerOpen" title="选择供应模板" size="lg">
       <div v-if="templates.length === 0" class="py-8">
         <EmptyState
-          type="folder"
+          type="data"
           title="暂无模板"
           description="可在发布表单中点击【保存为模板】创建"
           size="md"

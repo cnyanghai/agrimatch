@@ -285,10 +285,20 @@ public class FuturesContractServiceImpl implements FuturesContractService {
         resp.setContractName(contract.getContractName());
         resp.setDeliveryMonth(contract.getDeliveryMonth());
         
-        // 价格降级逻辑：优先使用最新价，如果没有则使用昨收价
-        BigDecimal displayPrice = contract.getLastPrice();
-        if (displayPrice == null || displayPrice.compareTo(BigDecimal.ZERO) <= 0) {
+        // 价格逻辑：交易时间用最新价，收盘后用收盘价
+        BigDecimal displayPrice;
+        if (isTradingTime()) {
+            // 交易时间：优先最新价，没有则用昨收
+            displayPrice = contract.getLastPrice();
+            if (displayPrice == null || displayPrice.compareTo(BigDecimal.ZERO) <= 0) {
+                displayPrice = contract.getPrevClose();
+            }
+        } else {
+            // 收盘后：直接用收盘价作为参考价
             displayPrice = contract.getPrevClose();
+            if (displayPrice == null || displayPrice.compareTo(BigDecimal.ZERO) <= 0) {
+                displayPrice = contract.getLastPrice(); // 降级备用
+            }
         }
         resp.setLastPrice(displayPrice);
         

@@ -141,4 +141,32 @@ export async function getNextSupplyNo() {
   return data
 }
 
+// ========== 供应模板 API ==========
+
+export interface SupplyTemplateCreateRequest {
+  templateName: string
+  templateJson: string
+}
+
+export interface SupplyTemplateResponse {
+  id: number
+  templateName: string
+  templateJson: string
+  createTime?: string
+}
+
+export async function createSupplyTemplate(req: SupplyTemplateCreateRequest) {
+  const { data } = await http.post<Result<number>>('/api/supply-templates', req)
+  return data
+}
+
+export async function getMySupplyTemplates() {
+  const { data } = await http.get<Result<SupplyTemplateResponse[]>>('/api/supply-templates')
+  return data
+}
+
+export async function deleteSupplyTemplate(id: number) {
+  const { data } = await http.delete<Result<void>>(`/api/supply-templates/${id}`)
+  return data
+}
 

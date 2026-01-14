@@ -103,6 +103,15 @@
         LIMIT #{limit}
     </select>
 
+    <update id="updateCompanyId">
+        UPDATE sys_user
+        SET company_id = #{companyId},
+            update_time = NOW()
+        WHERE user_id = #{userId}
+          AND del_flag = '0'
+          AND (is_deleted IS NULL OR is_deleted = 0)
+    </update>
+
 </mapper>
 
 

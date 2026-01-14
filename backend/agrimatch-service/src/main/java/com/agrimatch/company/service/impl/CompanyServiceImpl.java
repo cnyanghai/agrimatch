@@ -11,7 +11,9 @@ import com.agrimatch.company.mapper.CompanyMapper;
 import com.agrimatch.company.service.CompanyService;
 import com.agrimatch.geo.dto.GeoPoint;
 import com.agrimatch.geo.service.AmapGeocodeService;
+import com.agrimatch.user.mapper.UserMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -20,13 +22,16 @@ import java.util.List;
 public class CompanyServiceImpl implements CompanyService {
     private final CompanyMapper companyMapper;
     private final AmapGeocodeService amapGeocodeService;
+    private final UserMapper userMapper;
 
-    public CompanyServiceImpl(CompanyMapper companyMapper, AmapGeocodeService amapGeocodeService) {
+    public CompanyServiceImpl(CompanyMapper companyMapper, AmapGeocodeService amapGeocodeService, UserMapper userMapper) {
         this.companyMapper = companyMapper;
         this.amapGeocodeService = amapGeocodeService;
+        this.userMapper = userMapper;
     }
 
     @Override
+    @Transactional
     public Long create(Long ownerUserId, CompanyCreateRequest req) {
         if (ownerUserId == null) throw new ApiException(401, "未登录");
         BusCompany c = new BusCompany();
@@ -60,6 +65,10 @@ public class CompanyServiceImpl implements CompanyService {
 
         int rows = companyMapper.insert(c);
         if (rows != 1 || c.getId() == null) throw new ApiException(ResultCode.SERVER_ERROR);
+        
+        // 回写用户的 company_id，确保用户与公司关联
+        userMapper.updateCompanyId(ownerUserId, c.getId());
+        
         return c.getId();
     }
 

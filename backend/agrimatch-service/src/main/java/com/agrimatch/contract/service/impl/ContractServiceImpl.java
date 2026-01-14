@@ -222,6 +222,12 @@ public class ContractServiceImpl implements ContractService {
         Long buyerCompanyId = toCompanyId;
         Long sellerCompanyId = fromCompanyId;
 
+        // 校验买卖双方不能是同一家公司
+        if (buyerCompanyId.equals(sellerCompanyId)) {
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), 
+                "买卖双方不能是同一家公司，请检查双方的公司绑定信息");
+        }
+
         // 校验报价单必填字段 (针对基差合同，如果 unitPrice 为空，但 basisPrice 存在，则视为合法)
         if (quoteData.quantity == null || quoteData.quantity.compareTo(BigDecimal.ZERO) <= 0) {
             throw new ApiException(ResultCode.PARAM_ERROR.getCode(), 

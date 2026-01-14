@@ -197,8 +197,12 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         if (session != null && session.isOpen()) {
             try {
                 session.sendMessage(message);
-            } catch (Exception ignore) {
+                System.out.println("[WS] Sent message to user " + userId + " successfully");
+            } catch (Exception e) {
+                System.out.println("[WS] Failed to send message to user " + userId + ": " + e.getMessage());
             }
+        } else {
+            System.out.println("[WS] User " + userId + " is not online (session=" + (session == null ? "null" : "closed") + "), active sessions: " + sessions.keySet());
         }
     }
 

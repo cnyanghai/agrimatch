@@ -21,6 +21,11 @@ public interface UserMapper {
                     @Param("userType") String userType);
 
     List<UserBriefResponse> search(@Param("keyword") String keyword, @Param("limit") Integer limit);
+
+    /**
+     * 更新用户的公司ID（创建公司后回写）
+     */
+    int updateCompanyId(@Param("userId") Long userId, @Param("companyId") Long companyId);
 }
 
 

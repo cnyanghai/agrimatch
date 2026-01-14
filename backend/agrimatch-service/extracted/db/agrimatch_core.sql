@@ -180,13 +180,18 @@ CREATE TABLE IF NOT EXISTS `bus_post` (
   `title` varchar(120) NOT NULL COMMENT '标题',
   `content` longtext COMMENT '正文内容',
   `images_json` longtext COMMENT '图片JSON（可选）',
+  `post_type` varchar(20) NOT NULL DEFAULT 'general' COMMENT '帖子类型（general普通/bounty悬赏/poll投票）',
+  `bounty_points` int DEFAULT NULL COMMENT '悬赏积分（仅post_type=bounty时有效）',
+  `bounty_status` tinyint DEFAULT 0 COMMENT '悬赏状态（0进行中/1已采纳/2已过期）',
+  `accepted_comment_id` bigint DEFAULT NULL COMMENT '被采纳的评论ID',
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除（0否 1是）',
   `create_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `update_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`),
   KEY `idx_post_company` (`company_id`),
   KEY `idx_post_user` (`user_id`),
-  KEY `idx_post_create_time` (`create_time`)
+  KEY `idx_post_create_time` (`create_time`),
+  KEY `idx_post_type` (`post_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='观点帖子表';
 
 -- ============================================================

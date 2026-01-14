@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.supply_template.mapper.SupplyTemplateMapper">
+
+    <resultMap id="SupplyTemplateMap" type="com.agrimatch.supply_template.domain.BusSupplyTemplate">
+        <id property="id" column="id"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="templateName" column="template_name"/>
+        <result property="templateJson" column="template_json"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.agrimatch.supply_template.domain.BusSupplyTemplate" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO bus_supply_template (owner_user_id, template_name, template_json, is_deleted, create_time, update_time)
+        VALUES (#{ownerUserId}, #{templateName}, #{templateJson}, #{isDeleted}, NOW(3), NOW(3))
+    </insert>
+
+    <select id="selectByOwnerUserId" resultMap="SupplyTemplateMap">
+        SELECT id, owner_user_id, template_name, template_json, is_deleted, create_time, update_time
+        FROM bus_supply_template
+        WHERE owner_user_id = #{ownerUserId} AND is_deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectById" resultMap="SupplyTemplateMap">
+        SELECT id, owner_user_id, template_name, template_json, is_deleted, create_time, update_time
+        FROM bus_supply_template
+        WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <update id="softDelete">
+        UPDATE bus_supply_template
+        SET is_deleted = 1, update_time = NOW(3)
+        WHERE id = #{id} AND owner_user_id = #{ownerUserId} AND is_deleted = 0
+    </update>
+
+</mapper>
+

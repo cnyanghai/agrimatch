@@ -122,14 +122,32 @@ public class FileStorageService {
     
     /**
      * 获取文件资源
+     * 安全：验证路径必须在 uploadDir 内，防止目录遍历攻击
      */
     public Resource loadAsResource(String filePath) {
         try {
+            // 安全检查：拒绝包含 .. 的路径
+            if (filePath == null || filePath.contains("..")) {
+                throw new SecurityException("非法文件路径");
+            }
+            
             // 去掉开头的 /uploads/
             String relativePath = filePath.startsWith("/uploads/") 
                 ? filePath.substring("/uploads/".length()) 
                 : filePath;
+            
+            // 再次检查相对路径
+            if (relativePath.contains("..") || relativePath.startsWith("/")) {
+                throw new SecurityException("非法文件路径");
+            }
+            
             Path file = uploadDir.resolve(relativePath).normalize();
+            
+            // 安全检查：确保解析后的路径仍在 uploadDir 内
+            if (!file.startsWith(uploadDir)) {
+                throw new SecurityException("非法文件路径：路径越界");
+            }
+            
             Resource resource = new UrlResource(file.toUri());
             if (resource.exists() && resource.isReadable()) {
                 return resource;

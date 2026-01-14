@@ -132,6 +132,20 @@ CREATE TABLE IF NOT EXISTS `bus_requirement_template` (
   KEY `idx_req_tpl_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='采购需求发布模板表';
 
+-- Table structure for bus_supply_template (供应发布模板)
+CREATE TABLE IF NOT EXISTS `bus_supply_template` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '模板ID',
+  `owner_user_id` bigint NOT NULL COMMENT '所属用户ID（sys_user.user_id）',
+  `template_name` varchar(128) NOT NULL COMMENT '模板名称',
+  `template_json` longtext COMMENT '模板内容JSON（发布字段快照）',
+  `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除（0否 1是）',
+  `create_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  `update_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_supply_tpl_owner_user` (`owner_user_id`),
+  KEY `idx_supply_tpl_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='供应发布模板表';
+
 -- Table structure for bus_supply
 CREATE TABLE IF NOT EXISTS `bus_supply` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '供应ID',
@@ -141,6 +155,7 @@ CREATE TABLE IF NOT EXISTS `bus_supply` (
   `supply_no` varchar(64) DEFAULT NULL COMMENT '供应编号/单号（后端生成或前端传入）',
   `origin` varchar(128) DEFAULT NULL COMMENT '产地/来源地',
   `quantity` decimal(18,3) DEFAULT NULL COMMENT '供应数量（吨/件等）',
+  `price_type` int NOT NULL DEFAULT 0 COMMENT '报价类型（0=现货一口价 1=基差报价）',
   `ex_factory_price` decimal(18,2) NOT NULL COMMENT '出厂价',
   `ship_address` varchar(255) DEFAULT NULL COMMENT '发货点地址',
   `delivery_mode` varchar(20) DEFAULT NULL COMMENT '交付方式（自提/到厂等）',
@@ -357,13 +372,18 @@ CREATE TABLE IF NOT EXISTS `bus_post` (
   `title` varchar(120) NOT NULL COMMENT '标题',
   `content` longtext COMMENT '正文内容',
   `images_json` longtext COMMENT '图片JSON（可选）',
+  `post_type` varchar(20) NOT NULL DEFAULT 'general' COMMENT '帖子类型（general普通/bounty悬赏/poll投票）',
+  `bounty_points` int DEFAULT NULL COMMENT '悬赏积分（仅post_type=bounty时有效）',
+  `bounty_status` tinyint DEFAULT 0 COMMENT '悬赏状态（0进行中/1已采纳/2已过期）',
+  `accepted_comment_id` bigint DEFAULT NULL COMMENT '被采纳的评论ID',
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除（0否 1是）',
   `create_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `update_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
   PRIMARY KEY (`id`),
   KEY `idx_post_company` (`company_id`),
   KEY `idx_post_user` (`user_id`),
-  KEY `idx_post_create_time` (`create_time`)
+  KEY `idx_post_create_time` (`create_time`),
+  KEY `idx_post_type` (`post_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='观点帖子表';
 
 -- ============================================================
@@ -529,6 +549,8 @@ ALTER TABLE `bus_chat_message` ADD COLUMN `conversation_id` bigint DEFAULT NULL 
 ALTER TABLE `bus_chat_message` ADD COLUMN `msg_type` varchar(20) NOT NULL DEFAULT 'TEXT' COMMENT '消息类型（TEXT/QUOTE/SYSTEM/ATTACHMENT）';
 ALTER TABLE `bus_chat_message` ADD COLUMN `payload_json` longtext COMMENT '结构化负载JSON（报价卡/附件等）';
 ALTER TABLE `bus_chat_message` ADD COLUMN `quote_status` varchar(20) DEFAULT NULL COMMENT '报价状态(OFFERED/ACCEPTED/REJECTED/EXPIRED)';
+ALTER TABLE `bus_chat_message` ADD COLUMN `basis_price` decimal(10,2) DEFAULT NULL COMMENT '基差价格';
+ALTER TABLE `bus_chat_message` ADD COLUMN `contract_code` varchar(20) DEFAULT NULL COMMENT '期货合约代码';
 ALTER TABLE `bus_chat_message` ADD KEY `idx_chat_conv_time` (`conversation_id`, `create_time`, `id`);
 
 -- ============================================================
