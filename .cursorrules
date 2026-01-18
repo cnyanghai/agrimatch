@@ -399,3 +399,424 @@ com.agrimatch/
 - [ ] 对比度符合 WCAG AA
 - [ ] 动效时长在 150-300ms
 - [ ] 所有按钮有 hover/active 反馈
+
+---
+
+# 第七部分：Vue 3 工程规范（2025 最佳实践）
+
+> 基于 Smithery `vue-engineering` 技能，确保前端代码符合现代 Vue 3 生态的最高标准。
+
+## 1. 组件编写规范
+
+### 1.1 必须使用 `<script setup lang="ts">`
+```vue
+<!-- ✅ 正确 -->
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import type { VehicleResponse } from '../api/vehicle'
+
+const loading = ref(false)
+const vehicles = ref<VehicleResponse[]>([])
+</script>
+
+<!-- ❌ 错误：使用 Options API -->
+<script>
+export default {
+  data() { return { loading: false } }
+}
+</script>
+```
+
+### 1.2 Props 与 Emits 类型定义
+```typescript
+// ✅ 使用 defineProps 与 TypeScript
+interface Props {
+  modelValue: string
+  disabled?: boolean
+  placeholder?: string
+}
+const props = withDefaults(defineProps<Props>(), {
+  disabled: false,
+  placeholder: '请输入'
+})
+
+// ✅ 使用 defineEmits 与类型
+const emit = defineEmits<{
+  'update:modelValue': [value: string]
+  'change': [value: string]
+}>()
+```
+
+### 1.3 Composables 命名与结构
+```typescript
+// ✅ 命名以 use 开头，返回响应式数据和方法
+// src/composables/useVehicles.ts
+export function useVehicles() {
+  const vehicles = ref<Vehicle[]>([])
+  const loading = ref(false)
+  const error = ref<string | null>(null)
+
+  async function fetchVehicles() {
+    loading.value = true
+    try {
+      const r = await listVehicles()
+      if (r.code === 0) vehicles.value = r.data ?? []
+      else error.value = r.message
+    } catch (e: any) {
+      error.value = e?.message ?? '加载失败'
+    } finally {
+      loading.value = false
+    }
+  }
+
+  return { vehicles, loading, error, fetchVehicles }
+}
+```
+
+## 2. 响应式最佳实践
+
+### 2.1 ref vs reactive
+```typescript
+// ✅ 基础类型用 ref
+const count = ref(0)
+const isOpen = ref(false)
+
+// ✅ 对象/数组也优先用 ref（一致性更好）
+const form = ref({
+  name: '',
+  phone: ''
+})
+
+// ⚠️ reactive 仅在需要深层响应且不会重新赋值时使用
+const state = reactive({
+  nested: { value: 1 }
+})
+```
+
+### 2.2 计算属性优化
+```typescript
+// ✅ 使用 computed 缓存派生状态
+const filteredItems = computed(() =>
+  items.value.filter(item => item.status === 'active')
+)
+
+// ✅ 带 setter 的双向计算属性
+const fullName = computed({
+  get: () => `${firstName.value} ${lastName.value}`,
+  set: (val) => {
+    const [first, last] = val.split(' ')
+    firstName.value = first
+    lastName.value = last ?? ''
+  }
+})
+```
+
+### 2.3 Watch 使用规范
+```typescript
+// ✅ 监听单个 ref
+watch(searchKeyword, (newVal) => {
+  debouncedSearch(newVal)
+})
+
+// ✅ 监听多个源
+watch([page, pageSize], ([newPage, newSize]) => {
+  fetchData(newPage, newSize)
+})
+
+// ✅ 深度监听对象（谨慎使用，性能敏感）
+watch(form, (newForm) => {
+  validateForm(newForm)
+}, { deep: true })
+
+// ✅ 立即执行
+watch(userId, fetchUserDetail, { immediate: true })
+```
+
+## 3. 性能优化模式
+
+### 3.1 组件懒加载
+```typescript
+// router/index.ts
+const routes = [
+  {
+    path: '/supply',
+    component: () => import('../views/SupplyView.vue') // ✅ 路由级懒加载
+  }
+]
+```
+
+### 3.2 条件渲染优化
+```vue
+<!-- ✅ 频繁切换用 v-show -->
+<div v-show="isVisible">频繁显示/隐藏的内容</div>
+
+<!-- ✅ 条件渲染用 v-if -->
+<HeavyComponent v-if="shouldRender" />
+```
+
+### 3.3 列表渲染
+```vue
+<!-- ✅ 必须提供唯一 key -->
+<div v-for="item in items" :key="item.id">{{ item.name }}</div>
+
+<!-- ✅ 大列表使用虚拟滚动 (> 100 条) -->
+<el-table-v2 :data="largeList" :height="400" />
+```
+
+---
+
+# 第八部分：Spring Boot 企业级规范（2025 最佳实践）
+
+> 基于 Smithery `spring-boot-best-practices` 与 `spring-boot-rest-api-standards` 技能。
+
+## 1. Controller 层规范
+
+### 1.1 统一响应格式
+```java
+// ✅ 所有接口返回 Result<T>
+@GetMapping("/list")
+public Result<List<SupplyDTO>> list(@RequestParam(required = false) String keyword) {
+    return Result.success(supplyService.search(keyword));
+}
+
+// ✅ 分页响应
+@GetMapping("/page")
+public Result<PageResult<RequirementDTO>> page(
+    @RequestParam(defaultValue = "1") int page,
+    @RequestParam(defaultValue = "10") int size) {
+    return Result.success(requirementService.page(page, size));
+}
+```
+
+### 1.2 参数校验
+```java
+// ✅ 使用 @Valid + DTO 校验
+@PostMapping
+public Result<Long> create(@Valid @RequestBody CreateSupplyRequest req) {
+    return Result.success(supplyService.create(req));
+}
+
+// DTO 定义
+public class CreateSupplyRequest {
+    @NotBlank(message = "品类名称不能为空")
+    private String categoryName;
+    
+    @NotNull(message = "出厂价不能为空")
+    @DecimalMin(value = "0.01", message = "出厂价必须大于0")
+    private BigDecimal exFactoryPrice;
+    
+    @Size(max = 500, message = "备注不能超过500字")
+    private String remark;
+}
+```
+
+### 1.3 异常处理
+```java
+// ✅ 全局异常处理器
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    
+    @ExceptionHandler(ApiException.class)
+    public Result<?> handleApiException(ApiException e) {
+        return Result.error(e.getCode(), e.getMessage());
+    }
+    
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Result<?> handleValidation(MethodArgumentNotValidException e) {
+        String msg = e.getBindingResult().getFieldErrors().stream()
+            .map(FieldError::getDefaultMessage)
+            .collect(Collectors.joining("; "));
+        return Result.error(ResultCode.PARAM_ERROR.getCode(), msg);
+    }
+}
+```
+
+## 2. Service 层规范
+
+### 2.1 事务管理
+```java
+// ✅ 写操作加事务
+@Transactional(rollbackFor = Exception.class)
+public Long createDeal(CreateDealRequest req) {
+    // 1. 校验需求状态
+    Requirement requirement = requirementMapper.selectById(req.getRequirementId());
+    if (requirement == null) throw new ApiException("需求不存在");
+    
+    // 2. 校验剩余数量
+    BigDecimal remaining = calculateRemaining(requirement);
+    if (remaining.compareTo(req.getQuantity()) < 0) {
+        throw new ApiException("成交数量超过剩余数量");
+    }
+    
+    // 3. 创建成交记录
+    Deal deal = buildDeal(req, requirement);
+    dealMapper.insert(deal);
+    
+    // 4. 更新需求状态
+    updateRequirementStatus(requirement, req.getQuantity());
+    
+    return deal.getId();
+}
+```
+
+### 2.2 查询优化
+```java
+// ✅ 避免 N+1 查询，使用批量查询
+public List<SupplyDTO> listWithCompany(List<Long> supplyIds) {
+    List<Supply> supplies = supplyMapper.selectByIds(supplyIds);
+    
+    // 批量查询关联公司
+    Set<Long> companyIds = supplies.stream()
+        .map(Supply::getCompanyId)
+        .collect(Collectors.toSet());
+    Map<Long, Company> companyMap = companyMapper.selectByIds(companyIds)
+        .stream()
+        .collect(Collectors.toMap(Company::getId, Function.identity()));
+    
+    // 组装 DTO
+    return supplies.stream()
+        .map(s -> toDTO(s, companyMap.get(s.getCompanyId())))
+        .toList();
+}
+```
+
+## 3. 数据访问层规范
+
+### 3.1 MyBatis Mapper
+```java
+// ✅ 接口方法命名规范
+public interface SupplyMapper {
+    Supply selectById(Long id);
+    List<Supply> selectByCompanyId(Long companyId);
+    List<Supply> selectByCondition(SupplyQueryCondition condition);
+    int insert(Supply supply);
+    int updateById(Supply supply);
+    int deleteById(Long id); // 逻辑删除
+}
+```
+
+### 3.2 XML 动态查询
+```xml
+<!-- ✅ 使用 <where> 和 <if> 构建动态条件 -->
+<select id="selectByCondition" resultType="Supply">
+    SELECT * FROM bus_supply
+    <where>
+        del_flag = 0
+        <if test="companyId != null">
+            AND company_id = #{companyId}
+        </if>
+        <if test="categoryName != null and categoryName != ''">
+            AND category_name LIKE CONCAT('%', #{categoryName}, '%')
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+    </where>
+    ORDER BY create_time DESC
+</select>
+```
+
+## 4. 安全规范
+
+### 4.1 SQL 注入防护
+```java
+// ✅ 使用参数化查询
+@Select("SELECT * FROM bus_company WHERE company_name = #{name}")
+Company selectByName(@Param("name") String name);
+
+// ❌ 禁止字符串拼接 SQL
+// "SELECT * FROM bus_company WHERE company_name = '" + name + "'"
+```
+
+### 4.2 敏感数据脱敏
+```java
+// ✅ 返回前端时脱敏
+public String maskPhone(String phone) {
+    if (phone == null || phone.length() < 7) return phone;
+    return phone.substring(0, 3) + "****" + phone.substring(7);
+}
+
+public String maskIdCard(String idCard) {
+    if (idCard == null || idCard.length() < 14) return idCard;
+    return idCard.substring(0, 6) + "********" + idCard.substring(14);
+}
+```
+
+---
+
+# 第九部分：UI/UX 高级设计模式
+
+> 基于 Smithery `ui-ux-pro-max` 技能，引入 2025 年前沿设计趋势。
+
+## 1. Bento Grid 布局（仪表盘首选）
+
+```html
+<!-- ✅ 现代 Bento Grid 布局 -->
+<div class="grid grid-cols-4 gap-4 auto-rows-[120px]">
+  <!-- 大卡片：跨 2 列 2 行 -->
+  <div class="col-span-2 row-span-2 bg-white rounded-2xl p-6 border border-gray-100">
+    <h3 class="text-lg font-bold">核心指标</h3>
+    <!-- 内容 -->
+  </div>
+  
+  <!-- 小卡片 -->
+  <div class="bg-white rounded-2xl p-4 border border-gray-100">
+    <span class="text-xs text-gray-500">今日成交</span>
+    <p class="text-2xl font-bold">128</p>
+  </div>
+  
+  <!-- 更多卡片... -->
+</div>
+```
+
+## 2. 毛玻璃效果（Glassmorphism）
+
+```html
+<!-- ✅ 毛玻璃弹窗/浮层 -->
+<div class="fixed inset-0 bg-slate-900/40 backdrop-blur-md">
+  <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20">
+    <!-- 内容 -->
+  </div>
+</div>
+```
+
+## 3. 微交互动效
+
+```html
+<!-- ✅ 卡片悬浮效果 -->
+<div class="group bg-white rounded-2xl p-6 border border-gray-100 
+            transition-all duration-300 ease-out
+            hover:shadow-lg hover:border-emerald-200 hover:-translate-y-1">
+  <div class="transition-transform duration-300 group-hover:scale-105">
+    <!-- 图标或图片 -->
+  </div>
+</div>
+
+<!-- ✅ 按钮点击反馈 -->
+<button class="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-bold
+               transition-all duration-150 ease-out
+               hover:bg-emerald-700 hover:shadow-md
+               active:scale-95 active:shadow-sm">
+  确认提交
+</button>
+```
+
+## 4. 空状态设计
+
+```html
+<!-- ✅ 情感化空状态 -->
+<div class="flex flex-col items-center justify-center py-16 text-center">
+  <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+    <Package class="w-12 h-12 text-gray-300" />
+  </div>
+  <h3 class="text-lg font-bold text-gray-900 mb-2">暂无供应信息</h3>
+  <p class="text-sm text-gray-500 mb-6 max-w-xs">
+    您还没有发布任何供应，点击下方按钮开始发布您的第一条供应信息
+  </p>
+  <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-bold transition-all">
+    立即发布
+  </button>
+</div>
+```

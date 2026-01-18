@@ -22,19 +22,19 @@ const emit = defineEmits<{
   (e: 'click', event: MouseEvent): void
 }>()
 
-// 类型样式映射
+// 类型样式映射（使用新的设计系统）
 const typeClasses = computed(() => {
   const types: Record<string, string> = {
-    primary: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-100',
-    secondary: 'bg-gray-100 hover:bg-gray-200 text-gray-700',
-    danger: 'bg-red-50 hover:bg-red-100 text-red-600',
-    ghost: 'bg-transparent hover:bg-gray-50 text-gray-600',
-    outline: 'bg-white border-2 border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 text-gray-700 hover:text-emerald-600'
+    primary: 'bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary/25 hover:scale-105',
+    secondary: 'bg-white hover:bg-neutral-50 border-2 border-neutral-200 hover:border-neutral-300 text-neutral-700',
+    danger: 'bg-error/10 hover:bg-error/20 text-error',
+    ghost: 'bg-transparent hover:bg-primary/10 text-neutral-600 hover:text-primary-600',
+    outline: 'bg-white border-2 border-neutral-200 hover:border-primary-500 hover:bg-primary/50 text-neutral-700 hover:text-primary-600'
   }
   return types[props.type] || types.primary
 })
 
-// 尺寸样式映射
+// 尺寸样式映射（使用新的设计系统）
 const sizeClasses = computed(() => {
   if (props.icon) {
     const iconSizes: Record<string, string> = {
@@ -44,11 +44,11 @@ const sizeClasses = computed(() => {
     }
     return iconSizes[props.size] || iconSizes.md
   }
-  
+
   const sizes: Record<string, string> = {
-    sm: 'px-3 py-1.5 text-xs',
-    md: 'px-4 py-2.5 text-sm',
-    lg: 'px-6 py-3 text-base'
+    sm: 'px-4 py-2 text-sm rounded-lg',
+    md: 'px-6 py-3 text-base rounded-xl',
+    lg: 'px-8 py-4 text-lg rounded-2xl'
   }
   return sizes[props.size] || sizes.md
 })
@@ -66,7 +66,7 @@ function handleClick(e: MouseEvent) {
 <template>
   <button
     :class="[
-      'rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2',
+      'font-semibold transition-all duration-200 ease-out flex items-center justify-center gap-2 active:scale-95',
       typeClasses,
       sizeClasses,
       {
@@ -80,9 +80,8 @@ function handleClick(e: MouseEvent) {
   >
     <!-- Loading 图标 -->
     <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
-    
+
     <!-- 内容插槽 -->
     <slot />
   </button>
 </template>
-
