@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { requireAuth } from '../../utils/requireAuth'
-import PublicTopNav from '../../components/PublicTopNav.vue'
-import PublicFooter from '../../components/PublicFooter.vue'
-import ChatDrawer from '../../components/chat/ChatDrawer.vue'
-import { listRequirements, type RequirementResponse } from '../../api/requirement'
-import { openChatConversation } from '../../api/chat'
-import { followUser, unfollowUser, checkFollowStatus } from '../../api/follow'
+import { requireAuth } from '../utils/requireAuth'
+import PublicTopNav from '../components/PublicTopNav.vue'
+import PublicFooter from '../components/PublicFooter.vue'
+import ChatDrawer from '../components/chat/ChatDrawer.vue'
+import { listRequirements, type RequirementResponse } from '../api/requirement'
+import { openChatConversation } from '../api/chat'
+import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
 import { ElMessage } from 'element-plus'
-import { useAuthStore } from '../../store/auth'
+import { useAuthStore } from '../store/auth'
 
 const authStore = useAuthStore()
 

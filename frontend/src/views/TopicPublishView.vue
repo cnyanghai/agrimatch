@@ -2,10 +2,10 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { createPost } from '../../api/post'
-import { getPointsMe } from '../../api/points'
-import { useAuthStore } from '../../store/auth'
-import { requireAuth } from '../../utils/requireAuth'
+import { createPost } from '../api/post'
+import { getPointsMe } from '../api/points'
+import { useAuthStore } from '../store/auth'
+import { requireAuth } from '../utils/requireAuth'
 
 const router = useRouter()
 const auth = useAuthStore()

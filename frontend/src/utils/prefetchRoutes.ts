@@ -7,17 +7,17 @@
 type Importer = () => Promise<unknown>
 
 const importers: Record<string, Importer> = {
-  // Gemini 前台高频
-  landing: () => import('../views/gemini/GeminiLandingView.vue'),
-  hallSupply: () => import('../views/gemini/GeminiSupplyHallView.vue'),
-  hallNeed: () => import('../views/gemini/GeminiNeedHallView.vue'),
-  talks: () => import('../views/gemini/GeminiTalksView.vue'),
-  talkDetail: () => import('../views/gemini/GeminiTalkDetailView.vue'),
+  // 前台门户高频
+  landing: () => import('../views/HomeView.vue'),
+  hallSupply: () => import('../views/SupplyHallView.vue'),
+  hallNeed: () => import('../views/PurchaseHallView.vue'),
+  talks: () => import('../views/TopicSquareView.vue'),
+  talkDetail: () => import('../views/TopicDetailView.vue'),
 
   // 控制台/核心
-  chat: () => import('../views/ChatView.vue'),
-  profile: () => import('../views/ProfileView.vue'),
-  console: () => import('../views/ConsoleHomeView.vue'),
+  chat: () => import('../views/BusinessChatView.vue'),
+  profile: () => import('../views/AccountSettingsView.vue'),
+  console: () => import('../views/DashboardView.vue'),
 }
 
 function runIdle(cb: () => void, timeout = 2000) {

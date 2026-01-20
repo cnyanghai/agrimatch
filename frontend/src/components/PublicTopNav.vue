@@ -40,11 +40,19 @@ const categoryTree = ref<ProductNode[]>([])
 const topSuppliers = ref<CompanyCardResponse[]>([])
 const topBuyers = ref<CompanyCardResponse[]>([])
 
+const activeCategoryId = ref<number | null>(null)
+
 const topCategories = computed(() => {
   return categoryTree.value.filter(cat => (cat.parentId ?? 0) === 0)
 })
 
-function buildGroups(cat: ProductNode) {
+const activeCategory = computed(() => {
+  if (!activeCategoryId.value) return topCategories.value[0] || null
+  return topCategories.value.find(c => c.id === activeCategoryId.value) || topCategories.value[0] || null
+})
+
+function buildGroups(cat: ProductNode | null) {
+  if (!cat) return []
   const seconds = cat.children ?? []
   return seconds.map((s) => ({
     title: s.name,
@@ -60,7 +68,14 @@ onMounted(async () => {
     listTopCompanies('supplier', 50),
     listTopCompanies('buyer', 50)
   ])
-  if (catRes.code === 0) categoryTree.value = catRes.data ?? []
+  if (catRes.code === 0) {
+    categoryTree.value = catRes.data ?? []
+    // 默认选中第一个一级分类
+    const roots = categoryTree.value.filter(cat => (cat.parentId ?? 0) === 0)
+    if (roots.length > 0) {
+      activeCategoryId.value = roots[0].id
+    }
+  }
   if (supRes.code === 0) topSuppliers.value = supRes.data ?? []
   if (buyRes.code === 0) topBuyers.value = buyRes.data ?? []
 })
@@ -69,9 +84,9 @@ onMounted(async () => {
 <template>
   <nav class="bg-white border-b sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="h-16 flex items-center justify-between gap-6">
-        <!-- Left: Logo & Dropdowns -->
-        <div class="flex items-center gap-8">
+      <div class="min-h-[80px] py-4 flex items-center justify-between gap-6">
+        <!-- Left: Logo & Dropdowns (Stacked) -->
+        <div class="flex flex-col items-start gap-3">
           <div class="flex items-center gap-3 cursor-pointer hover:bg-gray-50/50 px-2 py-1 rounded-xl transition-all active:scale-[0.99]" @click="go('/')">
             <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black">A</div>
             <div class="leading-tight hidden sm:block">
@@ -80,32 +95,73 @@ onMounted(async () => {
             </div>
           </div>
 
-          <!-- Dropdowns -->
-          <div class="hidden lg:flex items-center gap-4">
+          <!-- Dropdowns Row -->
+          <div class="hidden lg:flex items-center gap-6 ml-2">
             <!-- 产品分类 -->
             <el-dropdown trigger="hover" popper-class="mega-menu-popper">
               <button class="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-emerald-600 transition-colors">
                 产品分类 <ChevronDown :size="14" />
               </button>
               <template #dropdown>
-                <div class="p-6 w-[800px] max-h-[600px] overflow-y-auto">
-                  <div class="grid grid-cols-4 gap-8">
-                    <div v-for="cat in topCategories" :key="cat.id" class="space-y-4">
-                      <div class="font-bold text-emerald-700 border-b border-emerald-50 pb-2 flex items-center justify-between group cursor-pointer" @click="go('/hall/supply', { categoryId: cat.id })">
-                        {{ cat.name }}
-                        <span class="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">查看全部</span>
-                      </div>
-                      <div v-for="group in buildGroups(cat)" :key="group.title" class="space-y-2">
-                        <div class="text-xs font-bold text-gray-900 cursor-pointer hover:text-emerald-600" @click="go('/hall/supply', { categoryId: group.titleNode.id })">
-                          {{ group.title }}
+                <div class="flex w-[900px] h-[540px] overflow-hidden bg-white rounded-2xl">
+                  <!-- Sidebar: 1st Level Categories -->
+                  <div class="w-64 bg-gray-50 border-r border-gray-100 py-4 overflow-y-auto">
+                    <div 
+                      v-for="cat in topCategories" 
+                      :key="cat.id"
+                      class="px-6 py-3 cursor-pointer transition-all flex items-center justify-between group"
+                      :class="activeCategoryId === cat.id ? 'bg-white text-emerald-700 font-bold border-r-2 border-emerald-600' : 'text-gray-600 hover:bg-gray-100'"
+                      @mouseenter="activeCategoryId = cat.id"
+                      @click="go('/hall/supply', { categoryId: cat.id })"
+                    >
+                      <span>{{ cat.name }}</span>
+                      <ChevronDown :size="12" class="-rotate-90 text-gray-300 group-hover:text-emerald-500 transition-colors" />
+                    </div>
+                  </div>
+
+                  <!-- Details Panel: 2nd & 3rd Level Categories -->
+                  <div class="flex-1 p-8 overflow-y-auto bg-white">
+                    <div v-if="activeCategory" class="space-y-8">
+                      <!-- Panel Header -->
+                      <div class="flex items-center justify-between border-b border-gray-50 pb-4 mb-6">
+                        <div class="flex items-center gap-3">
+                          <div class="w-1.5 h-5 bg-emerald-600 rounded-full"></div>
+                          <h3 class="text-xl font-black text-gray-900">{{ activeCategory.name }}</h3>
                         </div>
-                        <ul class="space-y-1">
-                          <li v-for="item in group.items" :key="item.id">
-                            <button class="text-[11px] text-gray-500 hover:text-emerald-600 transition-colors" @click="go('/hall/supply', { categoryId: item.id })">
+                        <button 
+                          class="text-xs font-bold text-emerald-600 hover:underline flex items-center gap-1"
+                          @click="go('/hall/supply', { categoryId: activeCategory.id })"
+                        >
+                          查看该大类全部
+                        </button>
+                      </div>
+
+                      <!-- Sub Groups -->
+                      <div class="grid grid-cols-3 gap-x-8 gap-y-10">
+                        <div v-for="group in buildGroups(activeCategory)" :key="group.title" class="space-y-4">
+                          <div 
+                            class="text-sm font-black text-gray-900 cursor-pointer hover:text-emerald-600 flex items-center gap-1 group/title" 
+                            @click="go('/hall/supply', { categoryId: group.titleNode.id })"
+                          >
+                            {{ group.title }}
+                            <ChevronDown :size="10" class="-rotate-90 text-gray-300 group-hover/title:text-emerald-500 opacity-0 group-hover/title:opacity-100 transition-all" />
+                          </div>
+                          <div class="flex flex-wrap gap-x-3 gap-y-2">
+                            <button 
+                              v-for="item in group.items" 
+                              :key="item.id"
+                              class="text-[11px] text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded-md transition-all border border-transparent hover:border-emerald-100" 
+                              @click="go('/hall/supply', { categoryId: item.id })"
+                            >
                               {{ item.name }}
                             </button>
-                          </li>
-                        </ul>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Empty State -->
+                      <div v-if="!activeCategory.children?.length" class="py-20 text-center text-gray-400">
+                        该分类下暂无子项
                       </div>
                     </div>
                   </div>
@@ -250,8 +306,14 @@ onMounted(async () => {
 <style>
 .mega-menu-popper {
   --el-dropdown-menu-box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-  border-radius: 16px !important;
+  border-radius: 20px !important;
   border: none !important;
+  padding: 0 !important;
+  margin-top: 12px !important;
+}
+.mega-menu-popper .el-dropdown-menu {
+  padding: 0 !important;
+  background: transparent !important;
 }
 </style>
 

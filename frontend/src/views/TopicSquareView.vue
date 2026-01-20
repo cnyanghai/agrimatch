@@ -2,12 +2,12 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { requireAuth } from '../../utils/requireAuth'
-import { listPosts, type PostResponse } from '../../api/post'
-import { useAuthStore } from '../../store/auth'
-import { useUiStore } from '../../store/ui'
-import PublicTopNav from '../../components/PublicTopNav.vue'
-import PublicFooter from '../../components/PublicFooter.vue'
+import { requireAuth } from '../utils/requireAuth'
+import { listPosts, type PostResponse } from '../api/post'
+import { useAuthStore } from '../store/auth'
+import { useUiStore } from '../store/ui'
+import PublicTopNav from '../components/PublicTopNav.vue'
+import PublicFooter from '../components/PublicFooter.vue'
 import { MessageSquare, Heart, Search, ChevronDown, Plus, Star, Gift, Coins, CheckCircle } from 'lucide-vue-next'
 
 const router = useRouter()

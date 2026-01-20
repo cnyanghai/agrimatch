@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { getProductTree, type ProductNode } from '../../api/product'
-import { listPosts, type PostResponse } from '../../api/post'
-import { getPlatformStats, type StatsResponse } from '../../api/stats'
-import { listTopCompanies, type CompanyCardResponse } from '../../api/company'
-import PublicTopNav from '../../components/PublicTopNav.vue'
-import PublicFooter from '../../components/PublicFooter.vue'
+import { getProductTree, type ProductNode } from '../api/product'
+import { listPosts, type PostResponse } from '../api/post'
+import { getPlatformStats, type StatsResponse } from '../api/stats'
+import { listTopCompanies, type CompanyCardResponse } from '../api/company'
+import PublicTopNav from '../components/PublicTopNav.vue'
+import PublicFooter from '../components/PublicFooter.vue'
 import { MapPin, ArrowRight, Search, TrendingUp, Package, Truck, ShoppingBag, Gift, MessageCircle, FileText } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -221,10 +221,13 @@ onBeforeUnmount(() => {
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-20 flex flex-col items-center text-center">
         <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight tracking-tight">
-          产品物料搜索
+          智慧畜牧供应链
+        </h1>
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight tracking-tight">
+          一站式采购与管理平台
         </h1>
         <p class="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl leading-relaxed">
-          最优质、最全面的产品库，交易更透明
+          链接全国优质饲料、兽药、养殖设备供应商，提供在线合同生成及全流程追溯服务
         </p>
 
         <!-- Centered Search Box -->
@@ -235,7 +238,7 @@ onBeforeUnmount(() => {
               <input
                 v-model="searchKeyword"
                 type="text"
-                placeholder="搜索品种、产地、供应商或采购商..."
+                placeholder="搜索玉米、豆粕、疫苗、自动喂料机、型号..."
                 class="w-full bg-transparent border-none outline-none text-white placeholder:text-gray-400 py-3"
                 @keyup.enter="onSearch"
               />

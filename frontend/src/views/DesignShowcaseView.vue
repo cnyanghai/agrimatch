@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Card } from '../components/ui'
-import { BaseButton } from '../components/ui/BaseButton.vue'
-import { FormInput } from '../components/ui/FormInput.vue'
+import BaseButton from '../components/ui/BaseButton.vue'
+import FormInput from '../components/ui/FormInput.vue'
 import { Search, Bell, User, Settings, TrendingUp, Users, CreditCard, AlertCircle } from 'lucide-vue-next'
 
 const loading = ref(false)

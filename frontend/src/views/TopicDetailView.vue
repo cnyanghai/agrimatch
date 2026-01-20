@@ -3,7 +3,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Present } from '@element-plus/icons-vue'
-import PublicTopNav from '../../components/PublicTopNav.vue'
+import PublicTopNav from '../components/PublicTopNav.vue'
 import { 
   getPost, 
   togglePostLike, 
@@ -12,11 +12,11 @@ import {
   acceptAnswer,
   type PostResponse,
   type PostCommentResponse 
-} from '../../api/post'
-import { giftPoints } from '../../api/points'
-import { useAuthStore } from '../../store/auth'
-import { requireAuth } from '../../utils/requireAuth'
-import PublicFooter from '../../components/PublicFooter.vue'
+} from '../api/post'
+import { giftPoints } from '../api/points'
+import { useAuthStore } from '../store/auth'
+import { requireAuth } from '../utils/requireAuth'
+import PublicFooter from '../components/PublicFooter.vue'
 
 const route = useRoute()
 const router = useRouter()

@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { requireAuth } from '../../utils/requireAuth'
-import PublicTopNav from '../../components/PublicTopNav.vue'
-import PublicFooter from '../../components/PublicFooter.vue'
-import ChatDrawer from '../../components/chat/ChatDrawer.vue'
-import { listSupplies, type SupplyResponse } from '../../api/supply'
-import { openChatConversation } from '../../api/chat'
-import { followUser, unfollowUser, checkFollowStatus } from '../../api/follow'
-import { batchGetFuturesPrices, type FuturesContractResponse } from '../../api/futures'
+import { requireAuth } from '../utils/requireAuth'
+import PublicTopNav from '../components/PublicTopNav.vue'
+import PublicFooter from '../components/PublicFooter.vue'
+import ChatDrawer from '../components/chat/ChatDrawer.vue'
+import { listSupplies, type SupplyResponse } from '../api/supply'
+import { openChatConversation } from '../api/chat'
+import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
+import { batchGetFuturesPrices, type FuturesContractResponse } from '../api/futures'
 import { ElMessage } from 'element-plus'
-import { useAuthStore } from '../../store/auth'
+import { useAuthStore } from '../store/auth'
 
 const router = useRouter()
 const route = useRoute()
