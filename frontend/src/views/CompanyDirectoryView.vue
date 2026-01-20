@@ -35,13 +35,6 @@ async function loadDirectory() {
   }
 }
 
-function setType(t: 'supplier' | 'buyer') {
-  type.value = t
-  page.value = 1
-  letter.value = ''
-  updateUrl()
-}
-
 function setLetter(l: string) {
   letter.value = letter.value === l ? '' : l
   page.value = 1
@@ -96,29 +89,6 @@ watch(() => route.query, () => {
 
       <!-- Type Switch & Alphabet Index -->
       <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
-        <div class="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between mb-8 border-b border-gray-50 pb-8">
-          <div class="flex p-1 bg-gray-100 rounded-2xl">
-            <button
-              class="px-8 py-2.5 rounded-xl font-bold text-sm transition-all"
-              :class="type === 'supplier' ? 'bg-white text-emerald-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
-              @click="setType('supplier')"
-            >
-              供应商
-            </button>
-            <button
-              class="px-8 py-2.5 rounded-xl font-bold text-sm transition-all"
-              :class="type === 'buyer' ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
-              @click="setType('buyer')"
-            >
-              采购商
-            </button>
-          </div>
-
-          <div class="flex items-center gap-2 text-sm text-gray-400">
-            <span>共找到 <b class="text-gray-900">{{ total }}</b> 家{{ type === 'supplier' ? '供应商' : '采购商' }}</span>
-          </div>
-        </div>
-
         <div class="flex flex-wrap gap-2">
           <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mr-4 self-center">跳转到</span>
           <button

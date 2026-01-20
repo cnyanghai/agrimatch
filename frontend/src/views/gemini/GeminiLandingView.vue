@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { requireAuth } from '../../utils/requireAuth'
 import { getProductTree, type ProductNode } from '../../api/product'
 import { listPosts, type PostResponse } from '../../api/post'
 import { getPlatformStats, type StatsResponse } from '../../api/stats'
 import { listTopCompanies, type CompanyCardResponse } from '../../api/company'
 import PublicTopNav from '../../components/PublicTopNav.vue'
 import PublicFooter from '../../components/PublicFooter.vue'
-import { MapPin, ArrowRight, Search, TrendingUp, Package, Truck, ShoppingBag, Gift } from 'lucide-vue-next'
+import { MapPin, ArrowRight, Search, TrendingUp, Package, Truck, ShoppingBag, Gift, MessageCircle, FileText } from 'lucide-vue-next'
 
 const router = useRouter()
 
@@ -66,8 +65,6 @@ function onSearch() {
   })
 }
 
-const quickCategories = ['玉米', '豆粕', '菜粕', 'DDGS', '赖氨酸', '蛋氨酸']
-
 function go(path: string) {
   router.push(path)
 }
@@ -109,16 +106,6 @@ async function loadHotTopics() {
   } finally {
     hotTopicsLoading.value = false
   }
-}
-
-function onPublishSupply() {
-  if (!requireAuth('/supply')) return
-  go('/supply')
-}
-
-function onPublishNeed() {
-  if (!requireAuth('/requirements')) return
-  go('/requirements')
 }
 
 async function loadCategories() {
@@ -257,18 +244,6 @@ onBeforeUnmount(() => {
               搜索
             </button>
           </div>
-          
-          <!-- Quick Categories -->
-          <div class="flex flex-wrap justify-center gap-3 mt-6">
-            <button
-              v-for="cat in quickCategories"
-              :key="cat"
-              class="text-xs font-bold text-gray-300 hover:text-white px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 transition-all"
-              @click="goCategory({ name: cat, id: 0 } as any)"
-            >
-              {{ cat }}
-            </button>
-          </div>
         </div>
 
         <!-- Stats Display -->
@@ -285,11 +260,6 @@ onBeforeUnmount(() => {
             <ShoppingBag :size="16" class="text-emerald-500" />
             <span>搜索数百家采购商 <b class="text-white">({{ stats?.buyerCount ?? 0 }})</b></span>
           </div>
-        </div>
-        
-        <div class="flex gap-4 mt-12">
-          <button class="bg-white/10 hover:bg-white/20 border border-white/20 px-8 py-3 rounded-xl font-bold transition-all text-sm" @click="onPublishSupply">发布供应</button>
-          <button class="bg-white/10 hover:bg-white/20 border border-white/20 px-8 py-3 rounded-xl font-bold transition-all text-sm" @click="onPublishNeed">发布采购</button>
         </div>
       </div>
     </section>
