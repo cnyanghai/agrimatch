@@ -26,7 +26,9 @@ import {
   Gem,
   FlaskConical,
   LayoutGrid,
-  ChevronRight
+  ChevronRight,
+  Building2,
+  Users
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -82,8 +84,8 @@ async function loadData() {
   try {
     const [statsRes, supRes, buyRes] = await Promise.all([
       getPlatformStats(),
-      listTopCompanies('supplier', 8),
-      listTopCompanies('buyer', 8)
+      listTopCompanies('supplier', 12),
+      listTopCompanies('buyer', 12)
     ])
     if (statsRes.code === 0) stats.value = statsRes.data ?? null
     if (supRes.code === 0) suppliers.value = supRes.data ?? []
@@ -115,6 +117,23 @@ function avatarText(p: PostResponse) {
   const n = displayName(p)
   const ch = n[0] ?? 'U'
   return /\d/.test(ch) ? 'U' : ch
+}
+
+const getPostCover = (post: PostResponse) => {
+  if (post.imagesJson) {
+    try {
+      const imgs = JSON.parse(post.imagesJson)
+      if (Array.isArray(imgs) && imgs.length > 0) return imgs[0]
+    } catch (e) {}
+  }
+  // 模拟占位图：基于 ID 选择不同的 Unsplash 图片
+  const placeholders = [
+    'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=800',
+    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=800',
+    'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&q=80&w=800',
+    'https://images.unsplash.com/photo-1495107332209-39780009581a?auto=format&fit=crop&q=80&w=800'
+  ]
+  return placeholders[post.id % placeholders.length]
 }
 
 function formatTime(timeStr: string | undefined) {
@@ -310,9 +329,6 @@ onBeforeUnmount(() => {
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Raw Materials</span>
-            </div>
             <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
               按 <span class="text-emerald-600">原料</span> 搜索
             </h2>
@@ -370,90 +386,96 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <!-- 按供应商搜索 -->
-    <section class="py-20 bg-gray-50/50 border-b border-gray-100">
+    <!-- 按供应商搜索 (品牌墙风格) -->
+    <section class="py-24 bg-gray-50/50 border-b border-gray-100">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="flex items-center justify-between mb-10">
-          <div class="flex items-center gap-3">
-            <div class="w-1.5 h-6 bg-blue-600 rounded-full"></div>
-            <h2 class="text-2xl font-bold text-gray-900">按供应商搜索</h2>
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+          <div>
+            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+              按 <span class="text-emerald-600">供应商</span> 搜索
+            </h2>
           </div>
-          <button class="text-sm font-bold text-blue-600 hover:underline" @click="go('/hall/supply')">查看更多供应商</button>
+          <button 
+            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-emerald-600 transition-colors"
+            @click="go('/hall/supply')"
+          >
+            查看所有供应商
+            <div class="w-8 h-8 rounded-full bg-white group-hover:bg-emerald-50 flex items-center justify-center transition-colors">
+              <ChevronRight :size="16" />
+            </div>
+          </button>
         </div>
 
-        <div v-if="dataLoading" class="grid md:grid-cols-4 gap-4">
-          <div v-for="i in 4" :key="i" class="h-48 bg-white rounded-2xl animate-pulse"></div>
+        <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div v-for="i in 12" :key="i" class="h-32 bg-white rounded-2xl animate-pulse"></div>
         </div>
-        <div v-else class="grid md:grid-cols-4 gap-4">
+        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           <div
-            v-for="s in suppliers"
+            v-for="s in suppliers.slice(0, 12)"
             :key="s.id"
-            class="bg-white p-6 rounded-2xl border border-gray-100 hover:shadow-lg hover:border-blue-100 transition-all cursor-pointer group"
+            class="group bg-white p-6 rounded-2xl border border-gray-100 transition-all cursor-pointer flex flex-col items-center justify-center text-center hover:shadow-lg hover:border-emerald-100 hover:-translate-y-1"
             @click="go(`/companies/${s.id}`)"
           >
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold">
+            <div class="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform overflow-hidden shadow-inner">
+              <div v-if="!s.logo" class="text-xl font-black text-emerald-600/30 tracking-tighter">
                 {{ s.companyName[0] }}
               </div>
-              <div class="min-w-0">
-                <div class="font-bold text-gray-900 truncate group-hover:text-blue-600">{{ s.companyName }}</div>
-                <div class="text-xs text-gray-400">{{ s.province }} {{ s.city }}</div>
-              </div>
+              <img v-else :src="s.logo" class="w-full h-full object-contain p-2" />
             </div>
-            <div class="space-y-2">
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-gray-400">主营品类</span>
-                <span class="text-gray-900 font-medium truncate ml-2">{{ s.categoryNames?.join(' / ') || '-' }}</span>
-              </div>
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-gray-400">供应信息</span>
-                <span class="text-blue-600 font-bold">{{ s.count }} 条</span>
-              </div>
+            <div class="text-sm font-bold text-gray-600 group-hover:text-emerald-600 transition-colors truncate w-full px-2">
+              {{ s.companyName }}
+            </div>
+            <div class="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+              <MapPin :size="10" />
+              {{ s.city || s.province }}
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 按采购商搜索 -->
-    <section class="py-20 bg-white border-b border-gray-100">
+    <!-- 按采购商搜索 (品牌墙风格) -->
+    <section class="py-24 bg-white border-b border-gray-100">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="flex items-center justify-between mb-10">
-          <div class="flex items-center gap-3">
-            <div class="w-1.5 h-6 bg-purple-600 rounded-full"></div>
-            <h2 class="text-2xl font-bold text-gray-900">按采购商搜索</h2>
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+          <div>
+            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+              按 <span class="text-blue-600">采购商</span> 搜索
+            </h2>
           </div>
-          <button class="text-sm font-bold text-purple-600 hover:underline" @click="go('/hall/need')">查看更多采购商</button>
+          <button 
+            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-blue-600 transition-colors"
+            @click="go('/hall/need')"
+          >
+            查看所有采购商
+            <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-blue-50 flex items-center justify-center transition-colors">
+              <ChevronRight :size="16" />
+            </div>
+          </button>
         </div>
 
-        <div v-if="dataLoading" class="grid md:grid-cols-4 gap-4">
-          <div v-for="i in 4" :key="i" class="h-48 bg-gray-50 rounded-2xl animate-pulse"></div>
+        <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div v-for="i in 12" :key="i" class="h-32 bg-gray-50 rounded-2xl animate-pulse"></div>
         </div>
-        <div v-else class="grid md:grid-cols-4 gap-4">
+        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           <div
-            v-for="b in buyers"
+            v-for="b in buyers.slice(0, 12)"
             :key="b.id"
-            class="bg-white p-6 rounded-2xl border border-gray-100 hover:shadow-lg hover:border-purple-100 transition-all cursor-pointer group"
+            class="group bg-white p-6 rounded-2xl border border-gray-100 transition-all cursor-pointer flex flex-col items-center justify-center text-center hover:shadow-lg hover:border-blue-100 hover:-translate-y-1"
             @click="go(`/companies/${b.id}`)"
           >
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-10 h-10 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center font-bold">
+            <div class="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform overflow-hidden shadow-inner">
+              <div v-if="!b.logo" class="text-xl font-black text-blue-600/30 tracking-tighter">
                 {{ b.companyName[0] }}
               </div>
-              <div class="min-w-0">
-                <div class="font-bold text-gray-900 truncate group-hover:text-purple-600">{{ b.companyName }}</div>
-                <div class="text-xs text-gray-400">{{ b.province }} {{ b.city }}</div>
-              </div>
+              <img v-else :src="b.logo" class="w-full h-full object-contain p-2" />
             </div>
-            <div class="space-y-2">
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-gray-400">采购品类</span>
-                <span class="text-gray-900 font-medium truncate ml-2">{{ b.categoryNames?.join(' / ') || '-' }}</span>
-              </div>
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-gray-400">需求信息</span>
-                <span class="text-purple-600 font-bold">{{ b.count }} 条</span>
-              </div>
+            <div class="text-sm font-bold text-gray-600 group-hover:text-blue-600 transition-colors truncate w-full px-2">
+              {{ b.companyName }}
+            </div>
+            <div class="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+              <Users :size="10" />
+              {{ b.city || b.province }}
             </div>
           </div>
         </div>
@@ -461,64 +483,74 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 话题广场 -->
-    <section class="max-w-7xl mx-auto px-4 py-24">
-      <div class="text-center mb-16">
-        <h2 class="text-3xl font-extrabold text-gray-900 mb-4">话题广场</h2>
-        <p class="text-gray-500 max-w-2xl mx-auto">
-          通过我们的博客、指南、播客、文章、访谈等，了解所有最新新闻和信息
-        </p>
+    <section class="max-w-7xl mx-auto px-4 py-24 border-b border-gray-100">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
+        <div>
+          <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">话题广场</h2>
+          <p class="text-gray-500 mt-4 max-w-2xl leading-relaxed">
+            通过我们的博客、指南、播客、文章、访谈等，了解所有最新新闻和信息
+          </p>
+        </div>
+        <button 
+          class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-emerald-600 transition-colors"
+          @click="go('/talks')"
+        >
+          查看更多内容
+          <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-emerald-50 flex items-center justify-center transition-colors">
+            <ChevronRight :size="16" />
+          </div>
+        </button>
       </div>
 
-      <div v-if="hotTopicsLoading" class="grid md:grid-cols-3 gap-8">
-        <div v-for="i in 3" :key="i" class="bg-white p-8 rounded-3xl border border-gray-100 animate-pulse h-64"></div>
-      </div>
-      <div v-else-if="hotTopics.length === 0" class="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-        <p class="text-gray-400">暂无热门话题</p>
-      </div>
-      <div v-else class="grid md:grid-cols-3 gap-8">
-        <div
-          v-for="(post, idx) in hotTopics.slice(0, 3)"
-          :key="post.id"
-          class="bg-white p-8 rounded-3xl border border-gray-100 hover:shadow-xl hover:border-emerald-100 transition-all cursor-pointer flex flex-col group"
-          @click="go(`/talks/${post.id}`)"
-        >
-          <div class="flex items-center gap-3 mb-6">
-            <div
-              class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-sm text-xs"
-              :class="idx % 2 === 0 ? 'bg-emerald-500' : 'bg-blue-500'"
-            >
-              {{ avatarText(post) }}
-            </div>
-            <div class="min-w-0">
-              <div class="font-bold text-gray-900 text-sm truncate">{{ displayName(post) }}</div>
-              <div class="text-[10px] text-gray-400 truncate">{{ formatTime(post.createTime) }}</div>
-            </div>
-          </div>
-          
-          <h3 class="text-lg font-bold text-gray-900 mb-4 line-clamp-2 group-hover:text-emerald-600 transition-colors">
-            {{ post.title }}
-          </h3>
-          <p class="text-gray-500 text-xs leading-relaxed mb-6 line-clamp-3">
-            {{ post.content || '暂无内容摘要' }}
-          </p>
-          
-          <div class="mt-auto flex items-center justify-between pt-6 border-t border-gray-50 text-[10px]">
-            <div class="flex items-center gap-3 text-gray-400 font-medium">
-              <span>{{ post.commentCount ?? 0 }} 评论</span>
-              <span>{{ post.likeCount ?? 0 }} 赞</span>
-            </div>
-            <span class="font-bold text-emerald-600 flex items-center gap-1">
-              阅读全文
-              <ArrowRight :size="12" />
-            </span>
+      <div v-if="hotTopicsLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div v-for="i in 4" :key="i" class="bg-white rounded-2xl border border-gray-100 animate-pulse overflow-hidden">
+          <div class="aspect-video bg-gray-50"></div>
+          <div class="p-6 space-y-4">
+            <div class="h-4 bg-gray-50 rounded w-3/4"></div>
+            <div class="h-4 bg-gray-50 rounded w-1/2"></div>
           </div>
         </div>
       </div>
+      <div v-else-if="hotTopics.length === 0" class="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <MessageCircle :size="32" class="text-gray-300" />
+        </div>
+        <p class="text-gray-400">暂无热门话题</p>
+      </div>
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div
+          v-for="post in hotTopics.slice(0, 4)"
+          :key="post.id"
+          class="group bg-white rounded-2xl border border-gray-100 hover:shadow-xl hover:border-emerald-100 transition-all cursor-pointer overflow-hidden flex flex-col hover:-translate-y-1"
+          @click="go(`/talks/${post.id}`)"
+        >
+          <!-- 封面图 -->
+          <div class="aspect-video overflow-hidden bg-gray-100 relative">
+            <img :src="getPostCover(post)" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+          </div>
 
-      <div class="text-center mt-12">
-        <button class="px-8 py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-all active:scale-95" @click="go('/talks')">
-          查看更多内容
-        </button>
+          <!-- 内容 -->
+          <div class="p-6 flex-1 flex flex-col">
+            <h3 class="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-emerald-600 transition-colors leading-snug">
+              {{ post.title }}
+            </h3>
+            <p class="text-xs text-gray-500 leading-relaxed line-clamp-3 mb-6 flex-1">
+              {{ post.content || '暂无内容摘要' }}
+            </p>
+            
+            <!-- 作者信息 -->
+            <div class="flex items-center gap-3 pt-4 border-t border-gray-50">
+              <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] font-bold text-white shadow-sm shrink-0">
+                {{ avatarText(post) }}
+              </div>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-gray-900 truncate">{{ displayName(post) }}</div>
+                <div class="text-[10px] text-gray-400 mt-0.5">{{ formatTime(post.createTime) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 

@@ -10,6 +10,7 @@ public class CompanyCardResponse {
     private String companyName;
     private String province;
     private String city;
+    private String logo;
     private Long count; // 供应/需求数量
     private String categoryNamesStr; // 数据库联接后的逗号分隔字符串
     private List<String> categoryNames;
@@ -44,6 +45,14 @@ public class CompanyCardResponse {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
     }
 
     public Long getCount() {

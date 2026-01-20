@@ -133,11 +133,12 @@
             c.company_name AS companyName,
             c.province AS province,
             c.city AS city,
+            c.license_img_url AS logo,
             COUNT(s.id) AS count,
             GROUP_CONCAT(DISTINCT s.category_name) AS categoryNamesStr
         FROM bus_company c
-        INNER JOIN bus_supply s ON c.id = s.company_id
-        WHERE c.is_deleted = 0 AND s.is_deleted = 0
+        LEFT JOIN bus_supply s ON c.id = s.company_id AND s.is_deleted = 0
+        WHERE c.is_deleted = 0
         <if test="region != null and region != ''">
             AND c.province LIKE CONCAT('%', #{region}, '%')
         </if>
@@ -152,11 +153,12 @@
             c.company_name AS companyName,
             c.province AS province,
             c.city AS city,
+            c.license_img_url AS logo,
             COUNT(r.id) AS count,
             GROUP_CONCAT(DISTINCT r.category_name) AS categoryNamesStr
         FROM bus_company c
-        INNER JOIN bus_requirement r ON c.id = r.company_id
-        WHERE c.is_deleted = 0 AND r.is_deleted = 0
+        LEFT JOIN bus_requirement r ON c.id = r.company_id AND r.is_deleted = 0
+        WHERE c.is_deleted = 0
         <if test="categoryName != null and categoryName != ''">
             AND r.category_name = #{categoryName}
         </if>
@@ -171,6 +173,7 @@
             c.company_name AS companyName,
             c.province AS province,
             c.city AS city,
+            c.license_img_url AS logo,
             <choose>
                 <when test="type == 'supplier'">
                     COUNT(s.id) AS count,
@@ -184,10 +187,10 @@
         FROM bus_company c
         <choose>
             <when test="type == 'supplier'">
-                INNER JOIN bus_supply s ON c.id = s.company_id AND s.is_deleted = 0
+                LEFT JOIN bus_supply s ON c.id = s.company_id AND s.is_deleted = 0
             </when>
             <otherwise>
-                INNER JOIN bus_requirement r ON c.id = r.company_id AND r.is_deleted = 0
+                LEFT JOIN bus_requirement r ON c.id = r.company_id AND r.is_deleted = 0
             </otherwise>
         </choose>
         WHERE c.is_deleted = 0
