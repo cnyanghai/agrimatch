@@ -118,9 +118,9 @@ export function getDeliveryModeText(code?: string): string {
 export const contractStatusMap: Record<number, { label: string; color: string; bgColor: string }> = {
   0: { label: '草稿', color: 'text-gray-600', bgColor: 'bg-gray-100' },
   1: { label: '待签署', color: 'text-amber-600', bgColor: 'bg-amber-50' },
-  2: { label: '已签署', color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
+  2: { label: '已签署', color: 'text-brand-600', bgColor: 'bg-brand-50' },
   3: { label: '履约中', color: 'text-blue-600', bgColor: 'bg-blue-50' },
-  4: { label: '已完成', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
+  4: { label: '已完成', color: 'text-brand-700', bgColor: 'bg-brand-100' },
   5: { label: '已取消', color: 'text-red-500', bgColor: 'bg-red-50' },
 }
 

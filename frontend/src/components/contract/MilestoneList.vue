@@ -33,7 +33,7 @@ const canAdd = computed(() => props.contractStatus === 2 || props.contractStatus
 // 节点类型映射
 const milestoneTypeMap: Record<string, { label: string; icon: any; color: string }> = {
   'SHIP': { label: '发货', icon: Truck, color: 'bg-blue-50 text-blue-600' },
-  'RECEIVE': { label: '收货', icon: Package, color: 'bg-emerald-50 text-emerald-600' },
+  'RECEIVE': { label: '收货', icon: Package, color: 'bg-brand-50 text-brand-600' },
   'PAY': { label: '付款', icon: CreditCard, color: 'bg-amber-50 text-amber-600' },
   'INSPECT': { label: '质检', icon: ClipboardCheck, color: 'bg-purple-50 text-purple-600' },
   'CUSTOM': { label: '自定义', icon: Settings, color: 'bg-gray-100 text-gray-600' }
@@ -43,7 +43,7 @@ const milestoneTypeMap: Record<string, { label: string; icon: any; color: string
 const statusMap: Record<string, { label: string; color: string; bgColor: string }> = {
   'pending': { label: '待提交', color: 'text-gray-500', bgColor: 'bg-gray-100' },
   'submitted': { label: '待确认', color: 'text-amber-600', bgColor: 'bg-amber-50' },
-  'confirmed': { label: '已完成', color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
+  'confirmed': { label: '已完成', color: 'text-brand-600', bgColor: 'bg-brand-50' },
   'rejected': { label: '已拒绝', color: 'text-red-500', bgColor: 'bg-red-50' }
 }
 
@@ -181,7 +181,7 @@ defineExpose({ refresh: loadMilestones })
       
       <button
         v-if="canAdd"
-        class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all active:scale-95"
+        class="flex items-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-all "
         @click="emit('add')"
       >
         <Plus class="w-3.5 h-3.5" />
@@ -217,7 +217,7 @@ defineExpose({ refresh: loadMilestones })
         <div 
           :class="[
             'absolute left-0 top-0 w-6 h-6 rounded-full flex items-center justify-center z-10',
-            milestone.status === 'confirmed' ? 'bg-emerald-500' : 
+            milestone.status === 'confirmed' ? 'bg-brand-500' : 
             milestone.status === 'submitted' ? 'bg-amber-500' :
             milestone.status === 'rejected' ? 'bg-red-500' : 'bg-gray-300'
           ]"
@@ -290,11 +290,11 @@ defineExpose({ refresh: loadMilestones })
               <!-- 确认 -->
               <button
                 v-if="milestone.status === 'submitted'"
-                class="p-1.5 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors"
+                class="p-1.5 bg-brand-50 hover:bg-brand-100 rounded-lg transition-colors"
                 title="确认完成"
                 @click="handleConfirm(milestone)"
               >
-                <Check class="w-4 h-4 text-emerald-600" />
+                <Check class="w-4 h-4 text-brand-600" />
               </button>
               
               <!-- 拒绝 -->

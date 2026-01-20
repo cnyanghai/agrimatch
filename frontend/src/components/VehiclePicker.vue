@@ -114,7 +114,7 @@ onMounted(() => {
         <!-- 下拉菜单 -->
         <div 
           v-if="dropdownOpen"
-          class="absolute right-0 top-full mt-1 w-72 bg-white rounded-xl border border-gray-100 shadow-xl z-50 overflow-hidden"
+          class="absolute right-0 top-full mt-1 w-72 bg-white rounded-xl border border-gray-200 shadow-md z-50 overflow-hidden"
         >
           <div v-if="loading" class="p-4 text-center text-gray-400 text-sm">
             加载中...
@@ -146,7 +146,7 @@ onMounted(() => {
           <!-- 手动输入选项 -->
           <button
             type="button"
-            class="w-full px-4 py-3 text-left hover:bg-emerald-50 border-t border-gray-100 flex items-center gap-2 text-emerald-600"
+            class="w-full px-4 py-3 text-left hover:bg-brand-50 border-t border-gray-200 flex items-center gap-2 text-brand-600"
             @click="switchToManual"
           >
             <Plus class="w-4 h-4" />
@@ -166,7 +166,7 @@ onMounted(() => {
           v-model="form.driverName"
           type="text"
           placeholder="请输入司机姓名"
-          class="w-full px-3 py-2 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+          class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
           @input="emitChange"
         />
       </div>
@@ -178,7 +178,7 @@ onMounted(() => {
           v-model="form.driverIdCard"
           type="text"
           placeholder="请输入身份证号"
-          class="w-full px-3 py-2 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+          class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
           @input="emitChange"
         />
       </div>
@@ -190,7 +190,7 @@ onMounted(() => {
           v-model="form.plateNumber"
           type="text"
           placeholder="例如：鄂A12345"
-          class="w-full px-3 py-2 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm uppercase"
+          class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm uppercase"
           @input="emitChange"
         />
       </div>
@@ -202,7 +202,7 @@ onMounted(() => {
           v-model="form.driverPhone"
           type="tel"
           placeholder="请输入联系电话"
-          class="w-full px-3 py-2 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+          class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
           @input="emitChange"
         />
       </div>

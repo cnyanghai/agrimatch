@@ -53,10 +53,6 @@ const getCategoryMeta = (name: string) => {
   return { icon: Package, ...commonStyles }
 }
 
-const canvasRef = ref<HTMLCanvasElement | null>(null)
-let raf: number | null = null
-let onResize: any = null
-
 // 平台统计
 const stats = ref<StatsResponse | null>(null)
 
@@ -191,82 +187,12 @@ function goCategory(node: ProductNode) {
   })
 }
 
-function startCanvas() {
-  const canvas = canvasRef.value
-  if (!canvas) return
-  const c = canvas
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return
-
-  const points: Array<{ x: number; y: number; vx: number; vy: number; size: number }> = []
-  const numPoints = 80
-
-  function resize() {
-    c.width = c.offsetWidth
-    c.height = c.offsetHeight
-  }
-
-  onResize = () => resize()
-  window.addEventListener('resize', onResize)
-  resize()
-
-  for (let i = 0; i < numPoints; i++) {
-    points.push({
-      x: Math.random() * c.width,
-      y: Math.random() * c.height,
-      vx: (Math.random() - 0.5) * 0.5,
-      vy: (Math.random() - 0.5) * 0.5,
-      size: Math.random() * 2 + 1
-    })
-  }
-
-  const loop = () => {
-    ctx.clearRect(0, 0, c.width, c.height)
-    ctx.strokeStyle = 'rgba(16, 185, 129, 0.15)'
-    ctx.lineWidth = 0.5
-
-    points.forEach((p, i) => {
-      p.x += p.vx
-      p.y += p.vy
-      if (p.x < 0 || p.x > c.width) p.vx *= -1
-      if (p.y < 0 || p.y > c.height) p.vy *= -1
-
-      ctx.beginPath()
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-      const alpha = 0.3 + Math.sin(Date.now() * 0.001 + i) * 0.2
-      ctx.fillStyle = `rgba(16, 185, 129, ${alpha})`
-      ctx.fill()
-
-      for (let j = i + 1; j < points.length; j++) {
-        const p2 = points[j]
-        if (!p2) continue
-        const dist = Math.hypot(p.x - p2.x, p.y - p2.y)
-        if (dist < 150) {
-          ctx.beginPath()
-          ctx.moveTo(p.x, p.y)
-          ctx.lineTo(p2.x, p2.y)
-          ctx.globalAlpha = 1 - dist / 150
-          ctx.stroke()
-          ctx.globalAlpha = 1
-        }
-      }
-    })
-
-    raf = requestAnimationFrame(loop)
-  }
-
-  loop()
-}
-
 onMounted(() => {
-  startCanvas()
   loadCategories()
   loadHotTopics()
   loadData()
 })
 onBeforeUnmount(() => {
-  if (raf) cancelAnimationFrame(raf)
-  if (onResize) window.removeEventListener('resize', onResize)
 })
 </script>
 
@@ -276,8 +202,6 @@ onBeforeUnmount(() => {
 
     <!-- Hero -->
     <section class="relative hero-gradient overflow-hidden text-white h-[510px] flex items-center pt-16">
-      <canvas ref="canvasRef" class="map-canvas"></canvas>
-
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-12 flex flex-col items-center text-center">
         <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight tracking-tight">
           智慧畜牧供应链
@@ -291,7 +215,7 @@ onBeforeUnmount(() => {
 
         <!-- Centered Search Box -->
         <div class="w-full max-w-3xl mb-12">
-          <div class="flex p-1.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl focus-within:border-emerald-500/50 transition-all">
+          <div class="flex p-1.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl focus-within:border-brand-500/50 transition-all">
             <div class="flex-1 flex items-center px-4">
               <Search :size="20" class="text-gray-400 mr-3" />
               <input
@@ -302,7 +226,7 @@ onBeforeUnmount(() => {
                 @keyup.enter="onSearch"
               />
             </div>
-            <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold transition-all active:scale-95" @click="onSearch">
+            <button class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl font-bold transition-all " @click="onSearch">
               搜索
             </button>
           </div>
@@ -311,15 +235,15 @@ onBeforeUnmount(() => {
         <!-- Stats Display -->
         <div class="flex flex-wrap justify-center gap-8 md:gap-16 text-sm font-medium text-gray-400">
           <div class="flex items-center gap-2">
-            <TrendingUp :size="16" class="text-emerald-500" />
+            <TrendingUp :size="16" class="text-brand-500" />
             <span>每月搜索量超过 <b class="text-white">{{ stats?.userCount ? stats.userCount * 123 : 400 }}</b> 万次</span>
           </div>
           <div class="flex items-center gap-2">
-            <Truck :size="16" class="text-emerald-500" />
+            <Truck :size="16" class="text-brand-500" />
             <span>搜索数千家供应商 <b class="text-white">({{ stats?.supplierCount ?? 0 }})</b></span>
           </div>
           <div class="flex items-center gap-2">
-            <ShoppingBag :size="16" class="text-emerald-500" />
+            <ShoppingBag :size="16" class="text-brand-500" />
             <span>搜索数百家采购商 <b class="text-white">({{ stats?.buyerCount ?? 0 }})</b></span>
           </div>
         </div>
@@ -327,34 +251,34 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 按原料搜索 -->
-    <section class="py-24 bg-white border-b border-gray-100">
+    <section class="py-24 bg-white border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
             <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-              按 <span class="text-emerald-600">原料</span> 搜索
+              按 <span class="text-brand-600">原料</span> 搜索
             </h2>
           </div>
           <button 
-            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-emerald-600 transition-colors"
+            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors"
             @click="go('/categories')"
           >
             查看所有类别
-            <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-emerald-50 flex items-center justify-center transition-colors">
+            <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-brand-50 flex items-center justify-center transition-colors">
               <ChevronRight :size="16" />
             </div>
           </button>
         </div>
 
         <div v-if="categoryLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div v-for="i in 8" :key="i" class="h-24 bg-gray-50 rounded-2xl animate-pulse"></div>
+          <div v-for="i in 8" :key="i" class="h-24 bg-gray-50 rounded-xl animate-pulse"></div>
         </div>
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <!-- 核心分类卡片 -->
           <div
             v-for="cat in topCategories.slice(0, 7)"
             :key="cat.id"
-            class="group p-5 bg-white border border-gray-100 rounded-2xl transition-all cursor-pointer flex items-center gap-4 hover:shadow-md hover:border-slate-200 hover:-translate-y-1"
+            class="group p-5 bg-white border border-gray-200 rounded-xl transition-all cursor-pointer flex items-center gap-4 hover:shadow-md hover:border-slate-200 "
             @click="goCategory(cat)"
           >
             <div 
@@ -371,7 +295,7 @@ onBeforeUnmount(() => {
 
           <!-- “更多”卡片 -->
           <div
-            class="group p-5 bg-gray-50/50 border border-dashed border-gray-200 rounded-2xl transition-all cursor-pointer flex items-center gap-4 hover:bg-white hover:border-slate-200 hover:shadow-md hover:-translate-y-1"
+            class="group p-5 bg-gray-50/50 border border-dashed border-gray-200 rounded-xl transition-all cursor-pointer flex items-center gap-4 hover:bg-white hover:border-slate-200 hover:shadow-md "
             @click="go('/categories')"
           >
             <div class="w-12 h-12 shrink-0 bg-white rounded-xl flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all shadow-sm text-slate-400">
@@ -386,45 +310,45 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 按供应商搜索 (品牌墙风格) -->
-    <section class="py-24 bg-gray-50/50 border-b border-gray-100">
+    <section class="py-24 bg-gray-50/50 border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
             <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-              按 <span class="text-emerald-600">供应商</span> 搜索
+              按 <span class="text-brand-600">供应商</span> 搜索
             </h2>
           </div>
           <button 
-            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-emerald-600 transition-colors"
+            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors"
             @click="go('/companies/directory')"
           >
             查看所有供应商
-            <div class="w-8 h-8 rounded-full bg-white group-hover:bg-emerald-50 flex items-center justify-center transition-colors">
+            <div class="w-8 h-8 rounded-full bg-white group-hover:bg-brand-50 flex items-center justify-center transition-colors">
               <ChevronRight :size="16" />
             </div>
           </button>
         </div>
 
         <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <div v-for="i in 12" :key="i" class="h-32 bg-white rounded-2xl animate-pulse"></div>
+          <div v-for="i in 12" :key="i" class="h-32 bg-white rounded-xl animate-pulse"></div>
         </div>
         <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           <div
             v-for="s in suppliers.slice(0, 12)"
             :key="s.id"
-            class="group bg-white p-5 rounded-2xl border border-gray-100 transition-all cursor-pointer flex flex-col hover:shadow-md hover:border-slate-200 hover:-translate-y-1"
+            class="group bg-white p-5 rounded-xl border border-gray-200 transition-all cursor-pointer flex flex-col hover:shadow-md hover:border-slate-200 "
             @click="go(`/companies/${s.id}`)"
           >
             <div class="flex items-start justify-between mb-4">
-              <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-emerald-50 transition-colors">
+              <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-brand-50 transition-colors">
                 <img v-if="s.logo" :src="s.logo" class="w-full h-full object-contain p-1" />
-                <Building2 v-else :size="20" class="text-slate-400 group-hover:text-emerald-500 transition-colors" />
+                <Building2 v-else :size="20" class="text-slate-400 group-hover:text-brand-500 transition-colors" />
               </div>
               <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded uppercase tracking-tighter">
                 {{ (s.province || '未知').substring(0, 2) }}
               </span>
             </div>
-            <div class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors truncate text-sm mb-1">
+            <div class="font-bold text-gray-900 group-hover:text-brand-600 transition-colors truncate text-sm mb-1">
               {{ s.companyName }}
             </div>
             <div class="text-[10px] text-gray-400 flex items-center gap-1">
@@ -437,7 +361,7 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 按采购商搜索 (品牌墙风格) -->
-    <section class="py-24 bg-white border-b border-gray-100">
+    <section class="py-24 bg-white border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
@@ -457,13 +381,13 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <div v-for="i in 12" :key="i" class="h-32 bg-gray-50 rounded-2xl animate-pulse"></div>
+          <div v-for="i in 12" :key="i" class="h-32 bg-gray-50 rounded-xl animate-pulse"></div>
         </div>
         <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           <div
             v-for="b in buyers.slice(0, 12)"
             :key="b.id"
-            class="group bg-white p-5 rounded-2xl border border-gray-100 transition-all cursor-pointer flex flex-col hover:shadow-md hover:border-slate-200 hover:-translate-y-1"
+            class="group bg-white p-5 rounded-xl border border-gray-200 transition-all cursor-pointer flex flex-col hover:shadow-md hover:border-slate-200 "
             @click="go(`/companies/${b.id}`)"
           >
             <div class="flex items-start justify-between mb-4">
@@ -488,7 +412,7 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 话题广场 -->
-    <section class="max-w-7xl mx-auto px-4 py-24 border-b border-gray-100">
+    <section class="max-w-7xl mx-auto px-4 py-24 border-b border-gray-200">
       <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
         <div>
           <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">话题广场</h2>
@@ -497,18 +421,18 @@ onBeforeUnmount(() => {
           </p>
         </div>
         <button 
-          class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-emerald-600 transition-colors"
+          class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors"
           @click="go('/talks')"
         >
           查看更多内容
-          <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-emerald-50 flex items-center justify-center transition-colors">
+          <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-brand-50 flex items-center justify-center transition-colors">
             <ChevronRight :size="16" />
           </div>
         </button>
       </div>
 
       <div v-if="hotTopicsLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div v-for="i in 4" :key="i" class="bg-white rounded-2xl border border-gray-100 animate-pulse overflow-hidden">
+        <div v-for="i in 4" :key="i" class="bg-white rounded-xl border border-gray-200 animate-pulse overflow-hidden">
           <div class="aspect-video bg-gray-50"></div>
           <div class="p-6 space-y-4">
             <div class="h-4 bg-gray-50 rounded w-3/4"></div>
@@ -516,7 +440,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </div>
-      <div v-else-if="hotTopics.length === 0" class="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+      <div v-else-if="hotTopics.length === 0" class="text-center py-20 bg-white rounded-xl border border-dashed border-gray-200">
         <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
           <MessageCircle :size="32" class="text-gray-300" />
         </div>
@@ -526,7 +450,7 @@ onBeforeUnmount(() => {
         <div
           v-for="post in hotTopics.slice(0, 4)"
           :key="post.id"
-          class="group bg-white rounded-2xl border border-gray-100 hover:shadow-xl hover:border-emerald-100 transition-all cursor-pointer overflow-hidden flex flex-col hover:-translate-y-1"
+          class="group bg-white rounded-xl border border-gray-200 hover:shadow-md hover:border-brand-100 transition-all cursor-pointer overflow-hidden flex flex-col "
           @click="go(`/talks/${post.id}`)"
         >
           <!-- 封面图 -->
@@ -537,7 +461,7 @@ onBeforeUnmount(() => {
 
           <!-- 内容 -->
           <div class="p-6 flex-1 flex flex-col">
-            <h3 class="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-emerald-600 transition-colors leading-snug">
+            <h3 class="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-brand-600 transition-colors leading-snug">
               {{ post.title }}
             </h3>
             <p class="text-xs text-gray-500 leading-relaxed line-clamp-3 mb-6 flex-1">
@@ -546,7 +470,7 @@ onBeforeUnmount(() => {
             
             <!-- 作者信息 -->
             <div class="flex items-center gap-3 pt-4 border-t border-gray-50">
-              <div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] font-bold text-white shadow-sm shrink-0">
+              <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center text-[10px] font-bold text-white shadow-sm shrink-0">
                 {{ avatarText(post) }}
               </div>
               <div class="min-w-0">
@@ -566,7 +490,7 @@ onBeforeUnmount(() => {
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div class="flex flex-col items-center">
-            <div class="w-16 h-16 bg-white/5 border border-white/10 text-emerald-400 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-xl">
+            <div class="w-16 h-16 bg-white/5 border border-white/10 text-brand-400 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xl">
               <span class="text-2xl font-black">01</span>
             </div>
             <h4 class="font-bold text-white mb-2">发布/发现</h4>
@@ -574,7 +498,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="flex flex-col items-center">
-            <div class="w-16 h-16 bg-white/5 border border-white/10 text-blue-400 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-xl">
+            <div class="w-16 h-16 bg-white/5 border border-white/10 text-blue-400 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xl">
               <span class="text-2xl font-black">02</span>
             </div>
             <h4 class="font-bold text-white mb-2">洽谈议价</h4>
@@ -582,7 +506,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="flex flex-col items-center">
-            <div class="w-16 h-16 bg-white/5 border border-white/10 text-purple-400 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-xl">
+            <div class="w-16 h-16 bg-white/5 border border-white/10 text-purple-400 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xl">
               <span class="text-2xl font-black">03</span>
             </div>
             <h4 class="font-bold text-white mb-2">电子签约</h4>
@@ -590,7 +514,7 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="flex flex-col items-center">
-            <div class="w-16 h-16 bg-emerald-600 text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-600/20">
+            <div class="w-16 h-16 bg-brand-600 text-white rounded-xl flex items-center justify-center mb-4 shadow-md">
               <Gift :size="28" />
             </div>
             <h4 class="font-bold text-white mb-2">履约/奖励</h4>
@@ -607,14 +531,5 @@ onBeforeUnmount(() => {
 <style scoped>
 .hero-gradient {
   background: radial-gradient(circle at 50% -20%, #065f46 0%, #022c22 100%);
-}
-.map-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.3;
-  pointer-events: none;
 }
 </style>

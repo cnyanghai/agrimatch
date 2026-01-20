@@ -67,7 +67,7 @@ const sizeClasses: Record<string, { container: string; icon: string; title: stri
     <!-- 图标 -->
     <div 
       :class="[
-        'mx-auto mb-4 rounded-2xl bg-gray-50 flex items-center justify-center',
+        'mx-auto mb-4 rounded-xl bg-gray-50 flex items-center justify-center',
         sizeClasses[size].icon
       ]"
     >

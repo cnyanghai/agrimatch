@@ -67,9 +67,9 @@ function getCompanyType(c: MapCompanyMarkerResponse): 'supply' | 'requirement' |
 // 获取类型对应的颜色
 function getTypeColor(type: string) {
   switch (type) {
-    case 'supply': return { bar: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-600', gradient: 'from-emerald-500 to-teal-600' }
+    case 'supply': return { bar: 'bg-brand-500', bg: 'bg-brand-50', text: 'text-brand-600', gradient: 'from-brand-500 to-teal-600' }
     case 'requirement': return { bar: 'bg-blue-500', bg: 'bg-blue-50', text: 'text-blue-600', gradient: 'from-blue-500 to-indigo-600' }
-    case 'both': return { bar: 'bg-gradient-to-b from-emerald-500 to-blue-500', bg: 'bg-purple-50', text: 'text-purple-600', gradient: 'from-purple-500 to-pink-600' }
+    case 'both': return { bar: 'bg-gradient-to-b from-brand-500 to-blue-500', bg: 'bg-purple-50', text: 'text-purple-600', gradient: 'from-purple-500 to-pink-600' }
     default: return { bar: 'bg-gray-300', bg: 'bg-gray-50', text: 'text-gray-500', gradient: 'from-gray-400 to-gray-500' }
   }
 }
@@ -330,7 +330,7 @@ onMounted(async () => {
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-teal-600 flex items-center justify-center shadow-md shadow-brand-500/20">
             <MapPin class="w-5 h-5 text-white" />
           </div>
           全域供需地图
@@ -346,12 +346,12 @@ onMounted(async () => {
             v-model="keyword"
             type="text"
             placeholder="搜索公司名称或地址..."
-            class="w-64 pl-10 pr-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+            class="w-64 pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
             @keyup.enter="handleSearch"
           />
         </div>
         <button
-          class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-sm font-bold rounded-xl transition-all active:scale-95 shadow-md shadow-emerald-500/20"
+          class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-700 hover:to-teal-700 text-white text-sm font-bold rounded-xl transition-all  shadow-md shadow-brand-500/20"
           :disabled="loading"
           @click="refresh"
         >
@@ -362,7 +362,7 @@ onMounted(async () => {
     </div>
     
     <!-- API Key 缺失提示 -->
-    <div v-if="!hasKey" class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+    <div v-if="!hasKey" class="bg-amber-50 border border-amber-200 rounded-xl p-5">
       <div class="flex items-start gap-3">
         <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
           <AlertTriangle class="w-5 h-5 text-amber-600" />
@@ -380,7 +380,7 @@ onMounted(async () => {
     </div>
     
     <!-- 筛选器 -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-4">
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
       <div class="flex items-center justify-between flex-wrap gap-4">
         <div class="flex gap-2">
           <button
@@ -401,14 +401,14 @@ onMounted(async () => {
             :class="[
               'px-4 py-2 text-sm font-bold rounded-xl transition-all flex items-center gap-2',
               filterType === 'supply' 
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20' 
-                : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20' 
+                : 'bg-brand-50 text-brand-600 hover:bg-brand-100'
             ]"
             @click="filterType = 'supply'; renderMarkers()"
           >
             <Package class="w-4 h-4" />
             有供应
-            <span class="px-1.5 py-0.5 text-[10px] rounded-full" :class="filterType === 'supply' ? 'bg-white/20' : 'bg-emerald-100'">{{ stats.hasSupply }}</span>
+            <span class="px-1.5 py-0.5 text-[10px] rounded-full" :class="filterType === 'supply' ? 'bg-white/20' : 'bg-brand-100'">{{ stats.hasSupply }}</span>
           </button>
           
           <button
@@ -449,13 +449,13 @@ onMounted(async () => {
     <!-- 主体内容 -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- 地图区域 -->
-      <div class="lg:col-span-3 bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+      <div class="lg:col-span-3 bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
         <div ref="mapRef" class="h-[600px] w-full"></div>
       </div>
       
       <!-- 公司列表 -->
-      <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="p-4 border-b border-gray-200 bg-gray-50/50">
           <div class="flex items-center justify-between">
             <h3 class="font-bold text-gray-900 flex items-center gap-2">
               <Building2 class="w-4 h-4 text-gray-500" />
@@ -501,9 +501,9 @@ onMounted(async () => {
               
               <!-- 供需数量 -->
               <div class="flex items-center gap-3 mt-3">
-                <div class="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 rounded-lg">
-                  <Package class="w-3 h-3 text-emerald-600" />
-                  <span class="text-xs font-bold text-emerald-600">{{ c.supplyCount ?? 0 }}</span>
+                <div class="flex items-center gap-1.5 px-2 py-1 bg-brand-50 rounded-lg">
+                  <Package class="w-3 h-3 text-brand-600" />
+                  <span class="text-xs font-bold text-brand-600">{{ c.supplyCount ?? 0 }}</span>
                 </div>
                 <div class="flex items-center gap-1.5 px-2 py-1 bg-blue-50 rounded-lg">
                   <ShoppingCart class="w-3 h-3 text-blue-600" />
@@ -544,7 +544,7 @@ onMounted(async () => {
                   定位
                 </button>
                 <button
-                  class="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-xs font-medium rounded-lg transition-all"
+                  class="flex items-center gap-1 px-2.5 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-600 text-xs font-medium rounded-lg transition-all"
                   @click.stop="ElMessage.info('功能开发中')"
                 >
                   <MessageCircle class="w-3 h-3" />
@@ -556,7 +556,7 @@ onMounted(async () => {
           
           <!-- 空状态 -->
           <div v-if="filtered.length === 0 && !loading" class="p-8 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 flex items-center justify-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gray-100 flex items-center justify-center">
               <Building2 class="w-8 h-8 text-gray-300" />
             </div>
             <p class="text-sm font-medium text-gray-500">暂无符合条件的公司</p>

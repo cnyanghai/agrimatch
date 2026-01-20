@@ -51,12 +51,12 @@ onMounted(loadProfile)
     <PublicTopNav />
 
     <main v-if="loading" class="flex-1 max-w-7xl mx-auto px-4 py-12 w-full">
-      <div class="h-64 bg-white rounded-3xl animate-pulse mb-8"></div>
+      <div class="h-64 bg-white rounded-xl animate-pulse mb-8"></div>
       <div class="grid grid-cols-3 gap-8">
         <div class="col-span-2 space-y-6">
-          <div v-for="i in 3" :key="i" class="h-32 bg-white rounded-2xl animate-pulse"></div>
+          <div v-for="i in 3" :key="i" class="h-32 bg-white rounded-xl animate-pulse"></div>
         </div>
-        <div class="h-96 bg-white rounded-2xl animate-pulse"></div>
+        <div class="h-96 bg-white rounded-xl animate-pulse"></div>
       </div>
     </main>
 
@@ -65,13 +65,13 @@ onMounted(loadProfile)
       <div class="bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl mb-12 text-white relative">
         <!-- Background Pattern -->
         <div class="absolute inset-0 opacity-10 pointer-events-none">
-          <div class="absolute top-0 right-0 w-96 h-96 bg-emerald-500 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
+          <div class="absolute top-0 right-0 w-96 h-96 bg-brand-500 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
           <div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-500 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
         </div>
 
         <div class="relative z-10 p-8 md:p-12 flex flex-col md:flex-row gap-10 items-start">
           <!-- Logo -->
-          <div class="w-32 h-32 bg-white rounded-3xl flex items-center justify-center text-4xl font-black text-slate-900 shadow-xl shrink-0 transition-transform hover:scale-105">
+          <div class="w-32 h-32 bg-white rounded-xl flex items-center justify-center text-4xl font-black text-slate-900 shadow-md shrink-0 transition-transform hover:scale-105">
             {{ company.companyName[0] }}
           </div>
 
@@ -79,7 +79,7 @@ onMounted(loadProfile)
           <div class="flex-1 min-w-0">
             <div class="flex flex-wrap items-center gap-4 mb-4">
               <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{{ company.companyName }}</h1>
-              <div class="flex items-center gap-1.5 bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/20">
+              <div class="flex items-center gap-1.5 bg-brand-500/20 text-brand-400 px-3 py-1 rounded-full text-xs font-bold border border-brand-500/20">
                 <ShieldCheck :size="14" />
                 资质已核验
               </div>
@@ -87,7 +87,7 @@ onMounted(loadProfile)
 
             <div class="flex flex-wrap gap-x-8 gap-y-4 text-slate-400 text-sm mb-8">
               <div class="flex items-center gap-2">
-                <MapPin :size="16" class="text-emerald-500" />
+                <MapPin :size="16" class="text-brand-500" />
                 {{ company.province }} · {{ company.city }} · {{ company.district }}
               </div>
               <div class="flex items-center gap-2">
@@ -101,11 +101,11 @@ onMounted(loadProfile)
             </div>
 
             <div class="flex flex-wrap gap-4">
-              <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold transition-all active:scale-95 flex items-center gap-2">
+              <button class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl font-bold transition-all  flex items-center gap-2">
                 <MessageCircle :size="18" />
                 立即咨询
               </button>
-              <button class="bg-white/10 hover:bg-white/20 border border-white/10 px-8 py-3 rounded-xl font-bold transition-all active:scale-95 flex items-center gap-2">
+              <button class="bg-white/10 hover:bg-white/20 border border-white/10 px-8 py-3 rounded-xl font-bold transition-all  flex items-center gap-2">
                 <ExternalLink :size="18" />
                 分享主页
               </button>
@@ -119,19 +119,19 @@ onMounted(loadProfile)
         <!-- Left Column: Business Data -->
         <div class="lg:col-span-2 space-y-8">
           <!-- Business Tabs -->
-          <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="flex border-b border-gray-50">
               <button
                 v-for="tab in [{id:'supplies', label:'在售货源', icon: Package, count: supplies.length}, {id:'requirements', label:'采购需求', icon: ShoppingBag, count: requirements.length}]"
                 :key="tab.id"
                 class="flex-1 flex items-center justify-center gap-2 py-5 font-bold text-sm transition-all relative"
-                :class="activeTab === tab.id ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'"
+                :class="activeTab === tab.id ? 'text-brand-600' : 'text-gray-400 hover:text-gray-600'"
                 @click="activeTab = tab.id"
               >
                 <component :is="tab.icon" :size="18" />
                 {{ tab.label }}
                 <span v-if="tab.count > 0" class="ml-1.5 bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full text-[10px]">{{ tab.count }}</span>
-                <div v-if="activeTab === tab.id" class="absolute bottom-0 left-0 right-0 h-1 bg-emerald-600 rounded-t-full"></div>
+                <div v-if="activeTab === tab.id" class="absolute bottom-0 left-0 right-0 h-1 bg-brand-600 rounded-t-full"></div>
               </button>
             </div>
 
@@ -145,13 +145,13 @@ onMounted(loadProfile)
                 <div
                   v-for="s in supplies"
                   :key="s.id"
-                  class="flex items-center gap-6 p-4 rounded-2xl border border-gray-50 hover:border-emerald-100 hover:bg-emerald-50/10 transition-all group"
+                  class="flex items-center gap-6 p-4 rounded-xl border border-gray-50 hover:border-brand-100 hover:bg-brand-50/10 transition-all group"
                 >
                   <div class="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center font-bold text-gray-400 group-hover:bg-white transition-colors">
                     {{ s.categoryName[0] }}
                   </div>
                   <div class="flex-1 min-w-0">
-                    <h4 class="font-bold text-gray-900 mb-1 group-hover:text-emerald-600">{{ s.categoryName }}</h4>
+                    <h4 class="font-bold text-gray-900 mb-1 group-hover:text-brand-600">{{ s.categoryName }}</h4>
                     <div class="flex gap-4 text-xs text-gray-400">
                       <span>库存：{{ s.quantity }} 吨</span>
                       <span>产地：{{ s.origin || '-' }}</span>
@@ -174,7 +174,7 @@ onMounted(loadProfile)
                 <div
                   v-for="r in requirements"
                   :key="r.id"
-                  class="flex items-center gap-6 p-4 rounded-2xl border border-gray-50 hover:border-blue-100 hover:bg-blue-50/10 transition-all group"
+                  class="flex items-center gap-6 p-4 rounded-xl border border-gray-50 hover:border-blue-100 hover:bg-blue-50/10 transition-all group"
                 >
                   <div class="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center font-bold text-gray-400 group-hover:bg-white transition-colors">
                     {{ r.categoryName[0] }}
@@ -197,9 +197,9 @@ onMounted(loadProfile)
           </div>
 
           <!-- Company Details (About) -->
-          <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
             <h3 class="text-xl font-extrabold text-gray-900 mb-6 flex items-center gap-2">
-              <Info :size="20" class="text-emerald-600" />
+              <Info :size="20" class="text-brand-600" />
               企业档案
             </h3>
             <div class="prose prose-sm max-w-none text-gray-600 leading-relaxed mb-8">
@@ -207,16 +207,16 @@ onMounted(loadProfile)
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="bg-gray-50 p-4 rounded-2xl flex items-center gap-4">
+              <div class="bg-gray-50 p-4 rounded-xl flex items-center gap-4">
                 <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                  <Phone :size="18" class="text-emerald-600" />
+                  <Phone :size="18" class="text-brand-600" />
                 </div>
                 <div>
                   <div class="text-[10px] font-bold text-gray-400 uppercase">联系电话</div>
                   <div class="text-sm font-bold text-gray-900">{{ company.phone || '-' }}</div>
                 </div>
               </div>
-              <div class="bg-gray-50 p-4 rounded-2xl flex items-center gap-4">
+              <div class="bg-gray-50 p-4 rounded-xl flex items-center gap-4">
                 <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
                   <Globe :size="18" class="text-blue-600" />
                 </div>
@@ -232,7 +232,7 @@ onMounted(loadProfile)
         <!-- Right Column: Sidebar -->
         <div class="space-y-8">
           <!-- Location Card -->
-          <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-6 border-b border-gray-50">
               <h3 class="font-bold text-gray-900 flex items-center gap-2">
                 <MapPin :size="18" class="text-red-500" />
@@ -251,9 +251,9 @@ onMounted(loadProfile)
           </div>
 
           <!-- Trust Factors -->
-          <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 text-white shadow-xl">
+          <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-8 text-white shadow-md">
             <h3 class="font-bold mb-6 flex items-center gap-2">
-              <ShieldCheck :size="18" class="text-emerald-400" />
+              <ShieldCheck :size="18" class="text-brand-400" />
               信用保障
             </h3>
             <ul class="space-y-6">
@@ -262,7 +262,7 @@ onMounted(loadProfile)
                 {title: '资质核实', desc: '营业执照及行业经营许可证已备案'},
                 {title: '平台直签', desc: '支持在线签署具备法律效力的合同'}
               ]" :key="item.title" class="flex gap-4">
-                <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full mt-2 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
+                <div class="w-1.5 h-1.5 bg-brand-400 rounded-full mt-2 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
                 <div>
                   <div class="text-sm font-bold">{{ item.title }}</div>
                   <div class="text-xs text-slate-400 mt-1">{{ item.desc }}</div>

@@ -25,7 +25,7 @@ const emit = defineEmits<{
 // 类型样式映射（使用新的设计系统）
 const typeClasses = computed(() => {
   const types: Record<string, string> = {
-    primary: 'bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary/25 hover:scale-105',
+    primary: 'bg-primary-600 hover:bg-primary-700 text-white shadow-md hover:scale-105',
     secondary: 'bg-white hover:bg-neutral-50 border-2 border-neutral-200 hover:border-neutral-300 text-neutral-700',
     danger: 'bg-error/10 hover:bg-error/20 text-error',
     ghost: 'bg-transparent hover:bg-primary/10 text-neutral-600 hover:text-primary-600',
@@ -48,7 +48,7 @@ const sizeClasses = computed(() => {
   const sizes: Record<string, string> = {
     sm: 'px-4 py-2 text-sm rounded-lg',
     md: 'px-6 py-3 text-base rounded-xl',
-    lg: 'px-8 py-4 text-lg rounded-2xl'
+    lg: 'px-8 py-4 text-lg rounded-xl'
   }
   return sizes[props.size] || sizes.md
 })
@@ -66,7 +66,7 @@ function handleClick(e: MouseEvent) {
 <template>
   <button
     :class="[
-      'font-semibold transition-all duration-200 ease-out flex items-center justify-center gap-2 active:scale-95',
+      'font-semibold transition-all duration-200 ease-out flex items-center justify-center gap-2 ',
       typeClasses,
       sizeClasses,
       {

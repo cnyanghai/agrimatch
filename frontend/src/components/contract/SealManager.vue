@@ -111,7 +111,7 @@ function selectSeal(seal: SealResponse) {
         :key="seal.id"
         class="relative bg-white rounded-xl border-2 p-4 cursor-pointer transition-all hover:shadow-md"
         :class="[
-          selected === seal.id ? 'border-emerald-500 bg-emerald-50' : 'border-gray-100 hover:border-gray-200',
+          selected === seal.id ? 'border-brand-500 bg-brand-50' : 'border-gray-200 hover:border-gray-200',
           selectable ? 'cursor-pointer' : 'cursor-default'
         ]"
         @click="selectSeal(seal)"
@@ -130,7 +130,7 @@ function selectSeal(seal: SealResponse) {
         <!-- 公章信息 -->
         <div class="text-sm font-medium text-gray-900 truncate">{{ seal.sealName }}</div>
         <div class="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-          <span v-if="seal.isDefault" class="text-emerald-600">默认</span>
+          <span v-if="seal.isDefault" class="text-brand-600">默认</span>
           <span>{{ seal.sealType === 'official' ? '公章' : seal.sealType === 'contract' ? '合同章' : '电子章' }}</span>
           <span v-if="seal.isGenerated" class="text-blue-500">· 系统生成</span>
         </div>
@@ -138,7 +138,7 @@ function selectSeal(seal: SealResponse) {
         <!-- 选中标记 -->
         <div 
           v-if="selected === seal.id"
-          class="absolute top-2 right-2 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center"
+          class="absolute top-2 right-2 w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center"
         >
           <Check class="w-4 h-4 text-white" />
         </div>
@@ -165,7 +165,7 @@ function selectSeal(seal: SealResponse) {
       
       <!-- 添加新公章 -->
       <div 
-        class="aspect-square bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:border-emerald-300 hover:bg-emerald-50/50 transition-all"
+        class="aspect-square bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:border-brand-300 hover:bg-brand-50/50 transition-all"
         @click="showCreateForm = true"
       >
         <Plus class="w-8 h-8 text-gray-300 mb-2" />
@@ -175,12 +175,12 @@ function selectSeal(seal: SealResponse) {
     
     <!-- 空状态 -->
     <div v-else-if="!loading" class="text-center py-12">
-      <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 flex items-center justify-center">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gray-100 flex items-center justify-center">
         <Sparkles class="w-8 h-8 text-gray-300" />
       </div>
       <div class="text-gray-500 mb-4">还没有电子公章</div>
       <button 
-        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all active:scale-95"
+        class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all "
         @click="showCreateForm = true"
       >
         创建电子公章
@@ -205,7 +205,7 @@ function selectSeal(seal: SealResponse) {
               <input 
                 v-model="newSealForm.sealName"
                 type="text"
-                class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
                 placeholder="如：公司公章"
               />
             </div>
@@ -214,7 +214,7 @@ function selectSeal(seal: SealResponse) {
               <label class="text-sm font-bold text-gray-700 mb-1 block">公章类型</label>
               <select 
                 v-model="newSealForm.sealType"
-                class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
               >
                 <option value="official">公章</option>
                 <option value="contract">合同专用章</option>
@@ -226,7 +226,7 @@ function selectSeal(seal: SealResponse) {
                 type="checkbox" 
                 id="generate" 
                 v-model="newSealForm.generate"
-                class="w-5 h-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                class="w-5 h-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
               />
               <label for="generate" class="text-sm text-gray-700">
                 <span class="font-medium">自动生成电子章</span>
@@ -243,7 +243,7 @@ function selectSeal(seal: SealResponse) {
               取消
             </button>
             <button 
-              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all disabled:opacity-50"
+              class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all disabled:opacity-50"
               :disabled="creating"
               @click="handleCreate"
             >

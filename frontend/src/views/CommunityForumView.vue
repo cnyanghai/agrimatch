@@ -196,7 +196,7 @@ onMounted(() => {
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- 发布帖子 -->
-      <div class="bg-white rounded-2xl border border-gray-100 p-6">
+      <div class="bg-white rounded-xl border border-gray-200 p-6">
         <h3 class="font-bold text-gray-900 mb-4">发布话题</h3>
         
         <div v-if="!isLoggedIn" class="py-8">
@@ -212,7 +212,7 @@ onMounted(() => {
         
         <div v-else class="space-y-4">
           <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold">
+            <div class="w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold">
               {{ (auth.me?.nickName || auth.me?.userName || 'U')[0] }}
             </div>
             <div class="flex-1 min-w-0">
@@ -230,7 +230,7 @@ onMounted(() => {
               type="text"
               maxlength="120"
               placeholder="请输入话题标题"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
 
@@ -241,7 +241,7 @@ onMounted(() => {
               rows="4"
               maxlength="20000"
               placeholder="分享你的观点..."
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all resize-none"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
             ></textarea>
           </div>
 
@@ -253,8 +253,8 @@ onMounted(() => {
       </div>
 
       <!-- 帖子列表 -->
-      <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <div class="p-4 border-b border-gray-100 flex items-center justify-between gap-4">
+      <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="p-4 border-b border-gray-200 flex items-center justify-between gap-4">
           <h3 class="font-bold text-gray-900">话题列表</h3>
           <div class="relative flex-1 max-w-[300px]">
             <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -262,7 +262,7 @@ onMounted(() => {
               v-model="q.keyword"
               type="text"
               placeholder="搜索话题..."
-              class="w-full pl-10 pr-4 py-2 border-2 border-gray-100 rounded-xl text-sm focus:border-emerald-500 outline-none transition-all"
+              class="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-xl text-sm focus:border-brand-500 outline-none transition-all"
               @keyup.enter="refresh"
             />
           </div>
@@ -368,14 +368,14 @@ onMounted(() => {
             rows="2"
             maxlength="1000"
             placeholder="输入评论..."
-            class="flex-1 px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all resize-none"
+            class="flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
           ></textarea>
           <BaseButton type="primary" :disabled="!commentText.trim()" @click="onAddComment">
             <Send class="w-4 h-4" />
           </BaseButton>
         </div>
 
-        <div class="border-t border-gray-100 pt-4">
+        <div class="border-t border-gray-200 pt-4">
           <!-- 加载状态 -->
           <div v-if="commentsLoading" class="space-y-3">
             <Skeleton type="text" />
@@ -404,7 +404,7 @@ onMounted(() => {
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 mb-1">
                   <span class="font-bold text-gray-900 text-sm">{{ c.nickName || c.userName || '匿名' }}</span>
-                  <span v-if="c.companyName" class="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{{ c.companyName }}</span>
+                  <span v-if="c.companyName" class="text-xs text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">{{ c.companyName }}</span>
                   <span class="text-xs text-gray-400 ml-auto">{{ formatTime(c.createTime) }}</span>
                 </div>
                 <p class="text-sm text-gray-700">{{ c.content }}</p>
@@ -419,7 +419,7 @@ onMounted(() => {
     <BaseModal v-model="tipDialogOpen" title="积分打赏" size="sm">
       <div class="space-y-5">
         <!-- 帖子信息卡片 -->
-        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
           <div class="font-bold text-gray-900 line-clamp-2 mb-3">{{ currentTipPost?.title }}</div>
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white font-bold flex-shrink-0">
@@ -440,7 +440,7 @@ onMounted(() => {
             type="number"
             min="1"
             max="10000"
-            class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-center text-lg font-bold"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-center text-lg font-bold"
           />
         </div>
 
@@ -450,9 +450,9 @@ onMounted(() => {
             v-for="amt in [5, 10, 50, 100]" 
             :key="amt"
             :class="[
-              'px-4 py-2 rounded-full text-sm font-bold transition-all active:scale-95',
+              'px-4 py-2 rounded-full text-sm font-bold transition-all ',
               tipForm.points === amt 
-                ? 'bg-emerald-600 text-white' 
+                ? 'bg-brand-600 text-white' 
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             ]"
             @click="tipForm.points = amt"
@@ -471,7 +471,7 @@ onMounted(() => {
             type="text"
             placeholder="写得好！支持一下..."
             maxlength="100"
-            class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
           />
         </div>
       </div>

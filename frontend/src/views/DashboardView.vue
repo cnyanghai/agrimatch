@@ -90,22 +90,22 @@ const quickActions = computed(() => {
   if (isBuyer.value) {
     actions.push(
       { title: '发布采购', desc: '快速发布采购需求', icon: ShoppingCart, path: '/requirements', color: 'orange' },
-      { title: '发现供应', desc: '查找优质供应商', icon: Box, path: '/supply-browse', color: 'emerald' }
+      { title: '发现供应', desc: '查找优质供应商', icon: Box, path: '/supply-browse', color: 'brand' }
     )
   }
-  
+
   // 供应商操作
   if (isSeller.value) {
     actions.push(
-      { title: '发布供应', desc: '展示您的产品', icon: Box, path: '/supply', color: 'emerald' },
+      { title: '发布供应', desc: '展示您的产品', icon: Box, path: '/supply', color: 'brand' },
       { title: '发现采购', desc: '查找采购商', icon: ShoppingCart, path: '/requirement-browse', color: 'orange' }
     )
   }
-  
+
   // 通用操作
   actions.push(
     { title: '地图找商', desc: '附近合作伙伴地图', icon: Location, path: '/map', color: 'slate' },
-    { title: '查看消息', desc: '在线沟通洽谈', icon: ChatDotRound, path: '/chat', color: 'emerald' }
+    { title: '查看消息', desc: '在线沟通洽谈', icon: ChatDotRound, path: '/chat', color: 'brand' }
   )
   
   return actions.slice(0, 4) // 限制显示 4 项，保持排版整齐
@@ -114,11 +114,12 @@ const quickActions = computed(() => {
 // 获取图标容器的样式类
 function getIconClass(color: string) {
   const colorMap: Record<string, string> = {
-    emerald: 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white',
+    brand: 'bg-brand-50 text-brand-600 group-hover:bg-brand-600 group-hover:text-white',
+    emerald: 'bg-brand-50 text-brand-600 group-hover:bg-brand-600 group-hover:text-white',
     orange: 'bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white',
     slate: 'bg-slate-50 text-slate-600 group-hover:bg-slate-900 group-hover:text-white'
   }
-  return colorMap[color] || colorMap.emerald
+  return colorMap[color] || colorMap.brand
 }
 
 // 待办项颜色
@@ -171,7 +172,7 @@ onMounted(() => {
       <!-- 欢迎区域 + 资料引导 -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- 欢迎卡片 -->
-        <section class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <section class="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
           <div class="flex items-center justify-between">
             <div>
               <h2 class="text-2xl font-bold text-gray-800 mb-1">
@@ -186,9 +187,9 @@ onMounted(() => {
                 </template>
               </p>
             </div>
-            <span 
+            <span
               class="text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider"
-              :class="isBuyer ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'"
+              :class="isBuyer ? 'bg-brand-100 text-brand-700 border border-brand-200' : 'bg-brand-100 text-brand-700 border border-brand-200'"
             >
               {{ isBuyer ? '采购商' : '供应商' }}
             </span>
@@ -200,8 +201,8 @@ onMounted(() => {
       </div>
 
       <!-- 待办事项（核心模块） -->
-      <section v-if="pendingItems.length > 0" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <section v-if="pendingItems.length > 0" class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <div class="w-1.5 h-5 bg-amber-500 rounded-full"></div>
             <h3 class="font-bold text-gray-800">待处理</h3>
@@ -236,34 +237,34 @@ onMounted(() => {
 
       <!-- 数据统计卡片 -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover-card animate-stagger-in">
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover-card animate-stagger-in">
           <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">
             {{ isBuyer ? '我的采购' : '我的供应' }}
           </p>
           <div class="flex items-end gap-2">
             <span class="text-2xl font-black text-gray-800 count-up">{{ dashboard?.myActiveListingCount ?? 0 }}</span>
-            <span class="text-xs text-emerald-500 font-bold pb-1">个活跃</span>
+            <span class="text-xs text-brand-500 font-bold pb-1">个活跃</span>
           </div>
         </div>
-        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover-card animate-stagger-in">
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover-card animate-stagger-in">
           <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">今日咨询</p>
           <div class="flex items-end gap-2">
             <span class="text-2xl font-black text-gray-800 count-up">{{ dashboard?.todayViewCount ?? 0 }}</span>
             <span class="text-xs text-blue-500 font-bold pb-1">次访问</span>
           </div>
         </div>
-        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover-card animate-stagger-in">
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover-card animate-stagger-in">
           <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">累计成交</p>
           <div class="flex items-end gap-2">
             <span class="text-2xl font-black text-gray-800 count-up">{{ formatNumber(dashboard?.totalDealQuantity) }}</span>
             <span class="text-xs text-gray-500 font-bold pb-1">吨</span>
           </div>
         </div>
-        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover-card animate-stagger-in">
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover-card animate-stagger-in">
           <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">进行中合同</p>
           <div class="flex items-end gap-2">
             <span class="text-2xl font-black text-gray-800 count-up">{{ dashboard?.activeContractCount ?? 0 }}</span>
-            <span class="text-xs text-emerald-500 font-bold pb-1">份</span>
+            <span class="text-xs text-brand-500 font-bold pb-1">份</span>
           </div>
         </div>
       </div>
@@ -277,7 +278,7 @@ onMounted(() => {
           <button
             v-for="(action, index) in quickActions"
             :key="action.title"
-            class="flex items-center gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover-card group cursor-pointer animate-stagger-in"
+            class="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover-card group cursor-pointer animate-stagger-in"
             :style="{ animationDelay: `${(index + 4) * 50}ms` }"
             @click="go(action.path)"
           >
@@ -285,30 +286,30 @@ onMounted(() => {
               <el-icon :size="24"><component :is="action.icon" /></el-icon>
             </div>
             <div class="text-left flex-1">
-              <p class="font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">{{ action.title }}</p>
+              <p class="font-bold text-gray-800 group-hover:text-brand-600 transition-colors">{{ action.title }}</p>
               <p class="text-[10px] text-gray-400 font-medium">{{ action.desc }}</p>
             </div>
-            <el-icon class="text-gray-300 group-hover:text-emerald-500 transition-colors group-hover:translate-x-1"><ArrowRight /></el-icon>
+            <el-icon class="text-gray-300 group-hover:text-brand-500 transition-colors group-hover:translate-x-1"><ArrowRight /></el-icon>
           </button>
         </div>
       </section>
 
       <!-- 无待办时的引导 -->
-      <section v-if="pendingItems.length === 0 && !loading" class="bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-2xl border border-emerald-100 p-8 text-center">
-        <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-emerald-100 flex items-center justify-center">
+      <section v-if="pendingItems.length === 0 && !loading" class="bg-gradient-to-br from-brand-50 to-brand-100/50 rounded-xl border border-brand-100 p-8 text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-brand-100 flex items-center justify-center">
           <span class="text-3xl">✨</span>
         </div>
         <h3 class="text-lg font-bold text-gray-800 mb-2">太棒了，暂无待办事项！</h3>
         <p class="text-sm text-gray-500 mb-6">您可以浏览市场发现新机会，或发布您的供应/采购信息</p>
         <div class="flex justify-center gap-4">
-          <button 
-            class="px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all active:scale-95"
+          <button
+            class="px-6 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-bold shadow-md shadow-brand-100 hover:bg-brand-700 transition-all "
             @click="go(isBuyer ? '/supply-browse' : '/requirement-browse')"
           >
             {{ isBuyer ? '浏览供应' : '浏览采购' }}
           </button>
           <button 
-            class="px-6 py-2.5 bg-white text-gray-700 rounded-xl text-sm font-bold border border-gray-200 hover:bg-gray-50 transition-all active:scale-95"
+            class="px-6 py-2.5 bg-white text-gray-700 rounded-xl text-sm font-bold border border-gray-200 hover:bg-gray-50 transition-all "
             @click="go(isBuyer ? '/requirements' : '/supply')"
           >
             {{ isBuyer ? '发布采购' : '发布供应' }}

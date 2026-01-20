@@ -81,7 +81,7 @@ onMounted(() => {
     
     <main class="flex-1">
       <!-- Header / Search -->
-      <div class="bg-white border-b border-gray-100 py-12">
+      <div class="bg-white border-b border-gray-200 py-12">
         <div class="max-w-7xl mx-auto px-4">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
@@ -106,7 +106,7 @@ onMounted(() => {
       <div class="max-w-7xl mx-auto px-4 py-16">
         <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           <div v-for="i in 8" :key="i" class="space-y-4">
-            <div class="h-8 bg-white rounded-lg animate-pulse w-1/2 border border-gray-100"></div>
+            <div class="h-8 bg-white rounded-lg animate-pulse w-1/2 border border-gray-200"></div>
             <div class="space-y-2">
               <div v-for="j in 5" :key="j" class="h-4 bg-white rounded animate-pulse w-full border border-gray-50"></div>
             </div>

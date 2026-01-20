@@ -292,7 +292,7 @@ const currentPosition = computed(() => auth.me?.position || '暂无职位')
 const currentRoleLabel = computed(() => (isBuyer.value ? '采购商' : isSeller.value ? '供应商' : '未设置'))
 const rolePillClass = computed(() => {
   if (isBuyer.value) return 'bg-blue-50 text-blue-600 border-blue-100'
-  if (isSeller.value) return 'bg-emerald-50 text-emerald-600 border-emerald-100'
+  if (isSeller.value) return 'bg-brand-50 text-brand-600 border-brand-100'
   return 'bg-gray-100 text-gray-600 border-gray-100'
 })
 const avatarText = computed(() => {
@@ -327,15 +327,15 @@ const tabs = [
     </div>
 
     <!-- 用户概览卡 -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-6 animate-fade-in">
+    <div class="bg-white rounded-xl border border-gray-200 p-6 animate-fade-in">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div class="flex items-center gap-4">
           <div class="relative">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center text-2xl font-bold shadow-lg">
+            <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center text-2xl font-bold shadow-md">
               {{ avatarText }}
             </div>
             <button
-              class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white border border-gray-100 shadow-sm hover:bg-gray-50 transition-all flex items-center justify-center"
+              class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all flex items-center justify-center"
               title="更换头像（暂未开放）"
             >
               <Upload class="w-3.5 h-3.5 text-gray-500" />
@@ -347,7 +347,7 @@ const tabs = [
               <span class="px-2 py-0.5 rounded-full text-xs font-bold border" :class="rolePillClass">
                 {{ currentRoleLabel }}
               </span>
-              <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-gray-50 text-gray-500 border border-gray-100">
+              <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-gray-50 text-gray-500 border border-gray-200">
                 ID: {{ auth.me?.userId ?? '-' }}
               </span>
             </div>
@@ -363,7 +363,7 @@ const tabs = [
             :class="[
               'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all',
               activeTab === tab.key 
-                ? 'bg-white text-emerald-600 shadow-sm' 
+                ? 'bg-white text-brand-600 shadow-sm' 
                 : 'text-gray-600 hover:text-gray-900'
             ]"
             @click="activeTab = tab.key"
@@ -376,8 +376,8 @@ const tabs = [
     </div>
 
     <!-- 基本信息 -->
-    <div v-show="activeTab === 'user'" class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in">
-      <div class="p-6 border-b border-gray-100">
+    <div v-show="activeTab === 'user'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
+      <div class="p-6 border-b border-gray-200">
         <h3 class="font-bold text-gray-900">基本信息</h3>
         <p class="text-sm text-gray-500 mt-1">修改后点击保存生效</p>
       </div>
@@ -393,7 +393,7 @@ const tabs = [
               v-model="userForm.displayName"
               type="text"
               placeholder="请输入姓名/昵称"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -402,7 +402,7 @@ const tabs = [
               v-model="userForm.phonenumber"
               type="text"
               placeholder="请输入手机号"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -411,7 +411,7 @@ const tabs = [
               v-model="userForm.position"
               type="text"
               placeholder="如：采购经理、销售总监"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -435,8 +435,8 @@ const tabs = [
                 :class="[
                   'flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all',
                   userForm.gender === opt.value 
-                    ? 'border-emerald-500 bg-emerald-50 text-emerald-600' 
-                    : 'border-gray-100 hover:border-gray-200'
+                    ? 'border-brand-500 bg-brand-50 text-brand-600' 
+                    : 'border-gray-200 hover:border-gray-200'
                 ]"
               >
                 <input
@@ -458,13 +458,13 @@ const tabs = [
             rows="3"
             maxlength="500"
             placeholder="简单介绍一下自己，让合作伙伴更好地了解您"
-            class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all resize-none"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
           ></textarea>
           <p class="text-xs text-gray-400 mt-1 text-right">{{ userForm.bio?.length || 0 }}/500</p>
         </div>
 
         <!-- 身份切换 -->
-        <div class="pt-6 border-t border-gray-100">
+        <div class="pt-6 border-t border-gray-200">
           <h4 class="font-bold text-gray-900 mb-4">用户身份</h4>
           <div class="grid grid-cols-2 gap-4 max-w-md">
             <button
@@ -472,7 +472,7 @@ const tabs = [
                 'relative p-4 rounded-xl border-2 transition-all text-center',
                 isBuyer 
                   ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-100 hover:border-blue-200'
+                  : 'border-gray-200 hover:border-blue-200'
               ]"
               @click="!isBuyer && changeUserType('buyer')"
             >
@@ -491,18 +491,18 @@ const tabs = [
               :class="[
                 'relative p-4 rounded-xl border-2 transition-all text-center',
                 isSeller 
-                  ? 'border-emerald-500 bg-emerald-50' 
-                  : 'border-gray-100 hover:border-emerald-200'
+                  ? 'border-brand-500 bg-brand-50' 
+                  : 'border-gray-200 hover:border-brand-200'
               ]"
               @click="!isSeller && changeUserType('seller')"
             >
               <div class="w-12 h-12 rounded-xl mx-auto mb-2 flex items-center justify-center"
-                :class="isSeller ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-500'"
+                :class="isSeller ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-500'"
               >
                 <Package class="w-6 h-6" />
               </div>
-              <div class="font-bold" :class="isSeller ? 'text-emerald-600' : 'text-gray-700'">供应商</div>
-              <div v-if="isSeller" class="absolute top-2 right-2 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+              <div class="font-bold" :class="isSeller ? 'text-brand-600' : 'text-gray-700'">供应商</div>
+              <div v-if="isSeller" class="absolute top-2 right-2 w-5 h-5 bg-brand-500 rounded-full flex items-center justify-center">
                 <Check class="w-3 h-3 text-white" />
               </div>
             </button>
@@ -510,7 +510,7 @@ const tabs = [
         </div>
 
         <!-- 保存按钮 -->
-        <div v-if="userDirty" class="pt-6 border-t border-gray-100 flex justify-end gap-3">
+        <div v-if="userDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
           <BaseButton type="secondary" :disabled="loading" @click="resetUserForm">取消</BaseButton>
           <BaseButton type="primary" :loading="loading" @click="saveUserInfo">保存修改</BaseButton>
         </div>
@@ -518,8 +518,8 @@ const tabs = [
     </div>
 
     <!-- 公司信息 -->
-    <div v-show="activeTab === 'company'" class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in">
-      <div class="p-6 border-b border-gray-100">
+    <div v-show="activeTab === 'company'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
+      <div class="p-6 border-b border-gray-200">
         <h3 class="font-bold text-gray-900">公司信息</h3>
         <p class="text-sm text-gray-500 mt-1">完善公司信息以便开展业务</p>
       </div>
@@ -534,7 +534,7 @@ const tabs = [
               v-model="companyForm.companyName"
               type="text"
               placeholder="请输入公司全称"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -543,7 +543,7 @@ const tabs = [
               v-model="companyForm.licenseNo"
               type="text"
               placeholder="请输入统一社会信用代码"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -552,7 +552,7 @@ const tabs = [
               v-model="companyForm.contacts"
               type="text"
               placeholder="请输入公司联系人"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -561,7 +561,7 @@ const tabs = [
               v-model="companyForm.phone"
               type="text"
               placeholder="请输入公司联系电话"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div class="md:col-span-2">
@@ -583,7 +583,7 @@ const tabs = [
             v-model="companyForm.address"
             type="text"
             placeholder="请输入详细地址（街道、门牌号等）"
-            class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
           />
         </div>
 
@@ -594,11 +594,11 @@ const tabs = [
             <!-- 上传区域 -->
             <div v-if="!companyForm.licenseImgUrl" class="relative">
               <label 
-                class="flex flex-col items-center justify-center w-40 h-32 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/50 transition-all"
+                class="flex flex-col items-center justify-center w-40 h-32 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-brand-400 hover:bg-brand-50/50 transition-all"
                 :class="{ 'opacity-50 pointer-events-none': licenseUploading }"
               >
                 <FileText v-if="!licenseUploading" class="w-8 h-8 text-gray-300 mb-2" />
-                <div v-else class="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mb-2" />
+                <div v-else class="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-2" />
                 <span class="text-xs text-gray-400 font-bold">{{ licenseUploading ? '上传中...' : '点击上传' }}</span>
                 <span class="text-[10px] text-gray-300 mt-1">支持 JPG/PNG</span>
                 <input 
@@ -615,7 +615,7 @@ const tabs = [
               <img 
                 :src="companyForm.licenseImgUrl" 
                 alt="营业执照" 
-                class="w-40 h-32 object-cover rounded-xl border-2 border-gray-100"
+                class="w-40 h-32 object-cover rounded-xl border-2 border-gray-200"
               />
               <!-- 操作遮罩 -->
               <div class="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
@@ -637,7 +637,7 @@ const tabs = [
                 </button>
               </div>
               <!-- 上传成功标记 -->
-              <div class="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+              <div class="absolute -top-1 -right-1 w-5 h-5 bg-brand-500 rounded-full flex items-center justify-center">
                 <Check class="w-3 h-3 text-white" />
               </div>
             </div>
@@ -655,30 +655,30 @@ const tabs = [
         <div
           :class="[
             'flex items-center gap-4 p-4 rounded-xl',
-            company?.id ? 'bg-emerald-50' : 'bg-amber-50'
+            company?.id ? 'bg-brand-50' : 'bg-amber-50'
           ]"
         >
           <div
             :class="[
               'w-10 h-10 rounded-xl flex items-center justify-center',
-              company?.id ? 'bg-emerald-100' : 'bg-amber-100'
+              company?.id ? 'bg-brand-100' : 'bg-amber-100'
             ]"
           >
-            <Check v-if="company?.id" class="w-5 h-5 text-emerald-600" />
+            <Check v-if="company?.id" class="w-5 h-5 text-brand-600" />
             <AlertTriangle v-else class="w-5 h-5 text-amber-600" />
           </div>
           <div>
-            <div :class="['font-bold', company?.id ? 'text-emerald-800' : 'text-amber-800']">
+            <div :class="['font-bold', company?.id ? 'text-brand-800' : 'text-amber-800']">
               {{ company?.id ? '公司信息已完善' : '公司信息未完善' }}
             </div>
-            <div :class="['text-sm', company?.id ? 'text-emerald-600' : 'text-amber-600']">
+            <div :class="['text-sm', company?.id ? 'text-brand-600' : 'text-amber-600']">
               {{ company?.id ? '您的公司信息已保存，可以正常使用平台功能' : '请完善公司信息，以便更好地使用平台功能' }}
             </div>
           </div>
         </div>
 
         <!-- 快捷管理 -->
-        <div class="pt-6 border-t border-gray-100">
+        <div class="pt-6 border-t border-gray-200">
           <h4 class="font-bold text-gray-900 mb-4">快捷管理</h4>
           <router-link 
             to="/vehicles"
@@ -696,7 +696,7 @@ const tabs = [
         </div>
 
         <!-- 保存按钮 -->
-        <div v-if="companyDirty" class="pt-6 border-t border-gray-100 flex justify-end gap-3">
+        <div v-if="companyDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
           <BaseButton type="secondary" :disabled="loading" @click="resetCompanyForm">取消</BaseButton>
           <BaseButton type="primary" :loading="loading" @click="saveCompanyInfo">保存修改</BaseButton>
         </div>
@@ -704,8 +704,8 @@ const tabs = [
     </div>
 
     <!-- 账户安全 -->
-    <div v-show="activeTab === 'security'" class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in">
-      <div class="p-6 border-b border-gray-100">
+    <div v-show="activeTab === 'security'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
+      <div class="p-6 border-b border-gray-200">
         <h3 class="font-bold text-gray-900">修改密码</h3>
         <p class="text-sm text-gray-500 mt-1">定期更换密码可以保护账户安全</p>
       </div>
@@ -718,7 +718,7 @@ const tabs = [
               v-model="passwordForm.oldPassword"
               type="password"
               placeholder="请输入原密码"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -727,7 +727,7 @@ const tabs = [
               v-model="passwordForm.newPassword"
               type="password"
               placeholder="请输入新密码（至少6位）"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -736,13 +736,13 @@ const tabs = [
               v-model="passwordForm.confirmPassword"
               type="password"
               placeholder="请再次输入新密码"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
         </div>
 
         <!-- 保存按钮 -->
-        <div v-if="passwordDirty" class="pt-6 border-t border-gray-100 flex justify-end gap-3">
+        <div v-if="passwordDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
           <BaseButton type="secondary" :disabled="loading" @click="resetPasswordForm">取消</BaseButton>
           <BaseButton type="primary" :loading="loading" @click="changePassword">确认修改</BaseButton>
         </div>

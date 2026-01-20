@@ -46,7 +46,7 @@ function goToProfile() {
 
 <template>
   <div v-if="showGuide" class="profile-guide-card">
-    <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border border-amber-200 p-5 relative overflow-hidden">
+    <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-5 relative overflow-hidden">
       <!-- 装饰背景 -->
       <div class="absolute top-0 right-0 w-32 h-32 bg-amber-100/50 rounded-full -translate-y-1/2 translate-x-1/2" />
       <div class="absolute bottom-0 left-0 w-24 h-24 bg-orange-100/50 rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -99,7 +99,7 @@ function goToProfile() {
 
         <!-- 操作按钮 -->
         <button 
-          class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-bold text-sm transition-all active:scale-[0.98] shadow-lg shadow-amber-500/20"
+          class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-bold text-sm transition-all active:scale-[0.98] shadow-md shadow-amber-500/20"
           @click="goToProfile"
         >
           立即完善

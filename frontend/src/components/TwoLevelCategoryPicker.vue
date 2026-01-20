@@ -243,7 +243,7 @@ onBeforeUnmount(detachListeners)
       @visible-change="onVisibleChange"
     />
 
-    <div v-if="currentLabel" class="px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-800 truncate max-w-full md:max-w-[220px]">
+    <div v-if="currentLabel" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-800 truncate max-w-full md:max-w-[220px]">
       {{ currentLabel }}
     </div>
   </div>

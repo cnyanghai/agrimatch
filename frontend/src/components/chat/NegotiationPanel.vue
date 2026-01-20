@@ -241,22 +241,22 @@ function send() {
 </script>
 
 <template>
-  <div class="bg-white rounded-[32px] border border-gray-100 p-5 shadow-2xl">
+  <div class="bg-white rounded-[32px] border border-gray-200 p-5 shadow-2xl">
     <div class="flex items-center justify-between mb-5">
       <div>
-        <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Double Confirmation</div>
+        <div class="text-[10px] font-bold uppercase tracking-widest text-brand-600">Double Confirmation</div>
         <div class="mt-0.5 font-bold text-gray-900 text-lg">正式交易报价单</div>
       </div>
       <div class="flex items-center gap-2">
         <button
-          class="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold transition-all active:scale-95 disabled:opacity-50"
+          class="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold transition-all  disabled:opacity-50"
           :disabled="disabled"
           @click="clear"
         >
           重置默认
         </button>
         <button
-          class="px-6 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-lg shadow-emerald-100 transition-all active:scale-95 disabled:opacity-50"
+          class="px-6 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold shadow-md shadow-brand-100 transition-all  disabled:opacity-50"
           :disabled="disabled || !canSend"
           @click="send"
         >
@@ -266,7 +266,7 @@ function send() {
     </div>
 
     <!-- 产品规格参数 (只读) -->
-    <div v-if="Object.keys(productParams).length > 0" class="mb-5 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+    <div v-if="Object.keys(productParams).length > 0" class="mb-5 p-4 bg-gray-50 rounded-xl border border-gray-200">
       <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-1">
         产品规格参数 <InfoFilled class="w-3 h-3" />
       </div>
@@ -279,7 +279,7 @@ function send() {
     </div>
 
     <!-- 只读产品信息区 -->
-    <div v-if="productInfo.categoryName || productInfo.companyName" class="mb-4 p-3 bg-gray-50 rounded-2xl border border-gray-100">
+    <div v-if="productInfo.categoryName || productInfo.companyName" class="mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
       <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">产品信息（只读）</div>
       <div class="flex flex-wrap gap-3 text-xs">
         <div v-if="productInfo.categoryName" class="flex items-center gap-1">
@@ -300,7 +300,7 @@ function send() {
         </div>
         <div v-if="productInfo.remainingQuantity" class="flex items-center gap-1">
           <span class="text-gray-400">剩余:</span>
-          <span class="font-bold text-emerald-600">{{ productInfo.remainingQuantity }} 吨</span>
+          <span class="font-bold text-brand-600">{{ productInfo.remainingQuantity }} 吨</span>
         </div>
       </div>
     </div>
@@ -310,21 +310,21 @@ function send() {
       <!-- 核心交易项 -->
       <div class="space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">意向单价 (元/吨)</div>
-        <input v-model="form.price" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold text-emerald-600 focus:border-emerald-500 outline-none transition-all" placeholder="必填" />
+        <input v-model="form.price" :disabled="disabled" class="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-bold text-brand-600 focus:border-brand-500 outline-none transition-all" placeholder="必填" />
       </div>
       <div class="space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">意向数量</div>
-        <input v-model="form.quantity" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm font-bold text-gray-900 focus:border-emerald-500 outline-none transition-all" placeholder="必填" />
+        <input v-model="form.quantity" :disabled="disabled" class="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-bold text-gray-900 focus:border-brand-500 outline-none transition-all" placeholder="必填" />
       </div>
 
       <!-- 物流与商务项 -->
       <div class="space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">交货方式</div>
-        <input v-model="form.deliveryMethod" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
+        <input v-model="form.deliveryMethod" :disabled="disabled" class="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-brand-500 outline-none transition-all" />
       </div>
       <div class="space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">交付地点</div>
-        <input v-model="form.deliveryPlace" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
+        <input v-model="form.deliveryPlace" :disabled="disabled" class="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-brand-500 outline-none transition-all" />
       </div>
       <div class="space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">到货日期</div>
@@ -375,19 +375,19 @@ function send() {
       </div>
       <div class="space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">包装要求</div>
-        <input v-model="form.packaging" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
+        <input v-model="form.packaging" :disabled="disabled" class="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-brand-500 outline-none transition-all" />
       </div>
 
       <!-- 动态技术指标 -->
       <div v-for="(v, name) in form.dynamicParams" :key="name" class="space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{{ name }}</div>
-        <input v-model="form.dynamicParams![name]" :disabled="disabled" class="w-full border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" />
+        <input v-model="form.dynamicParams![name]" :disabled="disabled" class="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-brand-500 outline-none transition-all" />
       </div>
 
       <!-- 备注（独占两列或更多） -->
       <div class="col-span-2 space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">备注信息</div>
-        <textarea v-model="form.remark" :disabled="disabled" rows="1" class="w-full resize-none border-2 border-gray-100 rounded-xl px-3 py-2 text-sm focus:border-emerald-500 outline-none transition-all" placeholder="如有其他特殊约定请在此说明" />
+        <textarea v-model="form.remark" :disabled="disabled" rows="1" class="w-full resize-none border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-brand-500 outline-none transition-all" placeholder="如有其他特殊约定请在此说明" />
       </div>
     </div>
 
@@ -395,14 +395,14 @@ function send() {
     <div class="mt-5 pt-5 border-t border-gray-50" v-if="diff.length">
       <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">参数变更预览</div>
       <div class="flex flex-wrap gap-2">
-        <div v-for="d in diff" :key="d.k" class="bg-emerald-50/50 border border-emerald-100/50 rounded-xl px-3 py-1.5 text-xs flex items-center gap-1.5">
+        <div v-for="d in diff" :key="d.k" class="bg-brand-50/50 border border-brand-100/50 rounded-xl px-3 py-1.5 text-xs flex items-center gap-1.5">
           <span class="text-gray-500 font-medium">{{ d.k }}：</span>
           <div class="flex items-center gap-1.5">
             <template v-if="d.peer">
               <span class="text-gray-400 line-through">{{ d.peer }}</span>
-              <span class="text-emerald-400 font-bold">→</span>
+              <span class="text-brand-400 font-bold">→</span>
             </template>
-            <span :class="[d.mine ? 'text-emerald-700 font-black' : 'text-red-400 italic font-medium']">
+            <span :class="[d.mine ? 'text-brand-700 font-black' : 'text-red-400 italic font-medium']">
               {{ d.mine || '[已清空]' }}
             </span>
           </div>

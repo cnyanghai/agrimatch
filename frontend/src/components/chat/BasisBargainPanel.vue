@@ -157,23 +157,23 @@ function clear() {
 </script>
 
 <template>
-  <div class="bg-white rounded-[32px] border border-gray-100 p-6 shadow-2xl">
+  <div class="bg-white rounded-[32px] border border-gray-200 p-6 shadow-2xl">
     <!-- 头部 -->
     <div class="flex items-center justify-between mb-6">
       <div>
-        <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Basis Trading</div>
+        <div class="text-[10px] font-bold uppercase tracking-widest text-brand-600">Basis Trading</div>
         <div class="mt-0.5 font-bold text-gray-900 text-lg">基差交易出价单</div>
       </div>
       <div class="flex items-center gap-2">
         <button
-          class="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold transition-all active:scale-95 disabled:opacity-50"
+          class="px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold transition-all  disabled:opacity-50"
           :disabled="disabled"
           @click="clear"
         >
           重置
         </button>
         <button
-          class="px-6 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-lg shadow-emerald-100 transition-all active:scale-95 disabled:opacity-50"
+          class="px-6 py-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold shadow-md shadow-brand-100 transition-all  disabled:opacity-50"
           :disabled="disabled || !canSend"
           @click="send"
         >
@@ -183,7 +183,7 @@ function clear() {
     </div>
 
     <!-- 产品规格参数 -->
-    <div v-if="Object.keys(productParams).length > 0" class="mb-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+    <div v-if="Object.keys(productParams).length > 0" class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
       <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-1">
         产品规格参数 <InfoFilled class="w-3 h-3" />
       </div>
@@ -196,14 +196,14 @@ function clear() {
     </div>
 
     <!-- 期货盘面状态 -->
-    <div v-if="selectedContract" class="mb-6 p-4 bg-slate-900 rounded-2xl text-white">
+    <div v-if="selectedContract" class="mb-6 p-4 bg-slate-900 rounded-xl text-white">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold text-slate-400">当前盘面：</span>
           <span class="text-sm font-bold">{{ selectedContract.contractName }} ({{ selectedContract.contractCode }})</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <div class="w-2 h-2 rounded-full" :class="selectedContract.isTrading ? 'bg-emerald-500 animate-pulse' : 'bg-slate-500'"></div>
+          <div class="w-2 h-2 rounded-full" :class="selectedContract.isTrading ? 'bg-brand-500 animate-pulse' : 'bg-slate-500'"></div>
           <span class="text-[10px] font-bold uppercase tracking-tight text-slate-400">
             {{ selectedContract.isTrading ? '交易中' : '已休盘' }}
           </span>
@@ -232,7 +232,7 @@ function clear() {
         <select 
           v-model="form.contractCode" 
           :disabled="disabled"
-          class="w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-emerald-500 focus:bg-white outline-none transition-all"
+          class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-brand-500 focus:bg-white outline-none transition-all"
         >
           <option value="" disabled>请选择合约</option>
           <option v-for="c in contracts" :key="c.contractCode" :value="c.contractCode">
@@ -249,10 +249,10 @@ function clear() {
             v-model.number="form.basisPrice" 
             type="number"
             :disabled="disabled"
-            class="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-emerald-500 outline-none transition-all"
+            class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-brand-500 outline-none transition-all"
             :class="[
               form.basisPrice && form.basisPrice > 0 ? 'text-rose-600' : 
-              form.basisPrice && form.basisPrice < 0 ? 'text-emerald-600' : 'text-gray-900'
+              form.basisPrice && form.basisPrice < 0 ? 'text-brand-600' : 'text-gray-900'
             ]"
             placeholder="如：+80 或 -20"
           />
@@ -268,7 +268,7 @@ function clear() {
         <input 
           v-model="form.quantity" 
           :disabled="disabled"
-          class="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-emerald-500 outline-none transition-all"
+          class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-brand-500 outline-none transition-all"
           placeholder="请输入吨数"
         />
       </div>
@@ -276,10 +276,10 @@ function clear() {
       <!-- 核算价格预览 -->
       <div class="space-y-2">
         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">实时核算价 (元/吨)</label>
-        <div class="w-full bg-emerald-50 border-2 border-emerald-100 rounded-xl px-4 py-2.5 flex items-center justify-between">
-          <span class="text-sm font-black text-emerald-700">¥ {{ referencePrice.toFixed(2) }}</span>
+        <div class="w-full bg-brand-50 border-2 border-brand-100 rounded-xl px-4 py-2.5 flex items-center justify-between">
+          <span class="text-sm font-black text-brand-700">¥ {{ referencePrice.toFixed(2) }}</span>
           <el-tooltip content="核算价格 = 期货最新价 + 基差" placement="top">
-            <el-icon class="text-emerald-400 cursor-help"><InfoFilled /></el-icon>
+            <el-icon class="text-brand-400 cursor-help"><InfoFilled /></el-icon>
           </el-tooltip>
         </div>
       </div>
@@ -291,7 +291,7 @@ function clear() {
           v-model="form.remark" 
           :disabled="disabled"
           rows="2"
-          class="w-full border-2 border-gray-100 rounded-xl px-4 py-2.5 text-sm focus:border-emerald-500 outline-none transition-all resize-none"
+          class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-500 outline-none transition-all resize-none"
           placeholder="如有其他特殊约定请说明..."
         ></textarea>
       </div>

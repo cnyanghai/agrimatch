@@ -176,7 +176,7 @@ onMounted(() => {
       
       <div class="flex gap-3">
         <button
-          class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold rounded-xl transition-all active:scale-95"
+          class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold rounded-xl transition-all "
           @click="loadContract"
         >
           <RefreshCw class="w-4 h-4" />
@@ -184,21 +184,21 @@ onMounted(() => {
         </button>
         <button
           v-if="canSendForSign"
-          class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all active:scale-95"
+          class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all "
           @click="handleSendForSign"
         >
           发送签署
         </button>
         <button
           v-if="canSign"
-          class="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all active:scale-95"
+          class="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl transition-all "
           @click="openSignModal"
         >
           <Pen class="w-4 h-4" />
           签署合同
         </button>
         <button
-          class="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-xl transition-all active:scale-95"
+          class="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-xl transition-all "
           @click="downloadPdf"
         >
           <Download class="w-4 h-4" />
@@ -215,10 +215,10 @@ onMounted(() => {
       
       <div v-else-if="contract" class="max-w-5xl mx-auto space-y-6">
         <!-- 状态卡片 -->
-        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
-              <div class="w-14 h-14 rounded-2xl bg-slate-900 flex items-center justify-center">
+              <div class="w-14 h-14 rounded-xl bg-slate-900 flex items-center justify-center">
                 <FileText class="w-7 h-7 text-white" />
               </div>
               <div>
@@ -233,16 +233,16 @@ onMounted(() => {
           </div>
           
           <!-- 签署状态 -->
-          <div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-gray-100">
+          <div class="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-gray-200">
             <div class="bg-gray-50 rounded-xl p-4">
               <div class="flex items-center gap-3">
-                <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', contract.buyerSigned ? 'bg-emerald-100' : 'bg-amber-100']">
-                  <Check v-if="contract.buyerSigned" class="w-5 h-5 text-emerald-600" />
+                <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', contract.buyerSigned ? 'bg-brand-100' : 'bg-amber-100']">
+                  <Check v-if="contract.buyerSigned" class="w-5 h-5 text-brand-600" />
                   <Clock v-else class="w-5 h-5 text-amber-500" />
                 </div>
                 <div>
                   <div class="text-xs text-gray-500">买方签署</div>
-                  <div :class="['font-bold', contract.buyerSigned ? 'text-emerald-600' : 'text-amber-600']">
+                  <div :class="['font-bold', contract.buyerSigned ? 'text-brand-600' : 'text-amber-600']">
                     {{ contract.buyerSigned ? '已签署' : '待签署' }}
                   </div>
                 </div>
@@ -255,13 +255,13 @@ onMounted(() => {
             
             <div class="bg-gray-50 rounded-xl p-4">
               <div class="flex items-center gap-3">
-                <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', contract.sellerSigned ? 'bg-emerald-100' : 'bg-amber-100']">
-                  <Check v-if="contract.sellerSigned" class="w-5 h-5 text-emerald-600" />
+                <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', contract.sellerSigned ? 'bg-brand-100' : 'bg-amber-100']">
+                  <Check v-if="contract.sellerSigned" class="w-5 h-5 text-brand-600" />
                   <Clock v-else class="w-5 h-5 text-amber-500" />
                 </div>
                 <div>
                   <div class="text-xs text-gray-500">卖方签署</div>
-                  <div :class="['font-bold', contract.sellerSigned ? 'text-emerald-600' : 'text-amber-600']">
+                  <div :class="['font-bold', contract.sellerSigned ? 'text-brand-600' : 'text-amber-600']">
                     {{ contract.sellerSigned ? '已签署' : '待签署' }}
                   </div>
                 </div>
@@ -275,7 +275,7 @@ onMounted(() => {
         </div>
 
         <!-- 履约进度（已签署及之后的状态显示） -->
-        <div v-if="contract.status >= 2" class="bg-white rounded-2xl border border-gray-100 p-6">
+        <div v-if="contract.status >= 2" class="bg-white rounded-xl border border-gray-200 p-6">
           <MilestoneList
             ref="milestoneListRef"
             :contract-id="contract.id"
@@ -289,7 +289,7 @@ onMounted(() => {
         </div>
 
         <!-- 甲方（买方）信息 -->
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <button
             class="w-full p-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors"
             @click="showBuyerDetail = !showBuyerDetail"
@@ -306,7 +306,7 @@ onMounted(() => {
             <component :is="showBuyerDetail ? ChevronUp : ChevronDown" class="w-5 h-5 text-gray-400" />
           </button>
           
-          <div v-if="showBuyerDetail" class="px-6 pb-6 pt-0 border-t border-gray-100">
+          <div v-if="showBuyerDetail" class="px-6 pb-6 pt-0 border-t border-gray-200">
             <div class="grid grid-cols-2 gap-4 mt-4">
               <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                 <Shield class="w-5 h-5 text-gray-400" />
@@ -362,14 +362,14 @@ onMounted(() => {
         </div>
 
         <!-- 乙方（卖方）信息 -->
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <button
             class="w-full p-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors"
             @click="showSellerDetail = !showSellerDetail"
           >
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <Building2 class="w-5 h-5 text-emerald-600" />
+              <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center">
+                <Building2 class="w-5 h-5 text-brand-600" />
               </div>
               <div class="text-left">
                 <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">乙方（卖方）</div>
@@ -379,7 +379,7 @@ onMounted(() => {
             <component :is="showSellerDetail ? ChevronUp : ChevronDown" class="w-5 h-5 text-gray-400" />
           </button>
           
-          <div v-if="showSellerDetail" class="px-6 pb-6 pt-0 border-t border-gray-100">
+          <div v-if="showSellerDetail" class="px-6 pb-6 pt-0 border-t border-gray-200">
             <div class="grid grid-cols-2 gap-4 mt-4">
               <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                 <Shield class="w-5 h-5 text-gray-400" />
@@ -411,10 +411,10 @@ onMounted(() => {
               </div>
             </div>
             <!-- 银行信息 -->
-            <div v-if="sellerBank" class="mt-4 p-4 bg-emerald-50 rounded-xl">
+            <div v-if="sellerBank" class="mt-4 p-4 bg-brand-50 rounded-xl">
               <div class="flex items-center gap-2 mb-2">
-                <Landmark class="w-4 h-4 text-emerald-600" />
-                <span class="text-xs font-bold text-emerald-600">银行账户信息</span>
+                <Landmark class="w-4 h-4 text-brand-600" />
+                <span class="text-xs font-bold text-brand-600">银行账户信息</span>
               </div>
               <div class="grid grid-cols-3 gap-4 text-sm">
                 <div>
@@ -435,13 +435,13 @@ onMounted(() => {
         </div>
         
         <!-- 交易信息 -->
-        <div class="bg-white rounded-2xl border border-gray-100 p-6">
+        <div class="bg-white rounded-xl border border-gray-200 p-6">
           <h3 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Package class="w-4 h-4 text-emerald-600" />
+            <Package class="w-4 h-4 text-brand-600" />
             交易标的
           </h3>
           
-          <div class="bg-emerald-50 rounded-xl p-4 mb-4">
+          <div class="bg-brand-50 rounded-xl p-4 mb-4">
             <div class="flex justify-between items-start">
               <div>
                 <div class="text-lg font-bold text-gray-900">{{ contract.productName }}</div>
@@ -454,7 +454,7 @@ onMounted(() => {
               </div>
               <div class="text-right">
                 <div class="text-xs text-gray-500">合同金额</div>
-                <div class="text-2xl font-bold text-emerald-600">¥{{ formatAmount(contract.totalAmount) }}</div>
+                <div class="text-2xl font-bold text-brand-600">¥{{ formatAmount(contract.totalAmount) }}</div>
               </div>
             </div>
           </div>
@@ -507,7 +507,7 @@ onMounted(() => {
         </div>
 
         <!-- 合同条款 -->
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <button
             class="w-full p-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors"
             @click="showTerms = !showTerms"
@@ -527,7 +527,7 @@ onMounted(() => {
             </div>
           </button>
           
-          <div v-if="showTerms" class="px-6 pb-6 pt-0 border-t border-gray-100">
+          <div v-if="showTerms" class="px-6 pb-6 pt-0 border-t border-gray-200">
             <div class="mt-4 p-6 bg-gray-50 rounded-xl">
               <pre class="whitespace-pre-wrap text-sm text-gray-700 font-sans leading-relaxed">{{ contract.formattedTerms || '暂无条款内容' }}</pre>
             </div>
@@ -548,7 +548,7 @@ onMounted(() => {
         </div>
         
         <!-- PDF 哈希 -->
-        <div v-if="contract.pdfHash" class="bg-white rounded-2xl border border-gray-100 p-6">
+        <div v-if="contract.pdfHash" class="bg-white rounded-xl border border-gray-200 p-6">
           <div class="flex items-center gap-2 mb-3">
             <Scale class="w-4 h-4 text-gray-500" />
             <h3 class="text-sm font-bold text-gray-900">合同防伪码</h3>

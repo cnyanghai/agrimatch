@@ -95,7 +95,7 @@ onMounted(() => {
   <div class="bg-gray-50 text-gray-900 min-h-screen">
     <PublicTopNav>
       <template #actions>
-        <button class="bg-emerald-600 text-white px-5 py-2 rounded-full font-bold hover:bg-emerald-700 transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-emerald-500/20" @click="onPublishTalk">
+        <button class="bg-brand-600 text-white px-5 py-2 rounded-full font-bold hover:bg-brand-700 transition-all  flex items-center gap-2 shadow-md shadow-brand-500/20" @click="onPublishTalk">
           <Plus :size="18" />
           发布话题
         </button>
@@ -110,22 +110,22 @@ onMounted(() => {
             <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight mb-2">话题广场</h1>
             <p class="text-gray-500 text-lg">在这里，每一个关于饲料原料的思考都有价值</p>
           </div>
-          <div class="bg-amber-50 border border-amber-100 rounded-3xl p-6 flex items-center gap-6 shadow-sm">
-            <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 shadow-inner">
+          <div class="bg-amber-50 border border-amber-100 rounded-xl p-6 flex items-center gap-6 shadow-sm">
+            <div class="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 shadow-inner">
               <Star :size="28" fill="currentColor" />
             </div>
             <div>
               <p class="text-sm font-bold text-amber-800">发布高质量话题</p>
               <p class="text-xs text-amber-600/80 font-medium">最高可得 <span class="text-lg font-black">500</span> 积分</p>
             </div>
-            <button class="bg-amber-500 text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:bg-amber-600 transition-all active:scale-95 shadow-md shadow-amber-500/20" @click="onPublishTalk">立即参与</button>
+            <button class="bg-amber-500 text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:bg-amber-600 transition-all  shadow-md shadow-amber-500/20" @click="onPublishTalk">立即参与</button>
           </div>
         </div>
 
         <div class="flex items-center gap-8 mt-12 border-b relative">
           <button 
             class="pb-4 px-2 text-sm font-bold transition-colors"
-            :class="activeTab === 'all' ? 'border-b-2 border-emerald-600 text-emerald-600' : 'text-gray-400 hover:text-emerald-600'"
+            :class="activeTab === 'all' ? 'border-b-2 border-brand-600 text-brand-600' : 'text-gray-400 hover:text-brand-600'"
             @click="onTabChange('all')"
           >全部话题</button>
           <button 
@@ -150,15 +150,15 @@ onMounted(() => {
                 v-model="keyword"
                 type="text" 
                 placeholder="搜索你感兴趣的话题或关键字..." 
-                class="w-full h-12 bg-white border border-gray-200 rounded-2xl px-12 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-sm"
+                class="w-full h-12 bg-white border border-gray-200 rounded-xl px-12 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/5 transition-all shadow-sm"
                 @keyup.enter="onSearch"
               />
-              <Search class="w-5 h-5 text-gray-400 absolute left-4 top-3.5 group-focus-within:text-emerald-500 transition-colors" />
+              <Search class="w-5 h-5 text-gray-400 absolute left-4 top-3.5 group-focus-within:text-brand-500 transition-colors" />
             </div>
             <div class="relative min-w-[140px]">
               <select 
                 v-model="order"
-                class="w-full h-12 bg-white border border-gray-200 rounded-2xl px-4 pr-10 text-sm font-bold text-gray-600 appearance-none outline-none cursor-pointer hover:border-emerald-500 transition-all shadow-sm"
+                class="w-full h-12 bg-white border border-gray-200 rounded-xl px-4 pr-10 text-sm font-bold text-gray-600 appearance-none outline-none cursor-pointer hover:border-brand-500 transition-all shadow-sm"
                 @change="onOrderChange"
               >
                 <option value="desc">最新发布</option>
@@ -172,14 +172,14 @@ onMounted(() => {
             <div 
               v-for="(post, idx) in posts" 
               :key="post.id"
-              class="topic-card bg-white rounded-[32px] p-8 border border-gray-100 transition-all cursor-pointer hover:shadow-2xl hover:shadow-emerald-900/5 hover:-translate-y-1"
+              class="topic-card bg-white rounded-[32px] p-8 border border-gray-200 transition-all cursor-pointer hover:shadow-2xl hover:shadow-brand-900/5 "
               @click="go(`/talks/${post.id}`)"
             >
               <div class="flex justify-between items-start mb-6">
                 <div class="flex items-center gap-3">
                   <span 
                     v-if="idx === 0"
-                    class="bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-lg shadow-emerald-500/20"
+                    class="bg-brand-600 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-md shadow-brand-500/20"
                   >
                     TOP
                   </span>
@@ -191,7 +191,7 @@ onMounted(() => {
                 <div v-if="post.postType === 'bounty'" class="flex items-center gap-2">
                   <span 
                     v-if="post.bountyStatus === 1"
-                    class="flex items-center gap-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-lg"
+                    class="flex items-center gap-1 bg-brand-100 text-brand-700 text-[10px] font-bold px-2.5 py-1 rounded-lg"
                   >
                     <CheckCircle :size="12" />
                     已采纳
@@ -206,7 +206,7 @@ onMounted(() => {
                 </div>
               </div>
               <h3 
-                class="text-2xl font-black text-gray-900 mb-4 hover:text-emerald-600 transition-colors line-clamp-1"
+                class="text-2xl font-black text-gray-900 mb-4 hover:text-brand-600 transition-colors line-clamp-1"
               >
                 {{ post.title }}
               </h3>
@@ -216,7 +216,7 @@ onMounted(() => {
               
               <div class="mt-8 flex items-center justify-between pt-6 border-t border-gray-50">
                 <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs font-black shadow-lg shadow-emerald-500/20">
+                  <div class="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center text-xs font-black shadow-md shadow-brand-500/20">
                     {{ (post.nickName || post.userName || '?')[0] }}
                   </div>
                   <span class="text-xs font-bold text-gray-700">
@@ -225,7 +225,7 @@ onMounted(() => {
                   </span>
                 </div>
                 <div class="flex items-center gap-6 text-xs font-bold text-gray-400">
-                  <span class="flex items-center gap-1.5 hover:text-emerald-600 transition-colors">
+                  <span class="flex items-center gap-1.5 hover:text-brand-600 transition-colors">
                     <MessageSquare :size="16" />
                     {{ post.commentCount ?? 0 }}
                   </span>
@@ -248,29 +248,29 @@ onMounted(() => {
         <div class="lg:col-span-4 space-y-8">
           <!-- 用户卡片 -->
           <div class="bg-slate-900 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden group">
-            <div class="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all"></div>
+            <div class="absolute -right-10 -top-10 w-40 h-40 bg-brand-500/10 rounded-full blur-3xl group-hover:bg-brand-500/20 transition-all"></div>
             <div class="relative z-10">
               <div class="flex items-center gap-4 mb-8">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-emerald-500/20">
+                <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500 to-teal-600 flex items-center justify-center font-black text-xl text-white shadow-md shadow-brand-500/20">
                   {{ displayName[0] || '我' }}
                 </div>
                 <div>
                   <h4 class="font-black text-lg">{{ displayName }}</h4>
-                  <p class="text-xs text-emerald-400 font-bold uppercase tracking-widest mt-1">
+                  <p class="text-xs text-brand-400 font-bold uppercase tracking-widest mt-1">
                     {{ isLoggedIn ? 'Professional Member' : 'Guest Viewer' }}
                   </p>
                 </div>
               </div>
               <button 
                 v-if="isLoggedIn"
-                class="w-full py-4 bg-emerald-600 text-white rounded-2xl text-sm font-black hover:bg-emerald-700 transition-all active:scale-[0.98] shadow-lg shadow-emerald-600/20" 
+                class="w-full py-4 bg-brand-600 text-white rounded-xl text-sm font-black hover:bg-brand-700 transition-all active:scale-[0.98] shadow-md shadow-brand-600/20" 
                 @click="onEnterMy"
               >
                 进入控制台
               </button>
               <button 
                 v-else
-                class="w-full py-4 bg-emerald-600 text-white rounded-2xl text-sm font-black hover:bg-emerald-700 transition-all active:scale-[0.98] shadow-lg shadow-emerald-600/20" 
+                class="w-full py-4 bg-brand-600 text-white rounded-xl text-sm font-black hover:bg-brand-700 transition-all active:scale-[0.98] shadow-md shadow-brand-600/20" 
                 @click="ui.openAuthDialog('login')"
               >
                 立即登录
@@ -279,7 +279,7 @@ onMounted(() => {
           </div>
 
           <!-- 积分兑换卡片 -->
-          <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-[32px] p-8 text-white relative overflow-hidden shadow-xl group cursor-pointer" @click="onPublishTalk">
+          <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-[32px] p-8 text-white relative overflow-hidden shadow-md group cursor-pointer" @click="onPublishTalk">
             <div class="absolute -right-4 -bottom-4 opacity-20 transform group-hover:scale-110 group-hover:-rotate-12 transition-all duration-500">
               <Gift :size="120" />
             </div>

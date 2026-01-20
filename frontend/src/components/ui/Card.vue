@@ -36,12 +36,12 @@ const cardClasses = computed(() => {
   const shadows: Record<string, string> = {
     sm: 'shadow-sm',
     md: 'shadow-md',
-    lg: 'shadow-lg',
-    xl: 'shadow-xl'
+    lg: 'shadow-md',
+    xl: 'shadow-md'
   }
 
   let classes = [
-    'rounded-2xl transition-all duration-300',
+    'rounded-xl transition-all duration-300',
     variants[props.variant],
     paddings[props.padding],
     shadows[props.shadow]
@@ -56,7 +56,7 @@ const cardClasses = computed(() => {
   }
 
   if (props.hover && props.variant === 'interactive') {
-    classes.push('hover:shadow-lg hover:-translate-y-0.5')
+    classes.push('hover:shadow-md hover:-translate-y-0.5')
   }
 
   return classes.filter(Boolean).join(' ')

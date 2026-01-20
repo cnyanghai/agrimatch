@@ -157,8 +157,8 @@ watch(visible, (val) => {
   >
     <!-- 头部图标 -->
     <template #icon>
-      <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-        <Plus class="w-5 h-5 text-emerald-600" />
+      <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center">
+        <Plus class="w-5 h-5 text-brand-600" />
       </div>
     </template>
 
@@ -175,16 +175,16 @@ watch(visible, (val) => {
             :class="[
               'flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all',
               form.milestoneType === option.value 
-                ? 'border-emerald-500 bg-emerald-50' 
-                : 'border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+                ? 'border-brand-500 bg-brand-50' 
+                : 'border-gray-200 hover:border-gray-200 hover:bg-gray-50'
             ]"
             @click="selectType(option.value)"
           >
             <component 
               :is="option.icon" 
-              :class="['w-5 h-5', form.milestoneType === option.value ? 'text-emerald-600' : 'text-gray-400']"
+              :class="['w-5 h-5', form.milestoneType === option.value ? 'text-brand-600' : 'text-gray-400']"
             />
-            <span :class="['text-xs font-bold', form.milestoneType === option.value ? 'text-emerald-600' : 'text-gray-600']">
+            <span :class="['text-xs font-bold', form.milestoneType === option.value ? 'text-brand-600' : 'text-gray-600']">
               {{ option.label }}
             </span>
           </button>
@@ -200,7 +200,7 @@ watch(visible, (val) => {
           v-model="form.milestoneName"
           type="text"
           placeholder="例如：发货确认、质量检验"
-          class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
         />
       </div>
       
@@ -213,7 +213,7 @@ watch(visible, (val) => {
           v-model="form.description"
           rows="2"
           placeholder="可选，说明此节点的具体要求..."
-          class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm resize-none"
+          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm resize-none"
         />
       </div>
       
@@ -225,7 +225,7 @@ watch(visible, (val) => {
         <input
           v-model="form.expectedDate"
           type="date"
-          class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
         />
       </div>
 

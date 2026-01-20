@@ -43,10 +43,10 @@ const statusConfig: Record<number, {
   },
   2: { 
     label: '已签署', 
-    color: 'bg-emerald-50 text-emerald-600',
-    barColor: 'bg-emerald-500',
-    bgGradient: 'from-emerald-500 to-teal-600',
-    iconColor: 'text-emerald-500'
+    color: 'bg-brand-50 text-brand-600',
+    barColor: 'bg-brand-500',
+    bgGradient: 'from-brand-500 to-teal-600',
+    iconColor: 'text-brand-500'
   },
   3: { 
     label: '履约中', 
@@ -57,10 +57,10 @@ const statusConfig: Record<number, {
   },
   4: { 
     label: '已完成', 
-    color: 'bg-emerald-100 text-emerald-700',
-    barColor: 'bg-emerald-600',
-    bgGradient: 'from-emerald-600 to-green-700',
-    iconColor: 'text-emerald-600'
+    color: 'bg-brand-100 text-brand-700',
+    barColor: 'bg-brand-600',
+    bgGradient: 'from-brand-600 to-green-700',
+    iconColor: 'text-brand-600'
   },
   5: { 
     label: '已取消', 
@@ -250,7 +250,7 @@ onMounted(() => {
         <p class="text-sm text-gray-500 mt-1">管理您的所有采购合同</p>
       </div>
       <button
-        class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-sm font-bold rounded-xl transition-all active:scale-95 shadow-md shadow-emerald-500/20"
+        class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-700 hover:to-teal-700 text-white text-sm font-bold rounded-xl transition-all  shadow-md shadow-brand-500/20"
         @click="loadContracts"
       >
         <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
@@ -263,8 +263,8 @@ onMounted(() => {
       <div 
         v-for="(info, status) in statusConfig" 
         :key="status"
-        class="bg-white rounded-xl border border-gray-100 p-3 cursor-pointer transition-all hover:shadow-md"
-        :class="{ 'ring-2 ring-emerald-500 ring-offset-1': filterStatus === Number(status) }"
+        class="bg-white rounded-xl border border-gray-200 p-3 cursor-pointer transition-all hover:shadow-md"
+        :class="{ 'ring-2 ring-brand-500 ring-offset-1': filterStatus === Number(status) }"
         @click="filterStatus = filterStatus === Number(status) ? null : Number(status)"
       >
         <div class="flex items-center gap-2">
@@ -285,7 +285,7 @@ onMounted(() => {
     <!-- 主内容 -->
     <div class="space-y-6">
       <!-- 搜索栏 -->
-      <div class="bg-white rounded-2xl border border-gray-100 p-4">
+      <div class="bg-white rounded-xl border border-gray-200 p-4">
         <div class="flex flex-wrap gap-4 items-center">
           <!-- 搜索框 -->
           <div class="flex-1 min-w-[280px] relative">
@@ -294,7 +294,7 @@ onMounted(() => {
               v-model="searchKeyword"
               type="text"
               placeholder="搜索合同编号、产品名称、公司名称..."
-              class="w-full pl-10 pr-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+              class="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
             />
           </div>
           
@@ -304,7 +304,7 @@ onMounted(() => {
               :class="[
                 'px-4 py-2 text-xs font-bold rounded-xl transition-all',
                 filterStatus === null 
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md' 
+                  ? 'bg-gradient-to-r from-brand-600 to-teal-600 text-white shadow-md' 
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               ]"
               @click="filterStatus = null"
@@ -343,7 +343,7 @@ onMounted(() => {
       
       <!-- 加载状态 - 骨架屏 -->
       <div v-if="loading" class="space-y-4">
-        <div v-for="i in 3" :key="i" class="bg-white rounded-2xl border border-gray-100 p-5">
+        <div v-for="i in 3" :key="i" class="bg-white rounded-xl border border-gray-200 p-5">
           <div class="flex gap-4">
             <Skeleton type="avatar" class="!w-14 !h-14 !rounded-xl" />
             <div class="flex-1 space-y-3">
@@ -360,8 +360,8 @@ onMounted(() => {
       </div>
       
       <!-- 空状态 -->
-      <div v-else-if="filteredContracts.length === 0" class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-        <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-4">
+      <div v-else-if="filteredContracts.length === 0" class="bg-white rounded-xl border border-gray-200 p-12 text-center">
+        <div class="w-20 h-20 mx-auto rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-4">
           <FileText class="w-10 h-10 text-gray-400" />
         </div>
         <p class="text-lg font-bold text-gray-700">暂无合同</p>
@@ -373,7 +373,7 @@ onMounted(() => {
         <div
           v-for="(contract, idx) in filteredContracts"
           :key="contract.id"
-          class="contract-card group bg-white rounded-2xl border border-gray-100 hover:shadow-xl hover:border-emerald-100 transition-all cursor-pointer overflow-hidden"
+          class="contract-card group bg-white rounded-xl border border-gray-200 hover:shadow-md hover:border-brand-100 transition-all cursor-pointer overflow-hidden"
           :style="{ animationDelay: `${idx * 50}ms` }"
           @click="viewContract(contract.id)"
         >
@@ -389,7 +389,7 @@ onMounted(() => {
               <div class="flex items-start gap-4">
                 <!-- 合同图标（渐变） -->
                 <div 
-                  class="w-14 h-14 rounded-xl bg-gradient-to-br flex items-center justify-center shrink-0 shadow-lg"
+                  class="w-14 h-14 rounded-xl bg-gradient-to-br flex items-center justify-center shrink-0 shadow-md"
                   :class="statusConfig[contract.status]?.bgGradient || 'from-gray-400 to-gray-500'"
                 >
                   <FileText class="w-7 h-7 text-white" />
@@ -422,7 +422,7 @@ onMounted(() => {
                 
                 <!-- 金额（突出显示） -->
                 <div class="text-right shrink-0">
-                  <div class="text-2xl font-bold text-emerald-600">
+                  <div class="text-2xl font-bold text-brand-600">
                     ¥{{ formatAmount(contract.totalAmount) }}
                   </div>
                   <div class="text-[10px] text-gray-400 mt-1">合同金额</div>
@@ -436,8 +436,8 @@ onMounted(() => {
               <div class="grid grid-cols-2 gap-4">
                 <!-- 买方 -->
                 <div class="flex items-center gap-3">
-                  <div :class="['w-6 h-6 rounded-full flex items-center justify-center text-[10px]', contract.buyerSigned ? 'bg-emerald-100' : 'bg-amber-100']">
-                    <CheckCircle v-if="contract.buyerSigned" class="w-4 h-4 text-emerald-600" />
+                  <div :class="['w-6 h-6 rounded-full flex items-center justify-center text-[10px]', contract.buyerSigned ? 'bg-brand-100' : 'bg-amber-100']">
+                    <CheckCircle v-if="contract.buyerSigned" class="w-4 h-4 text-brand-600" />
                     <Clock v-else class="w-4 h-4 text-amber-500" />
                   </div>
                   <div class="min-w-0">
@@ -451,8 +451,8 @@ onMounted(() => {
                 
                 <!-- 卖方 -->
                 <div class="flex items-center gap-3">
-                  <div :class="['w-6 h-6 rounded-full flex items-center justify-center text-[10px]', contract.sellerSigned ? 'bg-emerald-100' : 'bg-amber-100']">
-                    <CheckCircle v-if="contract.sellerSigned" class="w-4 h-4 text-emerald-600" />
+                  <div :class="['w-6 h-6 rounded-full flex items-center justify-center text-[10px]', contract.sellerSigned ? 'bg-brand-100' : 'bg-amber-100']">
+                    <CheckCircle v-if="contract.sellerSigned" class="w-4 h-4 text-brand-600" />
                     <Clock v-else class="w-4 h-4 text-amber-500" />
                   </div>
                   <div class="min-w-0">
@@ -495,7 +495,7 @@ onMounted(() => {
                 </button>
                 <button
                   v-if="contract.status === 1 && (!contract.buyerSigned || !contract.sellerSigned)"
-                  class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-xs font-medium rounded-lg transition-all flex items-center gap-1"
+                  class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-600 text-xs font-medium rounded-lg transition-all flex items-center gap-1"
                   @click="openSignModal(contract.id)"
                 >
                   <Pen class="w-3.5 h-3.5" />

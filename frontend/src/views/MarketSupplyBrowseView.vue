@@ -213,14 +213,14 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-3">
         <button 
-          class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all active:scale-95"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all "
           @click="refreshData"
         >
           <Refresh class="w-4 h-4" />
           刷新
         </button>
         <button 
-          class="bg-emerald-600 text-white px-5 py-2 rounded-xl font-bold hover:bg-emerald-700 transition-all active:scale-95 flex items-center gap-2"
+          class="bg-brand-600 text-white px-5 py-2 rounded-xl font-bold hover:bg-brand-700 transition-all  flex items-center gap-2"
           @click="goToHall"
         >
           <Box class="w-4 h-4" />
@@ -245,8 +245,8 @@ onMounted(() => {
           <div 
             class="w-16 h-16 rounded-full flex items-center justify-center transition-all border-2"
             :class="selectedUserId === null 
-              ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-200' 
-              : 'bg-gray-100 text-gray-500 border-gray-200 group-hover:border-emerald-300'"
+              ? 'bg-brand-600 text-white border-brand-600 shadow-md shadow-brand-200' 
+              : 'bg-gray-100 text-gray-500 border-gray-200 group-hover:border-brand-300'"
           >
             <UserFilled class="w-6 h-6" />
           </div>
@@ -262,8 +262,8 @@ onMounted(() => {
           <button
             class="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold transition-all border-2"
             :class="selectedUserId === user.userId 
-              ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-300' 
-              : 'bg-white text-slate-700 border-gray-200 group-hover:border-emerald-300 group-hover:shadow-md'"
+              ? 'bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-300' 
+              : 'bg-white text-slate-700 border-gray-200 group-hover:border-brand-300 group-hover:shadow-md'"
             @click="toggleUserFilter(user.userId)"
           >
             {{ getAvatarText(user) }}
@@ -288,22 +288,22 @@ onMounted(() => {
           class="flex flex-col items-center gap-2 shrink-0 group"
           @click="goToHall"
         >
-          <div class="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 group-hover:border-emerald-400 group-hover:text-emerald-500 transition-all">
+          <div class="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 group-hover:border-brand-400 group-hover:text-brand-500 transition-all">
             <Plus class="w-6 h-6" />
           </div>
-          <span class="text-xs font-medium text-gray-400 group-hover:text-emerald-500">发现更多</span>
+          <span class="text-xs font-medium text-gray-400 group-hover:text-brand-500">发现更多</span>
         </button>
       </div>
 
       <!-- 未关注任何人时的提示 -->
-      <div v-else class="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+      <div v-else class="bg-white rounded-xl border border-gray-200 p-8 text-center">
         <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
           <UserFilled class="w-10 h-10 text-gray-300" />
         </div>
         <h3 class="text-lg font-bold text-gray-900 mb-2">还没有关注任何供应商</h3>
         <p class="text-sm text-gray-500 mb-6">前往供应大厅，发现优质供应商并关注他们</p>
         <button 
-          class="px-6 py-2.5 bg-emerald-600 text-white rounded-full font-bold hover:bg-emerald-700 transition-all active:scale-95"
+          class="px-6 py-2.5 bg-brand-600 text-white rounded-full font-bold hover:bg-brand-700 transition-all "
           @click="goToHall"
         >
           去供应大厅看看
@@ -316,7 +316,7 @@ onMounted(() => {
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
           <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">最新供应信息</span>
-          <span v-if="selectedUserId" class="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+          <span v-if="selectedUserId" class="text-xs text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full">
             已筛选
           </span>
         </div>
@@ -329,18 +329,18 @@ onMounted(() => {
           <div
             v-for="supply in filteredSupplies"
             :key="supply.id"
-            class="group bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all hover:shadow-xl hover:border-emerald-100"
+            class="group bg-white rounded-xl border border-gray-200 overflow-hidden transition-all hover:shadow-md hover:border-brand-100"
           >
             <!-- 卡片头部 -->
-            <div class="p-5 bg-gradient-to-br from-emerald-50/50 to-white border-b border-gray-50">
+            <div class="p-5 bg-gradient-to-br from-brand-50/50 to-white border-b border-gray-50">
               <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-emerald-600 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-lg">
+                <div class="w-12 h-12 bg-brand-600 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-md">
                   {{ getSupplyAvatar(supply) }}
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
                     <span class="font-bold text-gray-900 truncate">{{ supply.nickName || supply.userName || '供应商' }}</span>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-2 py-0.5 rounded-full border border-brand-100">
                       SELLER
                     </span>
                   </div>
@@ -355,7 +355,7 @@ onMounted(() => {
               <div class="flex items-start justify-between mb-4">
                 <div>
                   <div class="flex items-center gap-2 mb-1">
-                    <Box class="w-4 h-4 text-emerald-600" />
+                    <Box class="w-4 h-4 text-brand-600" />
                     <h3 class="text-xl font-black text-gray-900">{{ supply.categoryName }}</h3>
                   </div>
                   <div class="text-xs text-gray-400">#{{ supply.id }} · {{ formatTime(supply.createTime) }}</div>
@@ -415,16 +415,16 @@ onMounted(() => {
             </div>
 
             <!-- 卡片底部 -->
-            <div class="px-5 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3">
+            <div class="px-5 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3">
               <button 
-                class="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition-all active:scale-95 flex items-center gap-2"
+                class="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition-all  flex items-center gap-2"
                 @click="viewDetail(supply)"
               >
                 <View class="w-4 h-4" />
                 详情
               </button>
               <button 
-                class="px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all active:scale-95 flex items-center gap-2"
+                class="px-6 py-2 bg-brand-600 text-white rounded-xl font-bold text-sm shadow-md shadow-brand-200 hover:bg-brand-700 transition-all  flex items-center gap-2"
                 @click="onConsult(supply)"
               >
                 <ChatDotRound class="w-4 h-4" />
@@ -435,7 +435,7 @@ onMounted(() => {
         </div>
 
         <!-- 空状态 -->
-        <div v-else-if="!loading" class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+        <div v-else-if="!loading" class="bg-white rounded-xl border border-gray-200 p-12 text-center">
           <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <Box class="w-8 h-8 text-gray-300" />
           </div>

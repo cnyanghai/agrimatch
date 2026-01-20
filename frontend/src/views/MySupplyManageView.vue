@@ -594,8 +594,8 @@ async function applyTemplate(template: SupplyTemplateResponse) {
       <!-- 左侧表单区域 -->
       <div class="lg:col-span-2 space-y-6">
         <!-- 发布信息 -->
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in">
-          <div class="p-5 border-b border-gray-100 flex items-center gap-2">
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-gray-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-slate-900 rounded-full"></div>
             <h2 class="font-bold text-gray-900">发布信息</h2>
           </div>
@@ -607,7 +607,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                   v-model="publishForm.companyName"
                   type="text"
                   placeholder="默认使用公司名称"
-                  class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
                 />
               </div>
               <div>
@@ -616,7 +616,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                   v-model="publisherNameInput"
                   type="text"
                   placeholder="默认使用个人信息"
-                  class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
                 />
               </div>
             </div>
@@ -626,7 +626,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                 v-model="publishForm.shipAddress"
                 type="text"
                 placeholder="请输入发货地址"
-                class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
               />
             </div>
             <p class="text-xs text-gray-400">以上信息仅用于本次发布，不会修改您的公司/个人资料</p>
@@ -634,9 +634,9 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         </div>
 
         <!-- 基础信息 -->
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in" style="animation-delay: 50ms">
-          <div class="p-5 border-b border-gray-100 flex items-center gap-2">
-            <div class="w-1.5 h-5 bg-emerald-600 rounded-full"></div>
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 50ms">
+          <div class="p-5 border-b border-gray-200 flex items-center gap-2">
+            <div class="w-1.5 h-5 bg-brand-600 rounded-full"></div>
             <h2 class="font-bold text-gray-900">基础信息</h2>
           </div>
           <div class="p-5 space-y-4">
@@ -698,7 +698,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                   点击"添加合约"开始配置基差报价
                 </div>
                 <div v-else class="space-y-4">
-                  <div v-for="(quote, index) in basisQuotes" :key="index" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm transition-all hover:shadow-md">
+                  <div v-for="(quote, index) in basisQuotes" :key="index" class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm transition-all hover:shadow-md">
                     <div class="flex flex-col md:flex-row md:items-start gap-4">
                       <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="space-y-1">
@@ -714,7 +714,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                                 <span>{{ c.contractName }}</span>
                                 <div class="flex items-center gap-2">
                                   <span v-if="c.lastPrice" class="text-xs font-bold">¥{{ c.lastPrice }}</span>
-                                  <span v-if="c.isTrading" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                  <span v-if="c.isTrading" class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
                                   <span v-else class="text-[8px] text-gray-400">已收盘</span>
                                 </div>
                               </div>
@@ -736,14 +736,14 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                           <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">3. 合约可售量 (吨)</label>
                           <el-input-number v-model="quote.availableQty" :min="0" :step="100" :controls="false" placeholder="输入分配量" class="w-full neo-input-number" />
                         </div>
-                        <div class="bg-emerald-50/50 rounded-xl p-3 border border-emerald-100 flex flex-col justify-center">
-                          <label class="block text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">核算远期价 (参考)</label>
+                        <div class="bg-brand-50/50 rounded-xl p-3 border border-brand-100 flex flex-col justify-center">
+                          <label class="block text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-1">核算远期价 (参考)</label>
                           <div class="flex items-baseline gap-1">
                             <template v-if="quote.contractCode && getContractByCode(quote.contractCode)?.lastPrice">
-                              <span class="text-2xl font-black text-emerald-600">
+                              <span class="text-2xl font-black text-brand-600">
                                 ¥{{ calcReferencePrice(quote.contractCode, quote.basisPrice)?.toFixed(0) || '-' }}
                               </span>
-                              <span class="text-xs font-bold text-emerald-500">/吨</span>
+                              <span class="text-xs font-bold text-brand-500">/吨</span>
                             </template>
                             <span v-else class="text-sm font-bold text-gray-400 italic">等待选择合约</span>
                           </div>
@@ -752,7 +752,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                       
                       <button
                         type="button"
-                        class="self-end md:self-start p-2.5 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0 active:scale-95 shadow-sm"
+                        class="self-end md:self-start p-2.5 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0  shadow-sm"
                         title="移除此合约"
                         @click="removeBasisQuote(index)"
                       >
@@ -761,11 +761,11 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                     </div>
 
                     <!-- 行情实时面板 -->
-                    <div v-if="quote.contractCode && getContractByCode(quote.contractCode)" class="mt-4 pt-4 border-t border-dashed border-gray-100 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs">
+                    <div v-if="quote.contractCode && getContractByCode(quote.contractCode)" class="mt-4 pt-4 border-t border-dashed border-gray-200 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs">
                       <div class="flex items-center gap-2">
                         <div 
                           class="w-1.5 h-1.5 rounded-full" 
-                          :class="getContractByCode(quote.contractCode)?.isTrading ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'"
+                          :class="getContractByCode(quote.contractCode)?.isTrading ? 'bg-brand-500 animate-pulse' : 'bg-gray-400'"
                         ></div>
                         <span class="text-gray-500 font-medium">
                           {{ getContractByCode(quote.contractCode)?.isTrading ? '期货实时报价' : '盘面参考价' }}:
@@ -778,7 +778,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                       
                       <div v-if="quote.basisPrice !== undefined" class="flex items-center gap-2">
                         <span class="text-gray-500 font-medium">当前基差:</span>
-                        <span class="font-black px-2 py-0.5 rounded" :class="(quote.basisPrice || 0) >= 0 ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'">
+                        <span class="font-black px-2 py-0.5 rounded" :class="(quote.basisPrice || 0) >= 0 ? 'bg-red-50 text-red-600' : 'bg-brand-50 text-brand-600'">
                           {{ (quote.basisPrice || 0) >= 0 ? '+' : '' }}{{ quote.basisPrice }}
                         </span>
                       </div>
@@ -790,7 +790,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                     </div>
                   </div>
                 </div>
-                <div class="mt-4 space-y-2 bg-amber-50 p-4 rounded-2xl border border-amber-100/50">
+                <div class="mt-4 space-y-2 bg-amber-50 p-4 rounded-xl border border-amber-100/50">
                   <div class="flex items-start gap-2 text-xs text-amber-700">
                     <div class="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1 shrink-0"></div>
                     <p class="font-medium">核心公式：核算远期价 = 期货盘面报价 + 您设定的基差（升水为正，贴水为负）。</p>
@@ -806,10 +806,10 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         </div>
 
         <!-- 规格参数 -->
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in" style="animation-delay: 100ms">
-          <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 100ms">
+          <div class="p-5 border-b border-gray-200 flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <div class="w-1.5 h-5 bg-emerald-500 rounded-full"></div>
+              <div class="w-1.5 h-5 bg-brand-500 rounded-full"></div>
               <h2 class="font-bold text-gray-900">规格参数</h2>
             </div>
             <span class="text-xs text-gray-400">选择品类后自动加载</span>
@@ -846,7 +846,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                   v-model="dynamicParams[param.id]"
                   type="text"
                   :placeholder="`请输入${param.paramName}`"
-                  class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
                 />
               </div>
             </div>
@@ -854,8 +854,8 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         </div>
 
         <!-- 物流与交付 -->
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in" style="animation-delay: 150ms">
-          <div class="p-5 border-b border-gray-100 flex items-center gap-2">
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 150ms">
+          <div class="p-5 border-b border-gray-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-amber-500 rounded-full"></div>
             <h2 class="font-bold text-gray-900">物流与交付</h2>
           </div>
@@ -894,7 +894,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                 v-model="publishForm.remark"
                 rows="3"
                 placeholder="备注（可选）"
-                class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all resize-none"
+                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
               ></textarea>
             </div>
             <div class="flex justify-end gap-3 pt-2">
@@ -913,8 +913,8 @@ async function applyTemplate(template: SupplyTemplateResponse) {
       
       <!-- 右侧预览区域 -->
       <div class="lg:col-span-1">
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden sticky top-24 animate-fade-in" style="animation-delay: 200ms">
-          <div class="p-5 border-b border-gray-100">
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden sticky top-24 animate-fade-in" style="animation-delay: 200ms">
+          <div class="p-5 border-b border-gray-200">
             <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">summary</div>
             <h3 class="font-bold text-gray-900 mt-1">发布前确认</h3>
           </div>
@@ -939,12 +939,12 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                   <div class="mt-1 font-bold text-gray-900 truncate text-sm">{{ publisherNameInput || publisherName }}</div>
                 </div>
               </div>
-              <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
-                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-600">
+              <div class="bg-brand-50 rounded-xl p-3 border border-brand-100">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-600">
                   <Package class="w-3 h-3" />
                   品类
                 </div>
-                <div class="mt-1 font-bold text-emerald-700">{{ previewData.categoryName }}</div>
+                <div class="mt-1 font-bold text-brand-700">{{ previewData.categoryName }}</div>
               </div>
               <div class="grid grid-cols-2 gap-3">
                 <div class="bg-gray-50 rounded-xl p-3">
@@ -953,7 +953,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                 </div>
                 <div v-if="publishForm.priceType === 0" class="bg-gray-50 rounded-xl p-3">
                   <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">出厂价</div>
-                  <div class="mt-1 font-bold text-emerald-600">
+                  <div class="mt-1 font-bold text-brand-600">
                     <span v-if="previewData.exFactoryPrice != null">¥{{ previewData.exFactoryPrice }}/吨</span>
                     <span v-else class="text-gray-500">面议</span>
                   </div>
@@ -980,7 +980,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                     <div class="flex items-center justify-between text-xs text-gray-500 mt-1">
                       <span>
                         期货 ¥{{ getContractByCode(quote.contractCode)?.lastPrice || '-' }} → 
-                        <span class="font-bold text-emerald-600">核算 ¥{{ calcReferencePrice(quote.contractCode, quote.basisPrice) || '-' }}</span>
+                        <span class="font-bold text-brand-600">核算 ¥{{ calcReferencePrice(quote.contractCode, quote.basisPrice) || '-' }}</span>
                       </span>
                       <span>{{ quote.availableQty }}吨</span>
                     </div>
@@ -1038,7 +1038,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         <div
           v-for="template in templates"
           :key="template.id"
-          class="bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md hover:border-emerald-100 transition-all cursor-pointer"
+          class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md hover:border-brand-100 transition-all cursor-pointer"
           @click="applyTemplate(template)"
         >
           <div class="flex items-start justify-between gap-3 mb-3">
@@ -1060,7 +1060,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             </div>
             <div class="bg-gray-50 rounded-lg px-2.5 py-1.5">
               <div class="text-[10px] text-gray-400">出厂价</div>
-              <div class="font-bold text-emerald-600">{{ formatPrice(getTemplateJson(template).exFactoryPrice) }}</div>
+              <div class="font-bold text-brand-600">{{ formatPrice(getTemplateJson(template).exFactoryPrice) }}</div>
             </div>
           </div>
           <div class="mt-2 text-xs text-gray-400">
@@ -1085,7 +1085,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             v-model="templateNameInput"
             type="text"
             placeholder="例如：玉米到厂-现款-常规指标"
-            class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             @keyup.enter="confirmSaveTemplate"
           />
         </div>

@@ -531,8 +531,8 @@ async function applyTemplate(template: RequirementTemplateResponse) {
       <!-- 左侧表单区域 -->
       <div class="lg:col-span-2 space-y-6">
         <!-- 发布信息 -->
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in">
-          <div class="p-5 border-b border-gray-100 flex items-center gap-2">
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-gray-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-slate-900 rounded-full"></div>
             <h2 class="font-bold text-gray-900">发布信息</h2>
           </div>
@@ -544,7 +544,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                   v-model="publishForm.companyName"
                   type="text"
                   placeholder="默认使用公司名称"
-                  class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
                 />
               </div>
               <div>
@@ -553,7 +553,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                   v-model="purchaserNameInput"
                   type="text"
                   placeholder="默认使用个人信息"
-                  class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
                 />
               </div>
             </div>
@@ -563,7 +563,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                 v-model="publishForm.purchaseAddress"
                 type="text"
                 placeholder="请输入交付/收货地址"
-                class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
               />
             </div>
             <p class="text-xs text-gray-400">以上信息仅用于本次发布，不会修改您的公司/个人资料</p>
@@ -571,9 +571,9 @@ async function applyTemplate(template: RequirementTemplateResponse) {
         </div>
 
         <!-- 基础信息 -->
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in" style="animation-delay: 50ms">
-          <div class="p-5 border-b border-gray-100 flex items-center gap-2">
-            <div class="w-1.5 h-5 bg-emerald-600 rounded-full"></div>
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 50ms">
+          <div class="p-5 border-b border-gray-200 flex items-center gap-2">
+            <div class="w-1.5 h-5 bg-brand-600 rounded-full"></div>
             <h2 class="font-bold text-gray-900">基础信息</h2>
           </div>
           <div class="p-5 space-y-4">
@@ -599,10 +599,10 @@ async function applyTemplate(template: RequirementTemplateResponse) {
         </div>
 
         <!-- 规格参数 -->
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in" style="animation-delay: 100ms">
-          <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 100ms">
+          <div class="p-5 border-b border-gray-200 flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <div class="w-1.5 h-5 bg-emerald-500 rounded-full"></div>
+              <div class="w-1.5 h-5 bg-brand-500 rounded-full"></div>
               <h2 class="font-bold text-gray-900">规格参数</h2>
             </div>
             <span class="text-xs text-gray-400">选择品类后自动加载</span>
@@ -639,7 +639,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                   v-model="dynamicParams[param.id]"
                   type="text"
                   :placeholder="`请输入${param.paramName}`"
-                  class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
                 />
               </div>
             </div>
@@ -647,8 +647,8 @@ async function applyTemplate(template: RequirementTemplateResponse) {
         </div>
 
         <!-- 物流与交付 -->
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-fade-in" style="animation-delay: 150ms">
-          <div class="p-5 border-b border-gray-100 flex items-center gap-2">
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 150ms">
+          <div class="p-5 border-b border-gray-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-amber-500 rounded-full"></div>
             <h2 class="font-bold text-gray-900">物流与交付</h2>
           </div>
@@ -704,7 +704,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                 v-model="publishForm.remark"
                 rows="3"
                 placeholder="备注（可选）"
-                class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all resize-none"
+                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
               ></textarea>
             </div>
             <div class="flex justify-end gap-3 pt-2">
@@ -723,8 +723,8 @@ async function applyTemplate(template: RequirementTemplateResponse) {
       
       <!-- 右侧预览区域 -->
       <div class="lg:col-span-1">
-        <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden sticky top-24 animate-fade-in" style="animation-delay: 200ms">
-          <div class="p-5 border-b border-gray-100">
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden sticky top-24 animate-fade-in" style="animation-delay: 200ms">
+          <div class="p-5 border-b border-gray-200">
             <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">summary</div>
             <h3 class="font-bold text-gray-900 mt-1">发布前确认</h3>
           </div>
@@ -749,12 +749,12 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                   <div class="mt-1 font-bold text-gray-900 truncate text-sm">{{ purchaserNameInput || purchaserName }}</div>
                 </div>
               </div>
-              <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
-                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-emerald-600">
+              <div class="bg-brand-50 rounded-xl p-3 border border-brand-100">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-600">
                   <Package class="w-3 h-3" />
                   品类
                 </div>
-                <div class="mt-1 font-bold text-emerald-700">{{ previewData.categoryName }}</div>
+                <div class="mt-1 font-bold text-brand-700">{{ previewData.categoryName }}</div>
               </div>
               <div class="grid grid-cols-2 gap-3">
                 <div class="bg-gray-50 rounded-xl p-3">
@@ -763,7 +763,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                 </div>
                 <div class="bg-gray-50 rounded-xl p-3">
                   <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">期望价</div>
-                  <div class="mt-1 font-bold text-emerald-600">
+                  <div class="mt-1 font-bold text-brand-600">
                     <span v-if="previewData.expectedPrice != null">¥{{ previewData.expectedPrice }}/吨</span>
                     <span v-else class="text-gray-500">面议</span>
                   </div>
@@ -823,7 +823,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
         <div
           v-for="template in templates"
           :key="template.id"
-          class="bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md hover:border-emerald-100 transition-all cursor-pointer"
+          class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md hover:border-brand-100 transition-all cursor-pointer"
           @click="applyTemplate(template)"
         >
           <div class="flex items-start justify-between gap-3 mb-3">
@@ -845,7 +845,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
             </div>
             <div class="bg-gray-50 rounded-lg px-2.5 py-1.5">
               <div class="text-[10px] text-gray-400">期望价</div>
-              <div class="font-bold text-emerald-600">{{ formatPrice(getTemplateJson(template).expectedPrice) }}</div>
+              <div class="font-bold text-brand-600">{{ formatPrice(getTemplateJson(template).expectedPrice) }}</div>
             </div>
           </div>
           <div class="mt-2 text-xs text-gray-400">
@@ -870,7 +870,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
             v-model="templateNameInput"
             type="text"
             placeholder="例如：玉米到厂-现款-常规指标"
-            class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             @keyup.enter="confirmSaveTemplate"
           />
         </div>
@@ -898,7 +898,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
 
 :deep(.neo-input-number .el-input__wrapper.is-focus),
 :deep(.neo-select .el-select__wrapper.is-focus) {
-  border-color: rgb(16 185 129); /* emerald-500 */
+  border-color: rgb(16 185 129); /* brand-500 */
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
 }
 

@@ -149,18 +149,18 @@ function onSignatureChange(data: string) {
   >
     <!-- 头部图标 -->
     <template #icon>
-      <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-        <FileSignature class="w-5 h-5 text-emerald-600" />
+      <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center">
+        <FileSignature class="w-5 h-5 text-brand-600" />
       </div>
     </template>
 
     <!-- 合同信息 -->
-    <div v-if="contract" class="bg-gray-50 rounded-2xl p-4 border border-gray-100 mb-5">
+    <div v-if="contract" class="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-5">
       <div class="text-xs text-gray-500 mb-1">合同编号</div>
       <div class="font-bold text-gray-900">{{ contract.contractNo }}</div>
-      <div class="flex justify-between items-center mt-2 border-b border-gray-100 pb-3 mb-3">
+      <div class="flex justify-between items-center mt-2 border-b border-gray-200 pb-3 mb-3">
         <span class="text-sm text-gray-600">{{ contract.productName }}</span>
-        <span class="text-sm font-bold text-emerald-600">¥{{ contract.totalAmount?.toLocaleString() }}</span>
+        <span class="text-sm font-bold text-brand-600">¥{{ contract.totalAmount?.toLocaleString() }}</span>
       </div>
 
       <!-- 规格参数摘要 -->
@@ -169,7 +169,7 @@ function onSignatureChange(data: string) {
           <Package class="w-3 h-3" /> 质量标准
         </div>
         <div class="flex flex-wrap gap-2">
-          <div v-for="spec in qualitySpecs" :key="spec.name" class="bg-white px-2 py-1 rounded-lg border border-gray-100 text-[10px] flex items-center gap-1.5 shadow-sm">
+          <div v-for="spec in qualitySpecs" :key="spec.name" class="bg-white px-2 py-1 rounded-lg border border-gray-200 text-[10px] flex items-center gap-1.5 shadow-sm">
             <span class="text-gray-400 font-medium">{{ spec.name }}:</span>
             <span class="text-gray-700 font-bold">{{ spec.value }}</span>
           </div>
@@ -184,47 +184,47 @@ function onSignatureChange(data: string) {
       <div class="grid grid-cols-3 gap-3">
         <button
           :class="[
-            'flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all',
+            'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
             signMethod === 'typed' 
-              ? 'border-emerald-500 bg-emerald-50' 
-              : 'border-gray-100 hover:border-gray-200 bg-white'
+              ? 'border-brand-500 bg-brand-50' 
+              : 'border-gray-200 hover:border-gray-200 bg-white'
           ]"
           @click="signMethod = 'typed'"
         >
-          <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', signMethod === 'typed' ? 'bg-emerald-100' : 'bg-gray-100']">
-            <Type :class="['w-5 h-5', signMethod === 'typed' ? 'text-emerald-600' : 'text-gray-500']" />
+          <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', signMethod === 'typed' ? 'bg-brand-100' : 'bg-gray-100']">
+            <Type :class="['w-5 h-5', signMethod === 'typed' ? 'text-brand-600' : 'text-gray-500']" />
           </div>
-          <span :class="['text-xs font-bold', signMethod === 'typed' ? 'text-emerald-600' : 'text-gray-600']">打字签名</span>
+          <span :class="['text-xs font-bold', signMethod === 'typed' ? 'text-brand-600' : 'text-gray-600']">打字签名</span>
         </button>
         
         <button
           :class="[
-            'flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all',
+            'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
             signMethod === 'handwrite' 
-              ? 'border-emerald-500 bg-emerald-50' 
-              : 'border-gray-100 hover:border-gray-200 bg-white'
+              ? 'border-brand-500 bg-brand-50' 
+              : 'border-gray-200 hover:border-gray-200 bg-white'
           ]"
           @click="signMethod = 'handwrite'"
         >
-          <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', signMethod === 'handwrite' ? 'bg-emerald-100' : 'bg-gray-100']">
-            <Pen :class="['w-5 h-5', signMethod === 'handwrite' ? 'text-emerald-600' : 'text-gray-500']" />
+          <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', signMethod === 'handwrite' ? 'bg-brand-100' : 'bg-gray-100']">
+            <Pen :class="['w-5 h-5', signMethod === 'handwrite' ? 'text-brand-600' : 'text-gray-500']" />
           </div>
-          <span :class="['text-xs font-bold', signMethod === 'handwrite' ? 'text-emerald-600' : 'text-gray-600']">手写签名</span>
+          <span :class="['text-xs font-bold', signMethod === 'handwrite' ? 'text-brand-600' : 'text-gray-600']">手写签名</span>
         </button>
         
         <button
           :class="[
-            'flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all',
+            'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
             signMethod === 'seal' 
-              ? 'border-emerald-500 bg-emerald-50' 
-              : 'border-gray-100 hover:border-gray-200 bg-white'
+              ? 'border-brand-500 bg-brand-50' 
+              : 'border-gray-200 hover:border-gray-200 bg-white'
           ]"
           @click="signMethod = 'seal'"
         >
-          <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', signMethod === 'seal' ? 'bg-emerald-100' : 'bg-gray-100']">
-            <Stamp :class="['w-5 h-5', signMethod === 'seal' ? 'text-emerald-600' : 'text-gray-500']" />
+          <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', signMethod === 'seal' ? 'bg-brand-100' : 'bg-gray-100']">
+            <Stamp :class="['w-5 h-5', signMethod === 'seal' ? 'text-brand-600' : 'text-gray-500']" />
           </div>
-          <span :class="['text-xs font-bold', signMethod === 'seal' ? 'text-emerald-600' : 'text-gray-600']">公司盖章</span>
+          <span :class="['text-xs font-bold', signMethod === 'seal' ? 'text-brand-600' : 'text-gray-600']">公司盖章</span>
         </button>
       </div>
       
@@ -235,7 +235,7 @@ function onSignatureChange(data: string) {
           v-model="typedName"
           type="text"
           placeholder="例如：张三"
-          class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-center text-xl font-bold"
+          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-center text-xl font-bold"
         />
         <p class="text-xs text-gray-400 mt-2 text-center">
           打字签名具有同等法律效力

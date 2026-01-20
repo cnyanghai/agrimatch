@@ -373,38 +373,25 @@ function parseParams(paramsJson?: string): string {
 
 <template>
   <div class="bg-gray-50 text-gray-900 min-h-screen">
-    <!-- 顶部行情走马灯 -->
-    <div class="bg-slate-900 text-white py-2 overflow-hidden">
-      <div class="flex animate-marquee space-x-12 px-4 text-xs font-medium">
-        <span>玉米主力 2505: <b class="text-red-400">2450 ↑</b></span>
-        <span>豆粕主力 2505: <b class="text-green-400">3210 ↓</b></span>
-        <span>菜粕 2505: <b class="text-red-400">2680 ↑</b></span>
-        <span>山东现货玉米: <b>2380</b></span>
-        <span>广东港口玉米: <b>2520</b></span>
-        <span>玉米主力 2505: <b class="text-red-400">2450 ↑</b></span>
-        <span>豆粕主力 2505: <b class="text-green-400">3210 ↓</b></span>
-      </div>
-    </div>
-
     <PublicTopNav>
       <template #actions>
-        <button class="bg-emerald-600 text-white px-5 py-2 rounded-full font-bold hover:bg-emerald-700 transition-all active:scale-95" @click="onPublishSupply">
+        <button class="bg-brand-600 text-white px-5 py-2 rounded-full font-bold hover:bg-brand-700 transition-all " @click="onPublishSupply">
           发布供应
         </button>
       </template>
     </PublicTopNav>
 
     <!-- 公司筛选提示 -->
-    <div v-if="companyIdFilter" class="bg-emerald-50 border-b border-emerald-100">
+    <div v-if="companyIdFilter" class="bg-brand-50 border-b border-brand-100">
       <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-2 text-emerald-700">
+        <div class="flex items-center gap-2 text-brand-700">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
           <span class="text-sm font-medium">
             正在查看该公司的供应信息
           </span>
         </div>
         <button 
-          class="px-3 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-sm font-medium transition-all"
+          class="px-3 py-1 bg-brand-100 hover:bg-brand-200 text-brand-700 rounded-lg text-sm font-medium transition-all"
           @click="router.push('/hall/supply')"
         >
           查看全部供应
@@ -421,13 +408,13 @@ function parseParams(paramsJson?: string): string {
               v-model="searchKeyword"
               type="text"
               placeholder="搜索品种、产地、指标或公司..."
-              class="w-full border-2 border-gray-100 rounded-xl py-2.5 px-10 focus:border-emerald-500 outline-none transition-all"
+              class="w-full border-2 border-gray-200 rounded-xl py-2.5 px-10 focus:border-brand-500 outline-none transition-all"
               @keyup.enter="onSearch"
             />
             <svg class="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </div>
           <button 
-            class="px-8 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all active:scale-95"
+            class="px-8 py-2.5 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition-all "
             @click="onSearch"
           >
             查询信息
@@ -439,7 +426,7 @@ function parseParams(paramsJson?: string): string {
             <span class="text-gray-400 shrink-0 mt-1.5 font-medium">常见品种:</span>
             <div class="flex flex-wrap gap-2">
               <button 
-                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === null ? 'bg-emerald-600 text-white border-emerald-600' : 'border-gray-200 hover:border-emerald-500 hover:text-emerald-600']"
+                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === null ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
                 @click="selectCategory(null)"
               >
                 全部
@@ -447,7 +434,7 @@ function parseParams(paramsJson?: string): string {
               <button 
                 v-for="cat in categoryOptions" 
                 :key="cat"
-                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === cat ? 'bg-emerald-600 text-white border-emerald-600' : 'border-gray-200 hover:border-emerald-500 hover:text-emerald-600']"
+                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === cat ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
                 @click="selectCategory(cat)"
               >
                 {{ cat }}
@@ -461,7 +448,7 @@ function parseParams(paramsJson?: string): string {
     <!-- 列表区（先按设计稿静态，后续二期接接口替换） -->
     <main class="max-w-7xl mx-auto px-4 py-8">
       <div class="space-y-4">
-        <div v-if="listLoading" class="bg-white rounded-2xl border border-gray-100 p-8 text-gray-400 text-sm">
+        <div v-if="listLoading" class="bg-white rounded-xl border border-gray-200 p-8 text-gray-400 text-sm">
           正在加载货源...
         </div>
 
@@ -469,28 +456,28 @@ function parseParams(paramsJson?: string): string {
           v-for="s in displaySupplies"
           :key="s.id"
           :ref="(el) => setCardEl(Number(s.id), el as any)"
-          class="supply-card bg-white rounded-2xl p-5 border border-gray-100 transition-all"
-          :class="focusedId === s.id ? 'ring-2 ring-emerald-500/60 bg-emerald-50/40' : 'hover:shadow-md hover:border-emerald-100'"
+          class="supply-card bg-white rounded-xl p-5 border border-gray-200 transition-all"
+          :class="focusedId === s.id ? 'ring-2 ring-brand-500/60 bg-brand-50/40' : 'hover:shadow-md hover:border-brand-100'"
         >
           <div class="flex flex-col lg:flex-row lg:flex-wrap items-start gap-6 mx-0">
             <div class="w-full lg:w-52 flex items-center gap-3 shrink-0 border-r border-gray-50 pr-4">
-              <div class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center text-xl font-bold shrink-0">
+              <div class="w-12 h-12 bg-brand-100 text-brand-700 rounded-lg flex items-center justify-center text-xl font-bold shrink-0">
                 {{ (s.companyName || s.nickName || s.userName || '供')[0] }}
               </div>
               <div class="overflow-hidden flex-1 min-w-0">
                 <div class="text-sm font-bold text-gray-900 truncate">{{ s.companyName || '未填写公司' }}</div>
                 <div class="flex items-center gap-1 mt-1">
-                  <span class="bg-emerald-50 text-emerald-600 text-[10px] px-1 py-0.5 rounded">供应</span>
+                  <span class="bg-brand-50 text-brand-600 text-[10px] px-1 py-0.5 rounded">供应</span>
                   <span class="text-[10px] text-gray-400">{{ s.nickName || s.userName || '' }}</span>
                 </div>
               </div>
               <!-- 关注按钮 -->
               <button
                 v-if="authStore.token && s.userId"
-                class="shrink-0 text-xs px-2 py-1 rounded-full border transition-all active:scale-95"
+                class="shrink-0 text-xs px-2 py-1 rounded-full border transition-all "
                 :class="isFollowingUser(s.userId)
-                  ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-emerald-300 hover:text-emerald-600'"
+                  ? 'bg-brand-50 text-brand-600 border-brand-200'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-brand-300 hover:text-brand-600'"
                 @click.stop="toggleFollow(s)"
               >
                 {{ isFollowingUser(s.userId) ? '已关注' : '+ 关注' }}
@@ -532,7 +519,7 @@ function parseParams(paramsJson?: string): string {
                     </div>
                     <div class="text-right">
                       <div class="text-[8px] text-gray-400 font-medium scale-90 origin-right">核算价</div>
-                      <span class="font-black text-emerald-600 text-sm">
+                      <span class="font-black text-brand-600 text-sm">
                         ¥{{ calcReferencePrice(bq.contractCode, bq.basisPrice)?.toFixed(0) || '-' }}
                       </span>
                     </div>
@@ -564,14 +551,14 @@ function parseParams(paramsJson?: string): string {
             </div>
 
             <div class="shrink-0 flex flex-col items-center gap-2">
-              <button class="px-8 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-md shadow-emerald-50 hover:bg-emerald-700 transition-all active:scale-95" @click="onConsult(s)">
+              <button class="px-8 py-3 bg-brand-600 text-white rounded-xl font-bold text-sm shadow-md shadow-brand-50 hover:bg-brand-700 transition-all " @click="onConsult(s)">
                 立即咨询
               </button>
             </div>
           </div>
         </div>
 
-        <div v-if="!listLoading && supplies.length === 0" class="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+        <div v-if="!listLoading && supplies.length === 0" class="bg-white rounded-xl border border-gray-200 p-8 text-center">
           <div class="text-gray-400 text-sm mb-2">暂无货源数据</div>
           <div class="text-xs text-gray-300">
             {{ selectedCategory ? `没有找到「${selectedCategory}」相关的供应信息` : '请尝试调整筛选条件' }}
@@ -625,18 +612,6 @@ function parseParams(paramsJson?: string): string {
 .supply-card:hover {
   border-color: #10b981;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.05);
-}
-.animate-marquee {
-  display: inline-block;
-  animation: marquee 30s linear infinite;
-}
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
 }
 </style>
 

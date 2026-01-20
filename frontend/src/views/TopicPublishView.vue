@@ -122,22 +122,22 @@ onMounted(() => {
             <label class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 block">选择发布类型</label>
             <div class="grid grid-cols-3 gap-4">
               <button
-                class="type-btn flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
-                :class="postType === 'general' ? 'border-indigo-600 bg-indigo-50 text-indigo-600' : 'border-gray-100 text-gray-500 hover:border-indigo-200'"
+                class="type-btn flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all"
+                :class="postType === 'general' ? 'border-indigo-600 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500 hover:border-indigo-200'"
                 @click="postType = 'general'"
               >
                 <span class="text-sm font-bold">普通话题</span>
               </button>
               <button
-                class="type-btn flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
-                :class="postType === 'bounty' ? 'border-amber-500 bg-amber-50 text-amber-600' : 'border-gray-100 text-gray-500 hover:border-amber-200'"
+                class="type-btn flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all"
+                :class="postType === 'bounty' ? 'border-amber-500 bg-amber-50 text-amber-600' : 'border-gray-200 text-gray-500 hover:border-amber-200'"
                 @click="postType = 'bounty'"
               >
                 <span class="text-sm font-bold">赏金求助</span>
               </button>
               <button
-                class="type-btn flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all"
-                :class="postType === 'poll' ? 'border-emerald-500 bg-emerald-50 text-emerald-600' : 'border-gray-100 text-gray-500 hover:border-emerald-200'"
+                class="type-btn flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all"
+                :class="postType === 'poll' ? 'border-brand-500 bg-brand-50 text-brand-600' : 'border-gray-200 text-gray-500 hover:border-brand-200'"
                 @click="postType = 'poll'"
               >
                 <span class="text-sm font-bold">发起投票</span>
@@ -151,7 +151,7 @@ onMounted(() => {
             <textarea v-model="content" placeholder="分享你的见解、经验或疑问..." class="w-full h-40 resize-none outline-none text-gray-700 leading-relaxed placeholder:text-gray-300"></textarea>
           </section>
 
-          <div v-if="showBounty" class="bg-amber-50 rounded-2xl p-6 border border-amber-100">
+          <div v-if="showBounty" class="bg-amber-50 rounded-xl p-6 border border-amber-100">
             <div class="flex justify-between items-center mb-4">
               <span class="font-bold text-amber-900">设置悬赏积分</span>
               <span class="text-xl font-black text-amber-600">{{ bountyPoints }} pts</span>
@@ -161,7 +161,7 @@ onMounted(() => {
               <p class="text-[10px] text-amber-700 leading-relaxed">* 发布后积分将被扣除，采纳回答后发放给被采纳者。</p>
               <span 
                 class="text-xs font-bold px-2 py-1 rounded-lg"
-                :class="pointsEnough ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'"
+                :class="pointsEnough ? 'bg-brand-100 text-brand-700' : 'bg-red-100 text-red-600'"
               >
                 当前余额: {{ myPoints }} pts
               </span>
@@ -173,13 +173,13 @@ onMounted(() => {
         <!-- 底部 -->
         <div class="px-8 py-6 bg-gray-50 border-t flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+            <div class="w-2 h-2 bg-brand-500 rounded-full animate-pulse"></div>
             <span class="text-[10px] text-gray-500 font-bold">账号已登录 · 发布可获得积分</span>
           </div>
           <div class="flex gap-4">
             <button class="text-sm font-bold text-gray-400 hover:text-gray-600" @click="close">取消</button>
             <button 
-              class="bg-indigo-600 text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
+              class="bg-indigo-600 text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-indigo-100 hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed" 
               :disabled="submitting"
               @click="submit"
             >

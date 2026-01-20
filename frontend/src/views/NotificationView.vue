@@ -121,7 +121,7 @@ onMounted(refresh)
     </div>
 
     <!-- 通知列表 -->
-    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <!-- 加载状态 -->
       <div v-if="loading && list.length === 0" class="p-6 space-y-4">
         <Skeleton type="card" />
@@ -145,7 +145,7 @@ onMounted(refresh)
           :key="notify.id"
           :class="[
             'p-5 transition-all cursor-pointer animate-stagger-in',
-            notify.read ? 'bg-white hover:bg-gray-50' : 'bg-emerald-50/30 hover:bg-emerald-50/50'
+            notify.read ? 'bg-white hover:bg-gray-50' : 'bg-brand-50/30 hover:bg-brand-50/50'
           ]"
           :style="{ animationDelay: `${index * 30}ms` }"
           @click="onRead(notify)"
@@ -189,7 +189,7 @@ onMounted(refresh)
               <div class="flex items-center gap-2 mt-2 text-xs text-gray-400">
                 <Clock class="w-3 h-3" />
                 <span>{{ formatTime(notify.createTime) }}</span>
-                <span v-if="notify.read" class="flex items-center gap-1 text-emerald-500">
+                <span v-if="notify.read" class="flex items-center gap-1 text-brand-500">
                   <CheckCircle class="w-3 h-3" />
                   已读
                 </span>
@@ -227,13 +227,13 @@ onMounted(refresh)
 .bg-pink-50 { background-color: rgb(253 242 248); }
 .bg-blue-50 { background-color: rgb(239 246 255); }
 .bg-amber-50 { background-color: rgb(255 251 235); }
-.bg-emerald-50 { background-color: rgb(236 253 245); }
+.bg-brand-50 { background-color: rgb(236 253 245); }
 .bg-gray-50 { background-color: rgb(249 250 251); }
 
 .text-pink-600 { color: rgb(219 39 119); }
 .text-blue-600 { color: rgb(37 99 235); }
 .text-amber-600 { color: rgb(217 119 6); }
-.text-emerald-600 { color: rgb(5 150 105); }
+.text-brand-600 { color: rgb(5 150 105); }
 .text-gray-600 { color: rgb(75 85 99); }
 
 .line-clamp-2 {

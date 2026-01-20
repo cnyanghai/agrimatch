@@ -319,22 +319,9 @@ function parseParams(paramsJson?: string): string {
 
 <template>
   <div class="bg-gray-50 text-gray-900 min-h-screen">
-    <!-- 顶部行情走马灯 -->
-    <div class="bg-slate-900 text-white py-2 overflow-hidden">
-      <div class="flex animate-marquee space-x-12 px-4 text-xs font-medium">
-        <span>玉米主力 2505: <b class="text-red-400">2450 ↑</b></span>
-        <span>豆粕主力 2505: <b class="text-green-400">3210 ↓</b></span>
-        <span>菜粕 2505: <b class="text-red-400">2680 ↑</b></span>
-        <span>山东现货玉米: <b>2380</b></span>
-        <span>广东港口玉米: <b>2520</b></span>
-        <span>玉米主力 2505: <b class="text-red-400">2450 ↑</b></span>
-        <span>豆粕主力 2505: <b class="text-green-400">3210 ↓</b></span>
-      </div>
-    </div>
-
     <PublicTopNav>
       <template #actions>
-        <button class="bg-emerald-600 text-white px-5 py-2 rounded-full font-bold hover:bg-emerald-700 transition-all active:scale-95" @click="onPublishNeed">
+        <button class="bg-brand-600 text-white px-5 py-2 rounded-full font-bold hover:bg-brand-700 transition-all " @click="onPublishNeed">
           发布采购
         </button>
       </template>
@@ -367,13 +354,13 @@ function parseParams(paramsJson?: string): string {
               v-model="searchKeyword"
               type="text"
               placeholder="搜索您想供应的品种、求购区域或指标要求..."
-              class="w-full border-2 border-gray-100 rounded-xl py-2.5 px-10 focus:border-emerald-500 outline-none transition-all"
+              class="w-full border-2 border-gray-200 rounded-xl py-2.5 px-10 focus:border-brand-500 outline-none transition-all"
               @keyup.enter="onSearch"
             />
             <svg class="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </div>
           <button 
-            class="px-8 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all active:scale-95"
+            class="px-8 py-2.5 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition-all "
             @click="onSearch"
           >
             搜索需求
@@ -385,7 +372,7 @@ function parseParams(paramsJson?: string): string {
             <span class="text-gray-400 shrink-0 mt-1.5 font-medium">求购品种:</span>
             <div class="flex flex-wrap gap-2">
               <button 
-                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === null ? 'bg-emerald-600 text-white border-emerald-600' : 'border-gray-200 hover:border-emerald-500 hover:text-emerald-600']"
+                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === null ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
                 @click="selectCategory(null)"
               >
                 全部
@@ -393,7 +380,7 @@ function parseParams(paramsJson?: string): string {
               <button 
                 v-for="cat in categoryOptions" 
                 :key="cat"
-                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === cat ? 'bg-emerald-600 text-white border-emerald-600' : 'border-gray-200 hover:border-emerald-500 hover:text-emerald-600']"
+                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === cat ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
                 @click="selectCategory(cat)"
               >
                 {{ cat }}
@@ -407,7 +394,7 @@ function parseParams(paramsJson?: string): string {
     <!-- 列表区（先按设计稿静态，后续二期接接口替换） -->
     <main class="max-w-7xl mx-auto px-4 py-8">
       <div class="space-y-4">
-        <div v-if="listLoading" class="bg-white rounded-2xl border border-gray-100 p-8 text-gray-400 text-sm">
+        <div v-if="listLoading" class="bg-white rounded-xl border border-gray-200 p-8 text-gray-400 text-sm">
           正在加载需求...
         </div>
 
@@ -415,7 +402,7 @@ function parseParams(paramsJson?: string): string {
           v-for="r in displayRequirements"
           :key="r.id"
           :ref="(el) => setCardEl(Number(r.id), el as any)"
-          class="purchase-card bg-white rounded-2xl p-5 border border-gray-100 transition-all"
+          class="purchase-card bg-white rounded-xl p-5 border border-gray-200 transition-all"
           :class="focusedId === r.id ? 'ring-2 ring-blue-500/50 bg-blue-50/40' : 'hover:shadow-md hover:border-blue-100'"
         >
           <div class="flex flex-col lg:flex-row lg:flex-wrap items-start gap-6 mx-0">
@@ -433,7 +420,7 @@ function parseParams(paramsJson?: string): string {
               <!-- 关注按钮 -->
               <button
                 v-if="authStore.token && r.userId"
-                class="shrink-0 text-xs px-2 py-1 rounded-full border transition-all active:scale-95"
+                class="shrink-0 text-xs px-2 py-1 rounded-full border transition-all "
                 :class="isFollowingUser(r.userId) 
                   ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100' 
                   : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300 hover:text-blue-600'"
@@ -449,7 +436,7 @@ function parseParams(paramsJson?: string): string {
                 <span class="text-gray-400 text-[10px]">ID: {{ r.id }}</span>
               </div>
               <h3 class="text-lg font-bold text-gray-900 truncate">{{ r.categoryName }}</h3>
-              <div class="mt-1 text-xl font-black text-emerald-600 italic">
+              <div class="mt-1 text-xl font-black text-brand-600 italic">
                 <template v-if="r.expectedPrice != null">
                   <span class="whitespace-nowrap inline-flex items-baseline gap-1">
                     <span>意向: ¥{{ r.expectedPrice }}</span>
@@ -480,14 +467,14 @@ function parseParams(paramsJson?: string): string {
             </div>
 
             <div class="shrink-0 flex flex-col items-center gap-2">
-              <button class="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-sm hover:bg-slate-800 transition-all active:scale-95" @click="onQuote(r)">
+              <button class="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-sm hover:bg-slate-800 transition-all " @click="onQuote(r)">
                 立即报价
               </button>
             </div>
           </div>
         </div>
 
-        <div v-if="!listLoading && requirements.length === 0" class="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+        <div v-if="!listLoading && requirements.length === 0" class="bg-white rounded-xl border border-gray-200 p-8 text-center">
           <div class="text-gray-400 text-sm mb-2">暂无采购需求</div>
           <div class="text-xs text-gray-300">
             {{ selectedCategory ? `没有找到「${selectedCategory}」相关的采购需求` : '请尝试调整筛选条件' }}
@@ -541,18 +528,6 @@ function parseParams(paramsJson?: string): string {
 .purchase-card:hover {
   border-color: #a7f3d0;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
-}
-.animate-marquee {
-  display: inline-block;
-  animation: marquee 30s linear infinite;
-}
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
 }
 </style>
 

@@ -178,7 +178,7 @@ onMounted(() => {
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- 顶部导航 -->
-    <header class="bg-white border-b border-gray-100 sticky top-0 z-40">
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-4 py-4 flex items-center gap-4">
         <button 
           class="p-2 hover:bg-gray-100 rounded-xl transition-colors"
@@ -205,7 +205,7 @@ onMounted(() => {
           </div>
         </div>
         <button
-          class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all active:scale-95 shadow-lg shadow-emerald-500/20"
+          class="flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition-all  shadow-md shadow-brand-500/20"
           @click="openCreate"
         >
           <Plus class="w-5 h-5" />
@@ -218,7 +218,7 @@ onMounted(() => {
         <div
           v-for="v in vehicles"
           :key="v.id"
-          class="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-lg hover:border-emerald-100 transition-all group"
+          class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md hover:border-brand-100 transition-all group"
         >
           <!-- 头部：车牌号 + 默认标记 -->
           <div class="flex items-center justify-between mb-4">
@@ -291,12 +291,12 @@ onMounted(() => {
         <!-- 空状态 -->
         <div 
           v-if="!loading && vehicles.length === 0"
-          class="col-span-full flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-dashed border-gray-200"
+          class="col-span-full flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-dashed border-gray-200"
         >
           <Truck class="w-16 h-16 text-gray-200 mb-4" />
           <p class="text-gray-400 font-bold mb-4">暂无常用车辆</p>
           <button
-            class="px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all"
+            class="px-6 py-2 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition-all"
             @click="openCreate"
           >
             添加第一辆车
@@ -322,7 +322,7 @@ onMounted(() => {
               v-model="form.driverName"
               type="text"
               placeholder="请输入司机姓名"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
             />
           </div>
           <div>
@@ -331,7 +331,7 @@ onMounted(() => {
               v-model="form.driverPhone"
               type="tel"
               placeholder="请输入联系电话"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
             />
           </div>
         </div>
@@ -342,7 +342,7 @@ onMounted(() => {
             v-model="form.driverIdCard"
             type="text"
             placeholder="请输入身份证号"
-            class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
           />
         </div>
 
@@ -353,7 +353,7 @@ onMounted(() => {
               v-model="form.plateNumber"
               type="text"
               placeholder="例如：鄂A12345"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm uppercase"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm uppercase"
             />
           </div>
           <div>
@@ -362,7 +362,7 @@ onMounted(() => {
               v-model="form.vehicleType"
               type="text"
               placeholder="例如：货车、挂车"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
             />
           </div>
         </div>
@@ -373,7 +373,7 @@ onMounted(() => {
             v-model="form.remark"
             rows="2"
             placeholder="可选，添加备注信息..."
-            class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm resize-none"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm resize-none"
           />
         </div>
       </div>
@@ -387,7 +387,7 @@ onMounted(() => {
             取消
           </button>
           <button
-            class="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all disabled:opacity-50"
+            class="flex-1 py-2.5 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition-all disabled:opacity-50"
             :disabled="submitting"
             @click="handleSubmit"
           >

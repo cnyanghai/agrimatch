@@ -204,7 +204,7 @@ function openAgreement(type: 'user' | 'privacy') {
   >
     <!-- 头部图标 -->
     <template #icon>
-      <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+      <div class="w-10 h-10 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600">
         <ShieldCheck :size="20" :stroke-width="2" />
       </div>
     </template>
@@ -215,12 +215,12 @@ function openAgreement(type: 'user' | 'privacy') {
       <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">AgriMatch 供需协作平台</div>
     </template>
 
-    <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+    <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
       <el-tabs v-model="activeTab" class="auth-tabs">
         <!-- 登录 Tab -->
         <el-tab-pane name="login" label="登录">
           <div class="space-y-4">
-            <div class="bg-white p-6 rounded-2xl border border-gray-100">
+            <div class="bg-white p-6 rounded-xl border border-gray-200">
               <div class="text-sm font-bold text-gray-900 mb-4">账号密码登录</div>
 
               <el-input v-model="loginForm.phoneOrUser" placeholder="手机号/用户名" class="mb-3">
@@ -236,7 +236,7 @@ function openAgreement(type: 'user' | 'privacy') {
                   <template #prefix><ShieldCheck class="text-gray-400" :size="16" :stroke-width="2" /></template>
                 </el-input>
                 <div 
-                  class="h-10 w-28 rounded-xl border border-gray-200 overflow-hidden cursor-pointer flex items-center justify-center bg-gray-50 hover:border-emerald-300 transition-all"
+                  class="h-10 w-28 rounded-xl border border-gray-200 overflow-hidden cursor-pointer flex items-center justify-center bg-gray-50 hover:border-brand-300 transition-all"
                   @click="refreshCaptcha"
                   :title="'点击刷新验证码'"
                 >
@@ -258,7 +258,7 @@ function openAgreement(type: 'user' | 'privacy') {
               </div>
 
               <div class="flex justify-between items-center mt-6">
-                <button class="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-all active:scale-95" @click="activeTab = 'register'">
+                <button class="text-sm font-bold text-brand-600 hover:text-brand-700 transition-all " @click="activeTab = 'register'">
                   没有账号？去注册
                 </button>
                 <BaseButton 
@@ -276,9 +276,9 @@ function openAgreement(type: 'user' | 'privacy') {
         <!-- 注册 Tab -->
         <el-tab-pane name="register" label="注册">
           <!-- 注册成功状态 -->
-          <div v-if="registerSuccess" class="bg-white p-8 rounded-2xl border border-gray-100 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-100 flex items-center justify-center animate-bounce">
-              <CheckCircle class="text-emerald-600" :size="32" :stroke-width="2" />
+          <div v-if="registerSuccess" class="bg-white p-8 rounded-xl border border-gray-200 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-brand-100 flex items-center justify-center animate-bounce">
+              <CheckCircle class="text-brand-600" :size="32" :stroke-width="2" />
             </div>
             <div class="text-xl font-bold text-gray-900 mb-2">注册成功！</div>
             <div class="text-sm text-gray-500">正在为您跳转...</div>
@@ -286,11 +286,11 @@ function openAgreement(type: 'user' | 'privacy') {
 
           <!-- 注册表单 -->
           <div v-else class="space-y-4">
-            <div class="bg-white p-6 rounded-2xl border border-gray-100">
+            <div class="bg-white p-6 rounded-xl border border-gray-200">
               <!-- 极简提示 -->
-              <div class="flex items-center gap-2 mb-4 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                <Sparkles class="text-emerald-600 shrink-0" :size="16" :stroke-width="2" />
-                <span class="text-xs text-emerald-700 font-medium">30秒极速注册，企业资料稍后完善</span>
+              <div class="flex items-center gap-2 mb-4 p-3 bg-brand-50 rounded-xl border border-brand-100">
+                <Sparkles class="text-brand-600 shrink-0" :size="16" :stroke-width="2" />
+                <span class="text-xs text-brand-700 font-medium">30秒极速注册，企业资料稍后完善</span>
               </div>
 
               <!-- 手机号 -->
@@ -312,15 +312,15 @@ function openAgreement(type: 'user' | 'privacy') {
                       :class="[
                         registerForm.password.length < 6 ? 'w-1/4 bg-red-400' :
                         registerForm.password.length < 8 ? 'w-2/4 bg-amber-400' :
-                        registerForm.password.length < 12 ? 'w-3/4 bg-emerald-400' :
-                        'w-full bg-emerald-600'
+                        registerForm.password.length < 12 ? 'w-3/4 bg-brand-400' :
+                        'w-full bg-brand-600'
                       ]"
                     />
                   </div>
                   <span class="text-xs font-medium" :class="[
                     registerForm.password.length < 6 ? 'text-red-500' :
                     registerForm.password.length < 8 ? 'text-amber-500' :
-                    'text-emerald-600'
+                    'text-brand-600'
                   ]">
                     {{ registerForm.password.length < 6 ? '弱' : registerForm.password.length < 8 ? '中' : '强' }}
                   </span>
@@ -333,7 +333,7 @@ function openAgreement(type: 'user' | 'privacy') {
                   <template #prefix><ShieldCheck class="text-gray-400" :size="16" :stroke-width="2" /></template>
                 </el-input>
                 <div 
-                  class="h-10 w-28 rounded-xl border border-gray-200 overflow-hidden cursor-pointer flex items-center justify-center bg-gray-50 hover:border-emerald-300 transition-all"
+                  class="h-10 w-28 rounded-xl border border-gray-200 overflow-hidden cursor-pointer flex items-center justify-center bg-gray-50 hover:border-brand-300 transition-all"
                   @click="refreshCaptcha"
                   :title="'点击刷新验证码'"
                 >
@@ -359,13 +359,13 @@ function openAgreement(type: 'user' | 'privacy') {
             <div class="flex flex-col gap-4">
               <el-checkbox v-model="agreed">
                 我已阅读并同意 
-                <button type="button" class="text-emerald-600 font-bold hover:underline" @click.stop="openAgreement('user')">用户协议</button> 
+                <button type="button" class="text-brand-600 font-bold hover:underline" @click.stop="openAgreement('user')">用户协议</button> 
                 与 
-                <button type="button" class="text-emerald-600 font-bold hover:underline" @click.stop="openAgreement('privacy')">隐私政策</button>
+                <button type="button" class="text-brand-600 font-bold hover:underline" @click.stop="openAgreement('privacy')">隐私政策</button>
               </el-checkbox>
               
               <div class="flex items-center justify-between">
-                <button class="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-all active:scale-95" @click="activeTab = 'login'">
+                <button class="text-sm font-bold text-brand-600 hover:text-brand-700 transition-all " @click="activeTab = 'login'">
                   已有账号？去登录
                 </button>
                 <BaseButton 

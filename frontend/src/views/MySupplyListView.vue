@@ -241,7 +241,7 @@ onMounted(() => {
     </div>
 
     <!-- 筛选栏 -->
-    <div class="bg-white rounded-2xl border border-gray-100 p-4">
+    <div class="bg-white rounded-xl border border-gray-200 p-4">
       <div class="flex flex-wrap items-center gap-4">
         <!-- 搜索框 -->
         <div class="relative flex-1 min-w-[200px] max-w-[300px]">
@@ -250,7 +250,7 @@ onMounted(() => {
             v-model="filters.categoryName"
             type="text"
             placeholder="搜索品类..."
-            class="w-full pl-10 pr-4 py-2.5 border-2 border-gray-100 rounded-xl text-sm focus:border-emerald-500 outline-none transition-all"
+            class="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:border-brand-500 outline-none transition-all"
             @keyup.enter="handleFilter"
           />
         </div>
@@ -263,7 +263,7 @@ onMounted(() => {
             :class="[
               'px-3 py-2 text-xs font-bold rounded-xl transition-all',
               filters.status === opt.value
-                ? 'bg-emerald-600 text-white'
+                ? 'bg-brand-600 text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             ]"
             @click="filters.status = opt.value; handleFilter()"
@@ -274,7 +274,7 @@ onMounted(() => {
 
         <!-- 统计 -->
         <div class="ml-auto">
-          <span class="px-3 py-1.5 bg-gray-50 text-gray-600 text-xs font-bold rounded-full border border-gray-100">
+          <span class="px-3 py-1.5 bg-gray-50 text-gray-600 text-xs font-bold rounded-full border border-gray-200">
             共 {{ pagination.total }} 条
           </span>
         </div>
@@ -282,7 +282,7 @@ onMounted(() => {
     </div>
 
     <!-- 供应列表 -->
-    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <!-- 加载状态 -->
       <div v-if="loading && supplies.length === 0" class="p-6 space-y-4">
         <Skeleton type="card" />
@@ -312,8 +312,8 @@ onMounted(() => {
           <!-- 头部：品类名 + 状态 -->
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <Package class="w-5 h-5 text-emerald-600" />
+              <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center">
+                <Package class="w-5 h-5 text-brand-600" />
               </div>
               <div>
                 <h3 class="font-bold text-gray-900">{{ s.categoryName }}</h3>
@@ -323,7 +323,7 @@ onMounted(() => {
             <span
               :class="[
                 'px-3 py-1 rounded-full text-xs font-bold',
-                getStatusColor(s.status) === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
+                getStatusColor(s.status) === 'emerald' ? 'bg-brand-50 text-brand-600' :
                 getStatusColor(s.status) === 'amber' ? 'bg-amber-50 text-amber-600' :
                 'bg-gray-100 text-gray-600'
               ]"
@@ -351,7 +351,7 @@ onMounted(() => {
                 <DollarSign class="w-3 h-3" />
                 出厂价
               </div>
-              <div class="font-bold text-emerald-600">{{ formatPrice(s.exFactoryPrice) }}</div>
+              <div class="font-bold text-brand-600">{{ formatPrice(s.exFactoryPrice) }}</div>
             </div>
             <div class="bg-gray-50 rounded-xl p-3">
               <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
@@ -371,22 +371,22 @@ onMounted(() => {
 
           <!-- 标签 -->
           <div class="flex flex-wrap gap-2 mb-4">
-            <span v-if="s.origin" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-100 text-gray-600">
+            <span v-if="s.origin" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-200 text-gray-600">
               产地：{{ s.origin }}
             </span>
-            <span v-if="s.packaging" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-100 text-gray-600">
+            <span v-if="s.packaging" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-200 text-gray-600">
               包装：{{ s.packaging }}
             </span>
-            <span v-if="s.deliveryMode" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-100 text-gray-600">
+            <span v-if="s.deliveryMode" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-200 text-gray-600">
               交付：{{ s.deliveryMode }}
             </span>
-            <span v-if="getParamsSummary(s.paramsJson)" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 border border-emerald-100 text-emerald-600">
+            <span v-if="getParamsSummary(s.paramsJson)" class="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-50 border border-brand-100 text-brand-600">
               指标：{{ getParamsSummary(s.paramsJson) }}
             </span>
           </div>
 
           <!-- 底部：时间 + 操作 -->
-          <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div class="flex items-center justify-between pt-4 border-t border-gray-200">
             <div class="text-xs text-gray-400">
               创建：{{ formatDate(s.createTime) }} · 更新：{{ formatDate(s.updateTime) }}
             </div>
@@ -424,7 +424,7 @@ onMounted(() => {
       </div>
 
       <!-- 分页 -->
-      <div v-if="pagination.total > pagination.size" class="p-4 border-t border-gray-100 flex justify-center">
+      <div v-if="pagination.total > pagination.size" class="p-4 border-t border-gray-200 flex justify-center">
         <el-pagination
           v-model:current-page="pagination.page"
           :page-size="pagination.size"
@@ -447,7 +447,7 @@ onMounted(() => {
         </p>
 
         <!-- 标的信息 -->
-        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
           <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">交易标的</div>
           <div class="mt-1 font-bold text-gray-900">
             {{ editing?.categoryName || '-' }}
@@ -462,7 +462,7 @@ onMounted(() => {
             <input
               v-model.number="editForm.quantity"
               type="number"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -470,7 +470,7 @@ onMounted(() => {
             <input
               v-model.number="editForm.exFactoryPrice"
               type="number"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -479,7 +479,7 @@ onMounted(() => {
               v-model="editForm.origin"
               type="text"
               placeholder="例如：山东济南..."
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -488,7 +488,7 @@ onMounted(() => {
               v-model="editForm.shipAddress"
               type="text"
               placeholder="例如：山东省济南市..."
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -497,7 +497,7 @@ onMounted(() => {
               v-model="editForm.deliveryMode"
               type="text"
               placeholder="例如：到厂 / 自提"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -506,7 +506,7 @@ onMounted(() => {
               v-model="editForm.packaging"
               type="text"
               placeholder="例如：散装 / 袋装"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -515,7 +515,7 @@ onMounted(() => {
               v-model="editForm.storageMethod"
               type="text"
               placeholder="例如：常温 / 冷藏"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -524,7 +524,7 @@ onMounted(() => {
               v-model.number="editForm.expireMinutes"
               type="number"
               placeholder="空=长期有效"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div class="md:col-span-2">
@@ -533,7 +533,7 @@ onMounted(() => {
               v-model="editForm.paramsJson"
               rows="3"
               placeholder='例如：{"custom":{"水分":"≤14%","霉变":"≤1%"}}'
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all resize-none"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
             ></textarea>
           </div>
           <div class="md:col-span-2">
@@ -542,7 +542,7 @@ onMounted(() => {
               v-model="editForm.remark"
               rows="2"
               placeholder="补充说明（选填）"
-              class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all resize-none"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
             ></textarea>
           </div>
         </div>

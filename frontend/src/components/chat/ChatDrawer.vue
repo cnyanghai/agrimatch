@@ -388,7 +388,7 @@ onBeforeUnmount(() => {
   >
     <div class="h-full flex flex-col bg-gray-50">
       <!-- header simplified -->
-      <div class="px-5 py-3 bg-white border-b border-gray-100 flex items-center justify-between gap-4">
+      <div class="px-5 py-3 bg-white border-b border-gray-200 flex items-center justify-between gap-4">
         <div class="min-w-0">
           <div class="font-bold text-gray-900 truncate leading-tight">{{ title }}</div>
           <div class="text-[10px] text-gray-400 mt-0.5">
@@ -397,13 +397,13 @@ onBeforeUnmount(() => {
         </div>
         <div class="flex items-center gap-2 shrink-0">
           <button
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all active:scale-95"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all "
             @click="goToChatCenter"
           >
             转入沟通中心
             <ArrowUpRight class="w-3.5 h-3.5" />
           </button>
-          <button class="p-1.5 rounded-xl hover:bg-gray-100 transition-all active:scale-95" @click="close">
+          <button class="p-1.5 rounded-xl hover:bg-gray-100 transition-all " @click="close">
             <X class="w-5 h-5 text-gray-500" />
           </button>
         </div>
@@ -432,7 +432,7 @@ onBeforeUnmount(() => {
                 {{ m.content }}
               </div>
               <div v-else-if="m.type === 'received'" class="max-w-[85%]">
-                <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'" class="bg-white rounded-2xl rounded-tl-sm px-4 py-3 border border-gray-100 shadow-sm">
+                <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'" class="bg-white rounded-xl rounded-tl-sm px-4 py-3 border border-gray-200 shadow-sm">
                   <div class="flex items-center justify-between mb-2">
                     <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">电子报价单</div>
                     <div v-if="quoteStatusBadge(m.quoteStatus)" 
@@ -448,28 +448,28 @@ onBeforeUnmount(() => {
                     </div>
                   </div>
                 </div>
-                <div v-else class="bg-white rounded-2xl rounded-tl-sm px-4 py-2.5 border border-gray-100 shadow-sm text-sm text-gray-800">
+                <div v-else class="bg-white rounded-xl rounded-tl-sm px-4 py-2.5 border border-gray-200 shadow-sm text-sm text-gray-800">
                   {{ m.content }}
                 </div>
               </div>
               <div v-else class="max-w-[85%] flex flex-col items-end">
-                <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'" class="bg-emerald-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm">
+                <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'" class="bg-brand-600 text-white rounded-xl rounded-tr-sm px-4 py-3 shadow-sm">
                   <div class="flex items-center justify-between mb-2 gap-4">
-                    <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-100">电子报价单</div>
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-brand-100">电子报价单</div>
                     <div v-if="quoteStatusBadge(m.quoteStatus)" 
-                         class="text-[10px] px-1.5 py-0.5 rounded-full border border-emerald-400 bg-emerald-500/50 font-bold text-white">
+                         class="text-[10px] px-1.5 py-0.5 rounded-full border border-brand-400 bg-brand-500/50 font-bold text-white">
                       {{ quoteStatusBadge(m.quoteStatus)?.label }}
                     </div>
                   </div>
-                  <div class="mt-1 font-bold text-sm border-b border-emerald-500 pb-2 mb-3">{{ m.content || '[报价]' }}</div>
+                  <div class="mt-1 font-bold text-sm border-b border-brand-500 pb-2 mb-3">{{ m.content || '[报价]' }}</div>
                   <div class="space-y-2">
                     <div v-for="field in getQuoteDisplayFields(m.payloadJson)" :key="field.label" class="flex justify-between text-[11px]">
-                      <span class="text-emerald-100/80">{{ field.label }}</span>
+                      <span class="text-brand-100/80">{{ field.label }}</span>
                       <span class="text-white font-medium">{{ field.value }}</span>
                     </div>
                   </div>
                 </div>
-                <div v-else class="bg-emerald-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-sm text-sm">
+                <div v-else class="bg-brand-600 text-white rounded-xl rounded-tr-sm px-4 py-2.5 shadow-sm text-sm">
                   {{ m.content }}
                 </div>
                 <div v-if="m.status === 'pending'" class="text-[10px] text-gray-400 mt-1">发送中…</div>
@@ -483,11 +483,11 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- composer simplified -->
-      <div class="p-4 bg-white border-t border-gray-100">
+      <div class="p-4 bg-white border-t border-gray-200">
         <div class="flex items-center gap-4 mb-3">
           <el-popover placement="top-start" :width="600" trigger="click" v-model:visible="quotePopoverVisible" popper-class="!p-0 !rounded-[32px] !border-none !shadow-2xl">
             <template #reference>
-              <button class="text-xs font-bold text-emerald-600">修改价格/报价</button>
+              <button class="text-xs font-bold text-brand-600">修改价格/报价</button>
             </template>
             <NegotiationPanel
               :disabled="!conversationId"
@@ -504,11 +504,11 @@ onBeforeUnmount(() => {
             v-model="messageInput"
             rows="1"
             placeholder="输入消息…"
-            class="flex-1 resize-none border-2 border-gray-100 rounded-xl px-3 py-2 text-sm outline-none focus:border-emerald-500 transition-all"
+            class="flex-1 resize-none border-2 border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-brand-500 transition-all"
             @keydown.enter.prevent="sendMessage"
           />
           <button
-            class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50"
+            class="px-4 py-2 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 transition-all  disabled:opacity-50"
             :disabled="!messageInput.trim() || !conversationId"
             @click="sendMessage"
           >

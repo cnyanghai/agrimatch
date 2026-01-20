@@ -86,10 +86,10 @@ onMounted(async () => {
     <!-- Sidebar -->
     <aside v-if="isLoggedIn" class="hidden md:flex w-60 flex-col bg-white shadow-modern">
       <div
-        class="px-5 py-4 border-b border-neutral-100 flex items-center gap-3 cursor-pointer hover:bg-gray-50/50 transition-all active:scale-[0.99]"
+        class="px-5 py-4 border-b border-neutral-100 flex items-center gap-3 cursor-pointer hover:bg-gray-50/50 transition-all"
         @click="go('/')"
       >
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-700 flex items-center justify-center font-bold text-white shadow-lg shadow-emerald-200">A</div>
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-600 to-brand-700 flex items-center justify-center font-bold text-white shadow-md">A</div>
         <div class="leading-tight">
           <div class="font-bold text-lg text-neutral-800">AgriMatch</div>
           <div class="text-xs text-neutral-500">农汇通 · 供需匹配平台</div>
@@ -99,13 +99,13 @@ onMounted(async () => {
       <!-- 用户身份标识 -->
       <div class="px-5 py-3 border-b border-neutral-100">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white bg-emerald-600">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white bg-brand-600">
             <ShoppingCart v-if="isBuyer" class="h-4 w-4" />
             <Box v-else class="h-4 w-4" />
           </div>
           <div>
             <div class="font-medium text-sm text-neutral-800">{{ auth.me?.nickName || '未设置昵称' }}</div>
-            <div class="text-xs text-emerald-700">{{ userTypeLabel }}</div>
+            <div class="text-xs text-brand-700">{{ userTypeLabel }}</div>
           </div>
         </div>
       </div>
@@ -114,64 +114,64 @@ onMounted(async () => {
       <div class="px-3 py-2 flex-1">
         <nav class="space-y-1">
           <!-- 1. 首页 -->
-          <button class="w-full text-left px-4 py-3 rounded-xl transition-all hover:bg-emerald-50 text-neutral-700 hover:text-emerald-700 flex items-center gap-3"
-                  :class="route.path==='/console' ? 'bg-emerald-50 text-emerald-700 font-medium' : ''"
+          <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
+                  :class="route.path==='/console' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/console')">
             <HomeFilled class="h-5 w-5" />
             首页
           </button>
 
           <!-- 2. 我的业务（采购商：采购管理 / 供应商：供应管理） -->
-          <button v-if="isBuyer" 
-                  class="w-full text-left px-4 py-3 rounded-xl transition-all hover:bg-emerald-50 text-neutral-700 hover:text-emerald-700 flex items-center gap-3"
-                  :class="route.path==='/requirements' || route.path==='/requirements/published' ? 'bg-emerald-50 text-emerald-700 font-medium' : ''"
+          <button v-if="isBuyer"
+                  class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
+                  :class="route.path==='/requirements' || route.path==='/requirements/published' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/requirements')">
             <Management class="h-5 w-5" />
             我的采购
           </button>
-          <button v-if="isSeller" 
-                  class="w-full text-left px-4 py-3 rounded-xl transition-all hover:bg-emerald-50 text-neutral-700 hover:text-emerald-700 flex items-center gap-3"
-                  :class="route.path==='/supply' || route.path==='/supply/published' ? 'bg-emerald-50 text-emerald-700 font-medium' : ''"
+          <button v-if="isSeller"
+                  class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
+                  :class="route.path==='/supply' || route.path==='/supply/published' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/supply')">
             <Box class="h-5 w-5" />
             我的供应
           </button>
 
           <!-- 3. 发现市场（采购商看供应 / 供应商看采购） -->
-          <button v-if="isBuyer" 
-                  class="w-full text-left px-4 py-3 rounded-xl transition-all hover:bg-emerald-50 text-neutral-700 hover:text-emerald-700 flex items-center gap-3"
-                  :class="route.path==='/supply-browse' ? 'bg-emerald-50 text-emerald-700 font-medium' : ''"
+          <button v-if="isBuyer"
+                  class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
+                  :class="route.path==='/supply-browse' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/supply-browse')">
             <Search class="h-5 w-5" />
             发现供应
           </button>
-          <button v-if="isSeller" 
-                  class="w-full text-left px-4 py-3 rounded-xl transition-all hover:bg-emerald-50 text-neutral-700 hover:text-emerald-700 flex items-center gap-3"
-                  :class="route.path==='/requirement-browse' ? 'bg-emerald-50 text-emerald-700 font-medium' : ''"
+          <button v-if="isSeller"
+                  class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
+                  :class="route.path==='/requirement-browse' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/requirement-browse')">
             <Search class="h-5 w-5" />
             发现采购
           </button>
 
           <!-- 4. 地图找商 -->
-          <button class="w-full text-left px-4 py-3 rounded-xl transition-all hover:bg-emerald-50 text-neutral-700 hover:text-emerald-700 flex items-center gap-3"
-                  :class="route.path==='/map' ? 'bg-emerald-50 text-emerald-700 font-medium' : ''"
+          <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
+                  :class="route.path==='/map' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/map')">
             <MapLocation class="h-5 w-5" />
             地图找商
           </button>
 
           <!-- 5. 合同管理 -->
-          <button class="w-full text-left px-4 py-3 rounded-xl transition-all hover:bg-emerald-50 text-neutral-700 hover:text-emerald-700 flex items-center gap-3"
-                  :class="route.path.startsWith('/contracts') ? 'bg-emerald-50 text-emerald-700 font-medium' : ''"
+          <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
+                  :class="route.path.startsWith('/contracts') ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/contracts')">
             <DocumentChecked class="h-5 w-5" />
             合同管理
           </button>
 
           <!-- 6. 消息（合并商务聊天+通知） -->
-          <button class="w-full text-left px-4 py-3 rounded-xl transition-all hover:bg-emerald-50 text-neutral-700 hover:text-emerald-700 flex items-center gap-3"
-                  :class="route.path==='/chat' || route.path==='/notify' ? 'bg-emerald-50 text-emerald-700 font-medium' : ''"
+          <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
+                  :class="route.path==='/chat' || route.path==='/notify' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/chat')">
             <ChatDotRound class="h-5 w-5" />
             消息
@@ -197,7 +197,7 @@ onMounted(async () => {
       <header class="bg-white border-b border-neutral-200 shadow-sm">
         <div class="px-4 py-3 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="md:hidden w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-700 text-white flex items-center justify-center font-bold shadow-lg shadow-emerald-200">A</div>
+            <div class="md:hidden w-10 h-10 rounded-lg bg-gradient-to-br from-brand-600 to-brand-700 text-white flex items-center justify-center font-bold shadow-md">A</div>
             <div class="font-bold text-neutral-800">农汇通 AgriMatch</div>
             <span class="hidden sm:inline text-xs text-neutral-500">供需匹配平台</span>
           </div>
@@ -253,8 +253,8 @@ onMounted(async () => {
       center
     >
       <div class="text-center py-4">
-        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-100 flex items-center justify-center">
-          <User class="w-10 h-10 text-emerald-600" />
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-brand-50 flex items-center justify-center">
+          <User class="w-10 h-10 text-brand-600" />
         </div>
         <h3 class="text-xl font-bold text-gray-800 mb-2">完善您的资料</h3>
         <p class="text-gray-500 mb-6">

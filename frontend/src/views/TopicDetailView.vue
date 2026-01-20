@@ -226,7 +226,7 @@ onMounted(() => {
   <div class="bg-gray-50 text-gray-900 min-h-screen">
     <PublicTopNav>
       <template #actions>
-        <button class="text-sm font-bold text-gray-500 hover:text-emerald-600 transition-all active:scale-95" @click="router.push('/talks')">
+        <button class="text-sm font-bold text-gray-500 hover:text-brand-600 transition-all " @click="router.push('/talks')">
           ← 返回话题广场
         </button>
       </template>
@@ -234,9 +234,9 @@ onMounted(() => {
 
     <main class="max-w-4xl mx-auto px-4 py-8" v-loading="loading">
       <!-- 话题内容 -->
-      <div v-if="post" class="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm mb-6">
+      <div v-if="post" class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm mb-6">
         <div class="flex items-center gap-3 mb-6">
-          <div class="w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center text-lg font-bold">
+          <div class="w-12 h-12 rounded-full bg-brand-600 text-white flex items-center justify-center text-lg font-bold">
             {{ (post.nickName || post.userName || '?')[0] }}
           </div>
           <div class="flex-1">
@@ -251,13 +251,13 @@ onMounted(() => {
         <div v-if="isBountyPost()" class="mb-6">
           <div 
             v-if="post.bountyStatus === 1"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-brand-50 border border-brand-200 rounded-xl text-brand-700"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
             <span class="font-bold">已采纳最佳答案</span>
-            <span class="text-emerald-600">+{{ post.bountyPoints }} 积分已发放</span>
+            <span class="text-brand-600">+{{ post.bountyPoints }} 积分已发放</span>
           </div>
           <div 
             v-else
@@ -276,7 +276,7 @@ onMounted(() => {
         </div>
 
         <!-- 互动操作 -->
-        <div class="flex items-center gap-4 pt-6 border-t border-gray-100">
+        <div class="flex items-center gap-4 pt-6 border-t border-gray-200">
           <button
             :class="[
               'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all',
@@ -313,20 +313,20 @@ onMounted(() => {
       </div>
 
       <!-- 评论区域 -->
-      <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm mb-6">
+      <div class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm mb-6">
         <h2 class="text-xl font-bold text-gray-900 mb-6">评论 ({{ comments.length }})</h2>
         
         <!-- 发表评论 -->
-        <div class="mb-8 pb-8 border-b border-gray-100">
+        <div class="mb-8 pb-8 border-b border-gray-200">
           <textarea
             v-model="commentText"
             placeholder="写下你的评论..."
-            class="w-full h-24 p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+            class="w-full h-24 p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
             :disabled="commenting"
           ></textarea>
           <div class="flex justify-end mt-4">
             <button
-              class="px-6 py-2 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all disabled:opacity-50"
+              class="px-6 py-2 bg-brand-600 text-white rounded-xl text-sm font-bold hover:bg-brand-700 transition-all disabled:opacity-50"
               :disabled="!commentText.trim() || commenting"
               @click="onAddComment"
             >
@@ -345,11 +345,11 @@ onMounted(() => {
             v-for="comment in comments"
             :key="comment.id"
             class="flex gap-4 pb-6 border-b border-gray-50 last:border-b-0"
-            :class="{ 'bg-emerald-50/50 -mx-4 px-4 py-4 rounded-2xl border border-emerald-200': isAccepted(comment) }"
+            :class="{ 'bg-brand-50/50 -mx-4 px-4 py-4 rounded-xl border border-brand-200': isAccepted(comment) }"
           >
             <div 
               class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-              :class="isAccepted(comment) ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-600'"
+              :class="isAccepted(comment) ? 'bg-brand-600 text-white' : 'bg-brand-100 text-brand-600'"
             >
               {{ (comment.nickName || comment.userName || '?')[0] }}
             </div>
@@ -359,7 +359,7 @@ onMounted(() => {
                 <!-- 已采纳标记 -->
                 <span 
                   v-if="isAccepted(comment)"
-                  class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-bold rounded-lg"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-600 text-white text-[10px] font-bold rounded-lg"
                 >
                   <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
@@ -407,7 +407,7 @@ onMounted(() => {
             <div class="text-xl font-bold text-gray-900">打赏作者</div>
           </div>
           <button 
-            class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95"
+            class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all "
             @click="tipDialogOpen = false"
           >
             <span class="text-gray-500 text-sm">✕</span>
@@ -417,7 +417,7 @@ onMounted(() => {
 
       <div v-if="post" class="space-y-5">
         <!-- 作者信息卡片 -->
-        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold text-lg shrink-0">
               {{ (post.nickName || post.userName || '?')[0] }}
@@ -458,15 +458,15 @@ onMounted(() => {
         </div>
         
         <!-- 快捷选择 -->
-        <div class="pt-4 border-t border-gray-100">
+        <div class="pt-4 border-t border-gray-200">
           <div class="text-xs text-gray-400 mb-3">快捷选择</div>
           <div class="flex flex-wrap gap-2">
             <button 
               v-for="amt in [5, 10, 50, 100]" 
               :key="amt"
-              class="px-4 py-2 rounded-full text-sm font-medium transition-all active:scale-95"
+              class="px-4 py-2 rounded-full text-sm font-medium transition-all "
               :class="tipForm.points === amt 
-                ? 'bg-emerald-600 text-white' 
+                ? 'bg-brand-600 text-white' 
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
               @click="tipForm.points = amt"
             >
@@ -479,14 +479,14 @@ onMounted(() => {
       <template #footer>
         <div class="flex gap-3">
           <el-button 
-            class="flex-1 !rounded-xl !h-11 transition-all active:scale-95" 
+            class="flex-1 !rounded-xl !h-11 transition-all " 
             @click="tipDialogOpen = false"
           >
             取消
           </el-button>
           <el-button 
             type="primary" 
-            class="flex-1 !rounded-xl !h-11 !bg-emerald-600 hover:!bg-emerald-700 !border-emerald-600 transition-all active:scale-95"
+            class="flex-1 !rounded-xl !h-11 !bg-brand-600 hover:!bg-brand-700 !border-brand-600 transition-all "
             :loading="tipping"
             @click="submitTip"
           >

@@ -229,7 +229,7 @@ function handleCreateError(message: string) {
         confirmButtonText: '前往完善资料',
         cancelButtonText: '稍后再说',
         type: 'warning',
-        confirmButtonClass: '!bg-emerald-600 !border-emerald-600 hover:!bg-emerald-700',
+        confirmButtonClass: '!bg-brand-600 !border-brand-600 hover:!bg-brand-700',
       }
     ).then(() => {
       emit('update:modelValue', false)
@@ -252,17 +252,17 @@ function handleCreateError(message: string) {
   >
     <!-- 头部图标 -->
     <template #icon>
-      <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-        <FileText class="w-5 h-5 text-emerald-600" />
+      <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center">
+        <FileText class="w-5 h-5 text-brand-600" />
       </div>
     </template>
 
     <div class="space-y-6">
       <!-- 交易信息卡片 -->
-      <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+      <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
         <div class="flex items-center gap-2 mb-4">
-          <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-            <FileText class="w-4 h-4 text-emerald-600" />
+          <div class="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center">
+            <FileText class="w-4 h-4 text-brand-600" />
           </div>
           <span class="font-bold text-gray-900">交易信息</span>
         </div>
@@ -302,7 +302,7 @@ function handleCreateError(message: string) {
                   <span class="text-xs text-gray-400 font-normal">({{ contractCode }})</span>
                 </span>
                 <span v-if="futuresPrice !== undefined" class="text-[10px] text-gray-500 leading-tight">
-                  当前核算价: <span class="text-emerald-600 font-bold">¥{{ (futuresPrice + basisPrice).toFixed(2) }}</span>
+                  当前核算价: <span class="text-brand-600 font-bold">¥{{ (futuresPrice + basisPrice).toFixed(2) }}</span>
                   <span class="text-gray-300 ml-1">(盘面 ¥{{ futuresPrice }})</span>
                 </span>
                 <span v-else class="text-[10px] text-gray-400 leading-tight">
@@ -316,7 +316,7 @@ function handleCreateError(message: string) {
           </div>
           <div class="space-y-1">
             <div class="text-xs text-gray-400">预估总金额</div>
-            <span class="font-bold text-emerald-600 text-lg">
+            <span class="font-bold text-brand-600 text-lg">
               <template v-if="basisPrice !== undefined">
                 待结算 <span class="text-[10px] font-normal text-gray-400">(根据签署时刻盘面核算)</span>
               </template>
@@ -342,7 +342,7 @@ function handleCreateError(message: string) {
           </div>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <div v-for="p in displayParams" :key="p.name" class="flex flex-col gap-1 bg-white px-3 py-2 rounded-xl border border-gray-100 shadow-sm">
+          <div v-for="p in displayParams" :key="p.name" class="flex flex-col gap-1 bg-white px-3 py-2 rounded-xl border border-gray-200 shadow-sm">
             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{{ p.name }}</span>
             <span class="text-xs font-black text-gray-700 truncate">{{ p.value }}</span>
           </div>
@@ -355,7 +355,7 @@ function handleCreateError(message: string) {
         <input 
           v-model="form.title"
           type="text"
-          class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
           :placeholder="defaultTitle"
         />
       </div>
@@ -370,7 +370,7 @@ function handleCreateError(message: string) {
           <input 
             v-model="form.deliveryDate"
             type="date"
-            class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
           />
         </div>
         <div class="space-y-2">
@@ -381,7 +381,7 @@ function handleCreateError(message: string) {
           <input 
             v-model="form.deliveryAddress"
             type="text"
-            class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
             :placeholder="deliveryPlace || '请输入交付地点'"
           />
         </div>
@@ -396,7 +396,7 @@ function handleCreateError(message: string) {
         <input 
           v-model="form.paymentMethod"
           type="text"
-          class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
           :placeholder="paymentMethod || '请输入付款方式'"
         />
       </div>
@@ -410,7 +410,7 @@ function handleCreateError(message: string) {
         <textarea 
           v-model="form.terms"
           rows="10"
-          class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all resize-none font-mono text-sm"
+          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none font-mono text-sm"
           :placeholder="defaultTerms"
         ></textarea>
         <div class="text-xs text-gray-400">留空将使用默认条款模板</div>

@@ -160,7 +160,7 @@ watch(visible, (val) => {
         <input
           v-model="form.actualDate"
           type="date"
-          class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm"
+          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
         />
       </div>
       
@@ -198,12 +198,12 @@ watch(visible, (val) => {
           <!-- 上传按钮 -->
           <button
             v-if="form.evidenceUrls.length < 9"
-            class="aspect-square rounded-xl border-2 border-dashed border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/50 flex flex-col items-center justify-center gap-1 transition-colors"
+            class="aspect-square rounded-xl border-2 border-dashed border-gray-200 hover:border-brand-500 hover:bg-brand-50/50 flex flex-col items-center justify-center gap-1 transition-colors"
             :disabled="uploading"
             @click="triggerFileInput"
           >
             <Upload v-if="!uploading" class="w-6 h-6 text-gray-400" />
-            <div v-else class="w-6 h-6 border-2 border-gray-300 border-t-emerald-500 rounded-full animate-spin" />
+            <div v-else class="w-6 h-6 border-2 border-gray-300 border-t-brand-500 rounded-full animate-spin" />
             <span class="text-xs text-gray-400">{{ uploading ? '上传中' : '上传' }}</span>
           </button>
         </div>
@@ -222,7 +222,7 @@ watch(visible, (val) => {
           v-model="form.remark"
           rows="2"
           placeholder="可选，补充说明..."
-          class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm resize-none"
+          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm resize-none"
         />
       </div>
     </div>

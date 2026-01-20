@@ -214,14 +214,14 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-3">
         <button 
-          class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all active:scale-95"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all "
           @click="refreshData"
         >
           <Refresh class="w-4 h-4" />
           刷新
         </button>
         <button 
-          class="bg-slate-900 text-white px-5 py-2 rounded-xl font-bold hover:bg-slate-800 transition-all active:scale-95 flex items-center gap-2"
+          class="bg-slate-900 text-white px-5 py-2 rounded-xl font-bold hover:bg-slate-800 transition-all  flex items-center gap-2"
           @click="goToHall"
         >
           <ShoppingCart class="w-4 h-4" />
@@ -246,7 +246,7 @@ onMounted(() => {
           <div 
             class="w-16 h-16 rounded-full flex items-center justify-center transition-all border-2"
             :class="selectedUserId === null 
-              ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-200' 
+              ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200' 
               : 'bg-gray-100 text-gray-500 border-gray-200 group-hover:border-blue-300'"
           >
             <UserFilled class="w-6 h-6" />
@@ -263,7 +263,7 @@ onMounted(() => {
           <button
             class="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold transition-all border-2"
             :class="selectedUserId === user.userId 
-              ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-300' 
+              ? 'bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-300' 
               : 'bg-white text-slate-700 border-gray-200 group-hover:border-blue-300 group-hover:shadow-md'"
             @click="toggleUserFilter(user.userId)"
           >
@@ -297,14 +297,14 @@ onMounted(() => {
       </div>
 
       <!-- 未关注任何人时的提示 -->
-      <div v-else class="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+      <div v-else class="bg-white rounded-xl border border-gray-200 p-8 text-center">
         <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
           <UserFilled class="w-10 h-10 text-gray-300" />
         </div>
         <h3 class="text-lg font-bold text-gray-900 mb-2">还没有关注任何采购商</h3>
         <p class="text-sm text-gray-500 mb-6">前往采购大厅，发现优质采购商并关注他们</p>
         <button 
-          class="px-6 py-2.5 bg-slate-900 text-white rounded-full font-bold hover:bg-slate-800 transition-all active:scale-95"
+          class="px-6 py-2.5 bg-slate-900 text-white rounded-full font-bold hover:bg-slate-800 transition-all "
           @click="goToHall"
         >
           去采购大厅看看
@@ -330,12 +330,12 @@ onMounted(() => {
           <div
             v-for="req in filteredRequirements"
             :key="req.id"
-            class="group bg-white rounded-2xl border border-gray-100 overflow-hidden transition-all hover:shadow-xl hover:border-blue-100"
+            class="group bg-white rounded-xl border border-gray-200 overflow-hidden transition-all hover:shadow-md hover:border-blue-100"
           >
             <!-- 卡片头部 -->
             <div class="p-5 bg-gradient-to-br from-blue-50/50 to-white border-b border-gray-50">
               <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-lg">
+                <div class="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-md">
                   {{ getRequirementAvatar(req) }}
                 </div>
                 <div class="flex-1 min-w-0">
@@ -363,7 +363,7 @@ onMounted(() => {
                 </div>
                 <div class="text-right">
                   <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">期望单价</div>
-                  <div v-if="req.expectedPrice" class="text-xl font-black text-emerald-600">
+                  <div v-if="req.expectedPrice" class="text-xl font-black text-brand-600">
                     ¥{{ req.expectedPrice }}
                     <span class="text-xs font-normal text-gray-400">/吨</span>
                   </div>
@@ -416,16 +416,16 @@ onMounted(() => {
             </div>
 
             <!-- 卡片底部 -->
-            <div class="px-5 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3">
+            <div class="px-5 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3">
               <button 
-                class="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition-all active:scale-95 flex items-center gap-2"
+                class="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition-all  flex items-center gap-2"
                 @click="viewDetail(req)"
               >
                 <View class="w-4 h-4" />
                 详情
               </button>
               <button 
-                class="px-6 py-2 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-lg shadow-slate-200 hover:bg-slate-800 transition-all active:scale-95 flex items-center gap-2"
+                class="px-6 py-2 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-md shadow-slate-200 hover:bg-slate-800 transition-all  flex items-center gap-2"
                 @click="onQuote(req)"
               >
                 <ChatDotRound class="w-4 h-4" />
@@ -436,7 +436,7 @@ onMounted(() => {
         </div>
 
         <!-- 空状态 -->
-        <div v-else-if="!loading" class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+        <div v-else-if="!loading" class="bg-white rounded-xl border border-gray-200 p-12 text-center">
           <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <ShoppingCart class="w-8 h-8 text-gray-300" />
           </div>
