@@ -35,20 +35,22 @@ const router = useRouter()
 
 // 分类元数据映射
 const getCategoryMeta = (name: string) => {
-  const mapping: Record<string, { icon: any; color: string; bgColor: string }> = {
-    '谷物': { icon: Wheat, color: 'text-amber-600', bgColor: 'bg-amber-50' },
-    '油料': { icon: Leaf, color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
-    '油脂': { icon: Droplets, color: 'text-blue-600', bgColor: 'bg-blue-50' },
-    '微生物': { icon: Microscope, color: 'text-purple-600', bgColor: 'bg-purple-50' },
-    '动物': { icon: Beef, color: 'text-red-600', bgColor: 'bg-red-50' },
-    '矿物质': { icon: Gem, color: 'text-sky-600', bgColor: 'bg-sky-50' },
-    '添加剂': { icon: FlaskConical, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
+  const mapping: Record<string, { icon: any }> = {
+    '谷物': { icon: Wheat },
+    '油料': { icon: Leaf },
+    '油脂': { icon: Droplets },
+    '微生物': { icon: Microscope },
+    '动物': { icon: Beef },
+    '矿物质': { icon: Gem },
+    '添加剂': { icon: FlaskConical },
   }
 
+  const commonStyles = { color: 'text-slate-500', bgColor: 'bg-slate-50' }
+
   for (const key in mapping) {
-    if (name.includes(key)) return mapping[key]
+    if (name.includes(key)) return { ...mapping[key], ...commonStyles }
   }
-  return { icon: Package, color: 'text-gray-600', bgColor: 'bg-gray-50' }
+  return { icon: Package, ...commonStyles }
 }
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
@@ -335,7 +337,7 @@ onBeforeUnmount(() => {
           </div>
           <button 
             class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-emerald-600 transition-colors"
-            @click="go('/hall/supply')"
+            @click="go('/categories')"
           >
             查看所有类别
             <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-emerald-50 flex items-center justify-center transition-colors">
@@ -352,34 +354,31 @@ onBeforeUnmount(() => {
           <div
             v-for="cat in topCategories.slice(0, 7)"
             :key="cat.id"
-            class="group p-5 bg-white border border-gray-100 rounded-2xl transition-all cursor-pointer flex items-center gap-4 hover:shadow-xl hover:border-emerald-100 hover:-translate-y-1"
+            class="group p-5 bg-white border border-gray-100 rounded-2xl transition-all cursor-pointer flex items-center gap-4 hover:shadow-md hover:border-slate-200 hover:-translate-y-1"
             @click="goCategory(cat)"
           >
             <div 
-              class="w-14 h-14 shrink-0 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm"
-              :class="getCategoryMeta(cat.name).bgColor"
+              class="w-12 h-12 shrink-0 rounded-xl flex items-center justify-center transition-transform shadow-sm bg-slate-50"
             >
-              <component :is="getCategoryMeta(cat.name).icon" :size="28" :class="getCategoryMeta(cat.name).color" />
+              <component :is="getCategoryMeta(cat.name).icon" :size="24" class="text-slate-500" />
             </div>
             <div class="min-w-0">
-              <div class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors truncate text-lg">
+              <div class="font-bold text-gray-900 group-hover:text-slate-900 transition-colors truncate text-base">
                 {{ cat.name }}
               </div>
-              <div class="text-xs text-gray-400 mt-0.5">探索优质{{ cat.name }}资源</div>
             </div>
           </div>
 
           <!-- “更多”卡片 -->
           <div
-            class="group p-5 bg-gray-50/50 border border-dashed border-gray-200 rounded-2xl transition-all cursor-pointer flex items-center gap-4 hover:bg-white hover:border-emerald-200 hover:shadow-lg hover:-translate-y-1"
-            @click="go('/hall/supply')"
+            class="group p-5 bg-gray-50/50 border border-dashed border-gray-200 rounded-2xl transition-all cursor-pointer flex items-center gap-4 hover:bg-white hover:border-slate-200 hover:shadow-md hover:-translate-y-1"
+            @click="go('/categories')"
           >
-            <div class="w-14 h-14 shrink-0 bg-white rounded-xl flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm text-gray-400">
-              <LayoutGrid :size="28" />
+            <div class="w-12 h-12 shrink-0 bg-white rounded-xl flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all shadow-sm text-slate-400">
+              <LayoutGrid :size="24" />
             </div>
             <div>
-              <div class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors text-lg">更多原料</div>
-              <div class="text-xs text-gray-400 mt-0.5">查看全部分类信息</div>
+              <div class="font-bold text-gray-900 group-hover:text-slate-900 transition-colors text-base">更多原料</div>
             </div>
           </div>
         </div>
@@ -397,7 +396,7 @@ onBeforeUnmount(() => {
           </div>
           <button 
             class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-emerald-600 transition-colors"
-            @click="go('/hall/supply')"
+            @click="go('/companies/directory')"
           >
             查看所有供应商
             <div class="w-8 h-8 rounded-full bg-white group-hover:bg-emerald-50 flex items-center justify-center transition-colors">
@@ -413,21 +412,24 @@ onBeforeUnmount(() => {
           <div
             v-for="s in suppliers.slice(0, 12)"
             :key="s.id"
-            class="group bg-white p-6 rounded-2xl border border-gray-100 transition-all cursor-pointer flex flex-col items-center justify-center text-center hover:shadow-lg hover:border-emerald-100 hover:-translate-y-1"
+            class="group bg-white p-5 rounded-2xl border border-gray-100 transition-all cursor-pointer flex flex-col hover:shadow-md hover:border-slate-200 hover:-translate-y-1"
             @click="go(`/companies/${s.id}`)"
           >
-            <div class="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform overflow-hidden shadow-inner">
-              <div v-if="!s.logo" class="text-xl font-black text-emerald-600/30 tracking-tighter">
-                {{ s.companyName[0] }}
+            <div class="flex items-start justify-between mb-4">
+              <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-emerald-50 transition-colors">
+                <img v-if="s.logo" :src="s.logo" class="w-full h-full object-contain p-1" />
+                <Building2 v-else :size="20" class="text-slate-400 group-hover:text-emerald-500 transition-colors" />
               </div>
-              <img v-else :src="s.logo" class="w-full h-full object-contain p-2" />
+              <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                {{ (s.province || '未知').substring(0, 2) }}
+              </span>
             </div>
-            <div class="text-sm font-bold text-gray-600 group-hover:text-emerald-600 transition-colors truncate w-full px-2">
+            <div class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors truncate text-sm mb-1">
               {{ s.companyName }}
             </div>
-            <div class="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+            <div class="text-[10px] text-gray-400 flex items-center gap-1">
               <MapPin :size="10" />
-              {{ s.city || s.province }}
+              {{ s.city || s.province || '全国' }}
             </div>
           </div>
         </div>
@@ -445,7 +447,7 @@ onBeforeUnmount(() => {
           </div>
           <button 
             class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-blue-600 transition-colors"
-            @click="go('/hall/need')"
+            @click="go('/companies/directory?type=buyer')"
           >
             查看所有采购商
             <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-blue-50 flex items-center justify-center transition-colors">
@@ -461,21 +463,24 @@ onBeforeUnmount(() => {
           <div
             v-for="b in buyers.slice(0, 12)"
             :key="b.id"
-            class="group bg-white p-6 rounded-2xl border border-gray-100 transition-all cursor-pointer flex flex-col items-center justify-center text-center hover:shadow-lg hover:border-blue-100 hover:-translate-y-1"
+            class="group bg-white p-5 rounded-2xl border border-gray-100 transition-all cursor-pointer flex flex-col hover:shadow-md hover:border-slate-200 hover:-translate-y-1"
             @click="go(`/companies/${b.id}`)"
           >
-            <div class="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform overflow-hidden shadow-inner">
-              <div v-if="!b.logo" class="text-xl font-black text-blue-600/30 tracking-tighter">
-                {{ b.companyName[0] }}
+            <div class="flex items-start justify-between mb-4">
+              <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-blue-50 transition-colors">
+                <img v-if="b.logo" :src="b.logo" class="w-full h-full object-contain p-1" />
+                <Users v-else :size="20" class="text-slate-400 group-hover:text-blue-500 transition-colors" />
               </div>
-              <img v-else :src="b.logo" class="w-full h-full object-contain p-2" />
+              <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                {{ (b.province || '未知').substring(0, 2) }}
+              </span>
             </div>
-            <div class="text-sm font-bold text-gray-600 group-hover:text-blue-600 transition-colors truncate w-full px-2">
+            <div class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate text-sm mb-1">
               {{ b.companyName }}
             </div>
-            <div class="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
-              <Users :size="10" />
-              {{ b.city || b.province }}
+            <div class="text-[10px] text-gray-400 flex items-center gap-1">
+              <MapPin :size="10" />
+              {{ b.city || b.province || '全国' }}
             </div>
           </div>
         </div>
@@ -553,44 +558,6 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </section>
-
-    <!-- 平台价值核心区域 (简化) -->
-    <section class="py-20 bg-gray-50 border-t border-gray-100">
-      <div class="max-w-7xl mx-auto px-4">
-        <div class="grid md:grid-cols-3 gap-12">
-          <div class="flex items-center gap-4 group">
-            <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <MessageCircle :size="24" />
-            </div>
-            <div>
-              <h3 class="font-bold text-gray-900 mb-1">高效沟通</h3>
-              <p class="text-xs text-gray-500">内置专业即时通讯系统</p>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-4 group">
-            <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <FileText :size="24" />
-            </div>
-            <div>
-              <h3 class="font-bold text-gray-900 mb-1">电子签约</h3>
-              <p class="text-xs text-gray-500">专业合法的合同保障</p>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-4 group">
-            <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <MapPin :size="24" />
-            </div>
-            <div>
-              <h3 class="font-bold text-gray-900 mb-1">全域地图</h3>
-              <p class="text-xs text-gray-500">货源动态直观展示</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- 底部流程引导 -->
     <section class="bg-slate-900 py-24 relative overflow-hidden border-t border-white/5">
       <div class="max-w-7xl mx-auto px-4 text-center">
