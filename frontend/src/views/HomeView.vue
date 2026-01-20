@@ -7,9 +7,47 @@ import { getPlatformStats, type StatsResponse } from '../api/stats'
 import { listTopCompanies, type CompanyCardResponse } from '../api/company'
 import PublicTopNav from '../components/PublicTopNav.vue'
 import PublicFooter from '../components/PublicFooter.vue'
-import { MapPin, ArrowRight, Search, TrendingUp, Package, Truck, ShoppingBag, Gift, MessageCircle, FileText } from 'lucide-vue-next'
+import { 
+  MapPin, 
+  ArrowRight, 
+  Search, 
+  TrendingUp, 
+  Package, 
+  Truck, 
+  ShoppingBag, 
+  Gift, 
+  MessageCircle, 
+  FileText,
+  Wheat,
+  Leaf,
+  Droplets,
+  Microscope,
+  Beef,
+  Gem,
+  FlaskConical,
+  LayoutGrid,
+  ChevronRight
+} from 'lucide-vue-next'
 
 const router = useRouter()
+
+// 分类元数据映射
+const getCategoryMeta = (name: string) => {
+  const mapping: Record<string, { icon: any; color: string; bgColor: string }> = {
+    '谷物': { icon: Wheat, color: 'text-amber-600', bgColor: 'bg-amber-50' },
+    '油料': { icon: Leaf, color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
+    '油脂': { icon: Droplets, color: 'text-blue-600', bgColor: 'bg-blue-50' },
+    '微生物': { icon: Microscope, color: 'text-purple-600', bgColor: 'bg-purple-50' },
+    '动物': { icon: Beef, color: 'text-red-600', bgColor: 'bg-red-50' },
+    '矿物质': { icon: Gem, color: 'text-sky-600', bgColor: 'bg-sky-50' },
+    '添加剂': { icon: FlaskConical, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
+  }
+
+  for (const key in mapping) {
+    if (name.includes(key)) return mapping[key]
+  }
+  return { icon: Package, color: 'text-gray-600', bgColor: 'bg-gray-50' }
+}
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 let raf: number | null = null
@@ -216,10 +254,10 @@ onBeforeUnmount(() => {
     <PublicTopNav />
 
     <!-- Hero -->
-    <section class="relative hero-gradient overflow-hidden text-white min-h-[500px] flex items-center pt-16">
+    <section class="relative hero-gradient overflow-hidden text-white h-[510px] flex items-center pt-16">
       <canvas ref="canvasRef" class="map-canvas"></canvas>
 
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-20 flex flex-col items-center text-center">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-12 flex flex-col items-center text-center">
         <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight tracking-tight">
           智慧畜牧供应链
         </h1>
@@ -268,30 +306,65 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 按原料搜索 -->
-    <section class="py-20 bg-white border-b border-gray-100">
+    <section class="py-24 bg-white border-b border-gray-100">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="flex items-center justify-between mb-10">
-          <div class="flex items-center gap-3">
-            <div class="w-1.5 h-6 bg-emerald-600 rounded-full"></div>
-            <h2 class="text-2xl font-bold text-gray-900">按原料搜索</h2>
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Raw Materials</span>
+            </div>
+            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+              按 <span class="text-emerald-600">原料</span> 搜索
+            </h2>
           </div>
-          <button class="text-sm font-bold text-emerald-600 hover:underline" @click="go('/hall/supply')">查看全部分类</button>
+          <button 
+            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-emerald-600 transition-colors"
+            @click="go('/hall/supply')"
+          >
+            查看所有类别
+            <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-emerald-50 flex items-center justify-center transition-colors">
+              <ChevronRight :size="16" />
+            </div>
+          </button>
         </div>
 
-        <div v-if="categoryLoading" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <div v-for="i in 6" :key="i" class="h-32 bg-gray-50 rounded-2xl animate-pulse"></div>
+        <div v-if="categoryLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div v-for="i in 8" :key="i" class="h-24 bg-gray-50 rounded-2xl animate-pulse"></div>
         </div>
-        <div v-else class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- 核心分类卡片 -->
           <div
-            v-for="cat in topCategories.slice(0, 12)"
+            v-for="cat in topCategories.slice(0, 7)"
             :key="cat.id"
-            class="group p-6 bg-gray-50/50 hover:bg-white border border-transparent hover:border-emerald-100 rounded-2xl transition-all cursor-pointer text-center"
+            class="group p-5 bg-white border border-gray-100 rounded-2xl transition-all cursor-pointer flex items-center gap-4 hover:shadow-xl hover:border-emerald-100 hover:-translate-y-1"
             @click="goCategory(cat)"
           >
-            <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-sm">
-              <Package :size="24" class="text-emerald-600" />
+            <div 
+              class="w-14 h-14 shrink-0 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm"
+              :class="getCategoryMeta(cat.name).bgColor"
+            >
+              <component :is="getCategoryMeta(cat.name).icon" :size="28" :class="getCategoryMeta(cat.name).color" />
             </div>
-            <div class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">{{ cat.name }}</div>
+            <div class="min-w-0">
+              <div class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors truncate text-lg">
+                {{ cat.name }}
+              </div>
+              <div class="text-xs text-gray-400 mt-0.5">探索优质{{ cat.name }}资源</div>
+            </div>
+          </div>
+
+          <!-- “更多”卡片 -->
+          <div
+            class="group p-5 bg-gray-50/50 border border-dashed border-gray-200 rounded-2xl transition-all cursor-pointer flex items-center gap-4 hover:bg-white hover:border-emerald-200 hover:shadow-lg hover:-translate-y-1"
+            @click="go('/hall/supply')"
+          >
+            <div class="w-14 h-14 shrink-0 bg-white rounded-xl flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm text-gray-400">
+              <LayoutGrid :size="28" />
+            </div>
+            <div>
+              <div class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors text-lg">更多原料</div>
+              <div class="text-xs text-gray-400 mt-0.5">查看全部分类信息</div>
+            </div>
           </div>
         </div>
       </div>
