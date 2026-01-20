@@ -22,6 +22,8 @@ public class StatsController {
         s.setUserCount(statsMapper.userCount());
         s.setRequirementCount(statsMapper.requirementCount());
         s.setSupplyCount(statsMapper.supplyCount());
+        s.setSupplierCount(statsMapper.supplierCount());
+        s.setBuyerCount(statsMapper.buyerCount());
         return Result.success(s);
     }
 }

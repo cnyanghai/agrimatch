@@ -56,7 +56,7 @@ const followingMap = ref<Map<number, boolean>>(new Map())
 
 // 检查并加载关注状态
 async function loadFollowStatus(userIds: number[]) {
-  if (!authStore.isLoggedIn) return
+  if (!authStore.token) return
   for (const userId of userIds) {
     if (!followingMap.value.has(userId)) {
       try {
@@ -226,7 +226,7 @@ async function loadRequirements() {
       result = result.filter(r => 
         r.categoryName?.toLowerCase().includes(kw) ||
         r.companyName?.toLowerCase().includes(kw) ||
-        r.deliveryAddress?.toLowerCase().includes(kw) ||
+        r.purchaseAddress?.toLowerCase().includes(kw) ||
         r.nickName?.toLowerCase().includes(kw)
       )
     }
@@ -432,7 +432,7 @@ function parseParams(paramsJson?: string): string {
               </div>
               <!-- 关注按钮 -->
               <button
-                v-if="authStore.isLoggedIn && r.userId"
+                v-if="authStore.token && r.userId"
                 class="shrink-0 text-xs px-2 py-1 rounded-full border transition-all active:scale-95"
                 :class="isFollowingUser(r.userId) 
                   ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100' 

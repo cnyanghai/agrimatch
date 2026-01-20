@@ -27,7 +27,11 @@ const router = createRouter({
     { path: '/points', name: 'points', component: () => import('../views/PointsView.vue') },
     { path: '/notify', name: 'notify', component: () => import('../views/NotifyView.vue') },
     { path: '/chat', name: 'chat', component: () => import('../views/ChatView.vue') },
-    { path: '/vehicles', name: 'vehicles', component: () => import('../views/VehicleManageView.vue') }
+    { path: '/vehicles', name: 'vehicles', component: () => import('../views/VehicleManageView.vue') },
+    
+    // 名录与公司详情
+    { path: '/companies/directory', name: 'company-directory', component: () => import('../views/CompanyDirectoryView.vue'), meta: { public: true, minimal: true } },
+    { path: '/companies/:id', name: 'company-profile', component: () => import('../views/CompanyProfileView.vue'), meta: { public: true, minimal: true } }
   ]
 })
 

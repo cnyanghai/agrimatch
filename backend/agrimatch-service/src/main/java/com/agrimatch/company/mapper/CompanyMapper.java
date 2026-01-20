@@ -25,6 +25,16 @@ public interface CompanyMapper {
     /** 仅更新坐标（内部使用，不校验 ownerUserId） */
     int updateCoords(@Param("id") Long id, @Param("lat") java.math.BigDecimal lat, @Param("lng") java.math.BigDecimal lng);
 
+    List<com.agrimatch.company.dto.CompanyCardResponse> selectTopSuppliers(@Param("limit") int limit, @Param("region") String region);
+
+    List<com.agrimatch.company.dto.CompanyCardResponse> selectTopBuyers(@Param("limit") int limit, @Param("categoryName") String categoryName);
+
+    List<com.agrimatch.company.dto.CompanyCardResponse> selectTopCompanies(@Param("type") String type, @Param("limit") int limit);
+
+    List<com.agrimatch.company.dto.CompanyCardResponse> selectDirectory(@Param("type") String type, @Param("letter") String letter, @Param("offset") int offset, @Param("limit") int limit);
+
+    long countDirectory(@Param("type") String type, @Param("letter") String letter);
+
     class IdNameRow {
         private Long id;
         private String companyName;

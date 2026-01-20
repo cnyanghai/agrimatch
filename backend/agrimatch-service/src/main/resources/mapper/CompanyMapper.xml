@@ -127,6 +127,157 @@
         WHERE id = #{id} AND is_deleted = 0
     </update>
 
+    <select id="selectTopSuppliers" resultType="com.agrimatch.company.dto.CompanyCardResponse">
+        SELECT
+            c.id AS id,
+            c.company_name AS companyName,
+            c.province AS province,
+            c.city AS city,
+            COUNT(s.id) AS count,
+            GROUP_CONCAT(DISTINCT s.category_name) AS categoryNamesStr
+        FROM bus_company c
+        INNER JOIN bus_supply s ON c.id = s.company_id
+        WHERE c.is_deleted = 0 AND s.is_deleted = 0
+        <if test="region != null and region != ''">
+            AND c.province LIKE CONCAT('%', #{region}, '%')
+        </if>
+        GROUP BY c.id
+        ORDER BY count DESC, c.id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectTopBuyers" resultType="com.agrimatch.company.dto.CompanyCardResponse">
+        SELECT
+            c.id AS id,
+            c.company_name AS companyName,
+            c.province AS province,
+            c.city AS city,
+            COUNT(r.id) AS count,
+            GROUP_CONCAT(DISTINCT r.category_name) AS categoryNamesStr
+        FROM bus_company c
+        INNER JOIN bus_requirement r ON c.id = r.company_id
+        WHERE c.is_deleted = 0 AND r.is_deleted = 0
+        <if test="categoryName != null and categoryName != ''">
+            AND r.category_name = #{categoryName}
+        </if>
+        GROUP BY c.id
+        ORDER BY count DESC, c.id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectTopCompanies" resultType="com.agrimatch.company.dto.CompanyCardResponse">
+        SELECT
+            c.id AS id,
+            c.company_name AS companyName,
+            c.province AS province,
+            c.city AS city,
+            <choose>
+                <when test="type == 'supplier'">
+                    COUNT(s.id) AS count,
+                    GROUP_CONCAT(DISTINCT s.category_name) AS categoryNamesStr
+                </when>
+                <otherwise>
+                    COUNT(r.id) AS count,
+                    GROUP_CONCAT(DISTINCT r.category_name) AS categoryNamesStr
+                </otherwise>
+            </choose>
+        FROM bus_company c
+        <choose>
+            <when test="type == 'supplier'">
+                INNER JOIN bus_supply s ON c.id = s.company_id AND s.is_deleted = 0
+            </when>
+            <otherwise>
+                INNER JOIN bus_requirement r ON c.id = r.company_id AND r.is_deleted = 0
+            </otherwise>
+        </choose>
+        WHERE c.is_deleted = 0
+        GROUP BY c.id
+        ORDER BY count DESC, c.id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectDirectory" resultType="com.agrimatch.company.dto.CompanyCardResponse">
+        SELECT
+            c.id AS id,
+            c.company_name AS companyName,
+            c.province AS province,
+            c.city AS city,
+            <choose>
+                <when test="type == 'supplier'">
+                    COUNT(DISTINCT s.id) AS count,
+                    GROUP_CONCAT(DISTINCT s.category_name) AS categoryNamesStr
+                </when>
+                <otherwise>
+                    COUNT(DISTINCT r.id) AS count,
+                    GROUP_CONCAT(DISTINCT r.category_name) AS categoryNamesStr
+                </otherwise>
+            </choose>
+        FROM bus_company c
+        <choose>
+            <when test="type == 'supplier'">
+                LEFT JOIN bus_supply s ON c.id = s.company_id AND s.is_deleted = 0
+            </when>
+            <otherwise>
+                LEFT JOIN bus_requirement r ON c.id = r.company_id AND r.is_deleted = 0
+            </otherwise>
+        </choose>
+        WHERE c.is_deleted = 0
+        <if test="type == 'supplier'">
+            AND EXISTS (SELECT 1 FROM bus_supply WHERE company_id = c.id AND is_deleted = 0)
+        </if>
+        <if test="type == 'buyer'">
+            AND EXISTS (SELECT 1 FROM bus_requirement WHERE company_id = c.id AND is_deleted = 0)
+        </if>
+        <if test="letter != null and letter != ''">
+            <choose>
+                <when test="letter == '0-9'">
+                    AND LEFT(c.company_name, 1) REGEXP '^[0-9]'
+                </when>
+                <otherwise>
+                    <!-- 简单的拼音首字母匹配逻辑，实际生产中建议使用专门的拼音列 -->
+                    AND (
+                        LEFT(c.company_name, 1) = #{letter}
+                        OR
+                        (ELT(INTERVAL(CONV(HEX(LEFT(CONVERT(c.company_name USING gbk),1)),16,10),
+                            0xB0A1,0xB0C5,0xB2C1,0xB4EE,0xB6EA,0xB7A2,0xB8C1,0xB9FE,0xBBF7,0xBFA6,0xC0AC,0xC2E8,0xC4C3,0xC5B6,0xC5BE,0xC6DA,0xC8BB,0xC8F6,0xCBFA,0xCDDA,0xCEF4,0xD1B9,0xD4D1),
+                            'A','B','C','D','E','F','G','H','J','K','L','M','N','O','P','Q','R','S','T','W','X','Y','Z') = #{letter})
+                    )
+                </otherwise>
+            </choose>
+        </if>
+        GROUP BY c.id
+        ORDER BY c.company_name ASC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countDirectory" resultType="long">
+        SELECT COUNT(DISTINCT c.id)
+        FROM bus_company c
+        <if test="type == 'supplier'">
+            INNER JOIN bus_supply s ON c.id = s.company_id AND s.is_deleted = 0
+        </if>
+        <if test="type == 'buyer'">
+            INNER JOIN bus_requirement r ON c.id = r.company_id AND r.is_deleted = 0
+        </if>
+        WHERE c.is_deleted = 0
+        <if test="letter != null and letter != ''">
+            <choose>
+                <when test="letter == '0-9'">
+                    AND LEFT(c.company_name, 1) REGEXP '^[0-9]'
+                </when>
+                <otherwise>
+                    AND (
+                        LEFT(c.company_name, 1) = #{letter}
+                        OR
+                        (ELT(INTERVAL(CONV(HEX(LEFT(CONVERT(c.company_name USING gbk),1)),16,10),
+                            0xB0A1,0xB0C5,0xB2C1,0xB4EE,0xB6EA,0xB7A2,0xB8C1,0xB9FE,0xBBF7,0xBFA6,0xC0AC,0xC2E8,0xC4C3,0xC5B6,0xC5BE,0xC6DA,0xC8BB,0xC8F6,0xCBFA,0xCDDA,0xCEF4,0xD1B9,0xD4D1),
+                            'A','B','C','D','E','F','G','H','J','K','L','M','N','O','P','Q','R','S','T','W','X','Y','Z') = #{letter})
+                    )
+                </otherwise>
+            </choose>
+        </if>
+    </select>
+
 </mapper>
 
 

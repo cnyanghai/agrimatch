@@ -47,6 +47,8 @@ export const useAuthStore = defineStore('auth', {
     me: null as MeResponse | null
   }),
   getters: {
+    // 是否已登录
+    isLoggedIn: (state) => !!state.token,
     // 是否为采购商
     isBuyer: (state) => state.me?.isBuyer === 1,
     // 是否为供应商

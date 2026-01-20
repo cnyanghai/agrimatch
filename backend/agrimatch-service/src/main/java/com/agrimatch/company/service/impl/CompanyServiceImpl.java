@@ -11,7 +11,12 @@ import com.agrimatch.company.mapper.CompanyMapper;
 import com.agrimatch.company.service.CompanyService;
 import com.agrimatch.geo.dto.GeoPoint;
 import com.agrimatch.geo.service.AmapGeocodeService;
+import com.agrimatch.requirement.dto.RequirementQuery;
+import com.agrimatch.requirement.service.RequirementService;
+import com.agrimatch.supply.dto.SupplyQuery;
+import com.agrimatch.supply.service.SupplyService;
 import com.agrimatch.user.mapper.UserMapper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -23,11 +28,16 @@ public class CompanyServiceImpl implements CompanyService {
     private final CompanyMapper companyMapper;
     private final AmapGeocodeService amapGeocodeService;
     private final UserMapper userMapper;
+    private final SupplyService supplyService;
+    private final RequirementService requirementService;
 
-    public CompanyServiceImpl(CompanyMapper companyMapper, AmapGeocodeService amapGeocodeService, UserMapper userMapper) {
+    public CompanyServiceImpl(CompanyMapper companyMapper, AmapGeocodeService amapGeocodeService, UserMapper userMapper,
+                              @Lazy SupplyService supplyService, @Lazy RequirementService requirementService) {
         this.companyMapper = companyMapper;
         this.amapGeocodeService = amapGeocodeService;
         this.userMapper = userMapper;
+        this.supplyService = supplyService;
+        this.requirementService = requirementService;
     }
 
     @Override
@@ -179,6 +189,56 @@ public class CompanyServiceImpl implements CompanyService {
         }
         int lim = (limit == null ? 20 : Math.max(1, Math.min(limit, 50)));
         return companyMapper.search(kw, lim);
+    }
+
+    @Override
+    public List<com.agrimatch.company.dto.CompanyCardResponse> getTopSuppliers(Integer limit, String region) {
+        int lim = (limit == null ? 10 : Math.max(1, Math.min(limit, 50)));
+        return companyMapper.selectTopSuppliers(lim, region);
+    }
+
+    @Override
+    public List<com.agrimatch.company.dto.CompanyCardResponse> getTopBuyers(Integer limit, String categoryName) {
+        int lim = (limit == null ? 10 : Math.max(1, Math.min(limit, 50)));
+        return companyMapper.selectTopBuyers(lim, categoryName);
+    }
+
+    @Override
+    public List<com.agrimatch.company.dto.CompanyCardResponse> getTopCompanies(String type, Integer limit) {
+        int lim = (limit == null ? 50 : Math.max(1, Math.min(limit, 100)));
+        return companyMapper.selectTopCompanies(type, lim);
+    }
+
+    @Override
+    public com.agrimatch.common.api.PageResult<com.agrimatch.company.dto.CompanyCardResponse> getDirectory(String type, String letter, int page, int size) {
+        int limit = Math.max(1, Math.min(size, 100));
+        int offset = (Math.max(1, page) - 1) * limit;
+        List<com.agrimatch.company.dto.CompanyCardResponse> list = companyMapper.selectDirectory(type, letter, offset, limit);
+        long total = companyMapper.countDirectory(type, letter);
+        return new com.agrimatch.common.api.PageResult<>(list, total, page, limit);
+    }
+
+    @Override
+    public com.agrimatch.company.dto.CompanyProfileResponse getProfile(Long id) {
+        BusCompany c = companyMapper.selectById(id);
+        if (c == null) throw new ApiException(ResultCode.NOT_FOUND);
+
+        com.agrimatch.company.dto.CompanyProfileResponse resp = new com.agrimatch.company.dto.CompanyProfileResponse();
+        resp.setCompany(toResp(c));
+
+        // 聚合供应
+        SupplyQuery sq = new SupplyQuery();
+        sq.setCompanyId(id);
+        sq.setStatus(0); // 仅发布中
+        resp.setSupplies(supplyService.list(null, sq));
+
+        // 聚合需求
+        RequirementQuery rq = new RequirementQuery();
+        rq.setCompanyId(id);
+        rq.setStatus(0); // 仅发布中
+        resp.setRequirements(requirementService.list(null, rq));
+
+        return resp;
     }
 
     private static CompanyResponse toResp(BusCompany c) {

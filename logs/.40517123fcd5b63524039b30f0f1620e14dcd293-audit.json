@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/home/cnyanghai/nongV1/logs/.40517123fcd5b63524039b30f0f1620e14dcd293-audit.json",
+    "files": [
+        {
+            "date": 1768832948384,
+            "name": "/home/cnyanghai/nongV1/logs/mcp-puppeteer-2026-01-19.log",
+            "hash": "3c8c21417de820e022f8442689220b5fb1bc90a6a903ff5e6cb1943bbc2d6f52"
+        }
+    ],
+    "hashType": "sha256"
+}

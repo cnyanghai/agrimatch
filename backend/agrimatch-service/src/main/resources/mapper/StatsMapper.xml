@@ -23,5 +23,17 @@
         WHERE is_deleted = 0
     </select>
 
+    <select id="supplierCount" resultType="long">
+        SELECT COUNT(DISTINCT company_id)
+        FROM bus_supply
+        WHERE is_deleted = 0
+    </select>
+
+    <select id="buyerCount" resultType="long">
+        SELECT COUNT(DISTINCT company_id)
+        FROM bus_requirement
+        WHERE is_deleted = 0
+    </select>
+
 </mapper>
 

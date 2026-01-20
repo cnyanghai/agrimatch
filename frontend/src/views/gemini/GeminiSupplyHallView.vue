@@ -5,7 +5,7 @@ import { requireAuth } from '../../utils/requireAuth'
 import PublicTopNav from '../../components/PublicTopNav.vue'
 import PublicFooter from '../../components/PublicFooter.vue'
 import ChatDrawer from '../../components/chat/ChatDrawer.vue'
-import { listSupplies, type SupplyResponse, type BasisQuoteResponse } from '../../api/supply'
+import { listSupplies, type SupplyResponse } from '../../api/supply'
 import { openChatConversation } from '../../api/chat'
 import { followUser, unfollowUser, checkFollowStatus } from '../../api/follow'
 import { batchGetFuturesPrices, type FuturesContractResponse } from '../../api/futures'
@@ -56,7 +56,7 @@ const followingMap = ref<Map<number, boolean>>(new Map())
 
 // 检查并加载关注状态
 async function loadFollowStatus(userIds: number[]) {
-  if (!authStore.isLoggedIn) return
+  if (!authStore.token) return
   for (const userId of userIds) {
     if (followingMap.value.has(userId)) continue
     try {
@@ -110,7 +110,7 @@ const focusIdFromRoute = computed(() => {
 const displaySupplies = computed(() => {
   // 若存在 focusId，则展示完整列表以保证可定位
   if (focusIdFromRoute.value) return supplies.value
-  // 前端分页（后端暂不支持分页参数）
+  // 前端分页
   const start = (currentPage.value - 1) * pageSize.value
   return supplies.value.slice(start, start + pageSize.value)
 })
@@ -486,7 +486,7 @@ function parseParams(paramsJson?: string): string {
               </div>
               <!-- 关注按钮 -->
               <button
-                v-if="authStore.isLoggedIn && s.userId"
+                v-if="authStore.token && s.userId"
                 class="shrink-0 text-xs px-2 py-1 rounded-full border transition-all active:scale-95"
                 :class="isFollowingUser(s.userId)
                   ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
@@ -524,7 +524,7 @@ function parseParams(paramsJson?: string): string {
                     <div class="flex flex-col">
                       <span class="text-[10px] text-gray-500 scale-90 origin-left">
                         期货 ¥{{ getFuturesPrice(bq.contractCode) || '-' }}
-                        <span v-if="futuresPriceCache[bq.contractCode] && !futuresPriceCache[bq.contractCode].isTrading" class="text-gray-400 ml-0.5">(收)</span>
+                        <span v-if="futuresPriceCache[bq.contractCode]?.isTrading === false" class="text-gray-400 ml-0.5">(收)</span>
                       </span>
                       <span class="font-bold text-[10px] -mt-0.5" :class="bq.basisPrice >= 0 ? 'text-red-500' : 'text-green-500'">
                         {{ bq.basisPrice >= 0 ? '+' : '' }}{{ bq.basisPrice }}

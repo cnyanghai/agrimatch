@@ -21,6 +21,16 @@ public interface CompanyService {
     CompanyResponse geocodeAndUpdate(Long ownerUserId, Long id);
 
     List<CompanyBriefResponse> search(String keyword, Integer limit);
+
+    List<com.agrimatch.company.dto.CompanyCardResponse> getTopSuppliers(Integer limit, String region);
+
+    List<com.agrimatch.company.dto.CompanyCardResponse> getTopBuyers(Integer limit, String categoryName);
+
+    List<com.agrimatch.company.dto.CompanyCardResponse> getTopCompanies(String type, Integer limit);
+
+    com.agrimatch.common.api.PageResult<com.agrimatch.company.dto.CompanyCardResponse> getDirectory(String type, String letter, int page, int size);
+
+    com.agrimatch.company.dto.CompanyProfileResponse getProfile(Long id);
 }
 
 

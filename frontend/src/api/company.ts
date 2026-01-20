@@ -89,4 +89,52 @@ export async function searchCompanies(keyword: string, limit = 20) {
   return data
 }
 
+export interface CompanyCardResponse {
+  id: number
+  companyName: string
+  province?: string
+  city?: string
+  count: number
+  categoryNames?: string[]
+}
+
+export async function listTopSuppliers(limit?: number, region?: string) {
+  const { data } = await http.get<Result<CompanyCardResponse[]>>('/api/companies/suppliers', {
+    params: { limit, region }
+  })
+  return data
+}
+
+export async function listTopBuyers(limit?: number, categoryName?: string) {
+  const { data } = await http.get<Result<CompanyCardResponse[]>>('/api/companies/buyers', {
+    params: { limit, categoryName }
+  })
+  return data
+}
+
+export async function listTopCompanies(type: 'supplier' | 'buyer', limit = 50) {
+  const { data } = await http.get<Result<CompanyCardResponse[]>>('/api/companies/top', {
+    params: { type, limit }
+  })
+  return data
+}
+
+export async function getCompanyDirectory(type: 'supplier' | 'buyer', letter?: string, page = 1, size = 20) {
+  const { data } = await http.get<Result<{ list: CompanyCardResponse[], total: number }>>('/api/companies/directory', {
+    params: { type, letter, page, size }
+  })
+  return data
+}
+
+export interface CompanyProfileResponse {
+  company: CompanyResponse
+  supplies: any[] // 简化，实际应为 SupplyResponse
+  requirements: any[] // 简化，实际应为 RequirementResponse
+}
+
+export async function getCompanyProfile(id: number | string) {
+  const { data } = await http.get<Result<CompanyProfileResponse>>(`/api/companies/${id}/profile`)
+  return data
+}
+
 

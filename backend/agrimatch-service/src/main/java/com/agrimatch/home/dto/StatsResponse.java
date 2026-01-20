@@ -4,6 +4,8 @@ public class StatsResponse {
     private Long userCount;
     private Long requirementCount;
     private Long supplyCount;
+    private Long supplierCount;
+    private Long buyerCount;
 
     public Long getUserCount() {
         return userCount;
@@ -27,6 +29,22 @@ public class StatsResponse {
 
     public void setSupplyCount(Long supplyCount) {
         this.supplyCount = supplyCount;
+    }
+
+    public Long getSupplierCount() {
+        return supplierCount;
+    }
+
+    public void setSupplierCount(Long supplierCount) {
+        this.supplierCount = supplierCount;
+    }
+
+    public Long getBuyerCount() {
+        return buyerCount;
+    }
+
+    public void setBuyerCount(Long buyerCount) {
+        this.buyerCount = buyerCount;
     }
 }
 

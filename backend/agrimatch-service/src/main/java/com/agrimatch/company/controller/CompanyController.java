@@ -61,6 +61,38 @@ public class CompanyController {
         return Result.success(companyService.search(keyword, limit));
     }
 
+    @GetMapping("/suppliers")
+    public Result<List<com.agrimatch.company.dto.CompanyCardResponse>> suppliers(@RequestParam(value = "limit", required = false) Integer limit,
+                                                                               @RequestParam(value = "region", required = false) String region) {
+        return Result.success(companyService.getTopSuppliers(limit, region));
+    }
+
+    @GetMapping("/buyers")
+    public Result<List<com.agrimatch.company.dto.CompanyCardResponse>> buyers(@RequestParam(value = "limit", required = false) Integer limit,
+                                                                            @RequestParam(value = "categoryName", required = false) String categoryName) {
+        return Result.success(companyService.getTopBuyers(limit, categoryName));
+    }
+
+    @GetMapping("/top")
+    public Result<List<com.agrimatch.company.dto.CompanyCardResponse>> top(@RequestParam("type") String type,
+                                                                         @RequestParam(value = "limit", required = false) Integer limit) {
+        return Result.success(companyService.getTopCompanies(type, limit));
+    }
+
+    @GetMapping("/directory")
+    public Result<com.agrimatch.common.api.PageResult<com.agrimatch.company.dto.CompanyCardResponse>> directory(
+            @RequestParam("type") String type,
+            @RequestParam(value = "letter", required = false) String letter,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size) {
+        return Result.success(companyService.getDirectory(type, letter, page, size));
+    }
+
+    @GetMapping("/{id}/profile")
+    public Result<com.agrimatch.company.dto.CompanyProfileResponse> profile(@PathVariable("id") Long id) {
+        return Result.success(companyService.getProfile(id));
+    }
+
     @PutMapping("/{id}")
     public Result<Void> update(Authentication authentication,
                                @PathVariable("id") @NotNull Long id,

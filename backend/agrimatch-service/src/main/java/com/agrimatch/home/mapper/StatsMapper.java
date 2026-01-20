@@ -6,6 +6,10 @@ public interface StatsMapper {
     Long requirementCount();
 
     Long supplyCount();
+
+    Long supplierCount();
+
+    Long buyerCount();
 }
 
 
