@@ -3,16 +3,13 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
 import { getDashboard, type DashboardResponse } from '../api/dashboard'
-import { ArrowRight, ShoppingCart, Box, ChatDotRound, Location, DocumentChecked, Bell, Clock } from '@element-plus/icons-vue'
+import { ArrowRight, ShoppingCart, Box, ChatDotRound, Location, DocumentChecked, Bell, Clock, HomeFilled, DocumentAdd, Star, User, Coin } from '@element-plus/icons-vue'
 import ProfileGuideCard from '../components/ProfileGuideCard.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
 const loading = ref(false)
 const dashboard = ref<DashboardResponse | null>(null)
-
-const isBuyer = computed(() => auth.me?.isBuyer === 1)
-const isSeller = computed(() => auth.me?.isSeller === 1)
 
 // 获取问候语
 const greeting = computed(() => {
@@ -82,33 +79,75 @@ const totalPending = computed(() => {
          (dashboard.value.pendingMilestoneCount || 0)
 })
 
-// 快捷操作配置 - 根据角色显示图标颜色
-const quickActions = computed(() => {
-  const actions = []
-  
-  // 采购商操作
-  if (isBuyer.value) {
-    actions.push(
-      { title: '发布采购', desc: '快速发布采购需求', icon: ShoppingCart, path: '/requirements', color: 'orange' },
-      { title: '发现供应', desc: '查找优质供应商', icon: Box, path: '/supply-browse', color: 'brand' }
-    )
-  }
-
-  // 供应商操作
-  if (isSeller.value) {
-    actions.push(
-      { title: '发布供应', desc: '展示您的产品', icon: Box, path: '/supply', color: 'brand' },
-      { title: '发现采购', desc: '查找采购商', icon: ShoppingCart, path: '/requirement-browse', color: 'orange' }
-    )
-  }
-
-  // 通用操作
-  actions.push(
-    { title: '地图找商', desc: '附近合作伙伴地图', icon: Location, path: '/map', color: 'slate' },
-    { title: '查看消息', desc: '在线沟通洽谈', icon: ChatDotRound, path: '/chat', color: 'brand' }
-  )
-  
-  return actions.slice(0, 4) // 限制显示 4 项，保持排版整齐
+// 8 大核心模块配置
+const consoleModules = computed(() => {
+  const modules = [
+    {
+      title: '控制台首页',
+      desc: '工作台概览与数据统计',
+      icon: HomeFilled,
+      path: '/console',
+      color: 'brand',
+      badge: null
+    },
+    {
+      title: '发布信息',
+      desc: '发布供应或采购需求',
+      icon: DocumentAdd,
+      path: '/console/publish',
+      color: 'emerald',
+      badge: null
+    },
+    {
+      title: '关注列表',
+      desc: '追踪关注商户动态',
+      icon: Star,
+      path: '/console/following',
+      color: 'amber',
+      badge: dashboard.value?.followingCount || null
+    },
+    {
+      title: '地图找商',
+      desc: '附近合作伙伴地图',
+      icon: Location,
+      path: '/map',
+      color: 'slate',
+      badge: null
+    },
+    {
+      title: '聊天议价',
+      desc: '在线沟通洽谈',
+      icon: ChatDotRound,
+      path: '/chat',
+      color: 'blue',
+      badge: dashboard.value?.unreadMessageCount || null
+    },
+    {
+      title: '合同管理',
+      desc: '电子合同签署与管理',
+      icon: DocumentChecked,
+      path: '/contracts',
+      color: 'purple',
+      badge: dashboard.value?.pendingContractCount || null
+    },
+    {
+      title: '用户资料',
+      desc: '个人信息与公司资料',
+      icon: User,
+      path: '/profile',
+      color: 'gray',
+      badge: null
+    },
+    {
+      title: '会员积分',
+      desc: '积分充值与兑换商城',
+      icon: Coin,
+      path: '/points',
+      color: 'orange',
+      badge: null
+    }
+  ]
+  return modules
 })
 
 // 获取图标容器的样式类
@@ -184,16 +223,10 @@ onMounted(() => {
                   您有 <span class="text-amber-600 font-bold">{{ totalPending }}</span> 项待处理事务
                 </template>
                 <template v-else>
-                  {{ isBuyer ? '今日有新供应信息等待您查看' : '今日有新采购需求等待您报价' }}
+                  欢迎使用 AgriMatch 平台，开始您的业务之旅
                 </template>
               </p>
             </div>
-            <span
-              class="text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider"
-              :class="isBuyer ? 'bg-brand-100 text-brand-700 border border-brand-200' : 'bg-brand-100 text-brand-700 border border-brand-200'"
-            >
-              {{ isBuyer ? '采购商' : '供应商' }}
-            </span>
           </div>
         </section>
 
@@ -240,7 +273,7 @@ onMounted(() => {
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover-card animate-stagger-in">
           <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">
-            {{ isBuyer ? '我的采购' : '我的供应' }}
+            我的发布
           </p>
           <div class="flex items-end gap-2">
             <span class="text-2xl font-black text-gray-800 count-up">{{ dashboard?.myActiveListingCount ?? 0 }}</span>
@@ -270,27 +303,47 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- 快捷操作 -->
+      <!-- 核心功能模块矩阵 (Bento Grid) -->
       <section>
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-bold text-gray-800">快捷操作</h3>
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h3 class="text-xl font-bold text-gray-900">核心功能</h3>
+            <p class="text-sm text-gray-500 mt-1">快速访问平台核心功能模块</p>
+          </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <button
-            v-for="(action, index) in quickActions"
-            :key="action.title"
-            class="flex items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover-card group cursor-pointer animate-stagger-in"
-            :style="{ animationDelay: `${(index + 4) * 50}ms` }"
-            @click="go(action.path)"
+            v-for="(module, index) in consoleModules"
+            :key="module.title"
+            class="group relative bg-white p-6 rounded-2xl border border-gray-100 hover:shadow-lg hover:border-emerald-200 hover:-translate-y-1 transition-all cursor-pointer text-left animate-stagger-in"
+            :style="{ animationDelay: `${index * 50}ms` }"
+            @click="go(module.path)"
           >
-            <div :class="`w-12 h-12 rounded-xl flex items-center justify-center transition-all hover-rotate ${getIconClass(action.color)}`">
-              <el-icon :size="24"><component :is="action.icon" /></el-icon>
+            <!-- 图标容器 -->
+            <div :class="`w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-all group-hover:scale-110 ${getIconClass(module.color)}`">
+              <el-icon :size="28"><component :is="module.icon" /></el-icon>
             </div>
-            <div class="text-left flex-1">
-              <p class="font-bold text-gray-800 group-hover:text-brand-600 transition-colors">{{ action.title }}</p>
-              <p class="text-[10px] text-gray-400 font-medium">{{ action.desc }}</p>
+            
+            <!-- 标题与描述 -->
+            <div class="mb-2">
+              <h4 class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors mb-1">
+                {{ module.title }}
+              </h4>
+              <p class="text-xs text-gray-500 leading-relaxed">
+                {{ module.desc }}
+              </p>
             </div>
-            <el-icon class="text-gray-300 group-hover:text-brand-500 transition-colors group-hover:translate-x-1"><ArrowRight /></el-icon>
+            
+            <!-- 角标 -->
+            <div v-if="module.badge" class="absolute top-4 right-4 w-6 h-6 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+              {{ module.badge > 99 ? '99+' : module.badge }}
+            </div>
+            
+            <!-- 箭头指示 -->
+            <div class="flex items-center gap-1 text-gray-400 group-hover:text-emerald-500 transition-colors mt-4">
+              <span class="text-xs font-bold">进入</span>
+              <el-icon :size="14"><ArrowRight /></el-icon>
+            </div>
           </button>
         </div>
       </section>
@@ -305,15 +358,15 @@ onMounted(() => {
         <div class="flex justify-center gap-4">
           <button
             class="px-6 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-bold shadow-md shadow-brand-100 hover:bg-brand-700 transition-all "
-            @click="go(isBuyer ? '/supply-browse' : '/requirement-browse')"
+            @click="go('/console/publish')"
           >
-            {{ isBuyer ? '浏览供应' : '浏览采购' }}
+            发布信息
           </button>
           <button 
             class="px-6 py-2.5 bg-white text-gray-700 rounded-xl text-sm font-bold border border-gray-200 hover:bg-gray-50 transition-all "
-            @click="go(isBuyer ? '/requirements' : '/supply')"
+            @click="go('/hall/supply')"
           >
-            {{ isBuyer ? '发布采购' : '发布供应' }}
+            浏览市场
           </button>
         </div>
       </section>

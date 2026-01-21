@@ -5,9 +5,10 @@ import { useAuthStore } from './store/auth'
 import { useUiStore } from './store/ui'
 import AuthDialog from './components/AuthDialog.vue'
 import {
-  ShoppingCart, Box, HomeFilled, Management, Search,
+  HomeFilled, Management, Search,
   MapLocation, DocumentChecked, ChatDotRound, Postcard,
-  Coin, User, SwitchButton, ArrowDown, Check, Plus
+  Coin, User, SwitchButton, ArrowDown, Check, Plus,
+  Star, DocumentAdd
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -23,8 +24,8 @@ const profileGuideChecked = ref(false)
 // 检查用户是否需要完善资料
 const needCompleteProfile = computed(() => {
   if (!auth.me) return false
-  // 未设置昵称或未设置身份
-  return !auth.me.nickName || (auth.me.isBuyer !== 1 && auth.me.isSeller !== 1)
+  // 未设置昵称
+  return !auth.me.nickName
 })
 
 // 监听登录状态，在登录后检查是否需要完善资料
@@ -46,16 +47,6 @@ function goToProfile() {
 function skipProfileGuide() {
   showProfileGuide.value = false
 }
-
-// 用户身份
-const isBuyer = computed(() => auth.me?.isBuyer === 1)
-const isSeller = computed(() => auth.me?.isSeller === 1)
-const userTypeLabel = computed(() => {
-  if (isBuyer.value) return '采购商'
-  if (isSeller.value) return '供应商'
-  return '未设置'
-})
-const userTypeColor = computed(() => isBuyer.value ? 'success' : 'warning')
 
 function go(path: string) {
   router.push(path)
@@ -96,61 +87,44 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- 用户身份标识 -->
+      <!-- 用户信息 -->
       <div class="px-5 py-3 border-b border-neutral-100">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white bg-brand-600">
-            <ShoppingCart v-if="isBuyer" class="h-4 w-4" />
-            <Box v-else class="h-4 w-4" />
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white bg-brand-600 font-bold text-sm">
+            {{ (auth.me?.nickName || auth.me?.userName || 'U')[0].toUpperCase() }}
           </div>
           <div>
-            <div class="font-medium text-sm text-neutral-800">{{ auth.me?.nickName || '未设置昵称' }}</div>
-            <div class="text-xs text-brand-700">{{ userTypeLabel }}</div>
+            <div class="font-medium text-sm text-neutral-800">{{ auth.me?.nickName || auth.me?.userName || '未设置昵称' }}</div>
+            <div class="text-xs text-neutral-500">平台用户</div>
           </div>
         </div>
       </div>
 
-      <!-- 核心功能（精简为5项） -->
+      <!-- 核心功能（8大模块） -->
       <div class="px-3 py-2 flex-1">
         <nav class="space-y-1">
-          <!-- 1. 首页 -->
+          <!-- 1. 控制台首页 -->
           <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
                   :class="route.path==='/console' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/console')">
             <HomeFilled class="h-5 w-5" />
-            首页
+            控制台首页
           </button>
 
-          <!-- 2. 我的业务（采购商：采购管理 / 供应商：供应管理） -->
-          <button v-if="isBuyer"
-                  class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
-                  :class="route.path==='/requirements' || route.path==='/requirements/published' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
-                  @click="go('/requirements')">
-            <Management class="h-5 w-5" />
-            我的采购
-          </button>
-          <button v-if="isSeller"
-                  class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
-                  :class="route.path==='/supply' || route.path==='/supply/published' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
-                  @click="go('/supply')">
-            <Box class="h-5 w-5" />
-            我的供应
+          <!-- 2. 发布信息 -->
+          <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
+                  :class="route.path==='/console/publish' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
+                  @click="go('/console/publish')">
+            <DocumentAdd class="h-5 w-5" />
+            发布信息
           </button>
 
-          <!-- 3. 发现市场（采购商看供应 / 供应商看采购） -->
-          <button v-if="isBuyer"
-                  class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
-                  :class="route.path==='/supply-browse' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
-                  @click="go('/supply-browse')">
-            <Search class="h-5 w-5" />
-            发现供应
-          </button>
-          <button v-if="isSeller"
-                  class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
-                  :class="route.path==='/requirement-browse' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
-                  @click="go('/requirement-browse')">
-            <Search class="h-5 w-5" />
-            发现采购
+          <!-- 3. 关注列表 -->
+          <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
+                  :class="route.path==='/console/following' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
+                  @click="go('/console/following')">
+            <Star class="h-5 w-5" />
+            关注列表
           </button>
 
           <!-- 4. 地图找商 -->
@@ -161,7 +135,15 @@ onMounted(async () => {
             地图找商
           </button>
 
-          <!-- 5. 合同管理 -->
+          <!-- 5. 聊天议价 -->
+          <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
+                  :class="route.path==='/chat' || route.path==='/notify' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
+                  @click="go('/chat')">
+            <ChatDotRound class="h-5 w-5" />
+            聊天议价
+          </button>
+
+          <!-- 6. 合同管理 -->
           <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
                   :class="route.path.startsWith('/contracts') ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/contracts')">
@@ -169,12 +151,20 @@ onMounted(async () => {
             合同管理
           </button>
 
-          <!-- 6. 消息（合并商务聊天+通知） -->
+          <!-- 7. 用户资料 -->
           <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
-                  :class="route.path==='/chat' || route.path==='/notify' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
-                  @click="go('/chat')">
-            <ChatDotRound class="h-5 w-5" />
-            消息
+                  :class="route.path==='/profile' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
+                  @click="go('/profile')">
+            <User class="h-5 w-5" />
+            用户资料
+          </button>
+
+          <!-- 8. 会员积分 -->
+          <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
+                  :class="route.path.startsWith('/points') ? 'bg-brand-50 text-brand-700 font-medium' : ''"
+                  @click="go('/points')">
+            <Coin class="h-5 w-5" />
+            会员积分
           </button>
         </nav>
       </div>
@@ -203,11 +193,6 @@ onMounted(async () => {
           </div>
 
           <div class="flex items-center gap-3">
-            <!-- 用户身份标签 -->
-            <el-tag :type="userTypeColor" effect="light" class="!rounded-lg">
-              {{ userTypeLabel }}
-            </el-tag>
-            
             <!-- 用户下拉菜单（包含个人中心、积分等） -->
             <el-dropdown>
               <el-button class="!rounded-lg">
@@ -270,15 +255,6 @@ onMounted(async () => {
               <Plus v-else class="w-4 h-4" />
             </div>
             <span :class="auth.me?.nickName ? 'text-gray-800' : 'text-gray-500'">设置昵称</span>
-          </div>
-          
-          <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center"
-                 :class="(auth.me?.isBuyer === 1 || auth.me?.isSeller === 1) ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-400'">
-              <Check v-if="auth.me?.isBuyer === 1 || auth.me?.isSeller === 1" class="w-4 h-4" />
-              <Plus v-else class="w-4 h-4" />
-            </div>
-            <span :class="(auth.me?.isBuyer === 1 || auth.me?.isSeller === 1) ? 'text-gray-800' : 'text-gray-500'">选择身份类型</span>
           </div>
         </div>
       </div>

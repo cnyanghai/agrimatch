@@ -5,7 +5,7 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { useAuthStore } from '../store/auth'
 import { updateMe, type UserUpdateRequest } from '../api/user'
 import { getMyCompany, createCompany, updateCompany, type CompanyResponse, type CompanyCreateRequest } from '../api/company'
-import { User, Building2, Lock, Check, Upload, ShoppingCart, Package, AlertTriangle, RefreshCw, Truck, ChevronRight, FileText, X, ZoomIn } from 'lucide-vue-next'
+import { User, Building2, Lock, Check, Upload, AlertTriangle, RefreshCw, Truck, ChevronRight, FileText, X, ZoomIn } from 'lucide-vue-next'
 import { BaseButton } from '../components/ui'
 import { regionData, codeToText } from 'element-china-area-data'
 import { uploadImage } from '../api/file'
@@ -13,10 +13,6 @@ import { uploadImage } from '../api/file'
 const auth = useAuthStore()
 const loading = ref(false)
 const activeTab = ref('user')
-
-// 用户身份
-const isBuyer = computed(() => auth.me?.isBuyer === 1)
-const isSeller = computed(() => auth.me?.isSeller === 1)
 
 // 公司数据
 const company = ref<CompanyResponse | null>(null)
@@ -247,23 +243,6 @@ async function saveCompanyInfo() {
   }
 }
 
-async function changeUserType(type: 'buyer' | 'seller') {
-  try {
-    await ElMessageBox.confirm(
-      `确定要切换为${type === 'buyer' ? '采购商' : '供应商'}身份吗？`,
-      '切换身份',
-      { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
-    )
-    loading.value = true
-    await auth.updateUserType(type)
-    ElMessage.success('身份切换成功')
-  } catch (e: any) {
-    if (e !== 'cancel') ElMessage.error(e?.message ?? '切换失败')
-  } finally {
-    loading.value = false
-  }
-}
-
 async function changePassword() {
   if (!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
     ElMessage.warning('请填写完整信息')
@@ -289,12 +268,6 @@ const genderOptions = [{ label: '男', value: 1 }, { label: '女', value: 2 }]
 const currentName = computed(() => auth.me?.nickName || auth.me?.userName || '用户')
 const currentPhone = computed(() => auth.me?.phonenumber || '未绑定手机号')
 const currentPosition = computed(() => auth.me?.position || '暂无职位')
-const currentRoleLabel = computed(() => (isBuyer.value ? '采购商' : isSeller.value ? '供应商' : '未设置'))
-const rolePillClass = computed(() => {
-  if (isBuyer.value) return 'bg-blue-50 text-blue-600 border-blue-100'
-  if (isSeller.value) return 'bg-brand-50 text-brand-600 border-brand-100'
-  return 'bg-gray-100 text-gray-600 border-gray-100'
-})
 const avatarText = computed(() => {
   const n = currentName.value.trim()
   const ch = (n[0] ?? 'U').toUpperCase()
@@ -317,7 +290,7 @@ const tabs = [
     <!-- 页面标题 -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">个人中心</h1>
+        <h1 class="text-2xl font-bold text-gray-900">用户资料</h1>
         <p class="text-sm text-gray-500 mt-1">管理账户信息和公司资料</p>
       </div>
       <BaseButton type="secondary" size="sm" :loading="loading" @click="loadUserData(); loadCompanyData()">
@@ -344,9 +317,6 @@ const tabs = [
           <div>
             <div class="flex items-center gap-2 flex-wrap">
               <h2 class="text-lg font-bold text-gray-900">{{ currentName }}</h2>
-              <span class="px-2 py-0.5 rounded-full text-xs font-bold border" :class="rolePillClass">
-                {{ currentRoleLabel }}
-              </span>
               <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-gray-50 text-gray-500 border border-gray-200">
                 ID: {{ auth.me?.userId ?? '-' }}
               </span>
@@ -461,52 +431,6 @@ const tabs = [
             class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
           ></textarea>
           <p class="text-xs text-gray-400 mt-1 text-right">{{ userForm.bio?.length || 0 }}/500</p>
-        </div>
-
-        <!-- 身份切换 -->
-        <div class="pt-6 border-t border-gray-200">
-          <h4 class="font-bold text-gray-900 mb-4">用户身份</h4>
-          <div class="grid grid-cols-2 gap-4 max-w-md">
-            <button
-              :class="[
-                'relative p-4 rounded-xl border-2 transition-all text-center',
-                isBuyer 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-200 hover:border-blue-200'
-              ]"
-              @click="!isBuyer && changeUserType('buyer')"
-            >
-              <div class="w-12 h-12 rounded-xl mx-auto mb-2 flex items-center justify-center"
-                :class="isBuyer ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500'"
-              >
-                <ShoppingCart class="w-6 h-6" />
-              </div>
-              <div class="font-bold" :class="isBuyer ? 'text-blue-600' : 'text-gray-700'">采购商</div>
-              <div v-if="isBuyer" class="absolute top-2 right-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                <Check class="w-3 h-3 text-white" />
-              </div>
-            </button>
-
-            <button
-              :class="[
-                'relative p-4 rounded-xl border-2 transition-all text-center',
-                isSeller 
-                  ? 'border-brand-500 bg-brand-50' 
-                  : 'border-gray-200 hover:border-brand-200'
-              ]"
-              @click="!isSeller && changeUserType('seller')"
-            >
-              <div class="w-12 h-12 rounded-xl mx-auto mb-2 flex items-center justify-center"
-                :class="isSeller ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-500'"
-              >
-                <Package class="w-6 h-6" />
-              </div>
-              <div class="font-bold" :class="isSeller ? 'text-brand-600' : 'text-gray-700'">供应商</div>
-              <div v-if="isSeller" class="absolute top-2 right-2 w-5 h-5 bg-brand-500 rounded-full flex items-center justify-center">
-                <Check class="w-3 h-3 text-white" />
-              </div>
-            </button>
-          </div>
         </div>
 
         <!-- 保存按钮 -->

@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Coins, Wallet, RefreshCw, ArrowUpCircle, ArrowDownCircle, Clock, TrendingUp, TrendingDown, Minus, CreditCard, Smartphone, ShieldCheck, Copy, Check, X } from 'lucide-vue-next'
+import { Coins, Wallet, RefreshCw, ArrowUpCircle, ArrowDownCircle, Clock, TrendingUp, TrendingDown, Minus, CreditCard, Smartphone, ShieldCheck, Copy, Check, X, Crown, ShoppingBag } from 'lucide-vue-next'
 import { getPointsMe, listPointsTx, rechargePoints, redeemPoints, type PointsTxResponse } from '../api/points'
 import { BaseButton, EmptyState, Skeleton } from '../components/ui'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const loading = ref(false)
 const creating = ref(false)
@@ -279,9 +282,18 @@ onUnmounted(() => {
   <div class="space-y-6">
     <!-- 页面标题 -->
     <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">我的积分</h1>
-        <p class="text-sm text-gray-500 mt-1">管理您的积分余额、充值与兑换</p>
+      <div class="flex items-center gap-3">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <h1 class="text-2xl font-bold text-gray-900">会员积分</h1>
+            <!-- 认证会员标识 -->
+            <div class="flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm">
+              <Crown class="w-3 h-3" />
+              <span>认证会员</span>
+            </div>
+          </div>
+          <p class="text-sm text-gray-500">管理您的积分余额、充值与兑换</p>
+        </div>
       </div>
       <div class="flex items-center gap-3">
         <span class="px-3 py-1.5 bg-brand-50 text-brand-700 text-xs font-bold rounded-full border border-brand-100">
@@ -291,6 +303,32 @@ onUnmounted(() => {
           <RefreshCw class="w-4 h-4" />
           刷新
         </BaseButton>
+      </div>
+    </div>
+
+    <!-- 会员权益说明卡片 -->
+    <div class="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-xl border border-amber-200 p-5">
+      <div class="flex items-start gap-4">
+        <div class="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+          <ShieldCheck class="w-6 h-6 text-white" />
+        </div>
+        <div class="flex-1">
+          <h3 class="font-bold text-gray-900 mb-2">认证会员权益</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+            <div class="flex items-center gap-2 text-gray-700">
+              <Check class="w-4 h-4 text-amber-600" />
+              <span>合同保障优先</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-700">
+              <Check class="w-4 h-4 text-amber-600" />
+              <span>平台推荐优先</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-700">
+              <Check class="w-4 h-4 text-amber-600" />
+              <span>专属客服支持</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -331,6 +369,26 @@ onUnmounted(() => {
           <div class="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center">
             <Wallet class="w-7 h-7 text-white" />
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 积分商城入口 -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-all cursor-pointer group"
+         @click="router.push('/points/mall')">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <ShoppingBag class="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <h3 class="font-bold text-gray-900 group-hover:text-orange-600 transition-colors mb-1">积分商城</h3>
+            <p class="text-sm text-gray-500">使用积分兑换精美商品</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 text-gray-400 group-hover:text-orange-500 transition-colors">
+          <span class="text-sm font-bold">进入商城</span>
+          <ArrowRight class="w-4 h-4" />
         </div>
       </div>
     </div>

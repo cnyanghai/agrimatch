@@ -19,8 +19,12 @@ const router = createRouter({
       meta: { public: true, minimal: true, title: '农牧原料分类目录 - AgriMatch' }
     },
 
-    { path: '/console', name: 'console', component: () => import('../views/DashboardView.vue'), meta: { title: '工作台 - AgriMatch' } },
-    { path: '/profile', name: 'profile', component: () => import('../views/AccountSettingsView.vue'), meta: { title: '个人中心 - AgriMatch' } },
+    { path: '/console', name: 'console', component: () => import('../views/DashboardView.vue'), meta: { title: '控制台首页 - AgriMatch' } },
+    { path: '/console/publish', name: 'publish-selection', component: () => import('../views/PublishSelectionView.vue'), meta: { title: '发布信息 - AgriMatch' } },
+    { path: '/console/following', name: 'following-list', component: () => import('../views/FollowingListView.vue'), meta: { title: '关注列表 - AgriMatch' } },
+    { path: '/profile', name: 'profile', component: () => import('../views/AccountSettingsView.vue'), meta: { title: '用户资料 - AgriMatch' } },
+    { path: '/points', name: 'points', component: () => import('../views/UserPointsView.vue'), meta: { title: '会员积分 - AgriMatch' } },
+    { path: '/points/mall', name: 'points-mall', component: () => import('../views/PointsMallView.vue'), meta: { title: '积分商城 - AgriMatch' } },
     { path: '/requirements', name: 'requirements', component: () => import('../views/MyPurchaseManageView.vue'), meta: { title: '我的采购管理 - AgriMatch' } },
     { path: '/requirements/published', name: 'requirements-published', component: () => import('../views/MyPurchaseListView.vue'), meta: { title: '已发布的采购 - AgriMatch' } },
     { path: '/requirement-browse', name: 'requirement-browse', component: () => import('../views/MarketPurchaseBrowseView.vue'), meta: { title: '市场采购浏览 - AgriMatch' } },
@@ -31,7 +35,6 @@ const router = createRouter({
     { path: '/contracts', name: 'contracts', component: () => import('../views/ContractListView.vue'), meta: { title: '合同管理 - AgriMatch' } },
     { path: '/contracts/:id', name: 'contract-detail', component: () => import('../views/ContractDetailView.vue'), meta: { title: '合同详情 - AgriMatch' } },
     { path: '/posts', name: 'posts', component: () => import('../views/CommunityForumView.vue'), meta: { title: '文章话题 - AgriMatch' } },
-    { path: '/points', name: 'points', component: () => import('../views/UserPointsView.vue'), meta: { title: '我的积分 - AgriMatch' } },
     { path: '/notify', name: 'notify', component: () => import('../views/NotificationView.vue'), meta: { title: '消息通知 - AgriMatch' } },
     { path: '/chat', name: 'chat', component: () => import('../views/BusinessChatView.vue'), meta: { title: '即时通讯 - AgriMatch' } },
     { path: '/vehicles', name: 'vehicles', component: () => import('../views/LogisticsVehicleView.vue'), meta: { title: '物流车辆管理 - AgriMatch' } },
