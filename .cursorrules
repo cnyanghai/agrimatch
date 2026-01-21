@@ -4,6 +4,18 @@
 
 ---
 
+## 📚 相关文档
+
+| 文件 | 说明 | 目标受众 |
+|------|------|---------|
+| `.cursorrules` | 核心开发规范（本文件） | 开发者 + AI |
+| `PROJECT_AI_GUIDE.md` | AI 专用开发指南（思维方法 + 工作流程） | AI Agent |
+| `QUICK_REFERENCE.md` | 快速参考（命令速查 + 常用模式） | 所有 |
+
+> **AI Agent 必读**：首先阅读 [PROJECT_AI_GUIDE.md](file:///home/cnyanghai/nongV1/PROJECT_AI_GUIDE.md) 了解思维方法和工作流程，然后参考本文件的具体规范。
+
+---
+
 # 第一部分：产品设计哲学（乔布斯原则）
 
 ## 核心理念

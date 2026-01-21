@@ -140,17 +140,17 @@ onMounted(async () => {
                       <div class="grid grid-cols-3 gap-x-8 gap-y-10">
                         <div v-for="group in buildGroups(activeCategory)" :key="group.title" class="space-y-4">
                           <div 
-                            class="text-sm font-black text-gray-900 cursor-pointer hover:text-brand-600 flex items-center gap-1 group/title" 
+                            class="text-xs font-black text-gray-900 cursor-pointer hover:text-brand-600 flex items-center gap-1 group/title" 
                             @click="go('/hall/supply', { categoryId: group.titleNode.id })"
                           >
                             {{ group.title }}
                             <ChevronDown :size="10" class="-rotate-90 text-gray-300 group-hover/title:text-brand-500 opacity-0 group-hover/title:opacity-100 transition-all" />
                           </div>
-                          <div class="flex flex-wrap gap-x-3 gap-y-2">
+                          <div class="flex flex-wrap gap-x-1.5 gap-y-1">
                             <button 
                               v-for="item in group.items" 
                               :key="item.id"
-                              class="text-[11px] text-gray-500 hover:text-brand-600 hover:bg-brand-50 px-2 py-1 rounded-md transition-all border border-transparent hover:border-brand-100" 
+                              class="text-xs text-gray-500 hover:text-brand-600 hover:bg-brand-50 px-2 py-1 rounded-md transition-all border border-transparent hover:border-brand-100" 
                               @click="go('/hall/supply', { categoryId: item.id })"
                             >
                               {{ item.name }}
