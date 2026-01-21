@@ -190,12 +190,14 @@ function formatTime(timeStr?: string): string {
 
 // 获取用户头像文字
 function getAvatarText(user: FollowedUser): string {
-  return (user.nickName || user.userName || '?')[0]
+  const name = user.nickName || user.userName || '?'
+  return name[0] || '?'
 }
 
 // 获取需求发布者头像
 function getRequirementAvatar(r: RequirementResponse): string {
-  return (r.nickName || r.companyName || '?')[0]
+  const name = r.nickName || r.companyName || '?'
+  return name[0] || '?'
 }
 
 onMounted(() => {

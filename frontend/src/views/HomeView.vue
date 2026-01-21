@@ -7,17 +7,15 @@ import { getPlatformStats, type StatsResponse } from '../api/stats'
 import { listTopCompanies, type CompanyCardResponse } from '../api/company'
 import PublicTopNav from '../components/PublicTopNav.vue'
 import PublicFooter from '../components/PublicFooter.vue'
-import { 
-  MapPin, 
-  ArrowRight, 
-  Search, 
-  TrendingUp, 
-  Package, 
-  Truck, 
-  ShoppingBag, 
-  Gift, 
-  MessageCircle, 
-  FileText,
+import {
+  MapPin,
+  Search,
+  TrendingUp,
+  Package,
+  Truck,
+  ShoppingBag,
+  Gift,
+  MessageCircle,
   Wheat,
   Leaf,
   Droplets,

@@ -34,6 +34,7 @@ type UiMessage = {
   payloadJson?: string
   time?: string
   status?: 'pending' | 'sent'
+  quoteStatus?: 'OFFERED' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED' | string
 }
 
 const loading = ref(false)
@@ -213,7 +214,7 @@ function getQuoteDisplayFields(payloadJson?: string) {
   Object.entries(fields)
     .filter(([k, v]) => v && QUOTE_LABEL_MAP[k])
     .forEach(([k, v]) => {
-      display.push({ label: QUOTE_LABEL_MAP[k], value: v })
+      display.push({ label: QUOTE_LABEL_MAP[k]!, value: v })
     })
 
   // 动态字段
@@ -423,7 +424,7 @@ onBeforeUnmount(() => {
         <template v-if="conversationId">
           <div v-for="(m, idx) in messages" :key="m.id" class="flex flex-col">
             <!-- 简化时间显示 -->
-            <div v-if="idx === 0 || m.time !== messages[idx-1].time" class="self-center my-2">
+            <div v-if="idx === 0 || m.time !== messages[idx-1]?.time" class="self-center my-2">
               <span class="text-[10px] text-gray-400">{{ m.time }}</span>
             </div>
 

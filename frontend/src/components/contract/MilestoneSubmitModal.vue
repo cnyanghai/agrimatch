@@ -31,7 +31,7 @@ const form = ref<{
   evidenceUrls: string[]
   remark: string
 }>({
-  actualDate: new Date().toISOString().split('T')[0],
+  actualDate: new Date().toISOString().split('T')[0] || '',
   evidenceUrls: [],
   remark: ''
 })
@@ -52,8 +52,8 @@ async function handleFileChange(event: Event) {
   try {
     for (const file of Array.from(files)) {
       const res = await uploadImage(file, () => {})
-      if (res.code === 0 && res.data?.url) {
-        form.value.evidenceUrls.push(res.data.url)
+      if (res.code === 0 && res.data?.fileUrl) {
+        form.value.evidenceUrls.push(res.data.fileUrl)
       }
     }
     ElMessage.success('上传成功')
@@ -76,7 +76,7 @@ function removeEvidence(index: number) {
 // 重置表单
 function resetForm() {
   form.value = {
-    actualDate: new Date().toISOString().split('T')[0],
+    actualDate: new Date().toISOString().split('T')[0] || '',
     evidenceUrls: [],
     remark: ''
   }

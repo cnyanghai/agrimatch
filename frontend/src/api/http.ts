@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { useAuthStore } from '../store/auth'
 import { ElMessage } from 'element-plus'
+import { ErrorHandler } from '../utils/error-handler'
 
 export const http = axios.create({
   baseURL: '',
@@ -33,6 +34,7 @@ http.interceptors.response.use(
     return response
   },
   (error) => {
+    ErrorHandler.handle(error)
     const msg = error.response?.data?.message || error.message || '请求失败'
     ElMessage.error(msg)
     return Promise.reject(error)

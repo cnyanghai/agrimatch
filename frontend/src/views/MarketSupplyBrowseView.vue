@@ -189,12 +189,14 @@ function formatTime(timeStr?: string): string {
 
 // 获取用户头像文字
 function getAvatarText(user: FollowedUser): string {
-  return (user.nickName || user.userName || '?')[0]
+  const name = user.nickName || user.userName || '?'
+  return name[0] || '?'
 }
 
 // 获取供应发布者头像
 function getSupplyAvatar(s: SupplyResponse): string {
-  return (s.nickName || s.companyName || '?')[0]
+  const name = s.nickName || s.companyName || '?'
+  return name[0] || '?'
 }
 
 onMounted(() => {

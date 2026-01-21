@@ -2,7 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Trash2, FileText, Save, Send, List, RefreshCw, Package, Truck, Clock, FileCheck, TrendingUp, Plus, X } from 'lucide-vue-next'
+import { Trash2, FileText, Save, Send, List, Package, Truck, Clock, FileCheck, TrendingUp, Plus, X } from 'lucide-vue-next'
 import { createSupply, getNextSupplyNo, createSupplyTemplate, getMySupplyTemplates, deleteSupplyTemplate, type SupplyCreateRequest, type BasisQuoteRequest, type SupplyTemplateResponse } from '../api/supply'
 import { listFuturesContracts, type FuturesContractResponse } from '../api/futures'
 import { getProductTree, getProductParams, addProductParamOption, type ProductNode, type ProductParamResponse } from '../api/product'
@@ -111,36 +111,11 @@ function getTemplateJson(template: SupplyTemplateResponse): TemplateJsonData {
   return data
 }
 
-function formatExpireMinutes(m?: number) {
-  const minutes = Number(m ?? 0)
-  if (!minutes) return '未设置'
-  const days = Math.floor(minutes / 1440)
-  const hours = Math.floor((minutes % 1440) / 60)
-  if (days > 0 && hours > 0) return `${days}天${hours}小时`
-  if (days > 0) return `${days}天`
-  if (hours > 0) return `${hours}小时`
-  return `${minutes}分钟`
-}
-
 function formatPrice(p?: number) {
   const n = Number(p)
   if (!p && p !== 0) return '面议'
   if (Number.isNaN(n)) return '面议'
   return `¥${n}/吨`
-}
-
-function templateParamsSummary(d: TemplateJsonData) {
-  if (!d.paramsJson) return '无特殊指标'
-  try {
-    const payload = JSON.parse(d.paramsJson) as any
-    const custom = payload?.custom && typeof payload.custom === 'object' ? payload.custom : null
-    if (custom && Object.keys(custom).length) {
-      return Object.entries(custom).slice(0, 6).map(([k, v]) => `${k}:${String(v)}`).join('; ')
-    }
-    const params = payload?.params && typeof payload.params === 'object' ? payload.params : null
-    const cnt = params ? Object.keys(params).length : 0
-    return cnt ? `已设置 ${cnt} 项指标` : '无特殊指标'
-  } catch { return '无特殊指标' }
 }
 
 function formatDate(dateStr?: string) {
@@ -149,17 +124,6 @@ function formatDate(dateStr?: string) {
   if (Number.isNaN(d.getTime())) return ''
   return d.toLocaleDateString('zh-CN')
 }
-
-const canPublish = computed(() => {
-  if (!publishForm.categoryId) return false
-  if (publishForm.priceType === 1) {
-    // 基差模式：至少有一条有效的基差报价
-    return basisQuotes.value.some(q => q.contractCode && q.basisPrice !== undefined && q.availableQty && q.availableQty > 0)
-  } else {
-    // 现货模式：必须有出厂价
-    return !!(publishForm.exFactoryPrice && publishForm.exFactoryPrice > 0)
-  }
-})
 
 const previewData = computed(() => {
   const expireDays = publishForm.expireMinutes ? Math.floor(publishForm.expireMinutes / 1440) : 0

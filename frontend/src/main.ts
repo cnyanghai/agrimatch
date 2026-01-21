@@ -12,12 +12,17 @@ import 'dayjs/locale/zh-cn'
 import { createPinia } from 'pinia'
 import router from './router'
 import { prefetchCommonRoutes } from './utils/prefetchRoutes'
+import { ErrorHandler } from './utils/error-handler'
 
 const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 dayjs.locale('zh-cn')
 app.use(ElementPlus, { locale: zhCn })
+
+// 初始化全局错误处理器
+ErrorHandler.init()
+
 app.mount('#app')
 
 // 首屏完成后，后台预加载高频路由页面（不影响主流程）

@@ -73,7 +73,7 @@ onMounted(async () => {
     // 默认选中第一个一级分类
     const roots = categoryTree.value.filter(cat => (cat.parentId ?? 0) === 0)
     if (roots.length > 0) {
-      activeCategoryId.value = roots[0].id
+      activeCategoryId.value = roots[0]!.id
     }
   }
   if (supRes.code === 0) topSuppliers.value = supRes.data ?? []

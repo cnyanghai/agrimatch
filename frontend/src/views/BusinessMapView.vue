@@ -4,7 +4,6 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { MapPin, Building2, Package, ShoppingCart, RefreshCw, Search, Navigation, MessageCircle, AlertTriangle, Zap } from 'lucide-vue-next'
 import { listMapCompanies, type MapCompanyMarkerResponse } from '../api/map'
-import { openChatConversation } from '../api/chat'
 import { Skeleton } from '../components/ui'
 
 const router = useRouter()
@@ -259,7 +258,7 @@ function openInfo(c: MapCompanyMarkerResponse, marker: any) {
 }
 
 // 全局回调用于信息窗口按钮
-;(window as any).__mapViewChat = async (companyId: number, companyName: string) => {
+;(window as any).__mapViewChat = async (companyId: number, _companyName: string) => {
   try {
     // 查找该公司的用户ID（使用公司管理员）
     const company = raw.value.find(c => c.companyId === companyId)

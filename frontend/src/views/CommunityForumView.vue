@@ -201,7 +201,7 @@ onMounted(() => {
         
         <div v-if="!isLoggedIn" class="py-8">
           <EmptyState
-            type="lock"
+            type="default"
             title="请先登录"
             description="登录后即可发布话题"
             action-text="去登录"

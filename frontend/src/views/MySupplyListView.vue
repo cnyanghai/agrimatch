@@ -73,12 +73,6 @@ function handleFilter() {
   loadSupplies()
 }
 
-function clearFilters() {
-  filters.categoryName = ''
-  filters.status = null
-  handleFilter()
-}
-
 function handlePageChange(page: number) {
   pagination.page = page
 }

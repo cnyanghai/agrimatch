@@ -11,22 +11,24 @@ const auth = useAuthStore()
 const profileStatus = computed(() => {
   const me = auth.me
   if (!me) return null
-  
+
   const issues: string[] = []
-  
-  // 检查公司名
-  if (!me.companyName || me.companyName.trim() === '') {
-    issues.push('公司名称')
+
+  // 检查公司ID（通过 companyId 判断是否已设置公司）
+  if (!me.companyId) {
+    issues.push('公司信息')
   }
-  
-  // 检查地址（通过 companyId 获取，暂时跳过详细检查）
-  // 可以在后续添加更精确的检查
-  
+
   // 检查联系人
-  if (!me.nickName || me.nickName === me.phone) {
+  if (!me.nickName || me.nickName === me.phonenumber) {
     issues.push('联系人姓名')
   }
-  
+
+  // 检查手机号
+  if (!me.phonenumber) {
+    issues.push('手机号码')
+  }
+
   return {
     isComplete: issues.length === 0,
     missingFields: issues,

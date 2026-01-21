@@ -41,7 +41,7 @@ const statusMap: Record<number, { label: string; color: string }> = {
   5: { label: '已取消', color: 'text-red-500 bg-red-50' }
 }
 
-const statusInfo = computed(() => statusMap[props.payload.status] || statusMap[0])
+const statusInfo = computed(() => statusMap[props.payload.status] ?? statusMap[0]!)
 
 const formatAmount = (val: number | string) => {
   const num = typeof val === 'string' ? parseFloat(val) : val

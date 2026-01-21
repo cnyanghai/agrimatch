@@ -4,10 +4,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './store/auth'
 import { useUiStore } from './store/ui'
 import AuthDialog from './components/AuthDialog.vue'
-import { 
-  ShoppingCart, Box, HomeFilled, Management, Search, 
-  MapLocation, DocumentChecked, ChatDotRound, Postcard, 
-  Bell, Coin, User, SwitchButton, ArrowDown, Check, Plus
+import {
+  ShoppingCart, Box, HomeFilled, Management, Search,
+  MapLocation, DocumentChecked, ChatDotRound, Postcard,
+  Coin, User, SwitchButton, ArrowDown, Check, Plus
 } from '@element-plus/icons-vue'
 
 const router = useRouter()

@@ -67,13 +67,13 @@ function archiveConversation(conversationId: number) {
   // 如果归档的是当前会话，切换到下一个
   if (activeConversationId.value === conversationId) {
     const remaining = currentPeerConversations.value.filter(c => c.id !== conversationId)
-    if (remaining.length > 0) {
+    if (remaining.length > 0 && remaining[0]) {
       switchConversation(remaining[0].id)
     } else {
       // 该联系人没有其他会话了，切换到下一个联系人
       activeConversationId.value = null
       const otherPeers = groupedByPeer.value.filter(p => p.peerUserId !== activePeerId.value)
-      if (otherPeers.length > 0) {
+      if (otherPeers.length > 0 && otherPeers[0]) {
         selectPeer(otherPeers[0])
       } else {
         activePeerId.value = null
@@ -176,20 +176,20 @@ const timeGroupedPeers = computed<TimeGroup[]>(() => {
       `${p.lastContent || ''}`.toLowerCase().includes(kw)
     )
   }
-  
+
   peers.forEach(peer => {
     const d = peer.lastTime ? new Date(peer.lastTime) : new Date(0)
     if (d >= today) {
-      groups[0].peers.push(peer)
+      groups[0]?.peers.push(peer)
     } else if (d >= yesterday) {
-      groups[1].peers.push(peer)
+      groups[1]?.peers.push(peer)
     } else if (d >= thisWeek) {
-      groups[2].peers.push(peer)
+      groups[2]?.peers.push(peer)
     } else {
-      groups[3].peers.push(peer)
+      groups[3]?.peers.push(peer)
     }
   })
-  
+
   return groups.filter(g => g.peers.length > 0)
 })
 
@@ -252,19 +252,6 @@ const subjectDialogOpen = ref(false)
 let xlMql: MediaQueryList | null = null
 let xlListener: ((e: MediaQueryListEvent) => void) | null = null
 
-const negotiationBtnLabel = computed(() => {
-  if (isDesktopXl.value) return sidePanelOpen.value ? '收起议价' : '展开议价'
-  return '议价面板'
-})
-
-function toggleNegotiationPanel() {
-  if (isDesktopXl.value) {
-    sidePanelOpen.value = !sidePanelOpen.value
-    return
-  }
-  negotiationDrawerOpen.value = true
-}
-
 // 搜索关键词
 const searchKeyword = ref('')
 
@@ -287,11 +274,6 @@ const attachmentInputRef = ref<HTMLInputElement | null>(null)
 const uploading = ref(false)
 const uploadProgress = ref(0)
 const uploadType = ref<'image' | 'attachment'>('image')
-
-// 当前联系人信息（聚合后）
-const currentPeer = computed(() => {
-  return groupedByPeer.value.find(p => p.peerUserId === activePeerId.value) || null
-})
 
 const currentConversation = computed(() => {
   return conversations.value.find(c => c.id === activeConversationId.value) || null
@@ -502,7 +484,11 @@ function onWsMessage(conversationId: number, msg: ChatMessageResponse) {
   updateConversationListOnIncoming(conversationId, msg)
   if (activeConversationId.value !== conversationId) return
   messages.value.push(mapApiMessageToUi(msg))
-  nextTick().then(scrollToBottom)
+  nextTick(() => {
+    if (chatContainerRef.value) {
+      chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight
+    }
+  })
 }
 
 function onOfferUpdated(conversationId: number, msg: ChatMessageResponse) {
@@ -528,7 +514,11 @@ function onOfferUpdated(conversationId: number, msg: ChatMessageResponse) {
     })
   }
 
-  nextTick().then(scrollToBottom)
+  nextTick(() => {
+    if (chatContainerRef.value) {
+      chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight
+    }
+  })
 }
 
 /**
@@ -536,12 +526,16 @@ function onOfferUpdated(conversationId: number, msg: ChatMessageResponse) {
  */
 function onMessageUpdate(conversationId: number, messageId: number, payload: any) {
   if (activeConversationId.value !== conversationId) return
-  
+
   // 使用 splice 确保 Vue 能检测到数组变化
   const idx = messages.value.findIndex(m => m.id === messageId)
   if (idx >= 0) {
-    const updated = {
-      ...messages.value[idx],
+    const oldMsg = messages.value[idx]
+    if (!oldMsg) return
+    const updated: UiMessage = {
+      ...oldMsg,
+      id: oldMsg.id,
+      type: oldMsg.type || 'received',
       payloadJson: JSON.stringify(payload)
     }
     messages.value.splice(idx, 1, updated)
@@ -597,7 +591,11 @@ function onWsSent(tempId?: string, id?: number, conversationId?: number) {
   m.id = id ?? m.id
   m.status = 'sent'
   if (conversationId && activeConversationId.value === conversationId) {
-    nextTick().then(scrollToBottom)
+    nextTick(() => {
+      if (chatContainerRef.value) {
+        chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight
+      }
+    })
   }
 }
 
@@ -755,7 +753,7 @@ const AVATAR_GRADIENTS = [
 
 function avatarGradient(name?: string): string {
   const s = (name || '').trim()
-  if (!s) return AVATAR_GRADIENTS[0]
+  if (!s) return AVATAR_GRADIENTS[0] || 'from-brand-500 to-teal-600'
   
   // 使用名字的字符码之和来确定渐变色
   let hash = 0
@@ -765,7 +763,7 @@ function avatarGradient(name?: string): string {
   }
   
   const index = Math.abs(hash) % AVATAR_GRADIENTS.length
-  return AVATAR_GRADIENTS[index]
+  return AVATAR_GRADIENTS[index]!
 }
 
 function subjectBadge(c: ChatConversationResponse) {
@@ -815,12 +813,12 @@ function getQuoteDisplayFields(payloadJson?: string) {
 
   const fields = payload
   const display: Array<{ label: string; value: any }> = []
-  
+
   // 基础字段
   Object.entries(fields)
     .filter(([k, v]) => v && QUOTE_LABEL_MAP[k])
     .forEach(([k, v]) => {
-      display.push({ label: QUOTE_LABEL_MAP[k], value: v })
+      display.push({ label: QUOTE_LABEL_MAP[k]!, value: v })
     })
 
   // 动态字段
@@ -969,10 +967,12 @@ async function loadMessages(conversationId: number) {
     const res = await getConversationMessages(conversationId, 100)
     if (res.code !== 0) throw new Error(res.message)
     messages.value = (res.data || []).map(mapApiMessageToUi)
-    
+
     // 滚动到底部
     await nextTick()
-    scrollToBottom()
+    if (chatContainerRef.value) {
+      chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight
+    }
   } finally {
     loading.value = false
   }
@@ -983,13 +983,6 @@ async function sendMessage() {
   if (!messageInput.value.trim()) return
   if (!activeConversationId.value) {
     ElMessage.warning('请先选择会话')
-    return
-  }
-  
-  // 连接未就绪：不做“假发送”，避免出现永远 pending 的消息
-  if (!ws.value || ws.value.readyState !== WebSocket.OPEN) {
-    ElMessage.warning('实时连接未就绪，正在重连…')
-    connectWs()
     return
   }
 
@@ -1020,18 +1013,22 @@ async function sendMessage() {
     status: 'pending',
     time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
   })
-  
+
   // 滚动到底部
   await nextTick()
-  scrollToBottom()
+  if (chatContainerRef.value) {
+    chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight
+  }
 
-  ws.value.send(JSON.stringify({
-    type: 'SEND',
-    conversationId: activeConversationId.value,
-    msgType: 'TEXT',
-    content,
-    tempId
-  }))
+  if (ws.value) {
+    ws.value.send(JSON.stringify({
+      type: 'SEND',
+      conversationId: activeConversationId.value,
+      msgType: 'TEXT',
+      content,
+      tempId
+    }))
+  }
 }
 
 async function sendQuote(payload: any, summary: string, basisPrice?: number, contractCode?: string) {
@@ -1073,24 +1070,21 @@ async function sendQuote(payload: any, summary: string, basisPrice?: number, con
     time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
   })
   await nextTick()
-  scrollToBottom()
-
-  ws.value.send(JSON.stringify({
-    type: 'SEND',
-    conversationId: activeConversationId.value,
-    msgType: 'QUOTE',
-    content: summary || '',
-    payload,
-    basisPrice,
-    contractCode,
-    tempId
-  }))
-}
-
-// 滚动到底部
-function scrollToBottom() {
   if (chatContainerRef.value) {
     chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight
+  }
+
+  if (ws.value) {
+    ws.value.send(JSON.stringify({
+      type: 'SEND',
+      conversationId: activeConversationId.value,
+      msgType: 'QUOTE',
+      content: summary || '',
+      payload,
+      basisPrice,
+      contractCode,
+      tempId
+    }))
   }
 }
 
@@ -1170,7 +1164,7 @@ function getSubjectProductName(): string {
 }
 
 // 合同创建成功
-function onContractCreated(contractId: number) {
+function onContractCreated(_contractId: number) {
   ElMessage.success('合同创建成功')
   // 刷新消息列表以显示合同卡片
   if (activeConversationId.value) {
@@ -1216,9 +1210,11 @@ async function submitGiftPoints() {
       content: `您已赠送 ${giftForm.points} 积分给对方`,
       time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
     })
-    
+
     await nextTick()
-    scrollToBottom()
+    if (chatContainerRef.value) {
+      chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight
+    }
   } catch (e: any) {
     ElMessage.error(e?.message || '赠送积分失败，请稍后重试')
   } finally {
@@ -1273,27 +1269,33 @@ async function uploadAndSendFile(file: File, type: 'image' | 'attachment') {
     ElMessage.warning('请先选择会话')
     return
   }
-  
+
   if (!ws.value || ws.value.readyState !== WebSocket.OPEN) {
     ElMessage.warning('实时连接未就绪，正在重连…')
     connectWs()
     return
   }
-  
+
   uploading.value = true
   uploadProgress.value = 0
   uploadType.value = type
-  
+
   try {
-    const res = type === 'image' 
-      ? await uploadImage(file, (p) => { uploadProgress.value = p })
-      : await uploadAttachment(file, (p) => { uploadProgress.value = p })
+    let uploadFile = file
+
+    const res = type === 'image'
+      ? await uploadImage(uploadFile, (p) => { uploadProgress.value = p })
+      : await uploadAttachment(uploadFile, (p) => { uploadProgress.value = p })
     
     if (res.code !== 0) {
       throw new Error(res.message || '上传失败')
     }
-    
+
     const fileData = res.data
+    if (!fileData) {
+      throw new Error('上传失败：文件数据为空')
+    }
+
     const msgType = type === 'image' ? 'IMAGE' : 'ATTACHMENT'
     const payload: ImagePayload | AttachmentPayload = {
       fileId: fileData.fileId,
@@ -1302,7 +1304,7 @@ async function uploadAndSendFile(file: File, type: 'image' | 'attachment') {
       size: fileData.size,
       mimeType: fileData.mimeType
     }
-    
+
     const summary = type === 'image' ? '[图片]' : `[文件] ${fileData.fileName}`
     const nowIso = new Date().toISOString()
     const tempId = `f_${Date.now()}_${Math.random().toString(16).slice(2)}`
@@ -1331,20 +1333,24 @@ async function uploadAndSendFile(file: File, type: 'image' | 'attachment') {
       status: 'pending',
       time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
     })
-    
+
     await nextTick()
-    scrollToBottom()
-    
+    if (chatContainerRef.value) {
+      chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight
+    }
+
     // 通过 WebSocket 发送
-    ws.value.send(JSON.stringify({
-      type: 'SEND',
-      conversationId: activeConversationId.value,
-      msgType,
-      content: summary,
-      payload,
-      tempId
-    }))
-    
+    if (ws.value) {
+      ws.value.send(JSON.stringify({
+        type: 'SEND',
+        conversationId: activeConversationId.value,
+        msgType,
+        content: summary,
+        payload,
+        tempId
+      }))
+    }
+
     ElMessage.success(type === 'image' ? '图片已发送' : '附件已发送')
   } catch (e: any) {
     ElMessage.error(e?.message || '上传失败，请重试')
@@ -1450,8 +1456,8 @@ onBeforeUnmount(() => {
                   <div class="text-xs text-gray-500 truncate mt-1">{{ peer.lastContent || '暂无消息' }}</div>
                   <!-- 标的标签（多个会话时显示数量） -->
                   <div class="mt-2 flex items-center gap-2">
-                    <span 
-                      v-if="peer.conversations.length === 1"
+                    <span
+                      v-if="peer.conversations.length === 1 && peer.conversations[0]"
                       class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border"
                       :class="subjectBadge(peer.conversations[0]).cls"
                     >
@@ -1599,13 +1605,13 @@ onBeforeUnmount(() => {
             <div class="flex items-center gap-2">
               <span class="text-[10px] text-gray-400">话题：</span>
               <span class="text-xs font-medium text-gray-700">
-                {{ getSubjectShortName(currentPeerConversations[0]) || subjectBadge(currentPeerConversations[0]).label }}
+                {{ getSubjectShortName(currentPeerConversations[0]!) || subjectBadge(currentPeerConversations[0]!).label }}
               </span>
             </div>
             <div class="flex items-center gap-2">
               <button
                 class="px-2 py-1 text-[10px] text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-all"
-                @click="archiveConversation(currentPeerConversations[0].id)"
+                @click="archiveConversation(currentPeerConversations[0]!.id)"
                 title="归档此话题"
               >
                 归档
@@ -1655,7 +1661,7 @@ onBeforeUnmount(() => {
                   class="flex flex-col"
                 >
                   <!-- 只有间隔较长或第一条显示时间 -->
-                  <div v-if="idx === 0 || msg.time !== messages[idx-1].time" class="self-center my-2">
+                  <div v-if="idx === 0 || (idx > 0 && msg.time !== messages[idx - 1]?.time)" class="self-center my-2">
                     <span class="text-[10px] text-gray-400 bg-gray-200/50 px-2 py-0.5 rounded-full">{{ msg.time }}</span>
                   </div>
 
@@ -1820,13 +1826,13 @@ onBeforeUnmount(() => {
                         <div v-else class="bg-brand-600 text-white rounded-xl rounded-tr-sm px-4 py-3 shadow-sm text-sm">
                           {{ msg.content }}
                         </div>
-                        <div v-if="msg.status === 'pending'" class="text-[10px] text-gray-400 mt-1">发送中…</div>
+                        <div v-show="msg.status === 'pending'" class="text-[10px] text-gray-400 mt-1">发送中…</div>
                       </div>
-                    </div>
                   </div>
                 </div>
               </div>
 
+              </div>
               <div v-else class="h-full flex items-center justify-center text-gray-400">
                 <div class="text-center">
                   <el-icon class="mx-auto mb-4 text-gray-300" :size="64"><ChatDotRound /></el-icon>
@@ -2317,9 +2323,8 @@ onBeforeUnmount(() => {
         </div>
       </Transition>
     </Teleport>
-  </div>
+    </div>
 </template>
-
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {

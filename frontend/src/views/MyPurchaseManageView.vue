@@ -83,17 +83,6 @@ function getTemplateJson(template: RequirementTemplateResponse): TemplateJsonDat
   return data
 }
 
-function formatExpireMinutes(m?: number) {
-  const minutes = Number(m ?? 0)
-  if (!minutes) return '未设置'
-  const days = Math.floor(minutes / 1440)
-  const hours = Math.floor((minutes % 1440) / 60)
-  if (days > 0 && hours > 0) return `${days}天${hours}小时`
-  if (days > 0) return `${days}天`
-  if (hours > 0) return `${hours}小时`
-  return `${minutes}分钟`
-}
-
 function formatPrice(p?: number) {
   const n = Number(p)
   if (!p && p !== 0) return '面议'
@@ -149,8 +138,6 @@ const previewData = computed(() => {
     remark: publishForm.remark || ''
   }
 })
-
-const canPublish = computed(() => !!publishForm.categoryId && !!publishForm.quantity && !!publishForm.purchaseAddress)
 
 const purchaserName = computed(() => {
   const real = meUser.value?.realName?.trim()

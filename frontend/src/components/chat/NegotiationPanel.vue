@@ -191,8 +191,6 @@ const diff = computed(() => {
   return changed
 })
 
-const hasPeerQuote = computed(() => !!props.peerLatestQuote && Object.values(props.peerLatestQuote).some(Boolean))
-
 function labelOf(k: keyof QuoteFields) {
   if (k === 'price') return '单价'
   if (k === 'quantity') return '数量'
@@ -379,7 +377,7 @@ function send() {
       </div>
 
       <!-- 动态技术指标 -->
-      <div v-for="(v, name) in form.dynamicParams" :key="name" class="space-y-1">
+      <div v-for="(_, name) in form.dynamicParams" :key="name" class="space-y-1">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{{ name }}</div>
         <input v-model="form.dynamicParams![name]" :disabled="disabled" class="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm focus:border-brand-500 outline-none transition-all" />
       </div>

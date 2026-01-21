@@ -123,14 +123,15 @@ function getIconClass(color: string) {
 }
 
 // 待办项颜色
-function getPendingColorClass(color: string) {
+function getPendingColorClass(color?: string): { bg: string; text: string; icon: string } {
   const colorMap: Record<string, { bg: string; text: string; icon: string }> = {
     amber: { bg: 'bg-amber-50', text: 'text-amber-700', icon: 'text-amber-500' },
     red: { bg: 'bg-red-50', text: 'text-red-700', icon: 'text-red-500' },
     blue: { bg: 'bg-blue-50', text: 'text-blue-700', icon: 'text-blue-500' },
     purple: { bg: 'bg-purple-50', text: 'text-purple-700', icon: 'text-purple-500' }
   }
-  return colorMap[color] || colorMap.amber
+  const key = color || 'amber'
+  return (colorMap[key] ?? colorMap.amber) as { bg: string; text: string; icon: string }
 }
 
 async function loadDashboard() {

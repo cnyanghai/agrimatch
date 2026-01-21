@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { 
   Plus, Truck, Package, CreditCard, ClipboardCheck, Settings,
@@ -62,19 +62,6 @@ async function loadMilestones() {
   } finally {
     loading.value = false
   }
-}
-
-// 判断当前用户是否是节点创建者
-function isCreator(milestone: MilestoneResponse): boolean {
-  // 简化判断：通过 operatorUserId 判断
-  return false // 需要后端返回当前用户ID来判断
-}
-
-// 判断当前用户是否可以确认/拒绝节点
-function canConfirm(milestone: MilestoneResponse): boolean {
-  if (milestone.status !== 'submitted') return false
-  // 只有对方才能确认（不是提交者）
-  return true // 简化处理，后端会校验
 }
 
 // 判断是否可以提交凭证
@@ -143,17 +130,17 @@ async function handleDelete(milestone: MilestoneResponse) {
 // 格式化日期
 function formatDate(val?: string): string {
   if (!val) return '-'
-  return val.split('T')[0]
+  return val.split('T')[0] || ''
 }
 
 // 获取类型信息
 function getTypeInfo(type: string) {
-  return milestoneTypeMap[type] || milestoneTypeMap['CUSTOM']
+  return milestoneTypeMap[type] ?? milestoneTypeMap['CUSTOM']!
 }
 
 // 获取状态信息
 function getStatusInfo(status: string) {
-  return statusMap[status] || statusMap['pending']
+  return statusMap[status] ?? statusMap['pending']!
 }
 
 // 监听 contractId 变化

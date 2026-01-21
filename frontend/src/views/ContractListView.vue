@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { FileText, Search, Eye, Pen, Trash2, RefreshCw, XCircle, Calendar, Package, CheckCircle, Clock, AlertCircle, MoreHorizontal, FileEdit, FileClock, FileCheck, FileBox, FileCheck2, FileX } from 'lucide-vue-next'
+import { FileText, Search, Eye, Pen, Trash2, RefreshCw, XCircle, Calendar, Package, CheckCircle, Clock, FileEdit, FileClock, FileCheck, FileBox, FileCheck2, FileX } from 'lucide-vue-next'
 import { listContracts, deleteContract, cancelContract, type ContractResponse, type ContractQuery } from '../api/contract'
 import { Skeleton } from '../components/ui'
 import ContractSignModal from '../components/contract/ContractSignModal.vue'
@@ -221,7 +221,7 @@ function formatAmount(val?: number): string {
 // 格式化日期
 function formatDate(val?: string): string {
   if (!val) return '-'
-  return val.split('T')[0]
+  return val.split('T')[0] || '-'
 }
 
 // 格式化完整时间
@@ -272,11 +272,11 @@ onMounted(() => {
           <span class="text-xs font-medium text-gray-500">{{ info.label }}</span>
         </div>
         <div class="text-xl font-bold text-gray-900 mt-1">
-          {{ status === '0' ? stats.draft : 
-             status === '1' ? stats.pending :
-             status === '2' ? stats.signed :
-             status === '3' ? stats.executing :
-             status === '4' ? stats.completed :
+          {{ Number(status) === 0 ? stats.draft :
+             Number(status) === 1 ? stats.pending :
+             Number(status) === 2 ? stats.signed :
+             Number(status) === 3 ? stats.executing :
+             Number(status) === 4 ? stats.completed :
              stats.cancelled }}
         </div>
       </div>

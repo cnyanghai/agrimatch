@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-
-const router = useRouter()
-
-function go(path: string) {
-  router.push(path)
-}
 
 function openAgreement(type: 'user' | 'privacy') {
   const title = type === 'user' ? '用户协议' : '隐私政策'

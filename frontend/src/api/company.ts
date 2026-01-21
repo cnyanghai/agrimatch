@@ -96,6 +96,7 @@ export interface CompanyCardResponse {
   city?: string
   count: number
   categoryNames?: string[]
+  logo?: string
 }
 
 export async function listTopSuppliers(limit?: number, region?: string) {

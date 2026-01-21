@@ -5,6 +5,10 @@ import { Pen, Stamp, Type, Check, FileSignature, Package } from 'lucide-vue-next
 import { signContract, getContract, type ContractResponse } from '../../api/contract'
 import { BaseModal, BaseButton } from '../ui'
 import SignaturePad from './SignaturePad.vue'
+import { signData, generateKeyPair } from '../../utils/crypto'
+import { auditLogger } from '../../utils/audit-logger'
+import { ErrorHandler } from '../../utils/error-handler'
+import { useAuthStore } from '../../store/auth'
 
 const props = defineProps<{
   modelValue: boolean
@@ -15,6 +19,8 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
   (e: 'signed'): void
 }>()
+
+const auth = useAuthStore()
 
 const visible = computed({
   get: () => props.modelValue,
@@ -114,20 +120,82 @@ async function handleSign() {
   
   loading.value = true
   try {
-    const res = await signContract(props.contractId, {
+    const payload = {
       signType: signMethod.value,
       signerName: typedName.value.trim() || undefined,
       signatureData: signatureImage.value || undefined
+    }
+
+    let encryptedSignatureData = payload.signatureData
+    if (payload.signatureData) {
+      try {
+        const { privateKey } = await generateKeyPair()
+        encryptedSignatureData = await signData(payload.signatureData, privateKey)
+        auditLogger.log({
+          userId: auth.me?.userId ?? 0,
+          action: 'contract_sign_prepared',
+          resourceType: 'contract',
+          resourceId: props.contractId,
+          details: {
+            contractId: props.contractId,
+            signType: signMethod.value,
+            signerName: payload.signerName,
+            hasSignature: !!payload.signatureData
+          }
+        })
+      } catch (cryptoError) {
+        ErrorHandler.handle(cryptoError)
+        ElMessage.warning('数字签名生成失败，使用原始签名')
+      }
+    }
+
+    const res = await signContract(props.contractId, {
+      ...payload,
+      signatureData: encryptedSignatureData
     })
-    
+
     if (res.code === 0) {
+      auditLogger.log({
+        userId: auth.me?.userId ?? 0,
+        action: 'contract_signed',
+        resourceType: 'contract',
+        resourceId: props.contractId,
+        details: {
+          contractId: props.contractId,
+          signType: signMethod.value,
+          success: true
+        }
+      })
       ElMessage.success('签署成功')
       emit('signed')
       visible.value = false
     } else {
+      auditLogger.log({
+        userId: auth.me?.userId ?? 0,
+        action: 'contract_signed',
+        resourceType: 'contract',
+        resourceId: props.contractId,
+        details: {
+          contractId: props.contractId,
+          signType: signMethod.value,
+          success: false,
+          error: res.message
+        }
+      })
       ElMessage.error(res.message || '签署失败')
     }
   } catch (e: any) {
+    ErrorHandler.handle(e)
+    auditLogger.log({
+      userId: auth.me?.userId ?? 0,
+      action: 'contract_sign_error',
+      resourceType: 'contract',
+      resourceId: props.contractId,
+      details: {
+        contractId: props.contractId,
+        error: e?.message || '未知错误'
+      }
+    })
     ElMessage.error(e.message || '签署失败')
   } finally {
     loading.value = false

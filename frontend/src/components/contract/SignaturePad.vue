@@ -37,7 +37,7 @@ onMounted(() => {
   }
 })
 
-function getEventPos(e: MouseEvent | TouchEvent) {
+function getEventPos(e: MouseEvent | TouchEvent): { x: number; y: number } {
   const canvas = canvasRef.value
   if (!canvas) return { x: 0, y: 0 }
   
@@ -56,6 +56,7 @@ function getEventPos(e: MouseEvent | TouchEvent) {
       y: (e.clientY - rect.top) * scaleY
     }
   }
+  return { x: 0, y: 0 }
 }
 
 function startDrawing(e: MouseEvent | TouchEvent) {

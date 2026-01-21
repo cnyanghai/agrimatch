@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch, onMounted, onUnmounted } from 'vue'
+import { computed, watch, onUnmounted } from 'vue'
 import { X } from 'lucide-vue-next'
 
 const props = withDefaults(defineProps<{

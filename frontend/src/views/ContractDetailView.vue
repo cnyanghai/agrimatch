@@ -39,8 +39,8 @@ const showSellerDetail = ref(false)
 const showTerms = ref(false)
 
 const statusInfo = computed(() => {
-  if (!contract.value) return contractStatusMap[0]
-  return contractStatusMap[contract.value.status] || contractStatusMap[0]
+  if (!contract.value) return contractStatusMap[0]!
+  return contractStatusMap[contract.value.status] ?? contractStatusMap[0]!
 })
 
 // 是否可以签署
@@ -149,7 +149,7 @@ function formatAmount(val?: number): string {
 // 格式化日期
 function formatDate(val?: string): string {
   if (!val) return '-'
-  return val.split('T')[0]
+  return val.split('T')[0] || '-'
 }
 
 onMounted(() => {

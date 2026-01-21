@@ -57,7 +57,7 @@ function formatNumber(num: number | undefined): string {
 }
 
 // 格式化时间
-function formatTime(timeStr: string): string {
+function formatTime(timeStr?: string): string {
   if (!timeStr) return '-'
   const date = new Date(timeStr)
   return date.toLocaleString('zh-CN', {

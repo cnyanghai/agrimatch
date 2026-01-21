@@ -95,9 +95,9 @@ watch(regionValue, (val) => {
     companyForm.district = ''
     return
   }
-  companyForm.province = val[0] ? codeToText[val[0]] : ''
-  companyForm.city = val[1] ? codeToText[val[1]] : ''
-  companyForm.district = val[2] ? codeToText[val[2]] : ''
+  companyForm.province = val[0] ? (codeToText[val[0]] || '') : ''
+  companyForm.city = val[1] ? (codeToText[val[1]] || '') : ''
+  companyForm.district = val[2] ? (codeToText[val[2]] || '') : ''
 })
 
 // 营业执照上传

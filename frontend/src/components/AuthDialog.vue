@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch, onMounted } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { ShieldCheck, Phone, KeyRound, Sparkles, CheckCircle, RefreshCw, Image as ImageIcon } from 'lucide-vue-next'

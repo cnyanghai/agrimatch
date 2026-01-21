@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, onMounted, watch } from 'vue'
 import { Truck, ChevronDown, Plus, Star } from 'lucide-vue-next'
 import { listVehicles, type VehicleResponse, type VehicleInfo } from '../api/vehicle'
 
@@ -76,12 +75,6 @@ function switchToManual() {
     driverPhone: ''
   }
   emitChange()
-}
-
-// 格式化身份证（脱敏）
-function maskIdCard(idCard: string) {
-  if (!idCard || idCard.length < 10) return idCard
-  return idCard.substring(0, 6) + '****' + idCard.substring(idCard.length - 4)
 }
 
 onMounted(() => {

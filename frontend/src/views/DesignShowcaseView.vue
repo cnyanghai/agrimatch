@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { Card } from '../components/ui'
 import BaseButton from '../components/ui/BaseButton.vue'
 import FormInput from '../components/ui/FormInput.vue'
@@ -11,10 +11,6 @@ const formData = ref({
   username: '',
   password: ''
 })
-
-function handleSearch() {
-  console.log('搜索:', formData.value.search)
-}
 
 function handleLogin() {
   loading.value = true
