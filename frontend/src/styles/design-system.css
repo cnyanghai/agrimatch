@@ -1,6 +1,46 @@
 /* AgriMatch Design System - CSS Variables */
 /* 融合原项目 emerald 色彩与 Stitch 现代化设计 */
 
+/* 字体使用规范：
+ * 1. 字体大小统一使用工具类或 CSS 变量：
+ *    - text-xs (12px) - 辅助文字、标签、徽章
+ *    - text-sm (14px) - 次要信息、描述文字
+ *    - text-base (16px) - 正文内容
+ *    - text-lg (18px) - 小标题
+ *    - text-xl (20px) - 页面副标题
+ *    - text-2xl (24px) - 卡片标题、章节标题
+ *    - text-3xl (30px) - 页面主标题
+ *    - text-4xl (36px) - 首页主标题
+ *    - text-5xl (48px) - 营销标题
+ *    - text-6xl (60px) - 超大标题
+ *
+ * 2. 字体粗细统一使用工具类：
+ *    - font-normal (400) - 正文、描述
+ *    - font-medium (500) - 强调文字
+ *    - font-semibold (600) - 小标题
+ *    - font-bold (700) - 主标题、按钮文字
+ *    - font-extrabold (800) - 营销标题（限制使用）
+ *    - 禁止使用 font-black (900)
+ *
+ * 3. 行高使用规范：
+ *    - leading-none (1.0) - 图标文字
+ *    - leading-tight (1.25) - 标题
+ *    - leading-normal (1.5) - 正文（默认）
+ *    - leading-relaxed (1.625) - 长篇文章
+ *    - leading-loose (2.0) - 特殊排版
+ *
+ * 4. 禁止事项：
+ *    - 禁止使用 px 单位指定字体大小
+ *    - 禁止使用数值直接指定字体粗细（如 font-weight: 800）
+ *    - 禁止使用 @apply 指令（与自定义 CSS 变量不兼容）
+ *    - 禁止混用不同字体家族
+ *
+ * 5. 示例用法：
+ *    <div class="text-2xl font-bold leading-tight">页面标题</div>
+ *    <p class="text-base font-normal leading-normal">正文内容</p>
+ *    <span class="text-sm font-medium">标签文字</span>
+ */
+
 :root {
   /* 主色系统 - 保留原项目 emerald */
   --primary-50: #ecfdf5;
@@ -46,7 +86,11 @@
   --opacity-medium: rgba(0, 0, 0, 0.1);
   --opacity-heavy: rgba(0, 0, 0, 0.15);
 
-  /* 字体系统 */
+  /* 字体家族 */
+  --font-family-sans: 'Inter', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* 字体大小系统 */
   --font-xs: 0.75rem;
   --font-sm: 0.875rem;
   --font-base: 1rem;
@@ -55,12 +99,35 @@
   --font-2xl: 1.5rem;
   --font-3xl: 1.875rem;
   --font-4xl: 2.25rem;
+  --font-5xl: 3rem;
+  --font-6xl: 3.75rem;
 
-  /* 行高 */
+  /* 字体粗细系统 */
+  --font-weight-thin: 100;
+  --font-weight-extralight: 200;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+
+  /* 行高系统 */
+  --leading-none: 1;
   --leading-tight: 1.25;
   --leading-snug: 1.375;
   --leading-normal: 1.5;
   --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* 字间距 */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
 
   /* 间距 */
   --space-1: 0.25rem;
@@ -116,13 +183,24 @@
 }
 
 html {
-  font-family: 'Inter', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-base);
+  line-height: var(--leading-normal);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  @apply bg-bg-light dark:bg-bg-dark text-neutral-900 dark:text-white transition-colors duration-200;
+  font-size: var(--font-base);
+  line-height: var(--leading-normal);
+  background-color: var(--bg-light);
+  color: var(--neutral-900);
+  transition: background-color var(--duration-normal), color var(--duration-normal);
+}
+
+.dark body {
+  background-color: var(--bg-dark);
+  color: var(--neutral-900);
 }
 
 /* 滚动条美化 */
@@ -132,15 +210,28 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-neutral-100 dark:bg-neutral-800;
+  background-color: var(--neutral-100);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background-color: var(--neutral-800);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-neutral-300 dark:bg-neutral-600 rounded-full;
+  background-color: var(--neutral-300);
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: var(--neutral-600);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-neutral-400 dark:bg-neutral-500;
+  background-color: var(--neutral-400);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--neutral-500);
 }
 
 /* 动画类 */
@@ -171,7 +262,7 @@ body {
 
 .scale-in-active {
   transition: transform var(--duration-normal) var(--ease-out),
-              opacity var(--duration-normal) var(--ease-out);
+    opacity var(--duration-normal) var(--ease-out);
 }
 
 .scale-in-from {
@@ -182,4 +273,141 @@ body {
 .scale-in-to {
   transform: scale(1);
   opacity: 1;
+}
+
+/* 字体大小工具类 */
+.text-xs {
+  font-size: var(--font-xs);
+}
+
+.text-sm {
+  font-size: var(--font-sm);
+}
+
+.text-base {
+  font-size: var(--font-base);
+}
+
+.text-lg {
+  font-size: var(--font-lg);
+}
+
+.text-xl {
+  font-size: var(--font-xl);
+}
+
+.text-2xl {
+  font-size: var(--font-2xl);
+}
+
+.text-3xl {
+  font-size: var(--font-3xl);
+}
+
+.text-4xl {
+  font-size: var(--font-4xl);
+}
+
+.text-5xl {
+  font-size: var(--font-5xl);
+}
+
+.text-6xl {
+  font-size: var(--font-6xl);
+}
+
+/* 字体粗细工具类 */
+.font-thin {
+  font-weight: var(--font-weight-thin);
+}
+
+.font-extralight {
+  font-weight: var(--font-weight-extralight);
+}
+
+.font-light {
+  font-weight: var(--font-weight-light);
+}
+
+.font-normal {
+  font-weight: var(--font-weight-normal);
+}
+
+.font-medium {
+  font-weight: var(--font-weight-medium);
+}
+
+.font-semibold {
+  font-weight: var(--font-weight-semibold);
+}
+
+.font-bold {
+  font-weight: var(--font-weight-bold);
+}
+
+.font-extrabold {
+  font-weight: var(--font-weight-extrabold);
+}
+
+.font-black {
+  font-weight: var(--font-weight-black);
+}
+
+/* 行高工具类 */
+.leading-none {
+  line-height: var(--leading-none);
+}
+
+.leading-tight {
+  line-height: var(--leading-tight);
+}
+
+.leading-snug {
+  line-height: var(--leading-snug);
+}
+
+.leading-normal {
+  line-height: var(--leading-normal);
+}
+
+.leading-relaxed {
+  line-height: var(--leading-relaxed);
+}
+
+.leading-loose {
+  line-height: var(--leading-loose);
+}
+
+/* 字间距工具类 */
+.tracking-tighter {
+  letter-spacing: var(--tracking-tighter);
+}
+
+.tracking-tight {
+  letter-spacing: var(--tracking-tight);
+}
+
+.tracking-normal {
+  letter-spacing: var(--tracking-normal);
+}
+
+.tracking-wide {
+  letter-spacing: var(--tracking-wide);
+}
+
+.tracking-wider {
+  letter-spacing: var(--tracking-wider);
+}
+
+.tracking-widest {
+  letter-spacing: var(--tracking-widest);
+}
+
+/* 字体家族工具类 */
+.font-sans {
+  font-family: var(--font-family-sans);
+}
+
+.font-mono {
+  font-family: var(--font-family-mono);
 }

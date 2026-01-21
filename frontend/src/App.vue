@@ -5,11 +5,10 @@ import { useAuthStore } from './store/auth'
 import { useUiStore } from './store/ui'
 import AuthDialog from './components/AuthDialog.vue'
 import {
-  HomeFilled, Management, Search,
-  MapLocation, DocumentChecked, ChatDotRound,
-  User, SwitchButton, ArrowDown, Check, Plus,
-  Star, DocumentAdd
-} from '@element-plus/icons-vue'
+  LayoutDashboard, FilePlus, Star, Map,
+  MessageSquare, FileCheck, User, LogOut,
+  ChevronDown, Check, Plus, Coins
+} from 'lucide-vue-next'
 
 const router = useRouter()
 const route = useRoute()
@@ -107,7 +106,7 @@ onMounted(async () => {
           <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
                   :class="route.path==='/console' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/console')">
-            <HomeFilled class="h-5 w-5" />
+            <LayoutDashboard class="h-5 w-5" stroke-width="2" />
             控制台首页
           </button>
 
@@ -115,7 +114,7 @@ onMounted(async () => {
           <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
                   :class="route.path==='/console/publish' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/console/publish')">
-            <DocumentAdd class="h-5 w-5" />
+            <FilePlus class="h-5 w-5" stroke-width="2" />
             发布信息
           </button>
 
@@ -123,7 +122,7 @@ onMounted(async () => {
           <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
                   :class="route.path==='/console/following' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/console/following')">
-            <Star class="h-5 w-5" />
+            <Star class="h-5 w-5" stroke-width="2" />
             关注列表
           </button>
 
@@ -131,7 +130,7 @@ onMounted(async () => {
           <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
                   :class="route.path==='/map' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/map')">
-            <MapLocation class="h-5 w-5" />
+            <Map class="h-5 w-5" stroke-width="2" />
             地图找商
           </button>
 
@@ -139,7 +138,7 @@ onMounted(async () => {
           <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
                   :class="route.path==='/chat' || route.path==='/notify' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/chat')">
-            <ChatDotRound class="h-5 w-5" />
+            <MessageSquare class="h-5 w-5" stroke-width="2" />
             聊天议价
           </button>
 
@@ -147,7 +146,7 @@ onMounted(async () => {
           <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
                   :class="route.path.startsWith('/contracts') ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/contracts')">
-            <DocumentChecked class="h-5 w-5" />
+            <FileCheck class="h-5 w-5" stroke-width="2" />
             合同管理
           </button>
 
@@ -155,7 +154,7 @@ onMounted(async () => {
           <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
                   :class="route.path==='/profile' ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/profile')">
-            <User class="h-5 w-5" />
+            <User class="h-5 w-5" stroke-width="2" />
             用户资料
           </button>
 
@@ -163,7 +162,7 @@ onMounted(async () => {
           <button class="w-full text-left px-4 py-3 rounded-lg transition-all hover:bg-brand-50 text-neutral-700 hover:text-brand-700 flex items-center gap-3"
                   :class="route.path.startsWith('/points') ? 'bg-brand-50 text-brand-700 font-medium' : ''"
                   @click="go('/points')">
-            <Coin class="h-5 w-5" />
+            <Coins class="h-5 w-5" stroke-width="2" />
             会员积分
           </button>
         </nav>
@@ -174,7 +173,7 @@ onMounted(async () => {
         <nav class="space-y-1">
           <button class="w-full text-left px-4 py-3 rounded-xl transition-all hover:bg-red-50 text-neutral-700 hover:text-red-600 flex items-center gap-3"
                   @click="logout">
-            <SwitchButton class="h-5 w-5" />
+            <LogOut class="h-5 w-5" stroke-width="2" />
             退出登录
           </button>
         </nav>
@@ -197,18 +196,16 @@ onMounted(async () => {
             <el-dropdown>
               <el-button class="!rounded-lg">
                 {{ auth.me?.nickName || auth.me?.userName || '未登录' }}
-                <el-icon class="el-icon--right">
-                  <ArrowDown />
-                </el-icon>
+                <ChevronDown class="w-4 h-4 ml-1" stroke-width="2" />
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item v-if="auth.me" @click="go('/console')">
-                    <User class="w-4 h-4 mr-2" />我的账户
+                    <User class="w-4 h-4 mr-2" stroke-width="2" />我的账户
                   </el-dropdown-item>
                   <el-dropdown-item v-if="!auth.me" @click="ui.openAuthDialog('login')">去登录/注册</el-dropdown-item>
                   <el-dropdown-item v-if="auth.me" divided @click="logout">
-                    <SwitchButton class="w-4 h-4 mr-2" />注销
+                    <LogOut class="w-4 h-4 mr-2" stroke-width="2" />注销
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -233,7 +230,7 @@ onMounted(async () => {
     >
       <div class="text-center py-4">
         <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-brand-50 flex items-center justify-center">
-          <User class="w-10 h-10 text-brand-600" />
+          <User class="w-10 h-10 text-brand-600" stroke-width="2" />
         </div>
         <h3 class="text-xl font-bold text-gray-800 mb-2">完善您的资料</h3>
         <p class="text-gray-500 mb-6">
@@ -245,8 +242,8 @@ onMounted(async () => {
           <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
             <div class="w-8 h-8 rounded-full flex items-center justify-center"
                  :class="auth.me?.nickName ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-400'">
-              <Check v-if="auth.me?.nickName" class="w-4 h-4" />
-              <Plus v-else class="w-4 h-4" />
+              <Check v-if="auth.me?.nickName" class="w-4 h-4" stroke-width="2" />
+              <Plus v-else class="w-4 h-4" stroke-width="2" />
             </div>
             <span :class="auth.me?.nickName ? 'text-gray-800' : 'text-gray-500'">设置昵称</span>
           </div>

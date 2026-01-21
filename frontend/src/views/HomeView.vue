@@ -201,10 +201,10 @@ onBeforeUnmount(() => {
     <!-- Hero -->
     <section class="relative hero-gradient overflow-hidden text-white h-[510px] flex items-center pt-16">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-12 flex flex-col items-center text-center">
-        <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight tracking-tight">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight tracking-tight">
           智慧畜牧供应链
         </h1>
-        <h1 class="text-4xl md:text-6xl font-extrabold mb-4 leading-tight tracking-tight">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight tracking-tight">
           一站式采购与管理平台
         </h1>
         <p class="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl leading-relaxed">
@@ -253,7 +253,7 @@ onBeforeUnmount(() => {
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
-            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+            <h2 class="text-3xl font-bold text-gray-900 tracking-tight">
               按 <span class="text-brand-600">原料</span> 搜索
             </h2>
           </div>
@@ -312,7 +312,7 @@ onBeforeUnmount(() => {
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
-            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+            <h2 class="text-3xl font-bold text-gray-900 tracking-tight">
               按 <span class="text-brand-600">供应商</span> 搜索
             </h2>
           </div>
@@ -363,16 +363,16 @@ onBeforeUnmount(() => {
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
-            <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">
-              按 <span class="text-blue-600">采购商</span> 搜索
+            <h2 class="text-3xl font-bold text-gray-900 tracking-tight">
+              按 <span class="text-autumn-600">采购商</span> 搜索
             </h2>
           </div>
           <button 
-            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-blue-600 transition-colors"
+            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-autumn-600 transition-colors"
             @click="go('/companies/directory?type=buyer')"
           >
             查看所有采购商
-            <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-blue-50 flex items-center justify-center transition-colors">
+            <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-autumn-50 flex items-center justify-center transition-colors">
               <ChevronRight :size="16" />
             </div>
           </button>
@@ -389,15 +389,15 @@ onBeforeUnmount(() => {
             @click="go(`/companies/${b.id}`)"
           >
             <div class="flex items-start justify-between mb-4">
-              <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-blue-50 transition-colors">
+              <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-autumn-50 transition-colors">
                 <img v-if="b.logo" :src="b.logo" class="w-full h-full object-contain p-1" />
-                <Users v-else :size="20" class="text-slate-400 group-hover:text-blue-500 transition-colors" />
+                <Users v-else :size="20" class="text-slate-400 group-hover:text-autumn-500 transition-colors" />
               </div>
               <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded uppercase tracking-tighter">
                 {{ (b.province || '未知').substring(0, 2) }}
               </span>
             </div>
-            <div class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate text-sm mb-1">
+            <div class="font-bold text-gray-900 group-hover:text-autumn-600 transition-colors truncate text-sm mb-1">
               {{ b.companyName }}
             </div>
             <div class="text-[10px] text-gray-400 flex items-center gap-1">
@@ -483,21 +483,21 @@ onBeforeUnmount(() => {
     <!-- 底部流程引导 -->
     <section class="bg-slate-900 py-24 relative overflow-hidden border-t border-white/5">
       <div class="max-w-7xl mx-auto px-4 text-center">
-        <h2 class="text-3xl font-extrabold text-white mb-4">开启您的专业交易之旅</h2>
+        <h2 class="text-3xl font-bold text-white mb-4">开启您的专业交易之旅</h2>
         <p class="text-gray-400 mb-16 max-w-xl mx-auto">从发现商机到合约履行，AgriMatch 为您提供全流程保障</p>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div class="flex flex-col items-center">
             <div class="w-16 h-16 bg-white/5 border border-white/10 text-brand-400 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xl">
-              <span class="text-2xl font-black">01</span>
+              <span class="text-2xl font-bold">01</span>
             </div>
             <h4 class="font-bold text-white mb-2">发布/发现</h4>
             <p class="text-[10px] text-gray-500 px-4 leading-relaxed">精准匹配海量供需信息</p>
           </div>
 
           <div class="flex flex-col items-center">
-            <div class="w-16 h-16 bg-white/5 border border-white/10 text-blue-400 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xl">
-              <span class="text-2xl font-black">02</span>
+            <div class="w-16 h-16 bg-white/5 border border-white/10 text-autumn-400 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xl">
+              <span class="text-2xl font-bold">02</span>
             </div>
             <h4 class="font-bold text-white mb-2">洽谈议价</h4>
             <p class="text-[10px] text-gray-500 px-4 leading-relaxed">在线直聊，快速达成意向</p>
@@ -505,7 +505,7 @@ onBeforeUnmount(() => {
 
           <div class="flex flex-col items-center">
             <div class="w-16 h-16 bg-white/5 border border-white/10 text-purple-400 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xl">
-              <span class="text-2xl font-black">03</span>
+              <span class="text-2xl font-bold">03</span>
             </div>
             <h4 class="font-bold text-white mb-2">电子签约</h4>
             <p class="text-[10px] text-gray-500 px-4 leading-relaxed">合法合规，保障双方权益</p>

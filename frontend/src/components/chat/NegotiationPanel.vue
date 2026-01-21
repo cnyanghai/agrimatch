@@ -442,6 +442,6 @@ function send() {
 }
 
 .neo-select :deep(.el-input__inner) {
-  font-size: 0.875rem;
+  font-size: var(--font-sm);
 }
 </style>

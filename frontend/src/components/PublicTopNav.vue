@@ -88,7 +88,7 @@ onMounted(async () => {
         <!-- Left: Logo & Dropdowns (Stacked) -->
         <div class="flex flex-col items-start gap-3">
           <div class="flex items-center gap-3 cursor-pointer hover:bg-gray-50/50 px-2 py-1 rounded-xl transition-all active:scale-[0.99]" @click="go('/')">
-            <div class="w-9 h-9 rounded-lg bg-brand-600 text-white flex items-center justify-center font-black">A</div>
+            <div class="w-9 h-9 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold">A</div>
             <div class="leading-tight hidden sm:block">
               <div class="font-bold text-gray-900">AgriMatch</div>
               <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">农汇通 · 供需匹配平台</div>
@@ -126,7 +126,7 @@ onMounted(async () => {
                       <div class="flex items-center justify-between border-b border-gray-50 pb-4 mb-6">
                         <div class="flex items-center gap-3">
                           <div class="w-1.5 h-5 bg-brand-600 rounded-full"></div>
-                          <h3 class="text-xl font-black text-gray-900">{{ activeCategory.name }}</h3>
+                          <h3 class="text-xl font-bold text-gray-900">{{ activeCategory.name }}</h3>
                         </div>
                         <button 
                           class="text-xs font-bold text-brand-600 hover:underline flex items-center gap-1"
@@ -140,7 +140,7 @@ onMounted(async () => {
                       <div class="grid grid-cols-3 gap-x-8 gap-y-10">
                         <div v-for="group in buildGroups(activeCategory)" :key="group.title" class="space-y-4">
                           <div 
-                            class="text-xs font-black text-gray-900 cursor-pointer hover:text-brand-600 flex items-center gap-1 group/title" 
+                            class="text-xs font-semibold text-gray-900 cursor-pointer hover:text-brand-600 flex items-center gap-1 group/title" 
                             @click="go('/hall/supply', { categoryId: group.titleNode.id })"
                           >
                             {{ group.title }}
@@ -214,7 +214,7 @@ onMounted(async () => {
               <template #dropdown>
                 <div class="p-6 w-[720px]">
                   <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-2 text-blue-700">
+                    <div class="flex items-center gap-2 text-autumn-700">
                       <ShoppingBag :size="18" />
                       <span class="font-bold text-lg">50 强采购商</span>
                     </div>
@@ -224,7 +224,7 @@ onMounted(async () => {
                     <button 
                       v-for="b in topBuyers" 
                       :key="b.id" 
-                      class="text-left text-xs text-gray-600 hover:text-blue-600 hover:font-bold transition-all truncate py-1"
+                      class="text-left text-xs text-gray-600 hover:text-autumn-600 hover:font-bold transition-all truncate py-1"
                       @click="go(`/companies/${b.id}`)"
                     >
                       {{ b.companyName }}
@@ -233,7 +233,7 @@ onMounted(async () => {
 
                   <div class="border-t pt-4">
                     <button 
-                      class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
+                      class="w-full bg-autumn-50 hover:bg-autumn-100 text-autumn-700 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
                       @click="go('/companies/directory', { type: 'buyer' })"
                     >
                       所有采购商名录

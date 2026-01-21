@@ -11,9 +11,11 @@
 .fade-enter-active {
   transition: opacity 0.25s ease-out;
 }
+
 .fade-leave-active {
   transition: opacity 0.2s ease-in;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
@@ -23,9 +25,11 @@
 .zoom-fade-enter-active {
   transition: all 0.25s ease-out;
 }
+
 .zoom-fade-leave-active {
   transition: all 0.2s ease-in;
 }
+
 .zoom-fade-enter-from,
 .zoom-fade-leave-to {
   opacity: 0;
@@ -36,13 +40,16 @@
 .slide-up-enter-active {
   transition: all 0.25s ease-out;
 }
+
 .slide-up-leave-active {
   transition: all 0.2s ease-in;
 }
+
 .slide-up-enter-from {
   opacity: 0;
   transform: translateY(20px);
 }
+
 .slide-up-leave-to {
   opacity: 0;
   transform: translateY(-10px);
@@ -52,13 +59,16 @@
 .slide-down-enter-active {
   transition: all 0.25s ease-out;
 }
+
 .slide-down-leave-active {
   transition: all 0.2s ease-in;
 }
+
 .slide-down-enter-from {
   opacity: 0;
   transform: translateY(-20px);
 }
+
 .slide-down-leave-to {
   opacity: 0;
   transform: translateY(10px);
@@ -68,13 +78,16 @@
 .slide-left-enter-active {
   transition: all 0.25s ease-out;
 }
+
 .slide-left-leave-active {
   transition: all 0.2s ease-in;
 }
+
 .slide-left-enter-from {
   opacity: 0;
   transform: translateX(20px);
 }
+
 .slide-left-leave-to {
   opacity: 0;
   transform: translateX(-10px);
@@ -84,13 +97,16 @@
 .slide-right-enter-active {
   transition: all 0.25s ease-out;
 }
+
 .slide-right-leave-active {
   transition: all 0.2s ease-in;
 }
+
 .slide-right-enter-from {
   opacity: 0;
   transform: translateX(-20px);
 }
+
 .slide-right-leave-to {
   opacity: 0;
   transform: translateX(10px);
@@ -106,6 +122,7 @@
     opacity: 0;
     transform: scale(0.95) translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -122,6 +139,7 @@
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+
   to {
     opacity: 0;
     transform: scale(0.95) translateY(10px);
@@ -134,9 +152,12 @@
 
 /* 脉动动画（用于加载等待） */
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -148,10 +169,13 @@
 
 /* 弹跳动画（用于成功提示） */
 @keyframes bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(-25%);
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
+
   50% {
     transform: none;
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
@@ -164,13 +188,24 @@
 
 /* 抖动动画（用于错误提示） */
 @keyframes shake {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(0);
   }
-  10%, 30%, 50%, 70%, 90% {
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
     transform: translateX(-4px);
   }
-  20%, 40%, 60%, 80% {
+
+  20%,
+  40%,
+  60%,
+  80% {
     transform: translateX(4px);
   }
 }
@@ -184,6 +219,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -199,6 +235,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -210,14 +247,37 @@
   opacity: 0;
 }
 
-.animate-stagger-in:nth-child(1) { animation-delay: 0ms; }
-.animate-stagger-in:nth-child(2) { animation-delay: 50ms; }
-.animate-stagger-in:nth-child(3) { animation-delay: 100ms; }
-.animate-stagger-in:nth-child(4) { animation-delay: 150ms; }
-.animate-stagger-in:nth-child(5) { animation-delay: 200ms; }
-.animate-stagger-in:nth-child(6) { animation-delay: 250ms; }
-.animate-stagger-in:nth-child(7) { animation-delay: 300ms; }
-.animate-stagger-in:nth-child(8) { animation-delay: 350ms; }
+.animate-stagger-in:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.animate-stagger-in:nth-child(2) {
+  animation-delay: 50ms;
+}
+
+.animate-stagger-in:nth-child(3) {
+  animation-delay: 100ms;
+}
+
+.animate-stagger-in:nth-child(4) {
+  animation-delay: 150ms;
+}
+
+.animate-stagger-in:nth-child(5) {
+  animation-delay: 200ms;
+}
+
+.animate-stagger-in:nth-child(6) {
+  animation-delay: 250ms;
+}
+
+.animate-stagger-in:nth-child(7) {
+  animation-delay: 300ms;
+}
+
+.animate-stagger-in:nth-child(8) {
+  animation-delay: 350ms;
+}
 
 /* ============================================
    骨架屏动画
@@ -227,18 +287,17 @@
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }
 }
 
 .skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
-  );
+  background: linear-gradient(90deg,
+      #f0f0f0 25%,
+      #e0e0e0 50%,
+      #f0f0f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -288,9 +347,12 @@
 
 /* 渐变边框动画 */
 @keyframes gradient-border {
-  0%, 100% {
+
+  0%,
+  100% {
     border-color: rgba(16, 185, 129, 0.3);
   }
+
   50% {
     border-color: rgba(16, 185, 129, 0.6);
   }
@@ -323,6 +385,7 @@
     opacity: 0;
     transform: translateX(100%);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -339,6 +402,7 @@
     opacity: 1;
     transform: translateX(0);
   }
+
   to {
     opacity: 0;
     transform: translateX(100%);
@@ -371,15 +435,15 @@
 }
 
 .el-message-box__title {
-  font-weight: 800 !important;
-  font-size: 18px !important;
+  font-weight: var(--font-weight-extrabold) !important;
+  font-size: var(--font-lg) !important;
   color: rgb(17 24 39) !important;
 }
 
 .el-message-box__content {
   padding: 24px !important;
   color: rgb(75 85 99) !important;
-  font-size: 14px !important;
+  font-size: var(--font-sm) !important;
 }
 
 .el-message-box__message {
@@ -394,7 +458,7 @@
 
 .el-message-box__btns .el-button {
   border-radius: 12px !important;
-  font-weight: 700 !important;
+  font-weight: var(--font-weight-bold) !important;
   padding: 10px 20px !important;
   transition: all 0.15s ease !important;
 }
@@ -463,8 +527,8 @@
 }
 
 .el-dialog__title {
-  font-weight: 800 !important;
-  font-size: 18px !important;
+  font-weight: var(--font-weight-extrabold) !important;
+  font-size: var(--font-lg) !important;
   color: rgb(17 24 39) !important;
 }
 
@@ -586,7 +650,7 @@
 
 .el-dropdown-menu__item {
   padding: 10px 16px !important;
-  font-size: 14px !important;
+  font-size: var(--font-sm) !important;
   transition: all 0.15s ease !important;
 }
 
@@ -605,7 +669,7 @@
 
 .el-select-dropdown__item {
   padding: 10px 16px !important;
-  font-size: 14px !important;
+  font-size: var(--font-sm) !important;
   transition: all 0.15s ease !important;
 }
 
@@ -616,7 +680,7 @@
 .el-select-dropdown__item.is-selected {
   background-color: rgb(236 253 245) !important;
   color: #059669 !important;
-  font-weight: 600 !important;
+  font-weight: var(--font-weight-semibold) !important;
 }
 
 /* DatePicker 日期选择器 */
@@ -641,7 +705,7 @@
 /* Pagination 分页 */
 .el-pagination .el-pager li {
   border-radius: 8px !important;
-  font-weight: 600 !important;
+  font-weight: var(--font-weight-semibold) !important;
   transition: all 0.15s ease !important;
 }
 
@@ -701,7 +765,7 @@
 
 .el-cascader-node {
   padding: 10px 16px !important;
-  font-size: 14px !important;
+  font-size: var(--font-sm) !important;
   transition: all 0.15s ease !important;
 }
 
@@ -714,7 +778,7 @@
 .el-cascader-node.in-active-path {
   background-color: rgb(236 253 245) !important;
   color: #059669 !important;
-  font-weight: 600 !important;
+  font-weight: var(--font-weight-semibold) !important;
 }
 
 .el-cascader-node__label {
@@ -765,8 +829,8 @@ div.el-segmented,
 .el-segmented__item,
 label.el-segmented__item {
   border-radius: 9999px !important;
-  font-weight: 700 !important;
-  font-size: 12px !important;
+  font-weight: var(--font-weight-bold) !important;
+  font-size: var(--font-xs) !important;
   padding: 6px 14px !important;
   transition: all 0.2s ease !important;
   border: none !important;
@@ -783,7 +847,7 @@ label.el-segmented__item:not(.is-selected) {
 .el-segmented__item-label,
 .el-segmented__item .el-segmented__item-label {
   color: #6b7280 !important;
-  font-weight: 700 !important;
+  font-weight: var(--font-weight-bold) !important;
 }
 
 .el-segmented .el-segmented__item:hover:not(.is-selected),
@@ -845,8 +909,8 @@ label.el-segmented__item.is-selected .el-segmented__item-label {
   line-height: 32px !important;
   padding: 0 16px !important;
   border-radius: 9999px !important;
-  font-weight: 700 !important;
-  font-size: 13px !important;
+  font-weight: var(--font-weight-bold) !important;
+  font-size: var(--font-sm) !important;
   color: #6b7280 !important;
   transition: all 0.2s ease !important;
 }
@@ -880,8 +944,8 @@ label.el-segmented__item.is-selected .el-segmented__item-label {
 
 .el-radio-button__inner {
   border-radius: 9999px !important;
-  font-weight: 700 !important;
-  font-size: 13px !important;
+  font-weight: var(--font-weight-bold) !important;
+  font-size: var(--font-sm) !important;
   padding: 8px 16px !important;
   border: 1px solid #e5e7eb !important;
   color: #6b7280 !important;
@@ -896,7 +960,7 @@ label.el-segmented__item.is-selected .el-segmented__item-label {
   color: #047857 !important;
 }
 
-.el-radio-button__original-radio:checked + .el-radio-button__inner {
+.el-radio-button__original-radio:checked+.el-radio-button__inner {
   background: linear-gradient(135deg, #059669, #10b981) !important;
   border-color: #059669 !important;
   color: #ffffff !important;
@@ -950,11 +1014,11 @@ label.el-segmented__item.is-selected .el-segmented__item-label {
 
 .el-checkbox__label {
   color: #374151 !important;
-  font-weight: 600 !important;
-  font-size: 13px !important;
+  font-weight: var(--font-weight-semibold) !important;
+  font-size: var(--font-sm) !important;
 }
 
-.el-checkbox__input.is-checked + .el-checkbox__label {
+.el-checkbox__input.is-checked+.el-checkbox__label {
   color: #059669 !important;
 }
 
@@ -983,7 +1047,7 @@ label.el-segmented__item.is-selected .el-segmented__item-label {
 }
 
 .el-input__inner {
-  font-size: 14px !important;
+  font-size: var(--font-sm) !important;
   color: #111827 !important;
 }
 
@@ -1006,7 +1070,7 @@ label.el-segmented__item.is-selected .el-segmented__item-label {
   border: 1px solid #e5e7eb !important;
   border-radius: 12px !important;
   padding: 12px !important;
-  font-size: 14px !important;
+  font-size: var(--font-sm) !important;
   color: #111827 !important;
   transition: all 0.2s ease !important;
 }
@@ -1069,4 +1133,3 @@ label.el-segmented__item.is-selected .el-segmented__item-label {
 .el-slider__button:hover {
   transform: scale(1.1) !important;
 }
-

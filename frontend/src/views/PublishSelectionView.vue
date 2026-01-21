@@ -38,20 +38,20 @@ const requirementFeatures = [
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- 发布供应 -->
       <div
-        class="group relative bg-white rounded-2xl border-2 border-gray-100 p-8 hover:border-emerald-200 hover:shadow-xl transition-all cursor-pointer overflow-hidden"
+        class="group relative bg-white rounded-2xl border-2 border-gray-100 p-8 hover:border-brand-200 hover:shadow-xl transition-all cursor-pointer overflow-hidden"
         @click="goToPublishSupply"
       >
         <!-- 背景装饰 -->
-        <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-70 transition-opacity"></div>
+        <div class="absolute top-0 right-0 w-32 h-32 bg-brand-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-70 transition-opacity"></div>
         
         <div class="relative">
           <!-- 图标与标题 -->
           <div class="flex items-center gap-4 mb-6">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
               <Package class="w-8 h-8 text-white" />
             </div>
             <div>
-              <h2 class="text-xl font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
+              <h2 class="text-xl font-bold text-gray-900 group-hover:text-brand-600 transition-colors">
                 发布供应
               </h2>
               <p class="text-sm text-gray-500">我有货，寻找买家</p>
@@ -65,8 +65,8 @@ const requirementFeatures = [
               :key="index"
               class="flex items-center gap-3 text-sm text-gray-600"
             >
-              <div class="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-                <component :is="feature.icon" class="w-4 h-4 text-emerald-600" />
+              <div class="w-6 h-6 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
+                <component :is="feature.icon" class="w-4 h-4 text-brand-600" />
               </div>
               <span>{{ feature.text }}</span>
             </li>
@@ -76,7 +76,6 @@ const requirementFeatures = [
           <BaseButton
             type="primary"
             block
-            class="group-hover:bg-emerald-700"
           >
             <span>立即发布供应</span>
             <ArrowRight class="w-4 h-4 ml-2" />
@@ -86,20 +85,20 @@ const requirementFeatures = [
 
       <!-- 发布采购 -->
       <div
-        class="group relative bg-white rounded-2xl border-2 border-gray-100 p-8 hover:border-blue-200 hover:shadow-xl transition-all cursor-pointer overflow-hidden"
+        class="group relative bg-white rounded-2xl border-2 border-gray-100 p-8 hover:border-autumn-200 hover:shadow-xl transition-all cursor-pointer overflow-hidden"
         @click="goToPublishRequirement"
       >
         <!-- 背景装饰 -->
-        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-70 transition-opacity"></div>
+        <div class="absolute top-0 right-0 w-32 h-32 bg-autumn-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:opacity-70 transition-opacity"></div>
         
         <div class="relative">
           <!-- 图标与标题 -->
           <div class="flex items-center gap-4 mb-6">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-autumn-500 to-autumn-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
               <ShoppingCart class="w-8 h-8 text-white" />
             </div>
             <div>
-              <h2 class="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+              <h2 class="text-xl font-bold text-gray-900 group-hover:text-autumn-600 transition-colors">
                 发布采购
               </h2>
               <p class="text-sm text-gray-500">我要货，寻找卖家</p>
@@ -113,8 +112,8 @@ const requirementFeatures = [
               :key="index"
               class="flex items-center gap-3 text-sm text-gray-600"
             >
-              <div class="w-6 h-6 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                <component :is="feature.icon" class="w-4 h-4 text-blue-600" />
+              <div class="w-6 h-6 rounded-lg bg-autumn-50 flex items-center justify-center shrink-0">
+                <component :is="feature.icon" class="w-4 h-4 text-autumn-600" />
               </div>
               <span>{{ feature.text }}</span>
             </li>
@@ -124,7 +123,7 @@ const requirementFeatures = [
           <BaseButton
             type="primary"
             block
-            class="!bg-blue-600 hover:!bg-blue-700"
+            class="!bg-autumn-600 hover:!bg-autumn-700"
           >
             <span>立即发布采购</span>
             <ArrowRight class="w-4 h-4 ml-2" />
@@ -134,12 +133,12 @@ const requirementFeatures = [
     </div>
 
     <!-- 提示信息 -->
-    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+    <div class="bg-autumn-50 border border-autumn-100 rounded-xl p-4">
       <div class="flex items-start gap-3">
-        <div class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center shrink-0 mt-0.5">
+        <div class="w-5 h-5 rounded-full bg-autumn-500 flex items-center justify-center shrink-0 mt-0.5">
           <Check class="w-3 h-3 text-white" />
         </div>
-        <div class="text-sm text-blue-700">
+        <div class="text-sm text-autumn-700">
           <p class="font-bold mb-1">温馨提示</p>
           <p>发布信息前，请确保已完善您的公司资料，以便更好地展示您的企业形象和提升交易成功率。</p>
         </div>

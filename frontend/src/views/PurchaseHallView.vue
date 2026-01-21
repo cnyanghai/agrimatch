@@ -403,17 +403,17 @@ function parseParams(paramsJson?: string): string {
           :key="r.id"
           :ref="(el) => setCardEl(Number(r.id), el as any)"
           class="purchase-card bg-white rounded-xl p-5 border border-gray-200 transition-all"
-          :class="focusedId === r.id ? 'ring-2 ring-blue-500/50 bg-blue-50/40' : 'hover:shadow-md hover:border-blue-100'"
+          :class="focusedId === r.id ? 'ring-2 ring-autumn-500/50 bg-autumn-50/40' : 'hover:shadow-md hover:border-autumn-100'"
         >
           <div class="flex flex-col lg:flex-row lg:flex-wrap items-start gap-6 mx-0">
             <div class="w-full lg:w-52 flex items-center gap-3 shrink-0 border-r border-gray-50 pr-4">
-              <div class="w-12 h-12 bg-blue-50 text-blue-700 rounded-lg flex items-center justify-center text-xl font-bold shrink-0">
+              <div class="w-12 h-12 bg-autumn-50 text-autumn-700 rounded-lg flex items-center justify-center text-xl font-bold shrink-0">
                 {{ (r.companyName || r.nickName || r.userName || '采')[0] }}
               </div>
               <div class="overflow-hidden flex-1">
                 <div class="text-sm font-bold text-gray-900 truncate">{{ r.companyName || '未填写公司' }}</div>
                 <div class="flex items-center gap-1 mt-1">
-                  <span class="bg-blue-50 text-blue-600 text-[10px] px-1 py-0.5 rounded">企业用户</span>
+                  <span class="bg-autumn-50 text-autumn-600 text-[10px] px-1 py-0.5 rounded">企业用户</span>
                   <span class="text-[10px] text-gray-400">{{ r.nickName || r.userName || '' }}</span>
                 </div>
               </div>
@@ -423,7 +423,7 @@ function parseParams(paramsJson?: string): string {
                 class="shrink-0 text-xs px-2 py-1 rounded-full border transition-all "
                 :class="isFollowingUser(r.userId) 
                   ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100' 
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300 hover:text-blue-600'"
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-autumn-300 hover:text-autumn-600'"
                 @click.stop="toggleFollow(r)"
               >
                 {{ isFollowingUser(r.userId) ? '已关注' : '+ 关注' }}
@@ -467,7 +467,7 @@ function parseParams(paramsJson?: string): string {
             </div>
 
             <div class="shrink-0 flex flex-col items-center gap-2">
-              <button class="px-8 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-sm hover:bg-slate-800 transition-all " @click="onQuote(r)">
+              <button class="px-8 py-3 bg-brand-600 text-white rounded-xl font-bold text-sm shadow-sm hover:bg-brand-700 transition-all " @click="onQuote(r)">
                 立即报价
               </button>
             </div>

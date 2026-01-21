@@ -561,7 +561,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
           <div class="p-5 border-b border-gray-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-slate-900 rounded-full"></div>
-            <h2 class="font-bold text-gray-900">发布信息</h2>
+            <h3 class="text-lg font-bold text-gray-900">发布信息</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -601,7 +601,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 50ms">
           <div class="p-5 border-b border-gray-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-brand-600 rounded-full"></div>
-            <h2 class="font-bold text-gray-900">基础信息</h2>
+            <h3 class="text-lg font-bold text-gray-900">基础信息</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -774,7 +774,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
           <div class="p-5 border-b border-gray-200 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-5 bg-brand-500 rounded-full"></div>
-              <h2 class="font-bold text-gray-900">规格参数</h2>
+              <h3 class="text-lg font-bold text-gray-900">规格参数</h3>
             </div>
             <span class="text-xs text-gray-400">选择品类后自动加载</span>
           </div>
@@ -821,7 +821,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 150ms">
           <div class="p-5 border-b border-gray-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-amber-500 rounded-full"></div>
-            <h2 class="font-bold text-gray-900">物流与交付</h2>
+            <h3 class="text-lg font-bold text-gray-900">物流与交付</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1108,7 +1108,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
 }
 :deep(.basis-plus .el-input__inner) {
   color: rgb(220, 38, 38);
-  font-weight: 800;
+  font-weight: var(--font-weight-extrabold);
 }
 :deep(.basis-minus .el-input__wrapper) {
   border-color: rgba(16, 185, 129, 0.15);
@@ -1116,7 +1116,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
 }
 :deep(.basis-minus .el-input__inner) {
   color: rgb(5, 150, 105);
-  font-weight: 800;
+  font-weight: var(--font-weight-extrabold);
 }
 
 /* 单选按钮组样式 */
@@ -1128,7 +1128,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
   border: 2px solid rgb(243 244 246) !important;
   border-radius: 10px !important;
   box-shadow: none !important;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   padding: 8px 16px;
 }
 :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {

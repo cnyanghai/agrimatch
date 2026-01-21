@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
 import { getDashboard, type DashboardResponse } from '../api/dashboard'
-import { ArrowRight, ShoppingCart, Box, ChatDotRound, Location, DocumentChecked, Bell, Clock, HomeFilled, DocumentAdd, Star, User, Coin } from '@element-plus/icons-vue'
+import { ArrowRight, FilePlus, Map, MessageSquare, FileCheck, User, Coins, Star, Bell, Clock } from 'lucide-vue-next'
 import ProfileGuideCard from '../components/ProfileGuideCard.vue'
 
 const router = useRouter()
@@ -39,7 +39,7 @@ const pendingItems = computed(() => {
   
   if (dashboard.value.pendingContractCount > 0) {
     items.push({
-      icon: DocumentChecked,
+      icon: FileCheck,
       label: '份待签署合同',
       count: dashboard.value.pendingContractCount,
       color: 'red',
@@ -49,7 +49,7 @@ const pendingItems = computed(() => {
   
   if (dashboard.value.pendingInquiryCount > 0) {
     items.push({
-      icon: ChatDotRound,
+      icon: MessageSquare,
       label: '条待回复询价',
       count: dashboard.value.pendingInquiryCount,
       color: 'blue',
@@ -85,9 +85,9 @@ const consoleModules = computed(() => {
     {
       title: '发布信息',
       desc: '发布供应或采购需求',
-      icon: DocumentAdd,
+      icon: FilePlus,
       path: '/console/publish',
-      color: 'emerald',
+      color: 'slate',
       badge: null
     },
     {
@@ -95,13 +95,13 @@ const consoleModules = computed(() => {
       desc: '追踪关注商户动态',
       icon: Star,
       path: '/console/following',
-      color: 'amber',
+      color: 'slate',
       badge: dashboard.value?.followingCount || null
     },
     {
       title: '地图找商',
       desc: '附近合作伙伴地图',
-      icon: Location,
+      icon: Map,
       path: '/map',
       color: 'slate',
       badge: null
@@ -109,17 +109,17 @@ const consoleModules = computed(() => {
     {
       title: '聊天议价',
       desc: '在线沟通洽谈',
-      icon: ChatDotRound,
+      icon: MessageSquare,
       path: '/chat',
-      color: 'blue',
+      color: 'slate',
       badge: dashboard.value?.unreadMessageCount || null
     },
     {
       title: '合同管理',
       desc: '电子合同签署与管理',
-      icon: DocumentChecked,
+      icon: FileCheck,
       path: '/contracts',
-      color: 'purple',
+      color: 'slate',
       badge: dashboard.value?.pendingContractCount || null
     },
     {
@@ -127,30 +127,25 @@ const consoleModules = computed(() => {
       desc: '个人信息与公司资料',
       icon: User,
       path: '/profile',
-      color: 'gray',
+      color: 'slate',
       badge: null
     },
     {
       title: '会员积分',
       desc: '积分充值与兑换商城',
-      icon: Coin,
+      icon: Coins,
       path: '/points',
-      color: 'orange',
+      color: 'slate',
       badge: null
     }
   ]
   return modules
 })
 
-// 获取图标容器的样式类
+// 获取图标容器的样式类（统一为 slate 风格，与首页对齐）
 function getIconClass(color: string) {
-  const colorMap: Record<string, string> = {
-    brand: 'bg-brand-50 text-brand-600 group-hover:bg-brand-600 group-hover:text-white',
-    emerald: 'bg-brand-50 text-brand-600 group-hover:bg-brand-600 group-hover:text-white',
-    orange: 'bg-orange-50 text-orange-600 group-hover:bg-orange-600 group-hover:text-white',
-    slate: 'bg-slate-50 text-slate-600 group-hover:bg-slate-900 group-hover:text-white'
-  }
-  return colorMap[color] || colorMap.brand
+  // 统一使用 slate 风格，与首页搜索模块保持一致
+  return 'bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600'
 }
 
 // 待办项颜色
@@ -158,7 +153,7 @@ function getPendingColorClass(color?: string): { bg: string; text: string; icon:
   const colorMap: Record<string, { bg: string; text: string; icon: string }> = {
     amber: { bg: 'bg-amber-50', text: 'text-amber-700', icon: 'text-amber-500' },
     red: { bg: 'bg-red-50', text: 'text-red-700', icon: 'text-red-500' },
-    blue: { bg: 'bg-blue-50', text: 'text-blue-700', icon: 'text-blue-500' },
+    blue: { bg: 'bg-autumn-50', text: 'text-autumn-700', icon: 'text-autumn-500' },
     purple: { bg: 'bg-purple-50', text: 'text-purple-700', icon: 'text-purple-500' }
   }
   const key = color || 'amber'
@@ -246,13 +241,11 @@ onMounted(() => {
           >
             <div class="flex items-center gap-3">
               <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', getPendingColorClass(item.color).bg]">
-                <el-icon :size="20" :class="getPendingColorClass(item.color).icon">
-                  <component :is="item.icon" />
-                </el-icon>
+                <component :is="item.icon" class="w-5 h-5" :class="getPendingColorClass(item.color).icon" stroke-width="2" />
               </div>
               <div>
                 <div class="flex items-baseline gap-1">
-                  <span class="text-2xl font-black text-gray-900">{{ item.count }}</span>
+                  <span class="text-2xl font-bold text-gray-900">{{ item.count }}</span>
                   <span :class="['text-xs font-medium', getPendingColorClass(item.color).text]">{{ item.label }}</span>
                 </div>
               </div>
@@ -268,28 +261,28 @@ onMounted(() => {
             我的发布
           </p>
           <div class="flex items-end gap-2">
-            <span class="text-2xl font-black text-gray-800 count-up">{{ dashboard?.myActiveListingCount ?? 0 }}</span>
+            <span class="text-2xl font-bold text-gray-800 count-up">{{ dashboard?.myActiveListingCount ?? 0 }}</span>
             <span class="text-xs text-brand-500 font-bold pb-1">个活跃</span>
           </div>
         </div>
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover-card animate-stagger-in">
           <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">今日咨询</p>
           <div class="flex items-end gap-2">
-            <span class="text-2xl font-black text-gray-800 count-up">{{ dashboard?.todayViewCount ?? 0 }}</span>
-            <span class="text-xs text-blue-500 font-bold pb-1">次访问</span>
+            <span class="text-2xl font-bold text-gray-800 count-up">{{ dashboard?.todayViewCount ?? 0 }}</span>
+            <span class="text-xs text-autumn-500 font-bold pb-1">次访问</span>
           </div>
         </div>
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover-card animate-stagger-in">
           <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">累计成交</p>
           <div class="flex items-end gap-2">
-            <span class="text-2xl font-black text-gray-800 count-up">{{ formatNumber(dashboard?.totalDealQuantity) }}</span>
+            <span class="text-2xl font-bold text-gray-800 count-up">{{ formatNumber(dashboard?.totalDealQuantity) }}</span>
             <span class="text-xs text-gray-500 font-bold pb-1">吨</span>
           </div>
         </div>
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover-card animate-stagger-in">
           <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-wider">进行中合同</p>
           <div class="flex items-end gap-2">
-            <span class="text-2xl font-black text-gray-800 count-up">{{ dashboard?.activeContractCount ?? 0 }}</span>
+            <span class="text-2xl font-bold text-gray-800 count-up">{{ dashboard?.activeContractCount ?? 0 }}</span>
             <span class="text-xs text-brand-500 font-bold pb-1">份</span>
           </div>
         </div>
@@ -307,18 +300,18 @@ onMounted(() => {
           <button
             v-for="(module, index) in consoleModules"
             :key="module.title"
-            class="group relative bg-white p-6 rounded-2xl border border-gray-100 hover:shadow-lg hover:border-emerald-200 hover:-translate-y-1 transition-all cursor-pointer text-left animate-stagger-in"
+            class="group relative bg-white p-6 rounded-2xl border border-gray-100 hover:shadow-lg hover:border-brand-200 hover:-translate-y-1 transition-all cursor-pointer text-left animate-stagger-in"
             :style="{ animationDelay: `${index * 50}ms` }"
             @click="go(module.path)"
           >
             <!-- 图标容器 -->
             <div :class="`w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-all group-hover:scale-110 ${getIconClass(module.color)}`">
-              <el-icon :size="28"><component :is="module.icon" /></el-icon>
+              <component :is="module.icon" class="w-6 h-6" stroke-width="2" />
             </div>
             
             <!-- 标题与描述 -->
             <div class="mb-2">
-              <h4 class="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors mb-1">
+              <h4 class="font-bold text-gray-900 group-hover:text-brand-600 transition-colors mb-1">
                 {{ module.title }}
               </h4>
               <p class="text-xs text-gray-500 leading-relaxed">
@@ -332,9 +325,9 @@ onMounted(() => {
             </div>
             
             <!-- 箭头指示 -->
-            <div class="flex items-center gap-1 text-gray-400 group-hover:text-emerald-500 transition-colors mt-4">
+            <div class="flex items-center gap-1 text-gray-400 group-hover:text-brand-500 transition-colors mt-4">
               <span class="text-xs font-bold">进入</span>
-              <el-icon :size="14"><ArrowRight /></el-icon>
+              <ArrowRight class="w-3.5 h-3.5" stroke-width="2" />
             </div>
           </button>
         </div>

@@ -1,19 +1,20 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+@import "./styles/typography.css";
 
 :root {
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, 'Microsoft YaHei', sans-serif;
+  font-family: var(--font-family);
 
-  /* Element Plus：全站 primary 统一为 Emerald（消除默认扎眼蓝） */
-  --el-color-primary: #059669; /* emerald-600 */
-  --el-color-primary-rgb: 5, 150, 105;
-  --el-color-primary-dark-2: #047857; /* emerald-700 */
-  --el-color-primary-light-3: #34d399; /* emerald-400 */
-  --el-color-primary-light-5: #6ee7b7; /* emerald-300 */
-  --el-color-primary-light-7: #a7f3d0; /* emerald-200 */
-  --el-color-primary-light-8: #d1fae5; /* emerald-100 */
-  --el-color-primary-light-9: #ecfdf5; /* emerald-50 */
+  /* Element Plus：全站 primary 统一为若竹色 (Ruozhu) */
+  --el-color-primary: #84BB9F; /* 若竹色主色 */
+  --el-color-primary-rgb: 132, 187, 159;
+  --el-color-primary-dark-2: #6da78b; /* 若竹色深色 */
+  --el-color-primary-light-3: #9ac9ab; /* 若竹色浅色 */
+  --el-color-primary-light-5: #b8dbc8; /* 若竹色更浅 */
+  --el-color-primary-light-7: #d9ede4; /* 若竹色极浅 */
+  --el-color-primary-light-8: #e8f2ed; /* 若竹色超浅 */
+  --el-color-primary-light-9: #f0f7f4; /* 若竹色背景 */
 }
 
 html,
@@ -25,15 +26,40 @@ body,
 body {
   margin: 0;
   background: #f8fafc; /* 更现代的浅灰背景 */
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
-/* 现代化渐变背景 */
+/* 强制重置表单元素字体 */
+input,
+textarea,
+select,
+button {
+  font-family: var(--font-family) !important;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+/* Element Plus 组件字体统一 */
+.el-button,
+.el-input__inner,
+.el-textarea__inner,
+.el-select .el-input__inner {
+  font-family: var(--font-family) !important;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+/* 现代化渐变背景 - 使用中国传统色 */
 .bg-gradient-primary {
-  background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%); /* 翡翠绿渐变 */
+  background: linear-gradient(135deg, #6da78b 0%, #84BB9F 100%); /* 若竹色渐变 */
 }
 
 .bg-gradient-secondary {
-  background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%); /* 靛蓝渐变 */
+  background: linear-gradient(135deg, #7aa0b3 0%, #A5CCDC 100%); /* 秋波蓝渐变 */
 }
 
 .bg-gradient-accent {

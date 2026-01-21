@@ -2344,19 +2344,19 @@ onBeforeUnmount(() => {
 }
 
 :deep(.transaction-steps .el-step__title) {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--font-xs);
+  font-weight: var(--font-weight-bold);
 }
 
 :deep(.transaction-steps .el-step__description) {
-  font-size: 11px;
-  line-height: 1.4;
+  font-size: var(--font-xs);
+  line-height: var(--leading-snug);
 }
 
 :deep(.transaction-steps .el-step__icon) {
   width: 20px;
   height: 20px;
-  font-size: 10px;
+  font-size: var(--font-xs);
 }
 
 /* 联系人列表入场动画 */

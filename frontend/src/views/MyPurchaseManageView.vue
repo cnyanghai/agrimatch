@@ -521,7 +521,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
           <div class="p-5 border-b border-gray-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-slate-900 rounded-full"></div>
-            <h2 class="font-bold text-gray-900">发布信息</h2>
+            <h3 class="text-lg font-bold text-gray-900">发布信息</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -561,7 +561,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 50ms">
           <div class="p-5 border-b border-gray-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-brand-600 rounded-full"></div>
-            <h2 class="font-bold text-gray-900">基础信息</h2>
+            <h3 class="text-lg font-bold text-gray-900">基础信息</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -590,7 +590,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
           <div class="p-5 border-b border-gray-200 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-5 bg-brand-500 rounded-full"></div>
-              <h2 class="font-bold text-gray-900">规格参数</h2>
+              <h3 class="text-lg font-bold text-gray-900">规格参数</h3>
             </div>
             <span class="text-xs text-gray-400">选择品类后自动加载</span>
           </div>
@@ -637,7 +637,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 150ms">
           <div class="p-5 border-b border-gray-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-amber-500 rounded-full"></div>
-            <h2 class="font-bold text-gray-900">物流与交付</h2>
+            <h3 class="text-lg font-bold text-gray-900">物流与交付</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

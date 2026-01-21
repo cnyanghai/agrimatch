@@ -50,16 +50,16 @@ const statusConfig: Record<number, {
   },
   3: { 
     label: '履约中', 
-    color: 'bg-blue-50 text-blue-600',
-    barColor: 'bg-blue-500',
-    bgGradient: 'from-blue-500 to-indigo-600',
-    iconColor: 'text-blue-500'
+    color: 'bg-autumn-50 text-autumn-600',
+    barColor: 'bg-autumn-500',
+    bgGradient: 'from-autumn-500 to-autumn-600',
+    iconColor: 'text-autumn-500'
   },
   4: { 
     label: '已完成', 
     color: 'bg-brand-100 text-brand-700',
     barColor: 'bg-brand-600',
-    bgGradient: 'from-brand-600 to-green-700',
+    bgGradient: 'from-brand-600 to-brand-700',
     iconColor: 'text-brand-600'
   },
   5: { 
@@ -329,8 +329,8 @@ onMounted(() => {
               :class="[
                 'px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1',
                 filterStatus === 3 
-                  ? 'bg-blue-500 text-white shadow-md' 
-                  : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                  ? 'bg-autumn-500 text-white shadow-md' 
+                  : 'bg-autumn-50 text-autumn-600 hover:bg-autumn-100'
               ]"
               @click="filterStatus = filterStatus === 3 ? null : 3"
             >
@@ -466,13 +466,13 @@ onMounted(() => {
               </div>
               
               <!-- 履约进度（仅履约中状态显示） -->
-              <div v-if="contract.status === 3" class="mt-4 p-3 bg-blue-50 rounded-xl">
+              <div v-if="contract.status === 3" class="mt-4 p-3 bg-autumn-50 rounded-xl">
                 <div class="flex items-center justify-between text-xs">
-                  <div class="flex items-center gap-2 text-blue-600 font-medium">
+                  <div class="flex items-center gap-2 text-autumn-600 font-medium">
                     <Package class="w-4 h-4" />
                     履约进行中
                   </div>
-                  <span class="text-blue-500">点击查看详情 →</span>
+                  <span class="text-autumn-500">点击查看详情 →</span>
                 </div>
               </div>
               

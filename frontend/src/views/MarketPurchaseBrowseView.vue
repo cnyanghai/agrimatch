@@ -223,7 +223,7 @@ onMounted(() => {
           刷新
         </button>
         <button 
-          class="bg-slate-900 text-white px-5 py-2 rounded-xl font-bold hover:bg-slate-800 transition-all  flex items-center gap-2"
+          class="bg-brand-600 text-white px-5 py-2 rounded-xl font-bold hover:bg-brand-700 transition-all  flex items-center gap-2"
           @click="goToHall"
         >
           <ShoppingCart class="w-4 h-4" />
@@ -248,8 +248,8 @@ onMounted(() => {
           <div 
             class="w-16 h-16 rounded-full flex items-center justify-center transition-all border-2"
             :class="selectedUserId === null 
-              ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200' 
-              : 'bg-gray-100 text-gray-500 border-gray-200 group-hover:border-blue-300'"
+              ? 'bg-autumn-600 text-white border-autumn-600 shadow-md shadow-autumn-200' 
+              : 'bg-gray-100 text-gray-500 border-gray-200 group-hover:border-autumn-300'"
           >
             <UserFilled class="w-6 h-6" />
           </div>
@@ -266,7 +266,7 @@ onMounted(() => {
             class="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold transition-all border-2"
             :class="selectedUserId === user.userId 
               ? 'bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-300' 
-              : 'bg-white text-slate-700 border-gray-200 group-hover:border-blue-300 group-hover:shadow-md'"
+              : 'bg-white text-slate-700 border-gray-200 group-hover:border-autumn-300 group-hover:shadow-md'"
             @click="toggleUserFilter(user.userId)"
           >
             {{ getAvatarText(user) }}
@@ -291,10 +291,10 @@ onMounted(() => {
           class="flex flex-col items-center gap-2 shrink-0 group"
           @click="goToHall"
         >
-          <div class="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 group-hover:border-blue-400 group-hover:text-blue-500 transition-all">
+          <div class="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 group-hover:border-autumn-400 group-hover:text-autumn-500 transition-all">
             <Plus class="w-6 h-6" />
           </div>
-          <span class="text-xs font-medium text-gray-400 group-hover:text-blue-500">发现更多</span>
+          <span class="text-xs font-medium text-gray-400 group-hover:text-autumn-500">发现更多</span>
         </button>
       </div>
 
@@ -319,7 +319,7 @@ onMounted(() => {
       <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
           <span class="text-[10px] font-bold uppercase tracking-widest text-gray-400">最新采购需求</span>
-          <span v-if="selectedUserId" class="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+          <span v-if="selectedUserId" class="text-xs text-autumn-600 bg-autumn-50 px-2 py-0.5 rounded-full">
             已筛选
           </span>
         </div>
@@ -332,10 +332,10 @@ onMounted(() => {
           <div
             v-for="req in filteredRequirements"
             :key="req.id"
-            class="group bg-white rounded-xl border border-gray-200 overflow-hidden transition-all hover:shadow-md hover:border-blue-100"
+            class="group bg-white rounded-xl border border-gray-200 overflow-hidden transition-all hover:shadow-md hover:border-autumn-100"
           >
             <!-- 卡片头部 -->
-            <div class="p-5 bg-gradient-to-br from-blue-50/50 to-white border-b border-gray-50">
+            <div class="p-5 bg-gradient-to-br from-autumn-50/50 to-white border-b border-gray-50">
               <div class="flex items-center gap-3">
                 <div class="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-md">
                   {{ getRequirementAvatar(req) }}
@@ -343,7 +343,7 @@ onMounted(() => {
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
                     <span class="font-bold text-gray-900 truncate">{{ req.nickName || req.userName || '采购商' }}</span>
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-autumn-600 bg-autumn-50 px-2 py-0.5 rounded-full border border-autumn-100">
                       BUYER
                     </span>
                   </div>
@@ -358,7 +358,7 @@ onMounted(() => {
               <div class="flex items-start justify-between mb-4">
                 <div>
                   <div class="flex items-center gap-2 mb-1">
-                    <ShoppingCart class="w-4 h-4 text-blue-600" />
+                    <ShoppingCart class="w-4 h-4 text-autumn-600" />
                     <h3 class="text-xl font-black text-gray-900">{{ req.categoryName }}</h3>
                   </div>
                   <div class="text-xs text-gray-400">#{{ req.id }} · {{ formatTime(req.createTime) }}</div>
@@ -427,7 +427,7 @@ onMounted(() => {
                 详情
               </button>
               <button 
-                class="px-6 py-2 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-md shadow-slate-200 hover:bg-slate-800 transition-all  flex items-center gap-2"
+                class="px-6 py-2 bg-brand-600 text-white rounded-xl font-bold text-sm shadow-md shadow-brand-200 hover:bg-brand-700 transition-all  flex items-center gap-2"
                 @click="onQuote(req)"
               >
                 <ChatDotRound class="w-4 h-4" />

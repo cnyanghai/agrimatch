@@ -243,14 +243,14 @@ onMounted(() => {
           :class="[
             'flex-1 px-4 py-2 rounded-lg text-sm font-bold transition-all',
             activeTab === 'requirements'
-              ? 'bg-white text-blue-600 shadow-sm'
+              ? 'bg-white text-autumn-600 shadow-sm'
               : 'text-gray-600 hover:text-gray-900'
           ]"
           @click="activeTab = 'requirements'"
         >
           <ShoppingCart class="w-4 h-4 inline mr-2" />
           采购需求
-          <span v-if="filteredRequirements.length > 0" class="ml-2 text-xs bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full">
+          <span v-if="filteredRequirements.length > 0" class="ml-2 text-xs bg-autumn-50 text-autumn-600 px-1.5 py-0.5 rounded-full">
             {{ filteredRequirements.length }}
           </span>
         </button>
@@ -300,12 +300,12 @@ onMounted(() => {
           <div
             v-for="req in filteredRequirements"
             :key="req.id"
-            class="group bg-white rounded-xl border border-gray-200 overflow-hidden transition-all hover:shadow-md hover:border-blue-100 cursor-pointer"
+            class="group bg-white rounded-xl border border-gray-200 overflow-hidden transition-all hover:shadow-md hover:border-autumn-100 cursor-pointer"
             @click="router.push(`/requirement-browse?id=${req.id}`)"
           >
             <div class="p-5">
               <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold">
+                <div class="w-10 h-10 bg-autumn-600 text-white rounded-lg flex items-center justify-center font-bold">
                   {{ (req.nickName || req.userName || 'U')[0].toUpperCase() }}
                 </div>
                 <div class="flex-1 min-w-0">
@@ -313,12 +313,12 @@ onMounted(() => {
                   <div class="text-xs text-gray-500 truncate">{{ req.companyName || '个人商户' }}</div>
                 </div>
               </div>
-              <h3 class="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+              <h3 class="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-autumn-600 transition-colors">
                 {{ req.categoryName || '原料采购' }}
               </h3>
               <div class="flex items-center justify-between text-sm">
                 <span class="text-gray-500">需求: {{ req.quantity || '-' }}</span>
-                <span class="font-bold text-blue-600">预算: ¥{{ req.budgetPrice || '-' }}/吨</span>
+                <span class="font-bold text-autumn-600">预算: ¥{{ req.budgetPrice || '-' }}/吨</span>
               </div>
             </div>
           </div>

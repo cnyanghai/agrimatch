@@ -147,7 +147,7 @@ function renderMarkers() {
           transform: rotate(45deg);
           color: white;
           font-size: 14px;
-          font-weight: bold;
+          font-weight: 700;
         ">${(c.supplyCount ?? 0) + (c.requirementCount ?? 0)}</div>
       </div>
     `
@@ -195,11 +195,11 @@ function openInfo(c: MapCompanyMarkerResponse, marker: any) {
   const color = typeColors[type]
   
   const supplyCats = (c.supplyCategories ?? []).slice(0, 5).map(cat => 
-    `<span style="display:inline-block;padding:2px 8px;margin:2px;background:#ecfdf5;color:#059669;border-radius:12px;font-size:11px;">${escapeHtml(cat)}</span>`
+    `<span style="display:inline-block;padding:2px 8px;margin:2px;background:#ecfdf5;color:#059669;border-radius:12px;font-size:12px;">${escapeHtml(cat)}</span>`
   ).join('')
   
   const reqCats = (c.requirementCategories ?? []).slice(0, 5).map(cat => 
-    `<span style="display:inline-block;padding:2px 8px;margin:2px;background:#eff6ff;color:#2563eb;border-radius:12px;font-size:11px;">${escapeHtml(cat)}</span>`
+    `<span style="display:inline-block;padding:2px 8px;margin:2px;background:#eff6ff;color:#2563eb;border-radius:12px;font-size:12px;">${escapeHtml(cat)}</span>`
   ).join('')
   
   const html = `
@@ -225,16 +225,16 @@ function openInfo(c: MapCompanyMarkerResponse, marker: any) {
         <div style="display:flex;gap:12px;margin-bottom:12px;">
           <div onclick="window.__mapViewSupply && window.__mapViewSupply(${c.companyId})" style="flex:1;background:#ecfdf5;padding:10px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#ecfdf5'">
             <div style="font-size:20px;font-weight:700;color:#059669;">${c.supplyCount ?? 0}</div>
-            <div style="font-size:11px;color:#6b7280;">供应发布</div>
+            <div style="font-size:12px;color:#6b7280;">供应发布</div>
           </div>
           <div onclick="window.__mapViewNeed && window.__mapViewNeed(${c.companyId})" style="flex:1;background:#eff6ff;padding:10px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
             <div style="font-size:20px;font-weight:700;color:#2563eb;">${c.requirementCount ?? 0}</div>
-            <div style="font-size:11px;color:#6b7280;">采购需求</div>
+            <div style="font-size:12px;color:#6b7280;">采购需求</div>
           </div>
         </div>
         
-        ${supplyCats ? `<div style="margin-bottom:8px;"><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">供应品类</div>${supplyCats}</div>` : ''}
-        ${reqCats ? `<div><div style="font-size:11px;color:#6b7280;margin-bottom:4px;">采购品类</div>${reqCats}</div>` : ''}
+        ${supplyCats ? `<div style="margin-bottom:8px;"><div style="font-size:12px;color:#6b7280;margin-bottom:4px;">供应品类</div>${supplyCats}</div>` : ''}
+        ${reqCats ? `<div><div style="font-size:12px;color:#6b7280;margin-bottom:4px;">采购品类</div>${reqCats}</div>` : ''}
       </div>
       
       <div style="padding:0 16px 16px;display:flex;gap:8px;">
@@ -245,7 +245,7 @@ function openInfo(c: MapCompanyMarkerResponse, marker: any) {
           color:white;
           border:none;
           border-radius:10px;
-          font-size:13px;
+          font-size:14px;
           font-weight:600;
           cursor:pointer;
         ">立即沟通</button>

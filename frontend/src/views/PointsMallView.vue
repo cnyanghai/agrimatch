@@ -95,9 +95,9 @@ function getCategoryIcon(category: string) {
 
 function getCategoryColor(category: string) {
   switch (category) {
-    case 'card': return 'bg-blue-50 text-blue-600'
+    case 'card': return 'bg-autumn-50 text-autumn-600'
     case 'gift': return 'bg-purple-50 text-purple-600'
-    case 'service': return 'bg-emerald-50 text-emerald-600'
+    case 'service': return 'bg-brand-50 text-brand-600'
     default: return 'bg-gray-50 text-gray-600'
   }
 }
@@ -218,7 +218,7 @@ onMounted(() => {
       <div
         v-for="product in filteredProducts"
         :key="product.id"
-        class="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-emerald-200 transition-all"
+            class="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-brand-200 transition-all"
       >
         <!-- 商品图片区域 -->
         <div class="relative h-48 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
@@ -247,7 +247,7 @@ onMounted(() => {
 
         <!-- 商品信息 -->
         <div class="p-6">
-          <h3 class="font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
+          <h3 class="font-bold text-gray-900 mb-2 group-hover:text-brand-600 transition-colors">
             {{ product.name }}
           </h3>
           <p class="text-sm text-gray-500 mb-4 line-clamp-2">

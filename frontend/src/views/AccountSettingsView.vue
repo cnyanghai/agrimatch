@@ -347,8 +347,8 @@ const tabs = [
 
     <!-- 基本信息 -->
     <div v-show="activeTab === 'user'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-      <div class="p-6 border-b border-gray-200">
-        <h3 class="font-bold text-gray-900">基本信息</h3>
+      <div class="p-5 border-b border-gray-200">
+        <h3 class="text-lg font-bold text-gray-900">基本信息</h3>
         <p class="text-sm text-gray-500 mt-1">修改后点击保存生效</p>
       </div>
       
@@ -443,8 +443,8 @@ const tabs = [
 
     <!-- 公司信息 -->
     <div v-show="activeTab === 'company'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-      <div class="p-6 border-b border-gray-200">
-        <h3 class="font-bold text-gray-900">公司信息</h3>
+      <div class="p-5 border-b border-gray-200">
+        <h3 class="text-lg font-bold text-gray-900">公司信息</h3>
         <p class="text-sm text-gray-500 mt-1">完善公司信息以便开展业务</p>
       </div>
       
@@ -629,8 +629,8 @@ const tabs = [
 
     <!-- 账户安全 -->
     <div v-show="activeTab === 'security'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-      <div class="p-6 border-b border-gray-200">
-        <h3 class="font-bold text-gray-900">修改密码</h3>
+      <div class="p-5 border-b border-gray-200">
+        <h3 class="text-lg font-bold text-gray-900">修改密码</h3>
         <p class="text-sm text-gray-500 mt-1">定期更换密码可以保护账户安全</p>
       </div>
       
