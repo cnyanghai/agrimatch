@@ -6,8 +6,8 @@ import { useUiStore } from './store/ui'
 import AuthDialog from './components/AuthDialog.vue'
 import {
   HomeFilled, Management, Search,
-  MapLocation, DocumentChecked, ChatDotRound, Postcard,
-  Coin, User, SwitchButton, ArrowDown, Check, Plus,
+  MapLocation, DocumentChecked, ChatDotRound,
+  User, SwitchButton, ArrowDown, Check, Plus,
   Star, DocumentAdd
 } from '@element-plus/icons-vue'
 
@@ -193,7 +193,7 @@ onMounted(async () => {
           </div>
 
           <div class="flex items-center gap-3">
-            <!-- 用户下拉菜单（包含个人中心、积分等） -->
+            <!-- 用户下拉菜单 -->
             <el-dropdown>
               <el-button class="!rounded-lg">
                 {{ auth.me?.nickName || auth.me?.userName || '未登录' }}
@@ -203,18 +203,12 @@ onMounted(async () => {
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item v-if="auth.me" @click="go('/profile')">
-                    <User class="w-4 h-4 mr-2" />个人中心
-                  </el-dropdown-item>
-                  <el-dropdown-item v-if="auth.me" @click="go('/points')">
-                    <Coin class="w-4 h-4 mr-2" />我的积分
-                  </el-dropdown-item>
-                  <el-dropdown-item v-if="auth.me" @click="go('/talks')">
-                    <Postcard class="w-4 h-4 mr-2" />话题广场
+                  <el-dropdown-item v-if="auth.me" @click="go('/console')">
+                    <User class="w-4 h-4 mr-2" />我的账户
                   </el-dropdown-item>
                   <el-dropdown-item v-if="!auth.me" @click="ui.openAuthDialog('login')">去登录/注册</el-dropdown-item>
-                  <el-dropdown-item divided @click="logout">
-                    <SwitchButton class="w-4 h-4 mr-2" />退出登录
+                  <el-dropdown-item v-if="auth.me" divided @click="logout">
+                    <SwitchButton class="w-4 h-4 mr-2" />注销
                   </el-dropdown-item>
                 </el-dropdown-menu>
               </template>

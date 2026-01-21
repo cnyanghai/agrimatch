@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
 import { useUiStore } from '../store/ui'
-import { LogOut, LayoutDashboard, Settings, ChevronDown, ShoppingBag, Truck } from 'lucide-vue-next'
+import { LogOut, Settings, ChevronDown, ShoppingBag, Truck } from 'lucide-vue-next'
 import { getProductTree, type ProductNode } from '../api/product'
 import { listTopCompanies, type CompanyCardResponse } from '../api/company'
 
@@ -275,20 +275,14 @@ onMounted(async () => {
                   <el-dropdown-menu>
                     <el-dropdown-item @click="go('/console')">
                       <div class="flex items-center gap-2">
-                        <LayoutDashboard :size="16" :stroke-width="2" />
-                        控制台
-                      </div>
-                    </el-dropdown-item>
-                    <el-dropdown-item @click="go('/profile')">
-                      <div class="flex items-center gap-2">
                         <Settings :size="16" :stroke-width="2" />
-                        个人资料
+                        我的账户
                       </div>
                     </el-dropdown-item>
                     <el-dropdown-item divided @click="onLogout">
                       <div class="flex items-center gap-2 text-red-600">
                         <LogOut :size="16" :stroke-width="2" />
-                        退出登录
+                        注销
                       </div>
                     </el-dropdown-item>
                   </el-dropdown-menu>

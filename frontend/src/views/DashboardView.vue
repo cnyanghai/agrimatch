@@ -79,17 +79,9 @@ const totalPending = computed(() => {
          (dashboard.value.pendingMilestoneCount || 0)
 })
 
-// 8 大核心模块配置
+// 7 大核心模块配置
 const consoleModules = computed(() => {
   const modules = [
-    {
-      title: '控制台首页',
-      desc: '工作台概览与数据统计',
-      icon: HomeFilled,
-      path: '/console',
-      color: 'brand',
-      badge: null
-    },
     {
       title: '发布信息',
       desc: '发布供应或采购需求',
@@ -344,29 +336,6 @@ onMounted(() => {
               <span class="text-xs font-bold">进入</span>
               <el-icon :size="14"><ArrowRight /></el-icon>
             </div>
-          </button>
-        </div>
-      </section>
-
-      <!-- 无待办时的引导 -->
-      <section v-if="pendingItems.length === 0 && !loading" class="bg-gradient-to-br from-brand-50 to-brand-100/50 rounded-xl border border-brand-100 p-8 text-center">
-        <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-brand-100 flex items-center justify-center">
-          <span class="text-3xl">✨</span>
-        </div>
-        <h3 class="text-lg font-bold text-gray-800 mb-2">太棒了，暂无待办事项！</h3>
-        <p class="text-sm text-gray-500 mb-6">您可以浏览市场发现新机会，或发布您的供应/采购信息</p>
-        <div class="flex justify-center gap-4">
-          <button
-            class="px-6 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-bold shadow-md shadow-brand-100 hover:bg-brand-700 transition-all "
-            @click="go('/console/publish')"
-          >
-            发布信息
-          </button>
-          <button 
-            class="px-6 py-2.5 bg-white text-gray-700 rounded-xl text-sm font-bold border border-gray-200 hover:bg-gray-50 transition-all "
-            @click="go('/hall/supply')"
-          >
-            浏览市场
           </button>
         </div>
       </section>
