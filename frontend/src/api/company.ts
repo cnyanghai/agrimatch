@@ -12,6 +12,7 @@ export interface CompanyCreateRequest {
   registeredCapital?: string
   establishDate?: string
   scale?: string
+  companyIntro?: string
   announcementsJson?: string
   recruitmentJson?: string
   certificatesJson?: string
@@ -43,6 +44,7 @@ export interface CompanyResponse {
   registeredCapital?: string
   establishDate?: string
   scale?: string
+  companyIntro?: string
   announcementsJson?: string
   recruitmentJson?: string
   certificatesJson?: string

@@ -583,4 +583,5 @@ CREATE TABLE IF NOT EXISTS `bus_user_follow` (
 -- 添加公司表的法人和经营范围字段
 ALTER TABLE bus_company ADD COLUMN IF NOT EXISTS legal_person varchar(50) DEFAULT NULL COMMENT '法定代表人';
 ALTER TABLE bus_company ADD COLUMN IF NOT EXISTS business_scope varchar(500) DEFAULT NULL COMMENT '经营范围';
+ALTER TABLE bus_company ADD COLUMN IF NOT EXISTS company_intro longtext COMMENT '公司介绍';
 

@@ -11,7 +11,8 @@ import PublicFooter from '../components/PublicFooter.vue'
 import { 
   Info, Shield, MapPin, Search, TrendingUp, TrendingDown, 
   Minus, Circle, Heart, MessageCircle, Share2, Factory,
-  Building2, User, FileText, Calendar, Star, BarChart3
+  Building2, User, FileText, Calendar, Star, BarChart3,
+  Briefcase, Award, Package, Truck, Tag
 } from 'lucide-vue-next'
 import CompanySkeleton from '../components/company/CompanySkeleton.vue'
 
@@ -24,6 +25,14 @@ const { loading, error, profile, company, supplies, requirements, loadProfile } 
 const searchKeyword = ref('')
 const isFollowing = ref(false)
 const followLoading = ref(false)
+
+// 证书预览
+const certificatePreviewVisible = ref(false)
+const previewCertificateUrl = ref('')
+function previewCertificate(url: string) {
+  previewCertificateUrl.value = url
+  certificatePreviewVisible.value = true
+}
 
 // 地图相关
 const amapKey = (import.meta as any).env?.VITE_AMAP_JS_KEY as string | undefined
@@ -108,11 +117,46 @@ const filteredSupplies = computed(() => {
   )
 })
 
+// 解析招聘信息
+const recruitments = computed(() => {
+  if (!company.value?.recruitmentJson) return []
+  try {
+    const parsed = JSON.parse(company.value.recruitmentJson)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (e) {
+    console.error('Failed to parse recruitmentJson:', e)
+    return []
+  }
+})
+
+// 解析资质证书
+const certificates = computed(() => {
+  if (!company.value?.certificatesJson) return []
+  try {
+    const parsed = JSON.parse(company.value.certificatesJson)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (e) {
+    console.error('Failed to parse certificatesJson:', e)
+    return []
+  }
+})
+
 // 获取企业运营时长
-function getOperationYears(createTime?: string) {
-  if (!createTime) return '-'
-  const years = new Date().getFullYear() - new Date(createTime).getFullYear()
-  return years > 0 ? `${years}年` : '不足1年'
+function getOperationYears(establishDate?: string, createTime?: string) {
+  // 优先使用成立日期，如果没有则使用平台创建时间
+  const dateStr = establishDate || createTime
+  if (!dateStr) return '-'
+  
+  const date = new Date(dateStr)
+  const currentYear = new Date().getFullYear()
+  const year = date.getFullYear()
+  const years = currentYear - year
+  
+  if (years > 0) {
+    return `${years}年`
+  } else {
+    return '不足1年'
+  }
 }
 
 // 获取企业规模
@@ -121,24 +165,46 @@ function getCompanyScale() {
   return '100人以上'
 }
 
-// 获取随机价格趋势
-function getPriceTrend() {
-  const trends = [
-    { type: 'up', value: '+2.4%', class: 'text-red-500', icon: TrendingUp },
-    { type: 'down', value: '-0.8%', class: 'text-green-600', icon: TrendingDown },
-    { type: 'flat', value: '持平', class: 'text-slate-400', icon: Minus }
-  ]
-  return trends[Math.floor(Math.random() * trends.length)]
+// 格式化价格显示
+function formatPrice(supply: any) {
+  if (supply.priceType === 1) {
+    // 基差报价模式
+    if (supply.basisQuotes && supply.basisQuotes.length > 0) {
+      const quotes = supply.basisQuotes.slice(0, 2) // 最多显示2个合约
+      return quotes.map((q: any) => {
+        const price = q.referencePrice ? `¥${q.referencePrice.toFixed(0)}` : '待定'
+        return `${q.contractName || q.contractCode}: ${price}`
+      }).join(' / ')
+    }
+    return '基差报价'
+  } else {
+    // 现货一口价模式
+    if (supply.exFactoryPrice != null) {
+      return `¥${supply.exFactoryPrice.toFixed(2)}/吨`
+    }
+    return '面议'
+  }
 }
 
-// 获取库存状态
-function getStockStatus() {
-  const statuses = [
-    { text: '现货充足', class: 'text-green-600 bg-green-50' },
-    { text: '预售中', class: 'text-amber-600 bg-amber-50' },
-    { text: '补货中', class: 'text-slate-600 bg-slate-50' }
-  ]
-  return statuses[Math.floor(Math.random() * statuses.length)]
+// 解析规格参数
+function getParamsList(paramsJson?: string): Array<{ key: string; value: string }> {
+  if (!paramsJson) return []
+  try {
+    const parsed = JSON.parse(paramsJson)
+    if (typeof parsed !== 'object' || parsed === null) return []
+    
+    // 支持新格式：{"参数名": "值"}
+    const params: Array<{ key: string; value: string }> = []
+    Object.entries(parsed).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        params.push({ key, value: String(value) })
+      }
+    })
+    return params
+  } catch (e) {
+    console.error('Failed to parse paramsJson:', e)
+    return []
+  }
 }
 
 // 加载关注状态
@@ -197,7 +263,7 @@ async function toggleFollow() {
   }
 }
 
-// 联系商家
+// 联系商家（通用）
 async function contactMerchant() {
   if (!authStore.me) {
     ElMessage.warning('请先登录')
@@ -234,6 +300,41 @@ async function contactMerchant() {
   }
 }
 
+// 针对特定供应信息联系商家
+async function sendInquiry(supply: any) {
+  if (!authStore.me) {
+    ElMessage.warning('请先登录')
+    return
+  }
+  
+  if (!company.value?.ownerUserId) {
+    ElMessage.warning('该企业未关联用户，无法联系')
+    return
+  }
+  
+  try {
+    const res = await openChatConversation({
+      peerUserId: company.value.ownerUserId,
+      subjectType: 'SUPPLY',
+      subjectId: supply.id,
+      subjectSnapshotJson: JSON.stringify({
+        companyName: company.value.companyName,
+        categoryName: supply.categoryName,
+        supplyNo: supply.supplyNo
+      })
+    })
+    
+    if (res.code === 0 && res.data) {
+      router.push({ path: '/chat', query: { conversationId: String(res.data) } })
+    } else {
+      ElMessage.error(res.message || '打开聊天失败')
+    }
+  } catch (e: any) {
+    console.error('Send inquiry error:', e)
+    ElMessage.error(e?.message || '联系商家失败，请稍后重试')
+  }
+}
+
 // 分享主页
 function shareProfile() {
   ElMessage.info('分享功能开发中')
@@ -248,7 +349,9 @@ async function loadCompanyProfile() {
   }
   
   const companyId = Number(id)
-  const cached = companyStore.activeProfile(companyId)
+  // 如果是查看自己的公司主页，强制重新加载而不使用缓存，确保显示最新数据
+  const isOwnCompany = authStore.me?.companyId === companyId
+  const cached = isOwnCompany ? null : companyStore.activeProfile(companyId)
   
   if (cached) {
     profile.value = cached
@@ -306,9 +409,9 @@ watch(() => route.params.id, (newId, oldId) => {
                 </div>
               </div>
               <div class="flex items-center gap-6 text-slate-500 text-sm flex-wrap">
-                <div v-if="company.createTime" class="flex items-center gap-1">
+                <div v-if="company.establishDate || company.createTime" class="flex items-center gap-1">
                   <Calendar class="w-4 h-4" />
-                  运营时长：{{ getOperationYears(company.createTime) }}
+                  运营时长：{{ getOperationYears(company.establishDate, company.createTime) }}
                 </div>
                 <div v-if="company.province || company.city" class="flex items-center gap-1">
                   <MapPin class="w-4 h-4" />
@@ -316,7 +419,7 @@ watch(() => route.params.id, (newId, oldId) => {
                 </div>
                 <div class="flex items-center gap-1">
                   <User class="w-4 h-4" />
-                  企业规模：1000人以上
+                  企业规模：{{ company.scale || '未公开' }}
                 </div>
               </div>
             </div>
@@ -356,43 +459,75 @@ watch(() => route.params.id, (newId, oldId) => {
                 企业介绍
               </h3>
               <p class="text-sm text-slate-600 leading-relaxed mb-6">
-                {{ company.businessScope || '暂无企业介绍' }}
+                {{ company.companyIntro || '暂无企业介绍' }}
               </p>
               <div class="space-y-4">
-                <div>
-                  <div class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">注册资本</div>
-                  <div class="text-sm font-semibold text-slate-800">{{ company.registeredCapital || '未公开' }}</div>
+                <div v-if="company.licenseNo">
+                  <div class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">统一社会信用代码</div>
+                  <div class="text-sm font-mono text-slate-600">{{ company.licenseNo }}</div>
                 </div>
                 <div v-if="company.legalPerson">
                   <div class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">法定代表人</div>
                   <div class="text-sm font-semibold text-slate-800">{{ company.legalPerson }}</div>
                 </div>
-                <div v-if="company.licenseNo">
-                  <div class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">统一社会信用代码</div>
-                  <div class="text-sm font-mono text-slate-600">{{ company.licenseNo }}</div>
+                <div>
+                  <div class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">注册资本</div>
+                  <div class="text-sm font-semibold text-slate-800">{{ company.registeredCapital || '未公开' }}</div>
+                </div>
+                <div v-if="company.businessScope">
+                  <div class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">经营范围</div>
+                  <div class="text-sm text-slate-600">{{ company.businessScope }}</div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 人才招聘 -->
+            <section v-if="recruitments.length > 0" class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm">
+              <h3 class="font-bold text-slate-900 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+                <Briefcase class="w-5 h-5 text-brand-700" />
+                人才招聘
+              </h3>
+              <div class="space-y-4">
+                <div 
+                  v-for="recruitment in recruitments" 
+                  :key="recruitment.id || recruitment.position"
+                  class="border border-slate-100 rounded-lg p-4 hover:border-brand-200 transition-colors space-y-3"
+                >
+                  <div>
+                    <div class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">岗位名称</div>
+                    <div class="text-sm font-semibold text-slate-800">{{ recruitment.position }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">薪资待遇</div>
+                    <div class="text-sm font-semibold text-brand-600">{{ recruitment.salary || '面议' }}</div>
+                  </div>
+                  <div v-if="recruitment.requirements">
+                    <div class="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">任职要求</div>
+                    <div class="text-sm text-slate-600 leading-relaxed">{{ recruitment.requirements }}</div>
+                  </div>
                 </div>
               </div>
             </section>
 
             <!-- 资质证书 -->
-            <section class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm">
+            <section v-if="certificates.length > 0" class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm">
               <h3 class="font-bold text-slate-900 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
-                <Shield class="w-5 h-5 text-brand-700" />
+                <Award class="w-5 h-5 text-brand-700" />
                 资质证书
               </h3>
-              <div class="flex flex-wrap gap-2">
-                <span class="bg-slate-50 border border-slate-200 text-slate-600 text-xs py-1.5 px-3 rounded hover:border-brand-600 hover:text-brand-700 cursor-default transition">
-                  ISO9001质量管理认证
-                </span>
-                <span class="bg-slate-50 border border-slate-200 text-slate-600 text-xs py-1.5 px-3 rounded hover:border-brand-600 hover:text-brand-700 cursor-default transition">
-                  FAMI-QS认证
-                </span>
-                <span class="bg-slate-50 border border-slate-200 text-slate-600 text-xs py-1.5 px-3 rounded hover:border-brand-600 hover:text-brand-700 cursor-default transition">
-                  高新技术企业证书
-                </span>
-                <span class="bg-slate-50 border border-slate-200 text-slate-600 text-xs py-1.5 px-3 rounded hover:border-brand-600 hover:text-brand-700 cursor-default transition">
-                  饲料添加剂生产许可证
-                </span>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div 
+                  v-for="(cert, index) in certificates" 
+                  :key="index"
+                  class="relative group cursor-pointer"
+                >
+                  <img 
+                    :src="cert" 
+                    :alt="`资质证书 ${index + 1}`"
+                    class="w-full h-32 object-cover rounded-lg border border-slate-200 hover:border-brand-500 transition-all group-hover:shadow-md"
+                    @click="() => previewCertificate(cert)"
+                  />
+                </div>
               </div>
             </section>
           </aside>
@@ -424,10 +559,9 @@ watch(() => route.params.id, (newId, oldId) => {
                 <table class="w-full text-left border-collapse">
                   <thead class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
                     <tr>
-                      <th class="px-6 py-4">产品名称</th>
+                      <th class="px-6 py-4">基础信息</th>
                       <th class="px-6 py-4">规格参数</th>
-                      <th class="px-6 py-4">价格走势</th>
-                      <th class="px-6 py-4">库存状态</th>
+                      <th class="px-6 py-4">物流交付</th>
                       <th class="px-6 py-4">操作</th>
                     </tr>
                   </thead>
@@ -437,31 +571,64 @@ watch(() => route.params.id, (newId, oldId) => {
                       :key="supply.id"
                       class="hover:bg-slate-50 transition"
                     >
+                      <!-- 基础信息列 -->
                       <td class="px-6 py-4">
-                        <div class="font-medium text-slate-900">{{ supply.categoryName }}</div>
-                        <div class="text-xs text-slate-400">{{ supply.origin || '国产' }}</div>
-                      </td>
-                      <td class="px-6 py-4 text-sm text-slate-600">
-                        {{ supply.quantity }}吨
-                      </td>
-                      <td class="px-6 py-4">
-                        <div :class="['flex items-center text-sm font-medium', getPriceTrend().class]">
-                          <component :is="getPriceTrend().icon" class="w-4 h-4 mr-1" />
-                          {{ getPriceTrend().value }}
+                        <div class="space-y-2">
+                          <div>
+                            <div class="font-semibold text-slate-900 text-base">{{ supply.categoryName }}</div>
+                            <div v-if="supply.origin" class="text-xs text-slate-500 mt-0.5">产地：{{ supply.origin }}</div>
+                          </div>
+                          <div class="flex items-center gap-4 text-sm">
+                            <div class="flex items-center gap-1.5">
+                              <Tag class="w-4 h-4 text-brand-600" />
+                              <span class="font-bold text-brand-600">{{ formatPrice(supply) }}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                              <Package class="w-4 h-4 text-slate-500" />
+                              <span class="text-slate-700">{{ supply.quantity || 0 }}吨</span>
+                            </div>
+                          </div>
                         </div>
                       </td>
+                      <!-- 规格参数列 -->
                       <td class="px-6 py-4">
-                        <span :class="['flex items-center gap-1.5 text-sm font-medium px-2 py-1 rounded-full w-fit', getStockStatus().class]">
-                          <Circle class="w-2 h-2 fill-current" />
-                          {{ getStockStatus().text }}
-                        </span>
+                        <div v-if="getParamsList(supply.paramsJson).length > 0" class="flex flex-wrap gap-1.5">
+                          <span
+                            v-for="param in getParamsList(supply.paramsJson)"
+                            :key="param.key"
+                            class="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700"
+                          >
+                            <span class="font-medium">{{ param.key }}:</span>
+                            <span>{{ param.value }}</span>
+                          </span>
+                        </div>
+                        <span v-else class="text-xs text-slate-400">暂无参数</span>
                       </td>
+                      <!-- 物流交付列 -->
+                      <td class="px-6 py-4">
+                        <div class="space-y-1.5 text-sm">
+                          <div v-if="supply.deliveryMode" class="flex items-center gap-1.5 text-slate-700">
+                            <Truck class="w-4 h-4 text-slate-500" />
+                            <span>{{ supply.deliveryMode }}</span>
+                          </div>
+                          <div v-if="supply.packaging" class="flex items-center gap-1.5 text-slate-700">
+                            <Package class="w-4 h-4 text-slate-500" />
+                            <span>{{ supply.packaging }}</span>
+                          </div>
+                          <div v-if="supply.shipAddress" class="flex items-center gap-1.5 text-slate-600 text-xs">
+                            <MapPin class="w-3 h-3 text-slate-400" />
+                            <span class="truncate max-w-[200px]">{{ supply.shipAddress }}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <!-- 操作列 -->
                       <td class="px-6 py-4">
                         <button 
-                          class="text-brand-700 hover:underline text-sm font-medium"
-                          @click="sendInquiry"
+                          class="flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg transition-all active:scale-95"
+                          @click="sendInquiry(supply)"
                         >
-                          询价
+                          <MessageCircle class="w-4 h-4" />
+                          联系商家
                         </button>
                       </td>
                     </tr>
@@ -573,6 +740,22 @@ watch(() => route.params.id, (newId, oldId) => {
 
     <!-- 项目底部组件 -->
     <PublicFooter />
+
+    <!-- 证书预览对话框 -->
+    <el-dialog
+      v-model="certificatePreviewVisible"
+      title="资质证书预览"
+      width="80%"
+      :before-close="() => { certificatePreviewVisible = false }"
+    >
+      <div class="flex justify-center">
+        <img 
+          :src="previewCertificateUrl" 
+          alt="资质证书"
+          class="max-w-full max-h-[70vh] object-contain rounded-lg"
+        />
+      </div>
+    </el-dialog>
   </div>
 </template>
 

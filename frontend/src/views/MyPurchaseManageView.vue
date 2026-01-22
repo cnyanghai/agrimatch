@@ -11,9 +11,11 @@ import { BaseButton, BaseModal, EmptyState } from '../components/ui'
 import { FileText, Save, List, Send, Package, MapPin, Clock, FileCheck, CreditCard, Trash2 } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
+import { useCompanyStore } from '../stores/company'
 
 const router = useRouter()
 const auth = useAuthStore()
+const companyStore = useCompanyStore()
 const loading = ref(false)
 const contractNo = ref<string>('')
 const templatePickerOpen = ref(false)
@@ -317,6 +319,10 @@ async function publishRequirement() {
     const r = await createRequirement(req)
     if (r.code === 0) {
       ElMessage.success('需求发布成功')
+      // 清除企业资料缓存，确保企业主页显示最新数据
+      if (company.value?.id) {
+        companyStore.invalidateProfile(company.value.id)
+      }
       router.push('/requirements/published')
       // 重置表单（保留公司名称和采购地址的默认值）
       Object.assign(publishForm, {

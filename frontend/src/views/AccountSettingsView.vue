@@ -39,6 +39,7 @@ const companyForm = reactive({
   registeredCapital: '',
   establishDate: '',
   scale: '',
+  companyIntro: '',
   contacts: '',
   phone: '',
   province: '',
@@ -58,7 +59,7 @@ const passwordForm = reactive({
 
 // 快照
 const userSnapshot = ref({ displayName: '', phonenumber: '', position: '', birthDate: '', gender: 1, bio: '', avatar: '' })
-const companySnapshot = ref({ companyName: '', licenseNo: '', licenseImgUrl: '', legalPerson: '', businessScope: '', registeredCapital: '', establishDate: '', scale: '', contacts: '', phone: '', province: '', city: '', district: '', address: '', announcementsJson: '', recruitmentJson: '', certificatesJson: '' })
+const companySnapshot = ref({ companyName: '', licenseNo: '', licenseImgUrl: '', legalPerson: '', businessScope: '', registeredCapital: '', establishDate: '', scale: '', companyIntro: '', contacts: '', phone: '', province: '', city: '', district: '', address: '', announcementsJson: '', recruitmentJson: '', certificatesJson: '' })
 
 // 车辆管理
 const vehicles = ref<VehicleResponse[]>([])
@@ -74,11 +75,6 @@ const vehicleForm = reactive<VehicleCreateRequest>({
   remark: ''
 })
 
-// 公告列表
-const announcements = ref<Array<{ id: string, title: string, content: string, date: string }>>([])
-const announcementDialogVisible = ref(false)
-const editingAnnouncementId = ref<string | null>(null)
-const announcementForm = reactive({ title: '', content: '', date: '' })
 
 // 招聘列表
 const recruitments = ref<Array<{ id: string, position: string, requirements: string, salary: string }>>([])
@@ -214,6 +210,7 @@ async function loadCompanyData() {
       companyForm.registeredCapital = res.data.registeredCapital || ''
       companyForm.establishDate = res.data.establishDate || ''
       companyForm.scale = res.data.scale || ''
+      companyForm.companyIntro = res.data.companyIntro || ''
       companyForm.contacts = res.data.contacts || ''
       companyForm.phone = res.data.phone || ''
       companyForm.province = res.data.province || ''
@@ -221,15 +218,6 @@ async function loadCompanyData() {
       companyForm.district = res.data.district || ''
       companyForm.address = res.data.address || ''
       // 解析 JSON 字段
-      if (res.data.announcementsJson) {
-        try {
-          announcements.value = JSON.parse(res.data.announcementsJson)
-        } catch (e) {
-          announcements.value = []
-        }
-      } else {
-        announcements.value = []
-      }
       if (res.data.recruitmentJson) {
         try {
           recruitments.value = JSON.parse(res.data.recruitmentJson)
@@ -312,7 +300,7 @@ async function saveCompanyInfo() {
   try {
     const req: CompanyCreateRequest = {
       ...companyForm,
-      announcementsJson: JSON.stringify(announcements.value),
+      announcementsJson: '',
       recruitmentJson: JSON.stringify(recruitments.value),
       certificatesJson: JSON.stringify(certificates.value)
     }
@@ -465,43 +453,6 @@ async function setDefault(id: number) {
   } catch (e: any) {
     ElMessage.error(e?.message ?? '设置失败')
   }
-}
-
-// 公告管理函数
-function openAnnouncementDialog(mode: 'create' | 'edit', item?: { id: string, title: string, content: string, date: string }) {
-  editingAnnouncementId.value = item?.id || null
-  if (mode === 'edit' && item) {
-    announcementForm.title = item.title
-    announcementForm.content = item.content
-    announcementForm.date = item.date
-  } else {
-    announcementForm.title = ''
-    announcementForm.content = ''
-    announcementForm.date = new Date().toISOString().slice(0, 10)
-  }
-  announcementDialogVisible.value = true
-}
-
-function saveAnnouncement() {
-  if (!announcementForm.title?.trim() || !announcementForm.content?.trim()) {
-    ElMessage.warning('请填写完整信息')
-    return
-  }
-  if (editingAnnouncementId.value) {
-    const index = announcements.value.findIndex(a => a.id === editingAnnouncementId.value)
-    if (index >= 0) {
-      announcements.value[index] = { ...announcements.value[index], ...announcementForm }
-    }
-  } else {
-    announcements.value.push({ id: Date.now().toString(), ...announcementForm })
-  }
-  announcementDialogVisible.value = false
-  ElMessage.success('保存成功')
-}
-
-function removeAnnouncement(id: string) {
-  announcements.value = announcements.value.filter(a => a.id !== id)
-  ElMessage.success('删除成功')
 }
 
 // 招聘管理函数
@@ -864,47 +815,15 @@ const navItems = [
               ></textarea>
             </div>
 
-            <!-- 公司公告 -->
+            <!-- 公司介绍 -->
             <div class="max-w-3xl">
-              <div class="flex items-center justify-between mb-4">
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">公司公告</label>
-                <BaseButton type="secondary" size="sm" @click="openAnnouncementDialog('create')">
-                  <Plus class="w-4 h-4" />
-                  添加公告
-                </BaseButton>
-              </div>
-              <div v-if="announcements.length === 0" class="text-sm text-gray-400 py-4 text-center border-2 border-dashed border-gray-200 rounded-lg">
-                暂无公告，点击上方按钮添加
-              </div>
-              <div v-else class="space-y-3">
-                <div
-                  v-for="item in announcements"
-                  :key="item.id"
-                  class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-start justify-between gap-4"
-                >
-                  <div class="flex-1">
-                    <div class="font-bold text-gray-900 mb-1">{{ item.title }}</div>
-                    <div class="text-sm text-gray-500 mb-2">{{ item.content }}</div>
-                    <div class="text-xs text-gray-400">{{ item.date }}</div>
-                  </div>
-                  <div class="flex gap-2">
-                    <button
-                      class="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-                      @click="openAnnouncementDialog('edit', item)"
-                      title="编辑"
-                    >
-                      <Edit2 class="w-4 h-4 text-gray-600" />
-                    </button>
-                    <button
-                      class="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                      @click="removeAnnouncement(item.id)"
-                      title="删除"
-                    >
-                      <Trash2 class="w-4 h-4 text-red-500" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">公司介绍</label>
+              <textarea
+                v-model="companyForm.companyIntro"
+                rows="5"
+                placeholder="请输入公司介绍（用于展示在商业主页的企业介绍部分）"
+                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+              ></textarea>
             </div>
 
             <!-- 人才招聘 -->
@@ -1272,53 +1191,6 @@ const navItems = [
         <div class="flex justify-end gap-3">
           <BaseButton type="secondary" size="sm" @click="vehicleDialogVisible = false">取消</BaseButton>
           <BaseButton type="primary" size="sm" :loading="loading" @click="saveVehicle">保存</BaseButton>
-        </div>
-      </template>
-    </el-dialog>
-
-    <!-- 公告弹窗 -->
-    <el-dialog
-      v-model="announcementDialogVisible"
-      :title="editingAnnouncementId ? '编辑公告' : '添加公告'"
-      width="600px"
-      align-center
-    >
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">标题 <span class="text-red-500">*</span></label>
-          <input
-            v-model="announcementForm.title"
-            type="text"
-            placeholder="请输入公告标题"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-          />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">内容 <span class="text-red-500">*</span></label>
-          <textarea
-            v-model="announcementForm.content"
-            rows="4"
-            placeholder="请输入公告内容"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
-          ></textarea>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发布日期</label>
-          <el-date-picker
-            v-model="announcementForm.date"
-            type="date"
-            :locale="zhCn"
-            placeholder="选择发布日期"
-            format="YYYY年MM月DD日"
-            value-format="YYYY-MM-DD"
-            class="w-full neo-picker"
-          />
-        </div>
-      </div>
-      <template #footer>
-        <div class="flex justify-end gap-3">
-          <BaseButton type="secondary" size="sm" @click="announcementDialogVisible = false">取消</BaseButton>
-          <BaseButton type="primary" size="sm" @click="saveAnnouncement">保存</BaseButton>
         </div>
       </template>
     </el-dialog>

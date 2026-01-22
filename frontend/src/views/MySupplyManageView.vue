@@ -11,8 +11,10 @@ import { getMe, type UserResponse } from '../api/user'
 import { codeToText } from 'element-china-area-data'
 import TwoLevelCategoryPicker from '../components/TwoLevelCategoryPicker.vue'
 import { BaseButton, BaseModal, EmptyState } from '../components/ui'
+import { useCompanyStore } from '../stores/company'
 
 const router = useRouter()
+const companyStore = useCompanyStore()
 const loading = ref(false)
 const supplyNo = ref<string>('')
 const templatePickerOpen = ref(false)
@@ -400,6 +402,10 @@ async function publishSupply() {
     const r = await createSupply(req)
     if (r.code === 0) {
       ElMessage.success('发布成功')
+      // 清除企业资料缓存，确保企业主页显示最新数据
+      if (company.value?.id) {
+        companyStore.invalidateProfile(company.value.id)
+      }
       router.push('/supply/published')
     } else {
       ElMessage.error(r.message || '发布失败')

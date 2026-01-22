@@ -64,6 +64,7 @@ public class CompanyServiceImpl implements CompanyService {
         c.setRegisteredCapital(emptyToNull(req.getRegisteredCapital()));
         c.setEstablishDate(parseDate(req.getEstablishDate()));
         c.setScale(emptyToNull(req.getScale()));
+        c.setCompanyIntro(emptyToNull(req.getCompanyIntro()));
         c.setAnnouncementsJson(emptyToNull(req.getAnnouncementsJson()));
         c.setRecruitmentJson(emptyToNull(req.getRecruitmentJson()));
         c.setCertificatesJson(emptyToNull(req.getCertificatesJson()));
@@ -133,6 +134,7 @@ public class CompanyServiceImpl implements CompanyService {
         c.setRegisteredCapital(emptyToNull(req.getRegisteredCapital()));
         c.setEstablishDate(parseDate(req.getEstablishDate()));
         c.setScale(emptyToNull(req.getScale()));
+        c.setCompanyIntro(emptyToNull(req.getCompanyIntro()));
         c.setAnnouncementsJson(emptyToNull(req.getAnnouncementsJson()));
         c.setRecruitmentJson(emptyToNull(req.getRecruitmentJson()));
         c.setCertificatesJson(emptyToNull(req.getCertificatesJson()));
@@ -281,6 +283,7 @@ public class CompanyServiceImpl implements CompanyService {
         r.setRegisteredCapital(c.getRegisteredCapital());
         r.setEstablishDate(c.getEstablishDate() != null ? c.getEstablishDate().toString() : null);
         r.setScale(c.getScale());
+        r.setCompanyIntro(c.getCompanyIntro());
         r.setAnnouncementsJson(c.getAnnouncementsJson());
         r.setRecruitmentJson(c.getRecruitmentJson());
         r.setCertificatesJson(c.getCertificatesJson());

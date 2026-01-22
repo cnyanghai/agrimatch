@@ -26,6 +26,7 @@ public class CompanyResponse {
     private String registeredCapital;
     private String establishDate;
     private String scale;
+    private String companyIntro;
     private String announcementsJson;
     private String recruitmentJson;
     private String certificatesJson;
@@ -206,6 +207,14 @@ public class CompanyResponse {
 
     public void setScale(String scale) {
         this.scale = scale;
+    }
+
+    public String getCompanyIntro() {
+        return companyIntro;
+    }
+
+    public void setCompanyIntro(String companyIntro) {
+        this.companyIntro = companyIntro;
     }
 
     public String getAnnouncementsJson() {
