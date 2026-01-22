@@ -384,7 +384,7 @@ watch(() => route.params.id, (newId, oldId) => {
 <template>
   <div class="bg-gray-50 min-h-screen flex flex-col">
     <!-- Loading State -->
-    <div v-if="loading" class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div v-if="loading" class="w-full px-4 md:px-10 py-12">
       <CompanySkeleton type="profile" />
     </div>
 
@@ -392,7 +392,7 @@ watch(() => route.params.id, (newId, oldId) => {
     <div v-else-if="company" class="flex-1">
       <!-- Header -->
       <header class="bg-white border-b border-slate-200 py-8 shadow-sm">
-        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="w-full px-4 md:px-10">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div class="flex flex-col gap-3">
               <div class="flex items-center gap-4 flex-wrap">
@@ -448,7 +448,7 @@ watch(() => route.params.id, (newId, oldId) => {
       </header>
 
       <!-- Main Content -->
-      <main class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main class="w-full px-4 md:px-10 py-8">
         <div class="grid-layout">
           <!-- Left Sidebar -->
           <aside class="space-y-6">
@@ -559,10 +559,10 @@ watch(() => route.params.id, (newId, oldId) => {
                 <table class="w-full text-left border-collapse">
                   <thead class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
                     <tr>
-                      <th class="px-6 py-4">基础信息</th>
-                      <th class="px-6 py-4">规格参数</th>
-                      <th class="px-6 py-4">物流交付</th>
-                      <th class="px-6 py-4">操作</th>
+                      <th class="px-3 py-1">基础信息</th>
+                      <th class="px-3 py-1">规格参数</th>
+                      <th class="px-3 py-1">物流交付</th>
+                      <th class="px-3 py-1">操作</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-slate-100">
@@ -572,31 +572,33 @@ watch(() => route.params.id, (newId, oldId) => {
                       class="hover:bg-slate-50 transition"
                     >
                       <!-- 基础信息列 -->
-                      <td class="px-6 py-4">
-                        <div class="space-y-2">
+                      <td class="px-3 py-1">
+                        <div class="space-y-0.5">
                           <div>
-                            <div class="font-semibold text-slate-900 text-base">{{ supply.categoryName }}</div>
-                            <div v-if="supply.origin" class="text-xs text-slate-500 mt-0.5">产地：{{ supply.origin }}</div>
+                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">名称</div>
+                            <div class="text-sm font-semibold text-slate-800">{{ supply.categoryName }}</div>
                           </div>
-                          <div class="flex items-center gap-4 text-sm">
-                            <div class="flex items-center gap-1.5">
-                              <Tag class="w-4 h-4 text-brand-600" />
-                              <span class="font-bold text-brand-600">{{ formatPrice(supply) }}</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                              <Package class="w-4 h-4 text-slate-500" />
-                              <span class="text-slate-700">{{ supply.quantity || 0 }}吨</span>
-                            </div>
+                          <div>
+                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">价格</div>
+                            <div class="text-sm font-bold text-brand-600">{{ formatPrice(supply) }}</div>
+                          </div>
+                          <div>
+                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">供应量</div>
+                            <div class="text-sm font-semibold text-slate-800">{{ supply.quantity || 0 }}吨</div>
+                          </div>
+                          <div v-if="supply.origin">
+                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">产地</div>
+                            <div class="text-sm font-semibold text-slate-800">{{ supply.origin }}</div>
                           </div>
                         </div>
                       </td>
                       <!-- 规格参数列 -->
-                      <td class="px-6 py-4">
-                        <div v-if="getParamsList(supply.paramsJson).length > 0" class="flex flex-wrap gap-1.5">
+                      <td class="px-3 py-1">
+                        <div v-if="getParamsList(supply.paramsJson).length > 0" class="flex flex-wrap gap-1">
                           <span
                             v-for="param in getParamsList(supply.paramsJson)"
                             :key="param.key"
-                            class="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700"
+                            class="inline-flex items-center gap-1 px-1 py-0 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700"
                           >
                             <span class="font-medium">{{ param.key }}:</span>
                             <span>{{ param.value }}</span>
@@ -605,26 +607,26 @@ watch(() => route.params.id, (newId, oldId) => {
                         <span v-else class="text-xs text-slate-400">暂无参数</span>
                       </td>
                       <!-- 物流交付列 -->
-                      <td class="px-6 py-4">
-                        <div class="space-y-1.5 text-sm">
-                          <div v-if="supply.deliveryMode" class="flex items-center gap-1.5 text-slate-700">
-                            <Truck class="w-4 h-4 text-slate-500" />
-                            <span>{{ supply.deliveryMode }}</span>
+                      <td class="px-3 py-1">
+                        <div class="space-y-0.5">
+                          <div v-if="supply.deliveryMode">
+                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">交付方式</div>
+                            <div class="text-sm font-semibold text-slate-700">{{ supply.deliveryMode }}</div>
                           </div>
-                          <div v-if="supply.packaging" class="flex items-center gap-1.5 text-slate-700">
-                            <Package class="w-4 h-4 text-slate-500" />
-                            <span>{{ supply.packaging }}</span>
+                          <div v-if="supply.packaging">
+                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">包装方式</div>
+                            <div class="text-sm font-semibold text-slate-700">{{ supply.packaging }}</div>
                           </div>
-                          <div v-if="supply.shipAddress" class="flex items-center gap-1.5 text-slate-600 text-xs">
-                            <MapPin class="w-3 h-3 text-slate-400" />
-                            <span class="truncate max-w-[200px]">{{ supply.shipAddress }}</span>
+                          <div v-if="supply.shipAddress">
+                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">发货地址</div>
+                            <div class="text-sm text-slate-600 truncate max-w-[200px]" :title="supply.shipAddress">{{ supply.shipAddress }}</div>
                           </div>
                         </div>
                       </td>
                       <!-- 操作列 -->
-                      <td class="px-6 py-4">
+                      <td class="px-3 py-1">
                         <button 
-                          class="flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg transition-all active:scale-95"
+                          class="flex items-center gap-1.5 px-3 py-1 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg transition-all active:scale-95"
                           @click="sendInquiry(supply)"
                         >
                           <MessageCircle class="w-4 h-4" />
