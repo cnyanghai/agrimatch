@@ -238,34 +238,36 @@ com.agrimatch/
 ```
 60% 主色调（背景/大面积）：bg-gray-50, bg-white
 30% 辅助色（卡片/次要元素）：border-gray-100, text-gray-500
-10% 强调色（CTA/重点提示）：emerald-600, red-500
+10% 强调色（CTA/重点提示）：brand-600（若竹）, red-500
 ```
 
 ### 2. 色彩心理学应用
 
-| 颜色 | 心理暗示 | 使用场景 |
-|------|----------|----------|
-| **Emerald 绿** | 信任、成长、成功 | 主按钮、成功状态、供应侧 |
-| **Blue 蓝** | 专业、稳定、可靠 | 采购侧标识、链接、信息提示 |
-| **Amber 黄** | 警示、注意、活力 | 待处理、警告、积分奖励 |
-| **Red 红** | 紧急、危险、重要 | 错误、删除、必填标记 |
-| **Gray 灰** | 中性、专业、克制 | 辅助文字、边框、禁用状态 |
-| **Slate 石板灰** | 高端、沉稳、权威 | 高级主按钮、深色区块 |
+| 颜色 | 心理暗示 | 使用场景 | Tailwind 类名 |
+|------|----------|----------|---------------|
+| **若竹色 Ruozhu** | 信任、成长、成功 | 主按钮、成功状态、供应侧 | brand-500/600/700 |
+| **秋波蓝 Qiubo** | 专业、稳定、可靠 | 采购侧标识、链接、信息提示 | autumn-500/600/700 |
+| **Amber 黄** | 警示、注意、活力 | 待处理、警告、积分奖励 | amber-500 |
+| **Red 红** | 紧急、危险、重要 | 错误、删除、必填标记 | red-500 |
+| **Gray 灰** | 中性、专业、克制 | 辅助文字、边框、禁用状态 | gray-* |
+| **Slate 石板灰** | 高端、沉稳、权威 | 高级主按钮、深色区块 | slate-* |
+
+色值定义见 `frontend/tailwind.config.cjs`：`brand`（若竹）、`autumn`（秋波蓝）。
 
 ### 3. 业务语义色彩
 ```css
-/* 供应侧（卖方）- 主品牌色 */
---color-supply: emerald-600      /* 主操作 */
---color-supply-light: emerald-50  /* 浅底背景 */
---color-supply-text: emerald-700  /* 文字 */
+/* 供应侧（卖方）- 若竹色 Ruozhu，主品牌色 */
+--color-supply: brand-600        /* 主操作 */
+--color-supply-light: brand-50   /* 浅底背景 */
+--color-supply-text: brand-700   /* 文字 */
 
-/* 采购侧（买方）- 辅助识别色 */
---color-demand: blue-600         /* 标识色（小面积）*/
---color-demand-light: blue-50    /* 浅底背景 */
---color-demand-text: blue-700    /* 文字 */
+/* 采购侧（买方）- 秋波蓝 Qiubo，辅助识别色 */
+--color-demand: autumn-600       /* 标识色（小面积）*/
+--color-demand-light: autumn-50  /* 浅底背景 */
+--color-demand-text: autumn-700  /* 文字 */
 
 /* 状态色 */
---color-success: emerald-500
+--color-success: brand-500
 --color-warning: amber-500
 --color-error: red-500
 --color-info: slate-500
@@ -299,14 +301,16 @@ com.agrimatch/
   - 辅助：`text-xs text-gray-400`
 
 ### 1.2 圆角体系
-- **外层卡片**：`rounded-2xl`（默认），核心弹窗 `rounded-[32px]`
-- **按钮/输入**：`rounded-full` 或 `rounded-xl`
+- **外层卡片**：`rounded-2xl`（1.5rem，默认），核心弹窗 `rounded-[32px]`
+- **按钮/输入**：`rounded-full` 或 `rounded-xl`（1.25rem）
 - **头像/徽章**：`rounded-full`
+- 与 `tailwind.config.cjs` 的 `borderRadius` 一致：sm/md/lg/xl/2xl/3xl。
 
 ### 1.3 阴影体系（克制使用）
 - 默认：无阴影或 `shadow-sm`
 - Hover：`hover:shadow-md`
 - 弹窗：`shadow-2xl`
+- 品牌强调（可选）：`shadow-brand`（若竹色阴影，见 tailwind 配置）
 
 ### 1.4 字体排版
 - 字体：`Inter` 优先，否则系统字体
@@ -317,8 +321,8 @@ com.agrimatch/
 
 ### 2.1 按钮
 ```html
-<!-- 主按钮 -->
-<button class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold transition-all active:scale-95">
+<!-- 主按钮（若竹色 brand） -->
+<button class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-xl font-bold transition-all active:scale-95">
   确认提交
 </button>
 
@@ -340,7 +344,7 @@ com.agrimatch/
 
 ### 2.2 输入框
 ```html
-<input class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all text-sm" />
+<input class="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl focus:border-brand-500 outline-none transition-all text-sm" />
 ```
 
 ### 2.3 卡片
@@ -351,7 +355,7 @@ com.agrimatch/
 </div>
 
 <!-- 可点击卡片 -->
-<div class="bg-white p-6 rounded-2xl border border-gray-100 cursor-pointer hover:shadow-md hover:border-emerald-100 transition-all">
+<div class="bg-white p-6 rounded-2xl border border-gray-100 cursor-pointer hover:shadow-md hover:border-brand-100 transition-all">
   内容
 </div>
 ```
@@ -380,7 +384,7 @@ com.agrimatch/
 
 ## 3. 图标规范
 - **统一使用 Lucide 图标库**（stroke-width=2）
-- 图标容器：`w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center`
+- 图标容器：`w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center`
 
 ---
 
@@ -800,16 +804,16 @@ public String maskIdCard(String idCard) {
 <!-- ✅ 卡片悬浮效果 -->
 <div class="group bg-white rounded-2xl p-6 border border-gray-100 
             transition-all duration-300 ease-out
-            hover:shadow-lg hover:border-emerald-200 hover:-translate-y-1">
+            hover:shadow-lg hover:border-brand-200 hover:-translate-y-1">
   <div class="transition-transform duration-300 group-hover:scale-105">
     <!-- 图标或图片 -->
   </div>
 </div>
 
 <!-- ✅ 按钮点击反馈 -->
-<button class="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-bold
+<button class="bg-brand-600 text-white px-6 py-2.5 rounded-xl font-bold
                transition-all duration-150 ease-out
-               hover:bg-emerald-700 hover:shadow-md
+               hover:bg-brand-700 hover:shadow-md
                active:scale-95 active:shadow-sm">
   确认提交
 </button>
@@ -827,7 +831,7 @@ public String maskIdCard(String idCard) {
   <p class="text-sm text-gray-500 mb-6 max-w-xs">
     您还没有发布任何供应，点击下方按钮开始发布您的第一条供应信息
   </p>
-  <button class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-bold transition-all">
+  <button class="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-xl font-bold transition-all active:scale-95">
     立即发布
   </button>
 </div>

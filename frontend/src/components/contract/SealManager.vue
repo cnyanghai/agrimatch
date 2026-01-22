@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus, Check, Trash2, Sparkles } from 'lucide-vue-next'
 import { listSeals, createSeal, setDefaultSeal, deleteSeal, type SealResponse } from '../../api/contract'
+import { vLazy } from '../../directives/lazyLoad'
 
 const props = defineProps<{
   selectable?: boolean
@@ -120,7 +121,7 @@ function selectSeal(seal: SealResponse) {
         <div class="aspect-square rounded-lg bg-gray-50 flex items-center justify-center mb-3 overflow-hidden">
           <img 
             v-if="seal.sealUrl" 
-            :src="seal.sealUrl" 
+            v-lazy="seal.sealUrl" 
             :alt="seal.sealName"
             class="max-w-full max-h-full object-contain"
           />

@@ -23,8 +23,8 @@ const profileGuideChecked = ref(false)
 // 检查用户是否需要完善资料
 const needCompleteProfile = computed(() => {
   if (!auth.me) return false
-  // 未设置昵称
-  return !auth.me.nickName
+  // 未设置真实姓名
+  return !auth.me.realName
 })
 
 // 监听登录状态，在登录后检查是否需要完善资料
@@ -90,10 +90,10 @@ onMounted(async () => {
       <div class="px-5 py-3 border-b border-neutral-100">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-full flex items-center justify-center text-white bg-brand-600 font-bold text-sm">
-            {{ (auth.me?.nickName || auth.me?.userName || 'U')[0].toUpperCase() }}
+            {{ ((auth.me?.realName || auth.me?.userName || 'U')[0] || 'U').toUpperCase() }}
           </div>
           <div>
-            <div class="font-medium text-sm text-neutral-800">{{ auth.me?.nickName || auth.me?.userName || '未设置昵称' }}</div>
+            <div class="font-medium text-sm text-neutral-800">{{ auth.me?.realName || auth.me?.userName || '未设置姓名' }}</div>
             <div class="text-xs text-neutral-500">平台用户</div>
           </div>
         </div>

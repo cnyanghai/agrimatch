@@ -15,6 +15,7 @@ export interface DashboardResponse {
   todayViewCount: number
   totalDealQuantity: number
   activeContractCount: number
+  followingCount?: number
 }
 
 /**

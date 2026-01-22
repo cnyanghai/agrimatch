@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Star, User, Building2, RefreshCw, Plus, X, Package, ShoppingCart, ArrowRight, MapPin } from 'lucide-vue-next'
+import { User, RefreshCw, Plus, X, Package, ShoppingCart } from 'lucide-vue-next'
 import { getFollowedUsers, getFollowedSupplies, getFollowedRequirements, unfollowUser, type FollowedUser } from '../api/follow'
 import { BaseButton, EmptyState } from '../components/ui'
 
@@ -17,7 +17,7 @@ const activeTab = ref<'supplies' | 'requirements'>('supplies')
 // 获取头像文字
 function getAvatarText(user: FollowedUser): string {
   const name = user.nickName || user.userName || 'U'
-  return name[0].toUpperCase()
+  return (name[0] || 'U').toUpperCase()
 }
 
 // 切换用户筛选

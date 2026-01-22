@@ -7,8 +7,8 @@ export interface CompanyCreateRequest {
   companyType?: CompanyType
   licenseNo?: string
   licenseImgUrl?: string
-  contacts?: string
-  phone?: string
+  legalPerson?: string
+  businessScope?: string
   wechat?: string
   province?: string
   city?: string
@@ -31,8 +31,8 @@ export interface CompanyResponse {
   companyType?: CompanyType
   licenseNo?: string
   licenseImgUrl?: string
-  contacts?: string
-  phone?: string
+  legalPerson?: string
+  businessScope?: string
   wechat?: string
   province?: string
   city?: string

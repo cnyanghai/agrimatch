@@ -1,37 +1,50 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getCompanyDirectory, type CompanyCardResponse } from '../api/company'
+import { useCompany } from '../composables/useCompany'
+import { useCompanyStore } from '../stores/company'
+import { debounce } from '../utils/debounce'
 import PublicTopNav from '../components/PublicTopNav.vue'
 import PublicFooter from '../components/PublicFooter.vue'
-import { Search, MapPin, Package, ShoppingBag, Truck, ChevronRight } from 'lucide-vue-next'
+import CompanyCard from '../components/company/CompanyCard.vue'
+import { Search, ShoppingBag, Truck, ChevronRight } from 'lucide-vue-next'
+import CompanySkeleton from '../components/company/CompanySkeleton.vue'
+import EmptyState from '../components/common/EmptyState.vue'
 
 const route = useRoute()
 const router = useRouter()
+const companyStore = useCompanyStore()
 
 const type = ref<'supplier' | 'buyer'>((route.query.type as any) || 'supplier')
 const letter = ref<string>((route.query.letter as string) || '')
 const page = ref(Number(route.query.page) || 1)
 const size = ref(24)
+const searchKeyword = ref<string>((route.query.keyword as string) || '')
 
-const companies = ref<CompanyCardResponse[]>([])
-const total = ref(0)
-const loading = ref(false)
+const { loading, companies, total, loadDirectory, searchCompaniesByKeyword, searchResults } = useCompany()
 
 const alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0-9']
 
-async function loadDirectory() {
-  loading.value = true
-  try {
-    const res = await getCompanyDirectory(type.value, letter.value, page.value, size.value)
-    if (res.code === 0 && res.data) {
-      companies.value = res.data.list
-      total.value = res.data.total
-    }
-  } catch (e) {
-    console.error(e)
-  } finally {
-    loading.value = false
+const handleSearch = debounce((keyword: string) => {
+  searchKeyword.value = keyword
+  if (keyword.trim()) {
+    searchCompaniesByKeyword(keyword)
+  } else {
+    searchResults.value = []
+  }
+  updateUrl()
+}, 500)
+
+async function loadDirectoryData() {
+  const cacheKey = `${type.value}-${letter.value || 'all'}-${page.value}-${size.value}`
+  const cached = companyStore.activeDirectory(type.value, letter.value || 'all')
+  
+  if (cached && cached.list.length > 0) {
+    companies.value = cached.list
+    total.value = cached.total
+  } else {
+    await loadDirectory(type.value, letter.value, page.value, size.value)
+    companyStore.directories.set(cacheKey, { list: companies.value, total: total.value })
   }
 }
 
@@ -53,6 +66,7 @@ function updateUrl() {
     query: {
       type: type.value,
       letter: letter.value || undefined,
+      keyword: searchKeyword.value || undefined,
       page: page.value > 1 ? page.value : undefined
     }
   })
@@ -62,13 +76,14 @@ function goProfile(id: number) {
   router.push(`/companies/${id}`)
 }
 
-onMounted(loadDirectory)
+onMounted(loadDirectoryData)
 
 watch(() => route.query, () => {
   type.value = (route.query.type as any) || 'supplier'
   letter.value = (route.query.letter as string) || ''
+  searchKeyword.value = (route.query.keyword as string) || ''
   page.value = Number(route.query.page) || 1
-  loadDirectory()
+  loadDirectoryData()
 }, { deep: true })
 </script>
 
@@ -80,11 +95,52 @@ watch(() => route.query, () => {
       <!-- Header -->
       <div class="mb-12">
         <h1 class="text-3xl font-extrabold text-gray-900 mb-4 flex items-center gap-3">
-          <Truck v-if="type === 'supplier'" class="text-brand-600" :size="32" />
-          <ShoppingBag v-else class="text-blue-600" :size="32" />
+          <Truck v-if="type === 'supplier'" class="text-brand-600" :size="32" aria-hidden="true" />
+          <ShoppingBag v-else class="text-blue-600" :size="32" aria-hidden="true" />
           {{ type === 'supplier' ? '制造商名录' : '采购商名录' }}
         </h1>
         <p class="text-gray-500">查找并对比优质{{ type === 'supplier' ? '饲料原料供应商' : '行业采购商' }}</p>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+        <div class="relative">
+          <Search :size="20" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+          <input
+            type="text"
+            v-model="searchKeyword"
+            @input="handleSearch(($event.target as HTMLInputElement).value)"
+            placeholder="搜索公司名称..."
+            class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-all text-sm"
+            aria-label="搜索公司"
+          />
+        </div>
+      </div>
+
+      <!-- Search Results Dropdown -->
+      <div v-if="searchResults.length > 0 && searchKeyword" class="bg-white rounded-xl shadow-lg border border-gray-200 mb-8 overflow-hidden">
+        <div class="p-4 bg-gray-50 border-b border-gray-100">
+          <div class="text-xs font-bold text-gray-500 uppercase tracking-widest">搜索结果</div>
+        </div>
+        <div class="max-h-96 overflow-y-auto">
+          <div
+            v-for="result in searchResults"
+            :key="result.id"
+            @click="goProfile(result.id)"
+            class="flex items-center justify-between p-4 hover:bg-brand-50 cursor-pointer transition-colors border-b border-gray-50 last:border-0"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-brand-100 rounded-lg flex items-center justify-center font-bold text-brand-600 text-sm">
+                {{ result.companyName[0] }}
+              </div>
+              <div>
+                <div class="font-bold text-gray-900">{{ result.companyName }}</div>
+                <div class="text-xs text-gray-400">{{ result.address || '暂无地址' }}</div>
+              </div>
+            </div>
+            <ChevronRight :size="16" class="text-gray-300" aria-hidden="true" />
+          </div>
+        </div>
       </div>
 
       <!-- Type Switch & Alphabet Index -->
@@ -111,61 +167,27 @@ watch(() => route.query, () => {
       </div>
 
       <!-- Company Grid -->
-      <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="i in 12" :key="i" class="h-48 bg-white rounded-xl border border-gray-200 animate-pulse"></div>
-      </div>
-      <div v-else-if="companies.length === 0" class="py-32 text-center bg-white rounded-xl border border-dashed border-gray-200">
-        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Search :size="32" class="text-gray-300" />
-        </div>
-        <h3 class="text-lg font-bold text-gray-900 mb-2">未找到相关公司</h3>
-        <p class="text-gray-400">尝试切换字母索引或浏览全部</p>
+      <CompanySkeleton v-if="loading" :count="12" type="card" />
+      <div v-else-if="companies.length === 0" class="bg-white rounded-xl border border-dashed border-gray-200">
+        <EmptyState
+          :icon="Search"
+          title="未找到相关公司"
+          description="尝试切换字母索引或浏览全部"
+        />
       </div>
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
+        <CompanyCard
           v-for="c in companies"
           :key="c.id"
-          class="group bg-white p-6 rounded-xl border border-gray-200 hover:shadow-md hover:border-brand-100 transition-all cursor-pointer flex flex-col"
+          :id="c.id"
+          :company-name="c.companyName"
+          :province="c.province"
+          :city="c.city"
+          :category-names="c.categoryNames"
+          :count="c.count"
+          :type="type"
           @click="goProfile(c.id)"
-        >
-          <div class="flex items-center gap-4 mb-6">
-            <div
-              class="w-14 h-14 rounded-xl flex items-center justify-center font-bold text-white text-xl shadow-sm transition-transform group-hover:scale-110"
-              :class="type === 'supplier' ? 'bg-gradient-to-br from-brand-500 to-teal-600' : 'bg-gradient-to-br from-blue-500 to-indigo-600'"
-            >
-              {{ c.companyName[0] }}
-            </div>
-            <div class="min-w-0">
-              <h3 class="font-bold text-gray-900 truncate group-hover:text-brand-600 transition-colors">
-                {{ c.companyName }}
-              </h3>
-              <div class="flex items-center gap-1.5 text-xs text-gray-400 mt-1">
-                <MapPin :size="12" />
-                {{ c.province }} · {{ c.city }}
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-3 mb-6 flex-1">
-            <div class="flex items-start gap-3">
-              <Package :size="14" class="text-gray-300 mt-0.5 shrink-0" />
-              <div class="text-xs text-gray-500 line-clamp-2">
-                {{ c.categoryNames?.join(' / ') || '暂无分类' }}
-              </div>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between pt-4 border-t border-gray-50">
-            <div class="text-xs">
-              <span class="text-gray-400">{{ type === 'supplier' ? '累计供应' : '累计需求' }}</span>
-              <b class="ml-2" :class="type === 'supplier' ? 'text-brand-600' : 'text-blue-600'">{{ c.count }}</b>
-            </div>
-            <div class="flex items-center gap-1 text-xs font-bold" :class="type === 'supplier' ? 'text-brand-600' : 'text-blue-600'">
-              进入主页
-              <ChevronRight :size="14" />
-            </div>
-          </div>
-        </div>
+        />
       </div>
 
       <!-- Pagination -->

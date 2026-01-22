@@ -411,3 +411,21 @@ body {
 .font-mono {
   font-family: var(--font-family-mono);
 }
+
+/* 图片懒加载样式 */
+img.lazy-loading {
+  opacity: 0.4;
+  filter: blur(8px);
+  transition: opacity 0.3s ease-out, filter 0.3s ease-out;
+}
+
+img.lazy-loaded {
+  opacity: 1;
+  filter: blur(0);
+  transition: opacity 0.3s ease-out, filter 0.3s ease-out;
+}
+
+img.lazy-loading,
+img.lazy-loaded {
+  will-change: opacity, filter;
+}

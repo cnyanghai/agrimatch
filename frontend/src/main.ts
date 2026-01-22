@@ -13,10 +13,12 @@ import { createPinia } from 'pinia'
 import router from './router'
 import { prefetchCommonRoutes } from './utils/prefetchRoutes'
 import { ErrorHandler } from './utils/error-handler'
+import lazyLoad from './directives/lazyLoad'
 
 const app = createApp(App)
 app.use(createPinia())
 app.use(router)
+app.directive('lazy', lazyLoad)
 dayjs.locale('zh-cn')
 app.use(ElementPlus, { locale: zhCn })
 

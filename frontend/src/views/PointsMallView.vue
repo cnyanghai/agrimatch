@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ShoppingBag, Coins, ArrowLeft, Check, Package, Gift, CreditCard, Sparkles } from 'lucide-vue-next'
+import { Coins, ArrowLeft, Package, Gift, CreditCard, Sparkles } from 'lucide-vue-next'
 import { getPointsMe, redeemPoints } from '../api/points'
 import { BaseButton, Skeleton } from '../components/ui'
 

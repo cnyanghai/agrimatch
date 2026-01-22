@@ -87,7 +87,7 @@ onMounted(async () => {
       <div class="min-h-[80px] py-4 flex items-center justify-between gap-6">
         <!-- Left: Logo & Dropdowns (Stacked) -->
         <div class="flex flex-col items-start gap-3">
-          <div class="flex items-center gap-3 cursor-pointer hover:bg-gray-50/50 px-2 py-1 rounded-xl transition-all active:scale-[0.99]" @click="go('/')">
+          <div class="flex items-center gap-3 cursor-pointer hover:bg-gray-50/50 px-2 py-1 rounded-xl transition-all active:scale-95" @click="go('/')">
             <div class="w-9 h-9 rounded-lg bg-brand-600 text-white flex items-center justify-center font-bold">A</div>
             <div class="leading-tight hidden sm:block">
               <div class="font-bold text-gray-900">AgriMatch</div>
@@ -99,11 +99,11 @@ onMounted(async () => {
           <div class="hidden lg:flex items-center gap-6 ml-2">
             <!-- 产品分类 -->
             <el-dropdown trigger="hover" popper-class="mega-menu-popper">
-              <button class="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-brand-600 transition-colors">
+              <button class="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-brand-600 transition-colors active:scale-95">
                 产品分类 <ChevronDown :size="14" />
               </button>
               <template #dropdown>
-                <div class="flex w-[900px] h-[540px] overflow-hidden bg-white rounded-xl">
+                <div class="flex w-[900px] h-[540px] overflow-hidden bg-white rounded-2xl">
                   <!-- Sidebar: 1st Level Categories -->
                   <div class="w-64 bg-gray-50 border-r border-gray-200 py-4 overflow-y-auto">
                     <div 
@@ -129,7 +129,7 @@ onMounted(async () => {
                           <h3 class="text-xl font-bold text-gray-900">{{ activeCategory.name }}</h3>
                         </div>
                         <button 
-                          class="text-xs font-bold text-brand-600 hover:underline flex items-center gap-1"
+                          class="text-xs font-bold text-brand-600 hover:underline flex items-center gap-1 active:scale-95 transition-transform"
                           @click="go('/hall/supply', { categoryId: activeCategory.id })"
                         >
                           查看该大类全部
@@ -150,7 +150,7 @@ onMounted(async () => {
                             <button 
                               v-for="item in group.items" 
                               :key="item.id"
-                              class="text-xs text-gray-500 hover:text-brand-600 hover:bg-brand-50 px-2 py-1 rounded-md transition-all border border-transparent hover:border-brand-100" 
+                              class="text-xs text-gray-500 hover:text-brand-600 hover:bg-brand-50 px-2 py-1 rounded-md transition-all border border-transparent hover:border-brand-100 active:scale-95" 
                               @click="go('/hall/supply', { categoryId: item.id })"
                             >
                               {{ item.name }}
@@ -171,7 +171,7 @@ onMounted(async () => {
 
             <!-- 供应商 -->
             <el-dropdown trigger="hover" popper-class="mega-menu-popper">
-              <button class="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-brand-600 transition-colors">
+              <button class="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-brand-600 transition-colors active:scale-95">
                 供应商 <ChevronDown :size="14" />
               </button>
               <template #dropdown>
@@ -187,7 +187,7 @@ onMounted(async () => {
                     <button 
                       v-for="s in topSuppliers" 
                       :key="s.id" 
-                      class="text-left text-xs text-gray-600 hover:text-brand-600 hover:font-bold transition-all truncate py-1"
+                      class="text-left text-xs text-gray-600 hover:text-brand-600 hover:font-bold transition-all truncate py-1 active:scale-95"
                       @click="go(`/companies/${s.id}`)"
                     >
                       {{ s.companyName }}
@@ -195,12 +195,12 @@ onMounted(async () => {
                   </div>
 
                   <div class="border-t pt-4">
-                    <button 
-                      class="w-full bg-brand-50 hover:bg-brand-100 text-brand-700 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
-                      @click="go('/companies/directory', { type: 'supplier' })"
-                    >
-                      所有制造商
-                    </button>
+<button 
+                    class="w-full bg-brand-50 hover:bg-brand-100 text-brand-700 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-95"
+                    @click="go('/companies/directory', { type: 'supplier' })"
+                  >
+                    所有制造商
+                  </button>
                   </div>
                 </div>
               </template>
@@ -208,7 +208,7 @@ onMounted(async () => {
 
             <!-- 采购商 -->
             <el-dropdown trigger="hover" popper-class="mega-menu-popper">
-              <button class="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-brand-600 transition-colors">
+              <button class="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-brand-600 transition-colors active:scale-95">
                 采购商 <ChevronDown :size="14" />
               </button>
               <template #dropdown>
@@ -224,7 +224,7 @@ onMounted(async () => {
                     <button 
                       v-for="b in topBuyers" 
                       :key="b.id" 
-                      class="text-left text-xs text-gray-600 hover:text-autumn-600 hover:font-bold transition-all truncate py-1"
+                      class="text-left text-xs text-gray-600 hover:text-autumn-600 hover:font-bold transition-all truncate py-1 active:scale-95"
                       @click="go(`/companies/${b.id}`)"
                     >
                       {{ b.companyName }}
@@ -232,12 +232,12 @@ onMounted(async () => {
                   </div>
 
                   <div class="border-t pt-4">
-                    <button 
-                      class="w-full bg-autumn-50 hover:bg-autumn-100 text-autumn-700 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
-                      @click="go('/companies/directory', { type: 'buyer' })"
-                    >
-                      所有采购商名录
-                    </button>
+<button 
+                    class="w-full bg-autumn-50 hover:bg-autumn-100 text-autumn-700 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-95"
+                    @click="go('/companies/directory', { type: 'buyer' })"
+                  >
+                    所有采购商名录
+                  </button>
                   </div>
                 </div>
               </template>
@@ -248,21 +248,21 @@ onMounted(async () => {
         <!-- Right: Nav & User -->
         <div class="flex items-center gap-6">
           <div class="hidden md:flex items-center gap-5 text-sm font-bold text-gray-500">
-            <button class="hover:text-brand-600 transition-all " @click="go('/hall/supply')">供应大厅</button>
-            <button class="hover:text-brand-600 transition-all " @click="go('/hall/need')">采购大厅</button>
-            <button class="hover:text-brand-600 transition-all " @click="go('/talks')">话题广场</button>
+            <button class="hover:text-brand-600 transition-all active:scale-95" @click="go('/hall/supply')">供应大厅</button>
+            <button class="hover:text-brand-600 transition-all active:scale-95" @click="go('/hall/need')">采购大厅</button>
+            <button class="hover:text-brand-600 transition-all active:scale-95" @click="go('/talks')">话题广场</button>
           </div>
 
           <div class="flex items-center gap-3">
             <slot name="actions" />
             <template v-if="!isLoggedIn">
-              <button class="bg-brand-600 text-white px-5 py-2 rounded-full font-bold hover:bg-brand-700 transition-all  text-sm" @click="openLogin">
+              <button class="bg-brand-600 text-white px-5 py-2 rounded-full font-bold hover:bg-brand-700 transition-all active:scale-95 text-sm" @click="openLogin">
                 登录/注册
               </button>
             </template>
             <template v-else>
               <el-dropdown>
-                <button class="flex items-center gap-3 bg-gray-50 border border-gray-200 px-3 py-2 rounded-full hover:bg-gray-50/50 transition-all ">
+                <button class="flex items-center gap-3 bg-gray-50 border border-gray-200 px-3 py-2 rounded-full hover:bg-gray-50/50 transition-all active:scale-95">
                   <div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm">
                     {{ avatarChar }}
                   </div>
@@ -300,7 +300,7 @@ onMounted(async () => {
 <style>
 .mega-menu-popper {
   --el-dropdown-menu-box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-  border-radius: 20px !important;
+  border-radius: 1.5rem !important; /* rounded-2xl */
   border: none !important;
   padding: 0 !important;
   margin-top: 12px !important;

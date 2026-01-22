@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { useAuthStore } from '../store/auth'
 import { updateMe, type UserUpdateRequest } from '../api/user'
@@ -19,7 +19,7 @@ const company = ref<CompanyResponse | null>(null)
 
 // 用户表单
 const userForm = reactive({
-  displayName: '',
+  realName: '',
   phonenumber: '',
   position: '',
   birthDate: '',
@@ -32,8 +32,8 @@ const companyForm = reactive({
   companyName: '',
   licenseNo: '',
   licenseImgUrl: '',
-  contacts: '',
-  phone: '',
+  legalPerson: '',
+  businessScope: '',
   province: '',
   city: '',
   district: '',
@@ -48,8 +48,8 @@ const passwordForm = reactive({
 })
 
 // 快照
-const userSnapshot = ref({ displayName: '', phonenumber: '', position: '', birthDate: '', gender: 1, bio: '' })
-const companySnapshot = ref({ companyName: '', licenseNo: '', licenseImgUrl: '', contacts: '', phone: '', province: '', city: '', district: '', address: '' })
+const userSnapshot = ref({ realName: '', phonenumber: '', position: '', birthDate: '', gender: 1, bio: '' })
+const companySnapshot = ref({ companyName: '', licenseNo: '', licenseImgUrl: '', legalPerson: '', businessScope: '', province: '', city: '', district: '', address: '' })
 
 // 省市区级联选择值
 const regionValue = ref<string[]>([])
@@ -146,10 +146,10 @@ async function loadUserData() {
   try {
     await auth.fetchMe()
     if (auth.me) {
-      userForm.displayName = auth.me.nickName || ''
+      userForm.realName = auth.me.realName || ''
       userForm.phonenumber = auth.me.phonenumber || ''
       userForm.position = auth.me.position || ''
-      userForm.birthDate = auth.me.birthDate ? auth.me.birthDate.slice(0, 7) : ''
+      userForm.birthDate = auth.me.birthDate || ''
       userForm.gender = auth.me.gender || 1
       userForm.bio = auth.me.bio || ''
     }
@@ -167,8 +167,8 @@ async function loadCompanyData() {
       companyForm.companyName = res.data.companyName || ''
       companyForm.licenseNo = res.data.licenseNo || ''
       companyForm.licenseImgUrl = res.data.licenseImgUrl || ''
-      companyForm.contacts = res.data.contacts || ''
-      companyForm.phone = res.data.phone || ''
+      companyForm.legalPerson = res.data.legalPerson || ''
+      companyForm.businessScope = res.data.businessScope || ''
       companyForm.province = res.data.province || ''
       companyForm.city = res.data.city || ''
       companyForm.district = res.data.district || ''
@@ -185,15 +185,15 @@ async function loadCompanyData() {
 }
 
 async function saveUserInfo() {
-  if (!userForm.displayName?.trim()) {
-    ElMessage.warning('请输入姓名/昵称')
+  if (!userForm.realName?.trim()) {
+    ElMessage.warning('请输入真实姓名')
     return
   }
   loading.value = true
   try {
     const birthDate = userForm.birthDate?.trim() ? `${userForm.birthDate}-01` : undefined
     const req: UserUpdateRequest = {
-      nickName: userForm.displayName,
+      realName: userForm.realName,
       phonenumber: userForm.phonenumber,
       position: userForm.position,
       birthDate,
@@ -265,7 +265,7 @@ function resetPasswordForm() { passwordForm.oldPassword = ''; passwordForm.newPa
 
 const genderOptions = [{ label: '男', value: 1 }, { label: '女', value: 2 }]
 
-const currentName = computed(() => auth.me?.nickName || auth.me?.userName || '用户')
+const currentName = computed(() => auth.me?.realName || auth.me?.userName || '用户')
 const currentPhone = computed(() => auth.me?.phonenumber || '未绑定手机号')
 const currentPosition = computed(() => auth.me?.position || '暂无职位')
 const avatarText = computed(() => {
@@ -279,7 +279,7 @@ const companyDirty = computed(() => JSON.stringify(companyForm) !== JSON.stringi
 const passwordDirty = computed(() => !!(passwordForm.oldPassword || passwordForm.newPassword || passwordForm.confirmPassword))
 
 const tabs = [
-  { key: 'user', label: '基本信息', icon: User },
+  { key: 'user', label: '个人信息', icon: User },
   { key: 'company', label: '公司信息', icon: Building2 },
   { key: 'security', label: '账户安全', icon: Lock }
 ]
@@ -345,27 +345,16 @@ const tabs = [
       </div>
     </div>
 
-    <!-- 基本信息 -->
+    <!-- 个人信息 -->
     <div v-show="activeTab === 'user'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
       <div class="p-5 border-b border-gray-200">
-        <h3 class="text-lg font-bold text-gray-900">基本信息</h3>
+        <h3 class="text-lg font-bold text-gray-900">个人信息</h3>
         <p class="text-sm text-gray-500 mt-1">修改后点击保存生效</p>
       </div>
       
       <div class="p-6 space-y-6">
         <!-- 表单 -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-              姓名/昵称 <span class="text-red-500">*</span>
-            </label>
-            <input
-              v-model="userForm.displayName"
-              type="text"
-              placeholder="请输入姓名/昵称"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
-            />
-          </div>
           <div>
             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">手机号码</label>
             <input
@@ -385,14 +374,14 @@ const tabs = [
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">出生年月</label>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">出生日期</label>
             <el-date-picker
               v-model="userForm.birthDate"
-              type="month"
+              type="date"
               :locale="zhCn"
-              placeholder="选择出生年月"
-              format="YYYY年MM月"
-              value-format="YYYY-MM"
+              placeholder="选择出生日期"
+              format="YYYY年MM月DD日"
+              value-format="YYYY-MM-DD"
               class="w-full neo-picker"
             />
           </div>
@@ -471,20 +460,20 @@ const tabs = [
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">联系人</label>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">法人</label>
             <input
-              v-model="companyForm.contacts"
+              v-model="companyForm.legalPerson"
               type="text"
-              placeholder="请输入公司联系人"
+              placeholder="请输入法人姓名"
               class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">联系电话</label>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">经营范围</label>
             <input
-              v-model="companyForm.phone"
+              v-model="companyForm.businessScope"
               type="text"
-              placeholder="请输入公司联系电话"
+              placeholder="请输入经营范围"
               class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
             />
           </div>

@@ -9,6 +9,7 @@ export interface MeResponse {
   userId: number
   userName: string
   nickName?: string
+  realName?: string
   phonenumber?: string
   wechat?: string
   position?: string

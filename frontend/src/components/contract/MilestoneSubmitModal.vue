@@ -5,6 +5,7 @@ import { Upload, Trash2, Check } from 'lucide-vue-next'
 import { submitMilestone, type MilestoneResponse, type MilestoneSubmitRequest } from '../../api/contract'
 import { uploadImage } from '../../api/file'
 import { BaseModal, BaseButton } from '../ui'
+import { vLazy } from '../../directives/lazyLoad'
 
 const props = defineProps<{
   modelValue: boolean
@@ -186,7 +187,7 @@ watch(visible, (val) => {
             :key="index"
             class="relative aspect-square rounded-xl overflow-hidden group"
           >
-            <img :src="url" alt="凭证" class="w-full h-full object-cover" />
+            <img v-lazy="url" alt="凭证" class="w-full h-full object-cover" />
             <button
               class="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               @click="removeEvidence(index)"

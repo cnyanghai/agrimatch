@@ -224,7 +224,7 @@ onBeforeUnmount(() => {
                 @keyup.enter="onSearch"
               />
             </div>
-            <button class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl font-bold transition-all " @click="onSearch">
+            <button class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl font-bold transition-all active:scale-95" @click="onSearch">
               搜索
             </button>
           </div>
@@ -258,7 +258,7 @@ onBeforeUnmount(() => {
             </h2>
           </div>
           <button 
-            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors"
+            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors active:scale-95"
             @click="go('/categories')"
           >
             查看所有类别
@@ -269,14 +269,14 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="categoryLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div v-for="i in 8" :key="i" class="h-24 bg-gray-50 rounded-xl animate-pulse"></div>
+          <div v-for="i in 8" :key="i" class="h-24 bg-gray-50 rounded-2xl animate-pulse"></div>
         </div>
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <!-- 核心分类卡片 -->
           <div
             v-for="cat in topCategories.slice(0, 7)"
             :key="cat.id"
-            class="group p-5 bg-white border border-gray-200 rounded-xl transition-all cursor-pointer flex items-center gap-4 hover:shadow-md hover:border-slate-200 "
+            class="group p-5 bg-white border border-gray-200 rounded-2xl transition-all cursor-pointer flex items-center gap-4 hover:shadow-md hover:border-slate-200"
             @click="goCategory(cat)"
           >
             <div 
@@ -293,7 +293,7 @@ onBeforeUnmount(() => {
 
           <!-- “更多”卡片 -->
           <div
-            class="group p-5 bg-gray-50/50 border border-dashed border-gray-200 rounded-xl transition-all cursor-pointer flex items-center gap-4 hover:bg-white hover:border-slate-200 hover:shadow-md "
+            class="group p-5 bg-gray-50/50 border border-dashed border-gray-200 rounded-2xl transition-all cursor-pointer flex items-center gap-4 hover:bg-white hover:border-slate-200 hover:shadow-md"
             @click="go('/categories')"
           >
             <div class="w-12 h-12 shrink-0 bg-white rounded-xl flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all shadow-sm text-slate-400">
@@ -317,7 +317,7 @@ onBeforeUnmount(() => {
             </h2>
           </div>
           <button 
-            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors"
+            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors active:scale-95"
             @click="go('/companies/directory')"
           >
             查看所有供应商
@@ -328,13 +328,13 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <div v-for="i in 12" :key="i" class="h-32 bg-white rounded-xl animate-pulse"></div>
+          <div v-for="i in 12" :key="i" class="h-32 bg-white rounded-2xl animate-pulse"></div>
         </div>
         <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           <div
             v-for="s in suppliers.slice(0, 12)"
             :key="s.id"
-            class="group bg-white p-5 rounded-xl border border-gray-200 transition-all cursor-pointer flex flex-col hover:shadow-md hover:border-slate-200 "
+            class="group bg-white p-5 rounded-2xl border border-gray-200 transition-all cursor-pointer flex flex-col hover:shadow-md hover:border-slate-200"
             @click="go(`/companies/${s.id}`)"
           >
             <div class="flex items-start justify-between mb-4">
@@ -368,7 +368,7 @@ onBeforeUnmount(() => {
             </h2>
           </div>
           <button 
-            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-autumn-600 transition-colors"
+            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-autumn-600 transition-colors active:scale-95"
             @click="go('/companies/directory?type=buyer')"
           >
             查看所有采购商
@@ -379,13 +379,13 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <div v-for="i in 12" :key="i" class="h-32 bg-gray-50 rounded-xl animate-pulse"></div>
+          <div v-for="i in 12" :key="i" class="h-32 bg-gray-50 rounded-2xl animate-pulse"></div>
         </div>
         <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           <div
             v-for="b in buyers.slice(0, 12)"
             :key="b.id"
-            class="group bg-white p-5 rounded-xl border border-gray-200 transition-all cursor-pointer flex flex-col hover:shadow-md hover:border-slate-200 "
+            class="group bg-white p-5 rounded-2xl border border-gray-200 transition-all cursor-pointer flex flex-col hover:shadow-md hover:border-slate-200"
             @click="go(`/companies/${b.id}`)"
           >
             <div class="flex items-start justify-between mb-4">
@@ -419,7 +419,7 @@ onBeforeUnmount(() => {
           </p>
         </div>
         <button 
-          class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors"
+          class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors active:scale-95"
           @click="go('/talks')"
         >
           查看更多内容
@@ -430,7 +430,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div v-if="hotTopicsLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div v-for="i in 4" :key="i" class="bg-white rounded-xl border border-gray-200 animate-pulse overflow-hidden">
+        <div v-for="i in 4" :key="i" class="bg-white rounded-2xl border border-gray-200 animate-pulse overflow-hidden">
           <div class="aspect-video bg-gray-50"></div>
           <div class="p-6 space-y-4">
             <div class="h-4 bg-gray-50 rounded w-3/4"></div>
@@ -438,7 +438,7 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </div>
-      <div v-else-if="hotTopics.length === 0" class="text-center py-20 bg-white rounded-xl border border-dashed border-gray-200">
+      <div v-else-if="hotTopics.length === 0" class="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
         <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
           <MessageCircle :size="32" class="text-gray-300" />
         </div>
@@ -448,12 +448,12 @@ onBeforeUnmount(() => {
         <div
           v-for="post in hotTopics.slice(0, 4)"
           :key="post.id"
-          class="group bg-white rounded-xl border border-gray-200 hover:shadow-md hover:border-brand-100 transition-all cursor-pointer overflow-hidden flex flex-col "
+          class="group bg-white rounded-2xl border border-gray-200 hover:shadow-md hover:border-brand-100 transition-all cursor-pointer overflow-hidden flex flex-col"
           @click="go(`/talks/${post.id}`)"
         >
           <!-- 封面图 -->
           <div class="aspect-video overflow-hidden bg-gray-100 relative">
-            <img :src="getPostCover(post)" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <img :src="getPostCover(post)" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out" />
             <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
           </div>
 

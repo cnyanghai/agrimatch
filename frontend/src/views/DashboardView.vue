@@ -143,7 +143,7 @@ const consoleModules = computed(() => {
 })
 
 // 获取图标容器的样式类（统一为 slate 风格，与首页对齐）
-function getIconClass(color: string) {
+function getIconClass() {
   // 统一使用 slate 风格，与首页搜索模块保持一致
   return 'bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600'
 }
@@ -305,7 +305,7 @@ onMounted(() => {
             @click="go(module.path)"
           >
             <!-- 图标容器 -->
-            <div :class="`w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-all group-hover:scale-110 ${getIconClass(module.color)}`">
+            <div :class="`w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-all group-hover:scale-110 ${getIconClass()}`">
               <component :is="module.icon" class="w-6 h-6" stroke-width="2" />
             </div>
             
