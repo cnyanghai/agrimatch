@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCompany } from '../composables/useCompany'
 import { useCompanyStore } from '../stores/company'
 import { debounce } from '../utils/debounce'
-import PublicTopNav from '../components/PublicTopNav.vue'
 import PublicFooter from '../components/PublicFooter.vue'
 import CompanyCard from '../components/company/CompanyCard.vue'
 import { Search, ShoppingBag, Truck, ChevronRight } from 'lucide-vue-next'
@@ -89,8 +88,6 @@ watch(() => route.query, () => {
 
 <template>
   <div class="bg-gray-50 min-h-screen flex flex-col">
-    <PublicTopNav />
-
     <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
       <!-- Header -->
       <div class="mb-12">

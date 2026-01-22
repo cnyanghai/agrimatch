@@ -3,7 +3,6 @@ import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Present } from '@element-plus/icons-vue'
-import PublicTopNav from '../components/PublicTopNav.vue'
 import { 
   getPost, 
   togglePostLike, 
@@ -224,13 +223,6 @@ onMounted(() => {
 
 <template>
   <div class="bg-gray-50 text-gray-900 min-h-screen">
-    <PublicTopNav>
-      <template #actions>
-        <button class="text-sm font-bold text-gray-500 hover:text-brand-600 transition-all " @click="router.push('/talks')">
-          ← 返回话题广场
-        </button>
-      </template>
-    </PublicTopNav>
 
     <main class="max-w-4xl mx-auto px-4 py-8" v-loading="loading">
       <!-- 话题内容 -->

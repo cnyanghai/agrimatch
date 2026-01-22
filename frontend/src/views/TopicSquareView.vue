@@ -6,7 +6,6 @@ import { requireAuth } from '../utils/requireAuth'
 import { listPosts, type PostResponse } from '../api/post'
 import { useAuthStore } from '../store/auth'
 import { useUiStore } from '../store/ui'
-import PublicTopNav from '../components/PublicTopNav.vue'
 import PublicFooter from '../components/PublicFooter.vue'
 import { MessageSquare, Heart, Search, ChevronDown, Plus, Star, Gift, Coins, CheckCircle } from 'lucide-vue-next'
 
@@ -93,14 +92,6 @@ onMounted(() => {
 
 <template>
   <div class="bg-gray-50 text-gray-900 min-h-screen">
-    <PublicTopNav>
-      <template #actions>
-        <button class="bg-brand-600 text-white px-5 py-2 rounded-full font-bold hover:bg-brand-700 transition-all  flex items-center gap-2 shadow-md shadow-brand-500/20" @click="onPublishTalk">
-          <Plus :size="18" />
-          发布话题
-        </button>
-      </template>
-    </PublicTopNav>
 
     <!-- 头部 -->
     <header class="bg-white border-b">

@@ -2,7 +2,6 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { requireAuth } from '../utils/requireAuth'
-import PublicTopNav from '../components/PublicTopNav.vue'
 import PublicFooter from '../components/PublicFooter.vue'
 import ChatDrawer from '../components/chat/ChatDrawer.vue'
 import { listSupplies, type SupplyResponse } from '../api/supply'
@@ -373,14 +372,6 @@ function parseParams(paramsJson?: string): string {
 
 <template>
   <div class="bg-gray-50 text-gray-900 min-h-screen">
-    <PublicTopNav>
-      <template #actions>
-        <button class="bg-brand-600 text-white px-5 py-2 rounded-full font-bold hover:bg-brand-700 transition-all " @click="onPublishSupply">
-          发布供应
-        </button>
-      </template>
-    </PublicTopNav>
-
     <!-- 公司筛选提示 -->
     <div v-if="companyIdFilter" class="bg-brand-50 border-b border-brand-100">
       <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">

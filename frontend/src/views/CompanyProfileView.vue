@@ -7,7 +7,6 @@ import { useCompanyStore } from '../stores/company'
 import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
 import { useAuthStore } from '../store/auth'
 import { openChatConversation } from '../api/chat'
-import PublicTopNav from '../components/PublicTopNav.vue'
 import PublicFooter from '../components/PublicFooter.vue'
 import { 
   Info, Shield, MapPin, Search, TrendingUp, TrendingDown, 
@@ -281,9 +280,6 @@ watch(() => route.params.id, (newId, oldId) => {
 
 <template>
   <div class="bg-gray-50 min-h-screen flex flex-col">
-    <!-- 项目导航栏 -->
-    <PublicTopNav />
-
     <!-- Loading State -->
     <div v-if="loading" class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <CompanySkeleton type="profile" />

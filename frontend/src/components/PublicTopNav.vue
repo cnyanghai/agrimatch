@@ -83,8 +83,8 @@ onMounted(async () => {
 
 <template>
   <nav class="bg-brand-700/90 backdrop-blur-md border-b border-brand-800/30 sticky top-0 z-50 shadow-lg shadow-brand-900/20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="min-h-[64px] py-3 flex items-center justify-between gap-6">
+    <div class="w-full px-4 md:px-10">
+      <div class="min-h-[52px] py-2 flex items-center justify-between gap-6">
         <!-- Left: Logo & Dropdowns (Stacked) -->
         <div class="flex flex-col items-start gap-3">
           <div class="flex items-center gap-3 cursor-pointer hover:bg-white/10 px-2 py-1 rounded-xl transition-all active:scale-95" @click="go('/')">

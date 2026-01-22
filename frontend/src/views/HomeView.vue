@@ -5,7 +5,6 @@ import { getProductTree, type ProductNode } from '../api/product'
 import { listPosts, type PostResponse } from '../api/post'
 import { getPlatformStats, type StatsResponse } from '../api/stats'
 import { listTopCompanies, type CompanyCardResponse } from '../api/company'
-import PublicTopNav from '../components/PublicTopNav.vue'
 import PublicFooter from '../components/PublicFooter.vue'
 import {
   MapPin,
@@ -196,8 +195,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="bg-gray-50 text-gray-900 min-h-screen">
-    <PublicTopNav />
-
     <!-- Hero -->
     <section class="relative hero-gradient overflow-hidden text-white h-[510px] flex items-center pt-0">
       <!-- Background Texture Overlay -->

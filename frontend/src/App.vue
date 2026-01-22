@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './store/auth'
 import { useUiStore } from './store/ui'
 import AuthDialog from './components/AuthDialog.vue'
+import PublicTopNav from './components/PublicTopNav.vue'
 import {
   LayoutDashboard, FilePlus, Star, Map,
   MessageSquare, FileCheck, User, LogOut,
@@ -17,6 +18,7 @@ const ui = useUiStore()
 
 const minimal = computed(() => Boolean(route.meta.minimal))
 const isLoggedIn = computed(() => Boolean(auth.me))
+const hideNav = computed(() => Boolean(route.meta.hideNav))
 const showProfileGuide = ref(false)
 const profileGuideChecked = ref(false)
 
@@ -67,26 +69,19 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="minimal">
-    <router-view />
-    <AuthDialog />
-  </div>
+  <div class="h-screen flex flex-col overflow-hidden bg-gray-50">
+    <!-- Global Navigation -->
+    <PublicTopNav v-if="!hideNav" />
 
-  <div v-else class="h-full flex bg-neutral-50">
-    <!-- Sidebar -->
-    <aside v-if="isLoggedIn" class="hidden md:flex w-60 flex-col bg-white shadow-modern">
-      <div
-        class="px-5 py-4 border-b border-neutral-100 flex items-center gap-3 cursor-pointer hover:bg-gray-50/50 transition-all"
-        @click="go('/')"
-      >
-        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-600 to-brand-700 flex items-center justify-center font-bold text-white shadow-md">A</div>
-        <div class="leading-tight">
-          <div class="font-bold text-lg text-neutral-800">AgriMatch</div>
-          <div class="text-xs text-neutral-500">农汇通 · 供需匹配平台</div>
-        </div>
-      </div>
+    <!-- Main Content Area -->
+    <div v-if="minimal" class="flex-1 overflow-auto">
+      <router-view />
+    </div>
 
-      <!-- 核心功能（8大模块） -->
+    <div v-else class="flex-1 flex overflow-hidden">
+      <!-- Sidebar -->
+      <aside v-if="isLoggedIn" class="hidden md:flex w-60 shrink-0 flex-col bg-white shadow-modern overflow-y-auto">
+        <!-- 核心功能（8大模块） -->
       <div class="px-3 py-2 flex-1">
         <nav class="space-y-1">
           <!-- 1. 控制台首页 -->
@@ -167,41 +162,8 @@ onMounted(async () => {
       </div>
     </aside>
 
-    <!-- Main -->
-    <div class="flex-1 flex flex-col min-w-0">
-      <!-- Topbar -->
-      <header class="bg-surface border-b border-border shadow-sm">
-        <div class="px-4 py-3 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="md:hidden w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary-hover text-white flex items-center justify-center font-bold shadow-md">A</div>
-            <div class="font-bold text-text-primary">农汇通 AgriMatch</div>
-            <span class="hidden sm:inline text-xs text-text-secondary">供需匹配平台</span>
-          </div>
-
-          <div class="flex items-center gap-3">
-            <!-- 用户下拉菜单 -->
-            <el-dropdown>
-              <el-button class="!rounded-lg">
-                {{ auth.me?.nickName || auth.me?.userName || '未登录' }}
-                <ChevronDown class="w-4 h-4 ml-1" stroke-width="2" />
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item v-if="auth.me" @click="go('/console')">
-                    <User class="w-4 h-4 mr-2" stroke-width="2" />我的账户
-                  </el-dropdown-item>
-                  <el-dropdown-item v-if="!auth.me" @click="ui.openAuthDialog('login')">去登录/注册</el-dropdown-item>
-                  <el-dropdown-item v-if="auth.me" divided @click="logout">
-                    <LogOut class="w-4 h-4 mr-2" stroke-width="2" />注销
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </div>
-        </div>
-      </header>
-
-      <main class="flex-1 overflow-auto p-4 md:p-6">
+      <!-- Main Content -->
+      <main class="flex-1 overflow-auto p-4 md:p-6 min-w-0">
         <router-view />
       </main>
     </div>

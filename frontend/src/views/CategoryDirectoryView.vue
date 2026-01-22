@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { getProductTree, type ProductNode } from '../api/product'
-import PublicTopNav from '../components/PublicTopNav.vue'
 import PublicFooter from '../components/PublicFooter.vue'
 import { 
   Package, 
@@ -77,8 +76,6 @@ onMounted(() => {
 
 <template>
   <div class="bg-gray-50 min-h-screen flex flex-col">
-    <PublicTopNav />
-    
     <main class="flex-1">
       <!-- Header / Search -->
       <div class="bg-white border-b border-gray-200 py-12">
