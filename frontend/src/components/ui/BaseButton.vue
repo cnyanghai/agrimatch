@@ -25,11 +25,11 @@ const emit = defineEmits<{
 // 类型样式映射（使用新的设计系统）
 const typeClasses = computed(() => {
   const types: Record<string, string> = {
-    primary: 'bg-primary hover:bg-primary-hover text-white shadow-md hover:scale-105',
-    secondary: 'bg-surface hover:bg-background border border-border hover:border-border-dark text-text-secondary',
-    danger: 'bg-error/10 hover:bg-error/20 text-error',
-    ghost: 'bg-transparent hover:bg-primary/10 text-text-secondary hover:text-primary',
-    outline: 'bg-surface border border-border hover:border-primary hover:bg-primary/10 text-text-secondary hover:text-primary'
+    primary: 'bg-primary-600 hover:bg-primary-700 text-white shadow-md hover:scale-105',
+    secondary: 'bg-gray-100 hover:bg-gray-200 border border-gray-200 hover:border-gray-300 text-gray-700',
+    danger: 'bg-red-50 hover:bg-red-100 text-red-600',
+    ghost: 'bg-transparent hover:bg-primary-50 text-gray-600 hover:text-primary-700',
+    outline: 'bg-white border border-gray-200 hover:border-primary-500 hover:bg-primary-50 text-gray-700 hover:text-primary-700'
   }
   return types[props.type] || types.primary
 })
@@ -66,7 +66,7 @@ function handleClick(e: MouseEvent) {
 <template>
   <button
     :class="[
-      'font-semibold transition-all duration-200 ease-out flex items-center justify-center gap-2 ',
+      'font-semibold transition-all duration-200 ease-out flex items-center justify-center gap-2 whitespace-nowrap',
       typeClasses,
       sizeClasses,
       {
@@ -82,6 +82,6 @@ function handleClick(e: MouseEvent) {
     <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
 
     <!-- 内容插槽 -->
-    <slot />
+    <span class="inline-flex items-center text-inherit"><slot /></span>
   </button>
 </template>

@@ -14,6 +14,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Service
@@ -64,9 +67,10 @@ public class UserServiceImpl implements UserService {
         u.setPhonenumber(emptyToNull(req.getPhonenumber()));
         u.setWechat(emptyToNull(req.getWechat()));
         u.setPosition(emptyToNull(req.getPosition()));
-        u.setBirthDate(req.getBirthDate());
+        u.setBirthDate(parseBirthDate(req.getBirthDate()));
         u.setGender(req.getGender());
         u.setBio(emptyToNull(req.getBio()));
+        u.setAvatar(emptyToNull(req.getAvatar()));
         u.setCompanyId(req.getCompanyId());
         u.setPayInfoJson(emptyToNull(req.getPayInfoJson()));
 
@@ -110,6 +114,10 @@ public class UserServiceImpl implements UserService {
         r.setIsSeller(u.getIsSeller());
         r.setUserType(u.getUserType());
         r.setPosition(u.getPosition());
+        r.setBirthDate(u.getBirthDate() != null ? u.getBirthDate().toString() : null);
+        r.setGender(u.getGender());
+        r.setBio(u.getBio());
+        r.setAvatar(u.getAvatar());
         r.setPayInfoJson(u.getPayInfoJson());
         r.setCreateTime(u.getCreateTime());
         r.setUpdateTime(u.getUpdateTime());
@@ -132,6 +140,19 @@ public class UserServiceImpl implements UserService {
 
     private static String emptyToNull(String s) {
         return StringUtils.hasText(s) ? s : null;
+    }
+
+    private static LocalDate parseBirthDate(String birthDateStr) {
+        if (!StringUtils.hasText(birthDateStr)) {
+            return null;
+        }
+        try {
+            // 支持 YYYY-MM-DD 格式
+            return LocalDate.parse(birthDateStr, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (DateTimeParseException e) {
+            // 如果解析失败，返回 null（不阻塞保存）
+            return null;
+        }
     }
 }
 

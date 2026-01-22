@@ -16,6 +16,7 @@ export interface MeResponse {
   birthDate?: string // YYYY-MM-DD
   gender?: number    // 1-男 2-女
   bio?: string
+  avatar?: string    // 个人头像URL
   companyId?: number
   isBuyer?: number
   isSeller?: number

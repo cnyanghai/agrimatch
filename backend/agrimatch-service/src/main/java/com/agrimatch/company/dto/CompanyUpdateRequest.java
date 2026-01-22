@@ -18,6 +18,12 @@ public class CompanyUpdateRequest {
     private String licenseImgUrl;
 
     @Size(max = 50)
+    private String legalPerson;
+
+    @Size(max = 500)
+    private String businessScope;
+
+    @Size(max = 50)
     private String contacts;
 
     @Size(max = 20)
@@ -43,6 +49,12 @@ public class CompanyUpdateRequest {
 
     private String locationsJson;
     private String bankInfoJson;
+    private String registeredCapital;
+    private String establishDate;
+    private String scale;
+    private String announcementsJson;
+    private String recruitmentJson;
+    private String certificatesJson;
 
     public String getCompanyName() {
         return companyName;
@@ -74,6 +86,22 @@ public class CompanyUpdateRequest {
 
     public void setLicenseImgUrl(String licenseImgUrl) {
         this.licenseImgUrl = licenseImgUrl;
+    }
+
+    public String getLegalPerson() {
+        return legalPerson;
+    }
+
+    public void setLegalPerson(String legalPerson) {
+        this.legalPerson = legalPerson;
+    }
+
+    public String getBusinessScope() {
+        return businessScope;
+    }
+
+    public void setBusinessScope(String businessScope) {
+        this.businessScope = businessScope;
     }
 
     public String getContacts() {
@@ -162,6 +190,54 @@ public class CompanyUpdateRequest {
 
     public void setBankInfoJson(String bankInfoJson) {
         this.bankInfoJson = bankInfoJson;
+    }
+
+    public String getRegisteredCapital() {
+        return registeredCapital;
+    }
+
+    public void setRegisteredCapital(String registeredCapital) {
+        this.registeredCapital = registeredCapital;
+    }
+
+    public String getEstablishDate() {
+        return establishDate;
+    }
+
+    public void setEstablishDate(String establishDate) {
+        this.establishDate = establishDate;
+    }
+
+    public String getScale() {
+        return scale;
+    }
+
+    public void setScale(String scale) {
+        this.scale = scale;
+    }
+
+    public String getAnnouncementsJson() {
+        return announcementsJson;
+    }
+
+    public void setAnnouncementsJson(String announcementsJson) {
+        this.announcementsJson = announcementsJson;
+    }
+
+    public String getRecruitmentJson() {
+        return recruitmentJson;
+    }
+
+    public void setRecruitmentJson(String recruitmentJson) {
+        this.recruitmentJson = recruitmentJson;
+    }
+
+    public String getCertificatesJson() {
+        return certificatesJson;
+    }
+
+    public void setCertificatesJson(String certificatesJson) {
+        this.certificatesJson = certificatesJson;
     }
 }
 

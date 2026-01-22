@@ -10,6 +10,8 @@ public class CompanyResponse {
     private String companyType;
     private String licenseNo;
     private String licenseImgUrl;
+    private String legalPerson;
+    private String businessScope;
     private String contacts;
     private String phone;
     private String wechat;
@@ -21,6 +23,12 @@ public class CompanyResponse {
     private BigDecimal lng;
     private String locationsJson;
     private String bankInfoJson;
+    private String registeredCapital;
+    private String establishDate;
+    private String scale;
+    private String announcementsJson;
+    private String recruitmentJson;
+    private String certificatesJson;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
@@ -70,6 +78,22 @@ public class CompanyResponse {
 
     public void setLicenseImgUrl(String licenseImgUrl) {
         this.licenseImgUrl = licenseImgUrl;
+    }
+
+    public String getLegalPerson() {
+        return legalPerson;
+    }
+
+    public void setLegalPerson(String legalPerson) {
+        this.legalPerson = legalPerson;
+    }
+
+    public String getBusinessScope() {
+        return businessScope;
+    }
+
+    public void setBusinessScope(String businessScope) {
+        this.businessScope = businessScope;
     }
 
     public String getContacts() {
@@ -158,6 +182,54 @@ public class CompanyResponse {
 
     public void setBankInfoJson(String bankInfoJson) {
         this.bankInfoJson = bankInfoJson;
+    }
+
+    public String getRegisteredCapital() {
+        return registeredCapital;
+    }
+
+    public void setRegisteredCapital(String registeredCapital) {
+        this.registeredCapital = registeredCapital;
+    }
+
+    public String getEstablishDate() {
+        return establishDate;
+    }
+
+    public void setEstablishDate(String establishDate) {
+        this.establishDate = establishDate;
+    }
+
+    public String getScale() {
+        return scale;
+    }
+
+    public void setScale(String scale) {
+        this.scale = scale;
+    }
+
+    public String getAnnouncementsJson() {
+        return announcementsJson;
+    }
+
+    public void setAnnouncementsJson(String announcementsJson) {
+        this.announcementsJson = announcementsJson;
+    }
+
+    public String getRecruitmentJson() {
+        return recruitmentJson;
+    }
+
+    public void setRecruitmentJson(String recruitmentJson) {
+        this.recruitmentJson = recruitmentJson;
+    }
+
+    public String getCertificatesJson() {
+        return certificatesJson;
+    }
+
+    public void setCertificatesJson(String certificatesJson) {
+        this.certificatesJson = certificatesJson;
     }
 
     public LocalDateTime getCreateTime() {

@@ -18,6 +18,7 @@ public class SysUser {
     private LocalDate birthDate;
     private Integer gender;
     private String bio;
+    private String avatar;
     private String payInfoJson;
     private Integer isDeleted;
     private LocalDateTime createTime;
@@ -133,6 +134,14 @@ public class SysUser {
 
     public void setBio(String bio) {
         this.bio = bio;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public String getPayInfoJson() {

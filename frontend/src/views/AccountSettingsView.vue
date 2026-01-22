@@ -52,7 +52,6 @@ const companyForm = reactive({
 
 // 密码表单
 const passwordForm = reactive({
-  oldPassword: '',
   newPassword: '',
   confirmPassword: ''
 })
@@ -190,7 +189,8 @@ async function loadUserData() {
       userForm.displayName = auth.me.nickName || ''
       userForm.phonenumber = auth.me.phonenumber || ''
       userForm.position = auth.me.position || ''
-      userForm.birthDate = auth.me.birthDate ? auth.me.birthDate.slice(0, 7) : ''
+      // 后端返回 YYYY-MM-DD 格式字符串，直接使用
+      userForm.birthDate = auth.me.birthDate || ''
       userForm.gender = auth.me.gender || 1
       userForm.bio = auth.me.bio || ''
       userForm.avatar = auth.me.avatar || ''
@@ -278,7 +278,7 @@ async function saveUserInfo() {
   }
   loading.value = true
   try {
-    const birthDate = userForm.birthDate?.trim() ? `${userForm.birthDate}-01` : undefined
+    const birthDate = userForm.birthDate?.trim() || undefined
     const req: UserUpdateRequest = {
       nickName: userForm.displayName,
       phonenumber: userForm.phonenumber,
@@ -337,7 +337,7 @@ async function saveCompanyInfo() {
 }
 
 async function changePassword() {
-  if (!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+  if (!passwordForm.newPassword || !passwordForm.confirmPassword) {
     ElMessage.warning('请填写完整信息')
     return
   }
@@ -354,7 +354,7 @@ async function changePassword() {
 
 function resetUserForm() { Object.assign(userForm, userSnapshot.value) }
 function resetCompanyForm() { Object.assign(companyForm, companySnapshot.value) }
-function resetPasswordForm() { passwordForm.oldPassword = ''; passwordForm.newPassword = ''; passwordForm.confirmPassword = '' }
+function resetPasswordForm() { passwordForm.newPassword = ''; passwordForm.confirmPassword = '' }
 
 // 头像上传
 const avatarUploading = ref(false)
@@ -589,7 +589,7 @@ const avatarText = computed(() => {
 
 const userDirty = computed(() => JSON.stringify(userForm) !== JSON.stringify(userSnapshot.value))
 const companyDirty = computed(() => JSON.stringify(companyForm) !== JSON.stringify(companySnapshot.value))
-const passwordDirty = computed(() => !!(passwordForm.oldPassword || passwordForm.newPassword || passwordForm.confirmPassword))
+const passwordDirty = computed(() => !!(passwordForm.newPassword || passwordForm.confirmPassword))
 
 const navItems = [
   { key: 'profile', label: '个人资料', icon: User },
@@ -608,10 +608,6 @@ const navItems = [
         <h1 class="text-2xl font-bold text-gray-900">用户资料</h1>
         <p class="text-sm text-gray-500 mt-1">管理账户信息和公司资料</p>
       </div>
-      <BaseButton type="secondary" size="sm" :loading="loading" @click="loadUserData(); loadCompanyData(); loadVehicles()">
-        <RefreshCw class="w-4 h-4" />
-        刷新
-      </BaseButton>
     </div>
 
     <!-- 主布局：左侧导航 + 右侧内容 -->
@@ -714,11 +710,11 @@ const navItems = [
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">出生年月</label>
                 <el-date-picker
                   v-model="userForm.birthDate"
-                  type="month"
+                  type="date"
                   :locale="zhCn"
-                  placeholder="选择出生年月"
-                  format="YYYY年MM月"
-                  value-format="YYYY-MM"
+                  placeholder="选择出生日期"
+                  format="YYYY年MM月DD日"
+                  value-format="YYYY-MM-DD"
                   class="w-full neo-picker"
                 />
               </div>
@@ -761,8 +757,8 @@ const navItems = [
 
             <!-- 保存按钮 -->
             <div v-if="userDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
-              <BaseButton type="secondary" :disabled="loading" @click="resetUserForm">取消</BaseButton>
-              <BaseButton type="primary" :loading="loading" @click="saveUserInfo">保存修改</BaseButton>
+              <BaseButton type="secondary" size="sm" :disabled="loading" @click="resetUserForm">取消</BaseButton>
+              <BaseButton type="primary" size="sm" :loading="loading" @click="saveUserInfo">保存</BaseButton>
             </div>
           </div>
         </div>
@@ -832,24 +828,6 @@ const navItems = [
                   v-model="companyForm.scale"
                   type="text"
                   placeholder="如：100-500人"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">联系人</label>
-                <input
-                  v-model="companyForm.contacts"
-                  type="text"
-                  placeholder="请输入公司联系人"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-                />
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">联系电话</label>
-                <input
-                  v-model="companyForm.phone"
-                  type="text"
-                  placeholder="请输入公司联系电话"
                   class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
@@ -1064,8 +1042,8 @@ const navItems = [
 
         <!-- 保存按钮 -->
         <div v-if="companyDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
-          <BaseButton type="secondary" :disabled="loading" @click="resetCompanyForm">取消</BaseButton>
-          <BaseButton type="primary" :loading="loading" @click="saveCompanyInfo">保存修改</BaseButton>
+          <BaseButton type="secondary" size="sm" :disabled="loading" @click="resetCompanyForm">取消</BaseButton>
+          <BaseButton type="primary" size="sm" :loading="loading" @click="saveCompanyInfo">保存</BaseButton>
         </div>
       </div>
         </div>
@@ -1111,8 +1089,8 @@ const navItems = [
             </div>
 
             <div v-if="companyDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
-              <BaseButton type="secondary" :disabled="loading" @click="resetCompanyForm">取消</BaseButton>
-              <BaseButton type="primary" :loading="loading" @click="saveCompanyInfo">保存修改</BaseButton>
+              <BaseButton type="secondary" size="sm" :disabled="loading" @click="resetCompanyForm">取消</BaseButton>
+              <BaseButton type="primary" size="sm" :loading="loading" @click="saveCompanyInfo">保存</BaseButton>
             </div>
           </div>
         </div>
@@ -1197,15 +1175,6 @@ const navItems = [
           <div class="p-6 space-y-6">
             <div class="max-w-md space-y-4">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">原密码</label>
-                <input
-                  v-model="passwordForm.oldPassword"
-                  type="password"
-                  placeholder="请输入原密码"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-                />
-              </div>
-              <div>
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">新密码</label>
                 <input
                   v-model="passwordForm.newPassword"
@@ -1227,8 +1196,8 @@ const navItems = [
 
             <!-- 保存按钮 -->
             <div v-if="passwordDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
-              <BaseButton type="secondary" :disabled="loading" @click="resetPasswordForm">取消</BaseButton>
-              <BaseButton type="primary" :loading="loading" @click="changePassword">确认修改</BaseButton>
+              <BaseButton type="secondary" size="sm" :disabled="loading" @click="resetPasswordForm">取消</BaseButton>
+              <BaseButton type="primary" size="sm" :loading="loading" @click="changePassword">保存</BaseButton>
             </div>
           </div>
         </div>
@@ -1301,8 +1270,8 @@ const navItems = [
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
-          <BaseButton type="secondary" @click="vehicleDialogVisible = false">取消</BaseButton>
-          <BaseButton type="primary" :loading="loading" @click="saveVehicle">保存</BaseButton>
+          <BaseButton type="secondary" size="sm" @click="vehicleDialogVisible = false">取消</BaseButton>
+          <BaseButton type="primary" size="sm" :loading="loading" @click="saveVehicle">保存</BaseButton>
         </div>
       </template>
     </el-dialog>
@@ -1348,8 +1317,8 @@ const navItems = [
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
-          <BaseButton type="secondary" @click="announcementDialogVisible = false">取消</BaseButton>
-          <BaseButton type="primary" @click="saveAnnouncement">保存</BaseButton>
+          <BaseButton type="secondary" size="sm" @click="announcementDialogVisible = false">取消</BaseButton>
+          <BaseButton type="primary" size="sm" @click="saveAnnouncement">保存</BaseButton>
         </div>
       </template>
     </el-dialog>
@@ -1392,8 +1361,8 @@ const navItems = [
       </div>
       <template #footer>
         <div class="flex justify-end gap-3">
-          <BaseButton type="secondary" @click="recruitmentDialogVisible = false">取消</BaseButton>
-          <BaseButton type="primary" @click="saveRecruitment">保存</BaseButton>
+          <BaseButton type="secondary" size="sm" @click="recruitmentDialogVisible = false">取消</BaseButton>
+          <BaseButton type="primary" size="sm" @click="saveRecruitment">保存</BaseButton>
         </div>
       </template>
     </el-dialog>
@@ -1421,23 +1390,33 @@ const navItems = [
 <style scoped>
 /* 统一 Element Plus 日期选择器样式 */
 :deep(.neo-picker .el-input__wrapper) {
-  border: 2px solid rgb(243 244 246);
-  border-radius: 12px;
+  border: 2px solid rgb(229 231 235);
+  border-radius: 8px;
   box-shadow: none;
   transition: all 0.15s ease;
+  height: 50px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
 }
 :deep(.neo-picker .el-input__wrapper.is-focus) {
   border-color: rgb(16 185 129);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
 }
+:deep(.neo-picker .el-input__wrapper:hover) {
+  border-color: rgb(209 213 219);
+}
 
 /* 级联选择器样式 */
 :deep(.neo-cascader .el-input__wrapper) {
-  border: 2px solid rgb(243 244 246);
-  border-radius: 12px;
+  border: 2px solid rgb(229 231 235);
+  border-radius: 8px;
   box-shadow: none;
   transition: all 0.15s ease;
-  padding: 6px 12px;
+  height: 50px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
 }
 :deep(.neo-cascader .el-input__wrapper.is-focus) {
   border-color: rgb(16 185 129);

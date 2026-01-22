@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
   `birth_date` date DEFAULT NULL COMMENT '出生年月（取当月1号）',
   `gender` tinyint(1) DEFAULT NULL COMMENT '性别（1男 2女）',
   `bio` varchar(500) DEFAULT NULL COMMENT '个人介绍',
+  `avatar` varchar(255) DEFAULT NULL COMMENT '个人头像URL',
   `pay_info_json` longtext COMMENT '收付款信息（银行卡/三方账户）JSON',
   `status` char(1) DEFAULT '0' COMMENT '账号状态（0正常 1停用）',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志（0代表存在 2代表删除）',
@@ -43,6 +44,7 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
 -- ALTER TABLE `sys_user` ADD COLUMN `birth_date` date DEFAULT NULL COMMENT '出生年月（取当月1号）';
 -- ALTER TABLE `sys_user` ADD COLUMN `gender` tinyint(1) DEFAULT NULL COMMENT '性别（1男 2女）';
 -- ALTER TABLE `sys_user` ADD COLUMN `bio` varchar(500) DEFAULT NULL COMMENT '个人介绍';
+-- ALTER TABLE `sys_user` ADD COLUMN `avatar` varchar(255) DEFAULT NULL COMMENT '个人头像URL';
 -- ALTER TABLE `sys_user` ADD COLUMN `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除（0否 1是）';
 -- ALTER TABLE `sys_user` ADD COLUMN `password` varchar(100) DEFAULT '' COMMENT '密码(BCrypt)';
 
@@ -64,6 +66,12 @@ CREATE TABLE IF NOT EXISTS `bus_company` (
   `lng` decimal(10,7) DEFAULT NULL COMMENT '公司默认经度',
   `locations_json` longtext COMMENT '多发货点/多收货点坐标JSON',
   `bank_info_json` longtext COMMENT '公司收付款信息JSON（可选）',
+  `registered_capital` varchar(50) DEFAULT NULL COMMENT '注册资本',
+  `establish_date` date DEFAULT NULL COMMENT '成立日期',
+  `scale` varchar(50) DEFAULT NULL COMMENT '公司规模（如：100-500人）',
+  `announcements_json` longtext COMMENT '公司公告JSON',
+  `recruitment_json` longtext COMMENT '人才招聘JSON',
+  `certificates_json` longtext COMMENT '资质证书JSON',
   `is_deleted` tinyint(1) NOT NULL DEFAULT 0 COMMENT '逻辑删除（0否 1是）',
   `create_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
   `update_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
@@ -76,6 +84,12 @@ CREATE TABLE IF NOT EXISTS `bus_company` (
 
 -- 企业类型（饲料厂/贸易商/粮库/加工厂/物流仓储/其他）
 ALTER TABLE `bus_company` ADD COLUMN `company_type` varchar(32) DEFAULT NULL COMMENT '企业类型';
+ALTER TABLE `bus_company` ADD COLUMN `registered_capital` varchar(50) DEFAULT NULL COMMENT '注册资本';
+ALTER TABLE `bus_company` ADD COLUMN `establish_date` date DEFAULT NULL COMMENT '成立日期';
+ALTER TABLE `bus_company` ADD COLUMN `scale` varchar(50) DEFAULT NULL COMMENT '公司规模（如：100-500人）';
+ALTER TABLE `bus_company` ADD COLUMN `announcements_json` longtext COMMENT '公司公告JSON';
+ALTER TABLE `bus_company` ADD COLUMN `recruitment_json` longtext COMMENT '人才招聘JSON';
+ALTER TABLE `bus_company` ADD COLUMN `certificates_json` longtext COMMENT '资质证书JSON';
 
 -- Table structure for bus_requirement
 CREATE TABLE IF NOT EXISTS `bus_requirement` (
@@ -565,4 +579,8 @@ CREATE TABLE IF NOT EXISTS `bus_user_follow` (
   UNIQUE KEY `uk_user_follow` (`user_id`, `follow_user_id`),
   KEY `idx_follow_user` (`follow_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户关注关系表';
+
+-- 添加公司表的法人和经营范围字段
+ALTER TABLE bus_company ADD COLUMN IF NOT EXISTS legal_person varchar(50) DEFAULT NULL COMMENT '法定代表人';
+ALTER TABLE bus_company ADD COLUMN IF NOT EXISTS business_scope varchar(500) DEFAULT NULL COMMENT '经营范围';
 

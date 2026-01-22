@@ -11,6 +11,8 @@
         <result column="company_type" property="companyType"/>
         <result column="license_no" property="licenseNo"/>
         <result column="license_img_url" property="licenseImgUrl"/>
+        <result column="legal_person" property="legalPerson"/>
+        <result column="business_scope" property="businessScope"/>
         <result column="contacts" property="contacts"/>
         <result column="phone" property="phone"/>
         <result column="wechat" property="wechat"/>
@@ -22,6 +24,12 @@
         <result column="lng" property="lng"/>
         <result column="locations_json" property="locationsJson"/>
         <result column="bank_info_json" property="bankInfoJson"/>
+        <result column="registered_capital" property="registeredCapital"/>
+        <result column="establish_date" property="establishDate"/>
+        <result column="scale" property="scale"/>
+        <result column="announcements_json" property="announcementsJson"/>
+        <result column="recruitment_json" property="recruitmentJson"/>
+        <result column="certificates_json" property="certificatesJson"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
@@ -30,12 +38,14 @@
     <insert id="insert" parameterType="com.agrimatch.company.domain.BusCompany"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO bus_company
-        (owner_user_id, company_name, company_type, license_no, license_img_url, contacts, phone, wechat,
+        (owner_user_id, company_name, company_type, license_no, license_img_url, legal_person, business_scope, contacts, phone, wechat,
          province, city, district, address, lat, lng, locations_json, bank_info_json,
+         registered_capital, establish_date, scale, announcements_json, recruitment_json, certificates_json,
          is_deleted, create_time, update_time)
         VALUES
-        (#{ownerUserId}, #{companyName}, #{companyType}, #{licenseNo}, #{licenseImgUrl}, #{contacts}, #{phone}, #{wechat},
+        (#{ownerUserId}, #{companyName}, #{companyType}, #{licenseNo}, #{licenseImgUrl}, #{legalPerson}, #{businessScope}, #{contacts}, #{phone}, #{wechat},
          #{province}, #{city}, #{district}, #{address}, #{lat}, #{lng}, #{locationsJson}, #{bankInfoJson},
+         #{registeredCapital}, #{establishDate}, #{scale}, #{announcementsJson}, #{recruitmentJson}, #{certificatesJson},
          0, NOW(3), NOW(3))
     </insert>
 
@@ -63,6 +73,8 @@
             <if test="companyType != null">company_type = #{companyType},</if>
             <if test="licenseNo != null">license_no = #{licenseNo},</if>
             <if test="licenseImgUrl != null">license_img_url = #{licenseImgUrl},</if>
+            <if test="legalPerson != null">legal_person = #{legalPerson},</if>
+            <if test="businessScope != null">business_scope = #{businessScope},</if>
             <if test="contacts != null">contacts = #{contacts},</if>
             <if test="phone != null">phone = #{phone},</if>
             <if test="wechat != null">wechat = #{wechat},</if>
@@ -74,6 +86,12 @@
             <if test="lng != null">lng = #{lng},</if>
             <if test="locationsJson != null">locations_json = #{locationsJson},</if>
             <if test="bankInfoJson != null">bank_info_json = #{bankInfoJson},</if>
+            <if test="registeredCapital != null">registered_capital = #{registeredCapital},</if>
+            <if test="establishDate != null">establish_date = #{establishDate},</if>
+            <if test="scale != null">scale = #{scale},</if>
+            <if test="announcementsJson != null">announcements_json = #{announcementsJson},</if>
+            <if test="recruitmentJson != null">recruitment_json = #{recruitmentJson},</if>
+            <if test="certificatesJson != null">certificates_json = #{certificatesJson},</if>
             update_time = NOW(3)
         </set>
         WHERE id = #{id}

@@ -248,8 +248,8 @@ onMounted(async () => {
             </template>
             <template v-else>
               <el-dropdown>
-                <button class="flex items-center gap-3 bg-white/10 border border-white/20 px-3 py-2 rounded-full hover:bg-white/20 transition-all active:scale-95">
-                  <div class="w-8 h-8 rounded-full bg-white text-brand-700 flex items-center justify-center font-bold text-sm">
+                <button class="flex items-center gap-3 bg-white/10 border border-white/20 px-3 py-2 rounded-xl hover:bg-white/20 transition-all active:scale-95">
+                  <div class="w-8 h-8 rounded-lg bg-white text-brand-700 flex items-center justify-center font-bold text-sm">
                     {{ avatarChar }}
                   </div>
                   <div class="text-left leading-tight hidden sm:block">

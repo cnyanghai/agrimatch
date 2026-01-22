@@ -50,6 +50,8 @@ public class CompanyServiceImpl implements CompanyService {
         c.setCompanyType(emptyToNull(req.getCompanyType()));
         c.setLicenseNo(req.getLicenseNo());
         c.setLicenseImgUrl(req.getLicenseImgUrl());
+        c.setLegalPerson(emptyToNull(req.getLegalPerson()));
+        c.setBusinessScope(emptyToNull(req.getBusinessScope()));
         c.setContacts(req.getContacts());
         c.setPhone(req.getPhone());
         c.setWechat(req.getWechat());
@@ -59,6 +61,12 @@ public class CompanyServiceImpl implements CompanyService {
         c.setAddress(req.getAddress());
         c.setLocationsJson(req.getLocationsJson());
         c.setBankInfoJson(req.getBankInfoJson());
+        c.setRegisteredCapital(emptyToNull(req.getRegisteredCapital()));
+        c.setEstablishDate(parseDate(req.getEstablishDate()));
+        c.setScale(emptyToNull(req.getScale()));
+        c.setAnnouncementsJson(emptyToNull(req.getAnnouncementsJson()));
+        c.setRecruitmentJson(emptyToNull(req.getRecruitmentJson()));
+        c.setCertificatesJson(emptyToNull(req.getCertificatesJson()));
 
         // 自动地理编码（用户无感知）：只要有地址就自动解析坐标
         if (StringUtils.hasText(c.getAddress())) {
@@ -111,6 +119,8 @@ public class CompanyServiceImpl implements CompanyService {
         c.setCompanyType(emptyToNull(req.getCompanyType()));
         c.setLicenseNo(emptyToNull(req.getLicenseNo()));
         c.setLicenseImgUrl(emptyToNull(req.getLicenseImgUrl()));
+        c.setLegalPerson(emptyToNull(req.getLegalPerson()));
+        c.setBusinessScope(emptyToNull(req.getBusinessScope()));
         c.setContacts(emptyToNull(req.getContacts()));
         c.setPhone(emptyToNull(req.getPhone()));
         c.setWechat(emptyToNull(req.getWechat()));
@@ -120,6 +130,12 @@ public class CompanyServiceImpl implements CompanyService {
         c.setAddress(emptyToNull(req.getAddress()));
         c.setLocationsJson(emptyToNull(req.getLocationsJson()));
         c.setBankInfoJson(emptyToNull(req.getBankInfoJson()));
+        c.setRegisteredCapital(emptyToNull(req.getRegisteredCapital()));
+        c.setEstablishDate(parseDate(req.getEstablishDate()));
+        c.setScale(emptyToNull(req.getScale()));
+        c.setAnnouncementsJson(emptyToNull(req.getAnnouncementsJson()));
+        c.setRecruitmentJson(emptyToNull(req.getRecruitmentJson()));
+        c.setCertificatesJson(emptyToNull(req.getCertificatesJson()));
 
         // 自动地理编码逻辑（用户无感知）
         // 1. 获取最终地址（本次提交的 > 旧数据的）
@@ -249,6 +265,8 @@ public class CompanyServiceImpl implements CompanyService {
         r.setCompanyType(c.getCompanyType());
         r.setLicenseNo(c.getLicenseNo());
         r.setLicenseImgUrl(c.getLicenseImgUrl());
+        r.setLegalPerson(c.getLegalPerson());
+        r.setBusinessScope(c.getBusinessScope());
         r.setContacts(c.getContacts());
         r.setPhone(c.getPhone());
         r.setWechat(c.getWechat());
@@ -260,6 +278,12 @@ public class CompanyServiceImpl implements CompanyService {
         r.setLng(c.getLng());
         r.setLocationsJson(c.getLocationsJson());
         r.setBankInfoJson(c.getBankInfoJson());
+        r.setRegisteredCapital(c.getRegisteredCapital());
+        r.setEstablishDate(c.getEstablishDate() != null ? c.getEstablishDate().toString() : null);
+        r.setScale(c.getScale());
+        r.setAnnouncementsJson(c.getAnnouncementsJson());
+        r.setRecruitmentJson(c.getRecruitmentJson());
+        r.setCertificatesJson(c.getCertificatesJson());
         r.setCreateTime(c.getCreateTime());
         r.setUpdateTime(c.getUpdateTime());
         return r;
@@ -267,6 +291,17 @@ public class CompanyServiceImpl implements CompanyService {
 
     private static String emptyToNull(String s) {
         return StringUtils.hasText(s) ? s : null;
+    }
+
+    private static java.time.LocalDate parseDate(String dateStr) {
+        if (!StringUtils.hasText(dateStr)) {
+            return null;
+        }
+        try {
+            return java.time.LocalDate.parse(dateStr);
+        } catch (java.time.format.DateTimeParseException e) {
+            return null;
+        }
     }
 }
 
