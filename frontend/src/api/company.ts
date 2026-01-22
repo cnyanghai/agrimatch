@@ -9,6 +9,12 @@ export interface CompanyCreateRequest {
   licenseImgUrl?: string
   legalPerson?: string
   businessScope?: string
+  registeredCapital?: string
+  establishDate?: string
+  scale?: string
+  announcementsJson?: string
+  recruitmentJson?: string
+  certificatesJson?: string
   wechat?: string
   province?: string
   city?: string
@@ -22,6 +28,7 @@ export interface CompanyCreateRequest {
 
 export interface CompanyUpdateRequest extends Partial<CompanyCreateRequest> {
   licenseImgUrl?: string
+  certificatesJson?: string
 }
 
 export interface CompanyResponse {
@@ -34,6 +41,11 @@ export interface CompanyResponse {
   legalPerson?: string
   businessScope?: string
   registeredCapital?: string
+  establishDate?: string
+  scale?: string
+  announcementsJson?: string
+  recruitmentJson?: string
+  certificatesJson?: string
   wechat?: string
   province?: string
   city?: string

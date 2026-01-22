@@ -19,6 +19,7 @@ export interface UserUpdateRequest {
   birthDate?: string       // 出生年月
   gender?: number          // 性别 (1-男, 2-女)
   bio?: string             // 个人介绍
+  avatar?: string          // 个人头像
   companyId?: number
   payInfoJson?: string
 }
@@ -38,6 +39,7 @@ export interface UserResponse {
   birthDate?: string       // 出生年月
   gender?: number          // 性别 (1-男, 2-女)
   bio?: string             // 个人介绍
+  avatar?: string          // 个人头像
   companyId?: number
   isBuyer?: number
   isSeller?: number

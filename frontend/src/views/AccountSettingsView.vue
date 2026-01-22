@@ -5,14 +5,15 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { useAuthStore } from '../store/auth'
 import { updateMe, type UserUpdateRequest } from '../api/user'
 import { getMyCompany, createCompany, updateCompany, type CompanyResponse, type CompanyCreateRequest } from '../api/company'
-import { User, Building2, Lock, Check, Upload, AlertTriangle, RefreshCw, Truck, ChevronRight, FileText, X, ZoomIn } from 'lucide-vue-next'
+import { User, Building2, Lock, Check, Upload, AlertTriangle, RefreshCw, Truck, ChevronRight, FileText, X, ZoomIn, Award, Calendar, Users, Plus, Trash2, Edit2, Star } from 'lucide-vue-next'
 import { BaseButton } from '../components/ui'
 import { regionData, codeToText } from 'element-china-area-data'
 import { uploadImage } from '../api/file'
+import { listVehicles, createVehicle, updateVehicle, deleteVehicle, setDefaultVehicle, type VehicleResponse, type VehicleCreateRequest } from '../api/vehicle'
 
 const auth = useAuthStore()
 const loading = ref(false)
-const activeTab = ref('user')
+const activeTab = ref('profile')
 
 // 公司数据
 const company = ref<CompanyResponse | null>(null)
@@ -24,7 +25,8 @@ const userForm = reactive({
   position: '',
   birthDate: '',
   gender: 1 as number,
-  bio: ''
+  bio: '',
+  avatar: ''
 })
 
 // 公司表单
@@ -32,12 +34,20 @@ const companyForm = reactive({
   companyName: '',
   licenseNo: '',
   licenseImgUrl: '',
+  legalPerson: '',
+  businessScope: '',
+  registeredCapital: '',
+  establishDate: '',
+  scale: '',
   contacts: '',
   phone: '',
   province: '',
   city: '',
   district: '',
-  address: ''
+  address: '',
+  announcementsJson: '',
+  recruitmentJson: '',
+  certificatesJson: ''
 })
 
 // 密码表单
@@ -48,8 +58,38 @@ const passwordForm = reactive({
 })
 
 // 快照
-const userSnapshot = ref({ displayName: '', phonenumber: '', position: '', birthDate: '', gender: 1, bio: '' })
-const companySnapshot = ref({ companyName: '', licenseNo: '', licenseImgUrl: '', contacts: '', phone: '', province: '', city: '', district: '', address: '' })
+const userSnapshot = ref({ displayName: '', phonenumber: '', position: '', birthDate: '', gender: 1, bio: '', avatar: '' })
+const companySnapshot = ref({ companyName: '', licenseNo: '', licenseImgUrl: '', legalPerson: '', businessScope: '', registeredCapital: '', establishDate: '', scale: '', contacts: '', phone: '', province: '', city: '', district: '', address: '', announcementsJson: '', recruitmentJson: '', certificatesJson: '' })
+
+// 车辆管理
+const vehicles = ref<VehicleResponse[]>([])
+const vehicleDialogVisible = ref(false)
+const vehicleDialogMode = ref<'create' | 'edit'>('create')
+const editingVehicleId = ref<number | null>(null)
+const vehicleForm = reactive<VehicleCreateRequest>({
+  driverName: '',
+  driverIdCard: '',
+  plateNumber: '',
+  driverPhone: '',
+  vehicleType: '',
+  remark: ''
+})
+
+// 公告列表
+const announcements = ref<Array<{ id: string, title: string, content: string, date: string }>>([])
+const announcementDialogVisible = ref(false)
+const editingAnnouncementId = ref<string | null>(null)
+const announcementForm = reactive({ title: '', content: '', date: '' })
+
+// 招聘列表
+const recruitments = ref<Array<{ id: string, position: string, requirements: string, salary: string }>>([])
+const recruitmentDialogVisible = ref(false)
+const editingRecruitmentId = ref<string | null>(null)
+const recruitmentForm = reactive({ position: '', requirements: '', salary: '' })
+
+// 资质证书列表
+const certificates = ref<string[]>([])
+const certificateUploading = ref(false)
 
 // 省市区级联选择值
 const regionValue = ref<string[]>([])
@@ -140,6 +180,7 @@ function removeLicenseImage() {
 onMounted(async () => {
   await loadUserData()
   await loadCompanyData()
+  await loadVehicles()
 })
 
 async function loadUserData() {
@@ -152,6 +193,7 @@ async function loadUserData() {
       userForm.birthDate = auth.me.birthDate ? auth.me.birthDate.slice(0, 7) : ''
       userForm.gender = auth.me.gender || 1
       userForm.bio = auth.me.bio || ''
+      userForm.avatar = auth.me.avatar || ''
     }
     userSnapshot.value = { ...userForm }
   } catch (e) {
@@ -167,12 +209,45 @@ async function loadCompanyData() {
       companyForm.companyName = res.data.companyName || ''
       companyForm.licenseNo = res.data.licenseNo || ''
       companyForm.licenseImgUrl = res.data.licenseImgUrl || ''
+      companyForm.legalPerson = res.data.legalPerson || ''
+      companyForm.businessScope = res.data.businessScope || ''
+      companyForm.registeredCapital = res.data.registeredCapital || ''
+      companyForm.establishDate = res.data.establishDate || ''
+      companyForm.scale = res.data.scale || ''
       companyForm.contacts = res.data.contacts || ''
       companyForm.phone = res.data.phone || ''
       companyForm.province = res.data.province || ''
       companyForm.city = res.data.city || ''
       companyForm.district = res.data.district || ''
       companyForm.address = res.data.address || ''
+      // 解析 JSON 字段
+      if (res.data.announcementsJson) {
+        try {
+          announcements.value = JSON.parse(res.data.announcementsJson)
+        } catch (e) {
+          announcements.value = []
+        }
+      } else {
+        announcements.value = []
+      }
+      if (res.data.recruitmentJson) {
+        try {
+          recruitments.value = JSON.parse(res.data.recruitmentJson)
+        } catch (e) {
+          recruitments.value = []
+        }
+      } else {
+        recruitments.value = []
+      }
+      if (res.data.certificatesJson) {
+        try {
+          certificates.value = JSON.parse(res.data.certificatesJson)
+        } catch (e) {
+          certificates.value = []
+        }
+      } else {
+        certificates.value = []
+      }
       // 初始化省市区级联选择值（支持代码或名称）
       if (res.data.province) {
         regionValue.value = findCodesByName(res.data.province, res.data.city || '', res.data.district || '')
@@ -181,6 +256,18 @@ async function loadCompanyData() {
     companySnapshot.value = { ...companyForm }
   } catch (e) {
     console.error('Failed to load company data', e)
+  }
+}
+
+// 加载车辆列表
+async function loadVehicles() {
+  try {
+    const r = await listVehicles()
+    if (r.code === 0) {
+      vehicles.value = r.data ?? []
+    }
+  } catch (e: any) {
+    console.error('Failed to load vehicles', e)
   }
 }
 
@@ -198,7 +285,8 @@ async function saveUserInfo() {
       position: userForm.position,
       birthDate,
       gender: userForm.gender,
-      bio: userForm.bio
+      bio: userForm.bio,
+      avatar: userForm.avatar
     }
     const res = await updateMe(req)
     if (res.code === 0) {
@@ -222,7 +310,12 @@ async function saveCompanyInfo() {
   }
   loading.value = true
   try {
-    const req: CompanyCreateRequest = { ...companyForm }
+    const req: CompanyCreateRequest = {
+      ...companyForm,
+      announcementsJson: JSON.stringify(announcements.value),
+      recruitmentJson: JSON.stringify(recruitments.value),
+      certificatesJson: JSON.stringify(certificates.value)
+    }
     let res
     if (company.value?.id) {
       res = await updateCompany(company.value.id, req)
@@ -263,6 +356,226 @@ function resetUserForm() { Object.assign(userForm, userSnapshot.value) }
 function resetCompanyForm() { Object.assign(companyForm, companySnapshot.value) }
 function resetPasswordForm() { passwordForm.oldPassword = ''; passwordForm.newPassword = ''; passwordForm.confirmPassword = '' }
 
+// 头像上传
+const avatarUploading = ref(false)
+async function handleAvatarUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  if (!file.type.startsWith('image/')) {
+    ElMessage.warning('请上传图片格式文件')
+    return
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    ElMessage.warning('图片大小不能超过 5MB')
+    return
+  }
+  avatarUploading.value = true
+  try {
+    const res = await uploadImage(file)
+    if (res.code === 0 && res.data?.fileUrl) {
+      userForm.avatar = res.data.fileUrl
+      ElMessage.success('头像上传成功')
+    } else {
+      ElMessage.error(res.message || '上传失败')
+    }
+  } catch (e: any) {
+    ElMessage.error(e.message || '上传失败')
+  } finally {
+    avatarUploading.value = false
+    input.value = ''
+  }
+}
+
+// 车辆管理函数
+function openVehicleDialog(mode: 'create' | 'edit', vehicle?: VehicleResponse) {
+  vehicleDialogMode.value = mode
+  editingVehicleId.value = vehicle?.id || null
+  if (mode === 'edit' && vehicle) {
+    vehicleForm.driverName = vehicle.driverName
+    vehicleForm.driverIdCard = vehicle.driverIdCard
+    vehicleForm.plateNumber = vehicle.plateNumber
+    vehicleForm.driverPhone = vehicle.driverPhone
+    vehicleForm.vehicleType = vehicle.vehicleType || ''
+    vehicleForm.remark = vehicle.remark || ''
+  } else {
+    vehicleForm.driverName = ''
+    vehicleForm.driverIdCard = ''
+    vehicleForm.plateNumber = ''
+    vehicleForm.driverPhone = ''
+    vehicleForm.vehicleType = ''
+    vehicleForm.remark = ''
+  }
+  vehicleDialogVisible.value = true
+}
+
+async function saveVehicle() {
+  if (!vehicleForm.driverName?.trim() || !vehicleForm.plateNumber?.trim() || !vehicleForm.driverPhone?.trim()) {
+    ElMessage.warning('请填写完整信息')
+    return
+  }
+  loading.value = true
+  try {
+    let res
+    if (vehicleDialogMode.value === 'edit' && editingVehicleId.value) {
+      res = await updateVehicle(editingVehicleId.value, vehicleForm)
+    } else {
+      res = await createVehicle(vehicleForm)
+    }
+    if (res.code === 0) {
+      ElMessage.success(vehicleDialogMode.value === 'edit' ? '修改成功' : '添加成功')
+      vehicleDialogVisible.value = false
+      await loadVehicles()
+    } else {
+      throw new Error(res.message)
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.message ?? '操作失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+async function removeVehicle(id: number) {
+  try {
+    await ElMessageBox.confirm('确定要删除这辆车吗？', '确认删除', { type: 'warning' })
+    const res = await deleteVehicle(id)
+    if (res.code === 0) {
+      ElMessage.success('删除成功')
+      await loadVehicles()
+    } else {
+      throw new Error(res.message)
+    }
+  } catch (e: any) {
+    if (e !== 'cancel') {
+      ElMessage.error(e?.message ?? '删除失败')
+    }
+  }
+}
+
+async function setDefault(id: number) {
+  try {
+    const res = await setDefaultVehicle(id)
+    if (res.code === 0) {
+      ElMessage.success('设置成功')
+      await loadVehicles()
+    } else {
+      throw new Error(res.message)
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.message ?? '设置失败')
+  }
+}
+
+// 公告管理函数
+function openAnnouncementDialog(mode: 'create' | 'edit', item?: { id: string, title: string, content: string, date: string }) {
+  editingAnnouncementId.value = item?.id || null
+  if (mode === 'edit' && item) {
+    announcementForm.title = item.title
+    announcementForm.content = item.content
+    announcementForm.date = item.date
+  } else {
+    announcementForm.title = ''
+    announcementForm.content = ''
+    announcementForm.date = new Date().toISOString().slice(0, 10)
+  }
+  announcementDialogVisible.value = true
+}
+
+function saveAnnouncement() {
+  if (!announcementForm.title?.trim() || !announcementForm.content?.trim()) {
+    ElMessage.warning('请填写完整信息')
+    return
+  }
+  if (editingAnnouncementId.value) {
+    const index = announcements.value.findIndex(a => a.id === editingAnnouncementId.value)
+    if (index >= 0) {
+      announcements.value[index] = { ...announcements.value[index], ...announcementForm }
+    }
+  } else {
+    announcements.value.push({ id: Date.now().toString(), ...announcementForm })
+  }
+  announcementDialogVisible.value = false
+  ElMessage.success('保存成功')
+}
+
+function removeAnnouncement(id: string) {
+  announcements.value = announcements.value.filter(a => a.id !== id)
+  ElMessage.success('删除成功')
+}
+
+// 招聘管理函数
+function openRecruitmentDialog(mode: 'create' | 'edit', item?: { id: string, position: string, requirements: string, salary: string }) {
+  editingRecruitmentId.value = item?.id || null
+  if (mode === 'edit' && item) {
+    recruitmentForm.position = item.position
+    recruitmentForm.requirements = item.requirements
+    recruitmentForm.salary = item.salary
+  } else {
+    recruitmentForm.position = ''
+    recruitmentForm.requirements = ''
+    recruitmentForm.salary = ''
+  }
+  recruitmentDialogVisible.value = true
+}
+
+function saveRecruitment() {
+  if (!recruitmentForm.position?.trim()) {
+    ElMessage.warning('请填写岗位名称')
+    return
+  }
+  if (editingRecruitmentId.value) {
+    const index = recruitments.value.findIndex(r => r.id === editingRecruitmentId.value)
+    if (index >= 0) {
+      recruitments.value[index] = { ...recruitments.value[index], ...recruitmentForm }
+    }
+  } else {
+    recruitments.value.push({ id: Date.now().toString(), ...recruitmentForm })
+  }
+  recruitmentDialogVisible.value = false
+  ElMessage.success('保存成功')
+}
+
+function removeRecruitment(id: string) {
+  recruitments.value = recruitments.value.filter(r => r.id !== id)
+  ElMessage.success('删除成功')
+}
+
+// 资质证书上传
+async function handleCertificateUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  if (!file.type.startsWith('image/')) {
+    ElMessage.warning('请上传图片格式文件')
+    return
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    ElMessage.warning('图片大小不能超过 10MB')
+    return
+  }
+  certificateUploading.value = true
+  try {
+    const res = await uploadImage(file)
+    if (res.code === 0 && res.data?.fileUrl) {
+      certificates.value.push(res.data.fileUrl)
+      ElMessage.success('上传成功')
+    } else {
+      ElMessage.error(res.message || '上传失败')
+    }
+  } catch (e: any) {
+    ElMessage.error(e.message || '上传失败')
+  } finally {
+    certificateUploading.value = false
+    input.value = ''
+  }
+}
+
+function removeCertificate(index: number) {
+  certificates.value.splice(index, 1)
+  ElMessage.success('删除成功')
+}
+
 const genderOptions = [{ label: '男', value: 1 }, { label: '女', value: 2 }]
 
 const currentName = computed(() => auth.me?.nickName || auth.me?.userName || '用户')
@@ -278,10 +591,12 @@ const userDirty = computed(() => JSON.stringify(userForm) !== JSON.stringify(use
 const companyDirty = computed(() => JSON.stringify(companyForm) !== JSON.stringify(companySnapshot.value))
 const passwordDirty = computed(() => !!(passwordForm.oldPassword || passwordForm.newPassword || passwordForm.confirmPassword))
 
-const tabs = [
-  { key: 'user', label: '基本信息', icon: User },
-  { key: 'company', label: '公司信息', icon: Building2 },
-  { key: 'security', label: '账户安全', icon: Lock }
+const navItems = [
+  { key: 'profile', label: '个人资料', icon: User },
+  { key: 'company', label: '公司主页', icon: Building2 },
+  { key: 'credentials', label: '资质证照', icon: Award },
+  { key: 'vehicles', label: '车辆管理', icon: Truck },
+  { key: 'security', label: '账号安全', icon: Lock }
 ]
 </script>
 
@@ -293,223 +608,369 @@ const tabs = [
         <h1 class="text-2xl font-bold text-gray-900">用户资料</h1>
         <p class="text-sm text-gray-500 mt-1">管理账户信息和公司资料</p>
       </div>
-      <BaseButton type="secondary" size="sm" :loading="loading" @click="loadUserData(); loadCompanyData()">
+      <BaseButton type="secondary" size="sm" :loading="loading" @click="loadUserData(); loadCompanyData(); loadVehicles()">
         <RefreshCw class="w-4 h-4" />
         刷新
       </BaseButton>
     </div>
 
-    <!-- 用户概览卡 -->
-    <div class="bg-white rounded-xl border border-gray-200 p-6 animate-fade-in">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div class="flex items-center gap-4">
-          <div class="relative">
-            <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center text-2xl font-bold shadow-md">
-              {{ avatarText }}
-            </div>
-            <button
-              class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all flex items-center justify-center"
-              title="更换头像（暂未开放）"
-            >
-              <Upload class="w-3.5 h-3.5 text-gray-500" />
-            </button>
-          </div>
-          <div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <h2 class="text-lg font-bold text-gray-900">{{ currentName }}</h2>
-              <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-gray-50 text-gray-500 border border-gray-200">
-                ID: {{ auth.me?.userId ?? '-' }}
-              </span>
-            </div>
-            <p class="text-sm text-gray-500 mt-1">{{ currentPhone }} · {{ currentPosition }}</p>
-          </div>
-        </div>
-
-        <!-- Tab 切换 -->
-        <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+    <!-- 主布局：左侧导航 + 右侧内容 -->
+    <div class="flex gap-6">
+      <!-- 左侧垂直导航 -->
+      <aside class="w-64 shrink-0">
+        <nav class="bg-white rounded-xl border border-gray-200 p-2 space-y-1">
           <button
-            v-for="tab in tabs"
-            :key="tab.key"
+            v-for="item in navItems"
+            :key="item.key"
             :class="[
-              'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all',
-              activeTab === tab.key 
-                ? 'bg-white text-brand-600 shadow-sm' 
-                : 'text-gray-600 hover:text-gray-900'
+              'w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3',
+              activeTab === item.key
+                ? 'bg-brand-50 text-brand-700 font-bold'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
             ]"
-            @click="activeTab = tab.key"
+            @click="activeTab = item.key"
           >
-            <component :is="tab.icon" class="w-4 h-4" />
-            {{ tab.label }}
+            <component :is="item.icon" class="w-5 h-5" />
+            <span>{{ item.label }}</span>
           </button>
-        </div>
-      </div>
-    </div>
+        </nav>
+      </aside>
 
-    <!-- 基本信息 -->
-    <div v-show="activeTab === 'user'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-      <div class="p-5 border-b border-gray-200">
-        <h3 class="text-lg font-bold text-gray-900">基本信息</h3>
-        <p class="text-sm text-gray-500 mt-1">修改后点击保存生效</p>
-      </div>
-      
-      <div class="p-6 space-y-6">
-        <!-- 表单 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-              姓名/昵称 <span class="text-red-500">*</span>
-            </label>
-            <input
-              v-model="userForm.displayName"
-              type="text"
-              placeholder="请输入姓名/昵称"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-            />
+      <!-- 右侧内容区 -->
+      <div class="flex-1 min-w-0">
+
+        <!-- 个人资料 -->
+        <div v-show="activeTab === 'profile'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-gray-200">
+            <h3 class="text-lg font-bold text-gray-900">个人资料</h3>
+            <p class="text-sm text-gray-500 mt-1">修改后点击保存生效</p>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">手机号码</label>
-            <input
-              v-model="userForm.phonenumber"
-              type="text"
-              placeholder="请输入手机号"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">公司职务</label>
-            <input
-              v-model="userForm.position"
-              type="text"
-              placeholder="如：采购经理、销售总监"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">出生年月</label>
-            <el-date-picker
-              v-model="userForm.birthDate"
-              type="month"
-              :locale="zhCn"
-              placeholder="选择出生年月"
-              format="YYYY年MM月"
-              value-format="YYYY-MM"
-              class="w-full neo-picker"
-            />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">性别</label>
-            <div class="flex gap-4">
-              <label
-                v-for="opt in genderOptions"
-                :key="opt.value"
-                :class="[
-                  'flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 cursor-pointer transition-all',
-                  userForm.gender === opt.value 
-                    ? 'border-brand-500 bg-brand-50 text-brand-600' 
-                    : 'border-gray-200 hover:border-gray-200'
-                ]"
-              >
+          
+          <div class="p-6 space-y-6">
+            <!-- 头像上传 -->
+            <div>
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">个人头像</label>
+              <div class="flex items-center gap-4">
+                <div class="relative">
+                  <img
+                    v-if="userForm.avatar"
+                    :src="userForm.avatar"
+                    alt="头像"
+                    class="w-20 h-20 rounded-lg object-cover border-2 border-gray-200"
+                  />
+                  <div
+                    v-else
+                    class="w-20 h-20 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center text-2xl font-bold"
+                  >
+                    {{ avatarText }}
+                  </div>
+                  <label
+                    class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all flex items-center justify-center cursor-pointer"
+                    :class="{ 'opacity-50 pointer-events-none': avatarUploading }"
+                  >
+                    <Upload class="w-3.5 h-3.5 text-gray-500" />
+                    <input type="file" class="hidden" accept="image/*" @change="handleAvatarUpload" />
+                  </label>
+                </div>
+                <div class="text-xs text-gray-400">
+                  <p>支持 JPG/PNG 格式</p>
+                  <p>建议尺寸 200x200px，大小不超过 5MB</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 表单 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  姓名/昵称 <span class="text-red-500">*</span>
+                </label>
                 <input
-                  v-model="userForm.gender"
-                  type="radio"
-                  :value="opt.value"
-                  class="sr-only"
+                  v-model="userForm.displayName"
+                  type="text"
+                  placeholder="请输入姓名/昵称"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
-                <span class="font-bold">{{ opt.label }}</span>
-              </label>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">手机号码</label>
+                <input
+                  v-model="userForm.phonenumber"
+                  type="text"
+                  placeholder="请输入手机号"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">公司职务</label>
+                <input
+                  v-model="userForm.position"
+                  type="text"
+                  placeholder="如：采购经理、销售总监"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">出生年月</label>
+                <el-date-picker
+                  v-model="userForm.birthDate"
+                  type="month"
+                  :locale="zhCn"
+                  placeholder="选择出生年月"
+                  format="YYYY年MM月"
+                  value-format="YYYY-MM"
+                  class="w-full neo-picker"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">性别</label>
+                <div class="flex gap-4">
+                  <label
+                    v-for="opt in genderOptions"
+                    :key="opt.value"
+                    :class="[
+                      'flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 cursor-pointer transition-all',
+                      userForm.gender === opt.value 
+                        ? 'border-brand-500 bg-brand-50 text-brand-600' 
+                        : 'border-gray-200 hover:border-gray-200'
+                    ]"
+                  >
+                    <input
+                      v-model="userForm.gender"
+                      type="radio"
+                      :value="opt.value"
+                      class="sr-only"
+                    />
+                    <span class="font-bold">{{ opt.label }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="max-w-3xl">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">个人介绍</label>
+              <textarea
+                v-model="userForm.bio"
+                rows="3"
+                maxlength="500"
+                placeholder="简单介绍一下自己，让合作伙伴更好地了解您"
+                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+              ></textarea>
+              <p class="text-xs text-gray-400 mt-1 text-right">{{ userForm.bio?.length || 0 }}/500</p>
+            </div>
+
+            <!-- 保存按钮 -->
+            <div v-if="userDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
+              <BaseButton type="secondary" :disabled="loading" @click="resetUserForm">取消</BaseButton>
+              <BaseButton type="primary" :loading="loading" @click="saveUserInfo">保存修改</BaseButton>
             </div>
           </div>
         </div>
-        
-        <div class="max-w-3xl">
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">个人介绍</label>
-          <textarea
-            v-model="userForm.bio"
-            rows="3"
-            maxlength="500"
-            placeholder="简单介绍一下自己，让合作伙伴更好地了解您"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
-          ></textarea>
-          <p class="text-xs text-gray-400 mt-1 text-right">{{ userForm.bio?.length || 0 }}/500</p>
-        </div>
 
-        <!-- 保存按钮 -->
-        <div v-if="userDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
-          <BaseButton type="secondary" :disabled="loading" @click="resetUserForm">取消</BaseButton>
-          <BaseButton type="primary" :loading="loading" @click="saveUserInfo">保存修改</BaseButton>
-        </div>
-      </div>
-    </div>
+        <!-- 公司主页 -->
+        <div v-show="activeTab === 'company'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-gray-200">
+            <h3 class="text-lg font-bold text-gray-900">公司主页</h3>
+            <p class="text-sm text-gray-500 mt-1">完善公司信息以便开展业务，这些信息将展示在公司主页</p>
+          </div>
+          
+          <div class="p-6 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  公司名称 <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="companyForm.companyName"
+                  type="text"
+                  placeholder="请输入公司全称"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">统一社会信用代码</label>
+                <input
+                  v-model="companyForm.licenseNo"
+                  type="text"
+                  placeholder="请输入统一社会信用代码"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">法定代表人</label>
+                <input
+                  v-model="companyForm.legalPerson"
+                  type="text"
+                  placeholder="请输入法定代表人"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">注册资本</label>
+                <input
+                  v-model="companyForm.registeredCapital"
+                  type="text"
+                  placeholder="如：1000万元"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">成立日期</label>
+                <el-date-picker
+                  v-model="companyForm.establishDate"
+                  type="date"
+                  :locale="zhCn"
+                  placeholder="选择成立日期"
+                  format="YYYY年MM月DD日"
+                  value-format="YYYY-MM-DD"
+                  class="w-full neo-picker"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">公司规模</label>
+                <input
+                  v-model="companyForm.scale"
+                  type="text"
+                  placeholder="如：100-500人"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">联系人</label>
+                <input
+                  v-model="companyForm.contacts"
+                  type="text"
+                  placeholder="请输入公司联系人"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">联系电话</label>
+                <input
+                  v-model="companyForm.phone"
+                  type="text"
+                  placeholder="请输入公司联系电话"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">所在地区</label>
+                <el-cascader
+                  v-model="regionValue"
+                  :options="regionData"
+                  :props="{ expandTrigger: 'hover' }"
+                  placeholder="请选择省/市/区"
+                  class="w-full neo-cascader"
+                  clearable
+                />
+              </div>
+            </div>
+            
+            <div class="max-w-3xl">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">详细地址</label>
+              <input
+                v-model="companyForm.address"
+                type="text"
+                placeholder="请输入详细地址（街道、门牌号等）"
+                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+              />
+            </div>
 
-    <!-- 公司信息 -->
-    <div v-show="activeTab === 'company'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-      <div class="p-5 border-b border-gray-200">
-        <h3 class="text-lg font-bold text-gray-900">公司信息</h3>
-        <p class="text-sm text-gray-500 mt-1">完善公司信息以便开展业务</p>
-      </div>
-      
-      <div class="p-6 space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-              公司名称 <span class="text-red-500">*</span>
-            </label>
-            <input
-              v-model="companyForm.companyName"
-              type="text"
-              placeholder="请输入公司全称"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">统一社会信用代码</label>
-            <input
-              v-model="companyForm.licenseNo"
-              type="text"
-              placeholder="请输入统一社会信用代码"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">联系人</label>
-            <input
-              v-model="companyForm.contacts"
-              type="text"
-              placeholder="请输入公司联系人"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">联系电话</label>
-            <input
-              v-model="companyForm.phone"
-              type="text"
-              placeholder="请输入公司联系电话"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-            />
-          </div>
-          <div class="md:col-span-2">
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">所在地区</label>
-            <el-cascader
-              v-model="regionValue"
-              :options="regionData"
-              :props="{ expandTrigger: 'hover' }"
-              placeholder="请选择省/市/区"
-              class="w-full neo-cascader"
-              clearable
-            />
-          </div>
-        </div>
-        
-        <div class="max-w-3xl">
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">详细地址</label>
-          <input
-            v-model="companyForm.address"
-            type="text"
-            placeholder="请输入详细地址（街道、门牌号等）"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-          />
-        </div>
+            <div class="max-w-3xl">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">经营范围</label>
+              <textarea
+                v-model="companyForm.businessScope"
+                rows="3"
+                placeholder="请输入公司经营范围"
+                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+              ></textarea>
+            </div>
+
+            <!-- 公司公告 -->
+            <div class="max-w-3xl">
+              <div class="flex items-center justify-between mb-4">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">公司公告</label>
+                <BaseButton type="secondary" size="sm" @click="openAnnouncementDialog('create')">
+                  <Plus class="w-4 h-4" />
+                  添加公告
+                </BaseButton>
+              </div>
+              <div v-if="announcements.length === 0" class="text-sm text-gray-400 py-4 text-center border-2 border-dashed border-gray-200 rounded-lg">
+                暂无公告，点击上方按钮添加
+              </div>
+              <div v-else class="space-y-3">
+                <div
+                  v-for="item in announcements"
+                  :key="item.id"
+                  class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-start justify-between gap-4"
+                >
+                  <div class="flex-1">
+                    <div class="font-bold text-gray-900 mb-1">{{ item.title }}</div>
+                    <div class="text-sm text-gray-500 mb-2">{{ item.content }}</div>
+                    <div class="text-xs text-gray-400">{{ item.date }}</div>
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      class="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                      @click="openAnnouncementDialog('edit', item)"
+                      title="编辑"
+                    >
+                      <Edit2 class="w-4 h-4 text-gray-600" />
+                    </button>
+                    <button
+                      class="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      @click="removeAnnouncement(item.id)"
+                      title="删除"
+                    >
+                      <Trash2 class="w-4 h-4 text-red-500" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 人才招聘 -->
+            <div class="max-w-3xl">
+              <div class="flex items-center justify-between mb-4">
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">人才招聘</label>
+                <BaseButton type="secondary" size="sm" @click="openRecruitmentDialog('create')">
+                  <Plus class="w-4 h-4" />
+                  添加岗位
+                </BaseButton>
+              </div>
+              <div v-if="recruitments.length === 0" class="text-sm text-gray-400 py-4 text-center border-2 border-dashed border-gray-200 rounded-lg">
+                暂无招聘信息，点击上方按钮添加
+              </div>
+              <div v-else class="space-y-3">
+                <div
+                  v-for="item in recruitments"
+                  :key="item.id"
+                  class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-start justify-between gap-4"
+                >
+                  <div class="flex-1">
+                    <div class="font-bold text-gray-900 mb-1">{{ item.position }}</div>
+                    <div class="text-sm text-gray-500 mb-1">{{ item.requirements }}</div>
+                    <div class="text-sm text-brand-600 font-bold">{{ item.salary }}</div>
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      class="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                      @click="openRecruitmentDialog('edit', item)"
+                      title="编辑"
+                    >
+                      <Edit2 class="w-4 h-4 text-gray-600" />
+                    </button>
+                    <button
+                      class="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      @click="removeRecruitment(item.id)"
+                      title="删除"
+                    >
+                      <Trash2 class="w-4 h-4 text-red-500" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
 
         <!-- 营业执照上传 -->
         <div class="max-w-3xl">
@@ -601,77 +1062,341 @@ const tabs = [
           </div>
         </div>
 
-        <!-- 快捷管理 -->
-        <div class="pt-6 border-t border-gray-200">
-          <h4 class="font-bold text-gray-900 mb-4">快捷管理</h4>
-          <router-link 
-            to="/vehicles"
-            class="flex items-center gap-4 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all group"
-          >
-            <div class="w-12 h-12 rounded-lg bg-blue-500 text-white flex items-center justify-center">
-              <Truck class="w-6 h-6" />
-            </div>
-            <div class="flex-1">
-              <div class="font-bold text-gray-900">常用车辆管理</div>
-              <div class="text-sm text-gray-500">管理公司提货车辆信息，方便快速选择</div>
-            </div>
-            <ChevronRight class="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
-          </router-link>
-        </div>
-
         <!-- 保存按钮 -->
         <div v-if="companyDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
           <BaseButton type="secondary" :disabled="loading" @click="resetCompanyForm">取消</BaseButton>
           <BaseButton type="primary" :loading="loading" @click="saveCompanyInfo">保存修改</BaseButton>
         </div>
       </div>
-    </div>
+        </div>
 
-    <!-- 账户安全 -->
-    <div v-show="activeTab === 'security'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-      <div class="p-5 border-b border-gray-200">
-        <h3 class="text-lg font-bold text-gray-900">修改密码</h3>
-        <p class="text-sm text-gray-500 mt-1">定期更换密码可以保护账户安全</p>
-      </div>
-      
-      <div class="p-6 space-y-6">
-        <div class="max-w-md space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">原密码</label>
-            <input
-              v-model="passwordForm.oldPassword"
-              type="password"
-              placeholder="请输入原密码"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-            />
+        <!-- 资质证照 -->
+        <div v-show="activeTab === 'credentials'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-gray-200">
+            <h3 class="text-lg font-bold text-gray-900">资质证照</h3>
+            <p class="text-sm text-gray-500 mt-1">上传公司相关资质证书，提升企业信誉</p>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">新密码</label>
-            <input
-              v-model="passwordForm.newPassword"
-              type="password"
-              placeholder="请输入新密码（至少6位）"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">确认新密码</label>
-            <input
-              v-model="passwordForm.confirmPassword"
-              type="password"
-              placeholder="请再次输入新密码"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-            />
+          
+          <div class="p-6 space-y-6">
+            <div class="max-w-3xl">
+              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">其他资质证书</label>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <label
+                  class="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-200 rounded-lg cursor-pointer hover:border-brand-400 hover:bg-brand-50/50 transition-all"
+                  :class="{ 'opacity-50 pointer-events-none': certificateUploading }"
+                >
+                  <Upload v-if="!certificateUploading" class="w-8 h-8 text-gray-300 mb-2" />
+                  <div v-else class="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-2" />
+                  <span class="text-xs text-gray-400 font-bold">{{ certificateUploading ? '上传中...' : '上传证书' }}</span>
+                  <input type="file" class="hidden" accept="image/*" @change="handleCertificateUpload" />
+                </label>
+                <div
+                  v-for="(url, index) in certificates"
+                  :key="index"
+                  class="relative group h-32"
+                >
+                  <img :src="url" alt="资质证书" class="w-full h-full object-cover rounded-lg border-2 border-gray-200" />
+                  <div class="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button
+                      class="w-8 h-8 bg-white/90 rounded-lg flex items-center justify-center hover:bg-white transition-colors"
+                      @click="removeCertificate(index)"
+                      title="删除"
+                    >
+                      <X class="w-4 h-4 text-red-500" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p class="text-xs text-gray-400 mt-2">支持 JPG/PNG 格式，单张不超过 10MB</p>
+            </div>
+
+            <div v-if="companyDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
+              <BaseButton type="secondary" :disabled="loading" @click="resetCompanyForm">取消</BaseButton>
+              <BaseButton type="primary" :loading="loading" @click="saveCompanyInfo">保存修改</BaseButton>
+            </div>
           </div>
         </div>
 
-        <!-- 保存按钮 -->
-        <div v-if="passwordDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
-          <BaseButton type="secondary" :disabled="loading" @click="resetPasswordForm">取消</BaseButton>
-          <BaseButton type="primary" :loading="loading" @click="changePassword">确认修改</BaseButton>
+        <!-- 车辆管理 -->
+        <div v-show="activeTab === 'vehicles'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-lg font-bold text-gray-900">车辆管理</h3>
+                <p class="text-sm text-gray-500 mt-1">管理公司常用车辆信息，方便快速选择</p>
+              </div>
+              <BaseButton type="primary" size="sm" @click="openVehicleDialog('create')">
+                <Plus class="w-4 h-4" />
+                添加车辆
+              </BaseButton>
+            </div>
+          </div>
+          
+          <div class="p-6">
+            <div v-if="vehicles.length === 0" class="text-center py-12 text-gray-400">
+              <Truck class="w-16 h-16 mx-auto mb-4 text-gray-300" />
+              <p>暂无车辆信息</p>
+              <p class="text-sm mt-2">点击上方按钮添加常用车辆</p>
+            </div>
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div
+                v-for="v in vehicles"
+                :key="v.id"
+                class="p-4 bg-gray-50 rounded-lg border border-gray-200"
+              >
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <div class="font-bold text-gray-900">{{ v.plateNumber }}</div>
+                    <span
+                      v-if="v.isDefault"
+                      class="px-2 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-700"
+                    >
+                      默认
+                    </span>
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      class="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
+                      @click="openVehicleDialog('edit', v)"
+                      title="编辑"
+                    >
+                      <Edit2 class="w-4 h-4 text-gray-600" />
+                    </button>
+                    <button
+                      class="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                      @click="removeVehicle(v.id)"
+                      title="删除"
+                    >
+                      <Trash2 class="w-4 h-4 text-red-500" />
+                    </button>
+                  </div>
+                </div>
+                <div class="space-y-1 text-sm text-gray-600">
+                  <div>司机：{{ v.driverName }}</div>
+                  <div>电话：{{ v.driverPhone }}</div>
+                  <div v-if="v.vehicleType">车型：{{ v.vehicleType }}</div>
+                </div>
+                <div v-if="!v.isDefault" class="mt-3">
+                  <BaseButton type="secondary" size="sm" @click="setDefault(v.id)">
+                    <Star class="w-3 h-3" />
+                    设为默认
+                  </BaseButton>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 账户安全 -->
+        <div v-show="activeTab === 'security'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-gray-200">
+            <h3 class="text-lg font-bold text-gray-900">修改密码</h3>
+            <p class="text-sm text-gray-500 mt-1">定期更换密码可以保护账户安全</p>
+          </div>
+          
+          <div class="p-6 space-y-6">
+            <div class="max-w-md space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">原密码</label>
+                <input
+                  v-model="passwordForm.oldPassword"
+                  type="password"
+                  placeholder="请输入原密码"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">新密码</label>
+                <input
+                  v-model="passwordForm.newPassword"
+                  type="password"
+                  placeholder="请输入新密码（至少6位）"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">确认新密码</label>
+                <input
+                  v-model="passwordForm.confirmPassword"
+                  type="password"
+                  placeholder="请再次输入新密码"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <!-- 保存按钮 -->
+            <div v-if="passwordDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
+              <BaseButton type="secondary" :disabled="loading" @click="resetPasswordForm">取消</BaseButton>
+              <BaseButton type="primary" :loading="loading" @click="changePassword">确认修改</BaseButton>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- 弹窗 -->
+    <!-- 车辆管理弹窗 -->
+    <el-dialog
+      v-model="vehicleDialogVisible"
+      :title="vehicleDialogMode === 'create' ? '添加车辆' : '编辑车辆'"
+      width="500px"
+      align-center
+    >
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">司机姓名 <span class="text-red-500">*</span></label>
+          <input
+            v-model="vehicleForm.driverName"
+            type="text"
+            placeholder="请输入司机姓名"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">身份证号 <span class="text-red-500">*</span></label>
+          <input
+            v-model="vehicleForm.driverIdCard"
+            type="text"
+            placeholder="请输入身份证号"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">车牌号 <span class="text-red-500">*</span></label>
+          <input
+            v-model="vehicleForm.plateNumber"
+            type="text"
+            placeholder="请输入车牌号"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">联系电话 <span class="text-red-500">*</span></label>
+          <input
+            v-model="vehicleForm.driverPhone"
+            type="text"
+            placeholder="请输入联系电话"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">车型</label>
+          <input
+            v-model="vehicleForm.vehicleType"
+            type="text"
+            placeholder="如：厢式货车、半挂车"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">备注</label>
+          <textarea
+            v-model="vehicleForm.remark"
+            rows="2"
+            placeholder="其他备注信息"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+          ></textarea>
+        </div>
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-3">
+          <BaseButton type="secondary" @click="vehicleDialogVisible = false">取消</BaseButton>
+          <BaseButton type="primary" :loading="loading" @click="saveVehicle">保存</BaseButton>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 公告弹窗 -->
+    <el-dialog
+      v-model="announcementDialogVisible"
+      :title="editingAnnouncementId ? '编辑公告' : '添加公告'"
+      width="600px"
+      align-center
+    >
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">标题 <span class="text-red-500">*</span></label>
+          <input
+            v-model="announcementForm.title"
+            type="text"
+            placeholder="请输入公告标题"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">内容 <span class="text-red-500">*</span></label>
+          <textarea
+            v-model="announcementForm.content"
+            rows="4"
+            placeholder="请输入公告内容"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+          ></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发布日期</label>
+          <el-date-picker
+            v-model="announcementForm.date"
+            type="date"
+            :locale="zhCn"
+            placeholder="选择发布日期"
+            format="YYYY年MM月DD日"
+            value-format="YYYY-MM-DD"
+            class="w-full neo-picker"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-3">
+          <BaseButton type="secondary" @click="announcementDialogVisible = false">取消</BaseButton>
+          <BaseButton type="primary" @click="saveAnnouncement">保存</BaseButton>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 招聘弹窗 -->
+    <el-dialog
+      v-model="recruitmentDialogVisible"
+      :title="editingRecruitmentId ? '编辑岗位' : '添加岗位'"
+      width="600px"
+      align-center
+    >
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">岗位名称 <span class="text-red-500">*</span></label>
+          <input
+            v-model="recruitmentForm.position"
+            type="text"
+            placeholder="如：销售经理、采购专员"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+          />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">任职要求</label>
+          <textarea
+            v-model="recruitmentForm.requirements"
+            rows="4"
+            placeholder="请输入任职要求"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+          ></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">薪资待遇</label>
+          <input
+            v-model="recruitmentForm.salary"
+            type="text"
+            placeholder="如：5000-8000元/月"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-3">
+          <BaseButton type="secondary" @click="recruitmentDialogVisible = false">取消</BaseButton>
+          <BaseButton type="primary" @click="saveRecruitment">保存</BaseButton>
+        </div>
+      </template>
+    </el-dialog>
 
     <!-- 营业执照预览弹窗 -->
     <el-dialog
