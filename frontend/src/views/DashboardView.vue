@@ -318,16 +318,10 @@ onMounted(() => {
                 {{ module.desc }}
               </p>
             </div>
-            
+
             <!-- 角标 -->
             <div v-if="module.badge" class="absolute top-4 right-4 w-6 h-6 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
               {{ module.badge > 99 ? '99+' : module.badge }}
-            </div>
-            
-            <!-- 箭头指示 -->
-            <div class="flex items-center gap-1 text-gray-400 group-hover:text-brand-500 transition-colors mt-4">
-              <span class="text-xs font-bold">进入</span>
-              <ArrowRight class="w-3.5 h-3.5" stroke-width="2" />
             </div>
           </button>
         </div>

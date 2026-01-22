@@ -157,7 +157,7 @@ function clear() {
 </script>
 
 <template>
-  <div class="bg-white rounded-[32px] border border-gray-200 p-6 shadow-2xl">
+  <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-2xl">
     <!-- 头部 -->
     <div class="flex items-center justify-between mb-6">
       <div>
@@ -183,12 +183,12 @@ function clear() {
     </div>
 
     <!-- 产品规格参数 -->
-    <div v-if="Object.keys(productParams).length > 0" class="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+    <div v-if="Object.keys(productParams).length > 0" class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
       <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-1">
         产品规格参数 <InfoFilled class="w-3 h-3" />
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <div v-for="(v, k) in productParams" :key="k" class="bg-white px-3 py-2 rounded-xl border border-gray-50 flex flex-col gap-0.5">
+        <div v-for="(v, k) in productParams" :key="k" class="bg-white px-3 py-2 rounded-lg border border-gray-50 flex flex-col gap-0.5">
           <span class="text-[10px] text-gray-400 font-medium">{{ k }}</span>
           <span class="text-xs font-bold text-gray-700 truncate">{{ v }}</span>
         </div>
@@ -196,7 +196,7 @@ function clear() {
     </div>
 
     <!-- 期货盘面状态 -->
-    <div v-if="selectedContract" class="mb-6 p-4 bg-slate-900 rounded-xl text-white">
+    <div v-if="selectedContract" class="mb-6 p-4 bg-slate-900 rounded-lg text-white">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold text-slate-400">当前盘面：</span>
@@ -232,7 +232,7 @@ function clear() {
         <select 
           v-model="form.contractCode" 
           :disabled="disabled"
-          class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-brand-500 focus:bg-white outline-none transition-all"
+          class="w-full bg-gray-50 border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm font-bold focus:border-brand-500 focus:bg-white outline-none transition-all"
         >
           <option value="" disabled>请选择合约</option>
           <option v-for="c in contracts" :key="c.contractCode" :value="c.contractCode">
@@ -249,7 +249,7 @@ function clear() {
             v-model.number="form.basisPrice" 
             type="number"
             :disabled="disabled"
-            class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-brand-500 outline-none transition-all"
+            class="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm font-bold focus:border-brand-500 outline-none transition-all"
             :class="[
               form.basisPrice && form.basisPrice > 0 ? 'text-rose-600' : 
               form.basisPrice && form.basisPrice < 0 ? 'text-brand-600' : 'text-gray-900'
@@ -268,7 +268,7 @@ function clear() {
         <input 
           v-model="form.quantity" 
           :disabled="disabled"
-          class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:border-brand-500 outline-none transition-all"
+          class="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm font-bold focus:border-brand-500 outline-none transition-all"
           placeholder="请输入吨数"
         />
       </div>
@@ -276,7 +276,7 @@ function clear() {
       <!-- 核算价格预览 -->
       <div class="space-y-2">
         <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">实时核算价 (元/吨)</label>
-        <div class="w-full bg-brand-50 border-2 border-brand-100 rounded-xl px-4 py-2.5 flex items-center justify-between">
+        <div class="w-full bg-brand-50 border-2 border-brand-100 rounded-lg px-4 py-2.5 flex items-center justify-between">
           <span class="text-sm font-black text-brand-700">¥ {{ referencePrice.toFixed(2) }}</span>
           <el-tooltip content="核算价格 = 期货最新价 + 基差" placement="top">
             <el-icon class="text-brand-400 cursor-help"><InfoFilled /></el-icon>
@@ -291,14 +291,14 @@ function clear() {
           v-model="form.remark" 
           :disabled="disabled"
           rows="2"
-          class="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-brand-500 outline-none transition-all resize-none"
+          class="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:border-brand-500 outline-none transition-all resize-none"
           placeholder="如有其他特殊约定请说明..."
         ></textarea>
       </div>
     </div>
 
     <!-- 风险提示 -->
-    <div class="mt-6 p-3 bg-amber-50 rounded-xl border border-amber-100 flex items-start gap-2">
+    <div class="mt-6 p-3 bg-amber-50 rounded-lg border border-amber-100 flex items-start gap-2">
       <el-icon class="text-amber-500 shrink-0 mt-0.5"><InfoFilled /></el-icon>
       <p class="text-[10px] text-amber-700 leading-relaxed">
         提示：基差交易的最终成交价受期货盘面波动影响。当前的“实时核算价”仅供参考，实际成交价格将以签署合同时点的期货盘面价为准。

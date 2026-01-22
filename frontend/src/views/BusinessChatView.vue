@@ -1389,7 +1389,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="chat-view h-full">
-    <div class="flex h-full bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="flex h-full bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
       <!-- 左侧联系人列表（聚合后） -->
       <div class="w-80 border-r border-gray-200 flex flex-col bg-white">
         <!-- 搜索栏 -->
@@ -1400,7 +1400,7 @@ onBeforeUnmount(() => {
               v-model="searchKeyword"
               type="text"
               placeholder="搜索联系人..."
-              class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border-2 border-transparent rounded-xl text-sm focus:bg-white focus:border-brand-500 outline-none transition-all"
+              class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border-2 border-transparent rounded-lg text-sm focus:bg-white focus:border-brand-500 outline-none transition-all"
             />
           </div>
         </div>
@@ -1436,7 +1436,7 @@ onBeforeUnmount(() => {
                 <!-- 头像 + 在线状态 -->
                 <div class="relative shrink-0">
                   <div 
-                    class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold bg-gradient-to-br shadow-md"
+                    class="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold bg-gradient-to-br shadow-md"
                     :class="avatarGradient(peer.peerNickName || peer.peerUserName || peer.peerCompanyName)"
                   >
                     {{ avatarText(peer.peerNickName || peer.peerUserName || peer.peerCompanyName) }}
@@ -1486,7 +1486,7 @@ onBeforeUnmount(() => {
 
           <!-- 空状态 -->
           <div v-if="timeGroupedPeers.length === 0" class="py-16 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gray-100 flex items-center justify-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-lg bg-gray-100 flex items-center justify-center">
               <ChatDotRound class="w-8 h-8 text-gray-300" />
             </div>
             <p class="text-sm font-medium text-gray-500">暂无会话</p>
@@ -1504,7 +1504,7 @@ onBeforeUnmount(() => {
             <div class="flex items-center gap-3">
               <div class="relative">
                 <div 
-                  class="w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center text-white font-bold shrink-0 shadow-md"
+                  class="w-10 h-10 rounded-lg bg-gradient-to-br flex items-center justify-center text-white font-bold shrink-0 shadow-md"
                   :class="avatarGradient(currentConversation.peerNickName || currentConversation.peerUserName || currentConversation.peerCompanyName)"
                 >
                   {{ avatarText(currentConversation.peerNickName || currentConversation.peerUserName || currentConversation.peerCompanyName) }}
@@ -1526,7 +1526,7 @@ onBeforeUnmount(() => {
             <div class="flex items-center gap-2">
               <!-- 关注按钮 -->
               <button 
-                class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all  flex items-center gap-1"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all  flex items-center gap-1"
                 :class="isFollowingPeer 
                   ? 'bg-amber-50 text-amber-600 hover:bg-amber-100' 
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
@@ -1538,14 +1538,14 @@ onBeforeUnmount(() => {
                 {{ isFollowingPeer ? '已关注' : '关注' }}
               </button>
               <button 
-                class="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-all "
+                class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all "
                 @click="openGiftDialog" 
                 title="赠送积分"
               >
                 <Present class="w-4 h-4 text-gray-600" />
               </button>
               <button 
-                class="px-4 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-700 hover:to-teal-700 text-white text-xs font-bold transition-all  shadow-md shadow-brand-500/20"
+                class="px-4 py-2 rounded-lg bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-700 hover:to-teal-700 text-white text-xs font-bold transition-all  shadow-md shadow-brand-500/20"
                 @click="initiateContract"
               >
                 起草合同
@@ -1674,14 +1674,14 @@ onBeforeUnmount(() => {
                     <!-- 接收的消息 -->
                     <div v-else-if="msg.type === 'received'" class="message-received flex items-start gap-3 max-w-[85%] lg:max-w-[70%]">
                       <div 
-                        class="w-8 h-8 rounded-xl bg-gradient-to-br flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm"
+                        class="w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-sm"
                         :class="avatarGradient(currentConversation?.peerNickName || currentConversation?.peerUserName || currentConversation?.peerCompanyName)"
                       >
                         {{ avatarText(currentConversation?.peerNickName || currentConversation?.peerUserName || currentConversation?.peerCompanyName) }}
                       </div>
                       <div>
                         <!-- 报价消息 -->
-                        <div v-if="(msg.msgType || '').toUpperCase() === 'QUOTE'" class="bg-white rounded-xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-200">
+                        <div v-if="(msg.msgType || '').toUpperCase() === 'QUOTE'" class="bg-white rounded-lg rounded-tl-sm px-4 py-3 shadow-sm border border-gray-200">
                           <div class="flex items-center justify-between mb-2">
                             <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">电子报价单</div>
                             <div v-if="quoteStatusBadge(msg.quoteStatus)" 
@@ -1701,7 +1701,7 @@ onBeforeUnmount(() => {
                             <el-button 
                               size="small" 
                               type="primary" 
-                              class="!rounded-xl !bg-brand-600 hover:!bg-brand-700 !border-brand-600 !text-white transition-all "
+                              class="!rounded-lg !bg-brand-600 hover:!bg-brand-700 !border-brand-600 !text-white transition-all "
                               @click="handleConfirmOffer(msg.id)"
                             >
                               确认成交
@@ -1710,7 +1710,7 @@ onBeforeUnmount(() => {
                           <!-- 已成交：起草合同按钮 -->
                           <div v-else-if="msg.quoteStatus === 'ACCEPTED'" class="mt-4 pt-3 border-t border-gray-50 flex justify-end">
                             <button 
-                              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all  flex items-center gap-1.5"
+                              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-all  flex items-center gap-1.5"
                               @click="openContractDraft(msg)"
                             >
                               <Document class="w-4 h-4" />
@@ -1719,20 +1719,20 @@ onBeforeUnmount(() => {
                           </div>
                         </div>
                         <!-- 图片消息 -->
-                        <div v-else-if="(msg.msgType || '').toUpperCase() === 'IMAGE'" class="bg-white rounded-xl rounded-tl-sm p-2 shadow-sm border border-gray-200">
+                        <div v-else-if="(msg.msgType || '').toUpperCase() === 'IMAGE'" class="bg-white rounded-lg rounded-tl-sm p-2 shadow-sm border border-gray-200">
                           <img 
                             v-if="parseImagePayload(msg.payloadJson)?.fileUrl"
                             :src="parseImagePayload(msg.payloadJson)?.fileUrl"
                             :alt="parseImagePayload(msg.payloadJson)?.fileName || '图片'"
-                            class="max-w-[280px] max-h-[200px] rounded-xl cursor-pointer hover:opacity-90 transition-opacity object-cover"
+                            class="max-w-[280px] max-h-[200px] rounded-lg cursor-pointer hover:opacity-90 transition-opacity object-cover"
                             @click="openImagePreview(parseImagePayload(msg.payloadJson)?.fileUrl || '')"
                           />
                           <div v-else class="text-sm text-gray-500">[图片加载失败]</div>
                         </div>
                         <!-- 附件消息 -->
-                        <div v-else-if="(msg.msgType || '').toUpperCase() === 'ATTACHMENT'" class="bg-white rounded-xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-200">
+                        <div v-else-if="(msg.msgType || '').toUpperCase() === 'ATTACHMENT'" class="bg-white rounded-lg rounded-tl-sm px-4 py-3 shadow-sm border border-gray-200">
                           <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
                               <Document class="w-5 h-5 text-blue-600" />
                             </div>
                             <div class="flex-1 min-w-0">
@@ -1756,7 +1756,7 @@ onBeforeUnmount(() => {
                           @sign="handleSignContract"
                         />
                         <!-- 普通文本消息 -->
-                        <div v-else class="bg-white rounded-xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-200 text-sm text-gray-800">
+                        <div v-else class="bg-white rounded-lg rounded-tl-sm px-4 py-3 shadow-sm border border-gray-200 text-sm text-gray-800">
                           {{ msg.content }}
                         </div>
                       </div>
@@ -1764,12 +1764,12 @@ onBeforeUnmount(() => {
                     
                     <!-- 发送的消息 -->
                     <div v-else class="message-sent flex items-start gap-3 max-w-[85%] lg:max-w-[70%] flex-row-reverse">
-                      <div class="w-8 h-8 rounded-xl bg-brand-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                      <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
                         {{ (auth.me?.nickName || 'U')[0] }}
                       </div>
                       <div class="flex flex-col items-end">
                         <!-- 报价消息 -->
-                        <div v-if="(msg.msgType || '').toUpperCase() === 'QUOTE'" class="bg-brand-600 text-white rounded-xl rounded-tr-sm px-4 py-3 shadow-sm">
+                        <div v-if="(msg.msgType || '').toUpperCase() === 'QUOTE'" class="bg-brand-600 text-white rounded-lg rounded-tr-sm px-4 py-3 shadow-sm">
                           <div class="flex items-center justify-between mb-2 gap-4">
                             <div class="text-[10px] font-bold uppercase tracking-widest text-brand-100">电子报价单</div>
                             <div v-if="quoteStatusBadge(msg.quoteStatus)" 
@@ -1786,20 +1786,20 @@ onBeforeUnmount(() => {
                           </div>
                         </div>
                         <!-- 图片消息 -->
-                        <div v-else-if="(msg.msgType || '').toUpperCase() === 'IMAGE'" class="bg-brand-600 rounded-xl rounded-tr-sm p-2 shadow-sm">
+                        <div v-else-if="(msg.msgType || '').toUpperCase() === 'IMAGE'" class="bg-brand-600 rounded-lg rounded-tr-sm p-2 shadow-sm">
                           <img 
                             v-if="parseImagePayload(msg.payloadJson)?.fileUrl"
                             :src="parseImagePayload(msg.payloadJson)?.fileUrl"
                             :alt="parseImagePayload(msg.payloadJson)?.fileName || '图片'"
-                            class="max-w-[280px] max-h-[200px] rounded-xl cursor-pointer hover:opacity-90 transition-opacity object-cover"
+                            class="max-w-[280px] max-h-[200px] rounded-lg cursor-pointer hover:opacity-90 transition-opacity object-cover"
                             @click="openImagePreview(parseImagePayload(msg.payloadJson)?.fileUrl || '')"
                           />
                           <div v-else class="text-sm text-white/80">[图片加载失败]</div>
                         </div>
                         <!-- 附件消息 -->
-                        <div v-else-if="(msg.msgType || '').toUpperCase() === 'ATTACHMENT'" class="bg-brand-600 rounded-xl rounded-tr-sm px-4 py-3 shadow-sm">
+                        <div v-else-if="(msg.msgType || '').toUpperCase() === 'ATTACHMENT'" class="bg-brand-600 rounded-lg rounded-tr-sm px-4 py-3 shadow-sm">
                           <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                            <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
                               <Document class="w-5 h-5 text-white" />
                             </div>
                             <div class="flex-1 min-w-0">
@@ -1823,7 +1823,7 @@ onBeforeUnmount(() => {
                           @sign="handleSignContract"
                         />
                         <!-- 普通文本消息 -->
-                        <div v-else class="bg-brand-600 text-white rounded-xl rounded-tr-sm px-4 py-3 shadow-sm text-sm">
+                        <div v-else class="bg-brand-600 text-white rounded-lg rounded-tr-sm px-4 py-3 shadow-sm text-sm">
                           {{ msg.content }}
                         </div>
                         <div v-show="msg.status === 'pending'" class="text-[10px] text-gray-400 mt-1">发送中…</div>
@@ -1906,7 +1906,7 @@ onBeforeUnmount(() => {
                 <!-- 发送按钮 -->
                 <el-button
                   type="primary"
-                  class="shrink-0 !h-12 !px-6 !rounded-xl !bg-brand-600 hover:!bg-brand-700 !border-brand-600 !text-white transition-all "
+                  class="shrink-0 !h-12 !px-6 !rounded-lg !bg-brand-600 hover:!bg-brand-700 !border-brand-600 !text-white transition-all "
                   :disabled="!messageInput.trim()"
                   @click="sendMessage"
                 >
@@ -1938,10 +1938,10 @@ onBeforeUnmount(() => {
 
             <div class="mt-8 pt-6 border-t border-gray-50">
               <div v-if="hasAcceptedQuote" class="space-y-3">
-                <div class="bg-brand-50 text-brand-700 p-3 rounded-xl text-xs font-medium leading-relaxed">
+                <div class="bg-brand-50 text-brand-700 p-3 rounded-lg text-xs font-medium leading-relaxed">
                   🎉 意向已达成！建议立即起草电子合同以保障双方权益。
                 </div>
-                <el-button type="primary" class="w-full !rounded-xl !bg-gradient-to-r !from-brand-600 !to-teal-600 hover:!from-brand-700 hover:!to-teal-700 !border-transparent !shadow-md !shadow-brand-500/20" @click="initiateContract">
+                <el-button type="primary" class="w-full !rounded-lg !bg-gradient-to-r !from-brand-600 !to-teal-600 hover:!from-brand-700 hover:!to-teal-700 !border-transparent !shadow-md !shadow-brand-500/20" @click="initiateContract">
                   起草合同
                 </el-button>
               </div>
@@ -2001,7 +2001,7 @@ onBeforeUnmount(() => {
           </button>
         </div>
         <div class="flex-1 overflow-y-auto p-6 bg-gray-50 space-y-4">
-          <div v-if="currentConversation" class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <div v-if="currentConversation" class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
             <div class="flex items-start justify-between gap-4">
               <div class="min-w-0">
                 <div class="flex items-center gap-2">
@@ -2017,7 +2017,7 @@ onBeforeUnmount(() => {
                   {{ currentConversation.subjectSnapshotJson ? '已附带标的快照' : '未附带标的快照（建议从大厅入口带上）' }}
                 </div>
               </div>
-              <el-button size="small" class="!rounded-xl transition-all " @click="viewLinkedInfo">查看</el-button>
+              <el-button size="small" class="!rounded-lg transition-all " @click="viewLinkedInfo">查看</el-button>
             </div>
           </div>
 
@@ -2046,7 +2046,7 @@ onBeforeUnmount(() => {
       :show-close="false"
       :append-to-body="true"
       modal-class="bg-slate-900/60 backdrop-blur-sm"
-      class="!rounded-[32px] overflow-hidden"
+      class="!rounded-2xl overflow-hidden"
     >
       <div class="bg-white">
         <div class="px-8 py-6 border-b flex items-center justify-between bg-white sticky top-0 z-10">
@@ -2070,7 +2070,7 @@ onBeforeUnmount(() => {
             :subject-snapshot-json="currentConversation.subjectSnapshotJson ?? null"
           />
 
-          <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
             <div class="flex items-center justify-between gap-4">
               <div class="min-w-0">
                 <div class="text-sm font-bold text-gray-900">为什么需要“标的详情”</div>
@@ -2079,8 +2079,8 @@ onBeforeUnmount(() => {
                 </div>
               </div>
               <div class="flex items-center gap-2 shrink-0">
-                <el-button size="small" class="!rounded-xl transition-all " @click="copySubjectId">复制ID</el-button>
-                <el-button size="small" class="!rounded-xl !bg-gradient-to-r !from-brand-600 !to-teal-600 hover:!from-brand-700 hover:!to-teal-700 !border-transparent !text-white transition-all  !shadow-md" @click="openSubjectOrigin">
+                <el-button size="small" class="!rounded-lg transition-all " @click="copySubjectId">复制ID</el-button>
+                <el-button size="small" class="!rounded-lg !bg-gradient-to-r !from-brand-600 !to-teal-600 hover:!from-brand-700 hover:!to-teal-700 !border-transparent !text-white transition-all  !shadow-md" @click="openSubjectOrigin">
                   打开原始发布
                 </el-button>
               </div>
@@ -2098,7 +2098,7 @@ onBeforeUnmount(() => {
       :show-close="false"
       align-center
       modal-class="bg-slate-900/60 backdrop-blur-sm"
-      class="!rounded-[32px] overflow-hidden !border-none"
+      class="!rounded-2xl overflow-hidden !border-none"
     >
       <template #header>
         <div class="flex items-center justify-between">
@@ -2117,10 +2117,10 @@ onBeforeUnmount(() => {
 
       <div class="space-y-5">
         <!-- 接收人信息卡片 -->
-        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
           <div class="flex items-center gap-3">
             <div 
-              class="w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-md"
+              class="w-12 h-12 rounded-lg bg-gradient-to-br flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-md"
               :class="avatarGradient(currentConversation?.peerNickName || currentConversation?.peerUserName || currentConversation?.peerCompanyName)"
             >
               {{ avatarText(currentConversation?.peerNickName || currentConversation?.peerUserName || currentConversation?.peerCompanyName) }}
@@ -2153,7 +2153,7 @@ onBeforeUnmount(() => {
             placeholder="感谢合作，期待下次合作..." 
             maxlength="100" 
             show-word-limit
-            class="!rounded-xl"
+            class="!rounded-lg"
           />
         </div>
         
@@ -2179,14 +2179,14 @@ onBeforeUnmount(() => {
       <template #footer>
         <div class="flex gap-3">
           <el-button 
-            class="flex-1 !rounded-xl !h-11 transition-all " 
+            class="flex-1 !rounded-lg !h-11 transition-all " 
             @click="giftDialogVisible = false"
           >
             取消
           </el-button>
           <el-button 
             type="primary" 
-            class="flex-1 !rounded-xl !h-11 !bg-brand-600 hover:!bg-brand-700 !border-brand-600 transition-all "
+            class="flex-1 !rounded-lg !h-11 !bg-brand-600 hover:!bg-brand-700 !border-brand-600 transition-all "
             :loading="giftLoading"
             @click="submitGiftPoints"
           >
@@ -2231,7 +2231,7 @@ onBeforeUnmount(() => {
           class="fixed inset-0 z-[9998] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
           @click.self="showArchivedModal = false"
         >
-          <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden animate-zoom-in">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-zoom-in">
             <!-- 头部 -->
             <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
               <div>
@@ -2249,7 +2249,7 @@ onBeforeUnmount(() => {
             <!-- 内容 -->
             <div class="max-h-[60vh] overflow-y-auto">
               <div v-if="archivedConversations.length === 0" class="py-12 text-center">
-                <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gray-100 flex items-center justify-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-lg bg-gray-100 flex items-center justify-center">
                   <span class="text-3xl">📦</span>
                 </div>
                 <p class="text-sm font-medium text-gray-500">暂无归档会话</p>

@@ -294,7 +294,7 @@ onMounted(() => {
               v-model="searchKeyword"
               type="text"
               placeholder="搜索合同编号、产品名称、公司名称..."
-              class="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+              class="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all text-sm"
             />
           </div>
           

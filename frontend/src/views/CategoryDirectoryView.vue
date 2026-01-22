@@ -90,7 +90,7 @@ onMounted(() => {
                 v-model="searchKeyword"
                 type="text" 
                 placeholder="搜索品类名称..." 
-                class="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:bg-white focus:border-slate-400 transition-all outline-none text-sm"
+                class="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-transparent rounded-lg focus:bg-white focus:border-slate-400 transition-all outline-none text-sm"
                 @keyup.enter="onSearch"
               />
               <Search :size="18" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />

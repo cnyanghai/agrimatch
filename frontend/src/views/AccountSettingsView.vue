@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { useAuthStore } from '../store/auth'
 import { updateMe, type UserUpdateRequest } from '../api/user'
@@ -19,7 +19,7 @@ const company = ref<CompanyResponse | null>(null)
 
 // 用户表单
 const userForm = reactive({
-  realName: '',
+  displayName: '',
   phonenumber: '',
   position: '',
   birthDate: '',
@@ -32,8 +32,8 @@ const companyForm = reactive({
   companyName: '',
   licenseNo: '',
   licenseImgUrl: '',
-  legalPerson: '',
-  businessScope: '',
+  contacts: '',
+  phone: '',
   province: '',
   city: '',
   district: '',
@@ -48,8 +48,8 @@ const passwordForm = reactive({
 })
 
 // 快照
-const userSnapshot = ref({ realName: '', phonenumber: '', position: '', birthDate: '', gender: 1, bio: '' })
-const companySnapshot = ref({ companyName: '', licenseNo: '', licenseImgUrl: '', legalPerson: '', businessScope: '', province: '', city: '', district: '', address: '' })
+const userSnapshot = ref({ displayName: '', phonenumber: '', position: '', birthDate: '', gender: 1, bio: '' })
+const companySnapshot = ref({ companyName: '', licenseNo: '', licenseImgUrl: '', contacts: '', phone: '', province: '', city: '', district: '', address: '' })
 
 // 省市区级联选择值
 const regionValue = ref<string[]>([])
@@ -146,10 +146,10 @@ async function loadUserData() {
   try {
     await auth.fetchMe()
     if (auth.me) {
-      userForm.realName = auth.me.realName || ''
+      userForm.displayName = auth.me.nickName || ''
       userForm.phonenumber = auth.me.phonenumber || ''
       userForm.position = auth.me.position || ''
-      userForm.birthDate = auth.me.birthDate || ''
+      userForm.birthDate = auth.me.birthDate ? auth.me.birthDate.slice(0, 7) : ''
       userForm.gender = auth.me.gender || 1
       userForm.bio = auth.me.bio || ''
     }
@@ -167,8 +167,8 @@ async function loadCompanyData() {
       companyForm.companyName = res.data.companyName || ''
       companyForm.licenseNo = res.data.licenseNo || ''
       companyForm.licenseImgUrl = res.data.licenseImgUrl || ''
-      companyForm.legalPerson = res.data.legalPerson || ''
-      companyForm.businessScope = res.data.businessScope || ''
+      companyForm.contacts = res.data.contacts || ''
+      companyForm.phone = res.data.phone || ''
       companyForm.province = res.data.province || ''
       companyForm.city = res.data.city || ''
       companyForm.district = res.data.district || ''
@@ -185,15 +185,15 @@ async function loadCompanyData() {
 }
 
 async function saveUserInfo() {
-  if (!userForm.realName?.trim()) {
-    ElMessage.warning('请输入真实姓名')
+  if (!userForm.displayName?.trim()) {
+    ElMessage.warning('请输入姓名/昵称')
     return
   }
   loading.value = true
   try {
     const birthDate = userForm.birthDate?.trim() ? `${userForm.birthDate}-01` : undefined
     const req: UserUpdateRequest = {
-      realName: userForm.realName,
+      nickName: userForm.displayName,
       phonenumber: userForm.phonenumber,
       position: userForm.position,
       birthDate,
@@ -265,7 +265,7 @@ function resetPasswordForm() { passwordForm.oldPassword = ''; passwordForm.newPa
 
 const genderOptions = [{ label: '男', value: 1 }, { label: '女', value: 2 }]
 
-const currentName = computed(() => auth.me?.realName || auth.me?.userName || '用户')
+const currentName = computed(() => auth.me?.nickName || auth.me?.userName || '用户')
 const currentPhone = computed(() => auth.me?.phonenumber || '未绑定手机号')
 const currentPosition = computed(() => auth.me?.position || '暂无职位')
 const avatarText = computed(() => {
@@ -279,7 +279,7 @@ const companyDirty = computed(() => JSON.stringify(companyForm) !== JSON.stringi
 const passwordDirty = computed(() => !!(passwordForm.oldPassword || passwordForm.newPassword || passwordForm.confirmPassword))
 
 const tabs = [
-  { key: 'user', label: '个人信息', icon: User },
+  { key: 'user', label: '基本信息', icon: User },
   { key: 'company', label: '公司信息', icon: Building2 },
   { key: 'security', label: '账户安全', icon: Lock }
 ]
@@ -304,7 +304,7 @@ const tabs = [
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div class="flex items-center gap-4">
           <div class="relative">
-            <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center text-2xl font-bold shadow-md">
+            <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 text-white flex items-center justify-center text-2xl font-bold shadow-md">
               {{ avatarText }}
             </div>
             <button
@@ -326,7 +326,7 @@ const tabs = [
         </div>
 
         <!-- Tab 切换 -->
-        <div class="flex items-center gap-1 bg-gray-100 rounded-xl p-1">
+        <div class="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
           <button
             v-for="tab in tabs"
             :key="tab.key"
@@ -345,10 +345,10 @@ const tabs = [
       </div>
     </div>
 
-    <!-- 个人信息 -->
+    <!-- 基本信息 -->
     <div v-show="activeTab === 'user'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
       <div class="p-5 border-b border-gray-200">
-        <h3 class="text-lg font-bold text-gray-900">个人信息</h3>
+        <h3 class="text-lg font-bold text-gray-900">基本信息</h3>
         <p class="text-sm text-gray-500 mt-1">修改后点击保存生效</p>
       </div>
       
@@ -356,12 +356,23 @@ const tabs = [
         <!-- 表单 -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
           <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+              姓名/昵称 <span class="text-red-500">*</span>
+            </label>
+            <input
+              v-model="userForm.displayName"
+              type="text"
+              placeholder="请输入姓名/昵称"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            />
+          </div>
+          <div>
             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">手机号码</label>
             <input
               v-model="userForm.phonenumber"
               type="text"
               placeholder="请输入手机号"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -370,18 +381,18 @@ const tabs = [
               v-model="userForm.position"
               type="text"
               placeholder="如：采购经理、销售总监"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">出生日期</label>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">出生年月</label>
             <el-date-picker
               v-model="userForm.birthDate"
-              type="date"
+              type="month"
               :locale="zhCn"
-              placeholder="选择出生日期"
-              format="YYYY年MM月DD日"
-              value-format="YYYY-MM-DD"
+              placeholder="选择出生年月"
+              format="YYYY年MM月"
+              value-format="YYYY-MM"
               class="w-full neo-picker"
             />
           </div>
@@ -392,7 +403,7 @@ const tabs = [
                 v-for="opt in genderOptions"
                 :key="opt.value"
                 :class="[
-                  'flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 cursor-pointer transition-all',
+                  'flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 cursor-pointer transition-all',
                   userForm.gender === opt.value 
                     ? 'border-brand-500 bg-brand-50 text-brand-600' 
                     : 'border-gray-200 hover:border-gray-200'
@@ -417,7 +428,7 @@ const tabs = [
             rows="3"
             maxlength="500"
             placeholder="简单介绍一下自己，让合作伙伴更好地了解您"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
           ></textarea>
           <p class="text-xs text-gray-400 mt-1 text-right">{{ userForm.bio?.length || 0 }}/500</p>
         </div>
@@ -447,7 +458,7 @@ const tabs = [
               v-model="companyForm.companyName"
               type="text"
               placeholder="请输入公司全称"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -456,25 +467,25 @@ const tabs = [
               v-model="companyForm.licenseNo"
               type="text"
               placeholder="请输入统一社会信用代码"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">法人</label>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">联系人</label>
             <input
-              v-model="companyForm.legalPerson"
+              v-model="companyForm.contacts"
               type="text"
-              placeholder="请输入法人姓名"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              placeholder="请输入公司联系人"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">经营范围</label>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">联系电话</label>
             <input
-              v-model="companyForm.businessScope"
+              v-model="companyForm.phone"
               type="text"
-              placeholder="请输入经营范围"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              placeholder="请输入公司联系电话"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div class="md:col-span-2">
@@ -496,7 +507,7 @@ const tabs = [
             v-model="companyForm.address"
             type="text"
             placeholder="请输入详细地址（街道、门牌号等）"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
           />
         </div>
 
@@ -507,7 +518,7 @@ const tabs = [
             <!-- 上传区域 -->
             <div v-if="!companyForm.licenseImgUrl" class="relative">
               <label 
-                class="flex flex-col items-center justify-center w-40 h-32 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-brand-400 hover:bg-brand-50/50 transition-all"
+                class="flex flex-col items-center justify-center w-40 h-32 border-2 border-dashed border-gray-200 rounded-lg cursor-pointer hover:border-brand-400 hover:bg-brand-50/50 transition-all"
                 :class="{ 'opacity-50 pointer-events-none': licenseUploading }"
               >
                 <FileText v-if="!licenseUploading" class="w-8 h-8 text-gray-300 mb-2" />
@@ -528,10 +539,10 @@ const tabs = [
               <img 
                 :src="companyForm.licenseImgUrl" 
                 alt="营业执照" 
-                class="w-40 h-32 object-cover rounded-xl border-2 border-gray-200"
+                class="w-40 h-32 object-cover rounded-lg border-2 border-gray-200"
               />
               <!-- 操作遮罩 -->
-              <div class="absolute inset-0 bg-black/50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+              <div class="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                 <button 
                   type="button"
                   class="w-8 h-8 bg-white/90 rounded-lg flex items-center justify-center hover:bg-white transition-colors"
@@ -567,13 +578,13 @@ const tabs = [
         <!-- 状态提示 -->
         <div
           :class="[
-            'flex items-center gap-4 p-4 rounded-xl',
+            'flex items-center gap-4 p-4 rounded-lg',
             company?.id ? 'bg-brand-50' : 'bg-amber-50'
           ]"
         >
           <div
             :class="[
-              'w-10 h-10 rounded-xl flex items-center justify-center',
+              'w-10 h-10 rounded-lg flex items-center justify-center',
               company?.id ? 'bg-brand-100' : 'bg-amber-100'
             ]"
           >
@@ -595,9 +606,9 @@ const tabs = [
           <h4 class="font-bold text-gray-900 mb-4">快捷管理</h4>
           <router-link 
             to="/vehicles"
-            class="flex items-center gap-4 p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all group"
+            class="flex items-center gap-4 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all group"
           >
-            <div class="w-12 h-12 rounded-xl bg-blue-500 text-white flex items-center justify-center">
+            <div class="w-12 h-12 rounded-lg bg-blue-500 text-white flex items-center justify-center">
               <Truck class="w-6 h-6" />
             </div>
             <div class="flex-1">
@@ -631,7 +642,7 @@ const tabs = [
               v-model="passwordForm.oldPassword"
               type="password"
               placeholder="请输入原密码"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -640,7 +651,7 @@ const tabs = [
               v-model="passwordForm.newPassword"
               type="password"
               placeholder="请输入新密码（至少6位）"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -649,7 +660,7 @@ const tabs = [
               v-model="passwordForm.confirmPassword"
               type="password"
               placeholder="请再次输入新密码"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
         </div>
@@ -675,7 +686,7 @@ const tabs = [
           v-if="companyForm.licenseImgUrl"
           :src="companyForm.licenseImgUrl" 
           alt="营业执照" 
-          class="max-w-full max-h-[70vh] object-contain rounded-xl"
+          class="max-w-full max-h-[70vh] object-contain rounded-lg"
         />
       </div>
     </el-dialog>

@@ -250,11 +250,11 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 按原料搜索 -->
-    <section class="py-24 bg-white border-b border-gray-200">
+    <section class="py-20 bg-white border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
-            <h2 class="text-3xl font-bold text-gray-900 tracking-tight">
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">
               按 <span class="text-brand-600">原料</span> 搜索
             </h2>
           </div>
@@ -270,14 +270,14 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="categoryLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div v-for="i in 8" :key="i" class="h-24 bg-gray-50 rounded-2xl animate-pulse"></div>
+          <div v-for="i in 8" :key="i" class="h-24 bg-gray-50 rounded-xl animate-pulse"></div>
         </div>
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <!-- 核心分类卡片 -->
           <div
             v-for="cat in topCategories.slice(0, 7)"
             :key="cat.id"
-            class="group p-5 bg-white border border-gray-200 rounded-2xl transition-all cursor-pointer flex items-center gap-4 hover:shadow-md hover:border-slate-200"
+            class="group p-5 bg-white border border-gray-200 rounded-xl transition-all cursor-pointer flex items-center gap-4 hover:shadow-md hover:border-slate-200"
             @click="goCategory(cat)"
           >
             <div 
@@ -286,7 +286,7 @@ onBeforeUnmount(() => {
               <component :is="getCategoryMeta(cat.name).icon" :size="24" class="text-slate-500" />
             </div>
             <div class="min-w-0">
-              <div class="font-bold text-gray-900 group-hover:text-slate-900 transition-colors truncate text-base">
+              <div class="font-semibold text-gray-900 group-hover:text-slate-900 transition-colors truncate text-base">
                 {{ cat.name }}
               </div>
             </div>
@@ -294,14 +294,14 @@ onBeforeUnmount(() => {
 
           <!-- “更多”卡片 -->
           <div
-            class="group p-5 bg-gray-50/50 border border-dashed border-gray-200 rounded-2xl transition-all cursor-pointer flex items-center gap-4 hover:bg-white hover:border-slate-200 hover:shadow-md"
+            class="group p-5 bg-gray-50/50 border border-dashed border-gray-200 rounded-xl transition-all cursor-pointer flex items-center gap-4 hover:bg-white hover:border-slate-200 hover:shadow-md"
             @click="go('/categories')"
           >
             <div class="w-12 h-12 shrink-0 bg-white rounded-xl flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all shadow-sm text-slate-400">
               <LayoutGrid :size="24" />
             </div>
             <div>
-              <div class="font-bold text-gray-900 group-hover:text-slate-900 transition-colors text-base">更多原料</div>
+              <div class="font-semibold text-gray-900 group-hover:text-slate-900 transition-colors text-base">更多原料</div>
             </div>
           </div>
         </div>
@@ -309,50 +309,34 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 按供应商搜索 (品牌墙风格) -->
-    <section class="py-24 bg-gray-50/50 border-b border-gray-200">
+    <section class="py-20 bg-gray-50/50 border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-          <div>
-            <h2 class="text-3xl font-bold text-gray-900 tracking-tight">
-              按 <span class="text-brand-600">供应商</span> 搜索
-            </h2>
+        <div class="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-sm">
+          <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 border-b border-gray-100 dark:border-slate-700 pb-4">
+            <div>
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                按 <span class="text-brand-600">供应商</span> 搜索
+              </h2>
+            </div>
+            <button 
+              class="group flex items-center gap-2 text-sm font-medium text-brand-600 hover:underline transition-colors active:scale-95"
+              @click="go('/companies/directory')"
+            >
+              查看所有供应商
+            </button>
           </div>
-          <button 
-            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors active:scale-95"
-            @click="go('/companies/directory')"
-          >
-            查看所有供应商
-            <div class="w-8 h-8 rounded-full bg-white group-hover:bg-brand-50 flex items-center justify-center transition-colors">
-              <ChevronRight :size="16" />
-            </div>
-          </button>
-        </div>
 
-        <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <div v-for="i in 12" :key="i" class="h-32 bg-white rounded-2xl animate-pulse"></div>
-        </div>
-        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <div
-            v-for="s in suppliers.slice(0, 12)"
-            :key="s.id"
-            class="group bg-white p-5 rounded-2xl border border-gray-200 transition-all cursor-pointer flex flex-col hover:shadow-md hover:border-slate-200"
-            @click="go(`/companies/${s.id}`)"
-          >
-            <div class="flex items-start justify-between mb-4">
-              <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-brand-50 transition-colors">
-                <img v-if="s.logo" :src="s.logo" class="w-full h-full object-contain p-1" />
-                <Building2 v-else :size="20" class="text-slate-400 group-hover:text-brand-500 transition-colors" />
-              </div>
-              <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded uppercase tracking-tighter">
-                {{ (s.province || '未知').substring(0, 2) }}
-              </span>
-            </div>
-            <div class="font-bold text-gray-900 group-hover:text-brand-600 transition-colors truncate text-sm mb-1">
-              {{ s.companyName }}
-            </div>
-            <div class="text-[10px] text-gray-400 flex items-center gap-1">
-              <MapPin :size="10" />
-              {{ s.city || s.province || '全国' }}
+          <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div v-for="i in 12" :key="i" class="h-16 bg-slate-50 rounded-xl animate-pulse"></div>
+          </div>
+          <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div
+              v-for="s in suppliers.slice(0, 12)"
+              :key="s.id"
+              class="group h-16 border border-gray-200 dark:border-slate-600 rounded-xl flex items-center justify-center bg-slate-50 dark:bg-slate-700 hover:border-brand-600 dark:hover:border-brand-600 cursor-pointer transition"
+              @click="go(`/companies/${s.id}`)"
+            >
+              <span class="font-bold text-gray-700 dark:text-slate-300 text-sm truncate px-3">{{ s.companyName }}</span>
             </div>
           </div>
         </div>
@@ -360,50 +344,34 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 按采购商搜索 (品牌墙风格) -->
-    <section class="py-24 bg-white border-b border-gray-200">
+    <section class="py-20 bg-white border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-          <div>
-            <h2 class="text-3xl font-bold text-gray-900 tracking-tight">
-              按 <span class="text-autumn-600">采购商</span> 搜索
-            </h2>
+        <div class="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-sm">
+          <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 border-b border-gray-100 dark:border-slate-700 pb-4">
+            <div>
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                按 <span class="text-autumn-600">采购商</span> 搜索
+              </h2>
+            </div>
+            <button 
+              class="group flex items-center gap-2 text-sm font-medium text-autumn-600 hover:underline transition-colors active:scale-95"
+              @click="go('/companies/directory?type=buyer')"
+            >
+              查看所有采购商
+            </button>
           </div>
-          <button 
-            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-autumn-600 transition-colors active:scale-95"
-            @click="go('/companies/directory?type=buyer')"
-          >
-            查看所有采购商
-            <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-autumn-50 flex items-center justify-center transition-colors">
-              <ChevronRight :size="16" />
-            </div>
-          </button>
-        </div>
 
-        <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <div v-for="i in 12" :key="i" class="h-32 bg-gray-50 rounded-2xl animate-pulse"></div>
-        </div>
-        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <div
-            v-for="b in buyers.slice(0, 12)"
-            :key="b.id"
-            class="group bg-white p-5 rounded-2xl border border-gray-200 transition-all cursor-pointer flex flex-col hover:shadow-md hover:border-slate-200"
-            @click="go(`/companies/${b.id}`)"
-          >
-            <div class="flex items-start justify-between mb-4">
-              <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-autumn-50 transition-colors">
-                <img v-if="b.logo" :src="b.logo" class="w-full h-full object-contain p-1" />
-                <Users v-else :size="20" class="text-slate-400 group-hover:text-autumn-500 transition-colors" />
-              </div>
-              <span class="text-[10px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded uppercase tracking-tighter">
-                {{ (b.province || '未知').substring(0, 2) }}
-              </span>
-            </div>
-            <div class="font-bold text-gray-900 group-hover:text-autumn-600 transition-colors truncate text-sm mb-1">
-              {{ b.companyName }}
-            </div>
-            <div class="text-[10px] text-gray-400 flex items-center gap-1">
-              <MapPin :size="10" />
-              {{ b.city || b.province || '全国' }}
+          <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div v-for="i in 12" :key="i" class="h-16 bg-slate-50 rounded-xl animate-pulse"></div>
+          </div>
+          <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div
+              v-for="b in buyers.slice(0, 12)"
+              :key="b.id"
+              class="group h-16 border border-gray-200 dark:border-slate-600 rounded-xl flex items-center justify-center bg-slate-50 dark:bg-slate-700 hover:border-autumn-600 dark:hover:border-autumn-600 cursor-pointer transition"
+              @click="go(`/companies/${b.id}`)"
+            >
+              <span class="font-bold text-gray-700 dark:text-slate-300 text-sm truncate px-3">{{ b.companyName }}</span>
             </div>
           </div>
         </div>
@@ -411,10 +379,10 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 话题广场 -->
-    <section class="max-w-7xl mx-auto px-4 py-24 border-b border-gray-200">
+    <section class="max-w-7xl mx-auto px-4 py-20 border-b border-gray-200">
       <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
         <div>
-          <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">话题广场</h2>
+          <h2 class="text-2xl font-bold text-gray-900 tracking-tight">话题广场</h2>
           <p class="text-gray-500 mt-4 max-w-2xl leading-relaxed">
             通过我们的博客、指南、播客、文章、访谈等，了解所有最新新闻和信息
           </p>

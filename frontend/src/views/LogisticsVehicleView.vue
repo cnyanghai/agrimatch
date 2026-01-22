@@ -322,7 +322,7 @@ onMounted(() => {
               v-model="form.driverName"
               type="text"
               placeholder="请输入司机姓名"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all text-sm"
             />
           </div>
           <div>
@@ -331,7 +331,7 @@ onMounted(() => {
               v-model="form.driverPhone"
               type="tel"
               placeholder="请输入联系电话"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all text-sm"
             />
           </div>
         </div>
@@ -342,7 +342,7 @@ onMounted(() => {
             v-model="form.driverIdCard"
             type="text"
             placeholder="请输入身份证号"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all text-sm"
           />
         </div>
 
@@ -353,7 +353,7 @@ onMounted(() => {
               v-model="form.plateNumber"
               type="text"
               placeholder="例如：鄂A12345"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm uppercase"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all text-sm uppercase"
             />
           </div>
           <div>
@@ -362,7 +362,7 @@ onMounted(() => {
               v-model="form.vehicleType"
               type="text"
               placeholder="例如：货车、挂车"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all text-sm"
             />
           </div>
         </div>
@@ -373,7 +373,7 @@ onMounted(() => {
             v-model="form.remark"
             rows="2"
             placeholder="可选，添加备注信息..."
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm resize-none"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all text-sm resize-none"
           />
         </div>
       </div>

@@ -108,7 +108,7 @@ watch(() => route.query, () => {
             v-model="searchKeyword"
             @input="handleSearch(($event.target as HTMLInputElement).value)"
             placeholder="搜索公司名称..."
-            class="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-all text-sm"
+            class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 outline-none transition-all text-sm"
             aria-label="搜索公司"
           />
         </div>

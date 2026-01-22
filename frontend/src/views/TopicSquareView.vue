@@ -141,7 +141,7 @@ onMounted(() => {
                 v-model="keyword"
                 type="text" 
                 placeholder="搜索你感兴趣的话题或关键字..." 
-                class="w-full h-12 bg-white border border-gray-200 rounded-xl px-12 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/5 transition-all shadow-sm"
+                class="w-full h-12 bg-white border border-gray-200 rounded-lg px-12 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/5 transition-all shadow-sm"
                 @keyup.enter="onSearch"
               />
               <Search class="w-5 h-5 text-gray-400 absolute left-4 top-3.5 group-focus-within:text-brand-500 transition-colors" />

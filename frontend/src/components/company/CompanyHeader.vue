@@ -42,17 +42,17 @@ function formatTime(time?: string) {
 </script>
 
 <template>
-  <header class="bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl mb-12 text-white relative">
+  <header class="bg-slate-900 rounded-2xl overflow-hidden shadow-2xl mb-12 text-white relative">
     <div class="absolute inset-0 opacity-10 pointer-events-none" aria-hidden="true">
       <div class="absolute top-0 right-0 w-96 h-96 bg-brand-500 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
       <div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-500 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
     </div>
     <div class="relative z-10 p-8 md:p-12 flex flex-col md:flex-row gap-10 items-start">
       <div
-        :class="['bg-white rounded-xl flex items-center justify-center font-black text-slate-900 shadow-md shrink-0 transition-transform hover:scale-105', sizeClasses[size]]"
+        :class="['bg-white rounded-lg flex items-center justify-center font-black text-slate-900 shadow-md shrink-0 transition-transform hover:scale-105', sizeClasses[size]]"
       >
         <template v-if="logo">
-          <img v-lazy="logo" :alt="`${companyName} logo`" class="w-full h-full object-cover rounded-xl" />
+          <img v-lazy="logo" :alt="`${companyName} logo`" class="w-full h-full object-cover rounded-lg" />
         </template>
         <template v-else>
           {{ companyName[0] }}
@@ -87,7 +87,7 @@ function formatTime(time?: string) {
         <div class="flex flex-wrap gap-4">
           <button 
             @click="emit('consult')"
-            class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl font-bold transition-all flex items-center gap-2 focus:ring-2 focus:ring-brand-400 focus:outline-none focus:ring-offset-2 focus:ring-offset-slate-900"
+            class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-lg font-bold transition-all flex items-center gap-2 focus:ring-2 focus:ring-brand-400 focus:outline-none focus:ring-offset-2 focus:ring-offset-slate-900"
             type="button"
             aria-label="立即咨询该公司"
           >
@@ -96,7 +96,7 @@ function formatTime(time?: string) {
           </button>
           <button 
             @click="emit('share')"
-            class="bg-white/10 hover:bg-white/20 border border-white/10 px-8 py-3 rounded-xl font-bold transition-all flex items-center gap-2 focus:ring-2 focus:ring-white/30 focus:outline-none focus:ring-offset-2 focus:ring-offset-slate-900"
+            class="bg-white/10 hover:bg-white/20 border border-white/10 px-8 py-3 rounded-lg font-bold transition-all flex items-center gap-2 focus:ring-2 focus:ring-white/30 focus:outline-none focus:ring-offset-2 focus:ring-offset-slate-900"
             type="button"
             aria-label="分享该公司主页"
           >

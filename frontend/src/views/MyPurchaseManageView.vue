@@ -531,7 +531,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                   v-model="publishForm.companyName"
                   type="text"
                   placeholder="默认使用公司名称"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
               <div>
@@ -540,7 +540,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                   v-model="purchaserNameInput"
                   type="text"
                   placeholder="默认使用个人信息"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
             </div>
@@ -550,7 +550,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                 v-model="publishForm.purchaseAddress"
                 type="text"
                 placeholder="请输入交付/收货地址"
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
               />
             </div>
             <p class="text-xs text-gray-400">以上信息仅用于本次发布，不会修改您的公司/个人资料</p>
@@ -626,7 +626,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                   v-model="dynamicParams[param.id]"
                   type="text"
                   :placeholder="`请输入${param.paramName}`"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
             </div>
@@ -691,7 +691,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                 v-model="publishForm.remark"
                 rows="3"
                 placeholder="备注（可选）"
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
+                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
               ></textarea>
             </div>
             <div class="flex justify-end gap-3 pt-2">
@@ -857,7 +857,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
             v-model="templateNameInput"
             type="text"
             placeholder="例如：玉米到厂-现款-常规指标"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             @keyup.enter="confirmSaveTemplate"
           />
         </div>

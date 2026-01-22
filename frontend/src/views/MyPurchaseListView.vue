@@ -456,7 +456,7 @@ onMounted(() => {
             <input
               v-model.number="editForm.quantity"
               type="number"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -464,7 +464,7 @@ onMounted(() => {
             <input
               v-model.number="editForm.expectedPrice"
               type="number"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -473,7 +473,7 @@ onMounted(() => {
               v-model="editForm.packaging"
               type="text"
               placeholder="例如：散装 / 袋装"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -482,7 +482,7 @@ onMounted(() => {
               v-model="editForm.paymentMethod"
               type="text"
               placeholder="例如：现款 / 账期"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -491,7 +491,7 @@ onMounted(() => {
               v-model="editForm.invoiceType"
               type="text"
               placeholder="例如：专票 / 普票 / 不需要"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -500,7 +500,7 @@ onMounted(() => {
               v-model="editForm.deliveryMethod"
               type="text"
               placeholder="例如：到厂 / 自提"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -509,7 +509,7 @@ onMounted(() => {
               v-model.number="editForm.expireMinutes"
               type="number"
               placeholder="空=长期有效"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
@@ -518,7 +518,7 @@ onMounted(() => {
               v-model="editForm.purchaseAddress"
               type="text"
               placeholder="例如：北京市朝阳区..."
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div class="md:col-span-2">
@@ -527,7 +527,7 @@ onMounted(() => {
               v-model="editForm.paramsJson"
               rows="3"
               placeholder='例如：{"custom":{"水分":"≤14%","霉变":"≤1%"}}'
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
             ></textarea>
           </div>
           <div class="md:col-span-2">
@@ -536,7 +536,7 @@ onMounted(() => {
               v-model="editForm.remark"
               rows="2"
               placeholder="补充说明（选填）"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
             ></textarea>
           </div>
         </div>

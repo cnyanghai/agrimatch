@@ -313,7 +313,7 @@ onMounted(() => {
           <textarea
             v-model="commentText"
             placeholder="写下你的评论..."
-            class="w-full h-24 p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+            class="w-full h-24 p-4 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
             :disabled="commenting"
           ></textarea>
           <div class="flex justify-end mt-4">

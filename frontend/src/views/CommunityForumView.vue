@@ -230,7 +230,7 @@ onMounted(() => {
               type="text"
               maxlength="120"
               placeholder="请输入话题标题"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
 
@@ -241,7 +241,7 @@ onMounted(() => {
               rows="4"
               maxlength="20000"
               placeholder="分享你的观点..."
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
             ></textarea>
           </div>
 
@@ -368,7 +368,7 @@ onMounted(() => {
             rows="2"
             maxlength="1000"
             placeholder="输入评论..."
-            class="flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none"
+            class="flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
           ></textarea>
           <BaseButton type="primary" :disabled="!commentText.trim()" @click="onAddComment">
             <Send class="w-4 h-4" />
@@ -440,7 +440,7 @@ onMounted(() => {
             type="number"
             min="1"
             max="10000"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-center text-lg font-bold"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all text-center text-lg font-bold"
           />
         </div>
 
@@ -471,7 +471,7 @@ onMounted(() => {
             type="text"
             placeholder="写得好！支持一下..."
             maxlength="100"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
           />
         </div>
       </div>

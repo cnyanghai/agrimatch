@@ -345,7 +345,7 @@ onMounted(async () => {
             v-model="keyword"
             type="text"
             placeholder="搜索公司名称或地址..."
-            class="w-64 pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+            class="w-64 pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all text-sm"
             @keyup.enter="handleSearch"
           />
         </div>

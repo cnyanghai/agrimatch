@@ -1,54 +1,20 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+@import "./styles/typography.css";
 
 :root {
-  /* Color System */
-  /* Primary - Forest Green (Agriculture/Seed/Feed) */
-  --primary: #1b5e20;
-  --primary-hover: #144a16;
-  --primary-light: #2e7d32;
-  --primary-lighter: #4caf50;
+  font-family: var(--font-family);
 
-  /* Secondary - Royal Blue (Merchant/Order/Contract) */
-  --secondary: #1754cf;
-  --secondary-hover: #0d3a99;
-  --secondary-light: #2d6bdc;
-
-  /* Semantic Colors */
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
-
-  /* Light Theme Neutrals */
-  --background-light: #f6f6f8;
-  --surface-light: #ffffff;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --border-light: #e2e8f0;
-
-  /* Typography */
-  --font-display: 'Noto Sans SC', 'Inter', system-ui, sans-serif;
-  --font-body: 'Noto Sans SC', 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-
-  /* Element Plus Overrides (Mapping to Primary) */
-  --el-color-primary: var(--primary);
-  --el-color-primary-light-3: #4caf50; /* Adjust as needed */
-  --el-color-primary-light-5: #81c784;
-  --el-color-primary-light-7: #a5d6a7;
-  --el-color-primary-light-9: #e8f5e9;
-  --el-color-primary-dark-2: var(--primary-hover);
-}
-
-.dark {
-  /* Dark Theme Neutrals */
-  --background-dark: #111621;
-  --surface-dark: #1a202c;
-  --text-primary-dark: #f1f5f9;
-  --text-secondary-dark: #94a3b8;
-  --border-dark: #2d3748;
+  /* Element Plus：全站 primary 统一为若竹色 (Ruozhu) */
+  --el-color-primary: #84BB9F; /* 若竹色主色 */
+  --el-color-primary-rgb: 132, 187, 159;
+  --el-color-primary-dark-2: #6da78b; /* 若竹色深色 */
+  --el-color-primary-light-3: #9ac9ab; /* 若竹色浅色 */
+  --el-color-primary-light-5: #b8dbc8; /* 若竹色更浅 */
+  --el-color-primary-light-7: #d9ede4; /* 若竹色极浅 */
+  --el-color-primary-light-8: #e8f2ed; /* 若竹色超浅 */
+  --el-color-primary-light-9: #f0f7f4; /* 若竹色背景 */
 }
 
 html,
@@ -59,56 +25,56 @@ body,
 
 body {
   margin: 0;
-  background-color: var(--background-light);
-  color: var(--text-primary);
-  font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background: #f8fafc; /* 更现代的浅灰背景 */
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
-.dark body {
-  background-color: var(--background-dark);
-  color: var(--text-primary-dark);
+/* 强制重置表单元素字体 */
+input,
+textarea,
+select,
+button {
+  font-family: var(--font-family) !important;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+/* Element Plus 组件字体统一 */
+.el-button,
+.el-input__inner,
+.el-textarea__inner,
+.el-select .el-input__inner {
+  font-family: var(--font-family) !important;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: #4a5568;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #718096;
-}
-
-/* Data Table Scrollbar (Thicker) */
-.data-table ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.data-table ::-webkit-scrollbar-thumb {
-  background: #2d3748;
-  border-radius: 4px;
-}
-
-/* Utility Classes for Gradients */
+/* 现代化渐变背景 - 使用中国传统色 */
 .bg-gradient-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  background: linear-gradient(135deg, #6da78b 0%, #84BB9F 100%); /* 若竹色渐变 */
 }
 
 .bg-gradient-secondary {
-  background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+  background: linear-gradient(135deg, #7aa0b3 0%, #A5CCDC 100%); /* 秋波蓝渐变 */
+}
+
+.bg-gradient-accent {
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%); /* 琥珀红渐变 */
+}
+
+/* 卡片悬停效果 */
+.transition-all-300 {
+  transition: all 0.3s ease;
+}
+
+.shadow-modern {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-modern-hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }

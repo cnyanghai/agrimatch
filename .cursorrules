@@ -301,10 +301,11 @@ com.agrimatch/
   - 辅助：`text-xs text-gray-400`
 
 ### 1.2 圆角体系
-- **外层卡片**：`rounded-2xl`（1.5rem，默认），核心弹窗 `rounded-[32px]`
-- **按钮/输入**：`rounded-full` 或 `rounded-xl`（1.25rem）
+- **大型容器/卡片**：`rounded-xl`（12px，0.75rem）- 适用于普通卡片、容器
+- **按钮/输入框/标签**：`rounded-lg`（8px，0.5rem）- 适用于所有输入框、按钮、标签
+- **核心弹窗**：`rounded-2xl`（16px，1rem）或 `rounded-3xl`（20px，1.25rem）- 适用于大型弹窗、核心交互
 - **头像/徽章**：`rounded-full`
-- 与 `tailwind.config.cjs` 的 `borderRadius` 一致：sm/md/lg/xl/2xl/3xl。
+- 与 `tailwind.config.cjs` 的 `borderRadius` 一致：sm(4px)/md(6px)/lg(8px)/xl(12px)/2xl(16px)/3xl(20px)
 
 ### 1.3 阴影体系（克制使用）
 - 默认：无阴影或 `shadow-sm`
