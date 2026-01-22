@@ -33,6 +33,7 @@ export interface CompanyResponse {
   licenseImgUrl?: string
   legalPerson?: string
   businessScope?: string
+  registeredCapital?: string
   wechat?: string
   province?: string
   city?: string

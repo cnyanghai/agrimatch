@@ -199,8 +199,12 @@ onBeforeUnmount(() => {
     <PublicTopNav />
 
     <!-- Hero -->
-    <section class="relative hero-gradient overflow-hidden text-white h-[510px] flex items-center pt-16">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-12 flex flex-col items-center text-center">
+    <section class="relative hero-gradient overflow-hidden text-white h-[510px] flex items-center pt-0">
+      <!-- Background Texture Overlay -->
+      <div class="absolute inset-0 hero-pattern opacity-10"></div>
+      <!-- Gradient Overlay for Smooth Transition -->
+      <div class="absolute inset-0 bg-gradient-to-b from-brand-700/20 via-transparent to-transparent"></div>
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-16 flex flex-col items-center text-center">
         <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight tracking-tight">
           智慧畜牧供应链
         </h1>
@@ -528,6 +532,23 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .hero-gradient {
-  background: radial-gradient(circle at 50% -20%, #065f46 0%, #022c22 100%);
+  background: linear-gradient(135deg, #047857 0%, #065f46 30%, #064e3b 60%, #022c22 100%);
+  position: relative;
+}
+
+.hero-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(5, 150, 105, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.hero-pattern {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
 }
 </style>

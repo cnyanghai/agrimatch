@@ -86,19 +86,6 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- 用户信息 -->
-      <div class="px-5 py-3 border-b border-neutral-100">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white bg-brand-600 font-bold text-sm">
-            {{ ((auth.me?.realName || auth.me?.userName || 'U')[0] || 'U').toUpperCase() }}
-          </div>
-          <div>
-            <div class="font-medium text-sm text-neutral-800">{{ auth.me?.realName || auth.me?.userName || '未设置姓名' }}</div>
-            <div class="text-xs text-neutral-500">平台用户</div>
-          </div>
-        </div>
-      </div>
-
       <!-- 核心功能（8大模块） -->
       <div class="px-3 py-2 flex-1">
         <nav class="space-y-1">
