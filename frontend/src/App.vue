@@ -183,12 +183,12 @@ onMounted(async () => {
     <!-- Main -->
     <div class="flex-1 flex flex-col min-w-0">
       <!-- Topbar -->
-      <header class="bg-white border-b border-neutral-200 shadow-sm">
+      <header class="bg-surface border-b border-border shadow-sm">
         <div class="px-4 py-3 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="md:hidden w-10 h-10 rounded-lg bg-gradient-to-br from-brand-600 to-brand-700 text-white flex items-center justify-center font-bold shadow-md">A</div>
-            <div class="font-bold text-neutral-800">农汇通 AgriMatch</div>
-            <span class="hidden sm:inline text-xs text-neutral-500">供需匹配平台</span>
+            <div class="md:hidden w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary-hover text-white flex items-center justify-center font-bold shadow-md">A</div>
+            <div class="font-bold text-text-primary">农汇通 AgriMatch</div>
+            <span class="hidden sm:inline text-xs text-text-secondary">供需匹配平台</span>
           </div>
 
           <div class="flex items-center gap-3">
@@ -218,45 +218,6 @@ onMounted(async () => {
         <router-view />
       </main>
     </div>
-
-    <!-- 资料完善引导弹窗 -->
-    <el-dialog
-      v-model="showProfileGuide"
-      title=""
-      width="440px"
-      :show-close="false"
-      :close-on-click-modal="false"
-      center
-    >
-      <div class="text-center py-4">
-        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-brand-50 flex items-center justify-center">
-          <User class="w-10 h-10 text-brand-600" stroke-width="2" />
-        </div>
-        <h3 class="text-xl font-bold text-gray-800 mb-2">完善您的资料</h3>
-        <p class="text-gray-500 mb-6">
-          完善个人信息可以帮助您获得更精准的匹配推荐，<br/>
-          提升交易成功率
-        </p>
-        
-        <div class="space-y-3 text-left mb-6 px-4">
-          <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center"
-                 :class="auth.me?.nickName ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-400'">
-              <Check v-if="auth.me?.nickName" class="w-4 h-4" stroke-width="2" />
-              <Plus v-else class="w-4 h-4" stroke-width="2" />
-            </div>
-            <span :class="auth.me?.nickName ? 'text-gray-800' : 'text-gray-500'">设置昵称</span>
-          </div>
-        </div>
-      </div>
-      
-      <template #footer>
-        <div class="flex gap-3 justify-center">
-          <el-button @click="skipProfileGuide">稍后完善</el-button>
-          <el-button type="primary" @click="goToProfile">立即完善</el-button>
-        </div>
-      </template>
-    </el-dialog>
 
     <AuthDialog />
   </div>

@@ -31,10 +31,10 @@ const inputValue = computed({
 
 // 输入框样式（使用新的设计系统）
 const inputClasses = computed(() => {
-  const base = 'w-full px-4 py-3 border-2 rounded-xl outline-none transition-all duration-200 text-sm'
-  const focus = 'focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50'
-  const disabled = props.disabled ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed' : 'bg-white'
-  const error = props.error ? 'border-error focus:border-error focus:ring-error/50' : 'border-neutral-200'
+  const base = 'w-full px-4 py-3 border rounded-xl outline-none transition-all duration-200 text-sm'
+  const focus = 'focus:border-primary focus:ring-2 focus:ring-primary/50'
+  const disabled = props.disabled ? 'bg-background text-text-secondary cursor-not-allowed' : 'bg-surface'
+  const error = props.error ? 'border-error focus:border-error focus:ring-error/50' : 'border-border'
 
   return `${base} ${focus} ${disabled} ${error}`
 })
@@ -43,7 +43,7 @@ const inputClasses = computed(() => {
 <template>
   <div class="space-y-1.5">
     <!-- 标签 -->
-    <label v-if="label" class="block text-xs font-bold text-neutral-500 uppercase tracking-wider">
+    <label v-if="label" class="block text-xs font-bold text-text-secondary uppercase tracking-wider">
       {{ label }}
       <span v-if="required" class="text-error ml-0.5">*</span>
     </label>
@@ -51,7 +51,7 @@ const inputClasses = computed(() => {
     <!-- 输入框容器 -->
     <div class="relative">
       <!-- 前缀图标插槽 -->
-      <div v-if="$slots.prefix" class="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400">
+      <div v-if="$slots.prefix" class="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary">
         <slot name="prefix" />
       </div>
 
@@ -80,7 +80,7 @@ const inputClasses = computed(() => {
       />
 
       <!-- 后缀图标插槽 -->
-      <div v-if="$slots.suffix" class="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400">
+      <div v-if="$slots.suffix" class="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary">
         <slot name="suffix" />
       </div>
     </div>
@@ -91,7 +91,7 @@ const inputClasses = computed(() => {
     </p>
 
     <!-- 提示信息 -->
-    <p v-else-if="hint" class="text-xs text-neutral-400">
+    <p v-else-if="hint" class="text-xs text-text-secondary">
       {{ hint }}
     </p>
   </div>

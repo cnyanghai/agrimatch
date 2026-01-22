@@ -20,11 +20,11 @@ const props = withDefaults(defineProps<{
 // 卡片样式
 const cardClasses = computed(() => {
   const variants: Record<string, string> = {
-    default: 'bg-white dark:bg-neutral-900',
-    interactive: 'bg-white dark:bg-neutral-900 cursor-pointer',
-    info: 'bg-blue-50 dark:bg-blue-900/20',
-    warning: 'bg-warning/10 dark:bg-warning/10',
-    success: 'bg-primary/50 dark:bg-primary/10'
+    default: 'bg-surface dark:bg-surface-dark',
+    interactive: 'bg-surface dark:bg-surface-dark cursor-pointer',
+    info: 'bg-info/10 dark:bg-info/20',
+    warning: 'bg-warning/10 dark:bg-warning/20',
+    success: 'bg-success/10 dark:bg-success/20'
   }
 
   const paddings: Record<string, string> = {
@@ -37,7 +37,7 @@ const cardClasses = computed(() => {
     sm: 'shadow-sm',
     md: 'shadow-md',
     lg: 'shadow-md',
-    xl: 'shadow-md'
+    xl: 'shadow-xl'
   }
 
   let classes = [
@@ -48,11 +48,11 @@ const cardClasses = computed(() => {
   ]
 
   if (props.border && props.variant === 'default') {
-    classes.push('border-2 border-neutral-200 dark:border-neutral-800')
+    classes.push('border border-border dark:border-border-dark')
   }
 
   if (props.border && props.variant === 'interactive') {
-    classes.push('border-2 border-neutral-200 dark:border-neutral-800 hover:border-primary-300')
+    classes.push('border border-border dark:border-border-dark hover:border-primary')
   }
 
   if (props.hover && props.variant === 'interactive') {

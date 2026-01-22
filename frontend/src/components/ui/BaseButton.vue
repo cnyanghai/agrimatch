@@ -25,11 +25,11 @@ const emit = defineEmits<{
 // 类型样式映射（使用新的设计系统）
 const typeClasses = computed(() => {
   const types: Record<string, string> = {
-    primary: 'bg-primary-600 hover:bg-primary-700 text-white shadow-md hover:scale-105',
-    secondary: 'bg-white hover:bg-neutral-50 border-2 border-neutral-200 hover:border-neutral-300 text-neutral-700',
+    primary: 'bg-primary hover:bg-primary-hover text-white shadow-md hover:scale-105',
+    secondary: 'bg-surface hover:bg-background border border-border hover:border-border-dark text-text-secondary',
     danger: 'bg-error/10 hover:bg-error/20 text-error',
-    ghost: 'bg-transparent hover:bg-primary/10 text-neutral-600 hover:text-primary-600',
-    outline: 'bg-white border-2 border-neutral-200 hover:border-primary-500 hover:bg-primary/50 text-neutral-700 hover:text-primary-600'
+    ghost: 'bg-transparent hover:bg-primary/10 text-text-secondary hover:text-primary',
+    outline: 'bg-surface border border-border hover:border-primary hover:bg-primary/10 text-text-secondary hover:text-primary'
   }
   return types[props.type] || types.primary
 })
