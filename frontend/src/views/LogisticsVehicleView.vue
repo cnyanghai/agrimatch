@@ -187,7 +187,7 @@ onMounted(() => {
           <ArrowLeft class="w-5 h-5 text-gray-600" />
         </button>
         <div>
-          <h1 class="text-xl font-bold text-gray-900">常用车辆管理</h1>
+          <h1 class="text-2xl font-bold text-gray-900">常用车辆管理</h1>
           <p class="text-xs text-gray-500">管理公司常用提货车辆信息</p>
         </div>
       </div>

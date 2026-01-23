@@ -197,7 +197,7 @@ onMounted(() => {
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- 发布帖子 -->
       <div class="bg-white rounded-xl border border-gray-200 p-6">
-        <h3 class="font-bold text-gray-900 mb-4">发布话题</h3>
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">发布话题</h3>
         
         <div v-if="!isLoggedIn" class="py-8">
           <EmptyState
@@ -255,7 +255,7 @@ onMounted(() => {
       <!-- 帖子列表 -->
       <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div class="p-4 border-b border-gray-200 flex items-center justify-between gap-4">
-          <h3 class="font-bold text-gray-900">话题列表</h3>
+          <h3 class="text-2xl font-bold text-gray-900">话题列表</h3>
           <div class="relative flex-1 max-w-[300px]">
             <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input

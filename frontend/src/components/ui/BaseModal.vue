@@ -112,7 +112,7 @@ onUnmounted(() => {
                   {{ subtitle }}
                 </div>
                 <!-- 标题 -->
-                <h2 v-if="title" class="text-xl font-bold text-gray-900">{{ title }}</h2>
+                <h2 v-if="title" class="text-2xl font-bold text-gray-900">{{ title }}</h2>
                 <!-- 自定义标题插槽 -->
                 <slot name="title" />
               </div>

@@ -82,7 +82,7 @@ onMounted(() => {
         <div class="max-w-7xl mx-auto px-4">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">农牧原料分类目录</h1>
+              <h1 class="text-2xl font-bold text-gray-900 tracking-tight">农牧原料分类目录</h1>
               <p class="text-gray-500 mt-2">浏览全平台供应品类，快速锁定所需原料</p>
             </div>
             <div class="w-full md:w-96 relative">

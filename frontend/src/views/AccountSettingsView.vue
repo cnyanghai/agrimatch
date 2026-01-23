@@ -589,7 +589,7 @@ const navItems = [
         <!-- 个人资料 -->
         <div v-show="activeTab === 'profile'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
           <div class="p-5 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-gray-900">个人资料</h3>
+            <h3 class="text-2xl font-bold text-gray-900">个人资料</h3>
             <p class="text-sm text-gray-500 mt-1">修改后点击保存生效</p>
           </div>
           
@@ -717,7 +717,7 @@ const navItems = [
         <!-- 公司主页 -->
         <div v-show="activeTab === 'company'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
           <div class="p-5 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-gray-900">公司主页</h3>
+            <h3 class="text-2xl font-bold text-gray-900">公司主页</h3>
             <p class="text-sm text-gray-500 mt-1">完善公司信息以便开展业务，这些信息将展示在公司主页</p>
           </div>
           
@@ -970,7 +970,7 @@ const navItems = [
         <!-- 资质证照 -->
         <div v-show="activeTab === 'credentials'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
           <div class="p-5 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-gray-900">资质证照</h3>
+            <h3 class="text-2xl font-bold text-gray-900">资质证照</h3>
             <p class="text-sm text-gray-500 mt-1">上传公司相关资质证书，提升企业信誉</p>
           </div>
           
@@ -1019,7 +1019,7 @@ const navItems = [
           <div class="p-5 border-b border-gray-200">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-lg font-bold text-gray-900">车辆管理</h3>
+                <h3 class="text-2xl font-bold text-gray-900">车辆管理</h3>
                 <p class="text-sm text-gray-500 mt-1">管理公司常用车辆信息，方便快速选择</p>
               </div>
               <BaseButton type="primary" size="sm" @click="openVehicleDialog('create')">
@@ -1087,7 +1087,7 @@ const navItems = [
         <!-- 账户安全 -->
         <div v-show="activeTab === 'security'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
           <div class="p-5 border-b border-gray-200">
-            <h3 class="text-lg font-bold text-gray-900">修改密码</h3>
+            <h3 class="text-2xl font-bold text-gray-900">修改密码</h3>
             <p class="text-sm text-gray-500 mt-1">定期更换密码可以保护账户安全</p>
           </div>
           

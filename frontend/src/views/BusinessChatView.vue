@@ -2236,7 +2236,7 @@ onBeforeUnmount(() => {
             <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
               <div>
                 <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">会话管理</div>
-                <h2 class="text-lg font-bold text-gray-900">已归档的会话</h2>
+                <h2 class="text-2xl font-bold text-gray-900">已归档的会话</h2>
               </div>
               <button 
                 class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all "

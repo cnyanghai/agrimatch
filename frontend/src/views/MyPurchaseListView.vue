@@ -307,7 +307,7 @@ onMounted(() => {
                 <ShoppingCart class="w-5 h-5 text-brand-600" />
               </div>
               <div>
-                <h3 class="font-bold text-gray-900">{{ req.categoryName }}</h3>
+                <h3 class="text-lg font-bold text-gray-900">{{ req.categoryName }}</h3>
                 <p v-if="req.contractNo" class="text-xs text-gray-400">{{ req.contractNo }}</p>
               </div>
             </div>

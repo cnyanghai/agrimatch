@@ -198,7 +198,7 @@ function selectSeal(seal: SealResponse) {
       <div v-if="showCreateForm" class="fixed inset-0 z-[2100] flex items-center justify-center">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showCreateForm = false"></div>
         <div class="relative bg-white rounded-[24px] shadow-2xl w-full max-w-md p-6">
-          <h3 class="text-lg font-bold text-gray-900 mb-4">创建电子公章</h3>
+          <h3 class="text-2xl font-bold text-gray-900 mb-4">创建电子公章</h3>
           
           <div class="space-y-4">
             <div>

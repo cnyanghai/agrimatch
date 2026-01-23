@@ -30,7 +30,7 @@ function handleLogin() {
           <div class="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center shadow-primary/25">
             <TrendingUp :size="20" class="text-white" />
           </div>
-          <h1 class="text-xl font-bold text-neutral-900 dark:text-white">AgriMatch</h1>
+          <h1 class="text-2xl font-bold text-gray-900">AgriMatch</h1>
         </div>
 
         <!-- 搜索框 -->
@@ -64,7 +64,7 @@ function handleLogin() {
     <main class="max-w-[1440px] mx-auto px-6 py-8">
       <!-- 欢迎区域 -->
       <section class="mb-12">
-        <h2 class="text-4xl font-black text-neutral-900 dark:text-white mb-4">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">
           欢迎来到
           <span class="text-primary-600">AgriMatch</span>
         </h2>
@@ -118,7 +118,7 @@ function handleLogin() {
 
       <!-- 功能卡片 -->
       <section class="mb-12">
-        <h3 class="text-2xl font-bold text-neutral-900 dark:text-white mb-6">核心功能</h3>
+        <h3 class="text-2xl font-bold text-gray-900 mb-6">核心功能</h3>
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card shadow="md" hover>
             <div class="flex flex-col gap-3">
@@ -167,7 +167,7 @@ function handleLogin() {
       <!-- 登录示例 -->
       <section class="max-w-md mx-auto">
         <Card shadow="xl" padding="lg">
-          <h3 class="text-xl font-bold text-neutral-900 dark:text-white mb-6">登录账户</h3>
+          <h3 class="text-2xl font-bold text-gray-900 mb-6">登录账户</h3>
 
           <div class="space-y-5">
             <FormInput

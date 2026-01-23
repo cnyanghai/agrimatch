@@ -303,7 +303,7 @@ onMounted(() => {
         <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
           <UserFilled class="w-10 h-10 text-gray-300" />
         </div>
-        <h3 class="text-lg font-bold text-gray-900 mb-2">还没有关注任何采购商</h3>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">还没有关注任何采购商</h3>
         <p class="text-sm text-gray-500 mb-6">前往采购大厅，发现优质采购商并关注他们</p>
         <button 
           class="px-6 py-2.5 bg-slate-900 text-white rounded-full font-bold hover:bg-slate-800 transition-all "
@@ -359,7 +359,7 @@ onMounted(() => {
                 <div>
                   <div class="flex items-center gap-2 mb-1">
                     <ShoppingCart class="w-4 h-4 text-autumn-600" />
-                    <h3 class="text-xl font-black text-gray-900">{{ req.categoryName }}</h3>
+                    <h3 class="text-lg font-bold text-gray-900">{{ req.categoryName }}</h3>
                   </div>
                   <div class="text-xs text-gray-400">#{{ req.id }} · {{ formatTime(req.createTime) }}</div>
                 </div>
@@ -442,7 +442,7 @@ onMounted(() => {
           <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <ShoppingCart class="w-8 h-8 text-gray-300" />
           </div>
-          <h3 class="text-lg font-bold text-gray-900 mb-2">暂无采购需求</h3>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">暂无采购需求</h3>
           <p class="text-sm text-gray-500">
             {{ selectedUserId ? '该用户暂未发布采购需求' : '您关注的采购商暂未发布新的需求' }}
           </p>

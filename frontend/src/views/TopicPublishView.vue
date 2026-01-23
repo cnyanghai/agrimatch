@@ -107,7 +107,7 @@ onMounted(() => {
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
             </div>
             <div>
-              <h2 class="text-xl font-bold text-gray-900">发布新话题</h2>
+              <h2 class="text-2xl font-bold text-gray-900">发布新话题</h2>
               <p class="text-[10px] text-gray-400 font-medium uppercase tracking-wider">分享行业见解，共建透明市场</p>
             </div>
           </div>

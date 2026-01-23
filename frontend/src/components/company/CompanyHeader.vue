@@ -60,7 +60,7 @@ function formatTime(time?: string) {
       </div>
       <div class="flex-1 min-w-0">
         <div class="flex flex-wrap items-center gap-4 mb-4">
-          <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+          <h1 class="text-2xl font-bold text-gray-900 tracking-tight">
             {{ companyName }}
           </h1>
           <div v-if="verified" class="flex items-center gap-1.5 bg-brand-500/20 text-brand-400 px-3 py-1 rounded-full text-xs font-bold border border-brand-500/20">

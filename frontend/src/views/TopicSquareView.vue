@@ -98,7 +98,7 @@ onMounted(() => {
       <div class="max-w-7xl mx-auto px-4 py-12">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-8">
           <div>
-            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight mb-2">话题广场</h1>
+            <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-2">话题广场</h1>
             <p class="text-gray-500 text-lg">在这里，每一个关于饲料原料的思考都有价值</p>
           </div>
           <div class="bg-amber-50 border border-amber-100 rounded-xl p-6 flex items-center gap-6 shadow-sm">

@@ -310,7 +310,7 @@ onMounted(() => {
                 <Package class="w-5 h-5 text-brand-600" />
               </div>
               <div>
-                <h3 class="font-bold text-gray-900">{{ s.categoryName }}</h3>
+                <h3 class="text-lg font-bold text-gray-900">{{ s.categoryName }}</h3>
                 <p v-if="s.supplyNo" class="text-xs text-gray-400">{{ s.supplyNo }}</p>
               </div>
             </div>

@@ -456,7 +456,7 @@ onMounted(async () => {
       <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div class="p-4 border-b border-gray-200 bg-gray-50/50">
           <div class="flex items-center justify-between">
-            <h3 class="font-bold text-gray-900 flex items-center gap-2">
+            <h3 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
               <Building2 class="w-4 h-4 text-gray-500" />
               公司列表
             </h3>

@@ -202,7 +202,7 @@ onMounted(() => {
         <section class="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-6">
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-2xl font-bold text-gray-800 mb-1">
+              <h2 class="text-2xl font-bold text-gray-900 mb-1">
                 {{ greeting }}，{{ auth.me?.nickName || auth.me?.userName || '用户' }}
               </h2>
               <p class="text-sm text-gray-500">
@@ -226,7 +226,7 @@ onMounted(() => {
         <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <div class="w-1.5 h-5 bg-amber-500 rounded-full"></div>
-            <h3 class="font-bold text-gray-800">待处理</h3>
+            <h3 class="text-2xl font-bold text-gray-900">待处理</h3>
             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
               {{ totalPending }} 项
             </span>
@@ -292,7 +292,7 @@ onMounted(() => {
       <section>
         <div class="flex items-center justify-between mb-6">
           <div>
-            <h3 class="text-xl font-bold text-gray-900">核心功能</h3>
+            <h3 class="text-2xl font-bold text-gray-900">核心功能</h3>
             <p class="text-sm text-gray-500 mt-1">快速访问平台核心功能模块</p>
           </div>
         </div>

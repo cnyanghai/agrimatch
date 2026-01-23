@@ -91,7 +91,7 @@ watch(() => route.query, () => {
     <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
       <!-- Header -->
       <div class="mb-12">
-        <h1 class="text-3xl font-extrabold text-gray-900 mb-4 flex items-center gap-3">
+        <h1 class="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-3">
           <Truck v-if="type === 'supplier'" class="text-brand-600" :size="32" aria-hidden="true" />
           <ShoppingBag v-else class="text-blue-600" :size="32" aria-hidden="true" />
           {{ type === 'supplier' ? '制造商名录' : '采购商名录' }}

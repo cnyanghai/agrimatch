@@ -186,7 +186,7 @@ onMounted(() => {
       <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
         <div class="flex items-center gap-2">
           <Heart class="w-5 h-5 text-brand-700" />
-          <h2 class="font-bold text-slate-800">关注列表</h2>
+          <h2 class="text-2xl font-bold text-gray-900">关注列表</h2>
           <span class="bg-brand-100 text-brand-700 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
             {{ followedUsers.length }}
           </span>
@@ -260,7 +260,7 @@ onMounted(() => {
             @click="selectUser(user)"
           >
             <div class="flex justify-between items-start mb-1">
-              <h3 class="font-bold text-slate-900 text-sm">
+              <h3 class="text-base font-bold text-gray-900">
                 {{ user.companyName || user.nickName || user.userName }}
               </h3>
               <span 
@@ -290,7 +290,7 @@ onMounted(() => {
           <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
             <Heart class="w-8 h-8 text-gray-300" />
           </div>
-          <h3 class="text-sm font-bold text-gray-900 mb-1">暂无关注</h3>
+          <h3 class="text-2xl font-bold text-gray-900 mb-1">暂无关注</h3>
           <p class="text-xs text-gray-500">
             {{ searchKeyword ? '未找到匹配的商户' : '您还没有关注任何商户' }}
           </p>
@@ -311,7 +311,7 @@ onMounted(() => {
               </div>
               <div>
                 <div class="flex items-center gap-3 mb-2">
-                  <h2 class="text-2xl font-bold text-slate-900">
+                  <h2 class="text-2xl font-bold text-gray-900">
                     {{ selectedUser.companyName || selectedUser.nickName || selectedUser.userName }}
                   </h2>
                   <span class="bg-brand-600 text-white text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -354,7 +354,7 @@ onMounted(() => {
             <!-- 信用评分卡片 -->
             <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
               <div class="flex items-center justify-between mb-6">
-                <h3 class="font-bold text-slate-800">信用评价</h3>
+                <h3 class="text-2xl font-bold text-gray-900">信用评价</h3>
                 <span class="text-2xl font-black text-brand-600 italic">A+</span>
               </div>
               <div class="space-y-5">
@@ -402,7 +402,7 @@ onMounted(() => {
 
             <!-- 信用背书卡片 -->
             <div class="bg-slate-900 rounded-lg p-6 text-white">
-              <h3 class="font-bold mb-4 flex items-center gap-2">
+              <h3 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
                 <span class="w-5 h-5 rounded bg-brand-400/20 flex items-center justify-center text-xs">✓</span>
                 信用背书
               </h3>
@@ -428,7 +428,7 @@ onMounted(() => {
             <!-- 供应/采购信息 -->
             <div class="bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col">
               <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-bold text-slate-800">最新动态</h3>
+                <h3 class="text-2xl font-bold text-gray-900">最新动态</h3>
                 <button class="text-brand-700 text-xs font-bold hover:underline">查看全部</button>
               </div>
               <div class="divide-y divide-slate-50">
@@ -505,7 +505,7 @@ onMounted(() => {
           <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
             <Heart class="w-12 h-12 text-gray-300" />
           </div>
-          <h3 class="text-lg font-bold text-gray-900 mb-2">选择一个商户查看详情</h3>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">选择一个商户查看详情</h3>
           <p class="text-sm text-gray-500">从左侧列表中选择您关注的商户</p>
         </div>
       </div>

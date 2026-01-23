@@ -167,7 +167,7 @@ onMounted(refresh)
             <!-- 内容 -->
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
-                <h3 :class="['font-bold', notify.read ? 'text-gray-700' : 'text-gray-900']">
+                <h3 :class="['text-2xl font-bold', notify.read ? 'text-gray-700' : 'text-gray-900']">
                   {{ notify.title || getNotifyTypeInfo(notify.type).label }}
                 </h3>
                 <span 

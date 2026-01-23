@@ -567,7 +567,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
           <div class="p-5 border-b border-gray-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-slate-900 rounded-full"></div>
-            <h3 class="text-lg font-bold text-gray-900">发布信息</h3>
+            <h3 class="text-2xl font-bold text-gray-900">发布信息</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -607,7 +607,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 50ms">
           <div class="p-5 border-b border-gray-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-brand-600 rounded-full"></div>
-            <h3 class="text-lg font-bold text-gray-900">基础信息</h3>
+            <h3 class="text-2xl font-bold text-gray-900">基础信息</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -780,7 +780,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
           <div class="p-5 border-b border-gray-200 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-5 bg-brand-500 rounded-full"></div>
-              <h3 class="text-lg font-bold text-gray-900">规格参数</h3>
+              <h3 class="text-2xl font-bold text-gray-900">规格参数</h3>
             </div>
             <span class="text-xs text-gray-400">选择品类后自动加载</span>
           </div>
@@ -827,7 +827,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 150ms">
           <div class="p-5 border-b border-gray-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-amber-500 rounded-full"></div>
-            <h3 class="text-lg font-bold text-gray-900">物流与交付</h3>
+            <h3 class="text-2xl font-bold text-gray-900">物流与交付</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -886,7 +886,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden sticky top-24 animate-fade-in" style="animation-delay: 200ms">
           <div class="p-5 border-b border-gray-200">
             <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">summary</div>
-            <h3 class="font-bold text-gray-900 mt-1">发布前确认</h3>
+            <h3 class="text-2xl font-bold text-gray-900 mt-1">发布前确认</h3>
           </div>
           
           <div class="p-5 max-h-[70vh] overflow-y-auto">

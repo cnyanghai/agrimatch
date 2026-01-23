@@ -51,7 +51,7 @@ const requirementFeatures = [
               <Package class="w-8 h-8 text-white" />
             </div>
             <div>
-              <h2 class="text-xl font-bold text-gray-900 group-hover:text-brand-600 transition-colors">
+              <h2 class="text-2xl font-bold text-gray-900 group-hover:text-brand-600 transition-colors">
                 发布供应
               </h2>
               <p class="text-sm text-gray-500">我有货，寻找买家</p>
@@ -98,7 +98,7 @@ const requirementFeatures = [
               <ShoppingCart class="w-8 h-8 text-white" />
             </div>
             <div>
-              <h2 class="text-xl font-bold text-gray-900 group-hover:text-autumn-600 transition-colors">
+              <h2 class="text-2xl font-bold text-gray-900 group-hover:text-autumn-600 transition-colors">
                 发布采购
               </h2>
               <p class="text-sm text-gray-500">我要货，寻找卖家</p>

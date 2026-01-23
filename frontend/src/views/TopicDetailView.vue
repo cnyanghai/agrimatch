@@ -237,7 +237,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <h1 class="text-3xl font-extrabold text-gray-900 mb-4">{{ post.title }}</h1>
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">{{ post.title }}</h1>
         
         <!-- 赏金信息 -->
         <div v-if="isBountyPost()" class="mb-6">
@@ -306,7 +306,7 @@ onMounted(() => {
 
       <!-- 评论区域 -->
       <div class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm mb-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-6">评论 ({{ comments.length }})</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">评论 ({{ comments.length }})</h2>
         
         <!-- 发表评论 -->
         <div class="mb-8 pb-8 border-b border-gray-200">

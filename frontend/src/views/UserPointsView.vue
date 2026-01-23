@@ -313,7 +313,7 @@ onUnmounted(() => {
           <ShieldCheck class="w-6 h-6 text-white" />
         </div>
         <div class="flex-1">
-          <h3 class="font-bold text-gray-900 mb-2">认证会员权益</h3>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">认证会员权益</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
             <div class="flex items-center gap-2 text-gray-700">
               <Check class="w-4 h-4 text-amber-600" />
@@ -382,7 +382,7 @@ onUnmounted(() => {
             <ShoppingBag class="w-7 h-7 text-white" />
           </div>
           <div>
-            <h3 class="font-bold text-gray-900 group-hover:text-orange-600 transition-colors mb-1">积分商城</h3>
+            <h3 class="text-2xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors mb-1">积分商城</h3>
             <p class="text-sm text-gray-500">使用积分兑换精美商品</p>
           </div>
         </div>
@@ -402,7 +402,7 @@ onUnmounted(() => {
             <ArrowUpCircle class="w-5 h-5 text-brand-600" />
           </div>
           <div>
-            <h3 class="font-bold text-gray-900">充值积分</h3>
+            <h3 class="text-2xl font-bold text-gray-900">充值积分</h3>
             <p class="text-xs text-gray-500">支持微信、支付宝扫码</p>
           </div>
         </div>
@@ -499,7 +499,7 @@ onUnmounted(() => {
             <CreditCard class="w-5 h-5 text-red-600" />
           </div>
           <div>
-            <h3 class="font-bold text-gray-900">兑换京东购物卡</h3>
+            <h3 class="text-2xl font-bold text-gray-900">兑换京东购物卡</h3>
             <p class="text-xs text-gray-500">1积分 = 1元面值</p>
           </div>
         </div>
@@ -567,7 +567,7 @@ onUnmounted(() => {
       <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div class="w-1.5 h-5 bg-brand-500 rounded-full"></div>
-          <h3 class="font-bold text-gray-900">交易记录</h3>
+          <h3 class="text-2xl font-bold text-gray-900">交易记录</h3>
           <span v-if="txs.length > 0" class="text-xs text-gray-400">
             共 {{ txs.length }} 条
           </span>
@@ -664,7 +664,7 @@ onUnmounted(() => {
     >
       <div class="p-6 text-center">
         <div v-if="payStatus === 'pending'">
-          <h3 class="text-lg font-bold text-gray-900 mb-2">扫码支付</h3>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">扫码支付</h3>
           <p class="text-sm text-gray-500 mb-6">请使用{{ payChannel === 'wechat' ? '微信' : '支付宝' }}扫描二维码完成支付</p>
           
           <div class="inline-block p-4 bg-white rounded-lg border-2 border-gray-200 shadow-md mb-4">
@@ -684,7 +684,7 @@ onUnmounted(() => {
           <div class="w-16 h-16 mx-auto rounded-full bg-brand-100 flex items-center justify-center mb-4">
             <Check class="w-8 h-8 text-brand-600" />
           </div>
-          <h3 class="text-lg font-bold text-gray-900">支付成功</h3>
+          <h3 class="text-2xl font-bold text-gray-900">支付成功</h3>
           <p class="text-sm text-gray-500 mt-2">积分已到账</p>
         </div>
         
@@ -692,7 +692,7 @@ onUnmounted(() => {
           <div class="w-16 h-16 mx-auto rounded-full bg-red-100 flex items-center justify-center mb-4">
             <X class="w-8 h-8 text-red-600" />
           </div>
-          <h3 class="text-lg font-bold text-gray-900">支付超时</h3>
+          <h3 class="text-2xl font-bold text-gray-900">支付超时</h3>
           <p class="text-sm text-gray-500 mt-2">请重新发起支付</p>
         </div>
         
@@ -730,7 +730,7 @@ onUnmounted(() => {
             <div class="w-16 h-16 mx-auto rounded-lg bg-red-50 flex items-center justify-center mb-4">
               <CreditCard class="w-8 h-8 text-red-600" />
             </div>
-            <h3 class="text-lg font-bold text-gray-900">兑换京东购物卡</h3>
+            <h3 class="text-2xl font-bold text-gray-900">兑换京东购物卡</h3>
             <p class="text-sm text-gray-500 mt-1">面额 ¥{{ selectedJdFace }}</p>
           </div>
           
@@ -767,7 +767,7 @@ onUnmounted(() => {
             <div class="w-16 h-16 mx-auto rounded-lg bg-blue-50 flex items-center justify-center mb-4">
               <Smartphone class="w-8 h-8 text-blue-600" />
             </div>
-            <h3 class="text-lg font-bold text-gray-900">短信验证</h3>
+            <h3 class="text-2xl font-bold text-gray-900">短信验证</h3>
             <p class="text-sm text-gray-500 mt-1">请输入手机收到的验证码</p>
           </div>
           
@@ -823,7 +823,7 @@ onUnmounted(() => {
             <div class="w-16 h-16 mx-auto rounded-lg bg-brand-50 flex items-center justify-center mb-4">
               <Check class="w-8 h-8 text-brand-600" />
             </div>
-            <h3 class="text-lg font-bold text-gray-900">兑换成功</h3>
+            <h3 class="text-2xl font-bold text-gray-900">兑换成功</h3>
             <p class="text-sm text-gray-500 mt-1">京东购物卡 ¥{{ redeemResult.faceValue }}</p>
           </div>
           

@@ -210,7 +210,7 @@ onMounted(() => {
 
     <div v-else-if="filteredProducts.length === 0" class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
       <Package class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-      <h3 class="text-lg font-bold text-gray-900 mb-2">暂无商品</h3>
+      <h3 class="text-2xl font-bold text-gray-900 mb-2">暂无商品</h3>
       <p class="text-sm text-gray-500">该分类下暂无可用商品</p>
     </div>
 
@@ -247,7 +247,7 @@ onMounted(() => {
 
         <!-- 商品信息 -->
         <div class="p-6">
-          <h3 class="font-bold text-gray-900 mb-2 group-hover:text-brand-600 transition-colors">
+          <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-brand-600 transition-colors">
             {{ product.name }}
           </h3>
           <p class="text-sm text-gray-500 mb-4 line-clamp-2">

@@ -37,7 +37,7 @@ function handleAction() {
       />
       <div v-else class="w-8 h-8 border-4 border-gray-200 border-t-gray-300 rounded-full animate-spin" aria-hidden="true"></div>
     </div>
-    <h3 class="text-lg font-bold text-gray-900 mb-2">{{ title }}</h3>
+    <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ title }}</h3>
     <p class="text-gray-400 max-w-md mx-auto mb-6">{{ description }}</p>
     <button
       v-if="showAction"

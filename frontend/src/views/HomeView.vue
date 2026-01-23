@@ -202,10 +202,10 @@ onBeforeUnmount(() => {
       <!-- Gradient Overlay for Smooth Transition -->
       <div class="absolute inset-0 bg-gradient-to-b from-brand-700/20 via-transparent to-transparent"></div>
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-16 flex flex-col items-center text-center">
-        <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight tracking-tight">
+        <h1 class="text-2xl font-bold mb-4 leading-tight tracking-tight">
           智慧畜牧供应链
         </h1>
-        <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight tracking-tight">
+        <h1 class="text-2xl font-bold mb-4 leading-tight tracking-tight">
           一站式采购与管理平台
         </h1>
         <p class="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl leading-relaxed">
@@ -428,7 +428,7 @@ onBeforeUnmount(() => {
 
           <!-- 内容 -->
           <div class="p-6 flex-1 flex flex-col">
-            <h3 class="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-brand-600 transition-colors leading-snug">
+            <h3 class="text-lg font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-brand-600 transition-colors leading-snug">
               {{ post.title }}
             </h3>
             <p class="text-xs text-gray-500 leading-relaxed line-clamp-3 mb-6 flex-1">
@@ -452,7 +452,7 @@ onBeforeUnmount(() => {
     <!-- 底部流程引导 -->
     <section class="bg-slate-900 py-24 relative overflow-hidden border-t border-white/5">
       <div class="max-w-7xl mx-auto px-4 text-center">
-        <h2 class="text-3xl font-bold text-white mb-4">开启您的专业交易之旅</h2>
+        <h2 class="text-2xl font-bold text-white mb-4">开启您的专业交易之旅</h2>
         <p class="text-gray-400 mb-16 max-w-xl mx-auto">从发现商机到合约履行，AgriMatch 为您提供全流程保障</p>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
