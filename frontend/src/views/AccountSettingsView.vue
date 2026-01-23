@@ -3,9 +3,9 @@ import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { useAuthStore } from '../store/auth'
-import { updateMe, type UserUpdateRequest } from '../api/user'
+import { updateMe, type UserUpdateRequest, getLoginLogs, type LoginLogResponse } from '../api/user'
 import { getMyCompany, createCompany, updateCompany, type CompanyResponse, type CompanyCreateRequest } from '../api/company'
-import { User, Building2, Lock, Check, Upload, AlertTriangle, RefreshCw, Truck, ChevronRight, FileText, X, ZoomIn, Award, Calendar, Users, Plus, Trash2, Edit2, Star } from 'lucide-vue-next'
+import { User, Building2, Lock, Check, Upload, AlertTriangle, RefreshCw, Truck, ChevronRight, FileText, X, ZoomIn, Award, Calendar, Users, Plus, Trash2, Edit2, Star, ShieldCheck, History, Monitor, MapPin } from 'lucide-vue-next'
 import { BaseButton } from '../components/ui'
 import { regionData, codeToText } from 'element-china-area-data'
 import { uploadImage } from '../api/file'
@@ -85,6 +85,33 @@ const recruitmentForm = reactive({ position: '', requirements: '', salary: '' })
 // 资质证书列表
 const certificates = ref<string[]>([])
 const certificateUploading = ref(false)
+
+// 登录日志
+const loginLogs = ref<LoginLogResponse[]>([])
+const loginLogsLoading = ref(false)
+
+async function fetchLoginLogs() {
+  if (loginLogsLoading.value) return
+  loginLogsLoading.value = true
+  try {
+    const res = await getLoginLogs()
+    if (res.code === 0) {
+      loginLogs.value = res.data ?? []
+    } else {
+      console.error('Failed to fetch login logs:', res.message)
+    }
+  } catch (e) {
+    console.error('API Error when fetching login logs:', e)
+  } finally {
+    loginLogsLoading.value = false
+  }
+}
+
+watch(activeTab, (newTab) => {
+  if (newTab === 'security') {
+    fetchLoginLogs()
+  }
+}, { immediate: true })
 
 // 省市区级联选择值
 const regionValue = ref<string[]>([])
@@ -1118,6 +1145,84 @@ const navItems = [
               <BaseButton type="secondary" size="sm" :disabled="loading" @click="resetPasswordForm">取消</BaseButton>
               <BaseButton type="primary" size="sm" :loading="loading" @click="changePassword">保存</BaseButton>
             </div>
+          </div>
+
+          <!-- 最近登录日志 -->
+          <div class="border-t border-gray-100 bg-gray-50/30 p-6">
+            <div class="flex items-center justify-between mb-6">
+              <div class="flex items-center gap-2">
+                <History class="w-5 h-5 text-brand-600" />
+                <h4 class="font-bold text-gray-900">最近登录日志</h4>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-2">Recent Logins</span>
+              </div>
+              <button 
+                class="p-1.5 hover:bg-gray-200 rounded-lg transition-all text-gray-400 hover:text-brand-600"
+                :class="{ 'animate-spin text-brand-600': loginLogsLoading }"
+                @click="fetchLoginLogs"
+                title="刷新日志"
+              >
+                <RefreshCw class="w-4 h-4" />
+              </button>
+            </div>
+
+            <div v-if="loginLogsLoading" class="flex justify-center py-8">
+              <div class="flex items-center gap-2 text-gray-400 text-sm">
+                <RefreshCw class="w-4 h-4 animate-spin" />
+                <span>加载中...</span>
+              </div>
+            </div>
+            <div v-else-if="loginLogs.length === 0" class="text-center py-12 bg-white rounded-xl border border-gray-100 shadow-sm">
+              <ShieldCheck class="w-12 h-12 text-gray-200 mx-auto mb-3" />
+              <p class="text-gray-400 text-sm font-medium">暂无登录记录</p>
+            </div>
+            <div v-else class="grid grid-cols-1 gap-3">
+              <div 
+                v-for="log in loginLogs" 
+                :key="log.infoId"
+                class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:border-brand-200 hover:shadow-md"
+              >
+                <div class="flex items-center gap-4">
+                  <div 
+                    :class="[
+                      'w-10 h-10 rounded-lg flex items-center justify-center shrink-0',
+                      log.status === '0' ? 'bg-brand-50 text-brand-600' : 'bg-red-50 text-red-600'
+                    ]"
+                  >
+                    <Monitor v-if="log.status === '0'" class="w-5 h-5" />
+                    <AlertTriangle v-else class="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-gray-900">{{ log.browser }} / {{ log.os }}</span>
+                      <span 
+                        :class="[
+                          'text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider',
+                          log.status === '0' ? 'bg-brand-100 text-brand-700' : 'bg-red-100 text-red-700'
+                        ]"
+                      >
+                        {{ log.status === '0' ? '成功' : '失败' }}
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-3 mt-1">
+                      <div class="flex items-center gap-1 text-xs text-gray-400">
+                        <MapPin class="w-3 h-3" />
+                        <span>{{ log.ipaddr }}</span>
+                      </div>
+                      <div class="flex items-center gap-1 text-xs text-gray-400">
+                        <Calendar class="w-3 h-3" />
+                        <span>{{ log.loginTime }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-xs font-medium text-gray-400 md:text-right">
+                  {{ log.msg }}
+                </div>
+              </div>
+            </div>
+            <p class="text-[10px] text-gray-400 mt-6 text-center italic">
+              * 仅展示最近 10 条登录记录，如发现异常登录请及时修改密码。
+            </p>
           </div>
         </div>
       </div>

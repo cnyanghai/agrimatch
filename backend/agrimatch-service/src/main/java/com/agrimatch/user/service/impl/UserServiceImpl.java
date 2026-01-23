@@ -9,6 +9,8 @@ import com.agrimatch.user.dto.UserResponse;
 import com.agrimatch.user.dto.UserRoleUpdateRequest;
 import com.agrimatch.user.dto.UserUpdateRequest;
 import com.agrimatch.user.mapper.UserMapper;
+import com.agrimatch.user.mapper.SysLoginLogMapper;
+import com.agrimatch.user.domain.SysLoginLog;
 import com.agrimatch.user.service.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,10 +25,12 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final SysLoginLogMapper loginLogMapper;
 
-    public UserServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserMapper userMapper, PasswordEncoder passwordEncoder, SysLoginLogMapper loginLogMapper) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.loginLogMapper = loginLogMapper;
     }
 
     @Override
@@ -100,6 +104,11 @@ public class UserServiceImpl implements UserService {
         }
         int lim = (limit == null ? 20 : Math.max(1, Math.min(limit, 50)));
         return userMapper.search(kw, lim);
+    }
+
+    @Override
+    public List<SysLoginLog> getLoginLogs(String userName, int limit) {
+        return loginLogMapper.selectByUserName(userName, limit);
     }
 
     private UserResponse toResponse(SysUser u) {

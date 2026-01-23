@@ -11,29 +11,39 @@ import com.agrimatch.common.api.ResultCode;
 import com.agrimatch.common.exception.ApiException;
 import com.agrimatch.security.JwtTokenUtil;
 import com.agrimatch.user.domain.SysUser;
+import com.agrimatch.user.domain.SysLoginLog;
 import com.agrimatch.user.mapper.UserMapper;
+import com.agrimatch.user.mapper.SysLoginLogMapper;
+import com.agrimatch.util.ServletUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 @Service
 public class AuthServiceImpl implements AuthService {
+    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
+    
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtil jwtTokenUtil;
     private final CompanyMapper companyMapper;
     private final SmsCodeService smsCodeService;
+    private final SysLoginLogMapper loginLogMapper;
 
     public AuthServiceImpl(UserMapper userMapper,
                            PasswordEncoder passwordEncoder,
                            JwtTokenUtil jwtTokenUtil,
                            CompanyMapper companyMapper,
-                           SmsCodeService smsCodeService) {
+                           SmsCodeService smsCodeService,
+                           SysLoginLogMapper loginLogMapper) {
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenUtil = jwtTokenUtil;
         this.companyMapper = companyMapper;
         this.smsCodeService = smsCodeService;
+        this.loginLogMapper = loginLogMapper;
     }
 
     @Override
@@ -43,12 +53,15 @@ public class AuthServiceImpl implements AuthService {
         }
         SysUser u = userMapper.selectByUserName(userName);
         if (u == null || !StringUtils.hasText(u.getPassword())) {
+            recordLoginLog(userName, "1", "账号或密码错误");
             throw new ApiException(401, "账号或密码错误");
         }
         if (!passwordEncoder.matches(password, u.getPassword())) {
+            recordLoginLog(userName, "1", "账号或密码错误");
             throw new ApiException(401, "账号或密码错误");
         }
         String token = jwtTokenUtil.generateToken(u.getUserId(), u.getUserName());
+        recordLoginLog(userName, "0", "登录成功");
         return new LoginResponse(token);
     }
 
@@ -60,10 +73,31 @@ public class AuthServiceImpl implements AuthService {
         String userName = phone.trim();
         SysUser u = userMapper.selectByUserName(userName);
         if (u == null) {
+            recordLoginLog(userName, "1", "账号不存在");
             throw new ApiException(404, "账号不存在，请先注册");
         }
         String token = jwtTokenUtil.generateToken(u.getUserId(), u.getUserName());
+        recordLoginLog(userName, "0", "短信登录成功");
         return new LoginResponse(token);
+    }
+
+    private void recordLoginLog(String userName, String status, String msg) {
+        log.info("Recording login log for user: {}, status: {}, msg: {}", userName, status, msg);
+        try {
+            SysLoginLog loginLog = new SysLoginLog();
+            loginLog.setUserName(userName);
+            loginLog.setStatus(status);
+            loginLog.setMsg(msg);
+            loginLog.setIpaddr(ServletUtils.getClientIp());
+            String ua = ServletUtils.getUserAgent();
+            loginLog.setBrowser(ServletUtils.getBrowser(ua));
+            loginLog.setOs(ServletUtils.getOs(ua));
+            loginLog.setLoginLocation("未知"); // 暂时不实现 IP 转位置
+            int rows = loginLogMapper.insert(loginLog);
+            log.info("Login log inserted successfully, rows affected: {}", rows);
+        } catch (Exception e) {
+            log.error("Failed to record login log", e);
+        }
     }
 
     @Override

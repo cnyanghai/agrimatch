@@ -6,6 +6,7 @@ import com.agrimatch.user.dto.UserBriefResponse;
 import com.agrimatch.user.dto.UserResponse;
 import com.agrimatch.user.dto.UserRoleUpdateRequest;
 import com.agrimatch.user.dto.UserUpdateRequest;
+import com.agrimatch.user.domain.SysLoginLog;
 import com.agrimatch.user.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -46,6 +47,12 @@ public class UserController {
     public Result<UserResponse> me(Authentication authentication) {
         Long userId = com.agrimatch.util.SecurityUtil.requireUserId(authentication);
         return Result.success(userService.getById(userId));
+    }
+
+    @GetMapping("/login-logs")
+    public Result<List<SysLoginLog>> getLoginLogs(Authentication authentication) {
+        String userName = ((com.agrimatch.security.LoginUser) authentication.getPrincipal()).getUserName();
+        return Result.success(userService.getLoginLogs(userName, 10));
     }
 
     @GetMapping("/search")

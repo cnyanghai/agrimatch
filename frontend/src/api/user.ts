@@ -57,6 +57,18 @@ export interface UserBriefResponse {
   companyName?: string
 }
 
+export interface LoginLogResponse {
+  infoId: number
+  userName: string
+  ipaddr: string
+  loginLocation: string
+  browser: string
+  os: string
+  status: string
+  msg: string
+  loginTime: string
+}
+
 export async function createUser(req: UserCreateRequest) {
   const { data } = await http.post<Result<number>>('/api/users', req)
   return data
@@ -96,6 +108,11 @@ export async function searchUsers(keyword: string, limit = 20) {
   const { data } = await http.get<Result<UserBriefResponse[]>>('/api/users/search', {
     params: { keyword, limit }
   })
+  return data
+}
+
+export async function getLoginLogs() {
+  const { data } = await http.get<Result<LoginLogResponse[]>>('/api/users/login-logs')
   return data
 }
 
