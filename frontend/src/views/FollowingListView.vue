@@ -185,7 +185,6 @@ onMounted(() => {
       <!-- 列表头部 -->
       <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
         <div class="flex items-center gap-2">
-          <Heart class="w-5 h-5 text-brand-700" />
           <h2 class="text-2xl font-bold text-gray-900">关注列表</h2>
           <span class="bg-brand-100 text-brand-700 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
             {{ followedUsers.length }}
