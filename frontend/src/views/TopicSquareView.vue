@@ -309,6 +309,27 @@ onMounted(() => {
         <!-- 右侧侧边栏 -->
         <div class="lg:col-span-4 space-y-6">
           
+          <!-- 我的帖子入口 -->
+          <Card v-if="isLoggedIn" radius="2xl" class="border-none shadow-sm ring-1 ring-gray-100 overflow-hidden mb-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center text-xs font-black shadow-lg shadow-brand-600/20">
+                  {{ displayName[0] }}
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-gray-900">{{ displayName }}</p>
+                  <p class="text-[10px] text-gray-400 font-medium">我的内容</p>
+                </div>
+              </div>
+              <button 
+                class="text-brand-600 text-xs font-black uppercase tracking-widest hover:underline"
+                @click="go(`/users/${auth.me?.userId}/posts`)"
+              >
+                查看我的帖子
+              </button>
+            </div>
+          </Card>
+
           <!-- 我的关注模块 -->
           <Card radius="2xl" class="border-none shadow-sm ring-1 ring-gray-100 overflow-hidden">
             <div class="flex items-center justify-between mb-6">

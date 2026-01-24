@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref, computed } from 'vue'
+import { ref, onMounted, computed, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { MessageSquare, ThumbsUp, Share2, Gift, ArrowLeft } from 'lucide-vue-next'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { MessageSquare, ThumbsUp, Share2, Gift, ArrowLeft, Edit3, Trash2 } from 'lucide-vue-next'
 import { 
   getPost, 
   togglePostLike, 
   listPostComments, 
   createPostComment,
+  deletePost,
   type PostResponse,
   type PostCommentResponse 
 } from '../api/post'
@@ -135,6 +136,36 @@ async function onToggleFollow() {
     ElMessage.error(e.message || '操作失败')
   } finally {
     followLoading.value = false
+  }
+}
+
+async function onDeletePost() {
+  if (!post.value) return
+  try {
+    await ElMessageBox.confirm('删除后将无法恢复，确定要删除这篇文章吗？', '确认删除', {
+      confirmButtonText: '确定删除',
+      cancelButtonText: '取消',
+      type: 'warning',
+      confirmButtonClass: 'el-button--danger'
+    })
+    
+    const r = await deletePost(post.value.id)
+    if (r.code === 0) {
+      ElMessage.success('删除成功')
+      router.push('/talks')
+    } else {
+      throw new Error(r.message)
+    }
+  } catch (e: any) {
+    if (e !== 'cancel') {
+      ElMessage.error(e?.message || '删除失败')
+    }
+  }
+}
+
+function onEditPost() {
+  if (post.value) {
+    router.push(`/talks/${post.value.id}/edit`)
   }
 }
 
@@ -323,8 +354,27 @@ onMounted(() => {
           </div>
           <div class="flex items-center gap-3">
             <PaidBadge v-if="post.isPaid" :price="post.price" />
+            
+            <!-- 作者操作按钮 -->
+            <div v-if="post.userId === auth.me?.userId" class="flex items-center gap-2">
+              <button 
+                class="flex items-center gap-1.5 px-4 py-2 rounded-full border border-gray-200 text-gray-600 text-xs font-black hover:bg-gray-50 hover:border-brand-200 hover:text-brand-600 transition-all active:scale-95"
+                @click="onEditPost"
+              >
+                <Edit3 :size="14" />
+                编辑
+              </button>
+              <button 
+                class="flex items-center gap-1.5 px-4 py-2 rounded-full border border-red-100 text-red-500 text-xs font-black hover:bg-red-50 transition-all active:scale-95"
+                @click="onDeletePost"
+              >
+                <Trash2 :size="14" />
+                删除
+              </button>
+            </div>
+
             <button 
-              v-if="post.userId !== auth.me?.userId"
+              v-else
               class="px-6 py-2 rounded-full border text-xs font-black transition-all active:scale-95 disabled:opacity-50"
               :class="isFollowing 
                 ? 'bg-gray-100 border-gray-200 text-gray-500 hover:bg-gray-200' 
