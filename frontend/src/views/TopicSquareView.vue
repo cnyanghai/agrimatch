@@ -110,6 +110,11 @@ function onSearch() {
   loadPosts()
 }
 
+function onAuthorClick(e: Event, userId: number) {
+  e.stopPropagation()
+  go(`/users/${userId}/posts`)
+}
+
 function onOrderChange() {
   loadPosts()
 }
@@ -235,11 +240,11 @@ onMounted(() => {
               <div class="p-4">
                 <!-- 作者行 -->
                 <div class="flex items-center justify-between mb-3">
-                  <div class="flex items-center gap-2">
-                    <div class="w-6 h-6 rounded-md bg-brand-600 text-white flex items-center justify-center text-[10px] font-black shadow-sm">
+                  <div class="flex items-center gap-2 cursor-pointer group/author" @click="onAuthorClick($event, post.userId)">
+                    <div class="w-6 h-6 rounded-md bg-brand-600 text-white flex items-center justify-center text-[10px] font-black shadow-sm group-hover/author:scale-110 transition-transform">
                       {{ (post.nickName || post.userName || '?')[0] }}
                     </div>
-                    <span class="text-xs font-bold text-gray-700">{{ post.nickName || post.userName }}</span>
+                    <span class="text-xs font-bold text-gray-700 group-hover/author:text-brand-600 transition-colors">{{ post.nickName || post.userName }}</span>
                     <ExpertBadge v-if="post.isExpert" />
                     <span class="text-gray-300 mx-1">·</span>
                     <span class="text-xs text-gray-400">{{ formatTime(post.createTime) }}</span>
@@ -314,12 +319,12 @@ onMounted(() => {
               <button 
                 v-if="isLoggedIn && followedUsers.length > 0"
                 class="text-[10px] font-black text-brand-600 uppercase tracking-widest hover:underline"
-                @click="go('/console/following')"
+                @click="go('/talks/following')"
               >查看全部</button>
             </div>
             
             <div v-if="isLoggedIn && followedUsers.length > 0" class="space-y-6">
-              <div v-for="user in followedUsers" :key="user.userId" class="flex items-center gap-4 group/exp cursor-pointer" @click="go(`/companies/${user.companyId}`)">
+              <div v-for="user in followedUsers" :key="user.userId" class="flex items-center gap-4 group/exp cursor-pointer" @click="go(`/users/${user.userId}/posts`)">
                 <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold shrink-0">
                   {{ (user.nickName || user.userName || '?')[0] }}
                 </div>
@@ -368,8 +373,8 @@ onMounted(() => {
               <button 
                 v-if="isLoggedIn && collectedPosts.length > 0"
                 class="text-[10px] font-black text-brand-600 uppercase tracking-widest hover:underline"
-                @click="onTabChange('all')"
-              >查看更多</button>
+                @click="go('/talks/collected')"
+              >查看全部</button>
             </div>
 
             <div v-if="isLoggedIn && collectedPosts.length > 0" class="space-y-5">

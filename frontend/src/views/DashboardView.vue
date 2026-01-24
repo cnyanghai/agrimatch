@@ -204,17 +204,17 @@ onMounted(() => {
           <div class="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-brand-50/50 to-transparent"></div>
           <div class="relative z-10">
             <h2 class="text-3xl font-black text-gray-900 mb-2 tracking-tight">
-              {{ greeting }}，{{ auth.me?.nickName || auth.me?.userName || '用户' }}
-            </h2>
+                {{ greeting }}，{{ auth.me?.nickName || auth.me?.userName || '用户' }}
+              </h2>
             <p class="text-gray-500 max-w-lg leading-relaxed">
               欢迎回到 AgriMatch 智慧畜牧管理控制台。
-              <template v-if="totalPending > 0">
+                <template v-if="totalPending > 0">
                 您当前有 <span class="text-brand-600 font-bold underline decoration-2 underline-offset-4">{{ totalPending }}</span> 项待办事项需要关注。
-              </template>
-              <template v-else>
+                </template>
+                <template v-else>
                 目前一切正常，祝您今天工作愉快。
-              </template>
-            </p>
+                </template>
+              </p>
             
             <div class="mt-8 flex flex-wrap gap-4">
               <button class="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-brand-900/10 flex items-center gap-2" @click="go('/console/publish')">
@@ -261,12 +261,12 @@ onMounted(() => {
             <h3 class="text-sm font-black text-gray-900 uppercase tracking-wider">任务详情</h3>
           </div>
           <div class="flex-1 overflow-y-auto">
-            <button
-              v-for="item in pendingItems"
-              :key="item.label"
+          <button
+            v-for="item in pendingItems"
+            :key="item.label"
               class="w-full p-6 hover:bg-slate-50 transition-colors text-left border-b border-gray-50 flex items-center gap-4 group"
-              @click="go(item.path)"
-            >
+            @click="go(item.path)"
+          >
               <div :class="['w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110', getPendingColorClass(item.color).bg]">
                 <component :is="item.icon" class="w-6 h-6" :class="getPendingColorClass(item.color).icon" stroke-width="2.5" />
               </div>
@@ -276,8 +276,8 @@ onMounted(() => {
                   <span :class="['text-[10px] font-bold uppercase truncate', getPendingColorClass(item.color).text]">{{ item.label }}</span>
                 </div>
                 <p class="text-[10px] text-gray-400 mt-0.5">点击处理该事项</p>
-              </div>
-            </button>
+            </div>
+          </button>
           </div>
         </Card>
 
@@ -298,7 +298,7 @@ onMounted(() => {
           <div class="flex items-center justify-between mb-4">
             <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:scale-110 transition-transform">
               <component :is="stat.icon" :size="20" />
-            </div>
+        </div>
             <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ stat.label }}</span>
           </div>
           <div class="flex items-baseline gap-2">

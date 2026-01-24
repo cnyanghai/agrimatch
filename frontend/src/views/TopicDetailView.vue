@@ -280,6 +280,12 @@ function formatTime(timeStr: string | undefined) {
   return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
+function onAuthorClick() {
+  if (post.value?.userId) {
+    router.push(`/users/${post.value.userId}/posts`)
+  }
+}
+
 onMounted(() => {
   loadPost()
   loadComments()
@@ -288,18 +294,28 @@ onMounted(() => {
 
 <template>
   <div class="bg-gray-50 text-gray-900 min-h-screen">
+    <header class="bg-white border-b sticky top-0 z-30 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <button @click="router.back()" class="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors">
+          <ArrowLeft :size="20" />
+          <span class="font-bold">返回</span>
+        </button>
+        <h1 class="text-lg font-black text-gray-900">话题详情</h1>
+        <div class="w-20"></div> <!-- Spacer for centering -->
+      </div>
+    </header>
 
     <main class="max-w-4xl mx-auto px-4 py-8" v-loading="loading">
       <!-- 话题内容 -->
       <div v-if="post" class="bg-white rounded-[32px] p-10 border border-gray-100 shadow-sm mb-8">
         <div class="flex items-center justify-between mb-10">
-          <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-xl font-black shadow-lg shadow-brand-600/20">
+          <div class="flex items-center gap-4 cursor-pointer group/author" @click="onAuthorClick">
+            <div class="w-14 h-14 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-xl font-black shadow-lg shadow-brand-600/20 group-hover/author:scale-105 transition-transform">
               {{ (post.nickName || post.userName || '?')[0] }}
             </div>
             <div>
               <div class="flex items-center gap-2 mb-1">
-                <span class="font-black text-gray-900 text-lg">{{ post.nickName || post.userName || '匿名用户' }}</span>
+                <span class="font-black text-gray-900 text-lg group-hover/author:text-brand-600 transition-colors">{{ post.nickName || post.userName || '匿名用户' }}</span>
                 <ExpertBadge v-if="post.isExpert" />
               </div>
               <div class="text-xs text-gray-400 font-bold uppercase tracking-wider">{{ formatTime(post.createTime) }} · {{ post.companyName || '个人作者' }}</div>

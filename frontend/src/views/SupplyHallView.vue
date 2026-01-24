@@ -479,15 +479,15 @@ function parseParams(paramsJson?: string): string {
 
     <!-- 列表区（先按设计稿静态，后续二期接接口替换） -->
     <main class="max-w-7xl mx-auto px-4 py-8">
-        <div class="space-y-4">
-          <div v-if="listLoading" class="bg-white rounded-xl border border-gray-200 p-8 text-gray-400 text-sm">
-            正在加载货源...
-          </div>
+      <div class="space-y-4">
+        <div v-if="listLoading" class="bg-white rounded-xl border border-gray-200 p-8 text-gray-400 text-sm">
+          正在加载货源...
+        </div>
 
           <!-- 供应卡片 -->
           <Card 
-            v-for="s in displaySupplies" 
-            :key="s.id"
+          v-for="s in displaySupplies"
+          :key="s.id"
             :ref="el => setCardEl(Number(s.id), el as any)"
             radius="2xl"
             padding="none"
@@ -495,7 +495,7 @@ function parseParams(paramsJson?: string): string {
             class="flex flex-col lg:flex-row items-stretch lg:items-center gap-6 p-6 group transition-all"
             :class="{ 'ring-2 ring-brand-500 shadow-lg': focusedId === s.id }"
             @click="onViewDetail(s)"
-          >
+        >
             <!-- 左侧公司/用户信息 -->
             <div class="flex items-start gap-3 w-full lg:w-[200px] shrink-0 border-b lg:border-b-0 lg:border-r border-gray-100 pb-4 lg:pb-0 lg:pr-4">
               <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
@@ -598,13 +598,13 @@ function parseParams(paramsJson?: string): string {
             </div>
           </Card>
 
-          <div v-if="!listLoading && supplies.length === 0" class="bg-white rounded-xl border border-gray-200 p-8 text-center">
-            <div class="text-gray-400 text-sm mb-2">暂无货源数据</div>
-            <div class="text-xs text-gray-300">
-              {{ selectedCategory ? `没有找到「${selectedCategory}」相关的供应信息` : '请尝试调整筛选条件' }}
-            </div>
+        <div v-if="!listLoading && supplies.length === 0" class="bg-white rounded-xl border border-gray-200 p-8 text-center">
+          <div class="text-gray-400 text-sm mb-2">暂无货源数据</div>
+          <div class="text-xs text-gray-300">
+            {{ selectedCategory ? `没有找到「${selectedCategory}」相关的供应信息` : '请尝试调整筛选条件' }}
           </div>
         </div>
+      </div>
 
       <!-- 分页 -->
       <div v-if="total > pageSize" class="flex justify-center mt-10">
