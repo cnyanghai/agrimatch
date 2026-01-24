@@ -40,6 +40,9 @@ public class RequirementCreateRequest {
     @Size(max = 20)
     private String deliveryMethod;
 
+    private String domain;        // 所属板块
+    private String tagsJson;      // 标签数据
+
     private String paramsJson;
 
     @Size(max = 500)
@@ -120,6 +123,22 @@ public class RequirementCreateRequest {
 
     public void setDeliveryMethod(String deliveryMethod) {
         this.deliveryMethod = deliveryMethod;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public String getTagsJson() {
+        return tagsJson;
+    }
+
+    public void setTagsJson(String tagsJson) {
+        this.tagsJson = tagsJson;
     }
 
     public String getParamsJson() {

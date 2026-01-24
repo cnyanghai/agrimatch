@@ -28,6 +28,7 @@
         <result column="establish_date" property="establishDate"/>
         <result column="scale" property="scale"/>
         <result column="company_intro" property="companyIntro"/>
+        <result column="tags_json" property="tagsJson"/>
         <result column="announcements_json" property="announcementsJson"/>
         <result column="recruitment_json" property="recruitmentJson"/>
         <result column="certificates_json" property="certificatesJson"/>
@@ -41,12 +42,12 @@
         INSERT INTO bus_company
         (owner_user_id, company_name, company_type, license_no, license_img_url, legal_person, business_scope, contacts, phone, wechat,
          province, city, district, address, lat, lng, locations_json, bank_info_json,
-         registered_capital, establish_date, scale, company_intro, announcements_json, recruitment_json, certificates_json,
+         registered_capital, establish_date, scale, company_intro, tags_json, announcements_json, recruitment_json, certificates_json,
          is_deleted, create_time, update_time)
         VALUES
         (#{ownerUserId}, #{companyName}, #{companyType}, #{licenseNo}, #{licenseImgUrl}, #{legalPerson}, #{businessScope}, #{contacts}, #{phone}, #{wechat},
          #{province}, #{city}, #{district}, #{address}, #{lat}, #{lng}, #{locationsJson}, #{bankInfoJson},
-         #{registeredCapital}, #{establishDate}, #{scale}, #{companyIntro}, #{announcementsJson}, #{recruitmentJson}, #{certificatesJson},
+         #{registeredCapital}, #{establishDate}, #{scale}, #{companyIntro}, #{tagsJson}, #{announcementsJson}, #{recruitmentJson}, #{certificatesJson},
          0, NOW(3), NOW(3))
     </insert>
 
@@ -91,6 +92,7 @@
             <if test="establishDate != null">establish_date = #{establishDate},</if>
             <if test="scale != null">scale = #{scale},</if>
             <if test="companyIntro != null">company_intro = #{companyIntro},</if>
+            <if test="tagsJson != null">tags_json = #{tagsJson},</if>
             <if test="announcementsJson != null">announcements_json = #{announcementsJson},</if>
             <if test="recruitmentJson != null">recruitment_json = #{recruitmentJson},</if>
             <if test="certificatesJson != null">certificates_json = #{certificatesJson},</if>

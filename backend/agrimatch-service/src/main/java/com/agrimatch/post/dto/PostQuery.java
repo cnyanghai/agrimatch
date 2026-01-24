@@ -4,6 +4,7 @@ public class PostQuery {
     private Long companyId;
     private Long userId;
     private String keyword;
+    private String domain;      // 所属板块
     private String postType; // general/bounty/poll
     private String orderBy; // create_time
     private String order; // asc/desc
@@ -33,6 +34,14 @@ public class PostQuery {
 
     public void setKeyword(String keyword) {
         this.keyword = keyword;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 
     public String getOrderBy() {

@@ -7,6 +7,8 @@ import { getProductTree, getProductParams, addProductParamOption, type ProductNo
 import { getMyCompany, type CompanyResponse } from '../api/company'
 import { getMe, type UserResponse } from '../api/user'
 import TwoLevelCategoryPicker from '../components/TwoLevelCategoryPicker.vue'
+import TagPicker from '../components/TagPicker.vue'
+import type { TagValue } from '../api/tag'
 import { BaseButton, BaseModal, EmptyState } from '../components/ui'
 import { FileText, Save, List, Send, Package, MapPin, Clock, FileCheck, CreditCard, Trash2 } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
@@ -105,6 +107,7 @@ const categoryParams = ref<ProductParamResponse[]>([])
 
 // 动态参数表单
 const dynamicParams = ref<Record<string, any>>({})
+const tagValues = ref<TagValue[]>([])
 
 // 实时预览数据
 const previewData = computed(() => {
@@ -300,6 +303,7 @@ async function publishRequirement() {
   loading.value = true
   try {
     const paramsJson = buildParamsJson()
+    const tagsJson = JSON.stringify(tagValues.value)
     
     const req: RequirementCreateRequest = {
       categoryName: publishForm.categoryName,
@@ -311,6 +315,7 @@ async function publishRequirement() {
       invoiceType: publishForm.invoiceType || undefined,
       deliveryMethod: publishForm.deliveryMethod || undefined,
       paramsJson,
+      tagsJson,
       expireMinutes: publishForm.expireMinutes,
       purchaseAddress: publishForm.purchaseAddress,
       remark: publishForm.remark || undefined
@@ -591,51 +596,21 @@ async function applyTemplate(template: RequirementTemplateResponse) {
           </div>
         </div>
 
-        <!-- 规格参数 -->
+        <!-- 规格参数 (标签化) -->
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 100ms">
           <div class="p-5 border-b border-gray-200 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-5 bg-brand-500 rounded-full"></div>
-              <h3 class="text-2xl font-bold text-gray-900">规格参数</h3>
+              <h3 class="text-2xl font-bold text-gray-900">质量要求 / 产品标签</h3>
             </div>
-            <span class="text-xs text-gray-400">选择品类后自动加载</span>
+            <span class="text-xs text-gray-400">选择标签描述采购需求</span>
           </div>
           <div class="p-5">
-            <div v-if="categoryParams.length === 0" class="py-8">
-              <EmptyState
-                type="folder"
-                title="暂无参数"
-                description="选择品类后，会自动加载对应的指标参数"
-                size="sm"
-              />
-            </div>
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div v-for="param in categoryParams" :key="param.id">
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">{{ param.paramName }}</label>
-                <el-select
-                  v-if="param.paramType === 1"
-                  v-model="dynamicParams[param.id]"
-                  :placeholder="`请选择${param.paramName}`"
-                  allow-create
-                  filterable
-                  class="w-full neo-select"
-                  @visible-change="(visible: boolean) => {
-                    if (!visible && dynamicParams[param.id] && !param.options?.includes(dynamicParams[param.id])) {
-                      addParamOption(param.id, dynamicParams[param.id])
-                    }
-                  }"
-                >
-                  <el-option v-for="option in param.options" :key="option" :label="option" :value="option" />
-                </el-select>
-                <input
-                  v-else
-                  v-model="dynamicParams[param.id]"
-                  type="text"
-                  :placeholder="`请输入${param.paramName}`"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-                />
-              </div>
-            </div>
+            <TagPicker
+              v-model="tagValues"
+              :category-id="publishForm.categoryId"
+              domain="material"
+            />
           </div>
         </div>
 
@@ -785,12 +760,16 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                   <div class="mt-1 font-bold text-gray-900">{{ previewData.expireText }}</div>
                 </div>
               </div>
-              <div v-if="previewData.paramsText !== '无'" class="bg-gray-50 rounded-xl p-3">
+              <div v-if="tagValues.length > 0" class="bg-gray-50 rounded-xl p-3">
                 <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
                   <FileCheck class="w-3 h-3" />
-                  指标
+                  参数要求
                 </div>
-                <div class="mt-1 text-sm text-gray-700 whitespace-pre-wrap">{{ previewData.paramsText }}</div>
+                <div class="mt-1 flex flex-wrap gap-1">
+                  <span v-for="tag in tagValues" :key="tag.tagId || tag.tagKey" class="text-[10px] bg-white px-1.5 py-0.5 rounded border border-gray-200 text-gray-600">
+                    {{ tag.tagName }}: {{ tag.value }}{{ tag.unit || '' }}
+                  </span>
+                </div>
               </div>
               <div v-if="previewData.remark" class="bg-gray-50 rounded-xl p-3">
                 <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">备注</div>

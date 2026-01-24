@@ -25,30 +25,53 @@ import {
   LayoutGrid,
   ChevronRight,
   Building2,
-  Users
+  Users,
+  Sprout,
+  Factory,
+  Cog
 } from 'lucide-vue-next'
 
 const router = useRouter()
 
-// 分类元数据映射
-const getCategoryMeta = (name: string) => {
-  const mapping: Record<string, { icon: any }> = {
-    '谷物': { icon: Wheat },
-    '油料': { icon: Leaf },
-    '油脂': { icon: Droplets },
-    '微生物': { icon: Microscope },
-    '动物': { icon: Beef },
-    '矿物质': { icon: Gem },
-    '添加剂': { icon: FlaskConical },
+// 产业板块定义
+const domains = [
+  {
+    key: 'biological',
+    name: '生物种苗',
+    desc: '种禽、种蛋、鱼苗、种猪...',
+    icon: Sprout,
+    color: 'text-green-600',
+    bgColor: 'bg-green-50',
+    tags: ['#日龄', '#疫苗', '#亲本品种']
+  },
+  {
+    key: 'processing',
+    name: '农牧加工',
+    desc: '肉禽分割、禽蛋、水产成品...',
+    icon: Factory,
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50',
+    tags: ['#分割部位', '#温控', '#保质期']
+  },
+  {
+    key: 'material',
+    name: '原料饲料',
+    desc: '玉米、豆粕、油脂、添加剂...',
+    icon: Wheat,
+    color: 'text-brand-600',
+    bgColor: 'bg-brand-50',
+    tags: ['#水分', '#蛋白', '#产地']
+  },
+  {
+    key: 'equipment',
+    name: '装备物流',
+    desc: '料车、风机、农机、包装...',
+    icon: Cog,
+    color: 'text-blue-600',
+    bgColor: 'bg-blue-50',
+    tags: ['#载重', '#马力', '#保修']
   }
-
-  const commonStyles = { color: 'text-slate-500', bgColor: 'bg-slate-50' }
-
-  for (const key in mapping) {
-    if (name.includes(key)) return { ...mapping[key], ...commonStyles }
-  }
-  return { icon: Package, ...commonStyles }
-}
+]
 
 // 平台统计
 const stats = ref<StatsResponse | null>(null)
@@ -95,7 +118,7 @@ async function loadData() {
 function onSearch() {
   if (!searchKeyword.value.trim()) return
   router.push({
-    path: '/hall/supply',
+    path: '/search',
     query: { keyword: searchKeyword.value.trim() }
   })
 }
@@ -249,59 +272,53 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <!-- 按原料搜索 -->
+    <!-- 全产业链支柱板块 -->
     <section class="py-20 bg-white border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <div>
             <h2 class="text-2xl font-bold text-gray-900 tracking-tight">
-              按 <span class="text-brand-600">原料</span> 搜索
+              全产业链 <span class="text-brand-600">物资板块</span>
             </h2>
+            <p class="text-gray-500 mt-2 text-sm">覆盖从种苗培育到加工流通的全链路需求</p>
           </div>
           <button 
             class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors active:scale-95"
             @click="go('/categories')"
           >
-            查看所有类别
+            查看所有物资
             <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-brand-50 flex items-center justify-center transition-colors">
               <ChevronRight :size="16" />
             </div>
           </button>
         </div>
 
-        <div v-if="categoryLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div v-for="i in 8" :key="i" class="h-24 bg-gray-50 rounded-xl animate-pulse"></div>
-        </div>
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <!-- 核心分类卡片 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div
-            v-for="cat in topCategories.slice(0, 7)"
-            :key="cat.id"
-            class="group p-5 bg-white border border-gray-200 rounded-xl transition-all cursor-pointer flex items-center gap-4 hover:shadow-md hover:border-slate-200"
-            @click="goCategory(cat)"
+            v-for="domain in domains"
+            :key="domain.key"
+            class="group bg-white border border-gray-200 rounded-2xl p-6 transition-all hover:shadow-xl hover:border-brand-500 cursor-pointer flex flex-col h-full"
+            @click="go(`/hall/supply?domain=${domain.key}`)"
           >
             <div 
-              class="w-12 h-12 shrink-0 rounded-xl flex items-center justify-center transition-transform shadow-sm bg-slate-50"
+              class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 shadow-sm"
+              :class="domain.bgColor"
             >
-              <component :is="getCategoryMeta(cat.name).icon" :size="24" class="text-slate-500" />
+              <component :is="domain.icon" :size="28" :class="domain.color" />
             </div>
-            <div class="min-w-0">
-              <div class="font-semibold text-gray-900 group-hover:text-slate-900 transition-colors truncate text-base">
-                {{ cat.name }}
+            <div class="flex-1">
+              <h3 class="text-xl font-bold text-gray-900 mb-2">{{ domain.name }}</h3>
+              <p class="text-xs text-gray-500 mb-4 line-clamp-2">{{ domain.desc }}</p>
+              
+              <div class="flex flex-wrap gap-2 mt-auto">
+                <span 
+                  v-for="tag in domain.tags" 
+                  :key="tag"
+                  class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-50 text-gray-400 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors"
+                >
+                  {{ tag }}
+                </span>
               </div>
-            </div>
-          </div>
-
-          <!-- “更多”卡片 -->
-          <div
-            class="group p-5 bg-gray-50/50 border border-dashed border-gray-200 rounded-xl transition-all cursor-pointer flex items-center gap-4 hover:bg-white hover:border-slate-200 hover:shadow-md"
-            @click="go('/categories')"
-          >
-            <div class="w-12 h-12 shrink-0 bg-white rounded-xl flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all shadow-sm text-slate-400">
-              <LayoutGrid :size="24" />
-            </div>
-            <div>
-              <div class="font-semibold text-gray-900 group-hover:text-slate-900 transition-colors text-base">更多原料</div>
             </div>
           </div>
         </div>

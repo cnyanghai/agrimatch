@@ -11,6 +11,7 @@ public class RequirementResponse {
     private String userName;
     private String nickName;
     private String categoryName;
+    private String domain;
     private String contractNo;
     private BigDecimal quantity;
     private BigDecimal expectedPrice;
@@ -19,6 +20,7 @@ public class RequirementResponse {
     private String paymentMethod;
     private String deliveryMethod;
     private String paramsJson;
+    private String tagsJson;
     private String remark;
     private Integer expireMinutes;
     private LocalDateTime expireTime;
@@ -94,6 +96,14 @@ public class RequirementResponse {
         this.categoryName = categoryName;
     }
 
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
     public String getContractNo() {
         return contractNo;
     }
@@ -156,6 +166,14 @@ public class RequirementResponse {
 
     public void setParamsJson(String paramsJson) {
         this.paramsJson = paramsJson;
+    }
+
+    public String getTagsJson() {
+        return tagsJson;
+    }
+
+    public void setTagsJson(String tagsJson) {
+        this.tagsJson = tagsJson;
     }
 
     public String getRemark() {

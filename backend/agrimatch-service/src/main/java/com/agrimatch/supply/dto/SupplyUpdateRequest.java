@@ -29,6 +29,9 @@ public class SupplyUpdateRequest {
 
     private String priceRulesJson;
 
+    private String domain;
+    private String tagsJson;
+
     private String paramsJson;
 
     @Size(max = 500)
@@ -114,6 +117,22 @@ public class SupplyUpdateRequest {
 
     public void setPriceRulesJson(String priceRulesJson) {
         this.priceRulesJson = priceRulesJson;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public String getTagsJson() {
+        return tagsJson;
+    }
+
+    public void setTagsJson(String tagsJson) {
+        this.tagsJson = tagsJson;
     }
 
     public String getParamsJson() {

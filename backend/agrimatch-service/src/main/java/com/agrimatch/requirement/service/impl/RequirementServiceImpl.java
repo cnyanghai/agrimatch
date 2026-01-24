@@ -12,6 +12,7 @@ import com.agrimatch.requirement.dto.RequirementResponse;
 import com.agrimatch.requirement.dto.RequirementUpdateRequest;
 import com.agrimatch.requirement.mapper.RequirementMapper;
 import com.agrimatch.requirement.service.RequirementService;
+import com.agrimatch.tag.service.TagService;
 import com.agrimatch.user.domain.SysUser;
 import com.agrimatch.user.mapper.UserMapper;
 import com.agrimatch.util.GeoUtil;
@@ -31,12 +32,16 @@ public class RequirementServiceImpl implements RequirementService {
     private final UserMapper userMapper;
     private final CompanyMapper companyMapper;
     private final DealMapper dealMapper;
+    private final TagService tagService;
 
-    public RequirementServiceImpl(RequirementMapper requirementMapper, UserMapper userMapper, CompanyMapper companyMapper, DealMapper dealMapper) {
+    public RequirementServiceImpl(RequirementMapper requirementMapper, UserMapper userMapper, 
+                                  CompanyMapper companyMapper, DealMapper dealMapper,
+                                  TagService tagService) {
         this.requirementMapper = requirementMapper;
         this.userMapper = userMapper;
         this.companyMapper = companyMapper;
         this.dealMapper = dealMapper;
+        this.tagService = tagService;
     }
 
     @Override
@@ -58,6 +63,8 @@ public class RequirementServiceImpl implements RequirementService {
         r.setPaymentMethod(req.getPaymentMethod());
         r.setDeliveryMethod(StringUtils.hasText(req.getDeliveryMethod()) ? req.getDeliveryMethod().trim() : null);
         r.setParamsJson(req.getParamsJson());
+        r.setTagsJson(req.getTagsJson());
+        r.setDomain(req.getDomain() != null ? req.getDomain() : "general");
         r.setRemark(StringUtils.hasText(req.getRemark()) ? req.getRemark().trim() : null);
         r.setExpireMinutes(normalizeExpireMinutes(req.getExpireMinutes()));
         if (r.getExpireMinutes() != null) {
@@ -78,6 +85,10 @@ public class RequirementServiceImpl implements RequirementService {
         if (rows != 1 || r.getId() == null) {
             throw new ApiException(ResultCode.SERVER_ERROR);
         }
+
+        // 同步标签
+        tagService.syncEntityTags("requirement", r.getId(), r.getDomain(), r.getTagsJson());
+
         return r.getId();
     }
 
@@ -159,6 +170,10 @@ public class RequirementServiceImpl implements RequirementService {
         r.setPaymentMethod(emptyToNull(req.getPaymentMethod()));
         r.setDeliveryMethod(emptyToNull(req.getDeliveryMethod()));
         r.setParamsJson(emptyToNull(req.getParamsJson()));
+        r.setTagsJson(emptyToNull(req.getTagsJson()));
+        if (req.getDomain() != null) {
+            r.setDomain(req.getDomain());
+        }
         r.setRemark(emptyToNull(req.getRemark()));
 
         // expire: minutes -> expireTime（管理端可重置有效期/再次发布）
@@ -179,6 +194,12 @@ public class RequirementServiceImpl implements RequirementService {
         int rows = requirementMapper.update(r);
         if (rows != 1) {
             throw new ApiException(ResultCode.NOT_FOUND);
+        }
+
+        // 同步标签
+        if (req.getTagsJson() != null) {
+            BusRequirement updated = requirementMapper.selectById(id);
+            tagService.syncEntityTags("requirement", id, updated.getDomain(), req.getTagsJson());
         }
     }
 
@@ -208,6 +229,8 @@ public class RequirementServiceImpl implements RequirementService {
         o.setPaymentMethod(r.getPaymentMethod());
         o.setDeliveryMethod(r.getDeliveryMethod());
         o.setParamsJson(r.getParamsJson());
+        o.setTagsJson(r.getTagsJson());
+        o.setDomain(r.getDomain());
         o.setRemark(r.getRemark());
         o.setExpireMinutes(r.getExpireMinutes());
         o.setExpireTime(r.getExpireTime());

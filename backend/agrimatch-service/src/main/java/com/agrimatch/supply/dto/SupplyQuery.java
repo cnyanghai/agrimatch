@@ -4,6 +4,7 @@ public class SupplyQuery {
     private Long companyId;
     private Long userId;
     private String categoryName;
+    private String domain;
     /**
      * 状态（0发布中 1部分成交 2已下架 3全部成交）
      * - 不传：不按状态过滤（用于管理端“全部状态”）
@@ -56,6 +57,14 @@ public class SupplyQuery {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 
     public Integer getStatus() {

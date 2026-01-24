@@ -13,6 +13,7 @@ public class BusRequirement {
     private String userName;
     private String nickName;
     private String categoryName;
+    private String domain;
     private String contractNo;
     private BigDecimal quantity;
     private BigDecimal expectedPrice;
@@ -21,6 +22,7 @@ public class BusRequirement {
     private String paymentMethod;
     private String deliveryMethod;
     private String paramsJson;
+    private String tagsJson;
     private String remark;
     private Integer expireMinutes;
     private LocalDateTime expireTime;
@@ -62,6 +64,14 @@ public class BusRequirement {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 
     public String getContractNo() {
@@ -126,6 +136,14 @@ public class BusRequirement {
 
     public void setParamsJson(String paramsJson) {
         this.paramsJson = paramsJson;
+    }
+
+    public String getTagsJson() {
+        return tagsJson;
+    }
+
+    public void setTagsJson(String tagsJson) {
+        this.tagsJson = tagsJson;
     }
 
     public String getRemark() {

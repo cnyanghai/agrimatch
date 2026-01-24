@@ -11,6 +11,7 @@ import com.agrimatch.supply.dto.*;
 import com.agrimatch.supply.mapper.SupplyBasisMapper;
 import com.agrimatch.supply.mapper.SupplyMapper;
 import com.agrimatch.supply.service.SupplyService;
+import com.agrimatch.tag.service.TagService;
 import com.agrimatch.user.domain.SysUser;
 import com.agrimatch.user.mapper.UserMapper;
 import com.agrimatch.util.GeoUtil;
@@ -33,17 +34,20 @@ public class SupplyServiceImpl implements SupplyService {
     private final UserMapper userMapper;
     private final CompanyMapper companyMapper;
     private final DealMapper dealMapper;
+    private final TagService tagService;
 
     @Value("${agrimatch.freight.rate-per-ton-km:0.8}")
     private BigDecimal freightRatePerTonKm;
 
     public SupplyServiceImpl(SupplyMapper supplyMapper, SupplyBasisMapper supplyBasisMapper, 
-                             UserMapper userMapper, CompanyMapper companyMapper, DealMapper dealMapper) {
+                             UserMapper userMapper, CompanyMapper companyMapper, DealMapper dealMapper,
+                             TagService tagService) {
         this.supplyMapper = supplyMapper;
         this.supplyBasisMapper = supplyBasisMapper;
         this.userMapper = userMapper;
         this.companyMapper = companyMapper;
         this.dealMapper = dealMapper;
+        this.tagService = tagService;
     }
 
     @Override
@@ -92,6 +96,8 @@ public class SupplyServiceImpl implements SupplyService {
         s.setStorageMethod(emptyToNull(req.getStorageMethod()));
         s.setPriceRulesJson(req.getPriceRulesJson());
         s.setParamsJson(req.getParamsJson());
+        s.setTagsJson(req.getTagsJson());
+        s.setDomain(req.getDomain() != null ? req.getDomain() : "general");
         s.setRemark(StringUtils.hasText(req.getRemark()) ? req.getRemark().trim() : null);
         s.setExpireMinutes(normalizeExpireMinutes(req.getExpireMinutes()));
         if (s.getExpireMinutes() != null) {
@@ -103,6 +109,9 @@ public class SupplyServiceImpl implements SupplyService {
         if (rows != 1 || s.getId() == null) {
             throw new ApiException(ResultCode.SERVER_ERROR);
         }
+
+        // 同步标签
+        tagService.syncEntityTags("supply", s.getId(), s.getDomain(), s.getTagsJson());
 
         // 如果是基差报价模式，保存基差明细
         if (priceType == 1 && req.getBasisQuotes() != null && !req.getBasisQuotes().isEmpty()) {
@@ -238,6 +247,10 @@ public class SupplyServiceImpl implements SupplyService {
         s.setStorageMethod(emptyToNull(req.getStorageMethod()));
         s.setPriceRulesJson(emptyToNull(req.getPriceRulesJson()));
         s.setParamsJson(emptyToNull(req.getParamsJson()));
+        s.setTagsJson(emptyToNull(req.getTagsJson()));
+        if (req.getDomain() != null) {
+            s.setDomain(req.getDomain());
+        }
         s.setRemark(emptyToNull(req.getRemark()));
 
         // expire: minutes -> expireTime（管理端可重置有效期/再次发布）
@@ -255,6 +268,12 @@ public class SupplyServiceImpl implements SupplyService {
         int rows = supplyMapper.update(s);
         if (rows != 1) {
             throw new ApiException(ResultCode.NOT_FOUND);
+        }
+
+        // 重新获取 domain 以便同步标签（如果 req 中没传）
+        if (req.getTagsJson() != null) {
+            BusSupply updated = supplyMapper.selectById(id);
+            tagService.syncEntityTags("supply", id, updated.getDomain(), req.getTagsJson());
         }
     }
 
@@ -287,6 +306,8 @@ public class SupplyServiceImpl implements SupplyService {
         o.setStorageMethod(s.getStorageMethod());
         o.setPriceRulesJson(s.getPriceRulesJson());
         o.setParamsJson(s.getParamsJson());
+        o.setTagsJson(s.getTagsJson());
+        o.setDomain(s.getDomain());
         o.setRemark(s.getRemark());
         o.setExpireMinutes(s.getExpireMinutes());
         o.setExpireTime(s.getExpireTime());

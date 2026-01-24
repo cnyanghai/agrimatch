@@ -13,6 +13,9 @@ public class PostCreateRequest {
 
     private String imagesJson;
     
+    private String domain;        // 所属板块
+    private String tagsJson;      // 标签数据
+    
     private String postType;      // general/bounty/poll
     private Integer bountyPoints; // 悬赏积分
 
@@ -38,6 +41,22 @@ public class PostCreateRequest {
 
     public void setImagesJson(String imagesJson) {
         this.imagesJson = imagesJson;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public String getTagsJson() {
+        return tagsJson;
+    }
+
+    public void setTagsJson(String tagsJson) {
+        this.tagsJson = tagsJson;
     }
 
     public String getPostType() {

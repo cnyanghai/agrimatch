@@ -28,8 +28,16 @@ const currentTipPost = ref<PostResponse | null>(null)
 const tipForm = reactive({ points: 10, remark: '' })
 const tipping = ref(false)
 
-const form = reactive({ title: '', content: '' })
-const q = reactive({ keyword: '' })
+const form = reactive({ title: '', content: '', domain: 'general' })
+const q = reactive({ keyword: '', domain: '' })
+
+const domains = [
+  { key: 'general', name: '综合讨论' },
+  { key: 'biological', name: '生物种苗' },
+  { key: 'processing', name: '农业加工' },
+  { key: 'material', name: '原料辅料' },
+  { key: 'equipment', name: '装备物流' }
+]
 
 const canCreate = computed(() => form.title.trim().length > 0 && !!auth.token)
 const isLoggedIn = computed(() => !!auth.token)
@@ -37,7 +45,12 @@ const isLoggedIn = computed(() => !!auth.token)
 async function refresh() {
   loading.value = true
   try {
-    const r = await listPosts({ keyword: q.keyword || undefined, orderBy: 'create_time', order: 'desc' })
+    const r = await listPosts({ 
+      keyword: q.keyword || undefined, 
+      domain: q.domain || undefined,
+      orderBy: 'create_time', 
+      order: 'desc' 
+    })
     if (r.code !== 0) throw new Error(r.message)
     list.value = r.data ?? []
   } catch (e: any) {
@@ -106,11 +119,16 @@ async function onCreate() {
   if (!requireAuth('/posts')) { ElMessage.warning('请先登录后再发布话题'); return }
   creating.value = true
   try {
-    const r = await createPost({ title: form.title.trim(), content: form.content?.trim() || undefined })
+    const r = await createPost({ 
+      title: form.title.trim(), 
+      content: form.content?.trim() || undefined,
+      domain: form.domain
+    })
     if (r.code !== 0) throw new Error(r.message)
     ElMessage.success('发布成功')
     form.title = ''
     form.content = ''
+    form.domain = 'general'
     await refresh()
   } catch (e: any) {
     ElMessage.error(e?.message ?? '发布失败')
@@ -222,6 +240,25 @@ onMounted(() => {
           </div>
 
           <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">所属板块</label>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="d in domains"
+                :key="d.key"
+                :class="[
+                  'px-3 py-1.5 rounded-lg text-xs font-bold transition-all border',
+                  form.domain === d.key
+                    ? 'bg-brand-600 text-white border-brand-600'
+                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-brand-500'
+                ]"
+                @click="form.domain = d.key"
+              >
+                {{ d.name }}
+              </button>
+            </div>
+          </div>
+
+          <div>
             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
               话题标题 <span class="text-red-500">*</span>
             </label>
@@ -253,18 +290,43 @@ onMounted(() => {
       </div>
 
       <!-- 帖子列表 -->
-      <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div class="p-4 border-b border-gray-200 flex items-center justify-between gap-4">
-          <h3 class="text-2xl font-bold text-gray-900">话题列表</h3>
-          <div class="relative flex-1 max-w-[300px]">
-            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              v-model="q.keyword"
-              type="text"
-              placeholder="搜索话题..."
-              class="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-xl text-sm focus:border-brand-500 outline-none transition-all"
-              @keyup.enter="refresh"
-            />
+      <div class="lg:col-span-2 bg-white rounded-xl border border-gray-200 overflow-hidden text-sm">
+        <div class="p-4 border-b border-gray-200 space-y-4">
+          <div class="flex items-center justify-between gap-4">
+            <h3 class="text-2xl font-bold text-gray-900">话题列表</h3>
+            <div class="relative flex-1 max-w-[300px]">
+              <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                v-model="q.keyword"
+                type="text"
+                placeholder="搜索话题..."
+                class="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-xl text-sm focus:border-brand-500 outline-none transition-all"
+                @keyup.enter="refresh"
+              />
+            </div>
+          </div>
+
+          <!-- 板块过滤 -->
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">板块:</span>
+            <div class="flex flex-wrap gap-2">
+              <button
+                class="px-3 py-1 rounded-full text-xs font-bold transition-all border"
+                :class="!q.domain ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-gray-500 border-gray-200 hover:border-brand-500'"
+                @click="q.domain = ''; refresh()"
+              >
+                全部
+              </button>
+              <button
+                v-for="d in domains"
+                :key="d.key"
+                class="px-3 py-1 rounded-full text-xs font-bold transition-all border"
+                :class="q.domain === d.key ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-gray-500 border-gray-200 hover:border-brand-500'"
+                @click="q.domain = d.key; refresh()"
+              >
+                {{ d.name }}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -301,6 +363,9 @@ onMounted(() => {
                 <!-- 作者信息 -->
                 <div class="flex items-center gap-2 mb-1">
                   <span class="font-bold text-gray-900">{{ post.nickName || post.userName || '匿名' }}</span>
+                  <span v-if="post.domain && post.domain !== 'general'" class="bg-blue-50 text-blue-600 text-[10px] px-1.5 py-0.5 rounded font-bold">
+                    {{ domains.find(d => d.key === post.domain)?.name || post.domain }}
+                  </span>
                   <span v-if="post.companyName" class="text-xs text-gray-400">· {{ post.companyName }}</span>
                   <span class="text-xs text-gray-400 ml-auto">{{ formatTime(post.createTime) }}</span>
                 </div>

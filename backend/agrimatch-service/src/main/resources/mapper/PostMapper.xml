@@ -14,6 +14,8 @@
         <result column="position" property="position"/>
         <result column="title" property="title"/>
         <result column="content" property="content"/>
+        <result column="domain" property="domain"/>
+        <result column="tags_json" property="tagsJson"/>
         <result column="images_json" property="imagesJson"/>
         <result column="post_type" property="postType"/>
         <result column="bounty_points" property="bountyPoints"/>
@@ -27,9 +29,9 @@
     <insert id="insert" parameterType="com.agrimatch.post.domain.BusPost"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO bus_post
-        (company_id, user_id, title, content, images_json, post_type, bounty_points, bounty_status, is_deleted, create_time, update_time)
+        (company_id, user_id, title, content, domain, tags_json, images_json, post_type, bounty_points, bounty_status, is_deleted, create_time, update_time)
         VALUES
-        (#{companyId}, #{userId}, #{title}, #{content}, #{imagesJson}, #{postType}, #{bountyPoints}, #{bountyStatus}, 0, NOW(3), NOW(3))
+        (#{companyId}, #{userId}, #{title}, #{content}, #{domain}, #{tagsJson}, #{imagesJson}, #{postType}, #{bountyPoints}, #{bountyStatus}, 0, NOW(3), NOW(3))
     </insert>
 
     <select id="selectById" resultMap="PostMap">
@@ -39,7 +41,7 @@
             u.user_name AS user_name,
             u.nick_name AS nick_name,
             u.position AS position,
-            p.title, p.content, p.images_json,
+            p.title, p.content, p.domain, p.tags_json, p.images_json,
             p.post_type, p.bounty_points, p.bounty_status, p.accepted_comment_id,
             p.is_deleted, p.create_time, p.update_time
         FROM bus_post p
@@ -57,7 +59,7 @@
             u.user_name AS user_name,
             u.nick_name AS nick_name,
             u.position AS position,
-            p.title, p.content, p.images_json,
+            p.title, p.content, p.domain, p.tags_json, p.images_json,
             p.post_type, p.bounty_points, p.bounty_status, p.accepted_comment_id,
             p.is_deleted, p.create_time, p.update_time
         FROM bus_post p
@@ -82,6 +84,9 @@
         </if>
         <where>
             p.is_deleted = 0
+            <if test="q != null and q.domain != null and q.domain != ''">
+                AND p.domain = #{q.domain}
+            </if>
             <if test="q != null and q.orderBy == 'hot_7d' and q.recentDays != null">
                 AND p.create_time &gt;= DATE_SUB(NOW(3), INTERVAL #{q.recentDays} DAY)
             </if>

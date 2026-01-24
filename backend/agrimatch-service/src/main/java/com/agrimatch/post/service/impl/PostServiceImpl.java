@@ -9,6 +9,7 @@ import com.agrimatch.post.dto.PostQuery;
 import com.agrimatch.post.dto.PostResponse;
 import com.agrimatch.post.mapper.PostMapper;
 import com.agrimatch.post.service.PostService;
+import com.agrimatch.tag.service.TagService;
 import com.agrimatch.post_social.domain.BusPostComment;
 import com.agrimatch.post_social.mapper.PostCommentMapper;
 import com.agrimatch.post_social.mapper.PostLikeMapper;
@@ -30,15 +31,17 @@ public class PostServiceImpl implements PostService {
     private final PostLikeMapper postLikeMapper;
     private final PostCommentMapper postCommentMapper;
     private final PointsService pointsService;
+    private final TagService tagService;
 
     public PostServiceImpl(PostMapper postMapper, UserMapper userMapper, 
                            PostLikeMapper postLikeMapper, PostCommentMapper postCommentMapper,
-                           PointsService pointsService) {
+                           PointsService pointsService, TagService tagService) {
         this.postMapper = postMapper;
         this.userMapper = userMapper;
         this.postLikeMapper = postLikeMapper;
         this.postCommentMapper = postCommentMapper;
         this.pointsService = pointsService;
+        this.tagService = tagService;
     }
 
     @Override
@@ -72,6 +75,8 @@ public class PostServiceImpl implements PostService {
         p.setCompanyId(u.getCompanyId()); // 允许为空
         p.setTitle(req.getTitle());
         p.setContent(emptyToNull(req.getContent()));
+        p.setDomain(req.getDomain() != null ? req.getDomain() : "general");
+        p.setTagsJson(req.getTagsJson());
         p.setImagesJson(emptyToNull(req.getImagesJson()));
         p.setPostType(postType);
         p.setBountyPoints("bounty".equals(postType) ? bountyPoints : 0);
@@ -79,6 +84,10 @@ public class PostServiceImpl implements PostService {
 
         int rows = postMapper.insert(p);
         if (rows != 1 || p.getId() == null) throw new ApiException(ResultCode.SERVER_ERROR);
+
+        // 同步标签
+        tagService.syncEntityTags("post", p.getId(), p.getDomain(), p.getTagsJson());
+
         return p.getId();
     }
 
@@ -194,6 +203,8 @@ public class PostServiceImpl implements PostService {
         r.setBountyPoints(p.getBountyPoints());
         r.setBountyStatus(p.getBountyStatus());
         r.setAcceptedCommentId(p.getAcceptedCommentId());
+        r.setDomain(p.getDomain());
+        r.setTagsJson(p.getTagsJson());
         r.setCreateTime(p.getCreateTime());
         return r;
     }

@@ -4,6 +4,7 @@ public class RequirementQuery {
     private Long companyId;
     private Long userId;
     private String categoryName;
+    private String domain;
     private Integer status;
     /**
      * 是否包含已过期数据：
@@ -36,6 +37,14 @@ public class RequirementQuery {
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 
     public Integer getStatus() {

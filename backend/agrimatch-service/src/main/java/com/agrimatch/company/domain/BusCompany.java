@@ -28,6 +28,7 @@ public class BusCompany {
     private LocalDate establishDate;
     private String scale;
     private String companyIntro;
+    private String tagsJson;
     private String announcementsJson;
     private String recruitmentJson;
     private String certificatesJson;
@@ -217,6 +218,14 @@ public class BusCompany {
 
     public void setCompanyIntro(String companyIntro) {
         this.companyIntro = companyIntro;
+    }
+
+    public String getTagsJson() {
+        return tagsJson;
+    }
+
+    public void setTagsJson(String tagsJson) {
+        this.tagsJson = tagsJson;
     }
 
     public String getAnnouncementsJson() {

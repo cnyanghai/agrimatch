@@ -246,20 +246,48 @@ onBeforeUnmount(detachListeners)
     <div v-if="currentLabel" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-gray-800 truncate max-w-full md:max-w-[220px]">
       {{ currentLabel }}
     </div>
+
+    <button
+      type="button"
+      class="text-xs text-brand-600 hover:text-brand-700 font-bold ml-2 underline underline-offset-4"
+      @click="customDialogOpen = true"
+    >
+      找不到品类？手动录入
+    </button>
   </div>
 
-  <el-dialog v-model="customDialogOpen" title="自定义二级品类" width="520px">
-    <el-form label-width="110px">
-      <el-form-item label="父级(一级品类)">
-        <el-input :model-value="customParentName" disabled placeholder="请先在左侧选择一级品类" />
-      </el-form-item>
-      <el-form-item label="品类名称">
-        <el-input v-model="customName" placeholder="例如：豆粕(高蛋白)" />
-      </el-form-item>
-    </el-form>
+  <el-dialog v-model="customDialogOpen" title="自定义品类" width="520px" append-to-body class="!rounded-3xl">
+    <div class="space-y-4 py-2">
+      <div v-if="!customParentId">
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">选择所属大类</label>
+        <el-select v-model="customParentId" placeholder="请选择一级大类" class="w-full neo-select">
+          <el-option v-for="opt in cascaderOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
+        </el-select>
+      </div>
+      <div v-else>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">所属大类</label>
+        <div class="px-4 py-2.5 bg-gray-50 border-2 border-gray-100 rounded-xl text-sm text-gray-600 font-bold">
+          {{ customParentName }}
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">品类名称</label>
+        <input
+          v-model="customName"
+          placeholder="例如：特种鱼苗、二手料车..."
+          class="w-full px-4 py-3 border-2 border-gray-100 rounded-xl focus:border-brand-500 outline-none transition-all"
+          @keyup.enter="submitCustom"
+        />
+      </div>
+    </div>
     <template #footer>
-      <el-button @click="customDialogOpen = false">取消</el-button>
-      <el-button type="primary" :loading="loading" @click="submitCustom">创建并选中</el-button>
+      <div class="flex gap-3">
+        <button @click="customDialogOpen = false" class="flex-1 px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-bold">取消</button>
+        <button @click="submitCustom" :disabled="loading" class="flex-1 px-4 py-2.5 bg-brand-600 text-white rounded-xl font-bold disabled:opacity-50">
+          {{ loading ? '创建中...' : '确认创建' }}
+        </button>
+      </div>
     </template>
   </el-dialog>
 </template>

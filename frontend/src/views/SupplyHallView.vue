@@ -50,6 +50,15 @@ const total = ref(0)
 // 品种列表
 const categoryOptions = ['玉米', '豆粕', '棉粕', '菜粕', 'DDGS', '赖氨酸', '蛋氨酸', '磷酸氢钙']
 
+// 板块列表
+const domains = [
+  { key: 'biological', name: '生物种苗', color: 'text-green-600 bg-green-50' },
+  { key: 'processing', name: '农业加工', color: 'text-blue-600 bg-blue-50' },
+  { key: 'material', name: '原料辅料', color: 'text-amber-600 bg-amber-50' },
+  { key: 'equipment', name: '装备物流', color: 'text-purple-600 bg-purple-50' }
+]
+const selectedDomain = ref<string | null>(null)
+
 // 关注状态 Map: userId -> isFollowing
 const followingMap = ref<Map<number, boolean>>(new Map())
 
@@ -219,6 +228,10 @@ async function loadSupplies() {
     if (selectedCategory.value) {
       params.categoryName = selectedCategory.value
     }
+
+    if (selectedDomain.value) {
+      params.domain = selectedDomain.value
+    }
     
     // 应用公司筛选（从地图跳转）
     if (companyIdFilter.value) {
@@ -300,6 +313,13 @@ function calcReferencePrice(contractCode: string, basisPrice: number): number | 
 function selectCategory(cat: string | null) {
   selectedCategory.value = selectedCategory.value === cat ? null : cat
   currentPage.value = 1 // 重置分页
+  loadSupplies()
+}
+
+// 选择板块筛选
+function selectDomain(domainKey: string | null) {
+  selectedDomain.value = selectedDomain.value === domainKey ? null : domainKey
+  currentPage.value = 1
   loadSupplies()
 }
 
@@ -413,6 +433,26 @@ function parseParams(paramsJson?: string): string {
         </div>
 
         <div class="space-y-4">
+          <div class="flex items-start gap-4 text-xs">
+            <span class="text-gray-400 shrink-0 mt-1.5 font-medium">所属板块:</span>
+            <div class="flex flex-wrap gap-2">
+              <button 
+                :class="['px-3 py-1 border rounded-full transition-all', selectedDomain === null ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
+                @click="selectDomain(null)"
+              >
+                全部
+              </button>
+              <button 
+                v-for="d in domains" 
+                :key="d.key"
+                :class="['px-3 py-1 border rounded-full transition-all', selectedDomain === d.key ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
+                @click="selectDomain(d.key)"
+              >
+                {{ d.name }}
+              </button>
+            </div>
+          </div>
+
           <div class="flex items-start gap-4 text-xs">
             <span class="text-gray-400 shrink-0 mt-1.5 font-medium">常见品种:</span>
             <div class="flex flex-wrap gap-2">

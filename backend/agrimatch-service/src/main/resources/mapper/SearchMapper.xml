@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.search.mapper.SearchMapper">
+
+    <resultMap id="SearchResultMap" type="com.agrimatch.search.dto.UnifiedSearchResult">
+        <result column="entity_type" property="entityType" />
+        <result column="entity_id" property="entityId" />
+        <result column="title" property="title" />
+        <result column="content" property="content" />
+        <result column="domain" property="domain" />
+        <result column="tags_json" property="tagsJson" />
+        <result column="user_name" property="userName" />
+        <result column="company_name" property="companyName" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <sql id="unifiedQueryBody">
+        FROM (
+            <if test="q.entityType == null or q.entityType == 'supply'">
+            SELECT 'supply' as entity_type, id as entity_id, category_name as title, remark as content, domain, tags_json, user_id, company_id, create_time
+            FROM bus_supply WHERE is_deleted = 0
+            </if>
+            <if test="q.entityType == null"> UNION ALL </if>
+            <if test="q.entityType == null or q.entityType == 'requirement'">
+            SELECT 'requirement' as entity_type, id as entity_id, category_name as title, remark as content, domain, tags_json, user_id, company_id, create_time
+            FROM bus_requirement WHERE is_deleted = 0
+            </if>
+            <if test="q.entityType == null"> UNION ALL </if>
+            <if test="q.entityType == null or q.entityType == 'post'">
+            SELECT 'post' as entity_type, id as entity_id, title, content, domain, tags_json, user_id, company_id, create_time
+            FROM bus_post WHERE is_deleted = 0
+            </if>
+        ) t
+        LEFT JOIN sys_user u ON u.user_id = t.user_id
+        LEFT JOIN bus_company c ON c.id = t.company_id
+        <where>
+            <if test="q.domain != null and q.domain != ''">
+                AND t.domain = #{q.domain}
+            </if>
+            <if test="q.keyword != null and q.keyword != ''">
+                AND (t.title LIKE CONCAT('%', #{q.keyword}, '%') OR t.content LIKE CONCAT('%', #{q.keyword}, '%'))
+            </if>
+            <if test="q.tagFilters != null and q.tagFilters.size() > 0">
+                AND (t.entity_type, t.entity_id) IN (
+                    SELECT entity_type, entity_id
+                    FROM bus_item_tag_values
+                    <where>
+                        <foreach collection="q.tagFilters" item="val" index="key" separator=" OR ">
+                            (tag_key = #{key} AND (tag_value_text = #{val.toString()} OR tag_value_num = #{val}))
+                        </foreach>
+                    </where>
+                    GROUP BY entity_type, entity_id
+                    HAVING COUNT(*) = #{q.tagFilters.size()}
+                )
+            </if>
+        </where>
+    </sql>
+
+    <select id="searchUnified" resultMap="SearchResultMap">
+        SELECT t.*, u.nick_name as user_name, c.company_name
+        <include refid="unifiedQueryBody" />
+        ORDER BY t.create_time DESC
+        LIMIT ${(q.page - 1) * q.size}, #{q.size}
+    </select>
+
+    <select id="countUnified" resultType="long">
+        SELECT COUNT(*)
+        <include refid="unifiedQueryBody" />
+    </select>
+
+</mapper>
+

@@ -12,6 +12,8 @@ public class PostResponse {
     private String position;
     private String title;
     private String content;
+    private String domain;
+    private String tagsJson;
     private String imagesJson;
     private String postType;
     private Integer bountyPoints;
@@ -92,6 +94,22 @@ public class PostResponse {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public String getTagsJson() {
+        return tagsJson;
+    }
+
+    public void setTagsJson(String tagsJson) {
+        this.tagsJson = tagsJson;
     }
 
     public String getImagesJson() {

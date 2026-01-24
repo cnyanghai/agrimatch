@@ -9,6 +9,7 @@ import com.agrimatch.company.dto.CompanyResponse;
 import com.agrimatch.company.dto.CompanyUpdateRequest;
 import com.agrimatch.company.mapper.CompanyMapper;
 import com.agrimatch.company.service.CompanyService;
+import com.agrimatch.tag.service.TagService;
 import com.agrimatch.geo.dto.GeoPoint;
 import com.agrimatch.geo.service.AmapGeocodeService;
 import com.agrimatch.requirement.dto.RequirementQuery;
@@ -30,14 +31,17 @@ public class CompanyServiceImpl implements CompanyService {
     private final UserMapper userMapper;
     private final SupplyService supplyService;
     private final RequirementService requirementService;
+    private final TagService tagService;
 
     public CompanyServiceImpl(CompanyMapper companyMapper, AmapGeocodeService amapGeocodeService, UserMapper userMapper,
-                              @Lazy SupplyService supplyService, @Lazy RequirementService requirementService) {
+                              @Lazy SupplyService supplyService, @Lazy RequirementService requirementService,
+                              TagService tagService) {
         this.companyMapper = companyMapper;
         this.amapGeocodeService = amapGeocodeService;
         this.userMapper = userMapper;
         this.supplyService = supplyService;
         this.requirementService = requirementService;
+        this.tagService = tagService;
     }
 
     @Override
@@ -84,6 +88,9 @@ public class CompanyServiceImpl implements CompanyService {
 
         int rows = companyMapper.insert(c);
         if (rows != 1 || c.getId() == null) throw new ApiException(ResultCode.SERVER_ERROR);
+
+        // 同步标签
+        tagService.syncEntityTags("company", c.getId(), "general", c.getTagsJson());
         
         // 回写用户的 company_id，确保用户与公司关联
         userMapper.updateCompanyId(ownerUserId, c.getId());
@@ -166,6 +173,11 @@ public class CompanyServiceImpl implements CompanyService {
 
         int rows = companyMapper.update(c);
         if (rows != 1) throw new ApiException(ResultCode.NOT_FOUND);
+
+        // 同步标签
+        if (req.getTagsJson() != null) {
+            tagService.syncEntityTags("company", id, "general", req.getTagsJson());
+        }
     }
 
     /**
@@ -287,6 +299,7 @@ public class CompanyServiceImpl implements CompanyService {
         r.setAnnouncementsJson(c.getAnnouncementsJson());
         r.setRecruitmentJson(c.getRecruitmentJson());
         r.setCertificatesJson(c.getCertificatesJson());
+        r.setTagsJson(c.getTagsJson());
         r.setCreateTime(c.getCreateTime());
         r.setUpdateTime(c.getUpdateTime());
         return r;

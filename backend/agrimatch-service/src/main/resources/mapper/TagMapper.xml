@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.tag.mapper.TagMapper">
+
+    <resultMap id="TagResultMap" type="com.agrimatch.tag.domain.NhtTag">
+        <id property="id" column="id" />
+        <result property="tagName" column="tag_name" />
+        <result property="tagKey" column="tag_key" />
+        <result property="domain" column="domain" />
+        <result property="tagType" column="tag_type" />
+        <result property="unit" column="unit" />
+        <result property="options" column="options" />
+        <result property="recommendCategories" column="recommend_categories" />
+        <result property="isHot" column="is_hot" />
+        <result property="status" column="status" />
+        <result property="sort" column="sort" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <sql id="selectTagVo">
+        select id, tag_name, tag_key, domain, tag_type, unit, options, recommend_categories, is_hot, status, sort, create_time, update_time
+        from nht_tags
+    </sql>
+
+    <select id="selectTagList" resultMap="TagResultMap">
+        <include refid="selectTagVo"/>
+        <where>
+            status = 1
+            <if test="keyword != null and keyword != ''">
+                AND tag_name LIKE concat('%', #{keyword}, '%')
+            </if>
+            <if test="domain != null and domain != ''">
+                AND domain = #{domain}
+            </if>
+            <if test="isHot != null">
+                AND is_hot = #{isHot}
+            </if>
+        </where>
+        order by sort asc, create_time desc
+    </select>
+
+    <select id="selectTagsByCategoryId" resultMap="TagResultMap">
+        <include refid="selectTagVo"/>
+        <where>
+            status = 1
+            AND JSON_CONTAINS(recommend_categories, CAST(#{categoryId} AS CHAR))
+        </where>
+        order by sort asc
+    </select>
+
+    <select id="selectTagById" resultMap="TagResultMap">
+        <include refid="selectTagVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertTag" parameterType="com.agrimatch.tag.domain.NhtTag" useGeneratedKeys="true" keyProperty="id">
+        insert into nht_tags (
+            tag_name, tag_key, domain, tag_type, unit, options, recommend_categories, is_hot, status, sort, create_time
+        ) values (
+            #{tagName}, #{tagKey}, #{domain}, #{tagType}, #{unit}, #{options}, #{recommendCategories}, #{isHot}, #{status}, #{sort}, now()
+        )
+    </insert>
+
+    <update id="updateTag" parameterType="com.agrimatch.tag.domain.NhtTag">
+        update nht_tags
+        <set>
+            <if test="tagName != null">tag_name = #{tagName},</if>
+            <if test="tagKey != null">tag_key = #{tagKey},</if>
+            <if test="domain != null">domain = #{domain},</if>
+            <if test="tagType != null">tag_type = #{tagType},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="options != null">options = #{options},</if>
+            <if test="recommendCategories != null">recommend_categories = #{recommendCategories},</if>
+            <if test="isHot != null">is_hot = #{isHot},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            update_time = now()
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTagById">
+        delete from nht_tags where id = #{id}
+    </delete>
+
+    <delete id="deleteEntityTags">
+        DELETE FROM bus_item_tag_values
+        WHERE entity_type = #{entityType} AND entity_id = #{entityId}
+    </delete>
+
+    <insert id="insertEntityTagValue">
+        INSERT INTO bus_item_tag_values (
+            entity_type, entity_id, tag_id, tag_key, tag_value_text, tag_value_num, domain, create_time
+        ) VALUES (
+            #{entityType}, #{entityId}, #{tagId}, #{tagKey}, #{tagValueText}, #{tagValueNum}, #{domain}, NOW(3)
+        )
+    </insert>
+
+</mapper>
+

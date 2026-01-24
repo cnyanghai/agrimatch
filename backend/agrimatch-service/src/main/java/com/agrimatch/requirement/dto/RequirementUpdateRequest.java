@@ -24,6 +24,9 @@ public class RequirementUpdateRequest {
     @Size(max = 20)
     private String deliveryMethod;
 
+    private String domain;
+    private String tagsJson;
+
     private String paramsJson;
 
     @Size(max = 255)
@@ -96,6 +99,22 @@ public class RequirementUpdateRequest {
 
     public void setDeliveryMethod(String deliveryMethod) {
         this.deliveryMethod = deliveryMethod;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public String getTagsJson() {
+        return tagsJson;
+    }
+
+    public void setTagsJson(String tagsJson) {
+        this.tagsJson = tagsJson;
     }
 
     public String getParamsJson() {

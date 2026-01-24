@@ -56,6 +56,9 @@ public class SupplyCreateRequest {
 
     private String priceRulesJson;
 
+    private String domain;        // 所属板块
+    private String tagsJson;      // 标签数据
+
     /**
      * 产品参数/指标选择结果 + 自定义参数（JSON字符串）
      */
@@ -171,6 +174,22 @@ public class SupplyCreateRequest {
 
     public void setPriceRulesJson(String priceRulesJson) {
         this.priceRulesJson = priceRulesJson;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public String getTagsJson() {
+        return tagsJson;
+    }
+
+    public void setTagsJson(String tagsJson) {
+        this.tagsJson = tagsJson;
     }
 
     public String getParamsJson() {

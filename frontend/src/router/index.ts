@@ -8,6 +8,7 @@ const router = createRouter({
     { path: '/', name: 'landing', component: () => import('../views/HomeView.vue'), meta: { public: true, minimal: true, title: 'AgriMatch - 领先的农牧原料数字化交易平台' } },
     { path: '/hall/supply', name: 'hall-supply', component: () => import('../views/SupplyHallView.vue'), meta: { public: true, minimal: true, title: '供应大厅 - 实时现货货源直供 - AgriMatch' } },
     { path: '/hall/need', name: 'hall-need', component: () => import('../views/PurchaseHallView.vue'), meta: { public: true, minimal: true, title: '采购大厅 - 精准匹配采购需求 - AgriMatch' } },
+    { path: '/search', name: 'search', component: () => import('../views/UnifiedSearchView.vue'), meta: { public: true, minimal: true, title: '全站搜索 - AgriMatch' } },
     { path: '/talks', name: 'talks', component: () => import('../views/TopicSquareView.vue'), meta: { public: true, minimal: true, title: '话题广场 - 行业深度交流与资讯 - AgriMatch' } },
     { path: '/talks/:id', name: 'talk-detail', component: () => import('../views/TopicDetailView.vue'), meta: { public: true, minimal: true, title: '话题详情 - AgriMatch' } },
     { path: '/talks/publish', name: 'talks-publish', component: () => import('../views/TopicPublishView.vue'), meta: { minimal: true, requiresAuth: true, title: '发布话题 - AgriMatch' } },
