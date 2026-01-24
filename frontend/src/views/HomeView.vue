@@ -219,106 +219,187 @@ onBeforeUnmount(() => {
 <template>
   <div class="bg-gray-50 text-gray-900 min-h-screen">
     <!-- Hero -->
-    <section class="relative hero-gradient overflow-hidden text-white h-[510px] flex items-center pt-0">
-      <!-- Background Texture Overlay -->
-      <div class="absolute inset-0 hero-pattern opacity-10"></div>
-      <!-- Gradient Overlay for Smooth Transition -->
-      <div class="absolute inset-0 bg-gradient-to-b from-brand-700/20 via-transparent to-transparent"></div>
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-16 flex flex-col items-center text-center">
-        <h1 class="text-2xl font-bold mb-4 leading-tight tracking-tight">
-          智慧畜牧供应链
+    <section class="relative min-h-[600px] flex items-center justify-center overflow-hidden">
+      <!-- Background Image with Parallax-like effect -->
+      <div class="absolute inset-0 z-0">
+        <img 
+          src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=2000" 
+          class="w-full h-full object-cover scale-105"
+          alt="Farmland background"
+        />
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-[2px]"></div>
+      </div>
+
+      <!-- Content -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-24 flex flex-col items-center text-center animate-fade-in">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/20 border border-brand-500/30 backdrop-blur-md mb-8 animate-slide-up">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+          </span>
+          <span class="text-[10px] font-bold text-brand-200 uppercase tracking-widest">2026 智慧畜牧新标准</span>
+        </div>
+
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight tracking-tight animate-slide-up" style="animation-delay: 100ms">
+          连接全球资源<br/>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-emerald-400">重塑农牧供应链</span>
         </h1>
-        <h1 class="text-2xl font-bold mb-4 leading-tight tracking-tight">
-          一站式采购与管理平台
-        </h1>
-        <p class="text-xl md:text-2xl text-gray-300 mb-12 max-w-2xl leading-relaxed">
-          链接全国优质饲料、兽药、养殖设备供应商，提供在线合同生成及全流程追溯服务
+        
+        <p class="text-lg md:text-xl text-gray-300 mb-12 max-w-2xl leading-relaxed animate-slide-up" style="animation-delay: 200ms">
+          链接全国优质饲料、兽药、养殖设备供应商，提供在线合同签约及交流服务
         </p>
 
-        <!-- Centered Search Box -->
-        <div class="w-full max-w-3xl mb-12">
-          <div class="flex p-1.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl focus-within:border-brand-500/50 transition-all">
+        <!-- Glassmorphism Search Box -->
+        <div class="w-full max-w-3xl animate-slide-up" style="animation-delay: 300ms">
+          <div class="group flex p-2 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-2xl focus-within:bg-white/15 focus-within:border-brand-500/50 transition-all duration-300">
             <div class="flex-1 flex items-center px-4">
-              <Search :size="20" class="text-gray-400 mr-3" />
+              <Search :size="22" class="text-brand-300 group-focus-within:text-brand-400 transition-colors" />
               <input
                 v-model="searchKeyword"
                 type="text"
                 placeholder="搜索玉米、豆粕、疫苗、自动喂料机、型号..."
-                class="w-full bg-transparent border-none outline-none text-white placeholder:text-gray-400 py-3"
+                class="w-full bg-transparent border-none outline-none text-white placeholder:text-gray-400/80 py-4 px-3 text-lg"
                 @keyup.enter="onSearch"
               />
             </div>
-            <button class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl font-bold transition-all active:scale-95" @click="onSearch">
-              搜索
+            <button 
+              class="bg-brand-600 hover:bg-brand-500 text-white px-10 py-4 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-brand-900/20 flex items-center gap-2"
+              @click="onSearch"
+            >
+              <span>搜索</span>
+              <ArrowRight :size="18" />
             </button>
           </div>
-        </div>
-
-        <!-- Stats Display -->
-        <div class="flex flex-wrap justify-center gap-8 md:gap-16 text-sm font-medium text-gray-400">
-          <div class="flex items-center gap-2">
-            <TrendingUp :size="16" class="text-brand-500" />
-            <span>每月搜索量超过 <b class="text-white">{{ stats?.userCount ? stats.userCount * 123 : 400 }}</b> 万次</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <Truck :size="16" class="text-brand-500" />
-            <span>搜索数千家供应商 <b class="text-white">({{ stats?.supplierCount ?? 0 }})</b></span>
-          </div>
-          <div class="flex items-center gap-2">
-            <ShoppingBag :size="16" class="text-brand-500" />
-            <span>搜索数百家采购商 <b class="text-white">({{ stats?.buyerCount ?? 0 }})</b></span>
+          
+          <!-- Hot Search Tags -->
+          <div class="flex flex-wrap justify-center gap-4 mt-6 text-xs font-medium text-gray-400">
+            <span class="text-gray-500">热门搜索:</span>
+            <button class="hover:text-brand-400 transition-colors">优质豆粕</button>
+            <button class="hover:text-brand-400 transition-colors">智能喂料系统</button>
+            <button class="hover:text-brand-400 transition-colors">疫苗直供</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 全产业链支柱板块 -->
-    <section class="py-20 bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4">
-        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+    <!-- Platform Stats (Stitch Style Layout) -->
+    <section class="relative z-20 -mt-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-6 group hover:border-brand-200 transition-all">
+          <div class="w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-600 group-hover:scale-110 transition-transform">
+            <Users :size="32" />
+          </div>
           <div>
-            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">
-              全产业链 <span class="text-brand-600">物资板块</span>
+            <div class="text-3xl font-black text-gray-900">{{ stats?.userCount ? stats.userCount * 123 : '4.8' }}w+</div>
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 text-nowrap">每月活跃搜索</div>
+          </div>
+        </div>
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-6 group hover:border-autumn-200 transition-all">
+          <div class="w-16 h-16 rounded-2xl bg-autumn-50 flex items-center justify-center text-autumn-600 group-hover:scale-110 transition-transform">
+            <Factory :size="32" />
+          </div>
+          <div>
+            <div class="text-3xl font-black text-gray-900">{{ stats?.supplierCount ?? '5,200' }}+</div>
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 text-nowrap">认证供应商</div>
+          </div>
+        </div>
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-6 group hover:border-purple-200 transition-all">
+          <div class="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
+            <Gem :size="32" />
+          </div>
+          <div>
+            <div class="text-3xl font-black text-gray-900">{{ stats?.buyerCount ?? '860' }}+</div>
+            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 text-nowrap">大宗采购商</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 全产业链支柱板块 (Bento Grid) -->
+    <section class="py-24 bg-white">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+          <div class="max-w-2xl">
+            <div class="inline-block px-3 py-1 rounded-lg bg-brand-50 text-brand-600 text-xs font-bold uppercase tracking-wider mb-4">核心业务范围</div>
+            <h2 class="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
+              覆盖从种苗培育到<br/>
+              加工流通的 <span class="text-brand-600">全链路物资</span>
             </h2>
-            <p class="text-gray-500 mt-2 text-sm">覆盖从种苗培育到加工流通的全链路需求</p>
           </div>
           <button 
-            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors active:scale-95"
+            class="group flex items-center gap-3 px-6 py-3 rounded-xl bg-gray-50 hover:bg-brand-50 text-sm font-bold text-gray-600 hover:text-brand-600 transition-all active:scale-95"
             @click="go('/categories')"
           >
-            查看所有物资
-            <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-brand-50 flex items-center justify-center transition-colors">
-              <ChevronRight :size="16" />
-            </div>
+            浏览全部分类
+            <ChevronRight :size="18" class="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div
-            v-for="domain in domains"
-            :key="domain.key"
-            class="group bg-white border border-gray-200 rounded-2xl p-6 transition-all hover:shadow-xl hover:border-brand-500 cursor-pointer flex flex-col h-full"
-            @click="go(`/hall/supply?domain=${domain.key}`)"
+        <div class="grid grid-cols-4 grid-rows-2 gap-6 h-[500px]">
+          <!-- Big Bento Card (Material) -->
+          <div 
+            class="col-span-2 row-span-2 group relative overflow-hidden rounded-3xl bg-brand-600 cursor-pointer p-10 flex flex-col justify-end"
+            @click="go(`/hall/supply?domain=material`)"
           >
-            <div 
-              class="w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 shadow-sm"
-              :class="domain.bgColor"
-            >
-              <component :is="domain.icon" :size="28" :class="domain.color" />
+            <div class="absolute top-10 right-10 opacity-20 group-hover:scale-110 transition-transform duration-500">
+              <Wheat :size="180" class="text-white" />
             </div>
-            <div class="flex-1">
-              <h3 class="text-xl font-bold text-gray-900 mb-2">{{ domain.name }}</h3>
-              <p class="text-xs text-gray-500 mb-4 line-clamp-2">{{ domain.desc }}</p>
-              
-              <div class="flex flex-wrap gap-2 mt-auto">
-                <span 
-                  v-for="tag in domain.tags" 
-                  :key="tag"
-                  class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-50 text-gray-400 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors"
-                >
-                  {{ tag }}
-                </span>
+            <div class="relative z-10">
+              <div class="flex flex-wrap gap-2 mb-6">
+                <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold text-white uppercase"># 玉米豆粕</span>
+                <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold text-white uppercase"># 进口添加剂</span>
               </div>
+              <h3 class="text-4xl font-black text-white mb-4">原料饲料</h3>
+              <p class="text-brand-50 max-w-sm text-sm leading-relaxed">提供全球大宗原料及核心添加剂的集采、比价与实时行情分析。</p>
+            </div>
+          </div>
+
+          <!-- Medium Bento Card (Biological) -->
+          <div 
+            class="col-span-2 group relative overflow-hidden rounded-3xl bg-slate-900 cursor-pointer p-8 flex flex-col justify-between"
+            @click="go(`/hall/supply?domain=biological`)"
+          >
+            <div class="absolute top-0 right-0 w-48 h-full bg-gradient-to-l from-emerald-500/20 to-transparent"></div>
+            <div class="flex justify-between items-start relative z-10">
+              <h3 class="text-2xl font-black text-white">生物种苗</h3>
+              <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-emerald-400 backdrop-blur-md">
+                <Sprout :size="24" />
+              </div>
+            </div>
+            <div class="flex items-end justify-between relative z-10">
+              <p class="text-gray-400 text-sm max-w-[200px]">优质种禽、种蛋、鱼苗及畜种资源调度。</p>
+              <div class="flex gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500/30"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Small Bento Card (Processing) -->
+          <div 
+            class="group relative overflow-hidden rounded-3xl bg-orange-50 border border-orange-100 cursor-pointer p-6 flex flex-col justify-between hover:border-orange-200 transition-all"
+            @click="go(`/hall/supply?domain=processing`)"
+          >
+            <div class="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600">
+              <Factory :size="24" />
+            </div>
+            <div>
+              <h4 class="font-black text-gray-900 mb-1">农牧加工</h4>
+              <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">成品/半成品流通</p>
+            </div>
+          </div>
+
+          <!-- Small Bento Card (Equipment) -->
+          <div 
+            class="group relative overflow-hidden rounded-3xl bg-blue-50 border border-blue-100 cursor-pointer p-6 flex flex-col justify-between hover:border-blue-200 transition-all"
+            @click="go(`/hall/supply?domain=equipment`)"
+          >
+            <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
+              <Cog :size="24" />
+            </div>
+            <div>
+              <h4 class="font-black text-gray-900 mb-1">装备物流</h4>
+              <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">自动化养殖系统</p>
             </div>
           </div>
         </div>

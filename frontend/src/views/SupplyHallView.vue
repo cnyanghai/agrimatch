@@ -10,6 +10,7 @@ import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
 import { batchGetFuturesPrices, type FuturesContractResponse } from '../api/futures'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../store/auth'
+import { Card, StatusBadge } from '../components/ui'
 
 const router = useRouter()
 const route = useRoute()
@@ -478,34 +479,41 @@ function parseParams(paramsJson?: string): string {
 
     <!-- 列表区（先按设计稿静态，后续二期接接口替换） -->
     <main class="max-w-7xl mx-auto px-4 py-8">
-      <div class="space-y-4">
-        <div v-if="listLoading" class="bg-white rounded-xl border border-gray-200 p-8 text-gray-400 text-sm">
-          正在加载货源...
-        </div>
+        <div class="space-y-4">
+          <div v-if="listLoading" class="bg-white rounded-xl border border-gray-200 p-8 text-gray-400 text-sm">
+            正在加载货源...
+          </div>
 
-        <div
-          v-for="s in displaySupplies"
-          :key="s.id"
-          :ref="(el) => setCardEl(Number(s.id), el as any)"
-          class="supply-card bg-white rounded-xl p-5 border border-gray-200 transition-all"
-          :class="focusedId === s.id ? 'ring-2 ring-brand-500/60 bg-brand-50/40' : 'hover:shadow-md hover:border-brand-100'"
-        >
-          <div class="flex flex-col lg:flex-row lg:flex-wrap items-start gap-6 mx-0">
-            <div class="w-full lg:w-52 flex items-center gap-3 shrink-0 border-r border-gray-50 pr-4">
-              <div class="w-12 h-12 bg-brand-100 text-brand-700 rounded-lg flex items-center justify-center text-xl font-bold shrink-0">
-                {{ (s.companyName || s.nickName || s.userName || '供')[0] }}
+          <!-- 供应卡片 -->
+          <Card 
+            v-for="s in displaySupplies" 
+            :key="s.id"
+            :ref="el => setCardEl(Number(s.id), el as any)"
+            radius="2xl"
+            padding="none"
+            hover
+            class="flex flex-col lg:flex-row items-stretch lg:items-center gap-6 p-6 group transition-all"
+            :class="{ 'ring-2 ring-brand-500 shadow-lg': focusedId === s.id }"
+            @click="onViewDetail(s)"
+          >
+            <!-- 左侧公司/用户信息 -->
+            <div class="flex items-start gap-3 w-full lg:w-[200px] shrink-0 border-b lg:border-b-0 lg:border-r border-gray-100 pb-4 lg:pb-0 lg:pr-4">
+              <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
+                <span class="text-sm font-bold">{{ (s.companyName || s.nickName || '户')[0] }}</span>
               </div>
-              <div class="overflow-hidden flex-1 min-w-0">
-                <div class="text-sm font-bold text-gray-900 truncate">{{ s.companyName || '未填写公司' }}</div>
+              <div class="min-w-0 flex-1">
+                <div class="font-bold text-gray-900 truncate hover:text-brand-600 transition-colors" @click.stop="go(`/companies/${s.companyId}`)">
+                  {{ s.companyName || '个人用户' }}
+                </div>
                 <div class="flex items-center gap-1 mt-1">
-                  <span class="bg-brand-50 text-brand-600 text-[10px] px-1 py-0.5 rounded">供应</span>
-                  <span class="text-[10px] text-gray-400">{{ s.nickName || s.userName || '' }}</span>
+                  <StatusBadge type="brand">供应</StatusBadge>
+                  <span class="text-[10px] text-gray-400 truncate">{{ s.nickName || s.userName || '' }}</span>
                 </div>
               </div>
               <!-- 关注按钮 -->
               <button
                 v-if="authStore.token && s.userId"
-                class="shrink-0 text-xs px-2 py-1 rounded-full border transition-all "
+                class="shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all active:scale-95"
                 :class="isFollowingUser(s.userId)
                   ? 'bg-brand-50 text-brand-600 border-brand-200'
                   : 'bg-white text-gray-500 border-gray-200 hover:border-brand-300 hover:text-brand-600'"
@@ -515,13 +523,14 @@ function parseParams(paramsJson?: string): string {
               </button>
             </div>
 
+            <!-- 产品核心信息 -->
             <div class="w-full lg:w-auto shrink-0" :class="s.priceType === 1 ? 'lg:min-w-[200px]' : 'lg:w-[120px]'">
               <div class="flex items-center gap-2 mb-1">
-                <span v-if="s.priceType === 1" class="bg-amber-100 text-amber-600 text-[10px] px-1.5 py-0.5 rounded font-bold">基差</span>
-                <span v-else class="bg-orange-100 text-orange-600 text-[10px] px-1.5 py-0.5 rounded font-bold">现货</span>
+                <StatusBadge v-if="s.priceType === 1" type="warning">基差</StatusBadge>
+                <StatusBadge v-else type="success">现货</StatusBadge>
                 <span class="text-gray-400 text-[10px]">ID: {{ s.id }}</span>
               </div>
-              <h3 class="text-lg font-bold text-gray-900 truncate">{{ s.categoryName }}</h3>
+              <h3 class="text-lg font-black text-gray-900 truncate">{{ s.categoryName }}</h3>
               
               <!-- 现货一口价 -->
               <div v-if="s.priceType !== 1" class="mt-1 text-xl font-black text-red-600 italic">
@@ -535,67 +544,67 @@ function parseParams(paramsJson?: string): string {
               <div v-else class="mt-2 space-y-1.5">
                 <div v-for="bq in (s.basisQuotes || []).slice(0, 3)" :key="bq.id" class="bg-amber-50/50 rounded-lg px-2 py-1.5 border border-amber-100">
                   <div class="flex items-center justify-between gap-2">
-                    <span class="text-gray-700 font-bold text-xs">{{ bq.contractName || bq.contractCode }}</span>
+                    <span class="text-gray-700 font-bold text-[10px]">{{ bq.contractName || bq.contractCode }}</span>
                     <span class="text-[10px] text-gray-400">{{ bq.availableQty }}吨</span>
                   </div>
                   <div class="flex items-center justify-between gap-2 mt-0.5">
                     <div class="flex flex-col">
-                      <span class="text-[10px] text-gray-500 scale-90 origin-left">
+                      <span class="text-[9px] text-gray-500">
                         期货 ¥{{ getFuturesPrice(bq.contractCode) || '-' }}
-                        <span v-if="futuresPriceCache[bq.contractCode]?.isTrading === false" class="text-gray-400 ml-0.5">(收)</span>
                       </span>
-                      <span class="font-bold text-[10px] -mt-0.5" :class="bq.basisPrice >= 0 ? 'text-red-500' : 'text-green-500'">
+                      <span class="font-bold text-[10px]" :class="bq.basisPrice >= 0 ? 'text-red-500' : 'text-green-500'">
                         {{ bq.basisPrice >= 0 ? '+' : '' }}{{ bq.basisPrice }}
                       </span>
                     </div>
                     <div class="text-right">
-                      <div class="text-[8px] text-gray-400 font-medium scale-90 origin-right">核算价</div>
+                      <div class="text-[8px] text-gray-400 font-bold uppercase">核算价</div>
                       <span class="font-black text-brand-600 text-sm">
                         ¥{{ calcReferencePrice(bq.contractCode, bq.basisPrice)?.toFixed(0) || '-' }}
                       </span>
                     </div>
                   </div>
                 </div>
-                <div v-if="(s.basisQuotes || []).length > 3" class="text-xs text-gray-400 text-center">
-                  +{{ s.basisQuotes!.length - 3 }} 个合约
-                </div>
               </div>
             </div>
 
-            <div class="flex-1 grid grid-cols-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_190px] gap-4 text-xs py-2 bg-gray-50/50 rounded-lg px-4">
+            <!-- 参数详情 -->
+            <div class="flex-1 grid grid-cols-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_190px] gap-4 text-xs py-3 bg-gray-50/50 rounded-2xl px-5">
               <div class="min-w-0">
-                <div class="text-gray-400 mb-0.5">规格参数</div>
-                <div class="font-semibold text-gray-700 truncate">{{ parseParams(s.paramsJson) }}</div>
+                <div class="text-gray-400 text-[10px] font-bold uppercase mb-1">规格参数</div>
+                <div class="font-bold text-gray-700 truncate">{{ parseParams(s.paramsJson) }}</div>
               </div>
               <div class="min-w-0">
-                <div class="text-gray-400 mb-0.5">发货地</div>
-                <div class="font-semibold text-gray-700 truncate">{{ s.shipAddress || '-' }}</div>
+                <div class="text-gray-400 text-[10px] font-bold uppercase mb-1">发货地</div>
+                <div class="font-bold text-gray-700 truncate">{{ s.shipAddress || '-' }}</div>
               </div>
               <div class="min-w-0">
-                <div class="text-gray-400 mb-0.5">库存</div>
-                <div class="font-semibold text-gray-700 truncate">{{ s.quantity ?? '-' }}吨</div>
+                <div class="text-gray-400 text-[10px] font-bold uppercase mb-1">库存</div>
+                <div class="font-bold text-gray-700 truncate">{{ s.quantity ?? '-' }}吨</div>
               </div>
               <div class="min-w-0">
-                <div class="text-gray-400 mb-0.5">物流方式</div>
-                <div class="font-semibold text-gray-700 truncate">{{ s.deliveryMode || '-' }}</div>
+                <div class="text-gray-400 text-[10px] font-bold uppercase mb-1">物流方式</div>
+                <div class="font-bold text-gray-700 truncate">{{ s.deliveryMode || '-' }}</div>
               </div>
             </div>
 
-            <div class="shrink-0 flex flex-col items-center gap-2">
-              <button class="px-8 py-3 bg-brand-600 text-white rounded-xl font-bold text-sm shadow-md shadow-brand-50 hover:bg-brand-700 transition-all " @click="onConsult(s)">
+            <!-- 操作 -->
+            <div class="shrink-0 flex flex-col items-center justify-center gap-2">
+              <button 
+                class="w-full lg:w-auto px-10 py-3 bg-brand-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-brand-900/10 hover:bg-brand-700 hover:-translate-y-0.5 transition-all active:scale-95" 
+                @click.stop="onConsult(s)"
+              >
                 立即咨询
               </button>
             </div>
-          </div>
-        </div>
+          </Card>
 
-        <div v-if="!listLoading && supplies.length === 0" class="bg-white rounded-xl border border-gray-200 p-8 text-center">
-          <div class="text-gray-400 text-sm mb-2">暂无货源数据</div>
-          <div class="text-xs text-gray-300">
-            {{ selectedCategory ? `没有找到「${selectedCategory}」相关的供应信息` : '请尝试调整筛选条件' }}
+          <div v-if="!listLoading && supplies.length === 0" class="bg-white rounded-xl border border-gray-200 p-8 text-center">
+            <div class="text-gray-400 text-sm mb-2">暂无货源数据</div>
+            <div class="text-xs text-gray-300">
+              {{ selectedCategory ? `没有找到「${selectedCategory}」相关的供应信息` : '请尝试调整筛选条件' }}
+            </div>
           </div>
         </div>
-      </div>
 
       <!-- 分页 -->
       <div v-if="total > pageSize" class="flex justify-center mt-10">

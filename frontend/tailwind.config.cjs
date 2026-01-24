@@ -75,26 +75,33 @@ module.exports = {
       },
       boxShadow: {
         sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-        md: '0 2px 4px 0 rgba(0, 0, 0, 0.05)',
-        lg: '0 4px 6px -1px rgba(0, 0, 0, 0.07)',
-        xl: '0 10px 15px -3px rgba(0, 0, 0, 0.08)',
-        '2xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-        brand: '0 2px 8px rgba(132, 187, 159, 0.15)', // 若竹色阴影
+        md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        brand: '0 4px 14px 0 rgba(132, 187, 159, 0.39)', // 增强的若竹色阴影
+        autumn: '0 4px 14px 0 rgba(165, 204, 220, 0.39)', // 秋波蓝阴影
+        glass: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)', // 玻璃质感边框阴影
       },
       fontSize: {
-        '3xl': '1.875rem',
-        '4xl': '2.25rem',
+        '3xl': ['1.875rem', { lineHeight: '2.25rem', letterSpacing: '-0.02em' }],
+        '4xl': ['2.25rem', { lineHeight: '2.5rem', letterSpacing: '-0.02em' }],
+        '5xl': ['3rem', { lineHeight: '1', letterSpacing: '-0.02em' }],
       },
       spacing: {
         '16': '4rem',
         '18': '4.5rem',
         '20': '5rem',
         '24': '6rem',
+        '28': '7rem',
+        '32': '8rem',
       },
       animation: {
-        'fade-in': 'fadeIn 0.2s ease-out',
-        'slide-up': 'slideUp 0.2s ease-out',
-        'scale-in': 'scaleIn 0.15s ease-out',
+        'fade-in': 'fadeIn 0.3s ease-out',
+        'slide-up': 'slideUp 0.4s ease-out',
+        'slide-down': 'slideDown 0.4s ease-out',
+        'scale-in': 'scaleIn 0.2s ease-out',
+        'float': 'float 3s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -105,10 +112,18 @@ module.exports = {
           '0%': { transform: 'translateY(20px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
+        slideDown: {
+          '0%': { transform: 'translateY(-20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
         scaleIn: {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        }
       },
     },
   },

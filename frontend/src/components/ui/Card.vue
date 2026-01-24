@@ -2,61 +2,75 @@
 import { computed } from 'vue'
 
 const props = withDefaults(defineProps<{
-  variant?: 'default' | 'interactive' | 'info' | 'warning' | 'success'
-  padding?: 'sm' | 'md' | 'lg'
-  shadow?: 'sm' | 'md' | 'lg' | 'xl'
+  variant?: 'default' | 'interactive' | 'info' | 'warning' | 'success' | 'glass' | 'slate'
+  padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl'
+  shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'brand'
+  radius?: 'xl' | '2xl' | '3xl'
   hover?: boolean
   border?: boolean
-  noPadding?: boolean
 }>(), {
   variant: 'default',
   padding: 'md',
-  shadow: 'md',
+  shadow: 'sm',
+  radius: 'xl',
   hover: false,
-  border: true,
-  noPadding: false
+  border: true
 })
 
-// 卡片样式
 const cardClasses = computed(() => {
+  const base = 'transition-all duration-300 overflow-hidden'
+  
   const variants: Record<string, string> = {
-    default: 'bg-surface dark:bg-surface-dark',
-    interactive: 'bg-surface dark:bg-surface-dark cursor-pointer',
-    info: 'bg-info/10 dark:bg-info/20',
-    warning: 'bg-warning/10 dark:bg-warning/20',
-    success: 'bg-success/10 dark:bg-success/20'
+    default: 'bg-white dark:bg-slate-900',
+    interactive: 'bg-white dark:bg-slate-900 cursor-pointer',
+    info: 'bg-autumn-50/50 dark:bg-autumn-900/20',
+    warning: 'bg-amber-50/50 dark:bg-amber-900/20',
+    success: 'bg-brand-50/50 dark:bg-brand-900/20',
+    glass: 'bg-white/10 backdrop-blur-xl border-white/20',
+    slate: 'bg-slate-900 text-white'
   }
 
   const paddings: Record<string, string> = {
+    none: 'p-0',
     sm: 'p-4',
     md: 'p-6',
-    lg: 'p-8'
+    lg: 'p-8',
+    xl: 'p-10'
   }
 
   const shadows: Record<string, string> = {
+    none: 'shadow-none',
     sm: 'shadow-sm',
     md: 'shadow-md',
-    lg: 'shadow-md',
-    xl: 'shadow-xl'
+    lg: 'shadow-lg',
+    xl: 'shadow-xl',
+    '2xl': 'shadow-2xl',
+    brand: 'shadow-brand'
+  }
+
+  const radii: Record<string, string> = {
+    xl: 'rounded-xl',
+    '2xl': 'rounded-2xl',
+    '3xl': 'rounded-3xl'
   }
 
   let classes = [
-    'rounded-xl transition-all duration-300',
+    base,
+    radii[props.radius],
     variants[props.variant],
     paddings[props.padding],
     shadows[props.shadow]
   ]
 
-  if (props.border && props.variant === 'default') {
-    classes.push('border border-border dark:border-border-dark')
+  if (props.border && props.variant !== 'glass') {
+    classes.push('border border-gray-100 dark:border-slate-800')
   }
 
-  if (props.border && props.variant === 'interactive') {
-    classes.push('border border-border dark:border-border-dark hover:border-primary')
-  }
-
-  if (props.hover && props.variant === 'interactive') {
-    classes.push('hover:shadow-md hover:-translate-y-0.5')
+  if (props.hover) {
+    classes.push('hover:shadow-lg hover:-translate-y-1')
+    if (props.variant === 'interactive') {
+      classes.push('hover:border-brand-200 dark:hover:border-brand-900/50')
+    }
   }
 
   return classes.filter(Boolean).join(' ')
@@ -64,7 +78,7 @@ const cardClasses = computed(() => {
 </script>
 
 <template>
-  <div :class="cardClasses" :style="noPadding ? 'padding: 0' : ''">
+  <div :class="cardClasses">
     <slot />
   </div>
 </template>
