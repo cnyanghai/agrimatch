@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.post_social.mapper.PostCollectMapper">
+
+    <insert id="insert" parameterType="com.agrimatch.post_social.domain.BusPostCollect"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_post_collect (user_id, post_id, create_time)
+        VALUES (#{userId}, #{postId}, NOW(3))
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM bus_post_collect
+        WHERE user_id = #{userId} AND post_id = #{postId}
+    </delete>
+
+    <select id="selectOne" resultType="com.agrimatch.post_social.domain.BusPostCollect">
+        SELECT id, user_id, post_id, create_time
+        FROM bus_post_collect
+        WHERE user_id = #{userId} AND post_id = #{postId}
+        LIMIT 1
+    </select>
+
+    <select id="selectCollectedPostIds" resultType="long">
+        SELECT post_id
+        FROM bus_post_collect
+        WHERE user_id = #{userId}
+        <if test="postIds != null and postIds.size() > 0">
+            AND post_id IN
+            <foreach collection="postIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>
+

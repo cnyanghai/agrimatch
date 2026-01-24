@@ -14,11 +14,6 @@ public interface PostService {
     List<PostResponse> list(PostQuery q);
 
     void delete(Long id);
-
-    /**
-     * 采纳回答（赏金求助）
-     */
-    void acceptAnswer(Long userId, Long postId, Long commentId);
 }
 
 

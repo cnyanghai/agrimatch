@@ -16,9 +16,12 @@ public class PostResponse {
     private String tagsJson;
     private String imagesJson;
     private String postType;
-    private Integer bountyPoints;
-    private Integer bountyStatus;
-    private Long acceptedCommentId;
+    private Boolean isPaid;
+    private java.math.BigDecimal price;
+    private Integer teaserLength;
+    private Boolean isExpert;
+    private Boolean hasPurchased;
+    private Boolean collectedByMe;
     private LocalDateTime createTime;
     private Integer likeCount;
     private Integer commentCount;
@@ -160,28 +163,52 @@ public class PostResponse {
         this.postType = postType;
     }
 
-    public Integer getBountyPoints() {
-        return bountyPoints;
+    public Boolean getIsPaid() {
+        return isPaid;
     }
 
-    public void setBountyPoints(Integer bountyPoints) {
-        this.bountyPoints = bountyPoints;
+    public void setIsPaid(Boolean isPaid) {
+        this.isPaid = isPaid;
     }
 
-    public Integer getBountyStatus() {
-        return bountyStatus;
+    public java.math.BigDecimal getPrice() {
+        return price;
     }
 
-    public void setBountyStatus(Integer bountyStatus) {
-        this.bountyStatus = bountyStatus;
+    public void setPrice(java.math.BigDecimal price) {
+        this.price = price;
     }
 
-    public Long getAcceptedCommentId() {
-        return acceptedCommentId;
+    public Integer getTeaserLength() {
+        return teaserLength;
     }
 
-    public void setAcceptedCommentId(Long acceptedCommentId) {
-        this.acceptedCommentId = acceptedCommentId;
+    public void setTeaserLength(Integer teaserLength) {
+        this.teaserLength = teaserLength;
+    }
+
+    public Boolean getIsExpert() {
+        return isExpert;
+    }
+
+    public void setIsExpert(Boolean isExpert) {
+        this.isExpert = isExpert;
+    }
+
+    public Boolean getHasPurchased() {
+        return hasPurchased;
+    }
+
+    public void setHasPurchased(Boolean hasPurchased) {
+        this.hasPurchased = hasPurchased;
+    }
+
+    public Boolean getCollectedByMe() {
+        return collectedByMe;
+    }
+
+    public void setCollectedByMe(Boolean collectedByMe) {
+        this.collectedByMe = collectedByMe;
     }
 }
 

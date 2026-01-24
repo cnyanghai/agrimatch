@@ -11,6 +11,8 @@ public class PostQuery {
     private Integer recentDays; // 用于 hot_7d：仅查询最近 N 天内发布的帖子
     private Integer limit; // 返回条数限制（首页等场景）
     private Long viewerUserId; // 用于计算“我是否点赞”，不参与过滤
+    private Long followingUserId; // 过滤关注的人发布的帖子
+    private boolean onlyCollected; // 仅查询收藏的帖子
 
     public Long getCompanyId() {
         return companyId;
@@ -82,6 +84,22 @@ public class PostQuery {
 
     public void setViewerUserId(Long viewerUserId) {
         this.viewerUserId = viewerUserId;
+    }
+
+    public Long getFollowingUserId() {
+        return followingUserId;
+    }
+
+    public void setFollowingUserId(Long followingUserId) {
+        this.followingUserId = followingUserId;
+    }
+
+    public boolean isOnlyCollected() {
+        return onlyCollected;
+    }
+
+    public void setOnlyCollected(boolean onlyCollected) {
+        this.onlyCollected = onlyCollected;
     }
 
     public String getPostType() {

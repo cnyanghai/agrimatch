@@ -17,10 +17,11 @@ public class BusPost {
     private String domain;
     private String tagsJson;
     private String imagesJson;
-    private String postType;          // 帖子类型: general/bounty/poll
-    private Integer bountyPoints;     // 悬赏积分
-    private Integer bountyStatus;     // 悬赏状态: 0=进行中, 1=已采纳, 2=已过期
-    private Long acceptedCommentId;   // 被采纳的评论ID
+    private String postType;          // 帖子类型: general/bounty/poll/paid
+    private Boolean isPaid;           // 是否付费文章 0=免费 1=付费
+    private java.math.BigDecimal price; // 付费价格
+    private Integer teaserLength;     // 免费预览字数
+    private Boolean isExpert;         // 是否专家内容
     private Integer isDeleted;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
@@ -153,28 +154,36 @@ public class BusPost {
         this.postType = postType;
     }
 
-    public Integer getBountyPoints() {
-        return bountyPoints;
+    public Boolean getIsPaid() {
+        return isPaid;
     }
 
-    public void setBountyPoints(Integer bountyPoints) {
-        this.bountyPoints = bountyPoints;
+    public void setIsPaid(Boolean isPaid) {
+        this.isPaid = isPaid;
     }
 
-    public Integer getBountyStatus() {
-        return bountyStatus;
+    public java.math.BigDecimal getPrice() {
+        return price;
     }
 
-    public void setBountyStatus(Integer bountyStatus) {
-        this.bountyStatus = bountyStatus;
+    public void setPrice(java.math.BigDecimal price) {
+        this.price = price;
     }
 
-    public Long getAcceptedCommentId() {
-        return acceptedCommentId;
+    public Integer getTeaserLength() {
+        return teaserLength;
     }
 
-    public void setAcceptedCommentId(Long acceptedCommentId) {
-        this.acceptedCommentId = acceptedCommentId;
+    public void setTeaserLength(Integer teaserLength) {
+        this.teaserLength = teaserLength;
+    }
+
+    public Boolean getIsExpert() {
+        return isExpert;
+    }
+
+    public void setIsExpert(Boolean isExpert) {
+        this.isExpert = isExpert;
     }
 }
 

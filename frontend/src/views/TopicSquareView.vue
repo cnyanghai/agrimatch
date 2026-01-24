@@ -3,11 +3,16 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { requireAuth } from '../utils/requireAuth'
-import { listPosts, type PostResponse } from '../api/post'
+import { listPosts, listCollectedPostIds, type PostResponse } from '../api/post'
+import { getFollowedPosts, getFollowedUsers, type FollowedUser } from '../api/follow'
 import { useAuthStore } from '../store/auth'
 import { useUiStore } from '../store/ui'
 import PublicFooter from '../components/PublicFooter.vue'
-import { MessageSquare, Heart, Search, ChevronDown, Plus, Star, Gift, Coins, CheckCircle } from 'lucide-vue-next'
+import { MessageSquare, Heart, Search, ChevronDown, Plus, Star, Gift, Coins, CheckCircle, Flame, Users, Clock, ArrowRight, UserPlus } from 'lucide-vue-next'
+import ExpertBadge from '../components/post/ExpertBadge.vue'
+import PaidBadge from '../components/post/PaidBadge.vue'
+import CollectButton from '../components/post/CollectButton.vue'
+import { Card, StatusBadge } from '../components/ui'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -22,7 +27,11 @@ const posts = ref<PostResponse[]>([])
 const keyword = ref('')
 const orderBy = ref('create_time')
 const order = ref<'asc' | 'desc'>('desc')
-const activeTab = ref<'all' | 'bounty'>('all')
+const activeTab = ref<'all' | 'hot' | 'following'>('all')
+const collectedPostIds = ref<number[]>([])
+
+const followedUsers = ref<FollowedUser[]>([])
+const collectedPosts = ref<PostResponse[]>([])
 
 function go(path: string) {
   router.push(path)
@@ -38,15 +47,51 @@ function onEnterMy() {
   go('/console')
 }
 
+async function loadCollectedIds() {
+  if (!isLoggedIn.value) return
+  try {
+    const r = await listCollectedPostIds()
+    if (r.code === 0) collectedPostIds.value = r.data || []
+  } catch (e) {
+    // ignore
+  }
+}
+
+async function loadFollowedUsers() {
+  if (!isLoggedIn.value) return
+  try {
+    const r = await getFollowedUsers()
+    if (r.code === 0) followedUsers.value = (r.data || []).slice(0, 5)
+  } catch (e) {
+    // ignore
+  }
+}
+
+async function loadCollectedPosts() {
+  if (!isLoggedIn.value) return
+  try {
+    const r = await listPosts({ onlyCollected: true, limit: 5, viewerUserId: auth.me?.userId })
+    if (r.code === 0) collectedPosts.value = r.data || []
+  } catch (e) {
+    // ignore
+  }
+}
+
 async function loadPosts() {
   loading.value = true
   try {
-    const r = await listPosts({ 
-      keyword: keyword.value.trim() || undefined, 
-      postType: activeTab.value === 'bounty' ? 'bounty' : undefined,
-      orderBy: orderBy.value, 
-      order: order.value 
-    })
+    let r
+    if (activeTab.value === 'following') {
+      if (!requireAuth('/talks')) return
+      r = await getFollowedPosts()
+    } else {
+      r = await listPosts({ 
+        keyword: keyword.value.trim() || undefined, 
+        orderBy: activeTab.value === 'hot' ? 'hot_7d' : orderBy.value, 
+        order: activeTab.value === 'hot' ? 'desc' : order.value 
+      })
+    }
+    
     if (r.code !== 0) throw new Error(r.message)
     posts.value = r.data ?? []
   } catch (e: any) {
@@ -56,7 +101,7 @@ async function loadPosts() {
   }
 }
 
-function onTabChange(tab: 'all' | 'bounty') {
+function onTabChange(tab: 'all' | 'hot' | 'following') {
   activeTab.value = tab
   loadPosts()
 }
@@ -87,201 +132,291 @@ function formatTime(timeStr: string | undefined) {
 
 onMounted(() => {
   loadPosts()
+  loadCollectedIds()
+  loadFollowedUsers()
+  loadCollectedPosts()
 })
 </script>
 
 <template>
   <div class="bg-gray-50 text-gray-900 min-h-screen">
 
-    <!-- 头部 -->
-    <header class="bg-white border-b">
-      <div class="max-w-7xl mx-auto px-4 py-12">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-8">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-2">话题广场</h1>
-            <p class="text-gray-500 text-lg">在这里，每一个关于饲料原料的思考都有价值</p>
+    <!-- 头部：知乎风格沉浸式 -->
+    <header class="bg-white border-b sticky top-0 z-30 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center gap-8">
+            <h1 class="text-xl font-black text-brand-600 tracking-tighter">TopicSquare</h1>
+            
+            <nav class="flex items-center gap-6 h-16">
+              <button 
+                v-for="tab in ([
+                  { id: 'all', label: '全部', icon: Clock },
+                  { id: 'hot', label: '热榜', icon: Flame },
+                  { id: 'following', label: '关注', icon: Users }
+                ] as const)"
+                :key="tab.id"
+                class="relative h-16 px-1 flex items-center gap-1.5 text-sm font-bold transition-all group"
+                :class="activeTab === tab.id ? 'text-brand-600' : 'text-gray-500 hover:text-gray-900'"
+                @click="onTabChange(tab.id)"
+              >
+                <component :is="tab.icon" :size="16" :stroke-width="activeTab === tab.id ? 3 : 2" />
+                {{ tab.label }}
+                <div v-if="activeTab === tab.id" class="absolute bottom-0 left-0 right-0 h-1 bg-brand-600 rounded-t-full"></div>
+              </button>
+            </nav>
           </div>
-          <div class="bg-amber-50 border border-amber-100 rounded-xl p-6 flex items-center gap-6 shadow-sm">
-            <div class="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 shadow-inner">
-              <Star :size="28" fill="currentColor" />
-            </div>
-            <div>
-              <p class="text-sm font-bold text-amber-800">发布高质量话题</p>
-              <p class="text-xs text-amber-600/80 font-medium">最高可得 <span class="text-lg font-black">500</span> 积分</p>
-            </div>
-            <button class="bg-amber-500 text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:bg-amber-600 transition-all  shadow-md shadow-amber-500/20" @click="onPublishTalk">立即参与</button>
-          </div>
-        </div>
 
-        <div class="flex items-center gap-8 mt-12 border-b relative">
-          <button 
-            class="pb-4 px-2 text-sm font-bold transition-colors"
-            :class="activeTab === 'all' ? 'border-b-2 border-brand-600 text-brand-600' : 'text-gray-400 hover:text-brand-600'"
-            @click="onTabChange('all')"
-          >全部话题</button>
-          <button 
-            class="pb-4 px-2 text-sm font-medium transition-colors flex items-center gap-1.5 group"
-            :class="activeTab === 'bounty' ? 'font-bold border-b-2 border-amber-500 text-amber-600' : 'text-gray-400 hover:text-amber-500'"
-            @click="onTabChange('bounty')"
-          >
-            赏金求助
-            <span class="w-2 h-2 bg-red-500 rounded-full group-hover:animate-ping"></span>
-          </button>
+          <div class="flex-1 max-w-md px-8">
+            <div class="relative group">
+              <input 
+                v-model="keyword"
+                type="text" 
+                placeholder="搜索你感兴趣的话题..." 
+                class="w-full h-10 bg-gray-100 border-none rounded-full px-10 text-sm outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
+                @keyup.enter="onSearch"
+              />
+              <Search class="w-4 h-4 text-gray-400 absolute left-4 top-3 group-focus-within:text-brand-500 transition-colors" />
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <button 
+              class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2 rounded-full text-sm font-black transition-all active:scale-95 shadow-lg shadow-brand-600/20"
+              @click="onPublishTalk"
+            >
+              发布话题
+            </button>
+          </div>
         </div>
       </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-12">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <!-- 列表 -->
-        <div class="lg:col-span-8 space-y-8">
-          <div class="flex flex-col sm:flex-row gap-4 mb-10">
-            <div class="flex-1 relative group">
-              <input 
-                v-model="keyword"
-                type="text" 
-                placeholder="搜索你感兴趣的话题或关键字..." 
-                class="w-full h-12 bg-white border border-gray-200 rounded-lg px-12 text-sm outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/5 transition-all shadow-sm"
-                @keyup.enter="onSearch"
-              />
-              <Search class="w-5 h-5 text-gray-400 absolute left-4 top-3.5 group-focus-within:text-brand-500 transition-colors" />
-            </div>
-            <div class="relative min-w-[140px]">
-              <select 
-                v-model="order"
-                class="w-full h-12 bg-white border border-gray-200 rounded-xl px-4 pr-10 text-sm font-bold text-gray-600 appearance-none outline-none cursor-pointer hover:border-brand-500 transition-all shadow-sm"
-                @change="onOrderChange"
+    <main class="max-w-7xl mx-auto px-4 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- 左侧 Feed -->
+        <div class="lg:col-span-8 space-y-4">
+          
+          <!-- 快速发布入口 (知乎风格集成卡片) -->
+          <Card padding="none" radius="2xl" class="overflow-hidden mb-6 border-none shadow-sm ring-1 ring-gray-100">
+            <div class="p-4 flex items-center gap-4">
+              <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold">
+                {{ displayName[0] }}
+              </div>
+              <button 
+                class="flex-1 h-10 bg-gray-100 rounded-lg px-4 text-left text-sm text-gray-400 font-medium hover:bg-gray-200 transition-colors"
+                @click="onPublishTalk"
               >
-                <option value="desc">最新发布</option>
-                <option value="asc">最早发布</option>
-              </select>
-              <ChevronDown class="w-4 h-4 text-gray-400 absolute right-4 top-4 pointer-events-none" />
+                有什么行业见解想分享给大家？
+              </button>
+              <div class="flex items-center gap-4 text-gray-400">
+                <button class="hover:text-brand-600 transition-colors flex flex-col items-center" @click="onPublishTalk">
+                  <MessageSquare :size="20" />
+                  <span class="text-[10px] mt-0.5 font-bold">发文章</span>
+                </button>
+                <button class="hover:text-orange-500 transition-colors flex flex-col items-center" @click="onPublishTalk">
+                  <Plus :size="20" />
+                  <span class="text-[10px] mt-0.5 font-bold">提问</span>
+                </button>
+              </div>
             </div>
-          </div>
+          </Card>
 
-          <div v-loading="loading" class="space-y-8">
-            <div 
+          <!-- 内容流 -->
+          <div v-loading="loading" class="space-y-4">
+            <Card 
               v-for="(post, idx) in posts" 
               :key="post.id"
-              class="topic-card bg-white rounded-[32px] p-8 border border-gray-200 transition-all cursor-pointer hover:shadow-2xl hover:shadow-brand-900/5 "
+              padding="none"
+              radius="2xl"
+              class="group transition-all hover:shadow-xl hover:shadow-brand-900/5 cursor-pointer border-none ring-1 ring-gray-100"
               @click="go(`/talks/${post.id}`)"
             >
-              <div class="flex justify-between items-start mb-6">
-                <div class="flex items-center gap-3">
-                  <span 
-                    v-if="idx === 0"
-                    class="bg-brand-600 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-md shadow-brand-500/20"
-                  >
-                    TOP
-                  </span>
-                  <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                    {{ formatTime(post.createTime) }} · {{ post.companyName || '行业同仁' }}
-                  </span>
-                </div>
-                <!-- 赏金标签 -->
-                <div v-if="post.postType === 'bounty'" class="flex items-center gap-2">
-                  <span 
-                    v-if="post.bountyStatus === 1"
-                    class="flex items-center gap-1 bg-brand-100 text-brand-700 text-[10px] font-bold px-2.5 py-1 rounded-lg"
-                  >
-                    <CheckCircle :size="12" />
-                    已采纳
-                  </span>
-                  <span 
-                    v-else
-                    class="flex items-center gap-1 bg-amber-100 text-amber-700 text-[10px] font-bold px-2.5 py-1 rounded-lg animate-pulse"
-                  >
-                    <Coins :size="12" />
-                    {{ post.bountyPoints }} 积分
-                  </span>
-                </div>
-              </div>
-              <h3 
-                class="text-2xl font-black text-gray-900 mb-4 hover:text-brand-600 transition-colors line-clamp-1"
-              >
-                {{ post.title }}
-              </h3>
-              <p v-if="post.content" class="text-gray-500 leading-relaxed line-clamp-2 text-sm">
-                {{ post.content }}
-              </p>
-              
-              <div class="mt-8 flex items-center justify-between pt-6 border-t border-gray-50">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center text-xs font-black shadow-md shadow-brand-500/20">
-                    {{ (post.nickName || post.userName || '?')[0] }}
+              <div class="p-4">
+                <!-- 作者行 -->
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-md bg-brand-600 text-white flex items-center justify-center text-[10px] font-black shadow-sm">
+                      {{ (post.nickName || post.userName || '?')[0] }}
+                    </div>
+                    <span class="text-xs font-bold text-gray-700">{{ post.nickName || post.userName }}</span>
+                    <ExpertBadge v-if="post.isExpert" />
+                    <span class="text-gray-300 mx-1">·</span>
+                    <span class="text-xs text-gray-400">{{ formatTime(post.createTime) }}</span>
                   </div>
-                  <span class="text-xs font-bold text-gray-700">
-                    {{ post.nickName || post.userName || '匿名' }}
-                    <span class="text-gray-400 font-medium"> · {{ post.position || '资深专家' }}</span>
-                  </span>
+                  
+                  <div class="flex items-center gap-2">
+                    <PaidBadge v-if="post.isPaid" :price="post.price" />
+                    <StatusBadge v-if="idx === 0 && activeTab === 'all'" type="brand" size="sm">置顶</StatusBadge>
+                  </div>
                 </div>
-                <div class="flex items-center gap-6 text-xs font-bold text-gray-400">
-                  <span class="flex items-center gap-1.5 hover:text-brand-600 transition-colors">
-                    <MessageSquare :size="16" />
-                    {{ post.commentCount ?? 0 }}
-                  </span>
-                  <span class="flex items-center gap-1.5 hover:text-red-500 transition-colors">
-                    <Heart :size="16" />
-                    {{ post.likeCount ?? 0 }}
-                  </span>
+
+                <!-- 标题与摘要 -->
+                <div class="flex gap-6">
+                  <div class="flex-1">
+                    <h3 class="text-lg font-black text-gray-900 mb-2 group-hover:text-brand-600 transition-colors">
+                      {{ post.title }}
+                    </h3>
+                    <p class="text-sm text-gray-500 leading-relaxed line-clamp-3 mb-3">
+                      {{ post.content }}
+                    </p>
+                  </div>
+                  <div v-if="post.imagesJson" class="w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-gray-50">
+                    <!-- 简化：仅展示第一张图 -->
+                    <img :src="JSON.parse(post.imagesJson)[0]" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  </div>
+                </div>
+
+                <!-- 交互行 -->
+                <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
+                  <div class="flex items-center gap-4">
+                    <button class="flex items-center gap-1.5 text-xs font-bold transition-all" :class="post.likedByMe ? 'text-red-500' : 'text-gray-400 hover:text-red-500'">
+                      <Heart :size="18" :fill="post.likedByMe ? 'currentColor' : 'none'" />
+                      {{ post.likeCount ?? 0 }}
+                    </button>
+                    <button class="flex items-center gap-1.5 text-gray-400 hover:text-brand-600 text-xs font-bold transition-all">
+                      <MessageSquare :size="18" />
+                      {{ post.commentCount ?? 0 }}
+                    </button>
+                    <CollectButton :post-id="post.id" :initial-status="collectedPostIds.includes(post.id)" />
+                  </div>
+                  <button class="text-brand-600 text-xs font-black flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    阅读全文 <ArrowRight :size="14" />
+                  </button>
                 </div>
               </div>
-            </div>
+            </Card>
 
-            <div v-if="!loading && posts.length === 0" class="text-center py-24 bg-white rounded-[32px] border border-dashed border-gray-200">
-              <MessageSquare :size="48" class="mx-auto text-gray-200 mb-4" />
-              <div class="text-gray-400 font-bold">暂无话题，快来发布第一个话题吧！</div>
+            <!-- 空状态 -->
+            <div v-if="!loading && posts.length === 0" class="py-24 text-center">
+              <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
+                <MessageSquare :size="40" />
+              </div>
+              <h3 class="text-lg font-bold text-gray-900 mb-2">暂无相关话题</h3>
+              <p class="text-sm text-gray-500 mb-8">换个搜索词或者去别的板块看看吧</p>
+              <button class="bg-brand-600 text-white px-8 py-2.5 rounded-xl font-bold transition-all active:scale-95" @click="activeTab = 'all'; loadPosts()">
+                返回全部话题
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- 右侧 -->
-        <div class="lg:col-span-4 space-y-8">
-          <!-- 用户卡片 -->
-          <div class="bg-slate-900 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden group">
-            <div class="absolute -right-10 -top-10 w-40 h-40 bg-brand-500/10 rounded-full blur-3xl group-hover:bg-brand-500/20 transition-all"></div>
-            <div class="relative z-10">
-              <div class="flex items-center gap-4 mb-8">
-                <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-brand-500 to-teal-600 flex items-center justify-center font-black text-xl text-white shadow-md shadow-brand-500/20">
-                  {{ displayName[0] || '我' }}
-                </div>
-                <div>
-                  <h4 class="font-black text-lg">{{ displayName }}</h4>
-                  <p class="text-xs text-brand-400 font-bold uppercase tracking-widest mt-1">
-                    {{ isLoggedIn ? 'Professional Member' : 'Guest Viewer' }}
-                  </p>
-                </div>
-              </div>
+        <!-- 右侧侧边栏 -->
+        <div class="lg:col-span-4 space-y-6">
+          
+          <!-- 我的关注模块 -->
+          <Card radius="2xl" class="border-none shadow-sm ring-1 ring-gray-100 overflow-hidden">
+            <div class="flex items-center justify-between mb-6">
+              <h4 class="text-base font-black text-gray-900 flex items-center gap-2">
+                <div class="w-1.5 h-4 bg-brand-600 rounded-full"></div>
+                我的关注
+              </h4>
               <button 
-                v-if="isLoggedIn"
-                class="w-full py-4 bg-brand-600 text-white rounded-xl text-sm font-black hover:bg-brand-700 transition-all active:scale-[0.98] shadow-md shadow-brand-600/20" 
-                @click="onEnterMy"
-              >
-                进入控制台
-              </button>
-              <button 
-                v-else
-                class="w-full py-4 bg-brand-600 text-white rounded-xl text-sm font-black hover:bg-brand-700 transition-all active:scale-[0.98] shadow-md shadow-brand-600/20" 
-                @click="ui.openAuthDialog('login')"
-              >
-                立即登录
-              </button>
+                v-if="isLoggedIn && followedUsers.length > 0"
+                class="text-[10px] font-black text-brand-600 uppercase tracking-widest hover:underline"
+                @click="go('/console/following')"
+              >查看全部</button>
             </div>
-          </div>
+            
+            <div v-if="isLoggedIn && followedUsers.length > 0" class="space-y-6">
+              <div v-for="user in followedUsers" :key="user.userId" class="flex items-center gap-4 group/exp cursor-pointer" @click="go(`/companies/${user.companyId}`)">
+                <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold shrink-0">
+                  {{ (user.nickName || user.userName || '?')[0] }}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="font-bold text-sm text-gray-900 truncate">
+                    {{ user.nickName || user.userName }}
+                  </div>
+                  <p class="text-[10px] text-gray-400 truncate mt-0.5">{{ user.position || '行业同仁' }} · {{ user.companyName || '个人' }}</p>
+                </div>
+                <ArrowRight :size="14" class="text-gray-300 group-hover/exp:text-brand-600 transition-colors" />
+              </div>
+            </div>
 
-          <!-- 积分兑换卡片 -->
-          <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-[32px] p-8 text-white relative overflow-hidden shadow-md group cursor-pointer" @click="onPublishTalk">
-            <div class="absolute -right-4 -bottom-4 opacity-20 transform group-hover:scale-110 group-hover:-rotate-12 transition-all duration-500">
-              <Gift :size="120" />
-            </div>
-            <div class="relative z-10">
-              <div class="bg-white/20 w-10 h-10 rounded-xl flex items-center justify-center mb-6 backdrop-blur-md">
-                <Plus :size="20" class="text-white" stroke-width="3" />
+            <!-- 空状态 -->
+            <div v-else-if="isLoggedIn" class="py-8 text-center">
+              <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+                <Users :size="24" />
               </div>
-              <h4 class="font-black text-xl mb-2">发布话题赚积分</h4>
-              <p class="text-sm text-amber-50 font-medium mb-6 leading-relaxed">分享您的真知灼见，积累积分可直接在线兑换实物好礼。</p>
-              <span class="text-xs font-black uppercase tracking-widest border-b-2 border-white/40 pb-1 group-hover:border-white transition-all">立即开始发布 →</span>
+              <p class="text-xs text-gray-400 mb-4">关注感兴趣的用户，这里会显示他们的动态</p>
+              <button 
+                class="bg-brand-600 text-white px-6 py-2 rounded-xl text-xs font-black transition-all active:scale-95"
+                @click="onTabChange('all')"
+              >去发现</button>
             </div>
+
+            <!-- 未登录 -->
+            <div v-else class="py-8 text-center">
+              <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+                <Users :size="24" />
+              </div>
+              <p class="text-xs text-gray-400 mb-4">登录后查看你的关注列表</p>
+              <button 
+                class="border border-brand-600 text-brand-600 px-6 py-2 rounded-xl text-xs font-black transition-all active:scale-95 hover:bg-brand-50"
+                @click="requireAuth('/talks')"
+              >立即登录</button>
+            </div>
+          </Card>
+
+          <!-- 我的收藏模块 -->
+          <Card radius="2xl" class="border-none shadow-sm ring-1 ring-gray-100 overflow-hidden">
+            <div class="flex items-center justify-between mb-6">
+              <h4 class="text-base font-black text-gray-900 flex items-center gap-2">
+                <Star :size="18" class="text-amber-500" fill="currentColor" />
+                我的收藏
+              </h4>
+              <button 
+                v-if="isLoggedIn && collectedPosts.length > 0"
+                class="text-[10px] font-black text-brand-600 uppercase tracking-widest hover:underline"
+                @click="onTabChange('all')"
+              >查看更多</button>
+            </div>
+
+            <div v-if="isLoggedIn && collectedPosts.length > 0" class="space-y-5">
+              <div v-for="post in collectedPosts" :key="post.id" class="flex gap-3 cursor-pointer group/hot" @click="go(`/talks/${post.id}`)">
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-bold text-gray-700 line-clamp-2 group-hover/hot:text-brand-600 transition-colors">
+                    {{ post.title }}
+                  </div>
+                  <div class="flex items-center gap-3 mt-1 text-[10px] text-gray-400 font-medium">
+                    <span class="flex items-center gap-1"><Heart :size="10" /> {{ post.likeCount || 0 }} 赞同</span>
+                    <span>{{ formatTime(post.createTime) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 空状态 -->
+            <div v-else-if="isLoggedIn" class="py-8 text-center">
+              <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+                <Star :size="24" />
+              </div>
+              <p class="text-xs text-gray-400 mb-2">还没有收藏任何文章</p>
+              <p class="text-[10px] text-gray-400">收藏精彩文章，方便下次阅读</p>
+            </div>
+
+            <!-- 未登录 -->
+            <div v-else class="py-8 text-center">
+              <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+                <Star :size="24" />
+              </div>
+              <p class="text-xs text-gray-400 mb-4">登录后同步你的收藏夹</p>
+              <button 
+                class="border border-brand-600 text-brand-600 px-6 py-2 rounded-xl text-xs font-black transition-all active:scale-95 hover:bg-brand-50"
+                @click="requireAuth('/talks')"
+              >立即登录</button>
+            </div>
+          </Card>
+
+          <!-- 社区公约 -->
+          <div class="px-4 text-[10px] text-gray-400 font-medium leading-relaxed">
+            <div class="flex flex-wrap gap-x-4 gap-y-2 mb-4">
+              <a href="#" class="hover:text-brand-600 transition-colors">社区指南</a>
+              <a href="#" class="hover:text-brand-600 transition-colors">版权申明</a>
+              <a href="#" class="hover:text-brand-600 transition-colors">认证入驻</a>
+              <a href="#" class="hover:text-brand-600 transition-colors">侵权举报</a>
+            </div>
+            <p>© 2026 AgriMatch · 农汇通智库</p>
           </div>
         </div>
       </div>
@@ -296,3 +431,4 @@ onMounted(() => {
   /* 基础卡片样式已内联 */
 }
 </style>
+

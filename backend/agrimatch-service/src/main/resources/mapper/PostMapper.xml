@@ -18,9 +18,10 @@
         <result column="tags_json" property="tagsJson"/>
         <result column="images_json" property="imagesJson"/>
         <result column="post_type" property="postType"/>
-        <result column="bounty_points" property="bountyPoints"/>
-        <result column="bounty_status" property="bountyStatus"/>
-        <result column="accepted_comment_id" property="acceptedCommentId"/>
+        <result column="is_paid" property="isPaid"/>
+        <result column="price" property="price"/>
+        <result column="teaser_length" property="teaserLength"/>
+        <result column="is_expert" property="isExpert"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
@@ -29,9 +30,13 @@
     <insert id="insert" parameterType="com.agrimatch.post.domain.BusPost"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO bus_post
-        (company_id, user_id, title, content, domain, tags_json, images_json, post_type, bounty_points, bounty_status, is_deleted, create_time, update_time)
+        (company_id, user_id, title, content, domain, tags_json, images_json, post_type, 
+         is_paid, price, teaser_length, is_expert,
+         is_deleted, create_time, update_time)
         VALUES
-        (#{companyId}, #{userId}, #{title}, #{content}, #{domain}, #{tagsJson}, #{imagesJson}, #{postType}, #{bountyPoints}, #{bountyStatus}, 0, NOW(3), NOW(3))
+        (#{companyId}, #{userId}, #{title}, #{content}, #{domain}, #{tagsJson}, #{imagesJson}, #{postType}, 
+         #{isPaid}, #{price}, #{teaserLength}, #{isExpert},
+         0, NOW(3), NOW(3))
     </insert>
 
     <select id="selectById" resultMap="PostMap">
@@ -42,7 +47,7 @@
             u.nick_name AS nick_name,
             u.position AS position,
             p.title, p.content, p.domain, p.tags_json, p.images_json,
-            p.post_type, p.bounty_points, p.bounty_status, p.accepted_comment_id,
+            p.post_type, p.is_paid, p.price, p.teaser_length, p.is_expert,
             p.is_deleted, p.create_time, p.update_time
         FROM bus_post p
         LEFT JOIN bus_company c ON c.id = p.company_id AND (c.is_deleted IS NULL OR c.is_deleted = 0)
@@ -60,7 +65,7 @@
             u.nick_name AS nick_name,
             u.position AS position,
             p.title, p.content, p.domain, p.tags_json, p.images_json,
-            p.post_type, p.bounty_points, p.bounty_status, p.accepted_comment_id,
+            p.post_type, p.is_paid, p.price, p.teaser_length, p.is_expert,
             p.is_deleted, p.create_time, p.update_time
         FROM bus_post p
         LEFT JOIN bus_company c ON c.id = p.company_id AND (c.is_deleted IS NULL OR c.is_deleted = 0)
@@ -103,6 +108,12 @@
             <if test="q != null and q.postType != null and q.postType != ''">
                 AND p.post_type = #{q.postType}
             </if>
+            <if test="q != null and q.followingUserId != null">
+                AND p.user_id IN (SELECT follow_user_id FROM bus_user_follow WHERE user_id = #{q.followingUserId})
+            </if>
+            <if test="q != null and q.onlyCollected and q.viewerUserId != null">
+                AND p.id IN (SELECT post_id FROM bus_post_collect WHERE user_id = #{q.viewerUserId})
+            </if>
         </where>
         ORDER BY
         <choose>
@@ -132,17 +143,6 @@
             update_time = NOW(3)
         WHERE id = #{id}
           AND is_deleted = 0
-    </update>
-
-    <update id="updateBountyAccepted">
-        UPDATE bus_post
-        SET bounty_status = 1,
-            accepted_comment_id = #{acceptedCommentId},
-            update_time = NOW(3)
-        WHERE id = #{postId}
-          AND is_deleted = 0
-          AND post_type = 'bounty'
-          AND bounty_status = 0
     </update>
 
 </mapper>

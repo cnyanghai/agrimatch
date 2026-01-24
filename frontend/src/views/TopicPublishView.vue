@@ -6,21 +6,23 @@ import { createPost } from '../api/post'
 import { getPointsMe } from '../api/points'
 import { useAuthStore } from '../store/auth'
 import { requireAuth } from '../utils/requireAuth'
+import { Coins, BookOpen, HelpCircle, LayoutGrid, Info } from 'lucide-vue-next'
 
 const router = useRouter()
 const auth = useAuthStore()
 
-type PostType = 'general' | 'bounty' | 'poll'
+type PostType = 'general' | 'poll' | 'paid'
 const postType = ref<PostType>('general')
 
 const title = ref('')
 const content = ref('')
 const submitting = ref(false)
 
-const bountyPoints = ref(50)
+const price = ref(9.9)
+const teaserLength = ref(100)
 const myPoints = ref(0)
-const showBounty = computed(() => postType.value === 'bounty')
-const pointsEnough = computed(() => myPoints.value >= bountyPoints.value)
+
+const showPaidSettings = computed(() => postType.value === 'paid')
 
 function close() {
   router.back()
@@ -47,20 +49,11 @@ async function submit() {
     return
   }
 
-  // 赏金类型需要确认
-  if (postType.value === 'bounty') {
-    if (myPoints.value < bountyPoints.value) {
-      ElMessage.warning(`积分不足，当前余额：${myPoints.value}，需要：${bountyPoints.value}`)
+  // 付费类型检查
+  if (postType.value === 'paid') {
+    if (!price.value || price.value <= 0) {
+      ElMessage.warning('请输入有效的阅读价格')
       return
-    }
-    try {
-      await ElMessageBox.confirm(
-        `发布后将扣除 ${bountyPoints.value} 积分，采纳回答后积分将发放给被采纳者。`,
-        '确认发布赏金求助',
-        { confirmButtonText: '确认发布', cancelButtonText: '取消', type: 'warning' }
-      )
-    } catch {
-      return // 用户取消
     }
   }
   
@@ -70,7 +63,9 @@ async function submit() {
       title: title.value.trim(), 
       content: content.value.trim() || undefined,
       postType: postType.value,
-      bountyPoints: postType.value === 'bounty' ? bountyPoints.value : undefined
+      isPaid: postType.value === 'paid',
+      price: postType.value === 'paid' ? price.value : undefined,
+      teaserLength: postType.value === 'paid' ? teaserLength.value : undefined
     })
     if (r.code !== 0) throw new Error(r.message)
     ElMessage.success('发布成功！')
@@ -122,51 +117,69 @@ onMounted(() => {
             <label class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 block">选择发布类型</label>
             <div class="grid grid-cols-3 gap-4">
               <button
-                class="type-btn flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all"
-                :class="postType === 'general' ? 'border-indigo-600 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-500 hover:border-indigo-200'"
+                class="type-btn flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all"
+                :class="postType === 'general' ? 'border-brand-600 bg-brand-50 text-brand-600' : 'border-gray-100 text-gray-500 hover:border-brand-200'"
                 @click="postType = 'general'"
               >
+                <LayoutGrid :size="20" />
                 <span class="text-sm font-bold">普通话题</span>
               </button>
               <button
-                class="type-btn flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all"
-                :class="postType === 'bounty' ? 'border-amber-500 bg-amber-50 text-amber-600' : 'border-gray-200 text-gray-500 hover:border-amber-200'"
-                @click="postType = 'bounty'"
+                class="type-btn flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all"
+                :class="postType === 'paid' ? 'border-amber-500 bg-amber-50 text-amber-600' : 'border-gray-100 text-gray-500 hover:border-amber-200'"
+                @click="postType = 'paid'"
               >
-                <span class="text-sm font-bold">赏金求助</span>
+                <BookOpen :size="20" />
+                <span class="text-sm font-bold">专家文章</span>
               </button>
               <button
-                class="type-btn flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all"
-                :class="postType === 'poll' ? 'border-brand-500 bg-brand-50 text-brand-600' : 'border-gray-200 text-gray-500 hover:border-brand-200'"
+                class="type-btn flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all"
+                :class="postType === 'poll' ? 'border-brand-500 bg-brand-50 text-brand-600' : 'border-gray-100 text-gray-500 hover:border-brand-200'"
                 @click="postType = 'poll'"
               >
+                <HelpCircle :size="20" />
                 <span class="text-sm font-bold">发起投票</span>
               </button>
             </div>
           </section>
 
           <section class="space-y-4">
-            <input v-model="title" type="text" placeholder="给你的话题起个响亮的标题" class="w-full text-2xl font-bold placeholder:text-gray-300 outline-none border-none" />
+            <input v-model="title" type="text" placeholder="给你的话题起个响亮的标题" class="w-full text-2xl font-black placeholder:text-gray-200 outline-none border-none" />
             <div class="h-px bg-gray-100 w-full"></div>
-            <textarea v-model="content" placeholder="分享你的见解、经验或疑问..." class="w-full h-40 resize-none outline-none text-gray-700 leading-relaxed placeholder:text-gray-300"></textarea>
+            <textarea v-model="content" placeholder="分享你的见解、经验或疑问..." class="w-full h-64 resize-none outline-none text-gray-700 leading-relaxed placeholder:text-gray-200 text-base"></textarea>
           </section>
 
-          <div v-if="showBounty" class="bg-amber-50 rounded-lg p-6 border border-amber-100">
-            <div class="flex justify-between items-center mb-4">
-              <span class="font-bold text-amber-900">设置悬赏积分</span>
-              <span class="text-xl font-black text-amber-600">{{ bountyPoints }} pts</span>
+          <!-- 付费设置区块 -->
+          <div v-if="showPaidSettings" class="bg-amber-50 rounded-2xl p-6 border border-amber-100 space-y-6 animate-fade-in">
+            <div class="flex items-center gap-2 text-amber-800 font-bold">
+              <Coins :size="18" />
+              <span>付费文章设置</span>
             </div>
-            <input v-model="bountyPoints" type="range" min="10" max="500" class="w-full h-2 bg-amber-200 rounded-lg appearance-none cursor-pointer accent-amber-500" />
-            <div class="flex items-center justify-between mt-4">
-              <p class="text-[10px] text-amber-700 leading-relaxed">* 发布后积分将被扣除，采纳回答后发放给被采纳者。</p>
-              <span 
-                class="text-xs font-bold px-2 py-1 rounded-lg"
-                :class="pointsEnough ? 'bg-brand-100 text-brand-700' : 'bg-red-100 text-red-600'"
-              >
-                当前余额: {{ myPoints }} pts
-              </span>
+            
+            <div class="grid grid-cols-2 gap-8">
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <label class="text-xs font-black text-amber-700 uppercase tracking-wider">阅读价格 (积分)</label>
+                  <span class="text-lg font-black text-amber-600">{{ price }} pts</span>
+                </div>
+                <el-input-number v-model="price" :min="0.1" :max="999" :precision="1" :step="1" class="!w-full" />
+              </div>
+              
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <label class="text-xs font-black text-amber-700 uppercase tracking-wider">免费预览字数</label>
+                  <span class="text-lg font-black text-amber-600">{{ teaserLength }} 字</span>
+                </div>
+                <el-slider v-model="teaserLength" :min="20" :max="1000" :step="10" />
+              </div>
             </div>
-            <p v-if="!pointsEnough" class="text-xs text-red-500 mt-2 font-bold">积分不足，请先充值或降低悬赏额度</p>
+
+            <div class="flex items-start gap-2 bg-white/50 p-3 rounded-lg border border-amber-200/50">
+              <Info :size="14" class="text-amber-500 mt-0.5 shrink-0" />
+              <p class="text-[10px] text-amber-700 leading-normal">
+                只有通过平台认证的专家才建议发布付费文章。普通用户发布的付费文章若质量不佳，可能会被举报并导致积分冻结。
+              </p>
+            </div>
           </div>
         </div>
 

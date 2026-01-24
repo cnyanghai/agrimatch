@@ -386,7 +386,11 @@ CREATE TABLE IF NOT EXISTS `bus_post` (
   `title` varchar(120) NOT NULL COMMENT '标题',
   `content` longtext COMMENT '正文内容',
   `images_json` longtext COMMENT '图片JSON（可选）',
-  `post_type` varchar(20) NOT NULL DEFAULT 'general' COMMENT '帖子类型（general普通/bounty悬赏/poll投票）',
+  `post_type` varchar(20) NOT NULL DEFAULT 'general' COMMENT '帖子类型（general普通/bounty悬赏/poll投票/paid付费）',
+  `is_paid` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否付费文章 0=免费 1=付费',
+  `price` decimal(10,2) DEFAULT NULL COMMENT '付费价格（元）',
+  `teaser_length` int DEFAULT NULL COMMENT '免费预览字数',
+  `is_expert` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否专家内容',
   `bounty_points` int DEFAULT NULL COMMENT '悬赏积分（仅post_type=bounty时有效）',
   `bounty_status` tinyint DEFAULT 0 COMMENT '悬赏状态（0进行中/1已采纳/2已过期）',
   `accepted_comment_id` bigint DEFAULT NULL COMMENT '被采纳的评论ID',
@@ -399,6 +403,18 @@ CREATE TABLE IF NOT EXISTS `bus_post` (
   KEY `idx_post_create_time` (`create_time`),
   KEY `idx_post_type` (`post_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='观点帖子表';
+
+-- Table structure for bus_post_collect (帖子收藏)
+CREATE TABLE IF NOT EXISTS `bus_post_collect` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '收藏ID',
+  `user_id` bigint NOT NULL COMMENT '收藏用户ID',
+  `post_id` bigint NOT NULL COMMENT '帖子ID',
+  `create_time` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '收藏时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_post` (`user_id`, `post_id`),
+  KEY `idx_collect_user` (`user_id`),
+  KEY `idx_collect_post` (`post_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='帖子收藏表';
 
 -- ============================================================
 -- Points (积分)

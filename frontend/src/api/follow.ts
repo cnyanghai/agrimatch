@@ -1,6 +1,7 @@
 import { http, type Result } from './http'
 import type { RequirementResponse } from './requirement'
 import type { SupplyResponse } from './supply'
+import type { PostResponse } from './post'
 
 /**
  * 关注的用户信息
@@ -78,6 +79,14 @@ export async function getFollowedSupplies(): Promise<Result<SupplyResponse[]>> {
  */
 export async function getFollowStats(userId: number): Promise<Result<FollowStats>> {
   const r = await http.get<Result<FollowStats>>(`/api/follows/stats/${userId}`)
+  return r.data
+}
+
+/**
+ * 获取关注用户发布的帖子
+ */
+export async function getFollowedPosts(): Promise<Result<PostResponse[]>> {
+  const r = await http.get<Result<PostResponse[]>>('/api/follows/posts')
   return r.data
 }
 

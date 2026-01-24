@@ -47,6 +47,24 @@ public class PostSocialController {
         Long userId = SecurityUtil.requireUserId(authentication);
         return Result.success(postSocialService.addComment(userId, postId, req.getContent()));
     }
+
+    @PostMapping("/{postId}/collect")
+    public Result<Boolean> toggleCollect(Authentication authentication, @PathVariable("postId") @NotNull Long postId) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        return Result.success(postSocialService.toggleCollect(userId, postId));
+    }
+
+    @GetMapping("/{postId}/collect/status")
+    public Result<Boolean> collectStatus(Authentication authentication, @PathVariable("postId") @NotNull Long postId) {
+        Long userId = SecurityUtil.getUserIdOrNull(authentication);
+        return Result.success(postSocialService.isCollected(userId, postId));
+    }
+
+    @GetMapping("/collected")
+    public Result<List<Long>> collected(Authentication authentication) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        return Result.success(postSocialService.listCollectedPostIds(userId));
+    }
 }
 
 

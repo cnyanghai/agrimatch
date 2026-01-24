@@ -4,8 +4,10 @@ export interface PostCreateRequest {
   title: string
   content?: string
   imagesJson?: string
-  postType?: 'general' | 'bounty' | 'poll'
-  bountyPoints?: number
+  postType?: 'general' | 'poll' | 'paid'
+  isPaid?: boolean
+  price?: number
+  teaserLength?: number
 }
 
 export interface PostResponse {
@@ -19,14 +21,17 @@ export interface PostResponse {
   title: string
   content?: string
   imagesJson?: string
-  postType?: 'general' | 'bounty' | 'poll'
-  bountyPoints?: number
-  bountyStatus?: number // 0=进行中, 1=已采纳, 2=已过期
-  acceptedCommentId?: number
+  postType?: 'general' | 'poll' | 'paid'
+  isPaid?: boolean
+  price?: number
+  teaserLength?: number
+  isExpert?: boolean
   createTime?: string
   likeCount?: number
   commentCount?: number
   likedByMe?: boolean
+  collectedByMe?: boolean
+  hasPurchased?: boolean
 }
 
 export interface PostQuery {
@@ -38,6 +43,8 @@ export interface PostQuery {
   order?: string
   recentDays?: number
   limit?: number
+  followingUserId?: number
+  onlyCollected?: boolean
 }
 
 export async function createPost(req: PostCreateRequest) {
@@ -93,8 +100,27 @@ export async function createPostComment(postId: number, content: string) {
   return data
 }
 
-export async function acceptAnswer(postId: number, commentId: number) {
-  const { data } = await http.post<Result<void>>(`/api/posts/${postId}/accept/${commentId}`)
+/**
+ * 收藏/取消收藏
+ */
+export async function togglePostCollect(postId: number) {
+  const { data } = await http.post<Result<boolean>>(`/api/posts/${postId}/collect`)
+  return data
+}
+
+/**
+ * 获取收藏状态
+ */
+export async function getPostCollectStatus(postId: number) {
+  const { data } = await http.get<Result<boolean>>(`/api/posts/${postId}/collect/status`)
+  return data
+}
+
+/**
+ * 获取收藏列表 (返回 ID 列表)
+ */
+export async function listCollectedPostIds() {
+  const { data } = await http.get<Result<number[]>>('/api/posts/collected')
   return data
 }
 

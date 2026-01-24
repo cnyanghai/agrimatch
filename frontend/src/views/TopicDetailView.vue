@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Present } from '@element-plus/icons-vue'
+import { MessageSquare, ThumbsUp, Share2, Gift, ArrowLeft } from 'lucide-vue-next'
 import { 
   getPost, 
   togglePostLike, 
   listPostComments, 
   createPostComment,
-  acceptAnswer,
   type PostResponse,
   type PostCommentResponse 
 } from '../api/post'
+import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
 import { giftPoints } from '../api/points'
 import { useAuthStore } from '../store/auth'
 import { requireAuth } from '../utils/requireAuth'
 import PublicFooter from '../components/PublicFooter.vue'
+import ExpertBadge from '../components/post/ExpertBadge.vue'
+import PaidBadge from '../components/post/PaidBadge.vue'
+import CollectButton from '../components/post/CollectButton.vue'
+import PaywallOverlay from '../components/post/PaywallOverlay.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -29,6 +33,23 @@ const comments = ref<PostCommentResponse[]>([])
 const commentText = ref('')
 const commenting = ref(false)
 
+// 关注状态
+const isFollowing = ref(false)
+const followLoading = ref(false)
+
+// 付费状态（简化：本地模拟，实际应由后端返回 hasPurchased）
+const hasPurchased = ref(false)
+
+const teaserContent = computed(() => {
+  if (!post.value?.content) return ''
+  const len = post.value.teaserLength || 100
+  return post.value.content.substring(0, len) + '...'
+})
+
+const showPaywall = computed(() => {
+  return post.value?.isPaid && !hasPurchased.value && post.value.userId !== auth.me?.userId
+})
+
 // 打赏对话框
 const tipDialogOpen = ref(false)
 const tipForm = reactive({
@@ -36,12 +57,6 @@ const tipForm = reactive({
   remark: ''
 })
 const tipping = ref(false)
-const accepting = ref(false)
-
-// 是否是赏金帖且可以采纳
-const isBountyPost = () => post.value?.postType === 'bounty'
-const canAccept = () => isBountyPost() && post.value?.bountyStatus === 0 && post.value?.userId === auth.me?.userId
-const isAccepted = (comment: PostCommentResponse) => comment.isAccepted === 1 || comment.id === post.value?.acceptedCommentId
 
 async function loadPost() {
   if (!postId.value) {
@@ -58,12 +73,81 @@ async function loadPost() {
     if (!post.value) {
       ElMessage.error('话题不存在')
       router.back()
+    } else {
+      // 加载关注状态
+      loadFollowStatus()
     }
   } catch (e: any) {
     ElMessage.error(e?.message ?? '加载话题失败')
     router.back()
   } finally {
     loading.value = false
+  }
+}
+
+async function loadFollowStatus() {
+  if (!post.value?.userId || !auth.token) return
+  // 不能关注自己
+  if (post.value.userId === auth.me?.userId) return
+  
+  try {
+    const r = await checkFollowStatus(post.value.userId)
+    if (r.code === 0) {
+      isFollowing.value = !!r.data
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
+async function onToggleFollow() {
+  if (!post.value?.userId || followLoading.value) return
+  
+  if (!requireAuth()) return
+  
+  // 不能关注自己
+  if (post.value.userId === auth.me?.userId) {
+    ElMessage.warning('不能关注你自己哦')
+    return
+  }
+  
+  followLoading.value = true
+  try {
+    const targetId = post.value.userId
+    if (isFollowing.value) {
+      const r = await unfollowUser(targetId)
+      if (r.code === 0) {
+        isFollowing.value = false
+        ElMessage.success('已取消关注')
+      } else {
+        throw new Error(r.message)
+      }
+    } else {
+      const r = await followUser(targetId)
+      if (r.code === 0) {
+        isFollowing.value = true
+        ElMessage.success('关注成功')
+      } else {
+        throw new Error(r.message)
+      }
+    }
+  } catch (e: any) {
+    ElMessage.error(e.message || '操作失败')
+  } finally {
+    followLoading.value = false
+  }
+}
+
+async function onPurchase() {
+  if (!requireAuth()) return
+  
+  try {
+    // 模拟购买逻辑：直接扣积分（后续可接入真实支付接口）
+    await giftPoints(post.value!.userId, post.value!.price || 0, `解锁文章《${post.value!.title}》`)
+    hasPurchased.value = true
+    ElMessage.success('文章已解锁')
+  } catch (e: any) {
+    ElMessage.error(e.message || '支付失败')
   }
 }
 
@@ -180,25 +264,6 @@ async function submitTip() {
   }
 }
 
-async function onAcceptAnswer(commentId: number) {
-  if (!postId.value || !post.value) return
-  if (accepting.value) return
-  
-  accepting.value = true
-  try {
-    const r = await acceptAnswer(postId.value, commentId)
-    if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('采纳成功！积分已发放给回答者')
-    // 刷新帖子和评论
-    await loadPost()
-    await loadComments()
-  } catch (e: any) {
-    ElMessage.error(e?.message ?? '采纳失败')
-  } finally {
-    accepting.value = false
-  }
-}
-
 function formatTime(timeStr: string | undefined) {
   if (!timeStr) return '未知时间'
   const date = new Date(timeStr)
@@ -226,87 +291,92 @@ onMounted(() => {
 
     <main class="max-w-4xl mx-auto px-4 py-8" v-loading="loading">
       <!-- 话题内容 -->
-      <div v-if="post" class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm mb-6">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="w-12 h-12 rounded-full bg-brand-600 text-white flex items-center justify-center text-lg font-bold">
-            {{ (post.nickName || post.userName || '?')[0] }}
+      <div v-if="post" class="bg-white rounded-[32px] p-10 border border-gray-100 shadow-sm mb-8">
+        <div class="flex items-center justify-between mb-10">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-xl font-black shadow-lg shadow-brand-600/20">
+              {{ (post.nickName || post.userName || '?')[0] }}
+            </div>
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-black text-gray-900 text-lg">{{ post.nickName || post.userName || '匿名用户' }}</span>
+                <ExpertBadge v-if="post.isExpert" />
+              </div>
+              <div class="text-xs text-gray-400 font-bold uppercase tracking-wider">{{ formatTime(post.createTime) }} · {{ post.companyName || '个人作者' }}</div>
+            </div>
           </div>
-          <div class="flex-1">
-            <div class="font-bold text-gray-900">{{ post.nickName || post.userName || '匿名用户' }}</div>
-            <div class="text-xs text-gray-400">{{ formatTime(post.createTime) }} · {{ post.companyName || '个人' }}</div>
+          <div class="flex items-center gap-3">
+            <PaidBadge v-if="post.isPaid" :price="post.price" />
+            <button 
+              v-if="post.userId !== auth.me?.userId"
+              class="px-6 py-2 rounded-full border text-xs font-black transition-all active:scale-95 disabled:opacity-50"
+              :class="isFollowing 
+                ? 'bg-gray-100 border-gray-200 text-gray-500 hover:bg-gray-200' 
+                : 'border-brand-200 text-brand-600 hover:bg-brand-50'"
+              :disabled="followLoading"
+              @click="onToggleFollow"
+            >
+              {{ isFollowing ? '已关注' : '+ 关注作者' }}
+            </button>
           </div>
         </div>
 
-        <h1 class="text-2xl font-bold text-gray-900 mb-4">{{ post.title }}</h1>
+        <h1 class="text-3xl font-black text-gray-900 mb-8 leading-tight">{{ post.title }}</h1>
         
-        <!-- 赏金信息 -->
-        <div v-if="isBountyPost()" class="mb-6">
-          <div 
-            v-if="post.bountyStatus === 1"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-brand-50 border border-brand-200 rounded-xl text-brand-700"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            <span class="font-bold">已采纳最佳答案</span>
-            <span class="text-brand-600">+{{ post.bountyPoints }} 积分已发放</span>
-          </div>
-          <div 
-            v-else
-            class="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-amber-700"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <span class="font-bold">悬赏 {{ post.bountyPoints }} 积分</span>
-            <span class="text-amber-600">等待采纳</span>
-          </div>
-        </div>
-        
-        <div v-if="post.content" class="prose max-w-none mb-8">
-          <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ post.content }}</p>
+        <div class="prose max-w-none mb-12">
+          <!-- 正文区：处理付费逻辑 -->
+          <template v-if="showPaywall">
+            <p class="text-gray-700 leading-relaxed whitespace-pre-wrap mb-8 opacity-60 italic">{{ teaserContent }}</p>
+            <PaywallOverlay :price="post.price" @purchase="onPurchase" />
+          </template>
+          <template v-else>
+            <p class="text-gray-700 leading-relaxed whitespace-pre-wrap text-lg">{{ post.content }}</p>
+          </template>
         </div>
 
         <!-- 互动操作 -->
-        <div class="flex items-center gap-4 pt-6 border-t border-gray-200">
-          <button
-            :class="[
-              'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all',
-              post.likedByMe 
-                ? 'bg-red-50 text-red-600 hover:bg-red-100' 
-                : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-            ]"
-            :disabled="liking"
-            @click="onToggleLike"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-            </svg>
-            {{ post.likeCount ?? 0 }}
-          </button>
-          
-          <button
-            class="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-xl text-sm font-bold hover:bg-gray-100 transition-all"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-            </svg>
-            {{ post.commentCount ?? 0 }} 条评论
-          </button>
+        <div class="flex items-center justify-between pt-8 border-t border-gray-100">
+          <div class="flex items-center gap-8">
+            <button
+              :class="[
+                'flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-black transition-all active:scale-95',
+                post.likedByMe 
+                  ? 'bg-red-50 text-red-600' 
+                  : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+              ]"
+              :disabled="liking"
+              @click="onToggleLike"
+            >
+              <ThumbsUp :size="18" />
+              {{ post.likeCount ?? 0 }} 赞同
+            </button>
+            
+            <button class="flex items-center gap-2 text-gray-400 hover:text-brand-600 transition-colors text-sm font-bold">
+              <MessageSquare :size="18" />
+              {{ post.commentCount ?? 0 }} 条评论
+            </button>
 
-          <button
-            class="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-600 rounded-xl text-sm font-bold hover:bg-amber-100 transition-all"
-            @click="openTipDialog"
-          >
-            <el-icon><Present /></el-icon>
-            打赏
-          </button>
+            <CollectButton :post-id="post.id" :initial-status="post.collectedByMe" />
+          </div>
+
+          <div class="flex items-center gap-4">
+            <button class="p-2 text-gray-400 hover:text-brand-600 transition-colors" title="分享">
+              <Share2 :size="20" />
+            </button>
+            <button
+              class="flex items-center gap-2 px-6 py-2.5 bg-amber-50 text-amber-600 rounded-full text-sm font-black hover:bg-amber-100 transition-all active:scale-95"
+              @click="openTipDialog"
+            >
+              <Gift :size="18" />
+              打赏
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- 评论区域 -->
-      <div class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">评论 ({{ comments.length }})</h2>
+      <div class="bg-white rounded-[32px] p-10 border border-gray-100 shadow-sm mb-8">
+        <h2 class="text-xl font-black text-gray-900 mb-8">互动讨论 ({{ comments.length }})</h2>
         
         <!-- 发表评论 -->
         <div class="mb-8 pb-8 border-b border-gray-200">
@@ -337,45 +407,19 @@ onMounted(() => {
             v-for="comment in comments"
             :key="comment.id"
             class="flex gap-4 pb-6 border-b border-gray-50 last:border-b-0"
-            :class="{ 'bg-brand-50/50 -mx-4 px-4 py-4 rounded-xl border border-brand-200': isAccepted(comment) }"
           >
             <div 
-              class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-              :class="isAccepted(comment) ? 'bg-brand-600 text-white' : 'bg-brand-100 text-brand-600'"
+              class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 bg-brand-100 text-brand-600"
             >
               {{ (comment.nickName || comment.userName || '?')[0] }}
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-2">
                 <span class="font-bold text-gray-900">{{ comment.nickName || comment.userName || '匿名用户' }}</span>
-                <!-- 已采纳标记 -->
-                <span 
-                  v-if="isAccepted(comment)"
-                  class="inline-flex items-center gap-1 px-2 py-0.5 bg-brand-600 text-white text-[10px] font-bold rounded-lg"
-                >
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  最佳答案
-                </span>
                 <span class="text-xs text-gray-400">{{ formatTime(comment.createTime) }}</span>
                 <span v-if="comment.companyName" class="text-xs text-gray-400">· {{ comment.companyName }}</span>
               </div>
               <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ comment.content }}</p>
-              
-              <!-- 采纳按钮 -->
-              <div v-if="canAccept() && !isAccepted(comment) && comment.userId !== auth.me?.userId" class="mt-3">
-                <button
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-xs font-bold hover:bg-amber-200 transition-all disabled:opacity-50"
-                  :disabled="accepting"
-                  @click="onAcceptAnswer(comment.id)"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  {{ accepting ? '采纳中...' : '采纳此回答' }}
-                </button>
-              </div>
             </div>
           </div>
         </div>

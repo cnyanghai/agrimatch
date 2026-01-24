@@ -16,8 +16,10 @@ public class PostCreateRequest {
     private String domain;        // 所属板块
     private String tagsJson;      // 标签数据
     
-    private String postType;      // general/bounty/poll
-    private Integer bountyPoints; // 悬赏积分
+    private String postType;      // general/poll/paid
+    private Boolean isPaid;
+    private java.math.BigDecimal price;
+    private Integer teaserLength;
 
     public String getTitle() {
         return title;
@@ -67,12 +69,28 @@ public class PostCreateRequest {
         this.postType = postType;
     }
 
-    public Integer getBountyPoints() {
-        return bountyPoints;
+    public Boolean getIsPaid() {
+        return isPaid;
     }
 
-    public void setBountyPoints(Integer bountyPoints) {
-        this.bountyPoints = bountyPoints;
+    public void setIsPaid(Boolean isPaid) {
+        this.isPaid = isPaid;
+    }
+
+    public java.math.BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(java.math.BigDecimal price) {
+        this.price = price;
+    }
+
+    public Integer getTeaserLength() {
+        return teaserLength;
+    }
+
+    public void setTeaserLength(Integer teaserLength) {
+        this.teaserLength = teaserLength;
     }
 }
 

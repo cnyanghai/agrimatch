@@ -55,15 +55,6 @@ public class PostController {
         postService.delete(id);
         return Result.success();
     }
-
-    @PostMapping("/{id}/accept/{commentId}")
-    public Result<Void> acceptAnswer(Authentication authentication,
-                                      @PathVariable("id") @NotNull Long postId,
-                                      @PathVariable("commentId") @NotNull Long commentId) {
-        Long userId = SecurityUtil.requireUserId(authentication);
-        postService.acceptAnswer(userId, postId, commentId);
-        return Result.success();
-    }
 }
 
 

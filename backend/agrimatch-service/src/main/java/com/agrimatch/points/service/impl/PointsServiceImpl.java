@@ -143,7 +143,7 @@ public class PointsServiceImpl implements PointsService {
 
         BusPointsTx tx = new BusPointsTx();
         tx.setUserId(userId);
-        tx.setTxType("BOUNTY_DEDUCT");
+        tx.setTxType("POST_PAID");
         tx.setPointsDelta(-points);
         tx.setCnyDelta(BigDecimal.ZERO);
         tx.setRemark(remark);
@@ -163,7 +163,7 @@ public class PointsServiceImpl implements PointsService {
 
         BusPointsTx tx = new BusPointsTx();
         tx.setUserId(userId);
-        tx.setTxType("BOUNTY_REWARD");
+        tx.setTxType("POST_INCOME");
         tx.setPointsDelta(points);
         tx.setCnyDelta(BigDecimal.ZERO);
         tx.setRemark(remark);

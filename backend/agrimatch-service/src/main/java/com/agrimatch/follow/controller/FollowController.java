@@ -5,6 +5,9 @@ import com.agrimatch.follow.dto.FollowedUserResponse;
 import com.agrimatch.follow.service.FollowService;
 import com.agrimatch.requirement.dto.RequirementResponse;
 import com.agrimatch.supply.dto.SupplyResponse;
+import com.agrimatch.post.dto.PostResponse;
+import com.agrimatch.post.dto.PostQuery;
+import com.agrimatch.post.service.PostService;
 import com.agrimatch.util.SecurityUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -18,9 +21,11 @@ import java.util.List;
 public class FollowController {
 
     private final FollowService followService;
+    private final PostService postService;
 
-    public FollowController(FollowService followService) {
+    public FollowController(FollowService followService, PostService postService) {
         this.followService = followService;
+        this.postService = postService;
     }
 
     /**
@@ -81,6 +86,18 @@ public class FollowController {
         Long userId = SecurityUtil.requireUserId(authentication);
         List<SupplyResponse> supplies = followService.getFollowedSupplies(userId);
         return Result.success(supplies);
+    }
+
+    /**
+     * 获取关注用户发布的观点帖子
+     */
+    @GetMapping("/posts")
+    public Result<List<PostResponse>> getFollowedPosts(Authentication authentication) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        PostQuery q = new PostQuery();
+        q.setViewerUserId(userId);
+        q.setFollowingUserId(userId); // 需要在 PostQuery 中支持此字段
+        return Result.success(postService.list(q));
     }
 
     /**

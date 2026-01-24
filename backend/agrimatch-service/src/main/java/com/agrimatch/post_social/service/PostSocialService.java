@@ -11,6 +11,12 @@ public interface PostSocialService {
     List<PostCommentResponse> listComments(Long postId);
 
     Long addComment(Long userId, Long postId, String content);
+
+    boolean toggleCollect(Long userId, Long postId);
+
+    boolean isCollected(Long userId, Long postId);
+
+    List<Long> listCollectedPostIds(Long userId);
 }
 
 

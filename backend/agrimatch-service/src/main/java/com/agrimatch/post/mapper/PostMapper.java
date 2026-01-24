@@ -14,9 +14,6 @@ public interface PostMapper {
     List<BusPost> selectList(@Param("q") PostQuery q);
 
     int logicalDelete(@Param("id") Long id);
-
-    int updateBountyAccepted(@Param("postId") Long postId, 
-                              @Param("acceptedCommentId") Long acceptedCommentId);
 }
 
 

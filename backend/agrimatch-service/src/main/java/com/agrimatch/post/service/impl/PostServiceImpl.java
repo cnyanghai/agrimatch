@@ -13,6 +13,7 @@ import com.agrimatch.tag.service.TagService;
 import com.agrimatch.post_social.domain.BusPostComment;
 import com.agrimatch.post_social.mapper.PostCommentMapper;
 import com.agrimatch.post_social.mapper.PostLikeMapper;
+import com.agrimatch.post_social.mapper.PostCollectMapper;
 import com.agrimatch.user.domain.SysUser;
 import com.agrimatch.user.mapper.UserMapper;
 import org.springframework.stereotype.Service;
@@ -30,16 +31,19 @@ public class PostServiceImpl implements PostService {
     private final UserMapper userMapper;
     private final PostLikeMapper postLikeMapper;
     private final PostCommentMapper postCommentMapper;
+    private final PostCollectMapper postCollectMapper;
     private final PointsService pointsService;
     private final TagService tagService;
 
     public PostServiceImpl(PostMapper postMapper, UserMapper userMapper, 
                            PostLikeMapper postLikeMapper, PostCommentMapper postCommentMapper,
+                           PostCollectMapper postCollectMapper,
                            PointsService pointsService, TagService tagService) {
         this.postMapper = postMapper;
         this.userMapper = userMapper;
         this.postLikeMapper = postLikeMapper;
         this.postCommentMapper = postCommentMapper;
+        this.postCollectMapper = postCollectMapper;
         this.pointsService = pointsService;
         this.tagService = tagService;
     }
@@ -52,23 +56,6 @@ public class PostServiceImpl implements PostService {
         if (u == null) throw new ApiException(401, "未登录");
 
         String postType = StringUtils.hasText(req.getPostType()) ? req.getPostType() : "general";
-        Integer bountyPoints = req.getBountyPoints();
-
-        // 赏金求助：验证积分并扣除
-        if ("bounty".equals(postType)) {
-            if (bountyPoints == null || bountyPoints < 10) {
-                throw new ApiException(400, "赏金积分至少需要10分");
-            }
-            if (bountyPoints > 500) {
-                throw new ApiException(400, "赏金积分最多500分");
-            }
-            Long balance = pointsService.getBalance(userId);
-            if (balance < bountyPoints) {
-                throw new ApiException(400, "积分不足，当前余额：" + balance);
-            }
-            // 扣除积分
-            pointsService.deduct(userId, bountyPoints.longValue(), "发布赏金求助");
-        }
 
         BusPost p = new BusPost();
         p.setUserId(userId);
@@ -79,8 +66,20 @@ public class PostServiceImpl implements PostService {
         p.setTagsJson(req.getTagsJson());
         p.setImagesJson(emptyToNull(req.getImagesJson()));
         p.setPostType(postType);
-        p.setBountyPoints("bounty".equals(postType) ? bountyPoints : 0);
-        p.setBountyStatus(0); // 进行中
+        p.setIsPaid(false);
+        p.setIsExpert(false);
+        
+        // 付费设置
+        if ("paid".equals(postType)) {
+            p.setIsPaid(true);
+            p.setPrice(req.getPrice());
+            p.setTeaserLength(req.getTeaserLength() != null ? req.getTeaserLength() : 100);
+        }
+        
+        // 专家标记 (简化：如果用户有 position 且包含专家字样，则自动标记)
+        if (u.getPosition() != null && u.getPosition().contains("专家")) {
+            p.setIsExpert(true);
+        }
 
         int rows = postMapper.insert(p);
         if (rows != 1 || p.getId() == null) throw new ApiException(ResultCode.SERVER_ERROR);
@@ -99,6 +98,7 @@ public class PostServiceImpl implements PostService {
         r.setLikeCount(postLikeMapper.countByPostId(id));
         r.setCommentCount(postCommentMapper.countByPostId(id));
         r.setLikedByMe(false);
+        r.setCollectedByMe(false);
         return r;
     }
 
@@ -122,9 +122,13 @@ public class PostServiceImpl implements PostService {
         }
 
         Map<Long, Boolean> likedByMeMap = new HashMap<>();
+        Map<Long, Boolean> collectedByMeMap = new HashMap<>();
         if (q != null && q.getViewerUserId() != null) {
             for (Long pid : postLikeMapper.selectLikedPostIds(q.getViewerUserId(), postIds)) {
                 likedByMeMap.put(pid, true);
+            }
+            for (Long pid : postCollectMapper.selectCollectedPostIds(q.getViewerUserId(), postIds)) {
+                collectedByMeMap.put(pid, true);
             }
         }
 
@@ -133,6 +137,7 @@ public class PostServiceImpl implements PostService {
             r.setLikeCount(likeCntMap.getOrDefault(p.getId(), 0));
             r.setCommentCount(commentCntMap.getOrDefault(p.getId(), 0));
             r.setLikedByMe(likedByMeMap.getOrDefault(p.getId(), false));
+            r.setCollectedByMe(collectedByMeMap.getOrDefault(p.getId(), false));
             out.add(r);
         }
         return out;
@@ -142,49 +147,6 @@ public class PostServiceImpl implements PostService {
     public void delete(Long id) {
         int rows = postMapper.logicalDelete(id);
         if (rows != 1) throw new ApiException(ResultCode.NOT_FOUND);
-    }
-
-    @Override
-    @Transactional
-    public void acceptAnswer(Long userId, Long postId, Long commentId) {
-        if (userId == null) throw new ApiException(401, "未登录");
-
-        // 验证帖子存在且是赏金帖
-        BusPost post = postMapper.selectById(postId);
-        if (post == null) throw new ApiException(ResultCode.NOT_FOUND);
-        if (!"bounty".equals(post.getPostType())) {
-            throw new ApiException(400, "只有赏金求助帖子才能采纳回答");
-        }
-        if (post.getBountyStatus() != null && post.getBountyStatus() != 0) {
-            throw new ApiException(400, "该帖子已采纳过回答");
-        }
-        if (!userId.equals(post.getUserId())) {
-            throw new ApiException(403, "只有帖子发布者才能采纳回答");
-        }
-
-        // 验证评论存在且属于该帖子
-        BusPostComment comment = postCommentMapper.selectById(commentId);
-        if (comment == null) throw new ApiException(ResultCode.NOT_FOUND);
-        if (!postId.equals(comment.getPostId())) {
-            throw new ApiException(400, "该回答不属于此帖子");
-        }
-        if (userId.equals(comment.getUserId())) {
-            throw new ApiException(400, "不能采纳自己的回答");
-        }
-
-        // 更新帖子状态
-        int rows = postMapper.updateBountyAccepted(postId, commentId);
-        if (rows != 1) throw new ApiException(ResultCode.SERVER_ERROR);
-
-        // 标记评论为已采纳
-        postCommentMapper.updateAccepted(commentId);
-
-        // 将积分发放给被采纳者
-        Integer bountyPoints = post.getBountyPoints();
-        if (bountyPoints != null && bountyPoints > 0) {
-            pointsService.add(comment.getUserId(), bountyPoints.longValue(), 
-                "赏金求助被采纳：" + post.getTitle());
-        }
     }
 
     private static PostResponse toResponse(BusPost p) {
@@ -200,9 +162,10 @@ public class PostServiceImpl implements PostService {
         r.setContent(p.getContent());
         r.setImagesJson(p.getImagesJson());
         r.setPostType(p.getPostType());
-        r.setBountyPoints(p.getBountyPoints());
-        r.setBountyStatus(p.getBountyStatus());
-        r.setAcceptedCommentId(p.getAcceptedCommentId());
+        r.setIsPaid(Boolean.TRUE.equals(p.getIsPaid()));
+        r.setPrice(p.getPrice());
+        r.setTeaserLength(p.getTeaserLength());
+        r.setIsExpert(Boolean.TRUE.equals(p.getIsExpert()));
         r.setDomain(p.getDomain());
         r.setTagsJson(p.getTagsJson());
         r.setCreateTime(p.getCreateTime());
