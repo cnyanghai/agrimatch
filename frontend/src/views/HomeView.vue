@@ -242,7 +242,7 @@ onBeforeUnmount(() => {
 
         <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight tracking-tight animate-slide-up" style="animation-delay: 100ms">
           连接全球资源<br/>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-emerald-400">重塑农牧供应链</span>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-500">重塑农牧供应链</span>
         </h1>
         
         <p class="text-lg md:text-xl text-gray-300 mb-12 max-w-2xl leading-relaxed animate-slide-up" style="animation-delay: 200ms">
@@ -355,22 +355,22 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- Medium Bento Card (Biological) -->
-          <div 
+          <div
             class="col-span-2 group relative overflow-hidden rounded-3xl bg-slate-900 cursor-pointer p-8 flex flex-col justify-between"
             @click="go(`/hall/supply?domain=biological`)"
           >
-            <div class="absolute top-0 right-0 w-48 h-full bg-gradient-to-l from-emerald-500/20 to-transparent"></div>
+            <div class="absolute top-0 right-0 w-48 h-full bg-gradient-to-l from-brand-500/20 to-transparent"></div>
             <div class="flex justify-between items-start relative z-10">
               <h3 class="text-2xl font-black text-white">生物种苗</h3>
-              <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-emerald-400 backdrop-blur-md">
+              <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-brand-400 backdrop-blur-md">
                 <Sprout :size="24" />
               </div>
             </div>
             <div class="flex items-end justify-between relative z-10">
               <p class="text-gray-400 text-sm max-w-[200px]">优质种禽、种蛋、鱼苗及畜种资源调度。</p>
               <div class="flex gap-2">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500/30"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+                <span class="w-1.5 h-1.5 rounded-full bg-brand-500/30"></span>
               </div>
             </div>
           </div>
@@ -603,8 +603,8 @@ onBeforeUnmount(() => {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 30% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 70% 80%, rgba(5, 150, 105, 0.1) 0%, transparent 50%);
+  background: radial-gradient(circle at 30% 20%, rgba(132, 187, 159, 0.15) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(132, 187, 159, 0.1) 0%, transparent 50%);
   pointer-events: none;
 }
 

@@ -33,9 +33,9 @@ function getCreditBadgeClass(user: FollowedUser) {
   // 暂时随机分配以展示效果
   const random = Math.random()
   if (random > 0.7) {
-    return { text: '信用优异', class: 'bg-green-100 text-green-700' }
+    return { text: '信用优异', class: 'bg-brand-100 text-brand-700' }
   } else if (random > 0.4) {
-    return { text: '信用良好', class: 'bg-blue-100 text-blue-700' }
+    return { text: '信用良好', class: 'bg-gray-100 text-gray-700' }
   } else {
     return { text: '关注异常', class: 'bg-amber-100 text-amber-700' }
   }

@@ -98,6 +98,16 @@ function go(path: string) {
   router.push(path)
 }
 
+async function handleShare() {
+  const url = window.location.href
+  try {
+    await navigator.clipboard.writeText(url)
+    ElMessage.success('链接已复制到剪贴板')
+  } catch {
+    ElMessage.error('复制失败，请手动复制链接')
+  }
+}
+
 onMounted(() => {
   loadUser()
   loadFollowStatus()
@@ -130,17 +140,26 @@ onMounted(() => {
               <h2 class="text-3xl font-black text-gray-900">{{ user?.nickName || user?.userName || '加载中...' }}</h2>
               <ExpertBadge v-if="user?.position?.includes('专家')" />
               <div class="flex-1"></div>
-              <button 
-                v-if="user && user.userId !== auth.me?.userId"
-                class="px-8 py-2.5 rounded-full font-black text-sm transition-all active:scale-95 shadow-lg shadow-brand-600/10"
-                :class="isFollowing 
-                  ? 'bg-gray-100 text-gray-500 hover:bg-gray-200' 
-                  : 'bg-brand-600 text-white hover:bg-brand-700'"
-                :disabled="followLoading"
-                @click="onToggleFollow"
-              >
-                {{ isFollowing ? '已关注' : '+ 关注' }}
-              </button>
+              <div class="flex items-center gap-2">
+                <button
+                  class="p-2.5 rounded-lg border border-gray-200 text-gray-400 hover:text-brand-600 hover:border-brand-200 transition-all"
+                  title="分享"
+                  @click="handleShare"
+                >
+                  <Share2 :size="18" />
+                </button>
+                <button
+                  v-if="user && user.userId !== auth.me?.userId"
+                  class="px-8 py-2.5 rounded-lg font-black text-sm transition-all active:scale-95 shadow-lg shadow-brand-600/10"
+                  :class="isFollowing
+                    ? 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    : 'bg-brand-600 text-white hover:bg-brand-700'"
+                  :disabled="followLoading"
+                  @click="onToggleFollow"
+                >
+                  {{ isFollowing ? '已关注' : '+ 关注' }}
+                </button>
+              </div>
             </div>
             <p class="text-gray-500 font-medium mb-4">
               {{ user?.position || '行业同仁' }} · {{ user?.companyName || '个人作者' }}

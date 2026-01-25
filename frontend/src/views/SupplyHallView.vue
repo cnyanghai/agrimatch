@@ -53,10 +53,10 @@ const categoryOptions = ['玉米', '豆粕', '棉粕', '菜粕', 'DDGS', '赖氨
 
 // 板块列表
 const domains = [
-  { key: 'biological', name: '生物种苗', color: 'text-green-600 bg-green-50' },
-  { key: 'processing', name: '农业加工', color: 'text-blue-600 bg-blue-50' },
-  { key: 'material', name: '原料辅料', color: 'text-amber-600 bg-amber-50' },
-  { key: 'equipment', name: '装备物流', color: 'text-purple-600 bg-purple-50' }
+  { key: 'biological', name: '生物种苗' },
+  { key: 'processing', name: '农业加工' },
+  { key: 'material', name: '原料辅料' },
+  { key: 'equipment', name: '装备物流' }
 ]
 const selectedDomain = ref<string | null>(null)
 
@@ -641,17 +641,17 @@ function parseParams(paramsJson?: string): string {
 
 <style scoped>
 .filter-tag:hover {
-  border-color: #10b981;
-  color: #10b981;
+  border-color: #84BB9F;
+  color: #84BB9F;
 }
 .filter-tag.active {
-  background-color: #10b981;
+  background-color: #84BB9F;
   color: white;
-  border-color: #10b981;
+  border-color: #84BB9F;
 }
 .supply-card:hover {
-  border-color: #10b981;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.05);
+  border-color: #84BB9F;
+  box-shadow: 0 4px 12px rgba(132, 187, 159, 0.1);
 }
 </style>
 

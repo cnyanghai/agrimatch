@@ -42,7 +42,6 @@ const router = createRouter({
     { path: '/notify', name: 'notify', component: () => import('../views/NotificationView.vue'), meta: { title: '消息通知 - AgriMatch' } },
     { path: '/chat', name: 'chat', component: () => import('../views/BusinessChatView.vue'), meta: { title: '即时通讯 - AgriMatch' } },
     { path: '/vehicles', name: 'vehicles', component: () => import('../views/LogisticsVehicleView.vue'), meta: { title: '物流车辆管理 - AgriMatch' } },
-    { path: '/design', name: 'design-showcase', component: () => import('../views/DesignShowcaseView.vue'), meta: { title: '设计规范预览 - AgriMatch', public: true, minimal: true } },
 
     // 名录与公司详情
     { path: '/companies/directory', name: 'company-directory', component: () => import('../views/CompanyDirectoryView.vue'), meta: { public: true, minimal: true, title: '企业名录 - 优质供应商与采购商黄页 - AgriMatch' } },

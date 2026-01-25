@@ -5,6 +5,7 @@ import { ElMessage } from 'element-plus'
 import { useCompany } from '../composables/useCompany'
 import { useCompanyStore } from '../stores/company'
 import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
+import { listCompanyEvals, type EvalResponse } from '../api/eval'
 import { useAuthStore } from '../store/auth'
 import { openChatConversation } from '../api/chat'
 import PublicFooter from '../components/PublicFooter.vue'
@@ -25,6 +26,7 @@ const { loading, error, profile, company, supplies, requirements, loadProfile } 
 const searchKeyword = ref('')
 const isFollowing = ref(false)
 const followLoading = ref(false)
+const evaluations = ref<EvalResponse[]>([])
 
 // 证书预览
 const certificatePreviewVisible = ref(false)
@@ -210,7 +212,7 @@ function getParamsList(paramsJson?: string): Array<{ key: string; value: string 
 // 加载关注状态
 async function loadFollowStatus() {
   if (!authStore.me || !company.value?.ownerUserId) return
-  
+
   try {
     const r = await checkFollowStatus(company.value.ownerUserId)
     if (r.code === 0) {
@@ -219,6 +221,36 @@ async function loadFollowStatus() {
   } catch (e) {
     console.error('Failed to load follow status:', e)
   }
+}
+
+// 加载公司评价
+async function loadCompanyEvals() {
+  if (!company.value?.id) return
+
+  try {
+    const r = await listCompanyEvals(company.value.id)
+    if (r.code === 0) {
+      evaluations.value = r.data ?? []
+    }
+  } catch (e) {
+    console.error('Failed to load company evaluations:', e)
+  }
+}
+
+// 格式化评价时间
+function formatEvalTime(dateStr?: string): string {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+
+  if (days === 0) return '今天'
+  if (days === 1) return '昨天'
+  if (days < 7) return `${days}天前`
+  if (days < 30) return `${Math.floor(days / 7)}周前`
+  if (days < 365) return `${Math.floor(days / 30)}个月前`
+  return `${Math.floor(days / 365)}年前`
 }
 
 // 关注/取消关注
@@ -336,8 +368,14 @@ async function sendInquiry(supply: any) {
 }
 
 // 分享主页
-function shareProfile() {
-  ElMessage.info('分享功能开发中')
+async function shareProfile() {
+  const url = window.location.href
+  try {
+    await navigator.clipboard.writeText(url)
+    ElMessage.success('链接已复制到剪贴板')
+  } catch {
+    ElMessage.error('复制失败，请手动复制链接')
+  }
 }
 
 async function loadCompanyProfile() {
@@ -362,9 +400,9 @@ async function loadCompanyProfile() {
     }
   }
   
-  // 加载关注状态
-  await loadFollowStatus()
-  
+  // 加载关注状态和评价
+  await Promise.all([loadFollowStatus(), loadCompanyEvals()])
+
   // 初始化地图
   setTimeout(() => {
     initMap()
@@ -398,11 +436,11 @@ watch(() => route.params.id, (newId, oldId) => {
               <div class="flex items-center gap-4 flex-wrap">
                 <h1 class="text-2xl font-bold text-gray-900">{{ company.companyName }}</h1>
                 <div class="flex gap-2">
-                  <span class="flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">
+                  <span class="flex items-center gap-1 bg-brand-100 text-brand-700 text-xs font-bold px-2 py-1 rounded">
                     <Shield class="w-3 h-3" />
                     资质已核验
                   </span>
-                  <span v-if="company.businessScope" class="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded">
+                  <span v-if="company.businessScope" class="flex items-center gap-1 bg-autumn-100 text-autumn-700 text-xs font-bold px-2 py-1 rounded">
                     <Star class="w-3 h-3" />
                     核心供应商
                   </span>
@@ -424,18 +462,25 @@ watch(() => route.params.id, (newId, oldId) => {
               </div>
             </div>
             <div class="flex items-center gap-3">
-              <button 
+              <button
+                class="flex items-center gap-2 border border-slate-200 px-3 py-2.5 rounded font-medium text-slate-500 hover:text-brand-600 hover:border-brand-300 transition"
+                title="分享"
+                @click="shareProfile"
+              >
+                <Share2 class="w-5 h-5" />
+              </button>
+              <button
                 :disabled="followLoading"
                 class="flex items-center gap-2 border px-6 py-2.5 rounded font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
-                :class="isFollowing 
-                  ? 'border-slate-200 text-slate-600 hover:bg-slate-50' 
+                :class="isFollowing
+                  ? 'border-slate-200 text-slate-600 hover:bg-slate-50'
                   : 'border-brand-600 text-brand-600 hover:bg-brand-50'"
                 @click="toggleFollow"
               >
                 <Heart class="w-5 h-5" :class="{ 'fill-red-500 text-red-500': isFollowing }" />
                 {{ isFollowing ? '已关注' : '加入关注' }}
               </button>
-              <button 
+              <button
                 class="flex items-center gap-2 bg-brand-700 hover:bg-brand-800 text-white px-6 py-2.5 rounded font-medium transition shadow-sm"
                 @click="contactMerchant"
               >
@@ -690,21 +735,30 @@ watch(() => route.params.id, (newId, oldId) => {
                 </div>
                 <div class="border-t border-slate-100 pt-4">
                   <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-medium text-slate-700">买家评价 (218)</span>
-                    <a class="text-brand-700 text-xs hover:underline" href="#">查看全部</a>
+                    <span class="text-sm font-medium text-slate-700">买家评价 ({{ evaluations.length }})</span>
                   </div>
-                  <div class="space-y-3">
-                    <div class="text-xs p-2 bg-slate-50 rounded">
+                  <div v-if="evaluations.length > 0" class="space-y-3">
+                    <div
+                      v-for="evalItem in evaluations.slice(0, 3)"
+                      :key="evalItem.id"
+                      class="text-xs p-2 bg-slate-50 rounded"
+                    >
                       <div class="flex items-center gap-1 mb-1">
-                        <Star class="w-3 h-3 text-amber-500 fill-amber-500" />
-                        <Star class="w-3 h-3 text-amber-500 fill-amber-500" />
-                        <Star class="w-3 h-3 text-amber-500 fill-amber-500" />
-                        <Star class="w-3 h-3 text-amber-500 fill-amber-500" />
-                        <Star class="w-3 h-3 text-amber-500 fill-amber-500" />
+                        <Star
+                          v-for="i in 5"
+                          :key="i"
+                          class="w-3 h-3"
+                          :class="i <= evalItem.stars ? 'text-amber-500 fill-amber-500' : 'text-slate-200'"
+                        />
                       </div>
-                      <p class="text-slate-600">"长期合作伙伴，质量非常稳定，物流速度快。"</p>
-                      <div class="text-[10px] text-slate-400 mt-1">某大型饲料厂采购部 · 2天前</div>
+                      <p v-if="evalItem.comment" class="text-slate-600">"{{ evalItem.comment }}"</p>
+                      <div class="text-[10px] text-slate-400 mt-1">
+                        {{ evalItem.fromNickName || evalItem.fromUserName || '匿名用户' }} · {{ formatEvalTime(evalItem.createTime) }}
+                      </div>
                     </div>
+                  </div>
+                  <div v-else class="text-xs text-slate-400 text-center py-4">
+                    暂无评价
                   </div>
                 </div>
               </div>

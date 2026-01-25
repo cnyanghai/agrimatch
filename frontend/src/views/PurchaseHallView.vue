@@ -340,16 +340,16 @@ function parseParams(paramsJson?: string): string {
   <div class="bg-gray-50 text-gray-900 min-h-screen">
 
     <!-- 公司筛选提示 -->
-    <div v-if="companyIdFilter" class="bg-blue-50 border-b border-blue-100">
+    <div v-if="companyIdFilter" class="bg-autumn-50 border-b border-autumn-100">
       <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-2 text-blue-700">
+        <div class="flex items-center gap-2 text-autumn-700">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
           <span class="text-sm font-medium">
             正在查看该公司的采购需求
           </span>
         </div>
-        <button 
-          class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg text-sm font-medium transition-all"
+        <button
+          class="px-3 py-1 bg-autumn-100 hover:bg-autumn-200 text-autumn-700 rounded-lg text-sm font-medium transition-all"
           @click="router.push('/hall/need')"
         >
           查看全部需求
@@ -549,17 +549,17 @@ function parseParams(paramsJson?: string): string {
 
 <style scoped>
 .filter-tag:hover {
-  border-color: #10b981;
-  color: #047857;
+  border-color: #A5CCDC;
+  color: #6BA3B7;
 }
 .filter-tag.active {
-  background-color: #10b981;
+  background-color: #A5CCDC;
   color: white;
-  border-color: #10b981;
+  border-color: #A5CCDC;
 }
 .purchase-card:hover {
-  border-color: #a7f3d0;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
+  border-color: #A5CCDC;
+  box-shadow: 0 4px 12px rgba(165, 204, 220, 0.15);
 }
 </style>
 

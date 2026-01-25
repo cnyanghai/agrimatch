@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/auth'
 import { getDashboard, type DashboardResponse } from '../api/dashboard'
 import { ArrowRight, FilePlus, Map, MessageSquare, FileCheck, User, Coins, Star, Bell, Clock, TrendingUp } from 'lucide-vue-next'
 import ProfileGuideCard from '../components/ProfileGuideCard.vue'
-import { Card } from '../components/ui'
+import { Card, LoadingSpinner } from '../components/ui'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -200,7 +200,7 @@ onMounted(() => {
       <!-- Top Section: Welcome & Pending (Bento Grid Style) -->
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <!-- Welcome Card (Span 3) -->
-        <Card radius="3xl" padding="lg" shadow="sm" class="lg:col-span-3 relative overflow-hidden group">
+        <Card radius="2xl" padding="lg" shadow="sm" class="lg:col-span-3 relative overflow-hidden group">
           <div class="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-brand-50/50 to-transparent"></div>
           <div class="relative z-10">
             <h2 class="text-3xl font-black text-gray-900 mb-2 tracking-tight">
@@ -235,7 +235,7 @@ onMounted(() => {
         </Card>
 
         <!-- Pending Count Widget (Span 1) -->
-        <Card variant="slate" radius="3xl" padding="lg" shadow="xl" class="group cursor-pointer hover:bg-slate-800" @click="go('/chat')">
+        <Card variant="slate" radius="2xl" padding="lg" shadow="xl" class="group cursor-pointer hover:bg-slate-800" @click="go('/chat')">
           <div class="flex justify-between items-start">
             <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-amber-400 backdrop-blur-md group-hover:scale-110 transition-transform">
               <Bell :size="24" />
@@ -256,7 +256,7 @@ onMounted(() => {
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         
         <!-- Pending Details (Bento Card - Tall) -->
-        <Card v-if="pendingItems.length > 0" radius="3xl" padding="none" class="md:row-span-2 flex flex-col overflow-hidden">
+        <Card v-if="pendingItems.length > 0" radius="2xl" padding="none" class="md:row-span-2 flex flex-col overflow-hidden">
           <div class="p-6 border-b border-gray-50 bg-gray-50/50">
             <h3 class="text-sm font-black text-gray-900 uppercase tracking-wider">任务详情</h3>
           </div>
@@ -290,7 +290,7 @@ onMounted(() => {
             { label: '执行中合同', value: dashboard?.activeContractCount, unit: '份', color: 'text-blue-600', icon: FileCheck }
           ]" 
           :key="stat.label"
-          radius="3xl"
+          radius="2xl"
           padding="md"
           hover
           class="group"
@@ -348,7 +348,7 @@ onMounted(() => {
 
       <!-- 加载状态 -->
       <div v-if="loading" class="flex items-center justify-center py-12">
-        <div class="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+        <LoadingSpinner size="md" color="brand" />
       </div>
     </div>
   </div>

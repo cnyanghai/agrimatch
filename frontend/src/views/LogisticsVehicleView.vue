@@ -197,8 +197,8 @@ onMounted(() => {
       <!-- 头部操作 -->
       <div class="flex items-center justify-between mb-8">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-            <Truck class="w-6 h-6 text-blue-600" />
+          <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center">
+            <Truck class="w-6 h-6 text-brand-600" />
           </div>
           <div>
             <p class="text-sm text-gray-500">共 {{ vehicles.length }} 辆常用车辆</p>
@@ -223,8 +223,8 @@ onMounted(() => {
           <!-- 头部：车牌号 + 默认标记 -->
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-                <Truck class="w-6 h-6 text-blue-600" />
+              <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center">
+                <Truck class="w-6 h-6 text-brand-600" />
               </div>
               <div>
                 <div class="text-lg font-black text-gray-900">{{ v.plateNumber }}</div>

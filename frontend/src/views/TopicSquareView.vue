@@ -186,8 +186,8 @@ onMounted(() => {
           </div>
 
           <div class="flex items-center gap-4">
-            <button 
-              class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2 rounded-full text-sm font-black transition-all active:scale-95 shadow-lg shadow-brand-600/20"
+            <button
+              class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2 rounded-lg text-sm font-black transition-all active:scale-95 shadow-lg shadow-brand-600/20"
               @click="onPublishTalk"
             >
               发布话题

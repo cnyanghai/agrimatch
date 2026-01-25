@@ -67,6 +67,11 @@ export async function deletePost(id: number) {
   return data
 }
 
+export async function updatePost(id: number, req: PostCreateRequest) {
+  const { data } = await http.put<Result<void>>(`/api/posts/${id}`, req)
+  return data
+}
+
 export interface PostLikeToggleResponse {
   liked: boolean
   likeCount: number

@@ -3,14 +3,15 @@ import { ref, onMounted, computed, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { MessageSquare, ThumbsUp, Share2, Gift, ArrowLeft, Edit3, Trash2 } from 'lucide-vue-next'
-import { 
-  getPost, 
-  togglePostLike, 
-  listPostComments, 
+import {
+  getPost,
+  togglePostLike,
+  listPostComments,
   createPostComment,
   deletePost,
+  updatePost,
   type PostResponse,
-  type PostCommentResponse 
+  type PostCommentResponse
 } from '../api/post'
 import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
 import { giftPoints } from '../api/points'
@@ -58,6 +59,14 @@ const tipForm = reactive({
   remark: ''
 })
 const tipping = ref(false)
+
+// 编辑对话框
+const editDialogOpen = ref(false)
+const editForm = reactive({
+  title: '',
+  content: ''
+})
+const editing = ref(false)
 
 async function loadPost() {
   if (!postId.value) {
@@ -165,7 +174,38 @@ async function onDeletePost() {
 
 function onEditPost() {
   if (post.value) {
-    router.push(`/talks/${post.value.id}/edit`)
+    editForm.title = post.value.title || ''
+    editForm.content = post.value.content || ''
+    editDialogOpen.value = true
+  }
+}
+
+async function submitEdit() {
+  if (!post.value) return
+
+  if (!editForm.title.trim()) {
+    ElMessage.warning('请输入标题')
+    return
+  }
+
+  editing.value = true
+  try {
+    const r = await updatePost(post.value.id, {
+      title: editForm.title.trim(),
+      content: editForm.content.trim() || undefined
+    })
+    if (r.code !== 0) throw new Error(r.message)
+
+    // 更新本地数据
+    post.value.title = editForm.title.trim()
+    post.value.content = editForm.content.trim()
+
+    ElMessage.success('更新成功')
+    editDialogOpen.value = false
+  } catch (e: any) {
+    ElMessage.error(e?.message || '更新失败')
+  } finally {
+    editing.value = false
   }
 }
 
@@ -317,6 +357,16 @@ function onAuthorClick() {
   }
 }
 
+async function handleShare() {
+  const url = window.location.href
+  try {
+    await navigator.clipboard.writeText(url)
+    ElMessage.success('链接已复制到剪贴板')
+  } catch {
+    ElMessage.error('复制失败，请手动复制链接')
+  }
+}
+
 onMounted(() => {
   loadPost()
   loadComments()
@@ -357,15 +407,15 @@ onMounted(() => {
             
             <!-- 作者操作按钮 -->
             <div v-if="post.userId === auth.me?.userId" class="flex items-center gap-2">
-              <button 
-                class="flex items-center gap-1.5 px-4 py-2 rounded-full border border-gray-200 text-gray-600 text-xs font-black hover:bg-gray-50 hover:border-brand-200 hover:text-brand-600 transition-all active:scale-95"
+              <button
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-200 text-gray-600 text-xs font-black hover:bg-gray-50 hover:border-brand-200 hover:text-brand-600 transition-all active:scale-95"
                 @click="onEditPost"
               >
                 <Edit3 :size="14" />
                 编辑
               </button>
-              <button 
-                class="flex items-center gap-1.5 px-4 py-2 rounded-full border border-red-100 text-red-500 text-xs font-black hover:bg-red-50 transition-all active:scale-95"
+              <button
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-red-100 text-red-500 text-xs font-black hover:bg-red-50 transition-all active:scale-95"
                 @click="onDeletePost"
               >
                 <Trash2 :size="14" />
@@ -373,11 +423,11 @@ onMounted(() => {
               </button>
             </div>
 
-            <button 
+            <button
               v-else
-              class="px-6 py-2 rounded-full border text-xs font-black transition-all active:scale-95 disabled:opacity-50"
-              :class="isFollowing 
-                ? 'bg-gray-100 border-gray-200 text-gray-500 hover:bg-gray-200' 
+              class="px-6 py-2 rounded-lg border text-xs font-black transition-all active:scale-95 disabled:opacity-50"
+              :class="isFollowing
+                ? 'bg-gray-100 border-gray-200 text-gray-500 hover:bg-gray-200'
                 : 'border-brand-200 text-brand-600 hover:bg-brand-50'"
               :disabled="followLoading"
               @click="onToggleFollow"
@@ -405,9 +455,9 @@ onMounted(() => {
           <div class="flex items-center gap-8">
             <button
               :class="[
-                'flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-black transition-all active:scale-95',
-                post.likedByMe 
-                  ? 'bg-red-50 text-red-600' 
+                'flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-black transition-all active:scale-95',
+                post.likedByMe
+                  ? 'bg-red-50 text-red-600'
                   : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
               ]"
               :disabled="liking"
@@ -426,11 +476,11 @@ onMounted(() => {
           </div>
 
           <div class="flex items-center gap-4">
-            <button class="p-2 text-gray-400 hover:text-brand-600 transition-colors" title="分享">
+            <button class="p-2 text-gray-400 hover:text-brand-600 transition-colors" title="分享" @click="handleShare">
               <Share2 :size="20" />
             </button>
             <button
-              class="flex items-center gap-2 px-6 py-2.5 bg-amber-50 text-amber-600 rounded-full text-sm font-black hover:bg-amber-100 transition-all active:scale-95"
+              class="flex items-center gap-2 px-6 py-2.5 bg-amber-50 text-amber-600 rounded-lg text-sm font-black hover:bg-amber-100 transition-all active:scale-95"
               @click="openTipDialog"
             >
               <Gift :size="18" />
@@ -491,6 +541,75 @@ onMounted(() => {
         </div>
       </div>
     </main>
+
+    <!-- 编辑对话框 -->
+    <el-dialog
+      v-model="editDialogOpen"
+      width="640px"
+      :close-on-click-modal="false"
+      :show-close="false"
+      align-center
+      modal-class="bg-slate-900/60 backdrop-blur-sm"
+      class="!rounded-2xl overflow-hidden !border-none"
+    >
+      <template #header>
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">编辑话题</div>
+            <div class="text-xl font-bold text-gray-900">修改内容</div>
+          </div>
+          <button
+            class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all"
+            @click="editDialogOpen = false"
+          >
+            <span class="text-gray-500 text-sm">✕</span>
+          </button>
+        </div>
+      </template>
+
+      <div class="space-y-6">
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">标题</label>
+          <el-input
+            v-model="editForm.title"
+            placeholder="请输入标题"
+            maxlength="100"
+            show-word-limit
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2">内容</label>
+          <el-input
+            v-model="editForm.content"
+            type="textarea"
+            :rows="8"
+            placeholder="请输入内容..."
+            maxlength="10000"
+            show-word-limit
+          />
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="flex gap-3">
+          <el-button
+            class="flex-1 !rounded-xl !h-11 transition-all"
+            @click="editDialogOpen = false"
+          >
+            取消
+          </el-button>
+          <el-button
+            type="primary"
+            class="flex-1 !rounded-xl !h-11 !bg-brand-600 hover:!bg-brand-700 !border-brand-600 transition-all"
+            :loading="editing"
+            @click="submitEdit"
+          >
+            保存修改
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
 
     <!-- 打赏对话框 (Soft Glass 风格) -->
     <el-dialog
@@ -563,12 +682,12 @@ onMounted(() => {
         <div class="pt-4 border-t border-gray-200">
           <div class="text-xs text-gray-400 mb-3">快捷选择</div>
           <div class="flex flex-wrap gap-2">
-            <button 
-              v-for="amt in [5, 10, 50, 100]" 
+            <button
+              v-for="amt in [5, 10, 50, 100]"
               :key="amt"
-              class="px-4 py-2 rounded-full text-sm font-medium transition-all "
-              :class="tipForm.points === amt 
-                ? 'bg-brand-600 text-white' 
+              class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+              :class="tipForm.points === amt
+                ? 'bg-brand-600 text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
               @click="tipForm.points = amt"
             >

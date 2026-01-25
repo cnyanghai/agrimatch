@@ -8,7 +8,7 @@ import PublicFooter from '../components/PublicFooter.vue'
 import CompanyCard from '../components/company/CompanyCard.vue'
 import { Search, ShoppingBag, Truck, ChevronRight } from 'lucide-vue-next'
 import CompanySkeleton from '../components/company/CompanySkeleton.vue'
-import EmptyState from '../components/common/EmptyState.vue'
+import { EmptyState } from '../components/ui'
 
 const route = useRoute()
 const router = useRouter()
@@ -167,7 +167,7 @@ watch(() => route.query, () => {
       <CompanySkeleton v-if="loading" :count="12" type="card" />
       <div v-else-if="companies.length === 0" class="bg-white rounded-xl border border-dashed border-gray-200">
         <EmptyState
-          :icon="Search"
+          type="search"
           title="未找到相关公司"
           description="尝试切换字母索引或浏览全部"
         />

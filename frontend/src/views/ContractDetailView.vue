@@ -8,8 +8,8 @@ import {
   Shield, RefreshCw, Phone, User, Landmark, ChevronDown, ChevronUp,
   ScrollText, AlertTriangle, Scale
 } from 'lucide-vue-next'
-import { 
-  getContract, sendContractForSigning, getContractPdfUrl, 
+import {
+  getContract, sendContractForSigning, getContractPdfUrl,
   getPaymentMethodText, getDeliveryModeText, parseBankInfo,
   contractStatusMap,
   type ContractResponse,
@@ -184,7 +184,7 @@ onMounted(() => {
         </button>
         <button
           v-if="canSendForSign"
-          class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all "
+          class="flex items-center gap-2 px-4 py-2 bg-autumn-600 hover:bg-autumn-700 text-white text-sm font-bold rounded-xl transition-all "
           @click="handleSendForSign"
         >
           发送签署
@@ -295,8 +295,8 @@ onMounted(() => {
             @click="showBuyerDetail = !showBuyerDetail"
           >
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                <Building2 class="w-5 h-5 text-blue-600" />
+              <div class="w-10 h-10 rounded-xl bg-autumn-50 flex items-center justify-center">
+                <Building2 class="w-5 h-5 text-autumn-600" />
               </div>
               <div class="text-left">
                 <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">甲方（买方）</div>
@@ -338,10 +338,10 @@ onMounted(() => {
               </div>
             </div>
             <!-- 银行信息 -->
-            <div v-if="buyerBank" class="mt-4 p-4 bg-blue-50 rounded-xl">
+            <div v-if="buyerBank" class="mt-4 p-4 bg-autumn-50 rounded-xl">
               <div class="flex items-center gap-2 mb-2">
-                <Landmark class="w-4 h-4 text-blue-600" />
-                <span class="text-xs font-bold text-blue-600">银行账户信息</span>
+                <Landmark class="w-4 h-4 text-autumn-600" />
+                <span class="text-xs font-bold text-autumn-600">银行账户信息</span>
               </div>
               <div class="grid grid-cols-3 gap-4 text-sm">
                 <div>

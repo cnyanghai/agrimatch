@@ -1,73 +1,75 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Users, UserMinus, Clock } from 'lucide-vue-next'
-import { getFollowedUsers, unfollowUser, type FollowedUser } from '../api/follow'
+import { ElMessage } from 'element-plus'
+import { ArrowLeft, Users, Heart, MessageSquare, Clock } from 'lucide-vue-next'
+import { getFollowedPosts } from '../api/follow'
+import { listCollectedPostIds, type PostResponse } from '../api/post'
 import ExpertBadge from '../components/post/ExpertBadge.vue'
+import PaidBadge from '../components/post/PaidBadge.vue'
+import CollectButton from '../components/post/CollectButton.vue'
 import { Card } from '../components/ui'
 import PublicFooter from '../components/PublicFooter.vue'
 
 const router = useRouter()
 
-const users = ref<FollowedUser[]>([])
+const posts = ref<PostResponse[]>([])
 const loading = ref(false)
+const collectedPostIds = ref<number[]>([])
 
-async function loadFollowedUsers() {
+async function loadFollowedPosts() {
   loading.value = true
   try {
-    const r = await getFollowedUsers()
+    const r = await getFollowedPosts()
     if (r.code === 0) {
-      users.value = r.data || []
+      posts.value = r.data || []
     } else {
       throw new Error(r.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '加载关注列表失败')
+    ElMessage.error(e?.message || '加载关注动态失败')
   } finally {
     loading.value = false
   }
 }
 
-async function handleUnfollow(e: Event, user: FollowedUser) {
-  e.stopPropagation()
+async function loadCollectedIds() {
   try {
-    await ElMessageBox.confirm(`确定要取消关注 ${user.nickName || user.userName} 吗？`, '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-    
-    const r = await unfollowUser(user.userId)
-    if (r.code === 0) {
-      ElMessage.success('已取消关注')
-      users.value = users.value.filter(u => u.userId !== user.userId)
-    } else {
-      throw new Error(r.message)
-    }
-  } catch (e: any) {
-    if (e !== 'cancel') {
-      ElMessage.error(e?.message || '取消关注失败')
-    }
+    const r = await listCollectedPostIds()
+    if (r.code === 0) collectedPostIds.value = r.data || []
+  } catch (e) {
+    // ignore
   }
 }
 
 function formatTime(timeStr: string | undefined) {
-  if (!timeStr) return ''
+  if (!timeStr) return '未知时间'
   const date = new Date(timeStr)
-  return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+
+  if (minutes < 1) return '刚刚'
+  if (minutes < 60) return `${minutes}分钟前`
+  if (hours < 24) return `${hours}小时前`
+  if (days < 7) return `${days}天前`
+  return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
 }
 
 function go(path: string) {
   router.push(path)
 }
 
-function goToUserPosts(userId: number) {
+function onAuthorClick(e: Event, userId: number) {
+  e.stopPropagation()
   go(`/users/${userId}/posts`)
 }
 
 onMounted(() => {
-  loadFollowedUsers()
+  loadFollowedPosts()
+  loadCollectedIds()
 })
 </script>
 
@@ -81,55 +83,64 @@ onMounted(() => {
         </button>
         <h1 class="text-lg font-black text-gray-900 flex items-center gap-2">
           <Users :size="20" class="text-brand-600" />
-          我的关注
+          关注动态
         </h1>
         <div class="w-20"></div> <!-- Spacer -->
       </div>
     </header>
 
-    <main class="max-w-5xl mx-auto px-4 py-8">
+    <main class="max-w-4xl mx-auto px-4 py-8">
       <div v-loading="loading">
-        <div v-if="users.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card 
-            v-for="user in users" 
-            :key="user.userId"
+        <div v-if="posts.length > 0" class="space-y-4">
+          <Card
+            v-for="post in posts"
+            :key="post.id"
             padding="none"
             radius="2xl"
-            class="group transition-all hover:shadow-xl hover:shadow-brand-900/5 cursor-pointer border-none ring-1 ring-gray-100 flex flex-col"
-            @click="goToUserPosts(user.userId)"
+            class="group transition-all hover:shadow-xl hover:shadow-brand-900/5 cursor-pointer border-none ring-1 ring-gray-100"
+            @click="go(`/talks/${post.id}`)"
           >
-            <div class="p-6 flex-1">
-              <div class="flex items-start justify-between mb-4">
-                <div class="w-16 h-16 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-2xl font-black shadow-lg shadow-brand-600/20 group-hover:scale-105 transition-transform">
-                  {{ (user.nickName || user.userName || '?')[0] }}
+            <div class="p-6">
+              <!-- 作者行 -->
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3 cursor-pointer group/author" @click="onAuthorClick($event, post.userId)">
+                  <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-brand-600/20 group-hover/author:scale-105 transition-transform">
+                    {{ (post.nickName || post.userName || '?')[0] }}
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-gray-900 group-hover/author:text-brand-600 transition-colors">{{ post.nickName || post.userName }}</span>
+                      <ExpertBadge v-if="post.isExpert" />
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-gray-400">
+                      <Clock :size="12" />
+                      {{ formatTime(post.createTime) }}
+                    </div>
+                  </div>
                 </div>
-                <button 
-                  class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
-                  title="取消关注"
-                  @click="handleUnfollow($event, user)"
-                >
-                  <UserMinus :size="20" />
+
+                <PaidBadge v-if="post.isPaid" :price="post.price" />
+              </div>
+
+              <!-- 标题与内容 -->
+              <h3 class="text-lg font-black text-gray-900 mb-2 group-hover:text-brand-600 transition-colors">
+                {{ post.title }}
+              </h3>
+              <p class="text-sm text-gray-500 leading-relaxed line-clamp-3 mb-4">
+                {{ post.content }}
+              </p>
+
+              <!-- 交互行 -->
+              <div class="flex items-center gap-6 pt-4 border-t border-gray-50">
+                <button class="flex items-center gap-1.5 text-xs font-bold transition-all" :class="post.likedByMe ? 'text-red-500' : 'text-gray-400 hover:text-red-500'">
+                  <Heart :size="16" :fill="post.likedByMe ? 'currentColor' : 'none'" />
+                  {{ post.likeCount ?? 0 }}
                 </button>
-              </div>
-
-              <div class="mb-4">
-                <div class="flex items-center gap-2 mb-1">
-                  <h4 class="text-lg font-black text-gray-900 group-hover:text-brand-600 transition-colors truncate">
-                    {{ user.nickName || user.userName }}
-                  </h4>
-                  <ExpertBadge v-if="user.position?.includes('专家')" />
-                </div>
-                <p class="text-sm text-gray-500 font-medium truncate">
-                  {{ user.position || '行业同仁' }} · {{ user.companyName || '个人作者' }}
-                </p>
-              </div>
-
-              <div class="pt-4 border-t border-gray-50 flex items-center justify-between text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                <div class="flex items-center gap-1.5">
-                  <Clock :size="12" />
-                  关注于 {{ formatTime(user.followTime) }}
-                </div>
-                <span class="text-brand-600 opacity-0 group-hover:opacity-100 transition-opacity">查看主页</span>
+                <button class="flex items-center gap-1.5 text-gray-400 hover:text-brand-600 text-xs font-bold transition-all">
+                  <MessageSquare :size="16" />
+                  {{ post.commentCount ?? 0 }}
+                </button>
+                <CollectButton :post-id="post.id" :initial-status="collectedPostIds.includes(post.id)" size="sm" />
               </div>
             </div>
           </Card>
@@ -140,8 +151,8 @@ onMounted(() => {
           <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
             <Users :size="48" />
           </div>
-          <h3 class="text-xl font-black text-gray-900 mb-2">还没有关注任何人</h3>
-          <p class="text-sm text-gray-500 mb-8 max-w-xs mx-auto">关注你感兴趣的行业大咖和专家，第一时间获取他们的最新动态与深度见解</p>
+          <h3 class="text-xl font-black text-gray-900 mb-2">暂无关注动态</h3>
+          <p class="text-sm text-gray-500 mb-8 max-w-xs mx-auto">关注你感兴趣的用户，这里会显示他们发布的最新话题</p>
           <button class="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-brand-600/20" @click="go('/talks')">
             去发现感兴趣的人
           </button>
@@ -152,7 +163,3 @@ onMounted(() => {
     <PublicFooter />
   </div>
 </template>
-
-<style scoped>
-/* 保持一致的阴影与过渡 */
-</style>
