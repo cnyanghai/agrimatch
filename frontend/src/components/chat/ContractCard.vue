@@ -1,29 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { FileText, Check, Clock, Eye, Pen } from 'lucide-vue-next'
-
-interface ContractPayload {
-  contractId: number
-  contractNo: string
-  productName: string
-  quantity: number | string
-  unit: string
-  unitPrice: number | string
-  basisPrice?: number | string
-  contractCode?: string
-  totalAmount: number | string
-  buyerCompanyId: number
-  buyerCompanyName: string
-  sellerCompanyId: number
-  sellerCompanyName: string
-  status: number
-  buyerSigned: boolean
-  sellerSigned: boolean
-}
+import { FileText, Check, Clock, Eye, Pen, CheckCircle, XCircle } from 'lucide-vue-next'
+import type { ContractPayload, ContractStatus } from '../../types/chat/message'
+import { CONTRACT_STATUS_MAP } from '../../types/chat/message'
 
 const props = defineProps<{
   payload: ContractPayload
   isSent: boolean
+  currentCompanyId?: number
 }>()
 
 const emit = defineEmits<{
@@ -31,27 +15,46 @@ const emit = defineEmits<{
   (e: 'sign', contractId: number): void
 }>()
 
-// 状态映射
-const statusMap: Record<number, { label: string; color: string }> = {
-  0: { label: '草稿', color: 'text-gray-500 bg-gray-100' },
-  1: { label: '待签署', color: 'text-amber-600 bg-amber-50' },
-  2: { label: '已签署', color: 'text-brand-600 bg-brand-50' },
-  3: { label: '履约中', color: 'text-blue-600 bg-blue-50' },
-  4: { label: '已完成', color: 'text-brand-700 bg-brand-100' },
-  5: { label: '已取消', color: 'text-red-500 bg-red-50' }
-}
+const statusInfo = computed(() => CONTRACT_STATUS_MAP[props.payload.status as ContractStatus] ?? CONTRACT_STATUS_MAP[0]!)
 
-const statusInfo = computed(() => statusMap[props.payload.status] ?? statusMap[0]!)
+// 进度计算
+const progressSteps = computed(() => {
+  const status = props.payload.status
+  if (status === 5) return 0 // 已取消
+  if (status >= 4) return 4 // 已完成
+  if (status >= 3) return 3 // 履约中
+  if (status >= 2) return 2 // 已签署
+  if (props.payload.buyerSigned || props.payload.sellerSigned) return 1.5 // 部分签署
+  if (status >= 1) return 1 // 待签署
+  return 0.5 // 草稿
+})
+
+// 是否为当前用户公司
+const isBuyer = computed(() => props.currentCompanyId === props.payload.buyerCompanyId)
+const isSeller = computed(() => props.currentCompanyId === props.payload.sellerCompanyId)
 
 const formatAmount = (val: number | string) => {
   const num = typeof val === 'string' ? parseFloat(val) : val
   return isNaN(num) ? '-' : num.toLocaleString('zh-CN', { minimumFractionDigits: 2 })
 }
 
-// 是否可以签署（状态为待签署且还没签）
+// 是否可以签署（状态为待签署且当前用户还没签）
 const canSign = computed(() => {
-  return props.payload.status === 1 && (!props.payload.buyerSigned || !props.payload.sellerSigned)
+  if (props.payload.status !== 1) return false
+  if (isBuyer.value && !props.payload.buyerSigned) return true
+  if (isSeller.value && !props.payload.sellerSigned) return true
+  // 如果没有 currentCompanyId，则显示按钮（兼容旧逻辑）
+  if (!props.currentCompanyId) {
+    return !props.payload.buyerSigned || !props.payload.sellerSigned
+  }
+  return false
 })
+
+// 是否已取消
+const isCancelled = computed(() => props.payload.status === 5)
+
+// 是否已完成
+const isCompleted = computed(() => props.payload.status === 4)
 </script>
 
 <template>
@@ -66,9 +69,25 @@ const canSign = computed(() => {
           <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">采购合同</div>
           <div class="text-sm font-bold text-gray-900 truncate">{{ payload.contractNo }}</div>
         </div>
-        <span :class="['text-[10px] font-bold px-2 py-1 rounded-full', statusInfo.color]">
+        <span :class="['text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1', statusInfo.color]">
+          <CheckCircle v-if="isCompleted" class="w-3 h-3" />
+          <XCircle v-else-if="isCancelled" class="w-3 h-3" />
           {{ statusInfo.label }}
         </span>
+      </div>
+    </div>
+
+    <!-- 进度条 -->
+    <div v-if="!isCancelled" class="px-4 py-2 bg-gray-50/50">
+      <div class="flex gap-1">
+        <div
+          v-for="i in 4"
+          :key="i"
+          :class="[
+            'flex-1 h-1 rounded-full transition-all',
+            i <= progressSteps ? 'bg-brand-500' : 'bg-gray-200'
+          ]"
+        ></div>
       </div>
     </div>
     

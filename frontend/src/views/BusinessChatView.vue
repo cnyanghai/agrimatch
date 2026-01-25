@@ -16,6 +16,12 @@ import ContractCard from '../components/chat/ContractCard.vue'
 import ContractSignModal from '../components/contract/ContractSignModal.vue'
 import { buildChatWsUrl } from '../utils/chatWs'
 
+// 新增：导入重构后的类型和工具函数
+import type { UiMessage, QuoteStatus, ContractPayload } from '../types/chat'
+import { QUOTE_STATUS_BADGE, CONTRACT_STATUS_MAP } from '../types/chat'
+import { parseQuotePayload, getQuoteDisplayFields as getQuoteDisplayFieldsNew, isBasisQuote } from '../utils/chat/quoteParser'
+import { parseProductParams } from '../utils/chat/paramsParser'
+
 const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
@@ -627,17 +633,11 @@ function mapApiMessageToUi(m: ChatMessageResponse): UiMessage {
   }
 }
 
+// 使用新的统一报价解析器（兼容旧接口）
 function parseQuoteFields(payloadJson?: string): QuoteFields | null {
-  if (!payloadJson) return null
-  try {
-    const obj = JSON.parse(payloadJson)
-    if (obj?.kind === 'BASIS_QUOTE_V1' && obj?.fields) return obj.fields as any
-    if (obj?.kind === 'QUOTE_V1' && obj?.fields) return obj.fields as QuoteFields
-    if (obj?.fields) return obj.fields as QuoteFields
-    return obj as QuoteFields
-  } catch {
-    return null
-  }
+  const payload = parseQuotePayload(payloadJson)
+  if (!payload) return null
+  return payload.fields as QuoteFields
 }
 
 const peerLatestQuote = computed<QuoteFields | null>(() => {
@@ -773,12 +773,16 @@ function subjectBadge(c: ChatConversationResponse) {
   return { label: '会话', cls: 'bg-gray-50 text-gray-600 border-gray-200' }
 }
 
+// 使用新的报价状态常量
 function quoteStatusBadge(status?: string) {
-  if (status === 'OFFERED') return { label: '待确认', cls: 'bg-blue-50 text-blue-600 border-blue-100' }
-  if (status === 'ACCEPTED') return { label: '已达成', cls: 'bg-brand-50 text-brand-600 border-brand-100' }
-  if (status === 'EXPIRED') return { label: '已失效', cls: 'bg-gray-50 text-gray-400 border-gray-100' }
-  if (status === 'REJECTED') return { label: '已拒绝', cls: 'bg-red-50 text-red-600 border-red-100' }
-  return null
+  if (!status) return null
+  const badge = QUOTE_STATUS_BADGE[status as QuoteStatus]
+  if (!badge) return null
+  // 转换为旧格式以保持模板兼容性
+  return {
+    label: badge.label,
+    cls: `${badge.bgColor} ${badge.color} border-${badge.bgColor.replace('bg-', '')}`
+  }
 }
 
 const QUOTE_LABEL_MAP: Record<string, string> = {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { ElDrawer, ElMessage } from 'element-plus'
 import { ArrowUpRight, X } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
@@ -7,7 +7,14 @@ import ChatSubjectCard from './ChatSubjectCard.vue'
 import NegotiationPanel, { type QuoteFields } from './NegotiationPanel.vue'
 import { getConversationMessages, markConversationRead, type ChatMessageResponse } from '../../api/chat'
 import { useAuthStore } from '../../store/auth'
-import { buildChatWsUrl } from '../../utils/chatWs'
+
+// 使用统一的类型和工具函数
+import type { UiMessage } from '../../types/chat'
+import { QUOTE_STATUS_BADGE } from '../../types/chat'
+import { parseQuotePayload, getQuoteDisplayFields } from '../../utils/chat/quoteParser'
+
+// 使用共享的 WebSocket composable
+import { useChatWebSocket, type WsIncomingMessage } from '../../composables/chat'
 
 const props = defineProps<{
   modelValue: boolean
@@ -26,43 +33,43 @@ const emit = defineEmits<{
 const auth = useAuthStore()
 const router = useRouter()
 
-type UiMessage = {
-  id: string | number
-  type: 'system' | 'received' | 'sent'
-  msgType?: string
-  content: string
-  payloadJson?: string
-  time?: string
-  status?: 'pending' | 'sent'
-  quoteStatus?: 'OFFERED' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED' | string
-}
+// UiMessage 类型现在从 types/chat 导入
 
 const loading = ref(false)
 const messageInput = ref('')
 const messages = ref<UiMessage[]>([])
 const quotePopoverVisible = ref(false)
-const ws = ref<WebSocket | null>(null)
-const wsConnected = ref(false)
-let wsReconnectTimer: number | null = null
-let wsReconnectAttempt = 0
-const wsCloseHinted = ref(false)
-const canRealtime = computed(() => !!auth.me || !!auth.token)
 
-function cleanupWs() {
-  if (wsReconnectTimer) {
-    window.clearTimeout(wsReconnectTimer)
-    wsReconnectTimer = null
-  }
-  wsReconnectAttempt = 0
-  wsConnected.value = false
-  wsCloseHinted.value = false
-  if (ws.value) {
-    try {
-      ws.value.close()
-    } catch {
-      // ignore
+// 使用共享的 WebSocket composable
+const websocket = useChatWebSocket(
+  () => auth.token,
+  () => !!auth.me || !!auth.token,
+  {
+    onMessage: handleWsMessage,
+    onDisconnect: (reason) => {
+      if (reason !== 'logged_out' && reason !== 'manual') {
+        ElMessage.warning('实时连接已断开，正在重连…')
+      }
     }
-    ws.value = null
+  }
+)
+
+// WebSocket 消息处理
+function handleWsMessage(data: WsIncomingMessage) {
+  const { type, conversationId, message, tempId, id } = data
+
+  if (type === 'MESSAGE' && message) {
+    const cid = Number(conversationId)
+    if (!props.conversationId || cid !== props.conversationId) return
+    messages.value.push(mapApiMessageToUi(message as ChatMessageResponse))
+    nextTick().then(scrollToBottom)
+    return
+  }
+
+  if (type === 'SENT') {
+    const cid = Number(conversationId)
+    if (!props.conversationId || cid !== props.conversationId) return
+    onWsSent(tempId, id)
   }
 }
 
@@ -73,76 +80,6 @@ function formatTime(ts?: string) {
   const d = new Date(ts)
   if (Number.isNaN(d.getTime())) return ts
   return d.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-}
-
-function wsUrl() {
-  return buildChatWsUrl(auth.token || undefined)
-}
-
-function connectWs() {
-  try {
-    if (!canRealtime.value) return
-    if (ws.value && (ws.value.readyState === WebSocket.OPEN || ws.value.readyState === WebSocket.CONNECTING)) return
-    const socket = new WebSocket(wsUrl())
-    ws.value = socket
-
-    socket.onopen = () => {
-      wsConnected.value = true
-      wsReconnectAttempt = 0
-      wsCloseHinted.value = false
-    }
-    socket.onclose = (ev: CloseEvent) => {
-      wsConnected.value = false
-      // 已退出/未登录：不提示、不重连（避免“不断刷新/断开”）
-      if (!canRealtime.value) return
-      if (!wsCloseHinted.value) {
-        wsCloseHinted.value = true
-        const reason = (ev?.reason || '').trim()
-        const code = ev?.code
-        if (reason) {
-          ElMessage.warning(`实时连接已断开：${reason}`)
-        } else if (code && code !== 1000) {
-          ElMessage.warning(`实时连接已断开（code=${code}），正在重连…`)
-        }
-      }
-      scheduleReconnect()
-    }
-    socket.onerror = () => {
-      wsConnected.value = false
-    }
-    socket.onmessage = (ev) => {
-      try {
-        const payload = JSON.parse(ev.data)
-        if (payload?.type === 'MESSAGE' && payload?.message) {
-          const cid = Number(payload.conversationId)
-          if (!props.conversationId || cid !== props.conversationId) return
-          messages.value.push(mapApiMessageToUi(payload.message as ChatMessageResponse))
-          nextTick().then(scrollToBottom)
-          return
-        }
-        if (payload?.type === 'SENT') {
-          const cid = Number(payload.conversationId)
-          if (!props.conversationId || cid !== props.conversationId) return
-          onWsSent(payload?.tempId, payload?.id)
-        }
-      } catch {
-        // ignore
-      }
-    }
-  } catch {
-    scheduleReconnect()
-  }
-}
-
-function scheduleReconnect() {
-  if (wsReconnectTimer) return
-  if (!canRealtime.value) return
-  wsReconnectAttempt += 1
-  const delay = Math.min(8000, 500 * wsReconnectAttempt)
-  wsReconnectTimer = window.setTimeout(() => {
-    wsReconnectTimer = null
-    connectWs()
-  }, delay)
 }
 
 function mapApiMessageToUi(m: ChatMessageResponse): UiMessage {
@@ -162,16 +99,11 @@ function mapApiMessageToUi(m: ChatMessageResponse): UiMessage {
   }
 }
 
+// 使用新的统一报价解析器（兼容旧接口）
 function parseQuoteFields(payloadJson?: string): QuoteFields | null {
-  if (!payloadJson) return null
-  try {
-    const obj = JSON.parse(payloadJson)
-    if (obj?.kind === 'QUOTE_V1' && obj?.fields) return obj.fields as QuoteFields
-    if (obj?.fields) return obj.fields as QuoteFields
-    return obj as QuoteFields
-  } catch {
-    return null
-  }
+  const payload = parseQuotePayload(payloadJson)
+  if (!payload) return null
+  return payload.fields as QuoteFields
 }
 
 const peerLatestQuote = computed<QuoteFields | null>(() => {
@@ -185,46 +117,13 @@ const peerLatestQuote = computed<QuoteFields | null>(() => {
   return null
 })
 
+// 使用统一的报价状态样式
 function quoteStatusBadge(status?: string) {
-  if (status === 'OFFERED') return { label: '待确认', cls: 'bg-blue-50 text-blue-600 border-blue-100' }
-  if (status === 'ACCEPTED') return { label: '已达成', cls: 'bg-green-50 text-green-600 border-green-100' }
-  if (status === 'EXPIRED') return { label: '已失效', cls: 'bg-gray-50 text-gray-400 border-gray-100' }
-  return null
+  if (!status) return null
+  return QUOTE_STATUS_BADGE[status as keyof typeof QUOTE_STATUS_BADGE] || null
 }
 
-const QUOTE_LABEL_MAP: Record<string, string> = {
-  price: '单价(元/吨)',
-  quantity: '数量',
-  deliveryMethod: '交货方式',
-  deliveryPlace: '交付地',
-  arrivalDate: '到货期',
-  paymentMethod: '结算方式',
-  invoiceType: '发票类型',
-  packaging: '包装方式',
-  validUntil: '有效期',
-  remark: '备注'
-}
-
-function getQuoteDisplayFields(payloadJson?: string) {
-  const fields = parseQuoteFields(payloadJson)
-  if (!fields) return []
-  const display: Array<{ label: string; value: any }> = []
-  
-  // 基础字段
-  Object.entries(fields)
-    .filter(([k, v]) => v && QUOTE_LABEL_MAP[k])
-    .forEach(([k, v]) => {
-      display.push({ label: QUOTE_LABEL_MAP[k]!, value: v })
-    })
-
-  // 动态字段
-  const dynamic = fields.dynamicParams || {}
-  Object.entries(dynamic).forEach(([k, v]) => {
-    if (v) display.push({ label: k, value: v })
-  })
-
-  return display
-}
+// QUOTE_LABEL_MAP 和 getQuoteDisplayFields 现在从 utils/chat/quoteParser 导入
 
 function onWsSent(tempId?: string, id?: number) {
   if (!tempId) return
@@ -266,15 +165,17 @@ function scrollToBottom() {
 async function sendMessage() {
   if (!props.conversationId) return
   if (!messageInput.value.trim()) return
-  if (!ws.value || ws.value.readyState !== WebSocket.OPEN) {
+
+  if (!websocket.ensureConnected()) {
     ElMessage.warning('实时连接未就绪，正在重连…')
-    connectWs()
     return
   }
+
   const content = messageInput.value.trim()
   const tempId = `t_${Date.now()}_${Math.random().toString(16).slice(2)}`
   messageInput.value = ''
 
+  // 乐观更新
   messages.value.push({
     id: tempId,
     type: 'sent',
@@ -286,25 +187,25 @@ async function sendMessage() {
   await nextTick()
   scrollToBottom()
 
-  ws.value.send(JSON.stringify({
-    type: 'SEND',
-    conversationId: props.conversationId,
-    msgType: 'TEXT',
-    content,
-    tempId
-  }))
+  // 使用 composable 发送
+  const sent = websocket.sendText(props.conversationId, content, tempId)
+  if (!sent) {
+    ElMessage.error('发送失败')
+  }
 }
 
 async function sendQuote(payload: any, summary: string) {
   if (!props.conversationId) return
   quotePopoverVisible.value = false
-  if (!ws.value || ws.value.readyState !== WebSocket.OPEN) {
+
+  if (!websocket.ensureConnected()) {
     ElMessage.warning('实时连接未就绪，正在重连…')
-    connectWs()
     return
   }
 
   const tempId = `q_${Date.now()}_${Math.random().toString(16).slice(2)}`
+
+  // 乐观更新
   messages.value.push({
     id: tempId,
     type: 'sent',
@@ -317,14 +218,16 @@ async function sendQuote(payload: any, summary: string) {
   await nextTick()
   scrollToBottom()
 
-  ws.value.send(JSON.stringify({
-    type: 'SEND',
-    conversationId: props.conversationId,
-    msgType: 'QUOTE',
-    content: summary || '',
-    payload,
+  // 使用 composable 发送
+  const sent = websocket.sendQuote(
+    props.conversationId,
+    JSON.stringify(payload),
+    summary || '',
     tempId
-  }))
+  )
+  if (!sent) {
+    ElMessage.error('发送失败')
+  }
 }
 
 function goToChatCenter() {
@@ -337,19 +240,18 @@ function close() {
   emit('closed')
 }
 
+// 抽屉打开时连接 WebSocket
 watch(
   () => props.modelValue,
   (open) => {
-    if (open) connectWs()
+    if (open) {
+      websocket.connect()
+    }
   },
   { immediate: true }
 )
 
-watch(canRealtime, (ok) => {
-  if (!ok) cleanupWs()
-  else if (props.modelValue) connectWs()
-})
-
+// 会话切换时加载消息
 watch(
   () => props.conversationId,
   async (id) => {
@@ -362,6 +264,7 @@ watch(
   { immediate: true }
 )
 
+// 抽屉打开且有会话时加载消息
 watch(
   () => props.modelValue,
   async (open) => {
@@ -369,9 +272,7 @@ watch(
   }
 )
 
-onBeforeUnmount(() => {
-  cleanupWs()
-})
+// 注意：WebSocket 清理由 composable 的 onBeforeUnmount 自动处理
 </script>
 
 <template>
@@ -393,7 +294,7 @@ onBeforeUnmount(() => {
         <div class="min-w-0">
           <div class="font-bold text-gray-900 truncate leading-tight">{{ title }}</div>
           <div class="text-[10px] text-gray-400 mt-0.5">
-            {{ wsConnected ? '● 在线' : '连接中…' }}
+            {{ websocket.isConnected.value ? '● 在线' : '连接中…' }}
           </div>
         </div>
         <div class="flex items-center gap-2 shrink-0">
@@ -436,8 +337,8 @@ onBeforeUnmount(() => {
                 <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'" class="bg-white rounded-lg rounded-tl-sm px-4 py-3 border border-gray-200 shadow-sm">
                   <div class="flex items-center justify-between mb-2">
                     <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">电子报价单</div>
-                    <div v-if="quoteStatusBadge(m.quoteStatus)" 
-                         :class="['text-[10px] px-1.5 py-0.5 rounded-full border font-bold', quoteStatusBadge(m.quoteStatus)?.cls]">
+                    <div v-if="quoteStatusBadge(m.quoteStatus)"
+                         :class="['text-[10px] px-1.5 py-0.5 rounded-full border font-bold', quoteStatusBadge(m.quoteStatus)?.bgColor, quoteStatusBadge(m.quoteStatus)?.color]">
                       {{ quoteStatusBadge(m.quoteStatus)?.label }}
                     </div>
                   </div>

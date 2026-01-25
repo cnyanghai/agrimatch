@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, watch, ref } from 'vue'
 import { InfoFilled } from '@element-plus/icons-vue'
+import { parseProductParams } from '../../utils/chat/paramsParser'
 
 // 结算方式选项
 const paymentMethodOptions = [
@@ -100,29 +101,11 @@ function initFromSnapshot() {
     // 到货日期：兼容多种字段名
     form.arrivalDate = s.arrivalDate ?? s.arrival_date ?? s.deliveryDate ?? s.delivery_date ?? s.expectedDeliveryDate ?? ''
 
-    // 解析动态参数（支持新的 {"Name": "Value"} 格式）
+    // 使用统一的参数解析工具（支持所有历史格式）
     if (s.paramsJson) {
-      try {
-        const paramsData = JSON.parse(s.paramsJson)
-        // 支持旧格式 { params: {...} } 和新格式 { "Name": "Value" }
-        const params = paramsData?.params || paramsData || {}
-        const dynamic: Record<string, string> = {}
-        Object.entries(params).forEach(([k, v]) => {
-          // 跳过纯数字键名（旧格式遗留）
-          if (/^\d+$/.test(k)) return
-          if (typeof v === 'object' && v !== null && 'name' in v) {
-            // 旧格式: { "1": { name: "xxx", value: "yyy" } }
-            dynamic[(v as any).name] = String((v as any).value)
-          } else if (typeof v === 'string' || typeof v === 'number') {
-            // 新格式: { "参数名": "参数值" }
-            dynamic[k] = String(v)
-          }
-        })
-        form.dynamicParams = { ...dynamic }
-        productParams.value = { ...dynamic }
-      } catch (e) {
-        console.error('Failed to parse paramsJson', e)
-      }
+      const dynamic = parseProductParams(s.paramsJson)
+      form.dynamicParams = { ...dynamic }
+      productParams.value = { ...dynamic }
     }
   } catch (e) {
     console.error('Failed to parse subject snapshot', e)

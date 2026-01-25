@@ -2,6 +2,7 @@
 import { computed, reactive, watch, ref, onMounted } from 'vue'
 import { listFuturesContracts, type FuturesContractResponse } from '../../api/futures'
 import { Loading, InfoFilled } from '@element-plus/icons-vue'
+import { parseProductParams } from '../../utils/chat/paramsParser'
 
 const props = defineProps<{
   disabled?: boolean
@@ -42,24 +43,9 @@ function initFromSnapshot() {
       form.quantity = String(s.remainingQuantity ?? s.quantity ?? '')
     }
 
-    // 解析产品参数
+    // 使用统一的参数解析工具
     if (s.paramsJson) {
-      try {
-        const paramsData = JSON.parse(s.paramsJson)
-        const params = paramsData?.params || paramsData || {}
-        const dynamic: Record<string, string> = {}
-        Object.entries(params).forEach(([k, v]) => {
-          if (/^\d+$/.test(k)) return
-          if (typeof v === 'object' && v !== null && 'name' in v) {
-            dynamic[(v as any).name] = String((v as any).value)
-          } else if (typeof v === 'string' || typeof v === 'number') {
-            dynamic[k] = String(v)
-          }
-        })
-        productParams.value = dynamic
-      } catch (e) {
-        console.error('Failed to parse paramsJson', e)
-      }
+      productParams.value = parseProductParams(s.paramsJson)
     }
   } catch (e) {
     console.error('Failed to parse subject snapshot', e)
