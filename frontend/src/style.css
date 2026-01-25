@@ -6,15 +6,15 @@
 :root {
   font-family: var(--font-family);
 
-  /* Element Plus：全站 primary 统一为若竹色 (Ruozhu) */
-  --el-color-primary: #84BB9F; /* 若竹色主色 */
-  --el-color-primary-rgb: 132, 187, 159;
-  --el-color-primary-dark-2: #6da78b; /* 若竹色深色 */
-  --el-color-primary-light-3: #9ac9ab; /* 若竹色浅色 */
-  --el-color-primary-light-5: #b8dbc8; /* 若竹色更浅 */
-  --el-color-primary-light-7: #d9ede4; /* 若竹色极浅 */
-  --el-color-primary-light-8: #e8f2ed; /* 若竹色超浅 */
-  --el-color-primary-light-9: #f0f7f4; /* 若竹色背景 */
+  /* Element Plus：全站 primary 统一为森林绿 (Forest Green) - 基于 stitch 设计系统 */
+  --el-color-primary: #16a34a; /* 森林绿主色 (brand-600) */
+  --el-color-primary-rgb: 22, 163, 74;
+  --el-color-primary-dark-2: #166534; /* 森林绿深色 (brand-700) */
+  --el-color-primary-light-3: #22c55e; /* 森林绿浅色 (brand-500) */
+  --el-color-primary-light-5: #4ade80; /* 森林绿更浅 (brand-400) */
+  --el-color-primary-light-7: #86efac; /* 森林绿极浅 (brand-300) */
+  --el-color-primary-light-8: #bbf7d0; /* 森林绿超浅 (brand-200) */
+  --el-color-primary-light-9: #dcfce7; /* 森林绿背景 (brand-100) */
 }
 
 html,
@@ -53,17 +53,21 @@ button {
   letter-spacing: var(--letter-spacing-tight);
 }
 
-/* 现代化渐变背景 - 使用中国传统色 */
+/* 现代化渐变背景 - 基于 stitch 设计系统 */
 .bg-gradient-primary {
-  background: linear-gradient(135deg, #6da78b 0%, #84BB9F 100%); /* 若竹色渐变 */
+  background: linear-gradient(135deg, #166534 0%, #16a34a 100%); /* 森林绿渐变 */
 }
 
 .bg-gradient-secondary {
-  background: linear-gradient(135deg, #7aa0b3 0%, #A5CCDC 100%); /* 秋波蓝渐变 */
+  background: linear-gradient(135deg, #334e68 0%, #486581 100%); /* 黛蓝渐变 */
 }
 
 .bg-gradient-accent {
-  background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%); /* 琥珀红渐变 */
+  background: linear-gradient(135deg, #ea580c 0%, #f97316 100%); /* 橙色渐变 */
+}
+
+.bg-gradient-action {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%); /* 行动蓝渐变 */
 }
 
 /* 卡片悬停效果 */

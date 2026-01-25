@@ -17,21 +17,65 @@ import {
 import type { QuoteDisplayField, QuoteFieldDiff } from '../../../types/chat/quote'
 import QuoteDiffBadge from './QuoteDiffBadge.vue'
 import QuoteValidityTimer from '../quote/QuoteValidityTimer.vue'
+import InlineCounterQuote from '../quote/InlineCounterQuote.vue'
 
 const props = defineProps<{
   message: UiMessage
   previousQuotePayloadJson?: string
   subjectName?: string
   subjectLocation?: string
+  /** 是否正在发送还价 */
+  counterSending?: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'accept'): void
   (e: 'counter'): void
+  (e: 'counter-submit', payload: { price?: number; basisPrice?: number; quantity?: string; remark?: string }): void
   (e: 'reject'): void
   (e: 'draft-contract'): void
   (e: 'view-timeline'): void
 }>()
+
+// 内联还价状态
+const showInlineCounter = ref(false)
+
+function handleCounterClick() {
+  showInlineCounter.value = true
+}
+
+function handleCounterSubmit(payload: { price?: number; basisPrice?: number; quantity?: string; remark?: string }) {
+  emit('counter-submit', payload)
+  showInlineCounter.value = false
+}
+
+function handleCounterCancel() {
+  showInlineCounter.value = false
+}
+
+// 获取原始价格用于还价
+const originalPrice = computed(() => {
+  if (!payload.value) return undefined
+  if (payload.value.kind === 'QUOTE_V1') {
+    const price = (payload.value as any).fields?.price
+    return typeof price === 'number' ? price : parseFloat(price)
+  }
+  return undefined
+})
+
+const originalBasisPrice = computed(() => {
+  if (!payload.value) return undefined
+  if (payload.value.kind === 'BASIS_QUOTE_V1') {
+    return (payload.value as any).fields?.basisPrice
+  }
+  return undefined
+})
+
+const originalQuantity = computed(() => {
+  if (!payload.value) return undefined
+  const fields = (payload.value as any).fields
+  return fields?.quantity
+})
 
 const payload = computed(() => parseQuotePayload(props.message.payloadJson))
 const isBasis = computed(() => isBasisQuote(payload.value))
@@ -227,7 +271,7 @@ const expanded = ref(false)
 
     <!-- 操作按钮 -->
     <div
-      v-if="canAccept || canDraftContract"
+      v-if="(canAccept || canDraftContract) && !showInlineCounter"
       :class="['px-4 py-3 border-t flex gap-2', isSent ? 'border-brand-500/30' : 'border-gray-100']"
     >
       <template v-if="canAccept">
@@ -239,7 +283,7 @@ const expanded = ref(false)
           接受报价
         </button>
         <button
-          @click="emit('counter')"
+          @click="handleCounterClick"
           class="px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-1.5 active:scale-95"
         >
           <Edit class="w-4 h-4" />
@@ -262,6 +306,20 @@ const expanded = ref(false)
           起草合同
         </button>
       </template>
+    </div>
+
+    <!-- 内联还价表单 -->
+    <div v-if="showInlineCounter && canAccept" class="p-3 border-t border-gray-100">
+      <InlineCounterQuote
+        :original-fields="displayFields"
+        :original-price="originalPrice"
+        :original-quantity="originalQuantity"
+        :is-basis="isBasis"
+        :original-basis-price="originalBasisPrice"
+        :sending="counterSending"
+        @submit="handleCounterSubmit"
+        @cancel="handleCounterCancel"
+      />
     </div>
 
     <!-- 时间戳 -->

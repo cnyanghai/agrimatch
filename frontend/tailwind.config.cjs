@@ -5,64 +5,113 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // 主品牌色 - 森林绿（基于 stitch 森林绿主题 #1b5e20）
         brand: {
-          // 若竹色 (Ruozhu) - 主品牌色，供应侧
-          50: '#f0f7f4',
-          100: '#d9ede4',
-          200: '#b8dbc8',
-          300: '#9ac9ab',
-          400: '#7bb78e',
-          500: '#84BB9F', // 主色
-          600: '#6da78b',
-          700: '#5a9074',
-          800: '#4a765f',
-          900: '#3a5c4a',
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#166534',  // 导航栏主色
+          800: '#14532d',
+          900: '#052e16',
         },
+        // 行动色 - 蓝色（基于 stitch #1152d4）用于 CTA 按钮
+        action: {
+          50: '#eff6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
+          600: '#2563eb',  // 主 CTA 按钮
+          700: '#1d4ed8',
+          800: '#1e40af',
+          900: '#1e3a8a',
+        },
+        // 强调色 - 橙色（用于价格、重要提示）
+        accent: {
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#f97316',
+          600: '#ea580c',
+          700: '#c2410c',
+          800: '#9a3412',
+          900: '#7c2d12',
+        },
+        // 采购侧辅助色 - 黛蓝（基于 stitch 黛蓝主题 #274472）
         autumn: {
-          // 秋波蓝 (Qiubo Blue) - 采购侧/辅助色
-          50: '#f0f7fa',
-          100: '#d9ecf3',
-          200: '#b8d9e8',
-          300: '#9ac6dd',
-          400: '#7bb3d2',
-          500: '#A5CCDC', // 主色
-          600: '#8fb8c9',
-          700: '#7aa0b3',
-          800: '#65889d',
-          900: '#507087',
+          50: '#f0f4f8',
+          100: '#d9e2ec',
+          200: '#bcccdc',
+          300: '#9fb3c8',
+          400: '#829ab1',
+          500: '#627d98',
+          600: '#486581',
+          700: '#334e68',  // 采购侧导航
+          800: '#243b53',
+          900: '#102a43',
         },
+        // 兼容旧代码的 primary（映射到 brand）
         primary: {
-          50: '#ecfdf5',
-          100: '#d1fae5',
-          200: '#a7f3d0',
-          300: '#6ee7b7',
-          400: '#34d399',
-          500: '#10b981',
-          600: '#059669',
-          700: '#047857',
-          800: '#065f46',
-          900: '#064e3b',
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#166534',
+          800: '#14532d',
+          900: '#052e16',
         },
+        // 背景色系（基于 stitch #f6f6f8）
         bg: {
-          light: '#f6f8f6',
-          'light-hover': '#e8ebe8',
-          dark: '#102210',
-          'dark-hover': '#1a351a',
+          light: '#fafaf9',      // 温暖的浅灰
+          'light-hover': '#f5f5f4',
+          dark: '#18181b',
+          'dark-hover': '#27272a',
           white: '#ffffff',
-          gray: '#f9fafb',
+          gray: '#f4f4f5',
+          muted: '#fafaf9',
         },
+        // 中性色（基于 stitch 文字色 #111318）
         neutral: {
           50: '#fafafa',
-          100: '#f5f5f5',
-          200: '#e5e5e5',
-          300: '#d4d4d4',
-          400: '#a3a3a3',
-          500: '#737373',
-          600: '#525252',
-          700: '#404040',
-          800: '#262626',
-          900: '#171717',
-        }
+          100: '#f4f4f5',
+          200: '#e4e4e7',
+          300: '#d4d4d8',
+          400: '#a1a1aa',
+          500: '#71717a',
+          600: '#52525b',
+          700: '#3f3f46',
+          800: '#27272a',
+          900: '#18181b',  // 主文字色
+        },
+        // 语义色
+        success: {
+          50: '#f0fdf4',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803d',
+        },
+        warning: {
+          50: '#fffbeb',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+        },
+        error: {
+          50: '#fef2f2',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+        },
       },
       borderRadius: {
         sm: '0.25rem',   // 4px
@@ -79,9 +128,14 @@ module.exports = {
         lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
         '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-        brand: '0 4px 14px 0 rgba(132, 187, 159, 0.39)', // 增强的若竹色阴影
-        autumn: '0 4px 14px 0 rgba(165, 204, 220, 0.39)', // 秋波蓝阴影
-        glass: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)', // 玻璃质感边框阴影
+        brand: '0 4px 14px 0 rgba(22, 163, 74, 0.25)',   // 更新为新 brand 色阴影
+        action: '0 4px 14px 0 rgba(37, 99, 235, 0.25)',  // action 色阴影
+        accent: '0 4px 14px 0 rgba(249, 115, 22, 0.25)', // accent 色阴影
+        glass: 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)',
+      },
+      fontFamily: {
+        display: ['Inter', 'Noto Sans SC', 'sans-serif'],
+        body: ['Inter', 'Noto Sans SC', 'sans-serif'],
       },
       fontSize: {
         '3xl': ['1.875rem', { lineHeight: '2.25rem', letterSpacing: '-0.02em' }],
@@ -102,6 +156,7 @@ module.exports = {
         'slide-down': 'slideDown 0.4s ease-out',
         'scale-in': 'scaleIn 0.2s ease-out',
         'float': 'float 3s ease-in-out infinite',
+        'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
       },
       keyframes: {
         fadeIn: {

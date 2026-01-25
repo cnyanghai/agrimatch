@@ -6,6 +6,72 @@
 /** 标的类型 */
 export type SubjectType = 'SUPPLY' | 'NEED'
 
+/** 会话业务状态 - 替代简单的归档概念 */
+export type ConversationBusinessStatus =
+  | 'ACTIVE'         // 活跃 - 正在进行议价
+  | 'PENDING'        // 待跟进 - 等待对方回复
+  | 'COMPLETED'      // 已完成 - 交易完成
+  | 'ON_HOLD'        // 暂缓 - 用户主动暂停
+  | 'CLOSED'         // 已关闭 - 无法达成协议
+
+/** 业务状态配置 */
+export interface BusinessStatusConfig {
+  label: string
+  icon: string
+  color: string
+  bgColor: string
+  description: string
+}
+
+/** 业务状态映射 */
+export const BUSINESS_STATUS_MAP: Record<ConversationBusinessStatus, BusinessStatusConfig> = {
+  ACTIVE: {
+    label: '活跃',
+    icon: 'MessageCircle',
+    color: 'text-brand-600',
+    bgColor: 'bg-brand-50',
+    description: '正在进行议价'
+  },
+  PENDING: {
+    label: '待跟进',
+    icon: 'Clock',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50',
+    description: '等待对方回复'
+  },
+  COMPLETED: {
+    label: '已完成',
+    icon: 'CheckCircle',
+    color: 'text-brand-700',
+    bgColor: 'bg-brand-100',
+    description: '交易已完成'
+  },
+  ON_HOLD: {
+    label: '暂缓',
+    icon: 'Pause',
+    color: 'text-gray-500',
+    bgColor: 'bg-gray-100',
+    description: '用户主动暂停'
+  },
+  CLOSED: {
+    label: '已关闭',
+    icon: 'XCircle',
+    color: 'text-red-500',
+    bgColor: 'bg-red-50',
+    description: '无法达成协议'
+  }
+}
+
+/** 状态过滤选项 */
+export const STATUS_FILTER_OPTIONS = [
+  { value: 'ALL', label: '全部会话' },
+  { value: 'ACTIVE', label: '活跃' },
+  { value: 'PENDING', label: '待跟进' },
+  { value: 'COMPLETED', label: '已完成' },
+  { value: 'ON_HOLD', label: '暂缓' },
+  { value: 'CLOSED', label: '已关闭' }
+] as const
+
 /** 会话响应 - 来自后端 API */
 export interface ChatConversationResponse {
   id: number
@@ -19,6 +85,8 @@ export interface ChatConversationResponse {
   lastContent?: string
   lastTime?: string
   unreadCount?: number
+  /** 业务状态（前端本地管理，可选后端持久化） */
+  businessStatus?: ConversationBusinessStatus
 }
 
 /** 联系人响应 - 来自后端 API */
@@ -153,15 +221,35 @@ export function isBasisTrade(snapshot: SubjectSnapshot | null): boolean {
   return snapshot.priceType === 1
 }
 
+/** 会话过滤选项 */
+export interface ConversationFilterOptions {
+  /** 已归档会话 ID（兼容旧逻辑） */
+  archivedIds?: Set<number>
+  /** 业务状态过滤 */
+  statusFilter?: ConversationBusinessStatus | 'ALL'
+  /** 会话状态映射（conversationId -> status） */
+  statusMap?: Map<number, ConversationBusinessStatus>
+}
+
 /** 按联系人聚合会话 */
 export function groupConversationsByPeer(
   conversations: ChatConversationResponse[],
-  archivedIds: Set<number>
+  archivedIds: Set<number>,
+  filterOptions?: ConversationFilterOptions
 ): PeerGroup[] {
-  const activeConversations = conversations.filter(c => !archivedIds.has(c.id))
+  let filtered = conversations.filter(c => !archivedIds.has(c.id))
+
+  // 如果有状态过滤
+  if (filterOptions?.statusFilter && filterOptions.statusFilter !== 'ALL' && filterOptions.statusMap) {
+    filtered = filtered.filter(c => {
+      const status = filterOptions.statusMap?.get(c.id) || c.businessStatus || 'ACTIVE'
+      return status === filterOptions.statusFilter
+    })
+  }
+
   const map = new Map<number, PeerGroup>()
 
-  activeConversations.forEach(c => {
+  filtered.forEach(c => {
     const existing = map.get(c.peerUserId)
     if (existing) {
       existing.conversations.push(c)
@@ -186,6 +274,28 @@ export function groupConversationsByPeer(
 
   return Array.from(map.values())
     .sort((a, b) => (b.lastTime || '').localeCompare(a.lastTime || ''))
+}
+
+/** 获取各状态的会话数量 */
+export function getStatusCounts(
+  conversations: ChatConversationResponse[],
+  statusMap: Map<number, ConversationBusinessStatus>
+): Record<ConversationBusinessStatus | 'ALL', number> {
+  const counts: Record<ConversationBusinessStatus | 'ALL', number> = {
+    ALL: conversations.length,
+    ACTIVE: 0,
+    PENDING: 0,
+    COMPLETED: 0,
+    ON_HOLD: 0,
+    CLOSED: 0
+  }
+
+  conversations.forEach(c => {
+    const status = statusMap.get(c.id) || c.businessStatus || 'ACTIVE'
+    counts[status]++
+  })
+
+  return counts
 }
 
 /** 按时间分组联系人 */

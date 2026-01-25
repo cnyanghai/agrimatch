@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import ConversationList from './ConversationList.vue'
 import ChatMain from './ChatMain.vue'
-import type { PeerGroup, TimeGroup, ChatConversationResponse } from '../../../types/chat/conversation'
+import type { PeerGroup, TimeGroup, ChatConversationResponse, ConversationBusinessStatus } from '../../../types/chat/conversation'
 import type { UiMessage } from '../../../types/chat/message'
 
 const props = defineProps<{
@@ -14,6 +14,10 @@ const props = defineProps<{
   searchKeyword: string
   archivedCount?: number
   conversationsLoading?: boolean
+  // 新增：状态过滤相关
+  activeStatusFilter?: ConversationBusinessStatus | 'ALL'
+  statusCounts?: Record<ConversationBusinessStatus | 'ALL', number>
+  conversationStatusMap?: Map<number, ConversationBusinessStatus>
 
   // Chat Main Props
   messages: UiMessage[]
@@ -39,6 +43,9 @@ const emit = defineEmits<{
   (e: 'archive-conversation', conversationId: number): void
   (e: 'update:searchKeyword', value: string): void
   (e: 'show-archived'): void
+  // 新增：状态相关
+  (e: 'update:activeStatusFilter', status: ConversationBusinessStatus | 'ALL'): void
+  (e: 'change-conversation-status', conversationId: number, status: ConversationBusinessStatus): void
 
   // Chat Main Events
   (e: 'send-text', text: string): void
@@ -126,11 +133,16 @@ defineExpose({
         :search-keyword="searchKeyword"
         :archived-count="archivedCount"
         :loading="conversationsLoading"
+        :active-status-filter="activeStatusFilter"
+        :status-counts="statusCounts"
+        :conversation-status-map="conversationStatusMap"
         @select-peer="handleSelectPeer"
         @switch-conversation="handleSwitchConversation"
         @archive-conversation="emit('archive-conversation', $event)"
         @update:search-keyword="emit('update:searchKeyword', $event)"
         @show-archived="emit('show-archived')"
+        @update:active-status-filter="emit('update:activeStatusFilter', $event)"
+        @change-conversation-status="(id, status) => emit('change-conversation-status', id, status)"
       />
     </div>
 

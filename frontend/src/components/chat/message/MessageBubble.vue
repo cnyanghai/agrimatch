@@ -20,6 +20,7 @@ const emit = defineEmits<{
   (e: 'confirm-quote', messageId: number): void
   (e: 'reject-quote', messageId: number): void
   (e: 'counter-quote', messageId: number): void
+  (e: 'counter-quote-submit', messageId: number, payload: { price?: number; basisPrice?: number; quantity?: string; remark?: string }): void
   (e: 'open-draft-contract', messageId: number): void
   (e: 'view-contract', contractId: number): void
   (e: 'sign-contract', contractId: number): void
@@ -114,6 +115,12 @@ function handleCounterQuote() {
     emit('counter-quote', props.message.id)
   }
 }
+
+function handleCounterQuoteSubmit(payload: { price?: number; basisPrice?: number; quantity?: string; remark?: string }) {
+  if (typeof props.message.id === 'number') {
+    emit('counter-quote-submit', props.message.id, payload)
+  }
+}
 </script>
 
 <template>
@@ -147,6 +154,7 @@ function handleCounterQuote() {
           :subject-location="subjectLocation"
           @accept="handleConfirmQuote"
           @counter="handleCounterQuote"
+          @counter-submit="handleCounterQuoteSubmit"
           @reject="handleRejectQuote"
           @draft-contract="handleDraftContract"
         />
@@ -181,10 +189,10 @@ function handleCounterQuote() {
             <div
               :class="[
                 'w-10 h-10 rounded-lg flex items-center justify-center shrink-0',
-                isSent ? 'bg-white/20' : 'bg-blue-50'
+                isSent ? 'bg-white/20' : 'bg-action-50'
               ]"
             >
-              <Document :class="['w-5 h-5', isSent ? 'text-white' : 'text-blue-600']" />
+              <Document :class="['w-5 h-5', isSent ? 'text-white' : 'text-action-600']" />
             </div>
             <div class="flex-1 min-w-0">
               <div :class="['text-sm font-medium truncate', isSent ? 'text-white' : 'text-gray-900']">
@@ -197,7 +205,7 @@ function handleCounterQuote() {
             <button
               :class="[
                 'shrink-0 px-3 py-1.5 text-xs font-bold rounded-lg transition-all',
-                isSent ? 'bg-white/20 text-white hover:bg-white/30' : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                isSent ? 'bg-white/20 text-white hover:bg-white/30' : 'bg-action-50 text-action-600 hover:bg-action-100'
               ]"
               @click="emit('download-attachment', parseAttachmentPayload(message.payloadJson)?.fileUrl || '', parseAttachmentPayload(message.payloadJson)?.fileName || 'file')"
             >
