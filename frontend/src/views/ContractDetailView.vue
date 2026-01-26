@@ -3,10 +3,11 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
-  ArrowLeft, Download, Pen, RefreshCw, Scale, History, FileText
+  ArrowLeft, Download, Pen, RefreshCw, Scale
 } from 'lucide-vue-next'
+import html2pdf from 'html2pdf.js'
 import {
-  getContract, sendContractForSigning, getContractPdfUrl,
+  getContract, sendContractForSigning,
   getPaymentMethodText, getDeliveryModeText, parseBankInfo,
   type ContractResponse,
   type MilestoneResponse
@@ -29,6 +30,9 @@ const signModalVisible = ref(false)
 
 // 履约管理
 const milestoneListRef = ref<InstanceType<typeof MilestoneList> | null>(null)
+// 合同文档引用（用于PDF导出）
+const contractDocRef = ref<HTMLElement | null>(null)
+const pdfGenerating = ref(false)
 const createMilestoneVisible = ref(false)
 const submitMilestoneVisible = ref(false)
 const currentMilestone = ref<MilestoneResponse | null>(null)
@@ -194,11 +198,41 @@ function onMilestoneRefresh() {
   loadContract()
 }
 
-// 下载 PDF
-function downloadPdf() {
-  if (!contract.value) return
-  const url = getContractPdfUrl(contract.value.id)
-  window.open(url, '_blank')
+// 下载 PDF（前端生成，与页面显示一致）
+async function downloadPdf() {
+  if (!contract.value || !contractDocRef.value) return
+
+  pdfGenerating.value = true
+  try {
+    const element = contractDocRef.value
+    const contractNo = contract.value.contractNo || 'contract'
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const opt: any = {
+      margin: [10, 10, 10, 10],
+      filename: `合同-${contractNo}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        logging: false
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait'
+      },
+      pagebreak: { mode: 'avoid-all' }
+    }
+
+    await html2pdf().set(opt).from(element).save()
+    ElMessage.success('PDF 下载成功')
+  } catch (e: any) {
+    console.error('PDF generation failed:', e)
+    ElMessage.error('PDF 生成失败，请重试')
+  } finally {
+    pdfGenerating.value = false
+  }
 }
 
 onMounted(() => {
@@ -247,11 +281,12 @@ onMounted(() => {
           签署合同
         </button>
         <button
-          class="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-xl transition-all"
+          class="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="pdfGenerating"
           @click="downloadPdf"
         >
-          <Download class="w-4 h-4" />
-          下载 PDF
+          <Download class="w-4 h-4" :class="{ 'animate-pulse': pdfGenerating }" />
+          {{ pdfGenerating ? '生成中...' : '下载 PDF' }}
         </button>
       </div>
     </div>
@@ -279,17 +314,20 @@ onMounted(() => {
         </div>
 
         <!-- 统一合同文档 -->
-        <UnifiedContractDocument
-          :data="documentData"
-          :status="documentStatus"
-          :buyer-signed="contract.buyerSigned"
-          :seller-signed="contract.sellerSigned"
-          :buyer-sign-time="contract.buyerSignTime"
-          :seller-sign-time="contract.sellerSignTime"
-          :show-legal-terms="showLegalTerms"
-          :show-confirm-area="false"
-          :show-sign-area="true"
-        />
+        <div ref="contractDocRef">
+          <UnifiedContractDocument
+            :data="documentData"
+            :status="documentStatus"
+            :buyer-signed="contract.buyerSigned"
+            :seller-signed="contract.sellerSigned"
+            :buyer-sign-time="contract.buyerSignTime"
+            :seller-sign-time="contract.sellerSignTime"
+            :show-legal-terms="showLegalTerms"
+            :show-confirm-area="false"
+            :show-sign-area="true"
+            :print-mode="pdfGenerating"
+          />
+        </div>
 
         <!-- PDF 哈希 -->
         <div v-if="contract.pdfHash" class="bg-white rounded-xl border border-gray-200 p-6">

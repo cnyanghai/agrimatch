@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { FileText, Search, Eye, Pen, Trash2, RefreshCw, XCircle, Calendar, Package, CheckCircle, Clock, FileEdit, FileClock, FileCheck, FileBox, FileCheck2, FileX } from 'lucide-vue-next'
+import {
+  FileText, Search, Pen, RefreshCw,
+  ChevronLeft, ChevronRight, BarChart3, AlertCircle,
+  Package, FileEdit, FileClock, FileCheck, FileBox, FileCheck2, FileX
+} from 'lucide-vue-next'
 import { listContracts, deleteContract, cancelContract, type ContractResponse, type ContractQuery } from '../api/contract'
 import { Skeleton } from '../components/ui'
 import ContractSignModal from '../components/contract/ContractSignModal.vue'
@@ -15,105 +19,164 @@ const contracts = ref<ContractResponse[]>([])
 const searchKeyword = ref('')
 const filterStatus = ref<number | null>(null)
 
+// 分页
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+// Tab 配置
+const tabs = [
+  { key: 'all', label: '所有合同', statusFilter: null },
+  { key: 'pending', label: '待我签署', statusFilter: 1 },
+  { key: 'executing', label: '履行中', statusFilter: 3 },
+  { key: 'archived', label: '已归档', statusFilter: 4 }
+]
+const activeTab = ref('all')
+
 // 签署弹窗
 const signModalVisible = ref(false)
 const signContractId = ref<number | null>(null)
 
-// 状态配置（包含颜色、图标、色条）
-const statusConfig: Record<number, { 
+// 状态配置
+const statusConfig: Record<number, {
   label: string
   color: string
-  barColor: string
-  bgGradient: string
-  iconColor: string
+  bgColor: string
+  borderColor: string
 }> = {
-  0: { 
-    label: '草稿', 
-    color: 'bg-gray-100 text-gray-600',
-    barColor: 'bg-gray-400',
-    bgGradient: 'from-gray-400 to-gray-500',
-    iconColor: 'text-gray-500'
-  },
-  1: { 
-    label: '待签署', 
-    color: 'bg-amber-50 text-amber-600',
-    barColor: 'bg-amber-500',
-    bgGradient: 'from-amber-400 to-orange-500',
-    iconColor: 'text-amber-500'
-  },
-  2: { 
-    label: '已签署', 
-    color: 'bg-brand-50 text-brand-600',
-    barColor: 'bg-brand-500',
-    bgGradient: 'from-brand-500 to-teal-600',
-    iconColor: 'text-brand-500'
-  },
-  3: { 
-    label: '履约中', 
-    color: 'bg-autumn-50 text-autumn-600',
-    barColor: 'bg-autumn-500',
-    bgGradient: 'from-autumn-500 to-autumn-600',
-    iconColor: 'text-autumn-500'
-  },
-  4: { 
-    label: '已完成', 
-    color: 'bg-brand-100 text-brand-700',
-    barColor: 'bg-brand-600',
-    bgGradient: 'from-brand-600 to-brand-700',
-    iconColor: 'text-brand-600'
-  },
-  5: { 
-    label: '已取消', 
-    color: 'bg-red-50 text-red-500',
-    barColor: 'bg-red-400',
-    bgGradient: 'from-red-400 to-rose-500',
-    iconColor: 'text-red-400'
-  }
+  0: { label: '草稿', color: 'text-gray-600', bgColor: 'bg-gray-100', borderColor: 'border-gray-200' },
+  1: { label: '待签署', color: 'text-amber-700', bgColor: 'bg-amber-100', borderColor: 'border-amber-200' },
+  2: { label: '已签署', color: 'text-brand-700', bgColor: 'bg-brand-100', borderColor: 'border-brand-200' },
+  3: { label: '履行中', color: 'text-autumn-700', bgColor: 'bg-autumn-100', borderColor: 'border-autumn-200' },
+  4: { label: '已完成', color: 'text-green-700', bgColor: 'bg-green-100', borderColor: 'border-green-200' },
+  5: { label: '已取消', color: 'text-red-700', bgColor: 'bg-red-100', borderColor: 'border-red-200' }
 }
 
 // 状态图标组件映射
 const statusIconMap: Record<number, any> = {
-  0: FileEdit,      // 草稿
-  1: FileClock,     // 待签署
-  2: FileCheck,     // 已签署
-  3: FileBox,       // 履约中
-  4: FileCheck2,    // 已完成
-  5: FileX          // 已取消
+  0: FileEdit,
+  1: FileClock,
+  2: FileCheck,
+  3: FileBox,
+  4: FileCheck2,
+  5: FileX
+}
+
+// 切换 Tab
+function switchTab(key: string) {
+  activeTab.value = key
+  const tab = tabs.find(t => t.key === key)
+  filterStatus.value = tab?.statusFilter ?? null
+  currentPage.value = 1
 }
 
 // 筛选后的合同列表
 const filteredContracts = computed(() => {
   let result = contracts.value
-  
+
   if (filterStatus.value !== null) {
     result = result.filter(c => c.status === filterStatus.value)
   }
-  
+
   if (searchKeyword.value.trim()) {
     const kw = searchKeyword.value.toLowerCase()
-    result = result.filter(c => 
+    result = result.filter(c =>
       c.contractNo?.toLowerCase().includes(kw) ||
       c.productName?.toLowerCase().includes(kw) ||
       c.buyerCompanyName?.toLowerCase().includes(kw) ||
       c.sellerCompanyName?.toLowerCase().includes(kw)
     )
   }
-  
+
   return result
 })
+
+// 分页后的合同列表
+const paginatedContracts = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredContracts.value.slice(start, end)
+})
+
+// 总页数
+const totalPages = computed(() => Math.ceil(filteredContracts.value.length / pageSize.value) || 1)
 
 // 统计数据
 const stats = computed(() => {
   const all = contracts.value
+  const pendingTotal = all
+    .filter(c => c.status === 1 || c.status === 3)
+    .reduce((sum, c) => sum + (c.totalAmount || 0), 0)
+  const monthlyNew = all.filter(c => {
+    if (!c.createTime) return false
+    const d = new Date(c.createTime)
+    const now = new Date()
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+  }).length
+  const completed = all.filter(c => c.status === 4).length
+  const total = all.length
+  const executionRate = total > 0 ? Math.round((completed / total) * 100) : 0
+
   return {
     total: all.length,
     draft: all.filter(c => c.status === 0).length,
     pending: all.filter(c => c.status === 1).length,
     signed: all.filter(c => c.status === 2).length,
     executing: all.filter(c => c.status === 3).length,
-    completed: all.filter(c => c.status === 4).length,
+    completed,
     cancelled: all.filter(c => c.status === 5).length,
+    pendingTotal,
+    monthlyNew,
+    executionRate
   }
+})
+
+// Tab 显示数量
+function getTabCount(key: string): number {
+  switch (key) {
+    case 'all': return stats.value.total
+    case 'pending': return stats.value.pending
+    case 'executing': return stats.value.executing
+    case 'archived': return stats.value.completed
+    default: return 0
+  }
+}
+
+// 待办事项
+const todoItems = computed(() => {
+  const items: Array<{
+    type: 'sign' | 'execute' | 'warning'
+    title: string
+    desc: string
+    contractId: number
+  }> = []
+
+  // 待签署的合同
+  contracts.value
+    .filter(c => c.status === 1)
+    .slice(0, 2)
+    .forEach(c => {
+      items.push({
+        type: 'sign',
+        title: `待签署: ${c.productName || c.contractNo}`,
+        desc: `合同金额 ¥${formatAmount(c.totalAmount)}`,
+        contractId: c.id
+      })
+    })
+
+  // 履行中的合同
+  contracts.value
+    .filter(c => c.status === 3)
+    .slice(0, 1)
+    .forEach(c => {
+      items.push({
+        type: 'execute',
+        title: `履约跟进: ${c.productName || c.contractNo}`,
+        desc: '请及时更新履约进度',
+        contractId: c.id
+      })
+    })
+
+  return items.slice(0, 3)
 })
 
 // 加载合同列表
@@ -154,7 +217,7 @@ async function handleDelete(contract: ContractResponse) {
     ElMessage.warning('只能删除草稿状态的合同')
     return
   }
-  
+
   try {
     await ElMessageBox.confirm(
       '确定要删除此合同吗？删除后不可恢复。',
@@ -165,7 +228,7 @@ async function handleDelete(contract: ContractResponse) {
         type: 'warning',
       }
     )
-    
+
     const res = await deleteContract(contract.id)
     if (res.code === 0) {
       ElMessage.success('删除成功')
@@ -186,7 +249,7 @@ async function handleCancel(contract: ContractResponse) {
     ElMessage.warning('只有草稿或待签署状态的合同可以取消')
     return
   }
-  
+
   try {
     const { value: reason } = await ElMessageBox.prompt(
       '请输入取消原因（可选）',
@@ -197,7 +260,7 @@ async function handleCancel(contract: ContractResponse) {
         inputPlaceholder: '例如：买卖双方协商一致取消',
       }
     )
-    
+
     const res = await cancelContract(contract.id, reason || undefined)
     if (res.code === 0) {
       ElMessage.success('合同已取消')
@@ -212,6 +275,14 @@ async function handleCancel(contract: ContractResponse) {
   }
 }
 
+// 重置筛选
+function resetFilters() {
+  searchKeyword.value = ''
+  filterStatus.value = null
+  activeTab.value = 'all'
+  currentPage.value = 1
+}
+
 // 格式化金额
 function formatAmount(val?: number): string {
   if (val == null) return '-'
@@ -224,17 +295,44 @@ function formatDate(val?: string): string {
   return val.split('T')[0] || '-'
 }
 
-// 格式化完整时间
-function formatDateTime(val?: string): string {
-  if (!val) return '-'
-  const d = new Date(val)
-  return d.toLocaleString('zh-CN', { 
-    month: '2-digit', 
-    day: '2-digit', 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  })
+// 获取交易对手（对方公司名称）
+function getCounterparty(contract: ContractResponse): string {
+  // 这里可以根据当前用户判断显示买方还是卖方
+  // 暂时显示买方或卖方（非空的那个）
+  return contract.buyerCompanyName || contract.sellerCompanyName || '-'
 }
+
+// 分页
+function goToPage(page: number) {
+  if (page < 1 || page > totalPages.value) return
+  currentPage.value = page
+}
+
+// 生成分页数字
+const pageNumbers = computed(() => {
+  const pages: (number | string)[] = []
+  const total = totalPages.value
+  const current = currentPage.value
+
+  if (total <= 7) {
+    for (let i = 1; i <= total; i++) pages.push(i)
+  } else {
+    pages.push(1)
+    if (current > 3) pages.push('...')
+    for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
+      pages.push(i)
+    }
+    if (current < total - 2) pages.push('...')
+    pages.push(total)
+  }
+
+  return pages
+})
+
+// 监听筛选变化重置页码
+watch([searchKeyword, filterStatus], () => {
+  currentPage.value = 1
+})
 
 onMounted(() => {
   loadContracts()
@@ -243,287 +341,332 @@ onMounted(() => {
 
 <template>
   <div class="contract-list-view">
-    <!-- 顶部标题 -->
-    <div class="mb-6 flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">合同管理</h1>
-        <p class="text-sm text-gray-500 mt-1">管理您的所有采购合同</p>
+    <!-- 页面标题 -->
+    <div class="flex flex-wrap justify-between items-end gap-4 mb-8">
+      <div class="flex flex-col gap-2">
+        <h1 class="text-3xl font-black text-gray-900 tracking-tight">合同管理中心</h1>
+        <p class="text-gray-500">管理并追踪所有采购、销售合同，实时洞察交易状态</p>
       </div>
       <button
-        class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-700 hover:to-teal-700 text-white text-sm font-bold rounded-xl transition-all  shadow-md shadow-brand-500/20"
+        class="flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold transition-all shadow-sm"
         @click="loadContracts"
       >
         <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
-        刷新
+        刷新数据
       </button>
     </div>
-    
-    <!-- 统计卡片 -->
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
-      <div 
-        v-for="(info, status) in statusConfig" 
-        :key="status"
-        class="bg-white rounded-xl border border-gray-200 p-3 cursor-pointer transition-all hover:shadow-md"
-        :class="{ 'ring-2 ring-brand-500 ring-offset-1': filterStatus === Number(status) }"
-        @click="filterStatus = filterStatus === Number(status) ? null : Number(status)"
-      >
-        <div class="flex items-center gap-2">
-          <component :is="statusIconMap[Number(status)]" class="w-4 h-4" :class="info.iconColor" />
-          <span class="text-xs font-medium text-gray-500">{{ info.label }}</span>
-        </div>
-        <div class="text-xl font-bold text-gray-900 mt-1">
-          {{ Number(status) === 0 ? stats.draft :
-             Number(status) === 1 ? stats.pending :
-             Number(status) === 2 ? stats.signed :
-             Number(status) === 3 ? stats.executing :
-             Number(status) === 4 ? stats.completed :
-             stats.cancelled }}
-        </div>
-      </div>
-    </div>
-    
-    <!-- 主内容 -->
-    <div class="space-y-6">
-      <!-- 搜索栏 -->
-      <div class="bg-white rounded-xl border border-gray-200 p-4">
-        <div class="flex flex-wrap gap-4 items-center">
-          <!-- 搜索框 -->
-          <div class="flex-1 min-w-[280px] relative">
-            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              v-model="searchKeyword"
-              type="text"
-              placeholder="搜索合同编号、产品名称、公司名称..."
-              class="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all text-sm"
-            />
-          </div>
-          
-          <!-- 快速筛选 -->
-          <div class="flex gap-2 flex-wrap">
+
+    <!-- 主内容区域 -->
+    <div class="flex gap-8">
+      <!-- 左侧：筛选 & 表格 -->
+      <div class="flex-1 min-w-0">
+        <!-- Tab + 筛选栏 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+          <!-- Tab 导航 -->
+          <div class="flex border-b border-gray-100 px-6">
             <button
-              :class="[
-                'px-4 py-2 text-xs font-bold rounded-xl transition-all',
-                filterStatus === null 
-                  ? 'bg-gradient-to-r from-brand-600 to-teal-600 text-white shadow-md' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              ]"
-              @click="filterStatus = null"
+              v-for="tab in tabs"
+              :key="tab.key"
+              class="py-4 px-4 text-sm font-medium transition-colors border-b-2 -mb-px"
+              :class="activeTab === tab.key
+                ? 'border-brand-600 text-brand-600 font-bold'
+                : 'border-transparent text-gray-500 hover:text-gray-700'"
+              @click="switchTab(tab.key)"
             >
-              全部 ({{ stats.total }})
-            </button>
-            <button
-              v-if="stats.pending > 0"
-              :class="[
-                'px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1',
-                filterStatus === 1 
-                  ? 'bg-amber-500 text-white shadow-md' 
-                  : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
-              ]"
-              @click="filterStatus = filterStatus === 1 ? null : 1"
-            >
-              <Clock class="w-3 h-3" />
-              待签署 ({{ stats.pending }})
-            </button>
-            <button
-              v-if="stats.executing > 0"
-              :class="[
-                'px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1',
-                filterStatus === 3 
-                  ? 'bg-autumn-500 text-white shadow-md' 
-                  : 'bg-autumn-50 text-autumn-600 hover:bg-autumn-100'
-              ]"
-              @click="filterStatus = filterStatus === 3 ? null : 3"
-            >
-              <Package class="w-3 h-3" />
-              履约中 ({{ stats.executing }})
+              {{ tab.label }} ({{ getTabCount(tab.key) }})
             </button>
           </div>
-        </div>
-      </div>
-      
-      <!-- 加载状态 - 骨架屏 -->
-      <div v-if="loading" class="space-y-4">
-        <div v-for="i in 3" :key="i" class="bg-white rounded-xl border border-gray-200 p-5">
-          <div class="flex gap-4">
-            <Skeleton type="avatar" class="!w-14 !h-14 !rounded-xl" />
-            <div class="flex-1 space-y-3">
-              <Skeleton type="title" class="!w-48" />
-              <Skeleton type="text" class="!w-72" />
-              <div class="flex gap-4">
-                <Skeleton type="text" class="!w-24" />
-                <Skeleton type="text" class="!w-24" />
-              </div>
+
+          <!-- 筛选栏 -->
+          <div class="p-4 flex flex-wrap items-center gap-3">
+            <!-- 状态筛选 -->
+            <div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5 border border-gray-100">
+              <span class="text-xs text-gray-400 uppercase font-bold">状态</span>
+              <select
+                v-model="filterStatus"
+                class="bg-transparent border-none focus:ring-0 text-sm py-0 pl-0 pr-6 font-medium cursor-pointer"
+              >
+                <option :value="null">全部状态</option>
+                <option :value="0">草稿</option>
+                <option :value="1">待签署</option>
+                <option :value="2">已签署</option>
+                <option :value="3">履行中</option>
+                <option :value="4">已完成</option>
+                <option :value="5">已取消</option>
+              </select>
             </div>
-            <Skeleton type="title" class="!w-24" />
+
+            <!-- 搜索框 -->
+            <div class="flex-1 min-w-[200px] relative">
+              <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                v-model="searchKeyword"
+                type="text"
+                placeholder="搜索合同编号、产品名称或交易对手..."
+                class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
+              />
+            </div>
+
+            <!-- 重置按钮 -->
+            <button
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-200 transition-colors"
+              @click="resetFilters"
+            >
+              重置筛选
+            </button>
           </div>
         </div>
-      </div>
-      
-      <!-- 空状态 -->
-      <div v-else-if="filteredContracts.length === 0" class="bg-white rounded-xl border border-gray-200 p-12 text-center">
-        <div class="w-20 h-20 mx-auto rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-4">
-          <FileText class="w-10 h-10 text-gray-400" />
-        </div>
-        <p class="text-lg font-bold text-gray-700">暂无合同</p>
-        <p class="text-sm text-gray-400 mt-2">在聊天中确认报价后可起草合同</p>
-      </div>
-      
-      <!-- 合同列表 -->
-      <div v-else class="space-y-4">
-        <div
-          v-for="(contract, idx) in filteredContracts"
-          :key="contract.id"
-          class="contract-card group bg-white rounded-xl border border-gray-200 hover:shadow-md hover:border-brand-100 transition-all cursor-pointer overflow-hidden"
-          :style="{ animationDelay: `${idx * 50}ms` }"
-          @click="viewContract(contract.id)"
-        >
-          <!-- 左侧状态色条 -->
-          <div class="flex">
-            <div 
-              class="w-1.5 shrink-0 rounded-l-2xl"
-              :class="statusConfig[contract.status]?.barColor || 'bg-gray-400'"
-            />
-            
-            <div class="flex-1 p-5">
-              <!-- 头部：图标 + 基本信息 + 金额 -->
-              <div class="flex items-start gap-4">
-                <!-- 合同图标（渐变） -->
-                <div 
-                  class="w-14 h-14 rounded-xl bg-gradient-to-br flex items-center justify-center shrink-0 shadow-md"
-                  :class="statusConfig[contract.status]?.bgGradient || 'from-gray-400 to-gray-500'"
+
+        <!-- 表格 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <!-- 加载状态 -->
+          <div v-if="loading" class="p-6">
+            <div v-for="i in 5" :key="i" class="flex gap-4 py-4 border-b border-gray-50 last:border-0">
+              <Skeleton type="text" class="!w-32" />
+              <Skeleton type="text" class="!w-40" />
+              <Skeleton type="text" class="!w-32" />
+              <Skeleton type="text" class="!w-24" />
+              <Skeleton type="text" class="!w-24" />
+              <Skeleton type="text" class="!w-20" />
+            </div>
+          </div>
+
+          <!-- 空状态 -->
+          <div v-else-if="filteredContracts.length === 0" class="p-12 text-center">
+            <div class="w-20 h-20 mx-auto rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-4">
+              <FileText class="w-10 h-10 text-gray-400" />
+            </div>
+            <p class="text-lg font-bold text-gray-700">暂无合同</p>
+            <p class="text-sm text-gray-400 mt-2">在聊天中确认报价后可起草合同</p>
+          </div>
+
+          <!-- 表格内容 -->
+          <template v-else>
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider">
+                  <th class="px-6 py-4">合同编号</th>
+                  <th class="px-6 py-4">产品/标题</th>
+                  <th class="px-6 py-4">交易对手</th>
+                  <th class="px-6 py-4">合同总额</th>
+                  <th class="px-6 py-4">创建日期</th>
+                  <th class="px-6 py-4 text-center">状态</th>
+                  <th class="px-6 py-4 text-right">操作</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr
+                  v-for="contract in paginatedContracts"
+                  :key="contract.id"
+                  class="hover:bg-gray-50 transition-colors cursor-pointer"
+                  @click="viewContract(contract.id)"
                 >
-                  <FileText class="w-7 h-7 text-white" />
-                </div>
-                
-                <!-- 核心信息 -->
-                <div class="flex-1 min-w-0">
-                  <!-- 合同编号 + 状态 -->
-                  <div class="flex items-center gap-3 flex-wrap">
-                    <span class="text-base font-bold text-gray-900">{{ contract.contractNo }}</span>
-                    <span 
-                      :class="['text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1', statusConfig[contract.status]?.color]"
+                  <td class="px-6 py-4 text-sm font-mono text-gray-500">
+                    {{ contract.contractNo || '-' }}
+                  </td>
+                  <td class="px-6 py-4 text-sm font-bold text-gray-900">
+                    {{ contract.productName || '-' }}
+                    <span v-if="contract.quantity" class="text-gray-400 font-normal ml-2">
+                      {{ contract.quantity }}{{ contract.unit }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <span class="text-brand-600 hover:underline font-medium">
+                      {{ getCounterparty(contract) }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                    ¥{{ formatAmount(contract.totalAmount) }}
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-500">
+                    {{ formatDate(contract.createTime) }}
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <span
+                      :class="[
+                        'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border',
+                        statusConfig[contract.status]?.bgColor,
+                        statusConfig[contract.status]?.color,
+                        statusConfig[contract.status]?.borderColor
+                      ]"
                     >
                       <component :is="statusIconMap[contract.status]" class="w-3 h-3" />
                       {{ statusConfig[contract.status]?.label || '未知' }}
                     </span>
-                    <span class="text-xs text-gray-400">{{ formatDate(contract.createTime) }}</span>
-                  </div>
-                  
-                  <!-- 产品信息：数量 × 单价 -->
-                  <div class="mt-2 text-sm text-gray-600">
-                    <span class="font-medium text-gray-900">{{ contract.productName || '-' }}</span>
-                    <span class="mx-2 text-gray-300">·</span>
-                    <span>{{ contract.quantity }} {{ contract.unit }}</span>
-                    <span v-if="contract.unitPrice" class="text-gray-400">
-                      × ¥{{ formatAmount(contract.unitPrice) }}/{{ contract.unit }}
-                    </span>
-                  </div>
-                </div>
-                
-                <!-- 金额（突出显示） -->
-                <div class="text-right shrink-0">
-                  <div class="text-2xl font-bold text-brand-600">
-                    ¥{{ formatAmount(contract.totalAmount) }}
-                  </div>
-                  <div class="text-[10px] text-gray-400 mt-1">合同金额</div>
-                </div>
-              </div>
-              
-              <!-- 分隔线 -->
-              <div class="border-t border-gray-50 my-4" />
-              
-              <!-- 签署信息 -->
-              <div class="grid grid-cols-2 gap-4">
-                <!-- 买方 -->
-                <div class="flex items-center gap-3">
-                  <div :class="['w-6 h-6 rounded-full flex items-center justify-center text-[10px]', contract.buyerSigned ? 'bg-brand-100' : 'bg-amber-100']">
-                    <CheckCircle v-if="contract.buyerSigned" class="w-4 h-4 text-brand-600" />
-                    <Clock v-else class="w-4 h-4 text-amber-500" />
-                  </div>
-                  <div class="min-w-0">
-                    <div class="text-[10px] text-gray-400">买方</div>
-                    <div class="text-xs font-medium text-gray-900 truncate">{{ contract.buyerCompanyName || '-' }}</div>
-                    <div class="text-[10px] text-gray-400">
-                      {{ contract.buyerSigned ? `已签署 ${formatDateTime(contract.buyerSignTime)}` : '待签署' }}
+                  </td>
+                  <td class="px-6 py-4 text-right whitespace-nowrap" @click.stop>
+                    <div class="flex justify-end gap-3 text-sm font-bold text-brand-600">
+                      <button class="hover:text-brand-800" @click="viewContract(contract.id)">
+                        查看
+                      </button>
+                      <button
+                        v-if="contract.status === 1 && (!contract.buyerSigned || !contract.sellerSigned)"
+                        class="hover:text-brand-800"
+                        @click="openSignModal(contract.id)"
+                      >
+                        签署
+                      </button>
+                      <button
+                        v-if="contract.status === 0"
+                        class="text-red-500 hover:text-red-600"
+                        @click="handleDelete(contract)"
+                      >
+                        删除
+                      </button>
+                      <button
+                        v-if="contract.status === 0 || contract.status === 1"
+                        class="text-amber-600 hover:text-amber-700"
+                        @click="handleCancel(contract)"
+                      >
+                        取消
+                      </button>
                     </div>
-                  </div>
-                </div>
-                
-                <!-- 卖方 -->
-                <div class="flex items-center gap-3">
-                  <div :class="['w-6 h-6 rounded-full flex items-center justify-center text-[10px]', contract.sellerSigned ? 'bg-brand-100' : 'bg-amber-100']">
-                    <CheckCircle v-if="contract.sellerSigned" class="w-4 h-4 text-brand-600" />
-                    <Clock v-else class="w-4 h-4 text-amber-500" />
-                  </div>
-                  <div class="min-w-0">
-                    <div class="text-[10px] text-gray-400">卖方</div>
-                    <div class="text-xs font-medium text-gray-900 truncate">{{ contract.sellerCompanyName || '-' }}</div>
-                    <div class="text-[10px] text-gray-400">
-                      {{ contract.sellerSigned ? `已签署 ${formatDateTime(contract.sellerSignTime)}` : '待签署' }}
-                    </div>
-                  </div>
-                </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- 分页 -->
+            <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+              <p class="text-xs text-gray-500">
+                显示第 {{ (currentPage - 1) * pageSize + 1 }} 至 {{ Math.min(currentPage * pageSize, filteredContracts.length) }} 条，共 {{ filteredContracts.length }} 条记录
+              </p>
+              <div class="flex gap-1">
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-400 disabled:opacity-50"
+                  :disabled="currentPage === 1"
+                  @click="goToPage(currentPage - 1)"
+                >
+                  <ChevronLeft class="w-4 h-4" />
+                </button>
+                <template v-for="(page, idx) in pageNumbers" :key="idx">
+                  <span v-if="page === '...'" class="px-1 text-gray-400 flex items-center">...</span>
+                  <button
+                    v-else
+                    class="w-8 h-8 flex items-center justify-center rounded text-xs font-bold transition-colors"
+                    :class="page === currentPage
+                      ? 'bg-brand-600 text-white'
+                      : 'border border-gray-200 text-gray-600 hover:bg-gray-50'"
+                    @click="goToPage(page as number)"
+                  >
+                    {{ page }}
+                  </button>
+                </template>
+                <button
+                  class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-600 disabled:opacity-50 disabled:text-gray-400"
+                  :disabled="currentPage === totalPages"
+                  @click="goToPage(currentPage + 1)"
+                >
+                  <ChevronRight class="w-4 h-4" />
+                </button>
               </div>
-              
-              <!-- 履约进度（仅履约中状态显示） -->
-              <div v-if="contract.status === 3" class="mt-4 p-3 bg-autumn-50 rounded-xl">
-                <div class="flex items-center justify-between text-xs">
-                  <div class="flex items-center gap-2 text-autumn-600 font-medium">
-                    <Package class="w-4 h-4" />
-                    履约进行中
-                  </div>
-                  <span class="text-autumn-500">点击查看详情 →</span>
-                </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- 右侧边栏 -->
+      <aside class="w-80 flex-shrink-0 flex flex-col gap-6">
+        <!-- 合同统计 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h3 class="text-sm font-bold mb-6 flex items-center gap-2">
+            <BarChart3 class="w-4 h-4 text-brand-600" />
+            合同统计
+          </h3>
+          <div class="space-y-6">
+            <!-- 待结算总额 -->
+            <div>
+              <p class="text-xs text-gray-500 mb-1">待结算总额 (CNY)</p>
+              <p class="text-2xl font-black text-brand-600">¥{{ formatAmount(stats.pendingTotal) }}</p>
+            </div>
+
+            <!-- 网格统计 -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <p class="text-[10px] text-gray-500 uppercase font-bold">本月新增</p>
+                <p class="text-lg font-bold">{{ stats.monthlyNew }} 份</p>
               </div>
-              
-              <!-- 交付日期（如果有） -->
-              <div v-if="contract.deliveryDate" class="mt-4 flex items-center gap-4 text-xs text-gray-500">
-                <div class="flex items-center gap-1.5">
-                  <Calendar class="w-3.5 h-3.5" />
-                  <span>交付日期：{{ formatDate(contract.deliveryDate) }}</span>
-                </div>
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <p class="text-[10px] text-gray-500 uppercase font-bold">完成率</p>
+                <p class="text-lg font-bold">{{ stats.executionRate }}%</p>
               </div>
-              
-              <!-- 操作按钮 -->
-              <div class="flex justify-end gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity" @click.stop>
-                <button
-                  class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-medium rounded-lg transition-all flex items-center gap-1"
-                  @click="viewContract(contract.id)"
-                >
-                  <Eye class="w-3.5 h-3.5" />
-                  查看
-                </button>
-                <button
-                  v-if="contract.status === 1 && (!contract.buyerSigned || !contract.sellerSigned)"
-                  class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-600 text-xs font-medium rounded-lg transition-all flex items-center gap-1"
-                  @click="openSignModal(contract.id)"
-                >
-                  <Pen class="w-3.5 h-3.5" />
-                  签署
-                </button>
-                <button
-                  v-if="contract.status === 0"
-                  class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-500 text-xs font-medium rounded-lg transition-all flex items-center gap-1"
-                  @click="handleDelete(contract)"
-                >
-                  <Trash2 class="w-3.5 h-3.5" />
-                  删除
-                </button>
-                <button
-                  v-if="contract.status === 0 || contract.status === 1"
-                  class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-600 text-xs font-medium rounded-lg transition-all flex items-center gap-1"
-                  @click="handleCancel(contract)"
-                >
-                  <XCircle class="w-3.5 h-3.5" />
-                  取消
-                </button>
+            </div>
+
+            <!-- 进度条 -->
+            <div class="pt-4 border-t border-gray-100">
+              <div class="flex justify-between items-center text-xs mb-2">
+                <span class="text-gray-500">履约中合同占比</span>
+                <span class="font-bold">{{ stats.total > 0 ? Math.round((stats.executing / stats.total) * 100) : 0 }}%</span>
+              </div>
+              <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-autumn-500 transition-all"
+                  :style="{ width: `${stats.total > 0 ? (stats.executing / stats.total) * 100 : 0}%` }"
+                />
               </div>
             </div>
           </div>
         </div>
-      </div>
+
+        <!-- 待办提醒 -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h3 class="text-sm font-bold mb-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <AlertCircle class="w-4 h-4 text-amber-500" />
+              待办提醒
+            </div>
+            <span
+              v-if="todoItems.length > 0"
+              class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full"
+            >
+              {{ todoItems.length }}
+            </span>
+          </h3>
+
+          <div v-if="todoItems.length === 0" class="text-center py-6 text-gray-400 text-sm">
+            暂无待办事项
+          </div>
+
+          <div v-else class="space-y-4">
+            <div
+              v-for="(item, idx) in todoItems"
+              :key="idx"
+              class="flex gap-3 group cursor-pointer"
+              @click="viewContract(item.contractId)"
+            >
+              <div
+                class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                :class="{
+                  'bg-amber-50 text-amber-600': item.type === 'sign',
+                  'bg-autumn-50 text-autumn-600': item.type === 'execute',
+                  'bg-red-50 text-red-600': item.type === 'warning'
+                }"
+              >
+                <Pen v-if="item.type === 'sign'" class="w-4 h-4" />
+                <Package v-else-if="item.type === 'execute'" class="w-4 h-4" />
+                <AlertCircle v-else class="w-4 h-4" />
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-bold text-gray-900 group-hover:text-brand-600 transition-colors truncate">
+                  {{ item.title }}
+                </p>
+                <p class="text-xs text-gray-400 mt-1">{{ item.desc }}</p>
+              </div>
+            </div>
+          </div>
+
+          <button
+            v-if="stats.pending > 0 || stats.executing > 0"
+            class="w-full mt-6 py-2 text-xs font-bold text-gray-500 hover:text-brand-600 border border-dashed border-gray-200 rounded-lg transition-colors"
+            @click="switchTab('pending')"
+          >
+            查看全部待办
+          </button>
+        </div>
+
+      </aside>
     </div>
-    
+
     <!-- 签署弹窗 -->
     <ContractSignModal
       v-model="signModalVisible"
@@ -534,19 +677,17 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 合同卡片入场动画 */
-.contract-card {
-  animation: slide-up 0.3s ease-out backwards;
+/* 表格行动画 */
+tbody tr {
+  animation: fade-in 0.2s ease-out;
 }
 
-@keyframes slide-up {
+@keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(12px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 </style>

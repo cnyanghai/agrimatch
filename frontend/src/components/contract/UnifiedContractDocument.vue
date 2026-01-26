@@ -238,9 +238,9 @@ function formatDateTime(dateStr: string | undefined): string {
         <!-- ========== 合同头部 ========== -->
         <div class="text-center mb-10 border-b-2 border-gray-800 pb-6">
           <h1 class="text-2xl md:text-3xl font-bold tracking-wide mb-2 font-serif">
-            粮食购销合同
+            购销合同
           </h1>
-          <p class="text-sm text-gray-500">Grain Purchase and Sale Contract</p>
+          <p class="text-sm text-gray-500">Purchase and Sale Contract</p>
           <div class="mt-4 flex justify-between text-sm">
             <span>合同编号: <span class="font-mono font-medium">{{ data.contractNo }}</span></span>
             <span>签订日期: {{ formatDate(data.signDate || data.createTime) }}</span>
