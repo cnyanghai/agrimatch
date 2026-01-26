@@ -1,17 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { ElDrawer, ElMessage } from 'element-plus'
-import { ArrowUpRight, X } from 'lucide-vue-next'
+import { ArrowUpRight, X, MessageCircle } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
-import ChatSubjectCard from './ChatSubjectCard.vue'
-import NegotiationPanel, { type QuoteFields } from './NegotiationPanel.vue'
 import { getConversationMessages, markConversationRead, type ChatMessageResponse } from '../../api/chat'
 import { useAuthStore } from '../../store/auth'
 
 // 使用统一的类型和工具函数
 import type { UiMessage } from '../../types/chat'
-import { QUOTE_STATUS_BADGE } from '../../types/chat'
-import { parseQuotePayload, getQuoteDisplayFields } from '../../utils/chat/quoteParser'
 
 // 使用共享的 WebSocket composable
 import { useChatWebSocket, type WsIncomingMessage } from '../../composables/chat'
@@ -38,7 +34,6 @@ const router = useRouter()
 const loading = ref(false)
 const messageInput = ref('')
 const messages = ref<UiMessage[]>([])
-const quotePopoverVisible = ref(false)
 
 // 使用共享的 WebSocket composable
 const websocket = useChatWebSocket(
@@ -75,6 +70,22 @@ function handleWsMessage(data: WsIncomingMessage) {
 
 const title = computed(() => props.peerDisplayName || '沟通')
 
+// 简化的标的摘要
+const subjectSummary = computed(() => {
+  if (!props.subjectSnapshotJson) return ''
+  try {
+    const snapshot = JSON.parse(props.subjectSnapshotJson)
+    const parts = []
+    if (snapshot.categoryName) parts.push(snapshot.categoryName)
+    if (snapshot.exFactoryPrice) parts.push(`¥${snapshot.exFactoryPrice}`)
+    else if (snapshot.expectedPrice) parts.push(`意向¥${snapshot.expectedPrice}`)
+    if (snapshot.quantity) parts.push(`${snapshot.quantity}吨`)
+    return parts.join(' · ') || '查看详情'
+  } catch {
+    return '查看详情'
+  }
+})
+
 function formatTime(ts?: string) {
   if (!ts) return ''
   const d = new Date(ts)
@@ -98,32 +109,6 @@ function mapApiMessageToUi(m: ChatMessageResponse): UiMessage {
     status: 'sent'
   }
 }
-
-// 使用新的统一报价解析器（兼容旧接口）
-function parseQuoteFields(payloadJson?: string): QuoteFields | null {
-  const payload = parseQuotePayload(payloadJson)
-  if (!payload) return null
-  return payload.fields as QuoteFields
-}
-
-const peerLatestQuote = computed<QuoteFields | null>(() => {
-  for (let i = messages.value.length - 1; i >= 0; i--) {
-    const m = messages.value[i]
-    if (!m) continue
-    if (m.type !== 'received') continue
-    if ((m.msgType || '').toUpperCase() !== 'QUOTE') continue
-    return parseQuoteFields(m.payloadJson) || null
-  }
-  return null
-})
-
-// 使用统一的报价状态样式
-function quoteStatusBadge(status?: string) {
-  if (!status) return null
-  return QUOTE_STATUS_BADGE[status as keyof typeof QUOTE_STATUS_BADGE] || null
-}
-
-// QUOTE_LABEL_MAP 和 getQuoteDisplayFields 现在从 utils/chat/quoteParser 导入
 
 function onWsSent(tempId?: string, id?: number) {
   if (!tempId) return
@@ -189,42 +174,6 @@ async function sendMessage() {
 
   // 使用 composable 发送
   const sent = websocket.sendText(props.conversationId, content, tempId)
-  if (!sent) {
-    ElMessage.error('发送失败')
-  }
-}
-
-async function sendQuote(payload: any, summary: string) {
-  if (!props.conversationId) return
-  quotePopoverVisible.value = false
-
-  if (!websocket.ensureConnected()) {
-    ElMessage.warning('实时连接未就绪，正在重连…')
-    return
-  }
-
-  const tempId = `q_${Date.now()}_${Math.random().toString(16).slice(2)}`
-
-  // 乐观更新
-  messages.value.push({
-    id: tempId,
-    type: 'sent',
-    msgType: 'QUOTE',
-    content: summary || '[报价]',
-    payloadJson: JSON.stringify(payload),
-    status: 'pending',
-    time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  })
-  await nextTick()
-  scrollToBottom()
-
-  // 使用 composable 发送
-  const sent = websocket.sendQuote(
-    props.conversationId,
-    JSON.stringify(payload),
-    summary || '',
-    tempId
-  )
   if (!sent) {
     ElMessage.error('发送失败')
   }
@@ -311,14 +260,11 @@ watch(
         </div>
       </div>
 
-      <!-- 常驻标的摘要 -->
-      <ChatSubjectCard
-        is-mini
-        class="sticky top-0 z-10"
-        :subject-type="subjectType"
-        :subject-id="subjectId"
-        :subject-snapshot-json="subjectSnapshotJson"
-      />
+      <!-- 简化的标的摘要 -->
+      <div v-if="subjectSnapshotJson" class="px-5 py-2 bg-gray-100 border-b border-gray-200 text-xs text-gray-600 flex items-center gap-2">
+        <span class="inline-block w-1.5 h-1.5 rounded-full" :class="subjectType === 'SUPPLY' ? 'bg-brand-500' : 'bg-autumn-500'"></span>
+        <span class="truncate">{{ subjectSummary }}</span>
+      </div>
 
       <!-- messages -->
       <div id="chat-drawer-scroll" class="flex-1 overflow-y-auto px-5 py-4 space-y-6" v-loading="loading">
@@ -334,20 +280,14 @@ watch(
                 {{ m.content }}
               </div>
               <div v-else-if="m.type === 'received'" class="max-w-[85%]">
-                <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'" class="bg-white rounded-lg rounded-tl-sm px-4 py-3 border border-gray-200 shadow-sm">
-                  <div class="flex items-center justify-between mb-2">
-                    <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">电子报价单</div>
-                    <div v-if="quoteStatusBadge(m.quoteStatus)"
-                         :class="['text-[10px] px-1.5 py-0.5 rounded-full border font-bold', quoteStatusBadge(m.quoteStatus)?.bgColor, quoteStatusBadge(m.quoteStatus)?.color]">
-                      {{ quoteStatusBadge(m.quoteStatus)?.label }}
-                    </div>
-                  </div>
-                  <div class="mt-1 font-bold text-gray-900 text-sm border-b pb-2 mb-3">{{ m.content || '[报价]' }}</div>
-                  <div class="space-y-2">
-                    <div v-for="field in getQuoteDisplayFields(m.payloadJson)" :key="field.label" class="flex justify-between text-[11px]">
-                      <span class="text-gray-400">{{ field.label }}</span>
-                      <span class="text-gray-700 font-medium">{{ field.value }}</span>
-                    </div>
+                <!-- 报价消息简化为链接 -->
+                <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'"
+                     class="bg-white rounded-lg rounded-tl-sm px-4 py-2.5 border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50 transition-all"
+                     @click="goToChatCenter">
+                  <div class="flex items-center gap-2 text-sm text-brand-600">
+                    <MessageCircle class="w-4 h-4" />
+                    <span class="font-medium">收到报价单</span>
+                    <span class="text-gray-400 text-xs">点击查看详情 →</span>
                   </div>
                 </div>
                 <div v-else class="bg-white rounded-lg rounded-tl-sm px-4 py-2.5 border border-gray-200 shadow-sm text-sm text-gray-800">
@@ -355,20 +295,14 @@ watch(
                 </div>
               </div>
               <div v-else class="max-w-[85%] flex flex-col items-end">
-                <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'" class="bg-brand-600 text-white rounded-lg rounded-tr-sm px-4 py-3 shadow-sm">
-                  <div class="flex items-center justify-between mb-2 gap-4">
-                    <div class="text-[10px] font-bold uppercase tracking-widest text-brand-100">电子报价单</div>
-                    <div v-if="quoteStatusBadge(m.quoteStatus)" 
-                         class="text-[10px] px-1.5 py-0.5 rounded-full border border-brand-400 bg-brand-500/50 font-bold text-white">
-                      {{ quoteStatusBadge(m.quoteStatus)?.label }}
-                    </div>
-                  </div>
-                  <div class="mt-1 font-bold text-sm border-b border-brand-500 pb-2 mb-3">{{ m.content || '[报价]' }}</div>
-                  <div class="space-y-2">
-                    <div v-for="field in getQuoteDisplayFields(m.payloadJson)" :key="field.label" class="flex justify-between text-[11px]">
-                      <span class="text-brand-100/80">{{ field.label }}</span>
-                      <span class="text-white font-medium">{{ field.value }}</span>
-                    </div>
+                <!-- 我发送的报价消息简化显示 -->
+                <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'"
+                     class="bg-brand-600 text-white rounded-lg rounded-tr-sm px-4 py-2.5 shadow-sm cursor-pointer hover:bg-brand-700 transition-all"
+                     @click="goToChatCenter">
+                  <div class="flex items-center gap-2 text-sm">
+                    <MessageCircle class="w-4 h-4" />
+                    <span class="font-medium">已发送报价单</span>
+                    <span class="text-brand-200 text-xs">点击查看 →</span>
                   </div>
                 </div>
                 <div v-else class="bg-brand-600 text-white rounded-lg rounded-tr-sm px-4 py-2.5 shadow-sm text-sm">
@@ -384,23 +318,8 @@ watch(
         </div>
       </div>
 
-      <!-- composer simplified -->
+      <!-- 简化的输入区域 -->
       <div class="p-4 bg-white border-t border-gray-200">
-        <div class="flex items-center gap-4 mb-3">
-          <el-popover placement="top-start" :width="600" trigger="click" v-model:visible="quotePopoverVisible" popper-class="!p-0 !rounded-2xl !border-none !shadow-2xl">
-            <template #reference>
-              <button class="text-xs font-bold text-brand-600">修改价格/报价</button>
-            </template>
-            <NegotiationPanel
-              :disabled="!conversationId"
-              :peer-latest-quote="peerLatestQuote"
-              :subject-snapshot-json="subjectSnapshotJson"
-              @send="({ payload, summary }) => sendQuote(payload, summary)"
-            />
-          </el-popover>
-          <button class="text-xs font-bold text-gray-400">图片</button>
-          <button class="text-xs font-bold text-gray-400">附件</button>
-        </div>
         <div class="flex items-end gap-3">
           <textarea
             v-model="messageInput"
@@ -410,11 +329,20 @@ watch(
             @keydown.enter.prevent="sendMessage"
           />
           <button
-            class="px-4 py-2 rounded-lg bg-brand-600 text-white font-bold hover:bg-brand-700 transition-all  disabled:opacity-50"
+            class="px-4 py-2 rounded-lg bg-brand-600 text-white font-bold hover:bg-brand-700 transition-all disabled:opacity-50"
             :disabled="!messageInput.trim() || !conversationId"
             @click="sendMessage"
           >
             发送
+          </button>
+        </div>
+        <!-- 引导提示 -->
+        <div class="mt-3 text-center">
+          <button
+            class="text-xs text-gray-400 hover:text-brand-600 transition-all"
+            @click="goToChatCenter"
+          >
+            💡 需要发送报价、图片或附件？<span class="font-medium text-brand-600">转入沟通中心</span>
           </button>
         </div>
       </div>

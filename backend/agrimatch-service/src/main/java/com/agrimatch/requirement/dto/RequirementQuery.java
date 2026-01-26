@@ -5,6 +5,10 @@ public class RequirementQuery {
     private Long userId;
     private String categoryName;
     private String domain;
+    /**
+     * 业态代码：feed/breed/process/equipment
+     */
+    private String schemaCode;
     private Integer status;
     /**
      * 是否包含已过期数据：
@@ -77,6 +81,14 @@ public class RequirementQuery {
 
     public void setOrder(String order) {
         this.order = order;
+    }
+
+    public String getSchemaCode() {
+        return schemaCode;
+    }
+
+    public void setSchemaCode(String schemaCode) {
+        this.schemaCode = schemaCode;
     }
 }
 

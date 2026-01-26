@@ -4,7 +4,7 @@
  * 用于供应大厅和需求大厅的左侧分类导航
  */
 import { ref, computed, watch } from 'vue'
-import { ChevronDown, ChevronRight, Wheat, Sprout, Factory, Truck } from 'lucide-vue-next'
+import { ChevronDown, ChevronRight, Wheat, Sprout, Factory, Truck, LayoutGrid } from 'lucide-vue-next'
 import type { ProductSchemaVO, CategoryNode } from '../api/productSchema'
 
 const props = defineProps<{
@@ -87,16 +87,10 @@ function getCategoryCount(_node: CategoryNode): number | null {
   return null
 }
 
-// 默认展开第一层
-watch(() => currentSchema.value, (schema) => {
-  if (schema?.categories) {
-    schema.categories.forEach(cat => {
-      if (cat.children && cat.children.length > 0) {
-        expandedNodes.value.add(cat.id)
-      }
-    })
-  }
-}, { immediate: true })
+// 切换业态时重置展开状态（默认折叠）
+watch(() => currentSchema.value, () => {
+  expandedNodes.value.clear()
+})
 </script>
 
 <template>
