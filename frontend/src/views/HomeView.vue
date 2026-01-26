@@ -282,34 +282,47 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <!-- Platform Stats (Stitch Style Layout) -->
-    <section class="relative z-20 -mt-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-6 group hover:border-brand-200 transition-all">
-          <div class="w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center text-brand-600 group-hover:scale-110 transition-transform">
-            <Users :size="32" />
+    <!-- Platform Stats (4-Column Compact) -->
+    <section class="relative z-20 -mt-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- 累计用户 -->
+        <div class="bg-white/95 backdrop-blur-sm p-5 rounded-xl shadow-lg border border-gray-100/80 flex items-center gap-4 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+          <div class="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-slate-200 transition-colors">
+            <Users :size="22" />
           </div>
-          <div>
-            <div class="text-3xl font-black text-gray-900">{{ stats?.userCount ? stats.userCount * 123 : '4.8' }}w+</div>
-            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 text-nowrap">每月活跃搜索</div>
-          </div>
-        </div>
-        <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-6 group hover:border-autumn-200 transition-all">
-          <div class="w-16 h-16 rounded-2xl bg-autumn-50 flex items-center justify-center text-autumn-600 group-hover:scale-110 transition-transform">
-            <Factory :size="32" />
-          </div>
-          <div>
-            <div class="text-3xl font-black text-gray-900">{{ stats?.supplierCount ?? '5,200' }}+</div>
-            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 text-nowrap">认证供应商</div>
+          <div class="min-w-0">
+            <div class="text-2xl font-black text-gray-900 tabular-nums">{{ stats?.userCount ?? '12,800' }}</div>
+            <div class="text-[10px] font-semibold text-gray-400 mt-0.5">平台用户</div>
           </div>
         </div>
-        <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-6 group hover:border-purple-200 transition-all">
-          <div class="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
-            <Gem :size="32" />
+        <!-- 认证供应商 -->
+        <div class="bg-white/95 backdrop-blur-sm p-5 rounded-xl shadow-lg border border-gray-100/80 flex items-center gap-4 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+          <div class="w-11 h-11 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 group-hover:bg-brand-100 transition-colors">
+            <Factory :size="22" />
           </div>
-          <div>
-            <div class="text-3xl font-black text-gray-900">{{ stats?.buyerCount ?? '860' }}+</div>
-            <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 text-nowrap">大宗采购商</div>
+          <div class="min-w-0">
+            <div class="text-2xl font-black text-gray-900 tabular-nums">{{ stats?.supplierCount ?? '5,200' }}</div>
+            <div class="text-[10px] font-semibold text-gray-400 mt-0.5">认证供应商</div>
+          </div>
+        </div>
+        <!-- 大宗采购商 -->
+        <div class="bg-white/95 backdrop-blur-sm p-5 rounded-xl shadow-lg border border-gray-100/80 flex items-center gap-4 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+          <div class="w-11 h-11 rounded-xl bg-autumn-50 flex items-center justify-center text-autumn-600 group-hover:bg-autumn-100 transition-colors">
+            <Building2 :size="22" />
+          </div>
+          <div class="min-w-0">
+            <div class="text-2xl font-black text-gray-900 tabular-nums">{{ stats?.buyerCount ?? '860' }}</div>
+            <div class="text-[10px] font-semibold text-gray-400 mt-0.5">大宗采购商</div>
+          </div>
+        </div>
+        <!-- 累计成交 -->
+        <div class="bg-white/95 backdrop-blur-sm p-5 rounded-xl shadow-lg border border-gray-100/80 flex items-center gap-4 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+          <div class="w-11 h-11 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600 group-hover:bg-orange-100 transition-colors">
+            <TrendingUp :size="22" />
+          </div>
+          <div class="min-w-0">
+            <div class="text-2xl font-black text-gray-900 tabular-nums">{{ stats?.dealCount ?? '3,680' }}</div>
+            <div class="text-[10px] font-semibold text-gray-400 mt-0.5">累计成交</div>
           </div>
         </div>
       </div>
