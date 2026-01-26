@@ -33,28 +33,10 @@ import {
 
 const router = useRouter()
 
-// 产业板块定义
+// 产业板块定义（key 与 schemaCode 统一）
 const domains = [
   {
-    key: 'biological',
-    name: '生物种苗',
-    desc: '种禽、种蛋、鱼苗、种猪...',
-    icon: Sprout,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    tags: ['#日龄', '#疫苗', '#亲本品种']
-  },
-  {
-    key: 'processing',
-    name: '农牧加工',
-    desc: '肉禽分割、禽蛋、水产成品...',
-    icon: Factory,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-    tags: ['#分割部位', '#温控', '#保质期']
-  },
-  {
-    key: 'material',
+    key: 'feed',  // 原料饲料
     name: '原料饲料',
     desc: '玉米、豆粕、油脂、添加剂...',
     icon: Wheat,
@@ -63,7 +45,25 @@ const domains = [
     tags: ['#水分', '#蛋白', '#产地']
   },
   {
-    key: 'equipment',
+    key: 'breed',  // 生物种苗
+    name: '生物种苗',
+    desc: '种禽、种蛋、鱼苗、种猪...',
+    icon: Sprout,
+    color: 'text-green-600',
+    bgColor: 'bg-green-50',
+    tags: ['#日龄', '#疫苗', '#亲本品种']
+  },
+  {
+    key: 'process',  // 农牧加工
+    name: '农牧加工',
+    desc: '肉禽分割、禽蛋、水产成品...',
+    icon: Factory,
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50',
+    tags: ['#分割部位', '#温控', '#保质期']
+  },
+  {
+    key: 'equipment',  // 装备物流
     name: '装备物流',
     desc: '料车、风机、农机、包装...',
     icon: Cog,
@@ -336,10 +336,10 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="grid grid-cols-4 grid-rows-2 gap-6 h-[500px]">
-          <!-- Big Bento Card (Material) -->
-          <div 
+          <!-- Big Bento Card (原料饲料) -->
+          <div
             class="col-span-2 row-span-2 group relative overflow-hidden rounded-3xl bg-brand-600 cursor-pointer p-10 flex flex-col justify-end"
-            @click="go(`/hall/supply?domain=material`)"
+            @click="go(`/hall/supply?schemaCode=feed`)"
           >
             <div class="absolute top-10 right-10 opacity-20 group-hover:scale-110 transition-transform duration-500">
               <Wheat :size="180" class="text-white" />
@@ -354,10 +354,10 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <!-- Medium Bento Card (Biological) -->
+          <!-- Medium Bento Card (生物种苗) -->
           <div
             class="col-span-2 group relative overflow-hidden rounded-3xl bg-slate-900 cursor-pointer p-8 flex flex-col justify-between"
-            @click="go(`/hall/supply?domain=biological`)"
+            @click="go(`/hall/supply?schemaCode=breed`)"
           >
             <div class="absolute top-0 right-0 w-48 h-full bg-gradient-to-l from-brand-500/20 to-transparent"></div>
             <div class="flex justify-between items-start relative z-10">
@@ -375,10 +375,10 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <!-- Small Bento Card (Processing) -->
-          <div 
+          <!-- Small Bento Card (农牧加工) -->
+          <div
             class="group relative overflow-hidden rounded-3xl bg-orange-50 border border-orange-100 cursor-pointer p-6 flex flex-col justify-between hover:border-orange-200 transition-all"
-            @click="go(`/hall/supply?domain=processing`)"
+            @click="go(`/hall/supply?schemaCode=process`)"
           >
             <div class="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600">
               <Factory :size="24" />
@@ -389,10 +389,10 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <!-- Small Bento Card (Equipment) -->
-          <div 
+          <!-- Small Bento Card (装备物流) -->
+          <div
             class="group relative overflow-hidden rounded-3xl bg-blue-50 border border-blue-100 cursor-pointer p-6 flex flex-col justify-between hover:border-blue-200 transition-all"
-            @click="go(`/hall/supply?domain=equipment`)"
+            @click="go(`/hall/supply?schemaCode=equipment`)"
           >
             <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
               <Cog :size="24" />

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { requireAuth } from '../utils/requireAuth'
 import PublicFooter from '../components/PublicFooter.vue'
 import ChatDrawer from '../components/chat/ChatDrawer.vue'
+import CategorySidebar from '../components/CategorySidebar.vue'
 import { listRequirements, type RequirementResponse } from '../api/requirement'
 import { openChatConversation } from '../api/chat'
 import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
@@ -11,6 +12,7 @@ import { getSchemaTree, type ProductSchemaVO, type CategoryNode } from '../api/p
 import { getSchemaUnitConfig } from '../utils/schemaUnits'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../store/auth'
+import { Menu } from 'lucide-vue-next'
 
 const authStore = useAuthStore()
 
@@ -44,6 +46,15 @@ const companyIdFilter = computed(() => {
   return Number.isFinite(n) ? n : null
 })
 
+// 从 URL 读取业态筛选参数
+const schemaCodeFromRoute = computed((): string | null => {
+  const raw = route.query.schemaCode
+  if (Array.isArray(raw)) {
+    return raw[0] ?? null
+  }
+  return raw ?? null
+})
+
 // 分页
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -53,22 +64,8 @@ const total = ref(0)
 const schemaTree = ref<ProductSchemaVO[]>([])
 const selectedSchemaCode = ref<string | null>(null)
 
-// 获取当前业态下的常见品类（用于快速筛选）
-const quickCategoryOptions = computed(() => {
-  if (!selectedSchemaCode.value) {
-    // 未选择业态时，显示饲料原料的常见品类
-    const feedSchema = schemaTree.value.find(s => s.schemaCode === 'feed')
-    if (feedSchema?.categories) {
-      return flattenCategories(feedSchema.categories).slice(0, 8)
-    }
-    return []
-  }
-  const schema = schemaTree.value.find(s => s.schemaCode === selectedSchemaCode.value)
-  if (schema?.categories) {
-    return flattenCategories(schema.categories).slice(0, 8)
-  }
-  return []
-})
+// 移动端侧边栏状态
+const mobileSidebarOpen = ref(false)
 
 // 扁平化分类树
 function flattenCategories(nodes: CategoryNode[]): string[] {
@@ -98,12 +95,20 @@ async function loadSchemaTree() {
   }
 }
 
-// 选择业态
-function selectSchema(schemaCode: string | null) {
-  selectedSchemaCode.value = selectedSchemaCode.value === schemaCode ? null : schemaCode
-  selectedCategory.value = null // 切换业态时清除品类筛选
+// 处理业态变化（来自侧边栏）
+function onSchemaChange(schemaCode: string | null) {
+  selectedSchemaCode.value = schemaCode
   currentPage.value = 1
   loadRequirements()
+}
+
+// 处理品类变化（来自侧边栏）
+function onCategoryChange(categoryName: string | null) {
+  selectedCategory.value = categoryName
+  currentPage.value = 1
+  loadRequirements()
+  // 移动端选择后自动关闭侧边栏
+  mobileSidebarOpen.value = false
 }
 
 // 关注状态 Map: userId -> isFollowing
@@ -306,12 +311,6 @@ async function loadRequirements() {
   }
 }
 
-// 选择品种筛选
-function selectCategory(cat: string | null) {
-  selectedCategory.value = selectedCategory.value === cat ? null : cat
-  currentPage.value = 1 // 重置分页
-  loadRequirements()
-}
 
 // 搜索
 function onSearch() {
@@ -326,6 +325,10 @@ function handlePageChange(page: number) {
 }
 
 onMounted(() => {
+  // 从URL初始化业态筛选
+  if (schemaCodeFromRoute.value) {
+    selectedSchemaCode.value = schemaCodeFromRoute.value
+  }
   loadSchemaTree()
   loadRequirements()
 })
@@ -338,6 +341,16 @@ watch(companyIdFilter, () => {
 
 watch(focusIdFromRoute, () => {
   applyFocusIfNeeded()
+})
+
+// 监听 URL 中的业态筛选变化（从首页跳转）
+watch(schemaCodeFromRoute, (newVal) => {
+  if (newVal !== selectedSchemaCode.value) {
+    selectedSchemaCode.value = newVal
+    selectedCategory.value = null
+    currentPage.value = 1
+    loadRequirements()
+  }
 })
 
 // 根据品类名称查找业态代码
@@ -415,76 +428,104 @@ function parseParams(paramsJson?: string): string {
       </div>
     </div>
 
-    <!-- 筛选区 -->
+    <!-- 搜索区 -->
     <section class="bg-white border-b shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 py-6">
-        <div class="flex flex-col md:flex-row gap-4 mb-6">
+      <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="flex gap-3">
+          <!-- 移动端侧边栏切换按钮 -->
+          <button
+            class="lg:hidden flex items-center justify-center w-11 h-11 border-2 border-gray-200 rounded-xl hover:border-autumn-500 hover:text-autumn-600 transition-all"
+            @click="mobileSidebarOpen = true"
+          >
+            <Menu class="w-5 h-5" />
+          </button>
           <div class="flex-1 relative">
             <input
               v-model="searchKeyword"
               type="text"
               placeholder="搜索您想供应的品种、求购区域或指标要求..."
-              class="w-full border-2 border-gray-200 rounded-lg py-2.5 px-10 focus:border-brand-500 outline-none transition-all"
+              class="w-full border-2 border-gray-200 rounded-xl py-2.5 px-10 focus:border-autumn-500 outline-none transition-all"
               @keyup.enter="onSearch"
             />
             <svg class="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </div>
-          <button 
-            class="px-8 py-2.5 bg-brand-600 text-white rounded-xl font-bold hover:bg-brand-700 transition-all "
+          <button
+            class="px-6 py-2.5 bg-autumn-600 text-white rounded-xl font-bold hover:bg-autumn-700 transition-all"
             @click="onSearch"
           >
-            搜索需求
+            搜索
           </button>
         </div>
-
-        <div class="space-y-4">
-          <!-- 业态筛选 -->
-          <div class="flex items-start gap-4 text-xs">
-            <span class="text-gray-400 shrink-0 mt-1.5 font-medium">产品业态:</span>
-            <div class="flex flex-wrap gap-2">
-              <button
-                :class="['px-3 py-1.5 border rounded-full transition-all font-medium', selectedSchemaCode === null ? 'bg-autumn-600 text-white border-autumn-600' : 'border-gray-200 hover:border-autumn-500 hover:text-autumn-600']"
-                @click="selectSchema(null)"
-              >
-                全部
-              </button>
-              <button
-                v-for="schema in schemaTree"
-                :key="schema.schemaCode"
-                :class="['px-3 py-1.5 border rounded-full transition-all font-medium', selectedSchemaCode === schema.schemaCode ? 'bg-autumn-600 text-white border-autumn-600' : 'border-gray-200 hover:border-autumn-500 hover:text-autumn-600']"
-                @click="selectSchema(schema.schemaCode)"
-              >
-                {{ schema.schemaName }}
-              </button>
-            </div>
-          </div>
-
-          <!-- 常见品类快速筛选 -->
-          <div class="flex items-start gap-4 text-xs">
-            <span class="text-gray-400 shrink-0 mt-1.5 font-medium">求购品类:</span>
-            <div class="flex flex-wrap gap-2">
-              <button
-                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === null ? 'bg-autumn-600 text-white border-autumn-600' : 'border-gray-200 hover:border-autumn-500 hover:text-autumn-600']"
-                @click="selectCategory(null)"
-              >
-                全部
-              </button>
-              <button
-                v-for="cat in quickCategoryOptions"
-                :key="cat"
-                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === cat ? 'bg-autumn-600 text-white border-autumn-600' : 'border-gray-200 hover:border-autumn-500 hover:text-autumn-600']"
-                @click="selectCategory(cat)"
-              >
-                {{ cat }}
-              </button>
-            </div>
-          </div>
+        <!-- 当前筛选状态 -->
+        <div v-if="selectedSchemaCode || selectedCategory" class="flex items-center gap-2 mt-3 text-xs">
+          <span class="text-gray-400">当前筛选:</span>
+          <span v-if="selectedSchemaCode" class="px-2 py-0.5 bg-autumn-50 text-autumn-700 rounded-full">
+            {{ schemaTree.find(s => s.schemaCode === selectedSchemaCode)?.schemaName }}
+          </span>
+          <span v-if="selectedCategory" class="px-2 py-0.5 bg-autumn-50 text-autumn-700 rounded-full">
+            {{ selectedCategory }}
+          </span>
+          <button
+            class="text-gray-400 hover:text-autumn-600 ml-1"
+            @click="selectedSchemaCode = null; selectedCategory = null; loadRequirements()"
+          >
+            清除
+          </button>
         </div>
       </div>
     </section>
 
-    <!-- 列表区（先按设计稿静态，后续二期接接口替换） -->
-    <main class="max-w-7xl mx-auto px-4 py-8">
+    <!-- 主体布局：侧边栏 + 列表 -->
+    <div class="max-w-7xl mx-auto flex">
+      <!-- 左侧边栏（桌面端） -->
+      <aside class="hidden lg:block w-64 shrink-0 border-r border-gray-100 bg-white sticky top-0 h-[calc(100vh-120px)] overflow-hidden">
+        <CategorySidebar
+          :schema-tree="schemaTree"
+          v-model:selected-schema-code="selectedSchemaCode"
+          v-model:selected-category="selectedCategory"
+          theme="autumn"
+          @schema-change="onSchemaChange"
+          @category-change="onCategoryChange"
+        />
+      </aside>
+
+      <!-- 移动端侧边栏抽屉 -->
+      <Teleport to="body">
+        <Transition name="fade">
+          <div
+            v-if="mobileSidebarOpen"
+            class="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            @click="mobileSidebarOpen = false"
+          />
+        </Transition>
+        <Transition name="slide-left">
+          <div
+            v-if="mobileSidebarOpen"
+            class="fixed left-0 top-0 bottom-0 w-72 bg-white z-50 lg:hidden shadow-2xl"
+          >
+            <div class="flex items-center justify-between p-4 border-b border-gray-100">
+              <span class="font-bold text-gray-900">筛选条件</span>
+              <button
+                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100"
+                @click="mobileSidebarOpen = false"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <CategorySidebar
+              :schema-tree="schemaTree"
+              v-model:selected-schema-code="selectedSchemaCode"
+              v-model:selected-category="selectedCategory"
+              theme="autumn"
+              @schema-change="onSchemaChange"
+              @category-change="onCategoryChange"
+            />
+          </div>
+        </Transition>
+      </Teleport>
+
+      <!-- 右侧列表区 -->
+      <main class="flex-1 px-4 py-6 min-w-0">
       <div class="space-y-4">
         <div v-if="listLoading" class="bg-white rounded-xl border border-gray-200 p-8 text-gray-400 text-sm">
           正在加载需求...
@@ -591,7 +632,8 @@ function parseParams(paramsJson?: string): string {
         共 {{ total }} 条采购需求
         <span v-if="selectedCategory" class="ml-2">· 当前筛选：{{ selectedCategory }}</span>
       </div>
-    </main>
+      </main>
+    </div>
 
     <PublicFooter />
 
@@ -620,6 +662,25 @@ function parseParams(paramsJson?: string): string {
 .purchase-card:hover {
   border-color: #A5CCDC;
   box-shadow: 0 4px 12px rgba(165, 204, 220, 0.15);
+}
+
+/* 侧边栏过渡动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform 0.3s ease;
+}
+.slide-left-enter-from,
+.slide-left-leave-to {
+  transform: translateX(-100%);
 }
 </style>
 
