@@ -5,11 +5,13 @@ import { ElMessage } from 'element-plus'
 import { Trash2, FileText, Save, Send, List, Package, Truck, Clock, FileCheck, TrendingUp, Plus, X } from 'lucide-vue-next'
 import { createSupply, getNextSupplyNo, createSupplyTemplate, getMySupplyTemplates, deleteSupplyTemplate, type SupplyCreateRequest, type BasisQuoteRequest, type SupplyTemplateResponse } from '../api/supply'
 import { listFuturesContracts, type FuturesContractResponse } from '../api/futures'
-import { getProductTree, getProductParams, addProductParamOption, type ProductNode, type ProductParamResponse } from '../api/product'
+import { getProductParams, type ProductParamResponse } from '../api/product'
 import { getMyCompany, type CompanyResponse } from '../api/company'
 import { getMe, type UserResponse } from '../api/user'
 import { codeToText } from 'element-china-area-data'
-import TwoLevelCategoryPicker from '../components/TwoLevelCategoryPicker.vue'
+import SchemaAwareCategoryPicker, { type PickedCategory } from '../components/SchemaAwareCategoryPicker.vue'
+import CategoryParamsForm from '../components/CategoryParamsForm.vue'
+import { getSchemaUnitConfig, getCategoryUnitConfig } from '../utils/schemaUnits'
 import TagPicker from '../components/TagPicker.vue'
 import type { TagValue } from '../api/tag'
 import { BaseButton, BaseModal, EmptyState } from '../components/ui'
@@ -72,15 +74,24 @@ function getProductCodeForCategory(): string | null {
 }
 
 // 品类相关
-const categoryTree = ref<ProductNode[]>([])
 const categoryParams = ref<ProductParamResponse[]>([])
 const dynamicParams = ref<Record<string, any>>({})
 const tagValues = ref<TagValue[]>([])
 
-// 品类选择器
-type PickedCategory = { id: number; name: string } | null
-const pickedCategory = ref<PickedCategory>(null)
+// 业态与品类选择器
+const selectedSchemaCode = ref<string>('feed')
+const pickedCategory = ref<PickedCategory | null>(null)
 const suspendCategoryWatch = ref(false)
+
+// 当前单位配置（根据业态和品类动态计算）
+const currentUnitConfig = computed(() => {
+  return getCategoryUnitConfig(selectedSchemaCode.value, publishForm.categoryName || '')
+})
+
+// 包装和交付选项（根据业态动态变化）
+const currentSchemaConfig = computed(() => {
+  return getSchemaUnitConfig(selectedSchemaCode.value)
+})
 
 // 模板系统 - 使用 API 响应类型
 const templates = ref<SupplyTemplateResponse[]>([])
@@ -120,7 +131,7 @@ function formatPrice(p?: number) {
   const n = Number(p)
   if (!p && p !== 0) return '面议'
   if (Number.isNaN(n)) return '面议'
-  return `¥${n}/吨`
+  return `¥${n}`
 }
 
 function formatDate(dateStr?: string) {
@@ -171,7 +182,7 @@ const publisherName = computed(() => {
 })
 
 onMounted(async () => {
-  await Promise.all([loadCategoryTree(), loadCompanyInfo(), loadMeUser(), loadTemplates(), loadFuturesContracts()])
+  await Promise.all([loadCompanyInfo(), loadMeUser(), loadTemplates(), loadFuturesContracts()])
   await loadNextSupplyNo()
 })
 
@@ -290,11 +301,17 @@ async function loadNextSupplyNo() {
   } catch { /* silent */ }
 }
 
-async function loadCategoryTree() {
-  try {
-    const r = await getProductTree()
-    if (r.code === 0) categoryTree.value = r.data || []
-  } catch { ElMessage.error('加载品类树失败') }
+// 业态切换处理
+function onSchemaChange(schemaCode: string) {
+  selectedSchemaCode.value = schemaCode
+  // 重置包装方式为新业态的默认值
+  const config = getSchemaUnitConfig(schemaCode)
+  if (config.packagingOptions.length > 0) {
+    publishForm.packaging = config.packagingOptions[0] ?? '散装'
+  }
+  if (config.deliveryOptions.length > 0) {
+    publishForm.deliveryMode = config.deliveryOptions[0] ?? '到厂'
+  }
 }
 
 async function loadTemplates() {
@@ -313,6 +330,10 @@ watch(pickedCategory, async (category) => {
   if (category) {
     publishForm.categoryId = category.id
     publishForm.categoryName = category.name
+    // 更新业态代码
+    if (category.schemaCode) {
+      selectedSchemaCode.value = category.schemaCode
+    }
     await loadCategoryParams(category.id)
     await loadNextSupplyNo()
   } else {
@@ -333,16 +354,6 @@ async function loadCategoryParams(productId: number) {
       dynamicParams.value = params
     }
   } catch { ElMessage.error('加载品类参数失败') }
-}
-
-async function addParamOption(paramId: number, optionValue: string) {
-  try {
-    const r = await addProductParamOption(paramId, optionValue)
-    if (r.code === 0) {
-      ElMessage.success('选项添加成功')
-      if (publishForm.categoryId) await loadCategoryParams(publishForm.categoryId)
-    }
-  } catch { ElMessage.error('添加选项失败') }
 }
 
 function buildParamsJson() {
@@ -436,6 +447,7 @@ async function confirmSaveTemplate() {
     const templateJson = JSON.stringify({
       companyName: publishForm.companyName,
       publisherName: publisherNameInput.value,
+      schemaCode: selectedSchemaCode.value,
       categoryId: publishForm.categoryId,
       categoryName: publishForm.categoryName,
       exFactoryPrice: publishForm.exFactoryPrice,
@@ -489,7 +501,17 @@ async function applyTemplate(template: SupplyTemplateResponse) {
     publisherNameInput.value = data.publisherName || publisherNameInput.value
 
     suspendCategoryWatch.value = true
-    pickedCategory.value = data.categoryId ? { id: data.categoryId, name: data.categoryName || String(data.categoryId) } : null
+
+    // 恢复业态代码
+    if (data.schemaCode) {
+      selectedSchemaCode.value = data.schemaCode
+    }
+
+    pickedCategory.value = data.categoryId ? {
+      id: data.categoryId,
+      name: data.categoryName || String(data.categoryId),
+      schemaCode: data.schemaCode || 'feed'
+    } : null
     publishForm.categoryId = data.categoryId
     publishForm.categoryName = data.categoryName || ''
     publishForm.exFactoryPrice = data.exFactoryPrice
@@ -615,16 +637,30 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             <h3 class="text-2xl font-bold text-gray-900">基础信息</h3>
           </div>
           <div class="p-5 space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="space-y-4">
               <div>
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                  品类选择 <span class="text-red-500">*</span>
+                  业态与品类 <span class="text-red-500">*</span>
                 </label>
-                <TwoLevelCategoryPicker v-model="pickedCategory" />
+                <SchemaAwareCategoryPicker
+                  v-model="pickedCategory"
+                  @schema-change="onSchemaChange"
+                />
               </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">可供数量（吨）</label>
-                <el-input-number v-model="publishForm.quantity" :min="0" :step="1" :controls="false" class="w-full neo-input-number" />
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                  {{ currentUnitConfig.quantityLabel }}
+                </label>
+                <el-input-number
+                  v-model="publishForm.quantity"
+                  :min="0"
+                  :step="currentSchemaConfig.quantityStep"
+                  :controls="false"
+                  :placeholder="currentSchemaConfig.quantityPlaceholder"
+                  class="w-full neo-input-number"
+                />
               </div>
               <div v-if="showBasisOption">
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">报价方式</label>
@@ -635,9 +671,16 @@ async function applyTemplate(template: SupplyTemplateResponse) {
               </div>
               <div v-else>
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                  出厂价（元/吨）<span class="text-red-500">*</span>
+                  {{ currentUnitConfig.priceLabel }} <span class="text-red-500">*</span>
                 </label>
-                <el-input-number v-model="publishForm.exFactoryPrice" :min="0" :step="10" :controls="false" class="w-full neo-input-number" />
+                <el-input-number
+                  v-model="publishForm.exFactoryPrice"
+                  :min="0"
+                  :step="currentSchemaConfig.priceStep"
+                  :controls="false"
+                  :placeholder="currentSchemaConfig.pricePlaceholder"
+                  class="w-full neo-input-number"
+                />
               </div>
             </div>
             
@@ -645,9 +688,16 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             <div v-if="showBasisOption && publishForm.priceType === 0" class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                  出厂价（元/吨）<span class="text-red-500">*</span>
+                  {{ currentUnitConfig.priceLabel }} <span class="text-red-500">*</span>
                 </label>
-                <el-input-number v-model="publishForm.exFactoryPrice" :min="0" :step="10" :controls="false" class="w-full neo-input-number" />
+                <el-input-number
+                  v-model="publishForm.exFactoryPrice"
+                  :min="0"
+                  :step="currentSchemaConfig.priceStep"
+                  :controls="false"
+                  :placeholder="currentSchemaConfig.pricePlaceholder"
+                  class="w-full neo-input-number"
+                />
               </div>
             </div>
             
@@ -780,14 +830,34 @@ async function applyTemplate(template: SupplyTemplateResponse) {
           </div>
         </div>
 
-        <!-- 规格参数 (标签化) -->
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 100ms">
+        <!-- 规格参数 -->
+        <div v-if="categoryParams.length > 0" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 100ms">
           <div class="p-5 border-b border-gray-200 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-5 bg-brand-500 rounded-full"></div>
-              <h3 class="text-2xl font-bold text-gray-900">规格参数 / 产品标签</h3>
+              <h3 class="text-2xl font-bold text-gray-900">规格参数</h3>
             </div>
-            <span class="text-xs text-gray-400">选择标签描述产品特性</span>
+            <span class="text-xs text-gray-400">
+              <span class="text-red-500">*</span> 为必填项
+            </span>
+          </div>
+          <div class="p-5">
+            <CategoryParamsForm
+              :params="categoryParams"
+              v-model="dynamicParams"
+            />
+          </div>
+        </div>
+
+        <!-- 产品标签（补充信息） -->
+        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 120ms">
+          <div class="p-5 border-b border-gray-200 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-1.5 h-5 bg-purple-500 rounded-full"></div>
+              <h3 class="text-2xl font-bold text-gray-900">产品标签</h3>
+              <span class="text-xs text-gray-400 ml-2">（可选）</span>
+            </div>
+            <span class="text-xs text-gray-400">添加更多产品特性标签</span>
           </div>
           <div class="p-5">
             <TagPicker
@@ -819,17 +889,23 @@ async function applyTemplate(template: SupplyTemplateResponse) {
               <div>
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">包装方式</label>
                 <el-select v-model="publishForm.packaging" class="w-full neo-select">
-                  <el-option label="散装" value="散装" />
-                  <el-option label="袋装" value="袋装" />
-                  <el-option label="箱装" value="箱装" />
+                  <el-option
+                    v-for="opt in currentSchemaConfig.packagingOptions"
+                    :key="opt"
+                    :label="opt"
+                    :value="opt"
+                  />
                 </el-select>
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">交付方式</label>
                 <el-select v-model="publishForm.deliveryMode" class="w-full neo-select">
-                  <el-option label="到厂" value="到厂" />
-                  <el-option label="自提" value="自提" />
-                  <el-option label="物流配送" value="物流配送" />
+                  <el-option
+                    v-for="opt in currentSchemaConfig.deliveryOptions"
+                    :key="opt"
+                    :label="opt"
+                    :value="opt"
+                  />
                 </el-select>
               </div>
             </div>
@@ -894,12 +970,12 @@ async function applyTemplate(template: SupplyTemplateResponse) {
               <div class="grid grid-cols-2 gap-3">
                 <div class="bg-gray-50 rounded-xl p-3">
                   <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">数量</div>
-                  <div class="mt-1 font-bold text-gray-900">{{ previewData.quantity }} 吨</div>
+                  <div class="mt-1 font-bold text-gray-900">{{ previewData.quantity }} {{ currentUnitConfig.quantityUnit }}</div>
                 </div>
                 <div v-if="publishForm.priceType === 0" class="bg-gray-50 rounded-xl p-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">出厂价</div>
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">单价</div>
                   <div class="mt-1 font-bold text-brand-600">
-                    <span v-if="previewData.exFactoryPrice != null">¥{{ previewData.exFactoryPrice }}/吨</span>
+                    <span v-if="previewData.exFactoryPrice != null">¥{{ previewData.exFactoryPrice }}/{{ currentUnitConfig.quantityUnit }}</span>
                     <span v-else class="text-gray-500">面议</span>
                   </div>
                 </div>
@@ -952,24 +1028,29 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                   <div class="mt-1 font-bold text-gray-900">{{ previewData.expireText }}</div>
                 </div>
               </div>
-              <div v-if="tagValues.length > 0" class="bg-gray-50 rounded-xl p-3">
-                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+              <!-- 规格参数预览 -->
+              <div v-if="previewData.paramsText !== '无'" class="bg-brand-50/50 rounded-xl p-3 border border-brand-100">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-brand-600">
                   <FileCheck class="w-3 h-3" />
-                  参数标签
+                  规格参数
                 </div>
-                <div class="mt-1 flex flex-wrap gap-1">
-                  <span v-for="tag in tagValues" :key="tag.tagId || tag.tagKey" class="text-[10px] bg-white px-1.5 py-0.5 rounded border border-gray-200 text-gray-600">
-                    {{ tag.tagName }}: {{ tag.value }}{{ tag.unit || '' }}
-                  </span>
+                <div class="mt-2 space-y-1">
+                  <template v-for="param in categoryParams" :key="param.id">
+                    <div v-if="dynamicParams[param.id]" class="flex items-center gap-2 text-xs">
+                      <span class="text-gray-500">{{ param.paramName }}:</span>
+                      <span class="font-bold text-gray-800">{{ dynamicParams[param.id] }}{{ param.unit || '' }}</span>
+                    </div>
+                  </template>
                 </div>
               </div>
-              <div v-if="tagValues.length > 0" class="bg-gray-50 rounded-xl p-3">
-                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+              <!-- 产品标签预览 -->
+              <div v-if="tagValues.length > 0" class="bg-purple-50/50 rounded-xl p-3 border border-purple-100">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-purple-600">
                   <FileCheck class="w-3 h-3" />
                   产品标签
                 </div>
                 <div class="mt-1 flex flex-wrap gap-1">
-                  <span v-for="tag in tagValues" :key="tag.tagId || tag.tagKey" class="text-[10px] bg-white px-1.5 py-0.5 rounded border border-gray-200 text-gray-600">
+                  <span v-for="tag in tagValues" :key="tag.tagId || tag.tagKey" class="text-[10px] bg-white px-1.5 py-0.5 rounded border border-purple-200 text-purple-700">
                     {{ tag.tagName }}: {{ tag.value }}{{ tag.unit || '' }}
                   </span>
                 </div>
@@ -1016,10 +1097,10 @@ async function applyTemplate(template: SupplyTemplateResponse) {
           <div class="grid grid-cols-2 gap-2 text-sm">
             <div class="bg-gray-50 rounded-lg px-2.5 py-1.5">
               <div class="text-[10px] text-gray-400">数量</div>
-              <div class="font-bold text-gray-900">{{ getTemplateJson(template).quantity || 0 }} 吨</div>
+              <div class="font-bold text-gray-900">{{ getTemplateJson(template).quantity || 0 }}</div>
             </div>
             <div class="bg-gray-50 rounded-lg px-2.5 py-1.5">
-              <div class="text-[10px] text-gray-400">出厂价</div>
+              <div class="text-[10px] text-gray-400">单价</div>
               <div class="font-bold text-brand-600">{{ formatPrice(getTemplateJson(template).exFactoryPrice) }}</div>
             </div>
           </div>

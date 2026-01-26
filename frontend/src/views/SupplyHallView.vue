@@ -8,6 +8,8 @@ import { listSupplies, type SupplyResponse } from '../api/supply'
 import { openChatConversation } from '../api/chat'
 import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
 import { batchGetFuturesPrices, type FuturesContractResponse } from '../api/futures'
+import { getSchemaTree, type ProductSchemaVO, type CategoryNode } from '../api/productSchema'
+import { getSchemaUnitConfig } from '../utils/schemaUnits'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../store/auth'
 import { Card, StatusBadge } from '../components/ui'
@@ -48,17 +50,63 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
-// 品种列表
-const categoryOptions = ['玉米', '豆粕', '棉粕', '菜粕', 'DDGS', '赖氨酸', '蛋氨酸', '磷酸氢钙']
+// 业态与品类数据（从API加载）
+const schemaTree = ref<ProductSchemaVO[]>([])
+const selectedSchemaCode = ref<string | null>(null)
 
-// 板块列表
-const domains = [
-  { key: 'biological', name: '生物种苗' },
-  { key: 'processing', name: '农业加工' },
-  { key: 'material', name: '原料辅料' },
-  { key: 'equipment', name: '装备物流' }
-]
-const selectedDomain = ref<string | null>(null)
+// 获取当前业态下的常见品类（用于快速筛选）
+const quickCategoryOptions = computed(() => {
+  if (!selectedSchemaCode.value) {
+    // 未选择业态时，显示饲料原料的常见品类
+    const feedSchema = schemaTree.value.find(s => s.schemaCode === 'feed')
+    if (feedSchema?.categories) {
+      return flattenCategories(feedSchema.categories).slice(0, 8)
+    }
+    return []
+  }
+  const schema = schemaTree.value.find(s => s.schemaCode === selectedSchemaCode.value)
+  if (schema?.categories) {
+    return flattenCategories(schema.categories).slice(0, 8)
+  }
+  return []
+})
+
+// 扁平化分类树
+function flattenCategories(nodes: CategoryNode[]): string[] {
+  const result: string[] = []
+  function traverse(list: CategoryNode[]) {
+    for (const node of list) {
+      if (node.children && node.children.length > 0) {
+        traverse(node.children)
+      } else {
+        result.push(node.name)
+      }
+    }
+  }
+  traverse(nodes)
+  return result
+}
+
+// 加载业态树
+async function loadSchemaTree() {
+  try {
+    const r = await getSchemaTree()
+    if (r.code === 0 && r.data) {
+      schemaTree.value = r.data
+    }
+  } catch {
+    // 静默失败
+  }
+}
+
+// 选择业态
+function selectSchema(schemaCode: string | null) {
+  selectedSchemaCode.value = selectedSchemaCode.value === schemaCode ? null : schemaCode
+  selectedCategory.value = null // 切换业态时清除品类筛选
+  currentPage.value = 1
+  loadSupplies()
+}
+
 
 // 关注状态 Map: userId -> isFollowing
 const followingMap = ref<Map<number, boolean>>(new Map())
@@ -230,8 +278,8 @@ async function loadSupplies() {
       params.categoryName = selectedCategory.value
     }
 
-    if (selectedDomain.value) {
-      params.domain = selectedDomain.value
+    if (selectedSchemaCode.value) {
+      params.schemaCode = selectedSchemaCode.value
     }
     
     // 应用公司筛选（从地图跳转）
@@ -317,11 +365,9 @@ function selectCategory(cat: string | null) {
   loadSupplies()
 }
 
-// 选择板块筛选
-function selectDomain(domainKey: string | null) {
-  selectedDomain.value = selectedDomain.value === domainKey ? null : domainKey
-  currentPage.value = 1
-  loadSupplies()
+// 查看供应详情
+function onViewDetail(s: SupplyResponse) {
+  router.push(`/supplies/${s.id}`)
 }
 
 // 搜索
@@ -338,6 +384,7 @@ function handlePageChange(page: number) {
 }
 
 onMounted(() => {
+  loadSchemaTree()
   loadSupplies()
 })
 
@@ -350,6 +397,23 @@ watch(companyIdFilter, () => {
   currentPage.value = 1
   loadSupplies()
 })
+
+// 根据品类名称查找业态代码
+function findSchemaCodeByCategory(categoryName: string): string {
+  for (const schema of schemaTree.value) {
+    const categories = flattenCategories(schema.categories)
+    if (categories.includes(categoryName)) {
+      return schema.schemaCode
+    }
+  }
+  return 'feed' // 默认饲料原料
+}
+
+// 获取供应的单位配置
+function getSupplyUnitConfig(s: SupplyResponse) {
+  const schemaCode = s.schemaCode || findSchemaCodeByCategory(s.categoryName)
+  return getSchemaUnitConfig(schemaCode)
+}
 
 // 解析品类参数 JSON，提取关键参数显示（极致精简版，支持标准化格式）
 function parseParams(paramsJson?: string): string {
@@ -434,37 +498,39 @@ function parseParams(paramsJson?: string): string {
         </div>
 
         <div class="space-y-4">
+          <!-- 业态筛选 -->
           <div class="flex items-start gap-4 text-xs">
-            <span class="text-gray-400 shrink-0 mt-1.5 font-medium">所属板块:</span>
+            <span class="text-gray-400 shrink-0 mt-1.5 font-medium">产品业态:</span>
             <div class="flex flex-wrap gap-2">
-              <button 
-                :class="['px-3 py-1 border rounded-full transition-all', selectedDomain === null ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
-                @click="selectDomain(null)"
+              <button
+                :class="['px-3 py-1.5 border rounded-full transition-all font-medium', selectedSchemaCode === null ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
+                @click="selectSchema(null)"
               >
                 全部
               </button>
-              <button 
-                v-for="d in domains" 
-                :key="d.key"
-                :class="['px-3 py-1 border rounded-full transition-all', selectedDomain === d.key ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
-                @click="selectDomain(d.key)"
+              <button
+                v-for="schema in schemaTree"
+                :key="schema.schemaCode"
+                :class="['px-3 py-1.5 border rounded-full transition-all font-medium', selectedSchemaCode === schema.schemaCode ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
+                @click="selectSchema(schema.schemaCode)"
               >
-                {{ d.name }}
+                {{ schema.schemaName }}
               </button>
             </div>
           </div>
 
+          <!-- 常见品类快速筛选 -->
           <div class="flex items-start gap-4 text-xs">
-            <span class="text-gray-400 shrink-0 mt-1.5 font-medium">常见品种:</span>
+            <span class="text-gray-400 shrink-0 mt-1.5 font-medium">常见品类:</span>
             <div class="flex flex-wrap gap-2">
-              <button 
+              <button
                 :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === null ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
                 @click="selectCategory(null)"
               >
                 全部
               </button>
-              <button 
-                v-for="cat in categoryOptions" 
+              <button
+                v-for="cat in quickCategoryOptions"
                 :key="cat"
                 :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === cat ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
                 @click="selectCategory(cat)"
@@ -536,7 +602,7 @@ function parseParams(paramsJson?: string): string {
               <div v-if="s.priceType !== 1" class="mt-1 text-xl font-black text-red-600 italic">
                 <span class="whitespace-nowrap inline-flex items-baseline gap-1">
                   <span>¥{{ s.exFactoryPrice }}</span>
-                  <span class="text-xs font-normal text-gray-400 not-italic">元/吨</span>
+                  <span class="text-xs font-normal text-gray-400 not-italic">{{ getSupplyUnitConfig(s).priceUnit }}</span>
                 </span>
               </div>
               
@@ -579,7 +645,7 @@ function parseParams(paramsJson?: string): string {
               </div>
               <div class="min-w-0">
                 <div class="text-gray-400 text-[10px] font-bold uppercase mb-1">库存</div>
-                <div class="font-bold text-gray-700 truncate">{{ s.quantity ?? '-' }}吨</div>
+                <div class="font-bold text-gray-700 truncate">{{ s.quantity ?? '-' }}{{ getSupplyUnitConfig(s).quantityUnit }}</div>
               </div>
               <div class="min-w-0">
                 <div class="text-gray-400 text-[10px] font-bold uppercase mb-1">物流方式</div>

@@ -103,3 +103,55 @@ try {
 - `frontend/tailwind.config.cjs` - Custom color tokens and design system
 - `frontend/src/router/index.ts` - Application routing
 - `backend/pom.xml` - Maven parent with module definitions
+
+## Chat Log Rules (聊天记录规则)
+
+**重要：每次对话结束前，必须将聊天内容保存到 `docs/chat-logs/` 目录**
+
+### 文件命名规范
+- 格式：`YYYY-MM-DD-序号-主题.md`
+- 示例：`2026-01-26-001-schema-based-units.md`
+- 序号从001开始，同一天有多个对话时递增
+
+### 文件内容格式
+```markdown
+# 聊天记录：[主题]
+
+- **日期**：YYYY-MM-DD
+- **序号**：XXX
+- **主要任务**：简要描述本次对话的主要目标
+
+## 对话摘要
+
+[概括本次对话的主要内容和成果]
+
+## 完成的工作
+
+1. [具体完成的任务1]
+2. [具体完成的任务2]
+...
+
+## 修改的文件
+
+- `path/to/file1.vue` - 简要说明修改内容
+- `path/to/file2.ts` - 简要说明修改内容
+...
+
+## 技术决策
+
+[记录本次对话中做出的重要技术决策]
+
+## 待办事项
+
+- [ ] 未完成的任务1
+- [ ] 未完成的任务2
+
+## 关键代码片段
+
+[如有重要的代码实现，在此记录]
+```
+
+### 操作流程
+1. 对话开始时，检查 `docs/chat-logs/` 目录
+2. 对话结束前，创建新的聊天记录文件
+3. 如果是继续之前的对话，更新对应的记录文件

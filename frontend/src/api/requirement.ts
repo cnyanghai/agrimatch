@@ -11,6 +11,7 @@ export interface RequirementCreateRequest {
   paymentMethod?: string
   deliveryMethod?: string
   paramsJson?: string
+  tagsJson?: string
   remark?: string
   expireMinutes?: number
   purchaseAddress?: string

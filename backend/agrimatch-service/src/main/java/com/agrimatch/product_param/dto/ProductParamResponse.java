@@ -6,7 +6,10 @@ public class ProductParamResponse {
     private Long id;
     private Long productId;
     private String paramName;
-    private Integer paramType; // 0输入框 1下拉
+    private Integer paramType;  // 0输入框 1下拉
+    private String paramGroup;  // 参数分组：quality/biology/logistics/trade
+    private String unit;        // 单位
+    private String placeholder; // 输入提示
     private boolean required;
     private Integer sort;
     private List<String> options;
@@ -41,6 +44,30 @@ public class ProductParamResponse {
 
     public void setParamType(Integer paramType) {
         this.paramType = paramType;
+    }
+
+    public String getParamGroup() {
+        return paramGroup;
+    }
+
+    public void setParamGroup(String paramGroup) {
+        this.paramGroup = paramGroup;
+    }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    public String getPlaceholder() {
+        return placeholder;
+    }
+
+    public void setPlaceholder(String placeholder) {
+        this.placeholder = placeholder;
     }
 
     public boolean isRequired() {

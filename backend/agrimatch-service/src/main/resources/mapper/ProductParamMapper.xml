@@ -10,6 +10,9 @@
         <result column="options" property="options"/>
         <result column="param_name" property="paramName"/>
         <result column="param_type" property="paramType"/>
+        <result column="param_group" property="paramGroup"/>
+        <result column="unit" property="unit"/>
+        <result column="placeholder" property="placeholder"/>
         <result column="required" property="required"/>
         <result column="sort" property="sort"/>
         <result column="del_flag" property="delFlag"/>
@@ -18,7 +21,7 @@
     </resultMap>
 
     <select id="selectByProductId" resultMap="ParamMap">
-        SELECT id, product_id, options, param_name, param_type, required, sort, del_flag, create_time, update_time
+        SELECT id, product_id, options, param_name, param_type, param_group, unit, placeholder, required, sort, del_flag, create_time, update_time
         FROM nht_product_parameters
         WHERE product_id = #{productId}
           AND del_flag = '0'
@@ -26,7 +29,7 @@
     </select>
 
     <select id="selectById" resultMap="ParamMap">
-        SELECT id, product_id, options, param_name, param_type, required, sort, del_flag, create_time, update_time
+        SELECT id, product_id, options, param_name, param_type, param_group, unit, placeholder, required, sort, del_flag, create_time, update_time
         FROM nht_product_parameters
         WHERE id = #{id}
         LIMIT 1

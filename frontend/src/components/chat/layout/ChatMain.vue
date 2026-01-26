@@ -20,6 +20,8 @@ const props = defineProps<{
   currentCompanyId?: number
   subjectName?: string
   subjectLocation?: string
+  schemaCode?: string
+  categoryName?: string
   quoteCount?: number
 }>()
 
@@ -216,6 +218,8 @@ defineExpose({
           :previous-quote-payload-json="getPreviousQuotePayload(idx)"
           :subject-name="subjectName"
           :subject-location="subjectLocation"
+          :schema-code="schemaCode"
+          :category-name="categoryName"
           :current-company-id="currentCompanyId"
           @confirm-quote="emit('confirm-quote', $event)"
           @reject-quote="emit('reject-quote', $event)"

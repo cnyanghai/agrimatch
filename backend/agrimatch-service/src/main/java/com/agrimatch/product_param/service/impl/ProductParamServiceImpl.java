@@ -35,6 +35,9 @@ public class ProductParamServiceImpl implements ProductParamService {
             r.setProductId(p.getProductId());
             r.setParamName(p.getParamName());
             r.setParamType(p.getParamType());
+            r.setParamGroup(p.getParamGroup());
+            r.setUnit(p.getUnit());
+            r.setPlaceholder(p.getPlaceholder());
             r.setRequired("Y".equalsIgnoreCase(p.getRequired()));
             r.setSort(p.getSort());
             r.setOptions(parseOptions(p.getOptions()));

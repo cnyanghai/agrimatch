@@ -50,6 +50,7 @@ export interface SupplyCreateRequest {
   storageMethod?: string
   priceRulesJson?: string
   paramsJson?: string
+  tagsJson?: string
   remark?: string
   expireMinutes?: number
 }
@@ -78,6 +79,7 @@ export interface SupplyResponse {
   userName?: string
   nickName?: string
   categoryName: string
+  schemaCode?: string  // 业态代码：feed, poultry, meat, other
   supplyNo?: string
   origin?: string
   quantity?: number

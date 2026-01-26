@@ -29,6 +29,11 @@
             "date": 1769329812553,
             "name": "/home/cnyanghai/nongV1/logs/mcp-puppeteer-2026-01-25.log",
             "hash": "8c543ddf2bf2939f21774dfacb401f7e7ba563f61f1bd41d40d31482476da382"
+        },
+        {
+            "date": 1769392976271,
+            "name": "/home/cnyanghai/nongV1/logs/mcp-puppeteer-2026-01-26.log",
+            "hash": "c8e72ae3f854800a0281f62e5e83c25f21690361654c401f7be3470cf4c23e6c"
         }
     ],
     "hashType": "sha256"

@@ -49,7 +49,10 @@ export interface ProductParamResponse {
   id: number
   productId: number
   paramName: string
-  paramType: number // 0输入 1下拉
+  paramType: number    // 0输入 1下拉
+  paramGroup?: string  // 参数分组：quality/biology/logistics/trade
+  unit?: string        // 单位
+  placeholder?: string // 输入提示
   required: boolean
   sort?: number
   options?: string[]

@@ -13,6 +13,8 @@ const props = defineProps<{
   previousQuotePayloadJson?: string
   subjectName?: string
   subjectLocation?: string
+  schemaCode?: string
+  categoryName?: string
   currentCompanyId?: number
 }>()
 
@@ -152,6 +154,8 @@ function handleCounterQuoteSubmit(payload: { price?: number; basisPrice?: number
           :previous-quote-payload-json="previousQuotePayloadJson"
           :subject-name="subjectName"
           :subject-location="subjectLocation"
+          :schema-code="schemaCode"
+          :category-name="categoryName"
           @accept="handleConfirmQuote"
           @counter="handleCounterQuote"
           @counter-submit="handleCounterQuoteSubmit"

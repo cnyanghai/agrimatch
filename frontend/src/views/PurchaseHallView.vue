@@ -7,6 +7,8 @@ import ChatDrawer from '../components/chat/ChatDrawer.vue'
 import { listRequirements, type RequirementResponse } from '../api/requirement'
 import { openChatConversation } from '../api/chat'
 import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
+import { getSchemaTree, type ProductSchemaVO, type CategoryNode } from '../api/productSchema'
+import { getSchemaUnitConfig } from '../utils/schemaUnits'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../store/auth'
 
@@ -47,17 +49,62 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
-// 品种列表
-const categoryOptions = ['玉米', '豆粕', '棉粕', '菜粕', 'DDGS', '赖氨酸', '蛋氨酸', '磷酸氢钙']
+// 业态与品类数据（从API加载）
+const schemaTree = ref<ProductSchemaVO[]>([])
+const selectedSchemaCode = ref<string | null>(null)
 
-// 板块列表
-const domains = [
-  { key: 'biological', name: '生物种苗' },
-  { key: 'processing', name: '农业加工' },
-  { key: 'material', name: '原料辅料' },
-  { key: 'equipment', name: '装备物流' }
-]
-const selectedDomain = ref<string | null>(null)
+// 获取当前业态下的常见品类（用于快速筛选）
+const quickCategoryOptions = computed(() => {
+  if (!selectedSchemaCode.value) {
+    // 未选择业态时，显示饲料原料的常见品类
+    const feedSchema = schemaTree.value.find(s => s.schemaCode === 'feed')
+    if (feedSchema?.categories) {
+      return flattenCategories(feedSchema.categories).slice(0, 8)
+    }
+    return []
+  }
+  const schema = schemaTree.value.find(s => s.schemaCode === selectedSchemaCode.value)
+  if (schema?.categories) {
+    return flattenCategories(schema.categories).slice(0, 8)
+  }
+  return []
+})
+
+// 扁平化分类树
+function flattenCategories(nodes: CategoryNode[]): string[] {
+  const result: string[] = []
+  function traverse(list: CategoryNode[]) {
+    for (const node of list) {
+      if (node.children && node.children.length > 0) {
+        traverse(node.children)
+      } else {
+        result.push(node.name)
+      }
+    }
+  }
+  traverse(nodes)
+  return result
+}
+
+// 加载业态树
+async function loadSchemaTree() {
+  try {
+    const r = await getSchemaTree()
+    if (r.code === 0 && r.data) {
+      schemaTree.value = r.data
+    }
+  } catch {
+    // 静默失败
+  }
+}
+
+// 选择业态
+function selectSchema(schemaCode: string | null) {
+  selectedSchemaCode.value = selectedSchemaCode.value === schemaCode ? null : schemaCode
+  selectedCategory.value = null // 切换业态时清除品类筛选
+  currentPage.value = 1
+  loadRequirements()
+}
 
 // 关注状态 Map: userId -> isFollowing
 const followingMap = ref<Map<number, boolean>>(new Map())
@@ -218,8 +265,8 @@ async function loadRequirements() {
       params.categoryName = selectedCategory.value
     }
 
-    if (selectedDomain.value) {
-      params.domain = selectedDomain.value
+    if (selectedSchemaCode.value) {
+      params.schemaCode = selectedSchemaCode.value
     }
     
     // 应用公司筛选（从地图跳转）
@@ -266,13 +313,6 @@ function selectCategory(cat: string | null) {
   loadRequirements()
 }
 
-// 选择板块筛选
-function selectDomain(domainKey: string | null) {
-  selectedDomain.value = selectedDomain.value === domainKey ? null : domainKey
-  currentPage.value = 1
-  loadRequirements()
-}
-
 // 搜索
 function onSearch() {
   currentPage.value = 1 // 重置分页
@@ -286,6 +326,7 @@ function handlePageChange(page: number) {
 }
 
 onMounted(() => {
+  loadSchemaTree()
   loadRequirements()
 })
 
@@ -298,6 +339,23 @@ watch(companyIdFilter, () => {
 watch(focusIdFromRoute, () => {
   applyFocusIfNeeded()
 })
+
+// 根据品类名称查找业态代码
+function findSchemaCodeByCategory(categoryName: string): string {
+  for (const schema of schemaTree.value) {
+    const categories = flattenCategories(schema.categories)
+    if (categories.includes(categoryName)) {
+      return schema.schemaCode
+    }
+  }
+  return 'feed' // 默认饲料原料
+}
+
+// 获取需求的单位配置
+function getRequirementUnitConfig(r: RequirementResponse) {
+  const schemaCode = findSchemaCodeByCategory(r.categoryName)
+  return getSchemaUnitConfig(schemaCode)
+}
 
 // 解析品类参数 JSON，提取关键参数显示（极致精简版，支持标准化格式）
 function parseParams(paramsJson?: string): string {
@@ -380,39 +438,41 @@ function parseParams(paramsJson?: string): string {
         </div>
 
         <div class="space-y-4">
+          <!-- 业态筛选 -->
           <div class="flex items-start gap-4 text-xs">
-            <span class="text-gray-400 shrink-0 mt-1.5 font-medium">所属板块:</span>
+            <span class="text-gray-400 shrink-0 mt-1.5 font-medium">产品业态:</span>
             <div class="flex flex-wrap gap-2">
-              <button 
-                :class="['px-3 py-1 border rounded-full transition-all', selectedDomain === null ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
-                @click="selectDomain(null)"
+              <button
+                :class="['px-3 py-1.5 border rounded-full transition-all font-medium', selectedSchemaCode === null ? 'bg-autumn-600 text-white border-autumn-600' : 'border-gray-200 hover:border-autumn-500 hover:text-autumn-600']"
+                @click="selectSchema(null)"
               >
                 全部
               </button>
-              <button 
-                v-for="d in domains" 
-                :key="d.key"
-                :class="['px-3 py-1 border rounded-full transition-all', selectedDomain === d.key ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
-                @click="selectDomain(d.key)"
+              <button
+                v-for="schema in schemaTree"
+                :key="schema.schemaCode"
+                :class="['px-3 py-1.5 border rounded-full transition-all font-medium', selectedSchemaCode === schema.schemaCode ? 'bg-autumn-600 text-white border-autumn-600' : 'border-gray-200 hover:border-autumn-500 hover:text-autumn-600']"
+                @click="selectSchema(schema.schemaCode)"
               >
-                {{ d.name }}
+                {{ schema.schemaName }}
               </button>
             </div>
           </div>
 
+          <!-- 常见品类快速筛选 -->
           <div class="flex items-start gap-4 text-xs">
-            <span class="text-gray-400 shrink-0 mt-1.5 font-medium">求购品种:</span>
+            <span class="text-gray-400 shrink-0 mt-1.5 font-medium">求购品类:</span>
             <div class="flex flex-wrap gap-2">
-              <button 
-                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === null ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
+              <button
+                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === null ? 'bg-autumn-600 text-white border-autumn-600' : 'border-gray-200 hover:border-autumn-500 hover:text-autumn-600']"
                 @click="selectCategory(null)"
               >
                 全部
               </button>
-              <button 
-                v-for="cat in categoryOptions" 
+              <button
+                v-for="cat in quickCategoryOptions"
                 :key="cat"
-                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === cat ? 'bg-brand-600 text-white border-brand-600' : 'border-gray-200 hover:border-brand-500 hover:text-brand-600']"
+                :class="['px-3 py-1 border rounded-full transition-all', selectedCategory === cat ? 'bg-autumn-600 text-white border-autumn-600' : 'border-gray-200 hover:border-autumn-500 hover:text-autumn-600']"
                 @click="selectCategory(cat)"
               >
                 {{ cat }}
@@ -472,7 +532,7 @@ function parseParams(paramsJson?: string): string {
                 <template v-if="r.expectedPrice != null">
                   <span class="whitespace-nowrap inline-flex items-baseline gap-1">
                     <span>意向: ¥{{ r.expectedPrice }}</span>
-                    <span class="text-xs font-normal text-gray-400 not-italic">元/吨</span>
+                    <span class="text-xs font-normal text-gray-400 not-italic">{{ getRequirementUnitConfig(r).priceUnit }}</span>
                   </span>
                 </template>
                 <span v-else>面议 / 基差报价</span>
@@ -482,7 +542,7 @@ function parseParams(paramsJson?: string): string {
             <div class="flex-1 grid grid-cols-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_190px] gap-4 text-xs py-2 bg-gray-50/50 rounded-lg px-4">
               <div class="min-w-0">
                 <div class="text-gray-400 mb-0.5">需求数量</div>
-                <div class="font-semibold text-gray-700">{{ r.quantity ?? '-' }} 吨</div>
+                <div class="font-semibold text-gray-700">{{ r.quantity ?? '-' }} {{ getRequirementUnitConfig(r).quantityUnit }}</div>
               </div>
               <div class="min-w-0">
                 <div class="text-gray-400 mb-0.5">收货地</div>

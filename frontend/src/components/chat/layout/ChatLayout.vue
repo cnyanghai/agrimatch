@@ -33,6 +33,8 @@ const props = defineProps<{
   currentCompanyId?: number
   subjectName?: string
   subjectLocation?: string
+  schemaCode?: string
+  categoryName?: string
   quoteCount?: number
 }>()
 
@@ -169,6 +171,8 @@ defineExpose({
         :current-company-id="currentCompanyId"
         :subject-name="subjectName"
         :subject-location="subjectLocation"
+        :schema-code="schemaCode"
+        :category-name="categoryName"
         :quote-count="quoteCount"
         @send-text="emit('send-text', $event)"
         @send-image="emit('send-image')"

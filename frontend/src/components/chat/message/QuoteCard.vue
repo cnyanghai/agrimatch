@@ -4,7 +4,7 @@
  * Displays quote messages with improved UX following B2B best practices
  */
 import { computed, ref } from 'vue'
-import { Check, X, Edit, Clock, FileText, TrendingUp, TrendingDown } from 'lucide-vue-next'
+import { Check, X, Edit, Clock, FileText } from 'lucide-vue-next'
 import type { UiMessage, QuoteStatus } from '../../../types/chat/message'
 import { QUOTE_STATUS_BADGE } from '../../../types/chat/message'
 import {
@@ -15,6 +15,7 @@ import {
   calculateQuoteDiff
 } from '../../../utils/chat/quoteParser'
 import type { QuoteDisplayField, QuoteFieldDiff } from '../../../types/chat/quote'
+import { getSchemaUnitConfig, getCategoryUnitConfig } from '../../../utils/schemaUnits'
 import QuoteDiffBadge from './QuoteDiffBadge.vue'
 import QuoteValidityTimer from '../quote/QuoteValidityTimer.vue'
 import InlineCounterQuote from '../quote/InlineCounterQuote.vue'
@@ -24,9 +25,21 @@ const props = defineProps<{
   previousQuotePayloadJson?: string
   subjectName?: string
   subjectLocation?: string
+  /** 业态代码 */
+  schemaCode?: string
+  /** 品类名称（用于更精确的单位） */
+  categoryName?: string
   /** 是否正在发送还价 */
   counterSending?: boolean
 }>()
+
+// 获取当前单位配置
+const unitConfig = computed(() => {
+  if (props.categoryName) {
+    return getCategoryUnitConfig(props.schemaCode || 'feed', props.categoryName)
+  }
+  return getSchemaUnitConfig(props.schemaCode || 'feed')
+})
 
 const emit = defineEmits<{
   (e: 'accept'): void
@@ -100,6 +113,8 @@ const hasDiffs = computed(() => diffs.value.length > 0)
 // 核心字段提取
 const coreFields = computed(() => {
   const fields: Array<{ label: string; value: string; highlight?: boolean }> = []
+  const priceUnit = unitConfig.value.priceUnit.replace('元/', '')
+  const quantityUnit = unitConfig.value.quantityUnit
 
   if (isBasis.value && payload.value?.kind === 'BASIS_QUOTE_V1') {
     const f = (payload.value as any).fields
@@ -119,21 +134,26 @@ const coreFields = computed(() => {
       })
     }
     if (f.quantity) {
-      fields.push({ label: '数量', value: f.quantity })
+      // 添加单位到数量（如果没有）
+      const qVal = String(f.quantity)
+      const hasUnit = /[吨枚只斤]/.test(qVal)
+      fields.push({ label: '数量', value: hasUnit ? qVal : `${qVal}${quantityUnit}` })
     }
   } else if (payload.value?.kind === 'QUOTE_V1') {
     const f = (payload.value as any).fields
     if (f.price) {
       fields.push({
         label: '单价',
-        value: `¥${f.price}/吨`,
+        value: `¥${f.price}/${priceUnit}`,
         highlight: true
       })
     }
     if (f.quantity) {
+      const qVal = String(f.quantity)
+      const hasUnit = /[吨枚只斤]/.test(qVal)
       fields.push({
         label: '数量',
-        value: f.quantity,
+        value: hasUnit ? qVal : `${qVal}${quantityUnit}`,
         highlight: true
       })
     }

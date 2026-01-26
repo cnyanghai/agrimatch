@@ -7,6 +7,9 @@ public class NhtProduct {
     private Long userId;
     private Long parentId;
     private String productName;
+    private String schemaCode;      // 所属业态：feed, poultry, meat, other
+    private Integer hasParams;      // 是否有预设参数：0否 1是
+    private Integer allowCustomName; // 是否允许自定义名称：0否 1是
     private String status;
     private String delFlag;
     private LocalDateTime createTime;
@@ -42,6 +45,30 @@ public class NhtProduct {
 
     public void setProductName(String productName) {
         this.productName = productName;
+    }
+
+    public String getSchemaCode() {
+        return schemaCode;
+    }
+
+    public void setSchemaCode(String schemaCode) {
+        this.schemaCode = schemaCode;
+    }
+
+    public Integer getHasParams() {
+        return hasParams;
+    }
+
+    public void setHasParams(Integer hasParams) {
+        this.hasParams = hasParams;
+    }
+
+    public Integer getAllowCustomName() {
+        return allowCustomName;
+    }
+
+    public void setAllowCustomName(Integer allowCustomName) {
+        this.allowCustomName = allowCustomName;
     }
 
     public String getStatus() {
