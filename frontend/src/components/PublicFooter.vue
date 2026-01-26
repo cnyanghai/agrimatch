@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
+import logoWhite from '../assets/logo-white.png'
 
 function openAgreement(type: 'user' | 'privacy') {
   const title = type === 'user' ? '用户协议' : '隐私政策'
@@ -13,12 +14,13 @@ function openAgreement(type: 'user' | 'privacy') {
       <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
         <!-- 品牌 -->
         <div class="col-span-1 md:col-span-2">
-          <div class="flex items-center gap-2 mb-6">
-            <div class="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center text-white font-black italic">A</div>
-            <span class="text-2xl font-bold text-white tracking-tighter italic">AgriMatch</span>
+          <div class="flex items-center gap-2.5 mb-6">
+            <!-- Logo: NHT 线条图形（白色版本，透明背景） -->
+            <img :src="logoWhite" alt="农汇通" class="h-9 w-auto opacity-90" />
+            <span class="text-2xl font-bold text-white tracking-wide">农汇通</span>
           </div>
           <p class="text-sm leading-relaxed max-w-sm mb-8">
-            领先的饲料原料供需协作平台。通过数字化手段连接产业上下游，让饲料人的每一笔交易都更安全、更透明、更简单。
+            领先的农牧供需智能匹配平台。通过数字化手段连接产业上下游，让农牧人的每一笔交易都更安全、更透明、更简单。
           </p>
           <div class="flex gap-4">
             <div class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-brand-600 hover:text-white transition-all cursor-pointer">
@@ -57,9 +59,9 @@ function openAgreement(type: 'user' | 'privacy') {
       <!-- 底部版权 -->
       <div class="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-[0.2em] font-black">
         <div class="flex items-center gap-4">
-          <p>© 2026 AgriMatch Team.</p>
+          <p>© 2026 农汇通团队</p>
           <div class="hidden md:block w-1 h-1 bg-gray-800 rounded-full"></div>
-          <p>Connecting Raw Materials</p>
+          <p>连接农牧产业上下游</p>
         </div>
         <div class="flex items-center gap-8">
           <span class="text-gray-700">辽ICP备202401064258号</span>

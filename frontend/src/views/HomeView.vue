@@ -329,9 +329,9 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 全产业链支柱板块 (Bento Grid) -->
-    <section class="py-24 bg-white">
+    <section class="pt-16 pb-12 bg-white">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div class="max-w-2xl">
             <div class="inline-block px-3 py-1 rounded-lg bg-brand-50 text-brand-600 text-xs font-bold uppercase tracking-wider mb-4">核心业务范围</div>
             <h2 class="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
@@ -419,70 +419,78 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <!-- 按供应商搜索 (品牌墙风格) -->
-    <section class="py-20 bg-gray-50/50 border-b border-gray-200">
+    <!-- 供应商 & 采购商 (深色背景带，并排布局) -->
+    <section class="py-12 bg-slate-900">
       <div class="max-w-7xl mx-auto px-4">
-        <div class="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-sm">
-          <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 border-b border-gray-100 dark:border-slate-700 pb-4">
-            <div>
-              <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-                按 <span class="text-brand-600">供应商</span> 搜索
-              </h2>
-            </div>
-            <button 
-              class="group flex items-center gap-2 text-sm font-medium text-brand-600 hover:underline transition-colors active:scale-95"
-              @click="go('/companies/directory')"
-            >
-              查看所有供应商
-            </button>
-          </div>
-
-          <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div v-for="i in 12" :key="i" class="h-16 bg-slate-50 rounded-xl animate-pulse"></div>
-          </div>
-          <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div
-              v-for="s in suppliers.slice(0, 12)"
-              :key="s.id"
-              class="group h-16 border border-gray-200 dark:border-slate-600 rounded-xl flex items-center justify-center bg-slate-50 dark:bg-slate-700 hover:border-brand-600 dark:hover:border-brand-600 cursor-pointer transition"
-              @click="go(`/companies/${s.id}`)"
-            >
-              <span class="font-bold text-gray-700 dark:text-slate-300 text-sm truncate px-3">{{ s.companyName }}</span>
-            </div>
-          </div>
+        <!-- 标题区 -->
+        <div class="text-center mb-10">
+          <h2 class="text-2xl font-bold text-white tracking-tight">
+            发现优质 <span class="text-brand-400">供应商</span> 与 <span class="text-autumn-400">采购商</span>
+          </h2>
+          <p class="text-gray-400 text-sm mt-2">连接全国农牧行业核心企业资源</p>
         </div>
-      </div>
-    </section>
 
-    <!-- 按采购商搜索 (品牌墙风格) -->
-    <section class="py-20 bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4">
-        <div class="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-sm">
-          <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 border-b border-gray-100 dark:border-slate-700 pb-4">
-            <div>
-              <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
-                按 <span class="text-autumn-600">采购商</span> 搜索
-              </h2>
+        <!-- 双列并排 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- 供应商列 -->
+          <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+            <div class="flex items-center justify-between mb-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-500/20 flex items-center justify-center">
+                  <Factory :size="20" class="text-brand-400" />
+                </div>
+                <span class="font-bold text-white">认证供应商</span>
+              </div>
+              <button
+                class="text-xs font-medium text-brand-400 hover:text-brand-300 transition-colors"
+                @click="go('/companies/directory')"
+              >
+                查看全部 →
+              </button>
             </div>
-            <button 
-              class="group flex items-center gap-2 text-sm font-medium text-autumn-600 hover:underline transition-colors active:scale-95"
-              @click="go('/companies/directory?type=buyer')"
-            >
-              查看所有采购商
-            </button>
+            <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div v-for="i in 6" :key="i" class="h-12 bg-white/5 rounded-lg animate-pulse"></div>
+            </div>
+            <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div
+                v-for="s in suppliers.slice(0, 6)"
+                :key="s.id"
+                class="group h-12 rounded-lg bg-white/5 hover:bg-brand-500/20 border border-white/10 hover:border-brand-500/50 flex items-center justify-center cursor-pointer transition-all"
+                @click="go(`/companies/${s.id}`)"
+              >
+                <span class="font-medium text-gray-300 group-hover:text-white text-xs truncate px-2">{{ s.companyName }}</span>
+              </div>
+            </div>
           </div>
 
-          <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div v-for="i in 12" :key="i" class="h-16 bg-slate-50 rounded-xl animate-pulse"></div>
-          </div>
-          <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div
-              v-for="b in buyers.slice(0, 12)"
-              :key="b.id"
-              class="group h-16 border border-gray-200 dark:border-slate-600 rounded-xl flex items-center justify-center bg-slate-50 dark:bg-slate-700 hover:border-autumn-600 dark:hover:border-autumn-600 cursor-pointer transition"
-              @click="go(`/companies/${b.id}`)"
-            >
-              <span class="font-bold text-gray-700 dark:text-slate-300 text-sm truncate px-3">{{ b.companyName }}</span>
+          <!-- 采购商列 -->
+          <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+            <div class="flex items-center justify-between mb-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-autumn-500/20 flex items-center justify-center">
+                  <Building2 :size="20" class="text-autumn-400" />
+                </div>
+                <span class="font-bold text-white">大宗采购商</span>
+              </div>
+              <button
+                class="text-xs font-medium text-autumn-400 hover:text-autumn-300 transition-colors"
+                @click="go('/companies/directory?type=buyer')"
+              >
+                查看全部 →
+              </button>
+            </div>
+            <div v-if="dataLoading" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div v-for="i in 6" :key="i" class="h-12 bg-white/5 rounded-lg animate-pulse"></div>
+            </div>
+            <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div
+                v-for="b in buyers.slice(0, 6)"
+                :key="b.id"
+                class="group h-12 rounded-lg bg-white/5 hover:bg-autumn-500/20 border border-white/10 hover:border-autumn-500/50 flex items-center justify-center cursor-pointer transition-all"
+                @click="go(`/companies/${b.id}`)"
+              >
+                <span class="font-medium text-gray-300 group-hover:text-white text-xs truncate px-2">{{ b.companyName }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -490,83 +498,83 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 话题广场 -->
-    <section class="max-w-7xl mx-auto px-4 py-20 border-b border-gray-200">
-      <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-900 tracking-tight">话题广场</h2>
-          <p class="text-gray-500 mt-4 max-w-2xl leading-relaxed">
-            通过我们的博客、指南、播客、文章、访谈等，了解所有最新新闻和信息
-          </p>
-        </div>
-        <button 
-          class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors active:scale-95"
-          @click="go('/talks')"
-        >
-          查看更多内容
-          <div class="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-brand-50 flex items-center justify-center transition-colors">
-            <ChevronRight :size="16" />
-          </div>
-        </button>
-      </div>
-
-      <div v-if="hotTopicsLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div v-for="i in 4" :key="i" class="bg-white rounded-2xl border border-gray-200 animate-pulse overflow-hidden">
-          <div class="aspect-video bg-gray-50"></div>
-          <div class="p-6 space-y-4">
-            <div class="h-4 bg-gray-50 rounded w-3/4"></div>
-            <div class="h-4 bg-gray-50 rounded w-1/2"></div>
-          </div>
-        </div>
-      </div>
-      <div v-else-if="hotTopics.length === 0" class="text-center py-20 bg-white rounded-2xl border border-dashed border-gray-200">
-        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <MessageCircle :size="32" class="text-gray-300" />
-        </div>
-        <p class="text-gray-400">暂无热门话题</p>
-      </div>
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div
-          v-for="post in hotTopics.slice(0, 4)"
-          :key="post.id"
-          class="group bg-white rounded-2xl border border-gray-200 hover:shadow-md hover:border-brand-100 transition-all cursor-pointer overflow-hidden flex flex-col"
-          @click="go(`/talks/${post.id}`)"
-        >
-          <!-- 封面图 -->
-          <div class="aspect-video overflow-hidden bg-gray-100 relative">
-            <img :src="getPostCover(post)" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-          </div>
-
-          <!-- 内容 -->
-          <div class="p-6 flex-1 flex flex-col">
-            <h3 class="text-lg font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-brand-600 transition-colors leading-snug">
-              {{ post.title }}
-            </h3>
-            <p class="text-xs text-gray-500 leading-relaxed line-clamp-3 mb-6 flex-1">
-              {{ post.content || '暂无内容摘要' }}
+    <section class="bg-gray-50 py-12">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">话题广场</h2>
+            <p class="text-gray-500 mt-2 max-w-2xl text-sm leading-relaxed">
+              行业资讯、市场动态、经验分享，了解农牧行业最新信息
             </p>
-            
-            <!-- 作者信息 -->
-            <div class="flex items-center gap-3 pt-4 border-t border-gray-50">
-              <div class="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center text-[10px] font-bold text-white shadow-sm shrink-0">
-                {{ avatarText(post) }}
-              </div>
-              <div class="min-w-0">
-                <div class="text-xs font-bold text-gray-900 truncate">{{ displayName(post) }}</div>
-                <div class="text-[10px] text-gray-400 mt-0.5">{{ formatTime(post.createTime) }}</div>
+          </div>
+          <button
+            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors active:scale-95"
+            @click="go('/talks')"
+          >
+            查看更多
+            <ChevronRight :size="16" class="group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </div>
+
+        <div v-if="hotTopicsLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div v-for="i in 4" :key="i" class="bg-white rounded-xl border border-gray-200 animate-pulse overflow-hidden">
+            <div class="aspect-video bg-gray-100"></div>
+            <div class="p-5 space-y-3">
+              <div class="h-4 bg-gray-100 rounded w-3/4"></div>
+              <div class="h-4 bg-gray-100 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+        <div v-else-if="hotTopics.length === 0" class="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
+          <div class="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <MessageCircle :size="28" class="text-gray-300" />
+          </div>
+          <p class="text-gray-400 text-sm">暂无热门话题</p>
+        </div>
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div
+            v-for="post in hotTopics.slice(0, 4)"
+            :key="post.id"
+            class="group bg-white rounded-xl border border-gray-200 hover:shadow-lg hover:border-brand-200 transition-all cursor-pointer overflow-hidden flex flex-col"
+            @click="go(`/talks/${post.id}`)"
+          >
+            <!-- 封面图 -->
+            <div class="aspect-video overflow-hidden bg-gray-100 relative">
+              <img :src="getPostCover(post)" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+            </div>
+
+            <!-- 内容 -->
+            <div class="p-5 flex-1 flex flex-col">
+              <h3 class="text-base font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-brand-600 transition-colors leading-snug">
+                {{ post.title }}
+              </h3>
+              <p class="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-4 flex-1">
+                {{ post.content || '暂无内容摘要' }}
+              </p>
+              <!-- 作者信息 -->
+              <div class="flex items-center gap-2 pt-3 border-t border-gray-100">
+                <div class="w-7 h-7 rounded-full bg-brand-500 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+                  {{ avatarText(post) }}
+                </div>
+                <div class="min-w-0">
+                  <div class="text-xs font-medium text-gray-900 truncate">{{ displayName(post) }}</div>
+                  <div class="text-[10px] text-gray-400">{{ formatTime(post.createTime) }}</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </section>
+
     <!-- 底部流程引导 -->
-    <section class="bg-slate-900 py-24 relative overflow-hidden border-t border-white/5">
+    <section class="bg-slate-900 py-16 relative overflow-hidden">
       <div class="max-w-7xl mx-auto px-4 text-center">
         <h2 class="text-2xl font-bold text-white mb-4">开启您的专业交易之旅</h2>
-        <p class="text-gray-400 mb-16 max-w-xl mx-auto">从发现商机到合约履行，AgriMatch 为您提供全流程保障</p>
+        <p class="text-gray-400 text-sm mb-10 max-w-xl mx-auto">从发现商机到合约履行，AgriMatch 为您提供全流程保障</p>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div class="flex flex-col items-center">
             <div class="w-16 h-16 bg-white/5 border border-white/10 text-brand-400 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xl">
               <span class="text-2xl font-bold">01</span>

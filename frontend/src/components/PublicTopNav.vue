@@ -6,6 +6,7 @@ import { useUiStore } from '../store/ui'
 import { LogOut, Settings, ChevronDown, ShoppingBag, Truck } from 'lucide-vue-next'
 import { getProductTree, type ProductNode } from '../api/product'
 import { listTopCompanies, type CompanyCardResponse } from '../api/company'
+import logoWhite from '../assets/logo-white.png'
 
 const router = useRouter()
 const route = useRoute()
@@ -87,11 +88,12 @@ onMounted(async () => {
       <div class="min-h-[52px] py-2 flex items-center justify-between gap-6">
         <!-- Left: Logo & Dropdowns (Stacked) -->
         <div class="flex flex-col items-start gap-3">
-          <div class="flex items-center gap-3 cursor-pointer hover:bg-white/10 px-2 py-1 rounded-xl transition-all active:scale-95" @click="go('/')">
-            <div class="w-9 h-9 rounded-lg bg-white text-brand-700 flex items-center justify-center font-bold">A</div>
+          <div class="flex items-center gap-2 cursor-pointer hover:bg-white/10 px-2 py-1.5 rounded-xl transition-all active:scale-95" @click="go('/')">
+            <!-- Logo: NHT 线条图形（白色版本，透明背景） -->
+            <img :src="logoWhite" alt="农汇通" class="h-8 w-auto" />
             <div class="leading-tight hidden sm:block">
-              <div class="font-bold text-white">AgriMatch</div>
-              <div class="text-[10px] font-bold text-brand-200 uppercase tracking-widest">农汇通 · 供需匹配平台</div>
+              <div class="font-bold text-white text-base tracking-wide">农汇通</div>
+              <div class="text-[9px] font-medium text-brand-200/80">农牧供需智能匹配平台</div>
             </div>
           </div>
 

@@ -212,7 +212,7 @@ function openAgreement(type: 'user' | 'privacy') {
     <!-- 标题 -->
     <template #title>
       <div class="text-xl font-bold text-gray-900">欢迎使用</div>
-      <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">AgriMatch 供需协作平台</div>
+      <div class="text-[10px] font-bold text-gray-400 tracking-widest mt-0.5">农汇通 · 农牧供需智能匹配平台</div>
     </template>
 
     <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
