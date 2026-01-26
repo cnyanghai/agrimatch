@@ -10,6 +10,7 @@ public class PostResponse {
     private String userName;
     private String nickName;
     private String position;
+    private String avatar;
     private String title;
     private String content;
     private String domain;
@@ -81,6 +82,14 @@ public class PostResponse {
 
     public void setPosition(String position) {
         this.position = position;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public String getTitle() {

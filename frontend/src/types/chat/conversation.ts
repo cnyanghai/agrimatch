@@ -79,6 +79,8 @@ export interface ChatConversationResponse {
   peerUserName?: string
   peerNickName?: string
   peerCompanyName?: string
+  /** 对方头像 URL */
+  peerAvatar?: string
   subjectType?: SubjectType | string
   subjectId?: number
   subjectSnapshotJson?: string
@@ -106,6 +108,8 @@ export interface PeerGroup {
   peerUserName?: string
   peerNickName?: string
   peerCompanyName?: string
+  /** 对方头像 URL */
+  peerAvatar?: string
   conversations: ChatConversationResponse[]
   totalUnread: number
   lastTime: string
@@ -264,6 +268,7 @@ export function groupConversationsByPeer(
         peerUserName: c.peerUserName,
         peerNickName: c.peerNickName,
         peerCompanyName: c.peerCompanyName,
+        peerAvatar: c.peerAvatar,
         conversations: [c],
         totalUnread: c.unreadCount || 0,
         lastTime: c.lastTime || '',

@@ -8,6 +8,8 @@ public class ChatConversationResponse {
     private String peerUserName;
     private String peerNickName;
     private String peerCompanyName;
+    /** 对方头像 URL */
+    private String peerAvatar;
 
     private String subjectType;
     private Long subjectId;
@@ -55,6 +57,14 @@ public class ChatConversationResponse {
 
     public void setPeerCompanyName(String peerCompanyName) {
         this.peerCompanyName = peerCompanyName;
+    }
+
+    public String getPeerAvatar() {
+        return peerAvatar;
+    }
+
+    public void setPeerAvatar(String peerAvatar) {
+        this.peerAvatar = peerAvatar;
     }
 
     public String getSubjectType() {

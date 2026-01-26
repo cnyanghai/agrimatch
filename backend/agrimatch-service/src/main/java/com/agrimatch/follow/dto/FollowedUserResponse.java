@@ -10,6 +10,7 @@ public class FollowedUserResponse {
     private String userName;
     private String nickName;
     private String position;
+    private String avatar;
     private Long companyId;
     private String companyName;
     private Boolean isBuyer;
@@ -46,6 +47,14 @@ public class FollowedUserResponse {
 
     public void setPosition(String position) {
         this.position = position;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
     }
 
     public Long getCompanyId() {

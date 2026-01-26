@@ -16,6 +16,7 @@
         <result column="user_name" property="userName"/>
         <result column="nick_name" property="nickName"/>
         <result column="position" property="position"/>
+        <result column="avatar" property="avatar"/>
         <result column="company_id" property="companyId"/>
         <result column="company_name" property="companyName"/>
         <result column="is_buyer" property="isBuyer"/>
@@ -75,6 +76,7 @@
             u.user_name,
             u.nick_name,
             u.position,
+            u.avatar,
             u.company_id,
             c.company_name,
             u.is_buyer,

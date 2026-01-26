@@ -99,8 +99,9 @@ onMounted(() => {
             <!-- 作者行 -->
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-3" @click="onAuthorClick($event, post.userId)">
-                <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center text-xs font-black shadow-md shadow-brand-600/10">
-                  {{ (post.nickName || post.userName || '?')[0] }}
+                <div class="w-8 h-8 rounded-lg bg-brand-600 text-white flex items-center justify-center text-xs font-black shadow-md shadow-brand-600/10 overflow-hidden">
+                  <img v-if="post.avatar" :src="post.avatar" alt="头像" class="w-full h-full object-cover" />
+                  <span v-else>{{ (post.nickName || post.userName || '?')[0] }}</span>
                 </div>
                 <div>
                   <div class="flex items-center gap-2">

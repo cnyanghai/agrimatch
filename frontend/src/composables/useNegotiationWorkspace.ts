@@ -744,21 +744,35 @@ export function useNegotiationWorkspace() {
     let buyer = false
     let seller = false
 
+    // DEBUG: 打印所有 SYSTEM 消息
+    const systemMsgs = chatMessages.messages.value.filter(m => (m.msgType || '').toUpperCase() === 'SYSTEM')
+    console.log('[DEBUG] SYSTEM messages:', systemMsgs.map(m => ({
+      id: m.id,
+      msgType: m.msgType,
+      content: m.content,
+      payloadJson: m.payloadJson
+    })))
+
     for (const msg of chatMessages.messages.value) {
       if ((msg.msgType || '').toUpperCase() !== 'SYSTEM') continue
-      if (!msg.payloadJson) continue
+      if (!msg.payloadJson) {
+        console.log('[DEBUG] SYSTEM message without payloadJson:', msg.id, msg.content)
+        continue
+      }
 
       try {
         const payload = JSON.parse(msg.payloadJson)
+        console.log('[DEBUG] Parsed payload:', payload)
         if (payload.action === 'CONFIRM_TERMS') {
           if (payload.role === 'buyer') buyer = true
           if (payload.role === 'seller') seller = true
         }
-      } catch {
-        // 忽略解析错误
+      } catch (e) {
+        console.error('[DEBUG] Failed to parse payloadJson:', msg.payloadJson, e)
       }
     }
 
+    console.log('[DEBUG] Confirmation result - buyer:', buyer, 'seller:', seller)
     buyerConfirmed.value = buyer
     sellerConfirmed.value = seller
 

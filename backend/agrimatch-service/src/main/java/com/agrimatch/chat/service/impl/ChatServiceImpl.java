@@ -146,6 +146,7 @@ public class ChatServiceImpl implements ChatService {
             o.setPeerUserName(r.getPeerUserName());
             o.setPeerNickName(r.getPeerNickName());
             o.setPeerCompanyName(r.getPeerCompanyName());
+            o.setPeerAvatar(r.getPeerAvatar());
             o.setSubjectType(r.getSubjectType());
             o.setSubjectId(r.getSubjectId());
             o.setSubjectSnapshotJson(r.getSubjectSnapshotJson());

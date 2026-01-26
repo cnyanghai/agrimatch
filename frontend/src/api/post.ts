@@ -18,6 +18,7 @@ export interface PostResponse {
   userName?: string
   nickName?: string
   position?: string
+  avatar?: string
   title: string
   content?: string
   imagesJson?: string

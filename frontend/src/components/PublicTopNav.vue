@@ -15,10 +15,11 @@ const ui = useUiStore()
 
 const isLoggedIn = computed(() => Boolean(auth.me))
 const displayName = computed(() => auth.me?.nickName || auth.me?.userName || '未登录')
+const avatarUrl = computed(() => auth.me?.avatar || '')
 const avatarChar = computed(() => {
   const name = (auth.me?.nickName || auth.me?.userName || '').trim()
   if (!name) return 'U'
-  // 若是纯数字账号（手机号等），不要显示“1/2/3”，统一兜底 U
+  // 若是纯数字账号（手机号等），不要显示"1/2/3"，统一兜底 U
   if (/^\d+$/.test(name)) return 'U'
   return (name[0] || 'U').toUpperCase()
 })
@@ -249,8 +250,9 @@ onMounted(async () => {
             <template v-else>
               <el-dropdown>
                 <button class="flex items-center gap-3 bg-white/10 border border-white/20 px-3 py-2 rounded-xl hover:bg-white/20 transition-all active:scale-95">
-                  <div class="w-8 h-8 rounded-lg bg-white text-brand-700 flex items-center justify-center font-bold text-sm">
-                    {{ avatarChar }}
+                  <div class="w-8 h-8 rounded-lg bg-white text-brand-700 flex items-center justify-center font-bold text-sm overflow-hidden">
+                    <img v-if="avatarUrl" :src="avatarUrl" alt="头像" class="w-full h-full object-cover" />
+                    <span v-else>{{ avatarChar }}</span>
                   </div>
                   <div class="text-left leading-tight hidden sm:block">
                     <div class="text-sm font-bold text-white">{{ displayName }}</div>

@@ -123,6 +123,7 @@ public interface ChatMapper {
         private String peerUserName;
         private String peerNickName;
         private String peerCompanyName;
+        private String peerAvatar;
         private String subjectType;
         private Long subjectId;
         private String subjectSnapshotJson;
@@ -168,6 +169,14 @@ public interface ChatMapper {
 
         public void setPeerCompanyName(String peerCompanyName) {
             this.peerCompanyName = peerCompanyName;
+        }
+
+        public String getPeerAvatar() {
+            return peerAvatar;
+        }
+
+        public void setPeerAvatar(String peerAvatar) {
+            this.peerAvatar = peerAvatar;
         }
 
         public String getSubjectType() {

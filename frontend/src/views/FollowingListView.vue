@@ -306,7 +306,8 @@ onMounted(() => {
             <div class="flex gap-6 items-center">
               <!-- 商户头像 -->
               <div class="w-20 h-20 bg-brand-100 rounded-lg flex items-center justify-center border-2 border-white shadow-sm overflow-hidden">
-                <Factory class="w-10 h-10 text-brand-700" />
+                <img v-if="selectedUser.avatar" :src="selectedUser.avatar" alt="头像" class="w-full h-full object-cover" />
+                <span v-else class="text-3xl font-black text-brand-700">{{ getAvatarText(selectedUser) }}</span>
               </div>
               <div>
                 <div class="flex items-center gap-3 mb-2">

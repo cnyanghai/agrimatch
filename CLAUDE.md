@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 工作流程规则 (Workflow Rules)
+
+**重要：在执行每一步操作前，必须先征求用户同意。**
+
+- 在修改任何文件之前，先说明计划并等待用户确认
+- 在执行命令之前，先告知用户并获得批准
+- 分步骤进行，每一步都需要用户明确同意后才能继续
+
 ## Project Overview
 
 AgriMatch (农汇通) is a B2B agricultural commodities trading platform connecting suppliers and buyers. It's a full-stack application with a Vue 3 frontend and Spring Boot backend.

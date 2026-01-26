@@ -158,6 +158,7 @@ public class PostServiceImpl implements PostService {
         r.setUserName(p.getUserName());
         r.setNickName(p.getNickName());
         r.setPosition(p.getPosition());
+        r.setAvatar(p.getAvatar());
         r.setTitle(p.getTitle());
         r.setContent(p.getContent());
         r.setImagesJson(p.getImagesJson());

@@ -153,9 +153,10 @@ function getSubjectTypeLabel(type?: string): string {
             >
               <!-- 头像 -->
               <div
-                :class="['w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0', getAvatarColor(peer.peerNickName || peer.peerUserName)]"
+                :class="['w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden', !peer.peerAvatar && getAvatarColor(peer.peerNickName || peer.peerUserName)]"
               >
-                {{ (peer.peerNickName || peer.peerUserName || '?')[0] }}
+                <img v-if="peer.peerAvatar" :src="peer.peerAvatar" alt="头像" class="w-full h-full object-cover" />
+                <span v-else>{{ (peer.peerNickName || peer.peerUserName || '?')[0] }}</span>
               </div>
 
               <!-- 信息 -->

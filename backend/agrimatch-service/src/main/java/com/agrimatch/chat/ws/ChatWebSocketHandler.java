@@ -77,10 +77,15 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         Long conversationId = root.hasNonNull("conversationId") ? root.get("conversationId").asLong() : null;
         String msgType = root.path("msgType").asText("TEXT");
         String content = root.path("content").asText("");
-        String payloadJson = root.hasNonNull("payload") ? root.get("payload").toString() : null;
+        // 注意：payload 是 JSON 字符串，需要用 asText() 而不是 toString()
+        // toString() 会返回带引号的字符串 "\"...\""，导致解析失败
+        String payloadJson = root.hasNonNull("payload") ? root.get("payload").asText() : null;
         java.math.BigDecimal basisPrice = root.hasNonNull("basisPrice") ? new java.math.BigDecimal(root.get("basisPrice").asText()) : null;
         String contractCode = root.hasNonNull("contractCode") ? root.get("contractCode").asText(null) : null;
         String tempId = root.path("tempId").asText(null);
+
+        // DEBUG: 打印接收到的消息
+        System.out.println("[WS DEBUG] Received - msgType: " + msgType + ", payload field exists: " + root.hasNonNull("payload") + ", payloadJson: " + payloadJson);
 
         if (conversationId == null) {
             session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"missing conversationId\"}"));

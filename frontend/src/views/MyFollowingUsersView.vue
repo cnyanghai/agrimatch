@@ -95,10 +95,11 @@ onMounted(() => {
               <div class="flex items-center gap-6">
                 <!-- 头像 -->
                 <div
-                  class="w-16 h-16 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-2xl font-black shadow-lg shadow-brand-600/20 cursor-pointer hover:scale-105 transition-transform"
+                  class="w-16 h-16 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-2xl font-black shadow-lg shadow-brand-600/20 cursor-pointer hover:scale-105 transition-transform overflow-hidden"
                   @click="go(`/users/${user.userId}/posts`)"
                 >
-                  {{ (user.nickName || user.userName || '?')[0] }}
+                  <img v-if="user.avatar" :src="user.avatar" alt="头像" class="w-full h-full object-cover" />
+                  <span v-else>{{ (user.nickName || user.userName || '?')[0] }}</span>
                 </div>
 
                 <!-- 用户信息 -->

@@ -230,8 +230,9 @@ onMounted(() => {
         
         <div v-else class="space-y-4">
           <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-            <div class="w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold">
-              {{ (auth.me?.nickName || auth.me?.userName || 'U')[0] }}
+            <div class="w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold overflow-hidden">
+              <img v-if="auth.me?.avatar" :src="auth.me.avatar" alt="头像" class="w-full h-full object-cover" />
+              <span v-else>{{ (auth.me?.nickName || auth.me?.userName || 'U')[0] }}</span>
             </div>
             <div class="flex-1 min-w-0">
               <div class="font-bold text-gray-900 truncate">{{ auth.me?.nickName || auth.me?.userName || '-' }}</div>
@@ -355,8 +356,9 @@ onMounted(() => {
           >
             <div class="flex items-start gap-4">
               <!-- 头像 -->
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center font-bold flex-shrink-0">
-                {{ (post.nickName || post.userName || '?')[0] }}
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center font-bold flex-shrink-0 overflow-hidden">
+                <img v-if="post.avatar" :src="post.avatar" alt="头像" class="w-full h-full object-cover" />
+                <span v-else>{{ (post.nickName || post.userName || '?')[0] }}</span>
               </div>
 
               <div class="flex-1 min-w-0">
@@ -487,8 +489,9 @@ onMounted(() => {
         <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
           <div class="font-bold text-gray-900 line-clamp-2 mb-3">{{ currentTipPost?.title }}</div>
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white font-bold flex-shrink-0">
-              {{ (currentTipPost?.nickName || currentTipPost?.userName || '?')[0] }}
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center text-white font-bold flex-shrink-0 overflow-hidden">
+              <img v-if="currentTipPost?.avatar" :src="currentTipPost.avatar" alt="头像" class="w-full h-full object-cover" />
+              <span v-else>{{ (currentTipPost?.nickName || currentTipPost?.userName || '?')[0] }}</span>
             </div>
             <div class="flex-1 min-w-0">
               <div class="font-bold text-gray-700 truncate">{{ currentTipPost?.nickName || currentTipPost?.userName || '作者' }}</div>

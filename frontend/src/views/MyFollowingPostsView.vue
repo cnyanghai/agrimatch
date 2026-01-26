@@ -104,8 +104,9 @@ onMounted(() => {
               <!-- 作者行 -->
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3 cursor-pointer group/author" @click="onAuthorClick($event, post.userId)">
-                  <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-brand-600/20 group-hover/author:scale-105 transition-transform">
-                    {{ (post.nickName || post.userName || '?')[0] }}
+                  <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center text-sm font-black shadow-lg shadow-brand-600/20 group-hover/author:scale-105 transition-transform overflow-hidden">
+                    <img v-if="post.avatar" :src="post.avatar" alt="头像" class="w-full h-full object-cover" />
+                    <span v-else>{{ (post.nickName || post.userName || '?')[0] }}</span>
                   </div>
                   <div>
                     <div class="flex items-center gap-2">

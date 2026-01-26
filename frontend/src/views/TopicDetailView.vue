@@ -352,8 +352,9 @@ onMounted(() => {
       <div v-if="post" class="bg-white rounded-[32px] p-10 border border-gray-100 shadow-sm mb-8">
         <div class="flex items-center justify-between mb-10">
           <div class="flex items-center gap-4 cursor-pointer group/author" @click="onAuthorClick">
-            <div class="w-14 h-14 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-xl font-black shadow-lg shadow-brand-600/20 group-hover/author:scale-105 transition-transform">
-              {{ (post.nickName || post.userName || '?')[0] }}
+            <div class="w-14 h-14 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-xl font-black shadow-lg shadow-brand-600/20 group-hover/author:scale-105 transition-transform overflow-hidden">
+              <img v-if="post.avatar" :src="post.avatar" alt="头像" class="w-full h-full object-cover" />
+              <span v-else>{{ (post.nickName || post.userName || '?')[0] }}</span>
             </div>
             <div>
               <div class="flex items-center gap-2 mb-1">
@@ -533,8 +534,9 @@ onMounted(() => {
         <!-- 作者信息卡片 -->
         <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold text-lg shrink-0">
-              {{ (post.nickName || post.userName || '?')[0] }}
+            <div class="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold text-lg shrink-0 overflow-hidden">
+              <img v-if="post.avatar" :src="post.avatar" alt="头像" class="w-full h-full object-cover" />
+              <span v-else>{{ (post.nickName || post.userName || '?')[0] }}</span>
             </div>
             <div class="flex-1 min-w-0">
               <div class="font-bold text-gray-900 truncate">{{ post.nickName || post.userName || '作者' }}</div>

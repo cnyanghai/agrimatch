@@ -186,6 +186,7 @@
             pu.user_name AS peerUserName,
             pu.nick_name AS peerNickName,
             pc.company_name AS peerCompanyName,
+            pu.avatar AS peerAvatar,
             t.subject_type AS subjectType,
             t.subject_id AS subjectId,
             t.subject_snapshot_json AS subjectSnapshotJson,

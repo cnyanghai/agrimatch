@@ -259,8 +259,9 @@ onMounted(() => {
                 <!-- 作者行 -->
                 <div class="flex items-center justify-between mb-3">
                   <div class="flex items-center gap-2 cursor-pointer group/author" @click="onAuthorClick($event, post.userId)">
-                    <div class="w-6 h-6 rounded-md bg-brand-600 text-white flex items-center justify-center text-[10px] font-black shadow-sm group-hover/author:scale-110 transition-transform">
-                      {{ (post.nickName || post.userName || '?')[0] }}
+                    <div class="w-6 h-6 rounded-md bg-brand-600 text-white flex items-center justify-center text-[10px] font-black shadow-sm group-hover/author:scale-110 transition-transform overflow-hidden">
+                      <img v-if="post.avatar" :src="post.avatar" alt="头像" class="w-full h-full object-cover" />
+                      <span v-else>{{ (post.nickName || post.userName || '?')[0] }}</span>
                     </div>
                     <span class="text-xs font-bold text-gray-700 group-hover/author:text-brand-600 transition-colors">{{ post.nickName || post.userName }}</span>
                     <ExpertBadge v-if="post.isExpert" />
@@ -330,8 +331,9 @@ onMounted(() => {
           <Card v-if="isLoggedIn" radius="2xl" class="border-none shadow-sm ring-1 ring-gray-100 overflow-hidden mb-6">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center text-xs font-black shadow-lg shadow-brand-600/20">
-                  {{ displayName[0] }}
+                <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center text-xs font-black shadow-lg shadow-brand-600/20 overflow-hidden">
+                  <img v-if="auth.me?.avatar" :src="auth.me.avatar" alt="头像" class="w-full h-full object-cover" />
+                  <span v-else>{{ displayName[0] }}</span>
                 </div>
                 <div>
                   <p class="text-sm font-bold text-gray-900">{{ displayName }}</p>
@@ -363,8 +365,9 @@ onMounted(() => {
             
             <div v-if="isLoggedIn && followedUsers.length > 0" class="space-y-6">
               <div v-for="user in followedUsers" :key="user.userId" class="flex items-center gap-4 group/exp cursor-pointer" @click="go(`/users/${user.userId}/posts`)">
-                <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold shrink-0">
-                  {{ (user.nickName || user.userName || '?')[0] }}
+                <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold shrink-0 overflow-hidden">
+                  <img v-if="user.avatar" :src="user.avatar" alt="头像" class="w-full h-full object-cover" />
+                  <span v-else>{{ (user.nickName || user.userName || '?')[0] }}</span>
                 </div>
                 <div class="min-w-0 flex-1">
                   <div class="font-bold text-sm text-gray-900 truncate">

@@ -34,7 +34,7 @@ export interface WsSendPayload {
   conversationId: number
   msgType?: string
   content?: string
-  payloadJson?: string
+  payload?: string  // 注意：后端期望字段名是 'payload'，不是 'payloadJson'
   tempId?: string
 }
 
@@ -234,7 +234,7 @@ export function useChatWebSocket(
       conversationId,
       msgType: 'QUOTE',
       content,
-      payloadJson,
+      payload: payloadJson,
       tempId
     })
   }
@@ -252,7 +252,7 @@ export function useChatWebSocket(
       conversationId,
       msgType: 'IMAGE',
       content: '[图片]',
-      payloadJson,
+      payload: payloadJson,
       tempId
     })
   }
@@ -271,7 +271,7 @@ export function useChatWebSocket(
       conversationId,
       msgType: 'ATTACHMENT',
       content: `[附件] ${fileName}`,
-      payloadJson,
+      payload: payloadJson,
       tempId
     })
   }
@@ -289,7 +289,7 @@ export function useChatWebSocket(
       conversationId,
       msgType: 'CONTRACT',
       content: '[合同]',
-      payloadJson,
+      payload: payloadJson,
       tempId
     })
   }
@@ -308,7 +308,7 @@ export function useChatWebSocket(
       conversationId,
       msgType: 'SYSTEM',
       content,
-      payloadJson,
+      payload: payloadJson,
       tempId
     })
   }
