@@ -21,6 +21,8 @@ public class BusSupply {
     private BigDecimal exFactoryPrice;
     private String shipAddress;
     private String deliveryMode;
+    private String paymentMethod;
+    private String invoiceType;
     private String packaging;
     private String storageMethod;
     private String priceRulesJson;
@@ -144,6 +146,22 @@ public class BusSupply {
 
     public void setDeliveryMode(String deliveryMode) {
         this.deliveryMode = deliveryMode;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getInvoiceType() {
+        return invoiceType;
+    }
+
+    public void setInvoiceType(String invoiceType) {
+        this.invoiceType = invoiceType;
     }
 
     public String getPriceRulesJson() {

@@ -20,6 +20,8 @@
         <result column="ex_factory_price" property="exFactoryPrice"/>
         <result column="ship_address" property="shipAddress"/>
         <result column="delivery_mode" property="deliveryMode"/>
+        <result column="payment_method" property="paymentMethod"/>
+        <result column="invoice_type" property="invoiceType"/>
         <result column="packaging" property="packaging"/>
         <result column="storage_method" property="storageMethod"/>
         <result column="price_rules_json" property="priceRulesJson"/>
@@ -38,12 +40,12 @@
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO bus_supply
         (company_id, user_id, category_name, domain, supply_no, origin, quantity, price_type, ex_factory_price, ship_address,
-         delivery_mode, packaging, storage_method,
+         delivery_mode, payment_method, invoice_type, packaging, storage_method,
          price_rules_json, params_json, tags_json, remark, expire_minutes, expire_time,
          status, is_deleted, create_time, update_time)
         VALUES
         (#{companyId}, #{userId}, #{categoryName}, #{domain}, #{supplyNo}, #{origin}, #{quantity}, #{priceType}, #{exFactoryPrice}, #{shipAddress},
-         #{deliveryMode}, #{packaging}, #{storageMethod},
+         #{deliveryMode}, #{paymentMethod}, #{invoiceType}, #{packaging}, #{storageMethod},
          #{priceRulesJson}, #{paramsJson}, #{tagsJson}, #{remark}, #{expireMinutes}, #{expireTime},
          #{status}, 0, NOW(3), NOW(3))
     </insert>
@@ -55,7 +57,7 @@
             u.user_name AS user_name,
             u.nick_name AS nick_name,
             s.category_name, s.domain, s.supply_no, s.origin, s.quantity, s.price_type, s.ex_factory_price, s.ship_address,
-            s.delivery_mode, s.packaging, s.storage_method,
+            s.delivery_mode, s.payment_method, s.invoice_type, s.packaging, s.storage_method,
             s.price_rules_json, s.params_json, s.tags_json, s.remark, s.expire_minutes, s.expire_time,
             s.status, s.is_deleted, s.create_time, s.update_time
         FROM bus_supply s
@@ -73,7 +75,7 @@
             u.user_name AS user_name,
             u.nick_name AS nick_name,
             s.category_name, s.domain, s.supply_no, s.origin, s.quantity, s.price_type, s.ex_factory_price, s.ship_address,
-            s.delivery_mode, s.packaging, s.storage_method,
+            s.delivery_mode, s.payment_method, s.invoice_type, s.packaging, s.storage_method,
             s.price_rules_json, s.params_json, s.tags_json, s.remark, s.expire_minutes, s.expire_time,
             s.status, s.is_deleted, s.create_time, s.update_time
         FROM bus_supply s
@@ -149,6 +151,8 @@
             <if test="exFactoryPrice != null">ex_factory_price = #{exFactoryPrice},</if>
             <if test="shipAddress != null">ship_address = #{shipAddress},</if>
             <if test="deliveryMode != null">delivery_mode = #{deliveryMode},</if>
+            <if test="paymentMethod != null">payment_method = #{paymentMethod},</if>
+            <if test="invoiceType != null">invoice_type = #{invoiceType},</if>
             <if test="packaging != null">packaging = #{packaging},</if>
             <if test="storageMethod != null">storage_method = #{storageMethod},</if>
             <if test="priceRulesJson != null">price_rules_json = #{priceRulesJson},</if>

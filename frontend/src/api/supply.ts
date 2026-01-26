@@ -46,6 +46,8 @@ export interface SupplyCreateRequest {
   basisQuotes?: BasisQuoteRequest[]
   shipAddress?: string
   deliveryMode?: string
+  paymentMethod?: string
+  invoiceType?: string
   packaging?: string
   storageMethod?: string
   priceRulesJson?: string
@@ -62,6 +64,8 @@ export interface SupplyUpdateRequest {
   exFactoryPrice?: number
   shipAddress?: string
   deliveryMode?: string
+  paymentMethod?: string
+  invoiceType?: string
   packaging?: string
   storageMethod?: string
   priceRulesJson?: string
@@ -95,6 +99,8 @@ export interface SupplyResponse {
   basisQuotes?: BasisQuoteResponse[]
   shipAddress?: string
   deliveryMode?: string
+  paymentMethod?: string
+  invoiceType?: string
   packaging?: string
   storageMethod?: string
   priceRulesJson?: string

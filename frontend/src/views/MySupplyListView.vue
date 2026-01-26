@@ -121,6 +121,8 @@ const editForm = reactive<SupplyUpdateRequest>({
   exFactoryPrice: undefined,
   shipAddress: undefined,
   deliveryMode: undefined,
+  paymentMethod: undefined,
+  invoiceType: undefined,
   packaging: undefined,
   storageMethod: undefined,
   expireMinutes: undefined,
@@ -136,6 +138,8 @@ function openEdit(s: SupplyResponse) {
   editForm.exFactoryPrice = s.exFactoryPrice
   editForm.shipAddress = s.shipAddress
   editForm.deliveryMode = s.deliveryMode
+  editForm.paymentMethod = s.paymentMethod
+  editForm.invoiceType = s.invoiceType
   editForm.packaging = s.packaging
   editForm.storageMethod = s.storageMethod
   editForm.expireMinutes = s.expireMinutes
@@ -155,6 +159,8 @@ async function saveEdit() {
       exFactoryPrice: editForm.exFactoryPrice,
       shipAddress: editForm.shipAddress,
       deliveryMode: editForm.deliveryMode,
+      paymentMethod: editForm.paymentMethod,
+      invoiceType: editForm.invoiceType,
       packaging: editForm.packaging,
       storageMethod: editForm.storageMethod,
       expireMinutes: editForm.expireMinutes,
@@ -374,6 +380,12 @@ onMounted(() => {
             <span v-if="s.deliveryMode" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-200 text-gray-600">
               交付：{{ s.deliveryMode }}
             </span>
+            <span v-if="s.paymentMethod" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-200 text-gray-600">
+              付款：{{ s.paymentMethod }}
+            </span>
+            <span v-if="s.invoiceType" class="px-2.5 py-1 rounded-full text-xs font-bold bg-white border border-gray-200 text-gray-600">
+              发票：{{ s.invoiceType }}
+            </span>
             <span v-if="getParamsSummary(s.paramsJson)" class="px-2.5 py-1 rounded-full text-xs font-bold bg-brand-50 border border-brand-100 text-brand-600">
               指标：{{ getParamsSummary(s.paramsJson) }}
             </span>
@@ -502,6 +514,29 @@ onMounted(() => {
               placeholder="例如：散装 / 袋装"
               class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">付款方式</label>
+            <select
+              v-model="editForm.paymentMethod"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all bg-white"
+            >
+              <option value="">请选择</option>
+              <option value="现款">现款</option>
+              <option value="账期">账期</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发票类型</label>
+            <select
+              v-model="editForm.invoiceType"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all bg-white"
+            >
+              <option value="">请选择</option>
+              <option value="普通发票">普通发票</option>
+              <option value="增值税发票">增值税发票</option>
+              <option value="不需要发票">不需要发票</option>
+            </select>
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">储存方式</label>

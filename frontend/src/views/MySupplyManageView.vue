@@ -39,6 +39,8 @@ const publishForm = reactive({
   packaging: '散装',
   shipAddress: '',
   deliveryMode: '到厂',
+  paymentMethod: '现款',
+  invoiceType: '',
   expireMinutes: 4320,
   priceRulesJson: '{}',
   paramsJson: '{}',
@@ -109,6 +111,8 @@ type TemplateJsonData = {
   packaging?: string
   shipAddress?: string
   deliveryMode?: string
+  paymentMethod?: string
+  invoiceType?: string
   expireMinutes?: number
   paramsJson?: string
   remark?: string
@@ -408,6 +412,8 @@ async function publishSupply() {
       basisQuotes: basisQuotesData,
       shipAddress: publishForm.shipAddress || undefined,
       deliveryMode: publishForm.deliveryMode || undefined,
+      paymentMethod: publishForm.paymentMethod || undefined,
+      invoiceType: publishForm.invoiceType || undefined,
       expireMinutes: publishForm.expireMinutes,
       priceRulesJson: publishForm.priceRulesJson || '{}',
       paramsJson,
@@ -455,6 +461,8 @@ async function confirmSaveTemplate() {
       packaging: publishForm.packaging,
       shipAddress: publishForm.shipAddress,
       deliveryMode: publishForm.deliveryMode,
+      paymentMethod: publishForm.paymentMethod,
+      invoiceType: publishForm.invoiceType,
       paramsJson,
       expireMinutes: publishForm.expireMinutes,
       remark: publishForm.remark
@@ -519,6 +527,8 @@ async function applyTemplate(template: SupplyTemplateResponse) {
     publishForm.packaging = data.packaging || '散装'
     publishForm.shipAddress = data.shipAddress || ''
     publishForm.deliveryMode = data.deliveryMode || '到厂'
+    publishForm.paymentMethod = data.paymentMethod || '现款'
+    publishForm.invoiceType = data.invoiceType || ''
     publishForm.expireMinutes = data.expireMinutes || 4320
     publishForm.remark = data.remark || ''
     
@@ -909,6 +919,23 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                 </el-select>
               </div>
             </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">付款方式</label>
+                <el-select v-model="publishForm.paymentMethod" class="w-full neo-select">
+                  <el-option label="现款" value="现款" />
+                  <el-option label="账期" value="账期" />
+                </el-select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发票类型</label>
+                <el-select v-model="publishForm.invoiceType" clearable class="w-full neo-select">
+                  <el-option label="普通发票" value="普通发票" />
+                  <el-option label="增值税发票" value="增值税发票" />
+                  <el-option label="不需要发票" value="不需要发票" />
+                </el-select>
+              </div>
+            </div>
             <div>
               <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">补充说明</label>
               <textarea
@@ -1026,6 +1053,16 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                     有效期
                   </div>
                   <div class="mt-1 font-bold text-gray-900">{{ previewData.expireText }}</div>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="bg-gray-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">付款方式</div>
+                  <div class="mt-1 font-bold text-gray-900">{{ publishForm.paymentMethod || '现款' }}</div>
+                </div>
+                <div v-if="publishForm.invoiceType" class="bg-gray-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">发票类型</div>
+                  <div class="mt-1 font-bold text-gray-900">{{ publishForm.invoiceType }}</div>
                 </div>
               </div>
               <!-- 规格参数预览 -->

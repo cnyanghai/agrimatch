@@ -92,6 +92,8 @@ public class SupplyServiceImpl implements SupplyService {
         }
         s.setShipAddress(addr);
         s.setDeliveryMode(req.getDeliveryMode());
+        s.setPaymentMethod(emptyToNull(req.getPaymentMethod()));
+        s.setInvoiceType(emptyToNull(req.getInvoiceType()));
         s.setPackaging(emptyToNull(req.getPackaging()));
         s.setStorageMethod(emptyToNull(req.getStorageMethod()));
         s.setPriceRulesJson(req.getPriceRulesJson());
@@ -243,6 +245,8 @@ public class SupplyServiceImpl implements SupplyService {
         s.setExFactoryPrice(req.getExFactoryPrice());
         s.setShipAddress(emptyToNull(req.getShipAddress()));
         s.setDeliveryMode(emptyToNull(req.getDeliveryMode()));
+        s.setPaymentMethod(emptyToNull(req.getPaymentMethod()));
+        s.setInvoiceType(emptyToNull(req.getInvoiceType()));
         s.setPackaging(emptyToNull(req.getPackaging()));
         s.setStorageMethod(emptyToNull(req.getStorageMethod()));
         s.setPriceRulesJson(emptyToNull(req.getPriceRulesJson()));
@@ -302,6 +306,8 @@ public class SupplyServiceImpl implements SupplyService {
         o.setExFactoryPrice(s.getExFactoryPrice());
         o.setShipAddress(s.getShipAddress());
         o.setDeliveryMode(s.getDeliveryMode());
+        o.setPaymentMethod(s.getPaymentMethod());
+        o.setInvoiceType(s.getInvoiceType());
         o.setPackaging(s.getPackaging());
         o.setStorageMethod(s.getStorageMethod());
         o.setPriceRulesJson(s.getPriceRulesJson());

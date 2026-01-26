@@ -49,6 +49,12 @@ public class SupplyCreateRequest {
     private String deliveryMode;
 
     @Size(max = 20)
+    private String paymentMethod;
+
+    @Size(max = 50)
+    private String invoiceType;
+
+    @Size(max = 20)
     private String packaging;
 
     @Size(max = 20)
@@ -150,6 +156,22 @@ public class SupplyCreateRequest {
 
     public void setDeliveryMode(String deliveryMode) {
         this.deliveryMode = deliveryMode;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getInvoiceType() {
+        return invoiceType;
+    }
+
+    public void setInvoiceType(String invoiceType) {
+        this.invoiceType = invoiceType;
     }
 
     public String getPackaging() {
