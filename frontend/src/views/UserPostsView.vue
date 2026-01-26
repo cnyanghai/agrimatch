@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowLeft, Clock, MessageSquare, Heart, Share2, Users } from 'lucide-vue-next'
+import { ArrowLeft, Clock, MessageSquare, Heart, MessageCircle, Users } from 'lucide-vue-next'
 import { listPosts, type PostResponse } from '../api/post'
 import { getUser, type UserResponse } from '../api/user'
 import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
@@ -106,18 +106,32 @@ function getPostCover(post: PostResponse): string {
   return getPostPlaceholderCover(post.id)
 }
 
+// 去除 HTML 标签，用于列表预览
+function stripHtml(html: string | undefined): string {
+  if (!html) return ''
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
+}
+
 function go(path: string) {
   router.push(path)
 }
 
-async function handleShare() {
-  const url = window.location.href
-  try {
-    await navigator.clipboard.writeText(url)
-    ElMessage.success('链接已复制到剪贴板')
-  } catch {
-    ElMessage.error('复制失败，请手动复制链接')
+function handleSendMessage() {
+  if (!requireAuth()) return
+
+  if (!user.value) {
+    ElMessage.warning('用户信息加载中，请稍后再试')
+    return
   }
+
+  // 跳转到聊天页面，带上用户信息
+  router.push({
+    path: '/chat',
+    query: {
+      peerUserId: String(user.value.userId),
+      peerName: user.value.nickName || user.value.userName || '用户'
+    }
+  })
 }
 
 onMounted(() => {
@@ -144,8 +158,20 @@ onMounted(() => {
       <!-- 用户资料卡片 -->
       <Card radius="2xl" class="mb-8 border-none shadow-sm ring-1 ring-gray-100">
         <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
-          <div class="w-24 h-24 rounded-3xl bg-brand-600 text-white flex items-center justify-center text-4xl font-black shadow-xl shadow-brand-600/20">
-            {{ (user?.nickName || user?.userName || '?')[0] }}
+          <!-- 头像 -->
+          <div class="w-24 h-24 rounded-3xl overflow-hidden shadow-xl shadow-brand-600/20">
+            <img
+              v-if="user?.avatar"
+              :src="user.avatar"
+              alt="头像"
+              class="w-full h-full object-cover"
+            />
+            <div
+              v-else
+              class="w-full h-full bg-brand-600 text-white flex items-center justify-center text-4xl font-black"
+            >
+              {{ (user?.nickName || user?.userName || '?')[0] }}
+            </div>
           </div>
           <div class="flex-1 text-center md:text-left">
             <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
@@ -153,13 +179,16 @@ onMounted(() => {
               <ExpertBadge v-if="user?.position?.includes('专家')" />
               <div class="flex-1"></div>
               <div class="flex items-center gap-2">
+                <!-- 发消息按钮 -->
                 <button
-                  class="p-2.5 rounded-lg border border-gray-200 text-gray-400 hover:text-brand-600 hover:border-brand-200 transition-all"
-                  title="分享"
-                  @click="handleShare"
+                  v-if="user && user.userId !== auth.me?.userId"
+                  class="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-200 text-gray-600 font-bold text-sm hover:bg-brand-50 hover:border-brand-200 hover:text-brand-600 transition-all active:scale-95"
+                  @click="handleSendMessage"
                 >
-                  <Share2 :size="18" />
+                  <MessageCircle :size="18" />
+                  发消息
                 </button>
+                <!-- 关注按钮 -->
                 <button
                   v-if="user && user.userId !== auth.me?.userId"
                   class="px-8 py-2.5 rounded-lg font-black text-sm transition-all active:scale-95 shadow-lg shadow-brand-600/10"
@@ -176,6 +205,12 @@ onMounted(() => {
             <p class="text-gray-500 font-medium mb-4">
               {{ user?.position || '行业同仁' }} · {{ user?.companyName || '个人作者' }}
             </p>
+
+            <!-- 个人介绍 -->
+            <p v-if="user?.bio" class="text-gray-600 text-sm leading-relaxed mb-4 max-w-2xl">
+              {{ user.bio }}
+            </p>
+
             <div class="flex items-center justify-center md:justify-start gap-6 text-sm">
               <div class="flex flex-col">
                 <span class="text-gray-400 font-bold uppercase text-[10px] tracking-widest mb-1">文章发布</span>
@@ -223,7 +258,7 @@ onMounted(() => {
                     {{ post.title }}
                   </h4>
                   <p class="text-gray-500 leading-relaxed line-clamp-3 mb-4">
-                    {{ post.content }}
+                    {{ stripHtml(post.content) }}
                   </p>
                 </div>
                 <div class="w-40 h-28 rounded-2xl overflow-hidden shrink-0 bg-gray-100">

@@ -147,6 +147,12 @@ function getPostCover(post: PostResponse): string {
   return getPostPlaceholderCover(post.id)
 }
 
+// 去除 HTML 标签，用于列表预览
+function stripHtml(html: string | undefined): string {
+  if (!html) return ''
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
+}
+
 onMounted(() => {
   loadPosts()
   loadCollectedIds()
@@ -275,7 +281,7 @@ onMounted(() => {
                       {{ post.title }}
                     </h3>
                     <p class="text-sm text-gray-500 leading-relaxed line-clamp-3 mb-3">
-                      {{ post.content }}
+                      {{ stripHtml(post.content) }}
                     </p>
                   </div>
                   <div class="w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-gray-100">
@@ -348,10 +354,10 @@ onMounted(() => {
                 <div class="w-1.5 h-4 bg-brand-600 rounded-full"></div>
                 我的关注
               </h4>
-              <button 
+              <button
                 v-if="isLoggedIn && followedUsers.length > 0"
                 class="text-[10px] font-black text-brand-600 uppercase tracking-widest hover:underline"
-                @click="go('/talks/following')"
+                @click="go('/talks/following/users')"
               >查看全部</button>
             </div>
             

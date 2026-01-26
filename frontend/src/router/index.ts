@@ -12,8 +12,10 @@ const router = createRouter({
     { path: '/talks', name: 'talks', component: () => import('../views/TopicSquareView.vue'), meta: { public: true, minimal: true, title: '话题广场 - 行业深度交流与资讯 - AgriMatch' } },
     { path: '/talks/:id', name: 'talk-detail', component: () => import('../views/TopicDetailView.vue'), meta: { public: true, minimal: true, title: '话题详情 - AgriMatch' } },
     { path: '/talks/publish', name: 'talks-publish', component: () => import('../views/TopicPublishView.vue'), meta: { minimal: true, requiresAuth: true, title: '发布话题 - AgriMatch' } },
+    { path: '/talks/:id/edit', name: 'talk-edit', component: () => import('../views/TopicEditView.vue'), meta: { minimal: true, requiresAuth: true, title: '编辑话题 - AgriMatch' } },
     { path: '/talks/collected', name: 'collected-posts', component: () => import('../views/MyCollectedPostsView.vue'), meta: { requiresAuth: true, minimal: true, title: '我的收藏 - AgriMatch' } },
     { path: '/talks/following', name: 'following-posts', component: () => import('../views/MyFollowingPostsView.vue'), meta: { requiresAuth: true, minimal: true, title: '关注动态 - AgriMatch' } },
+    { path: '/talks/following/users', name: 'following-users', component: () => import('../views/MyFollowingUsersView.vue'), meta: { requiresAuth: true, minimal: true, title: '我的关注 - AgriMatch' } },
     { path: '/users/:id/posts', name: 'user-posts', component: () => import('../views/UserPostsView.vue'), meta: { public: true, minimal: true, title: '用户主页 - AgriMatch' } },
 
     {

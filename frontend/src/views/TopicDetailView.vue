@@ -9,7 +9,6 @@ import {
   listPostComments,
   createPostComment,
   deletePost,
-  updatePost,
   type PostResponse,
   type PostCommentResponse
 } from '../api/post'
@@ -60,13 +59,6 @@ const tipForm = reactive({
 })
 const tipping = ref(false)
 
-// 编辑对话框
-const editDialogOpen = ref(false)
-const editForm = reactive({
-  title: '',
-  content: ''
-})
-const editing = ref(false)
 
 async function loadPost() {
   if (!postId.value) {
@@ -174,38 +166,7 @@ async function onDeletePost() {
 
 function onEditPost() {
   if (post.value) {
-    editForm.title = post.value.title || ''
-    editForm.content = post.value.content || ''
-    editDialogOpen.value = true
-  }
-}
-
-async function submitEdit() {
-  if (!post.value) return
-
-  if (!editForm.title.trim()) {
-    ElMessage.warning('请输入标题')
-    return
-  }
-
-  editing.value = true
-  try {
-    const r = await updatePost(post.value.id, {
-      title: editForm.title.trim(),
-      content: editForm.content.trim() || undefined
-    })
-    if (r.code !== 0) throw new Error(r.message)
-
-    // 更新本地数据
-    post.value.title = editForm.title.trim()
-    post.value.content = editForm.content.trim()
-
-    ElMessage.success('更新成功')
-    editDialogOpen.value = false
-  } catch (e: any) {
-    ElMessage.error(e?.message || '更新失败')
-  } finally {
-    editing.value = false
+    router.push(`/talks/${post.value.id}/edit`)
   }
 }
 
@@ -442,11 +403,12 @@ onMounted(() => {
         <div class="prose max-w-none mb-12">
           <!-- 正文区：处理付费逻辑 -->
           <template v-if="showPaywall">
-            <p class="text-gray-700 leading-relaxed whitespace-pre-wrap mb-8 opacity-60 italic">{{ teaserContent }}</p>
+            <div class="text-gray-700 leading-relaxed mb-8 opacity-60 italic">{{ teaserContent }}</div>
             <PaywallOverlay :price="post.price" @purchase="onPurchase" />
           </template>
           <template v-else>
-            <p class="text-gray-700 leading-relaxed whitespace-pre-wrap text-lg">{{ post.content }}</p>
+            <!-- 富文本内容渲染 -->
+            <div class="post-content text-gray-700 leading-relaxed text-lg" v-html="post.content"></div>
           </template>
         </div>
 
@@ -541,75 +503,6 @@ onMounted(() => {
         </div>
       </div>
     </main>
-
-    <!-- 编辑对话框 -->
-    <el-dialog
-      v-model="editDialogOpen"
-      width="640px"
-      :close-on-click-modal="false"
-      :show-close="false"
-      align-center
-      modal-class="bg-slate-900/60 backdrop-blur-sm"
-      class="!rounded-2xl overflow-hidden !border-none"
-    >
-      <template #header>
-        <div class="flex items-center justify-between">
-          <div>
-            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">编辑话题</div>
-            <div class="text-xl font-bold text-gray-900">修改内容</div>
-          </div>
-          <button
-            class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all"
-            @click="editDialogOpen = false"
-          >
-            <span class="text-gray-500 text-sm">✕</span>
-          </button>
-        </div>
-      </template>
-
-      <div class="space-y-6">
-        <div>
-          <label class="block text-sm font-bold text-gray-700 mb-2">标题</label>
-          <el-input
-            v-model="editForm.title"
-            placeholder="请输入标题"
-            maxlength="100"
-            show-word-limit
-          />
-        </div>
-
-        <div>
-          <label class="block text-sm font-bold text-gray-700 mb-2">内容</label>
-          <el-input
-            v-model="editForm.content"
-            type="textarea"
-            :rows="8"
-            placeholder="请输入内容..."
-            maxlength="10000"
-            show-word-limit
-          />
-        </div>
-      </div>
-
-      <template #footer>
-        <div class="flex gap-3">
-          <el-button
-            class="flex-1 !rounded-xl !h-11 transition-all"
-            @click="editDialogOpen = false"
-          >
-            取消
-          </el-button>
-          <el-button
-            type="primary"
-            class="flex-1 !rounded-xl !h-11 !bg-brand-600 hover:!bg-brand-700 !border-brand-600 transition-all"
-            :loading="editing"
-            @click="submitEdit"
-          >
-            保存修改
-          </el-button>
-        </div>
-      </template>
-    </el-dialog>
 
     <!-- 打赏对话框 (Soft Glass 风格) -->
     <el-dialog
@@ -728,6 +621,71 @@ onMounted(() => {
 }
 .prose p {
   margin-bottom: 1rem;
+}
+
+/* 富文本内容样式 */
+.post-content :deep(p) {
+  margin-bottom: 1rem;
+  line-height: 1.875;
+}
+
+.post-content :deep(h1),
+.post-content :deep(h2),
+.post-content :deep(h3),
+.post-content :deep(h4) {
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #111827;
+}
+
+.post-content :deep(h1) { font-size: 1.5rem; }
+.post-content :deep(h2) { font-size: 1.25rem; }
+.post-content :deep(h3) { font-size: 1.125rem; }
+
+.post-content :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 1rem 0;
+}
+
+.post-content :deep(blockquote) {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.post-content :deep(ul),
+.post-content :deep(ol) {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.post-content :deep(li) {
+  margin: 0.5rem 0;
+}
+
+.post-content :deep(strong) {
+  font-weight: 600;
+  color: #111827;
+}
+
+.post-content :deep(a) {
+  color: #059669;
+  text-decoration: underline;
+}
+
+.post-content :deep(a:hover) {
+  color: #047857;
+}
+
+.post-content :deep(hr) {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 2rem 0;
 }
 </style>
 

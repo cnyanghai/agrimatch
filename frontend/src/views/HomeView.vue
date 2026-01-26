@@ -149,6 +149,12 @@ const getPostCover = (post: PostResponse) => {
   return getPostPlaceholderCover(post.id)
 }
 
+// 去除 HTML 标签，用于列表预览
+const stripHtml = (html: string | undefined): string => {
+  if (!html) return ''
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
+}
+
 function formatTime(timeStr: string | undefined) {
   if (!timeStr) return '未知时间'
   const date = new Date(timeStr)
@@ -545,7 +551,7 @@ onBeforeUnmount(() => {
                 {{ post.title }}
               </h3>
               <p class="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-4 flex-1">
-                {{ post.content || '暂无内容摘要' }}
+                {{ stripHtml(post.content) || '暂无内容摘要' }}
               </p>
               <!-- 作者信息 -->
               <div class="flex items-center gap-2 pt-3 border-t border-gray-100">

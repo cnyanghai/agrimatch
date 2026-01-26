@@ -49,6 +49,12 @@ function getPostCover(post: PostResponse): string {
   return getPostPlaceholderCover(post.id)
 }
 
+// 去除 HTML 标签，用于列表预览
+function stripHtml(html: string | undefined): string {
+  if (!html) return ''
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
+}
+
 function go(path: string) {
   router.push(path)
 }
@@ -116,7 +122,7 @@ onMounted(() => {
                   {{ post.title }}
                 </h4>
                 <p class="text-sm text-gray-500 leading-relaxed line-clamp-2 mb-4">
-                  {{ post.content }}
+                  {{ stripHtml(post.content) }}
                 </p>
               </div>
               <div class="w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-gray-100">
