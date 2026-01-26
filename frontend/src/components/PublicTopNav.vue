@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
 import { useUiStore } from '../store/ui'
 import { LogOut, Settings, ChevronDown, ShoppingBag, Truck } from 'lucide-vue-next'
-import { getProductTree, type ProductNode } from '../api/product'
+import { getSchemaTree, type ProductSchemaVO } from '../api/productSchema'
 import { listTopCompanies, type CompanyCardResponse } from '../api/company'
 import logoWhite from '../assets/logo-white.png'
 
@@ -38,44 +38,51 @@ async function onLogout() {
 }
 
 // Mega Menu Data
-const categoryTree = ref<ProductNode[]>([])
+const schemaTree = ref<ProductSchemaVO[]>([])
 const topSuppliers = ref<CompanyCardResponse[]>([])
 const topBuyers = ref<CompanyCardResponse[]>([])
 
-const activeCategoryId = ref<number | null>(null)
+const activeSchemaCode = ref<string | null>(null)
 
-const topCategories = computed(() => {
-  return categoryTree.value.filter(cat => (cat.parentId ?? 0) === 0)
+// 当前选中的业态
+const activeSchema = computed(() => {
+  if (!activeSchemaCode.value) return schemaTree.value[0] || null
+  return schemaTree.value.find(s => s.schemaCode === activeSchemaCode.value) || schemaTree.value[0] || null
 })
 
-const activeCategory = computed(() => {
-  if (!activeCategoryId.value) return topCategories.value[0] || null
-  return topCategories.value.find(c => c.id === activeCategoryId.value) || topCategories.value[0] || null
-})
-
-function buildGroups(cat: ProductNode | null) {
-  if (!cat) return []
-  const seconds = cat.children ?? []
-  return seconds.map((s) => ({
-    title: s.name,
-    titleNode: s,
-    items: s.children ?? []
+// 构建分类组（二级分类 + 三级分类）
+function buildGroups(schema: ProductSchemaVO | null) {
+  if (!schema) return []
+  const categories = schema.categories ?? []
+  return categories.map((cat) => ({
+    title: cat.name,
+    titleNode: cat,
+    schemaCode: schema.schemaCode,
+    items: cat.children ?? []
   }))
+}
+
+// 跳转到供应大厅，传递 schemaCode 和 categoryName
+function goToHall(schemaCode: string, categoryName?: string) {
+  const query: any = { schemaCode }
+  if (categoryName) {
+    query.categoryName = categoryName
+  }
+  go('/hall/supply', query)
 }
 
 onMounted(async () => {
   // 异步加载菜单数据
-  const [catRes, supRes, buyRes] = await Promise.all([
-    getProductTree(),
+  const [schemaRes, supRes, buyRes] = await Promise.all([
+    getSchemaTree(),
     listTopCompanies('supplier', 50),
     listTopCompanies('buyer', 50)
   ])
-  if (catRes.code === 0) {
-    categoryTree.value = catRes.data ?? []
-    // 默认选中第一个一级分类
-    const roots = categoryTree.value.filter(cat => (cat.parentId ?? 0) === 0)
-    if (roots.length > 0) {
-      activeCategoryId.value = roots[0]!.id
+  if (schemaRes.code === 0) {
+    schemaTree.value = schemaRes.data ?? []
+    // 默认选中第一个业态
+    if (schemaTree.value.length > 0) {
+      activeSchemaCode.value = schemaTree.value[0]!.schemaCode
     }
   }
   if (supRes.code === 0) topSuppliers.value = supRes.data ?? []
@@ -107,39 +114,39 @@ onMounted(async () => {
               </button>
               <template #dropdown>
                 <div class="flex w-[520px] h-[480px] overflow-hidden bg-white rounded-2xl shadow-2xl">
-                  <!-- Sidebar: 1st Level Categories -->
+                  <!-- Sidebar: 业态列表 -->
                   <div class="w-40 bg-gray-50/80 border-r border-gray-100 py-3 overflow-y-auto">
                     <div
-                      v-for="cat in topCategories"
-                      :key="cat.id"
+                      v-for="schema in schemaTree"
+                      :key="schema.schemaCode"
                       class="px-4 py-2.5 mx-2 rounded-lg cursor-pointer transition-all flex items-center justify-between group text-[13px]"
-                      :class="activeCategoryId === cat.id ? 'bg-white text-brand-600 font-medium shadow-sm' : 'text-gray-600 hover:bg-white/60'"
-                      @mouseenter="activeCategoryId = cat.id"
-                      @click="go('/hall/supply', { categoryId: cat.id })"
+                      :class="activeSchemaCode === schema.schemaCode ? 'bg-white text-brand-600 font-medium shadow-sm' : 'text-gray-600 hover:bg-white/60'"
+                      @mouseenter="activeSchemaCode = schema.schemaCode"
+                      @click="goToHall(schema.schemaCode)"
                     >
-                      <span>{{ cat.name }}</span>
+                      <span>{{ schema.schemaName }}</span>
                       <ChevronDown :size="12" class="-rotate-90 text-gray-300 group-hover:text-brand-500 transition-colors" />
                     </div>
                   </div>
 
-                  <!-- Details Panel: 2nd & 3rd Level Categories -->
+                  <!-- Details Panel: 分类树 -->
                   <div class="flex-1 py-3 overflow-y-auto bg-white">
-                    <div v-if="activeCategory">
-                      <template v-for="group in buildGroups(activeCategory)" :key="group.titleNode.id">
-                        <!-- Second Level Category -->
+                    <div v-if="activeSchema">
+                      <template v-for="group in buildGroups(activeSchema)" :key="group.titleNode.id">
+                        <!-- 一级分类 -->
                         <div
                           class="px-5 py-2.5 cursor-pointer transition-all flex items-center justify-between group text-[13px] font-medium text-gray-800 hover:bg-gray-50 hover:text-brand-600"
-                          @click="go('/hall/supply', { categoryId: group.titleNode.id })"
+                          @click="goToHall(group.schemaCode, group.titleNode.name)"
                         >
                           <span>{{ group.title }}</span>
                           <ChevronDown :size="12" class="-rotate-90 text-gray-300 group-hover:text-brand-500 transition-colors" />
                         </div>
-                        <!-- Third Level Products -->
+                        <!-- 二级/三级分类 -->
                         <div
                           v-for="item in group.items"
                           :key="item.id"
                           class="px-5 pl-9 py-2 cursor-pointer transition-all flex items-center justify-between group text-[13px] text-gray-500 hover:bg-gray-50 hover:text-brand-600"
-                          @click="go('/hall/supply', { categoryId: item.id })"
+                          @click="goToHall(group.schemaCode, item.name)"
                         >
                           <span>{{ item.name }}</span>
                           <ChevronDown :size="10" class="-rotate-90 text-gray-200 group-hover:text-brand-400 transition-colors" />
@@ -147,8 +154,8 @@ onMounted(async () => {
                       </template>
 
                       <!-- Empty State -->
-                      <div v-if="!activeCategory.children?.length" class="py-16 text-center text-gray-400 text-sm">
-                        该分类下暂无子项
+                      <div v-if="!activeSchema.categories?.length" class="py-16 text-center text-gray-400 text-sm">
+                        该业态下暂无分类
                       </div>
                     </div>
                   </div>

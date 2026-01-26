@@ -56,6 +56,15 @@ const schemaCodeFromRoute = computed((): string | null => {
   return raw ?? null
 })
 
+// 从 URL 读取分类名称参数
+const categoryNameFromRoute = computed((): string | null => {
+  const raw = route.query.categoryName
+  if (Array.isArray(raw)) {
+    return raw[0] ?? null
+  }
+  return raw ?? null
+})
+
 // 分页
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -387,6 +396,10 @@ onMounted(() => {
   if (schemaCodeFromRoute.value) {
     selectedSchemaCode.value = schemaCodeFromRoute.value
   }
+  // 从 URL 初始化分类筛选
+  if (categoryNameFromRoute.value) {
+    selectedCategory.value = categoryNameFromRoute.value
+  }
   loadSchemaTree()
   loadSupplies()
 })
@@ -405,7 +418,19 @@ watch(companyIdFilter, () => {
 watch(schemaCodeFromRoute, (newVal) => {
   if (newVal !== selectedSchemaCode.value) {
     selectedSchemaCode.value = newVal
-    selectedCategory.value = null
+    // 只有当 URL 中没有 categoryName 时才重置分类
+    if (!categoryNameFromRoute.value) {
+      selectedCategory.value = null
+    }
+    currentPage.value = 1
+    loadSupplies()
+  }
+})
+
+// 监听 URL 中的 categoryName 变化
+watch(categoryNameFromRoute, (newVal) => {
+  if (newVal !== selectedCategory.value) {
+    selectedCategory.value = newVal
     currentPage.value = 1
     loadSupplies()
   }
