@@ -13,6 +13,7 @@ import ExpertBadge from '../components/post/ExpertBadge.vue'
 import PaidBadge from '../components/post/PaidBadge.vue'
 import CollectButton from '../components/post/CollectButton.vue'
 import { Card, StatusBadge } from '../components/ui'
+import { getPostPlaceholderCover } from '../assets/placeholders'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -127,12 +128,23 @@ function formatTime(timeStr: string | undefined) {
   const minutes = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
   const days = Math.floor(diff / 86400000)
-  
+
   if (minutes < 1) return '刚刚'
   if (minutes < 60) return `${minutes}分钟前`
   if (hours < 24) return `${hours}小时前`
   if (days < 7) return `${days}天前`
   return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+}
+
+// 获取帖子封面图，没有图片时返回本地占位图
+function getPostCover(post: PostResponse): string {
+  if (post.imagesJson) {
+    try {
+      const imgs = JSON.parse(post.imagesJson)
+      if (Array.isArray(imgs) && imgs.length > 0) return imgs[0]
+    } catch (e) { /* ignore */ }
+  }
+  return getPostPlaceholderCover(post.id)
 }
 
 onMounted(() => {
@@ -266,9 +278,8 @@ onMounted(() => {
                       {{ post.content }}
                     </p>
                   </div>
-                  <div v-if="post.imagesJson" class="w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-gray-50">
-                    <!-- 简化：仅展示第一张图 -->
-                    <img :src="JSON.parse(post.imagesJson)[0]" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <div class="w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-gray-100">
+                    <img :src="getPostCover(post)" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                 </div>
 

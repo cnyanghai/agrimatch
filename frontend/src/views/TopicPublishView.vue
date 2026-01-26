@@ -4,9 +4,10 @@ import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { createPost } from '../api/post'
 import { getPointsMe } from '../api/points'
+import { uploadImage } from '../api/file'
 import { useAuthStore } from '../store/auth'
 import { requireAuth } from '../utils/requireAuth'
-import { Coins, BookOpen, HelpCircle, LayoutGrid, Info } from 'lucide-vue-next'
+import { Coins, BookOpen, HelpCircle, LayoutGrid, Info, ImagePlus, X, Loader2 } from 'lucide-vue-next'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -22,10 +23,56 @@ const price = ref(9.9)
 const teaserLength = ref(100)
 const myPoints = ref(0)
 
+// 封面图上传
+const coverImages = ref<string[]>([])
+const uploadingImage = ref(false)
+const fileInputRef = ref<HTMLInputElement | null>(null)
+
 const showPaidSettings = computed(() => postType.value === 'paid')
 
 function close() {
   router.back()
+}
+
+// 图片上传相关
+function triggerImageUpload() {
+  fileInputRef.value?.click()
+}
+
+async function handleImageUpload(e: Event) {
+  const input = e.target as HTMLInputElement
+  const files = input.files
+  if (!files || files.length === 0) return
+
+  const file = files[0]
+  if (!file.type.startsWith('image/')) {
+    ElMessage.warning('请选择图片文件')
+    return
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    ElMessage.warning('图片大小不能超过 5MB')
+    return
+  }
+
+  uploadingImage.value = true
+  try {
+    const r = await uploadImage(file)
+    if (r.code === 0 && r.data) {
+      coverImages.value.push(r.data.fileUrl)
+      ElMessage.success('图片上传成功')
+    } else {
+      throw new Error(r.message || '上传失败')
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.message || '图片上传失败')
+  } finally {
+    uploadingImage.value = false
+    input.value = ''  // 重置 input 以便重复上传同一文件
+  }
+}
+
+function removeImage(index: number) {
+  coverImages.value.splice(index, 1)
 }
 
 async function loadMyPoints() {
@@ -59,9 +106,10 @@ async function submit() {
   
   submitting.value = true
   try {
-    const r = await createPost({ 
-      title: title.value.trim(), 
+    const r = await createPost({
+      title: title.value.trim(),
       content: content.value.trim() || undefined,
+      imagesJson: coverImages.value.length > 0 ? JSON.stringify(coverImages.value) : undefined,
       postType: postType.value,
       isPaid: postType.value === 'paid',
       price: postType.value === 'paid' ? price.value : undefined,
@@ -72,6 +120,7 @@ async function submit() {
     // 清空表单
     title.value = ''
     content.value = ''
+    coverImages.value = []
     postType.value = 'general'
     // 返回话题广场
     router.push('/talks')
@@ -147,6 +196,57 @@ onMounted(() => {
             <input v-model="title" type="text" placeholder="给你的话题起个响亮的标题" class="w-full text-2xl font-black placeholder:text-gray-200 outline-none border-none" />
             <div class="h-px bg-gray-100 w-full"></div>
             <textarea v-model="content" placeholder="分享你的见解、经验或疑问..." class="w-full h-64 resize-none outline-none text-gray-700 leading-relaxed placeholder:text-gray-200 text-base"></textarea>
+          </section>
+
+          <!-- 封面图上传 -->
+          <section class="space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                <ImagePlus :size="14" />
+                封面配图
+                <span class="text-gray-300 normal-case tracking-normal font-normal">(推荐)</span>
+              </label>
+              <span class="text-[10px] text-gray-400">添加配图可以吸引更多读者关注</span>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+              <!-- 已上传的图片 -->
+              <div
+                v-for="(img, idx) in coverImages"
+                :key="idx"
+                class="relative w-24 h-24 rounded-xl overflow-hidden group border border-gray-100"
+              >
+                <img :src="img" class="w-full h-full object-cover" />
+                <button
+                  class="absolute top-1 right-1 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                  @click="removeImage(idx)"
+                >
+                  <X :size="14" />
+                </button>
+              </div>
+
+              <!-- 上传按钮 -->
+              <button
+                v-if="coverImages.length < 9"
+                class="w-24 h-24 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1 text-gray-400 hover:border-brand-400 hover:text-brand-500 transition-colors"
+                :disabled="uploadingImage"
+                @click="triggerImageUpload"
+              >
+                <Loader2 v-if="uploadingImage" :size="24" class="animate-spin" />
+                <template v-else>
+                  <ImagePlus :size="24" />
+                  <span class="text-[10px] font-medium">添加图片</span>
+                </template>
+              </button>
+            </div>
+
+            <input
+              ref="fileInputRef"
+              type="file"
+              accept="image/*"
+              class="hidden"
+              @change="handleImageUpload"
+            />
           </section>
 
           <!-- 付费设置区块 -->

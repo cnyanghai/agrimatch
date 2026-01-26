@@ -6,6 +6,7 @@ import { listPosts, type PostResponse } from '../api/post'
 import { getPlatformStats, type StatsResponse } from '../api/stats'
 import { listTopCompanies, type CompanyCardResponse } from '../api/company'
 import PublicFooter from '../components/PublicFooter.vue'
+import { getPostPlaceholderCover } from '../assets/placeholders'
 import {
   MapPin,
   Search,
@@ -144,14 +145,8 @@ const getPostCover = (post: PostResponse) => {
       if (Array.isArray(imgs) && imgs.length > 0) return imgs[0]
     } catch (e) {}
   }
-  // 模拟占位图：基于 ID 选择不同的 Unsplash 图片
-  const placeholders = [
-    'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=800',
-    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=800',
-    'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?auto=format&fit=crop&q=80&w=800',
-    'https://images.unsplash.com/photo-1495107332209-39780009581a?auto=format&fit=crop&q=80&w=800'
-  ]
-  return placeholders[post.id % placeholders.length]
+  // 使用本地占位图
+  return getPostPlaceholderCover(post.id)
 }
 
 function formatTime(timeStr: string | undefined) {
