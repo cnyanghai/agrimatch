@@ -295,6 +295,25 @@ export function useChatWebSocket(
   }
 
   /**
+   * 发送系统消息（用于条款确认等）
+   */
+  function sendSystem(
+    conversationId: number,
+    content: string,
+    payloadJson: string,
+    tempId: string
+  ): boolean {
+    return send({
+      type: 'SEND',
+      conversationId,
+      msgType: 'SYSTEM',
+      content,
+      payloadJson,
+      tempId
+    })
+  }
+
+  /**
    * 发送正在输入状态
    */
   function sendTyping(conversationId: number): boolean {
@@ -351,6 +370,7 @@ export function useChatWebSocket(
     sendImage,
     sendAttachment,
     sendContract,
+    sendSystem,
     sendTyping,
     sendRead
   }

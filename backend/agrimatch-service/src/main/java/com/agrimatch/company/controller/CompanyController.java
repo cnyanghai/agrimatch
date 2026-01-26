@@ -53,6 +53,11 @@ public class CompanyController {
         return Result.success(companyService.getById(id));
     }
 
+    @GetMapping("/by-user/{userId}")
+    public Result<CompanyResponse> getByUserId(@PathVariable("userId") @NotNull Long userId) {
+        return Result.success(companyService.getMyCompany(userId));
+    }
+
     @GetMapping("/search")
     public Result<List<CompanyBriefResponse>> search(Authentication authentication,
                                                      @RequestParam("keyword") String keyword,

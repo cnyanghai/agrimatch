@@ -26,6 +26,8 @@ public interface ChatService {
     ChatMessageResponse sendToConversation(Long fromUserId, Long conversationId, String msgType, String content, String payloadJson, java.math.BigDecimal basisPrice, String contractCode);
 
     ChatMessageResponse confirmOffer(Long userId, Long messageId);
+
+    ChatMessageResponse rejectOffer(Long userId, Long messageId);
 }
 
 

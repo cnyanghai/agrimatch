@@ -301,6 +301,7 @@ export function useChatMessages(options: UseChatMessagesOptions) {
     // WebSocket 处理
     handleIncomingMessage,
     handleQuoteStatusUpdate,
+    updateQuoteStatus: handleQuoteStatusUpdate,
 
     // Computed
     peerLatestQuote,

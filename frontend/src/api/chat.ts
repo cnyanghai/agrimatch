@@ -32,6 +32,11 @@ export async function confirmChatOffer(messageId: number) {
   return data
 }
 
+export async function rejectChatOffer(messageId: number) {
+  const { data } = await http.post<Result<ChatMessageResponse>>(`/api/chat/messages/${messageId}/reject`)
+  return data
+}
+
 export interface ChatConversationResponse {
   id: number
   peerUserId: number
@@ -85,6 +90,12 @@ export async function getConversationMessages(conversationId: number, limit = 50
 
 export async function markConversationRead(conversationId: number) {
   const { data } = await http.post<Result<void>>(`/api/chat/conversations/${conversationId}/read`)
+  return data
+}
+
+/** 获取单个会话详情 */
+export async function getConversation(conversationId: number) {
+  const { data } = await http.get<Result<ChatConversationResponse>>(`/api/chat/conversations/${conversationId}`)
   return data
 }
 

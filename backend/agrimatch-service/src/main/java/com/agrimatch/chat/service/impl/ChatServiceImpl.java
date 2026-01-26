@@ -300,6 +300,49 @@ public class ChatServiceImpl implements ChatService {
         return r;
     }
 
+    @Override
+    @Transactional
+    public ChatMessageResponse rejectOffer(Long userId, Long messageId) {
+        if (userId == null || messageId == null) throw new ApiException(ResultCode.PARAM_ERROR);
+        BusChatMessage m = chatMapper.selectMessageById(messageId);
+        if (m == null || m.getIsDeleted() == 1) throw new ApiException(ResultCode.NOT_FOUND);
+
+        // 只有报价卡可以被拒绝
+        if (!"QUOTE".equals(m.getMsgType())) throw new ApiException(400, "只有报价消息可以被拒绝");
+        // 只有接收方可以拒绝
+        if (!userId.equals(m.getToUserId())) throw new ApiException(403, "只有接收方可以拒绝报价");
+        // 只有 OFFERED 状态可以被拒绝
+        if (!"OFFERED".equals(m.getQuoteStatus())) throw new ApiException(400, "该报价已生效或已失效");
+
+        // 更新当前报价状态
+        chatMapper.updateQuoteStatus(messageId, "REJECTED");
+
+        // 插入系统消息通知
+        sendToConversation(m.getFromUserId(), m.getConversationId(), "SYSTEM", "对方已拒绝您的报价", null, null, null);
+
+        // 返回更新后的消息
+        BusChatMessage updated = chatMapper.selectMessageById(messageId);
+        ChatMessageResponse r = new ChatMessageResponse();
+        r.setId(updated.getId());
+        r.setConversationId(updated.getConversationId());
+        r.setFromUserId(updated.getFromUserId());
+        r.setToUserId(updated.getToUserId());
+        r.setMsgType(updated.getMsgType());
+        r.setContent(updated.getContent());
+        r.setPayloadJson(updated.getPayloadJson());
+        r.setQuoteStatus(updated.getQuoteStatus());
+        r.setBasisPrice(updated.getBasisPrice());
+        r.setContractCode(updated.getContractCode());
+        r.setRead(updated.getIsRead() != null && updated.getIsRead() == 1);
+        r.setCreateTime(updated.getCreateTime());
+
+        // 发布事件通知 WebSocket 广播
+        ChatMapper.ConversationUserPair pair = requireConversationMember(userId, m.getConversationId());
+        eventPublisher.publishEvent(new OfferUpdatedEvent(this, m.getConversationId(), pair.getAUserId(), pair.getBUserId(), r));
+
+        return r;
+    }
+
     private ChatMapper.ConversationUserPair requireConversationMember(Long userId, Long conversationId) {
         if (userId == null) throw new ApiException(401, "未登录");
         if (conversationId == null) throw new ApiException(ResultCode.PARAM_ERROR);

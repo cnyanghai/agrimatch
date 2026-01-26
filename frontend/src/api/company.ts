@@ -73,6 +73,11 @@ export async function getMyCompany() {
   return data
 }
 
+export async function getCompanyByUserId(userId: number) {
+  const { data } = await http.get<Result<CompanyResponse | null>>(`/api/companies/by-user/${userId}`)
+  return data
+}
+
 export async function createCompany(req: CompanyCreateRequest) {
   const { data } = await http.post<Result<number>>('/api/companies', req)
   return data

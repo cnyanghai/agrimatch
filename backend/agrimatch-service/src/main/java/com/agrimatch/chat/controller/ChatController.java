@@ -92,6 +92,12 @@ public class ChatController {
         Long userId = SecurityUtil.requireUserId(authentication);
         return Result.success(chatService.confirmOffer(userId, messageId));
     }
+
+    @PostMapping("/messages/{id}/reject")
+    public Result<ChatMessageResponse> rejectOffer(Authentication authentication, @PathVariable("id") Long messageId) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        return Result.success(chatService.rejectOffer(userId, messageId));
+    }
 }
 
 

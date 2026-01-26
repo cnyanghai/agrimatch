@@ -40,7 +40,7 @@ const router = createRouter({
     { path: '/contracts/:id', name: 'contract-detail', component: () => import('../views/ContractDetailView.vue'), meta: { title: '合同详情 - AgriMatch' } },
     { path: '/posts', name: 'posts', component: () => import('../views/CommunityForumView.vue'), meta: { title: '文章话题 - AgriMatch' } },
     { path: '/notify', name: 'notify', component: () => import('../views/NotificationView.vue'), meta: { title: '消息通知 - AgriMatch' } },
-    { path: '/chat', name: 'chat', component: () => import('../views/BusinessChatViewRefactored.vue'), meta: { title: '即时通讯 - AgriMatch' } },
+    { path: '/chat', name: 'chat', component: () => import('../views/NegotiationWorkspace.vue'), meta: { title: '聊天议价 - AgriMatch' } },
     { path: '/vehicles', name: 'vehicles', component: () => import('../views/LogisticsVehicleView.vue'), meta: { title: '物流车辆管理 - AgriMatch' } },
 
     // 名录与公司详情
