@@ -9,13 +9,16 @@ export interface DashboardResponse {
   pendingContractCount: number
   pendingInquiryCount: number
   pendingMilestoneCount: number
-  
+
   // 业务统计
   myActiveListingCount: number
-  todayViewCount: number
-  totalDealQuantity: number
   activeContractCount: number
-  followingCount?: number
+  totalSignedContractCount: number
+  totalDealAmount: number
+
+  // 用户相关
+  followingCount: number
+  pointsBalance: number
 }
 
 /**

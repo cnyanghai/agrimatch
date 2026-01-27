@@ -1,5 +1,6 @@
 package com.agrimatch.home.mapper;
 
+import java.math.BigDecimal;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -121,5 +122,27 @@ public interface DashboardMapper {
             "AND c.status IN (2, 3) " +
             "AND c.is_deleted = 0")
     Integer countActiveContracts(@Param("userId") Long userId);
+
+    /**
+     * 统计累计签署合同个数（status >= 2，即已签署、履约中、已完成）
+     * 通过用户的company_id关联合同
+     */
+    @Select("SELECT COUNT(*) FROM bus_contract c, sys_user u " +
+            "WHERE u.user_id = #{userId} " +
+            "AND (c.buyer_company_id = u.company_id OR c.seller_company_id = u.company_id) " +
+            "AND c.status >= 2 " +
+            "AND c.is_deleted = 0")
+    Integer countTotalSignedContracts(@Param("userId") Long userId);
+
+    /**
+     * 统计累计成交合同金额（已完成 status = 4 的合同总金额）
+     * 通过用户的company_id关联合同
+     */
+    @Select("SELECT COALESCE(SUM(c.total_amount), 0) FROM bus_contract c, sys_user u " +
+            "WHERE u.user_id = #{userId} " +
+            "AND (c.buyer_company_id = u.company_id OR c.seller_company_id = u.company_id) " +
+            "AND c.status = 4 " +
+            "AND c.is_deleted = 0")
+    BigDecimal sumTotalDealAmount(@Param("userId") Long userId);
 }
 

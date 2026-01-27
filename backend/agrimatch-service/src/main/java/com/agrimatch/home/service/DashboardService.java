@@ -1,7 +1,11 @@
 package com.agrimatch.home.service;
 
+import java.math.BigDecimal;
+import com.agrimatch.follow.mapper.FollowMapper;
 import com.agrimatch.home.dto.DashboardResponse;
 import com.agrimatch.home.mapper.DashboardMapper;
+import com.agrimatch.points.domain.BusPointsAccount;
+import com.agrimatch.points.mapper.PointsMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,9 +19,13 @@ public class DashboardService {
 
     private static final Logger log = LoggerFactory.getLogger(DashboardService.class);
     private final DashboardMapper dashboardMapper;
+    private final FollowMapper followMapper;
+    private final PointsMapper pointsMapper;
 
-    public DashboardService(DashboardMapper dashboardMapper) {
+    public DashboardService(DashboardMapper dashboardMapper, FollowMapper followMapper, PointsMapper pointsMapper) {
         this.dashboardMapper = dashboardMapper;
+        this.followMapper = followMapper;
+        this.pointsMapper = pointsMapper;
     }
 
     /**
@@ -46,16 +54,29 @@ public class DashboardService {
         int activeListings = activeSupplies + activeRequirements;
         response.setMyActiveListingCount(activeListings);
 
-        int todayViews = safeInt(dashboardMapper.countTodayViews(userId));
-        long totalDeal = safeLong(dashboardMapper.sumTotalDealQuantity(userId));
         int activeContracts = safeInt(dashboardMapper.countActiveContracts(userId));
-        response.setTodayViewCount(todayViews);
-        response.setTotalDealQuantity(totalDeal);
         response.setActiveContractCount(activeContracts);
 
-        log.info("[Dashboard] 用户 {} 数据: 未读={}, 待签={}, 询价={}, 里程碑={}, 供应={}, 采购={}, 发布={}, 咨询={}, 成交={}, 合同={}",
+        // 累计签署合同个数
+        int totalSignedContracts = safeInt(dashboardMapper.countTotalSignedContracts(userId));
+        response.setTotalSignedContractCount(totalSignedContracts);
+
+        // 累计成交合同金额
+        BigDecimal totalDealAmount = dashboardMapper.sumTotalDealAmount(userId);
+        response.setTotalDealAmount(totalDealAmount != null ? totalDealAmount : BigDecimal.ZERO);
+
+        // 关注商户数
+        int followingCount = followMapper.countFollowing(userId);
+        response.setFollowingCount(followingCount);
+
+        // 用户积分余额
+        BusPointsAccount account = pointsMapper.selectAccountByUserId(userId);
+        long pointsBalance = (account != null && account.getPointsBalance() != null) ? account.getPointsBalance() : 0L;
+        response.setPointsBalance(pointsBalance);
+
+        log.info("[Dashboard] 用户 {} 数据: 未读={}, 待签={}, 询价={}, 里程碑={}, 发布={}, 执行中合同={}, 累计签署={}, 累计金额={}, 关注={}, 积分={}",
                 userId, unreadMsg, pendingContract, pendingInquiry, pendingMilestone,
-                activeSupplies, activeRequirements, activeListings, todayViews, totalDeal, activeContracts);
+                activeListings, activeContracts, totalSignedContracts, totalDealAmount, followingCount, pointsBalance);
 
         return response;
     }
