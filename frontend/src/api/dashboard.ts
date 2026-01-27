@@ -22,13 +22,15 @@ export interface DashboardResponse {
  * 获取控制台首页数据
  */
 export async function getDashboard(): Promise<{ code: number; message?: string; data?: DashboardResponse }> {
-  return http.get('/api/dashboard')
+  const { data } = await http.get('/api/dashboard')
+  return data
 }
 
 /**
  * 获取待办事项总数（用于显示角标）
  */
 export async function getPendingCount(): Promise<{ code: number; message?: string; data?: number }> {
-  return http.get('/api/dashboard/pending-count')
+  const { data } = await http.get('/api/dashboard/pending-count')
+  return data
 }
 

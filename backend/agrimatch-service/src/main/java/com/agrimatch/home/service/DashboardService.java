@@ -2,6 +2,8 @@ package com.agrimatch.home.service;
 
 import com.agrimatch.home.dto.DashboardResponse;
 import com.agrimatch.home.mapper.DashboardMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -10,43 +12,51 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class DashboardService {
-    
+
+    private static final Logger log = LoggerFactory.getLogger(DashboardService.class);
     private final DashboardMapper dashboardMapper;
-    
+
     public DashboardService(DashboardMapper dashboardMapper) {
         this.dashboardMapper = dashboardMapper;
     }
-    
+
     /**
      * 获取用户的控制台首页数据
+     * 注意：系统不再区分供应商/采购商，用户可同时发布供应和采购
      * @param userId 用户ID
-     * @param isBuyer 是否采购商
-     * @param isSeller 是否供应商
      * @return 首页数据
      */
-    public DashboardResponse getDashboardData(Long userId, boolean isBuyer, boolean isSeller) {
+    public DashboardResponse getDashboardData(Long userId) {
+        log.info("[Dashboard] 开始获取用户 {} 的首页数据", userId);
         DashboardResponse response = new DashboardResponse();
-        
+
         // 待办事项
-        response.setUnreadMessageCount(safeInt(dashboardMapper.countUnreadMessages(userId)));
-        response.setPendingContractCount(safeInt(dashboardMapper.countPendingContracts(userId)));
-        response.setPendingInquiryCount(safeInt(dashboardMapper.countPendingInquiries(userId)));
-        response.setPendingMilestoneCount(safeInt(dashboardMapper.countPendingMilestones(userId)));
-        
-        // 业务统计
-        int activeListings = 0;
-        if (isSeller) {
-            activeListings += safeInt(dashboardMapper.countActiveSupplies(userId));
-        }
-        if (isBuyer) {
-            activeListings += safeInt(dashboardMapper.countActiveRequirements(userId));
-        }
+        int unreadMsg = safeInt(dashboardMapper.countUnreadMessages(userId));
+        int pendingContract = safeInt(dashboardMapper.countPendingContracts(userId));
+        int pendingInquiry = safeInt(dashboardMapper.countPendingInquiries(userId));
+        int pendingMilestone = safeInt(dashboardMapper.countPendingMilestones(userId));
+        response.setUnreadMessageCount(unreadMsg);
+        response.setPendingContractCount(pendingContract);
+        response.setPendingInquiryCount(pendingInquiry);
+        response.setPendingMilestoneCount(pendingMilestone);
+
+        // 业务统计 - 统计用户发布的所有活跃供应和采购
+        int activeSupplies = safeInt(dashboardMapper.countActiveSupplies(userId));
+        int activeRequirements = safeInt(dashboardMapper.countActiveRequirements(userId));
+        int activeListings = activeSupplies + activeRequirements;
         response.setMyActiveListingCount(activeListings);
-        
-        response.setTodayViewCount(safeInt(dashboardMapper.countTodayViews(userId)));
-        response.setTotalDealQuantity(safeLong(dashboardMapper.sumTotalDealQuantity(userId)));
-        response.setActiveContractCount(safeInt(dashboardMapper.countActiveContracts(userId)));
-        
+
+        int todayViews = safeInt(dashboardMapper.countTodayViews(userId));
+        long totalDeal = safeLong(dashboardMapper.sumTotalDealQuantity(userId));
+        int activeContracts = safeInt(dashboardMapper.countActiveContracts(userId));
+        response.setTodayViewCount(todayViews);
+        response.setTotalDealQuantity(totalDeal);
+        response.setActiveContractCount(activeContracts);
+
+        log.info("[Dashboard] 用户 {} 数据: 未读={}, 待签={}, 询价={}, 里程碑={}, 供应={}, 采购={}, 发布={}, 咨询={}, 成交={}, 合同={}",
+                userId, unreadMsg, pendingContract, pendingInquiry, pendingMilestone,
+                activeSupplies, activeRequirements, activeListings, todayViews, totalDeal, activeContracts);
+
         return response;
     }
     

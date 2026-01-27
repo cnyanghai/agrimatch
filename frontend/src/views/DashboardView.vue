@@ -143,6 +143,14 @@ const consoleModules = computed(() => {
   return modules
 })
 
+// 统计数据 - 使用computed确保响应式更新
+const statsData = computed(() => [
+  { label: '我的发布', value: dashboard.value?.myActiveListingCount ?? 0, unit: '个活跃', color: 'text-brand-600', icon: FilePlus },
+  { label: '今日咨询', value: dashboard.value?.todayViewCount ?? 0, unit: '次访问', color: 'text-autumn-600', icon: MessageSquare },
+  { label: '累计成交', value: formatNumber(dashboard.value?.totalDealQuantity), unit: '吨', color: 'text-purple-600', icon: Coins },
+  { label: '执行中合同', value: dashboard.value?.activeContractCount ?? 0, unit: '份', color: 'text-blue-600', icon: FileCheck }
+])
+
 // 获取图标容器的样式类（统一为 slate 风格，与首页对齐）
 function getIconClass() {
   // 统一使用 slate 风格，与首页搜索模块保持一致
@@ -282,13 +290,8 @@ onMounted(() => {
         </Card>
 
         <!-- Stats Grid (Bento Cards - Regular) -->
-        <Card 
-          v-for="stat in [
-            { label: '我的发布', value: dashboard?.myActiveListingCount, unit: '个活跃', color: 'text-brand-600', icon: FilePlus },
-            { label: '今日咨询', value: dashboard?.todayViewCount, unit: '次访问', color: 'text-autumn-600', icon: MessageSquare },
-            { label: '累计成交', value: formatNumber(dashboard?.totalDealQuantity), unit: '吨', color: 'text-purple-600', icon: Coins },
-            { label: '执行中合同', value: dashboard?.activeContractCount, unit: '份', color: 'text-blue-600', icon: FileCheck }
-          ]" 
+        <Card
+          v-for="stat in statsData" 
           :key="stat.label"
           radius="2xl"
           padding="md"
