@@ -10,7 +10,6 @@
  * 4. 跳转第三方签署工具完成电子签章
  */
 import { computed } from 'vue'
-import { History, Download, Clock, CheckCircle, FileSignature } from 'lucide-vue-next'
 import UnifiedContractDocument, {
   type ContractDocumentData,
   type ContractStatus as DocContractStatus
@@ -81,23 +80,9 @@ const emit = defineEmits<{
   (e: 'confirm'): void
   /** 生成正式合同并跳转签署 */
   (e: 'generate-formal-contract'): void
-  (e: 'view-history'): void
-  (e: 'export-pdf'): void
 }>()
 
 // ==================== 计算属性 ====================
-
-// 状态配置（用于工具栏显示）
-const statusConfig = computed(() => {
-  const configs: Record<ContractStatus, { label: string; color: string; bgColor: string }> = {
-    DRAFT: { label: '草稿', color: 'text-orange-600', bgColor: 'bg-orange-100' },
-    PENDING_CONFIRM: { label: '待确认', color: 'text-amber-600', bgColor: 'bg-amber-100' },
-    CONFIRMED: { label: '条款已确认', color: 'text-brand-600', bgColor: 'bg-brand-100' },
-    SIGNING: { label: '签署中', color: 'text-blue-600', bgColor: 'bg-blue-100' },
-    COMPLETED: { label: '已完成', color: 'text-brand-700', bgColor: 'bg-brand-200' }
-  }
-  return configs[props.status]
-})
 
 // 转换为统一组件的状态
 const documentStatus = computed((): DocContractStatus => {
@@ -171,44 +156,6 @@ function handleGenerateFormal() {
 
 <template>
   <div class="flex flex-col h-full">
-    <!-- 工具栏 -->
-    <div class="flex items-center justify-between mb-4 shrink-0">
-      <div class="flex items-center gap-2">
-        <!-- 状态标签 -->
-        <div :class="[
-          'h-8 px-3 rounded-lg flex items-center gap-2 text-xs font-bold',
-          statusConfig.bgColor, statusConfig.color
-        ]">
-          <span v-if="status === 'DRAFT'" class="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-          <Clock v-else-if="status === 'PENDING_CONFIRM'" class="w-3.5 h-3.5" />
-          <FileSignature v-else-if="status === 'SIGNING'" class="w-3.5 h-3.5" />
-          <CheckCircle v-else class="w-3.5 h-3.5" />
-          {{ statusConfig.label }}
-        </div>
-        <span class="text-xs text-gray-400">
-          合同编号: {{ contractData.contractNo }}
-        </span>
-      </div>
-      <div class="flex gap-2">
-        <button
-          @click="emit('view-history')"
-          class="h-8 px-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50
-                 text-xs font-medium text-gray-600 flex items-center gap-1 transition-colors"
-        >
-          <History class="w-4 h-4" />
-          历史版本
-        </button>
-        <button
-          @click="emit('export-pdf')"
-          class="h-8 px-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50
-                 text-xs font-medium text-gray-600 flex items-center gap-1 transition-colors"
-        >
-          <Download class="w-4 h-4" />
-          导出 PDF
-        </button>
-      </div>
-    </div>
-
     <!-- 统一合同文档 -->
     <div class="flex-1 overflow-y-auto">
       <UnifiedContractDocument

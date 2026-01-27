@@ -194,7 +194,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="h-screen flex flex-col bg-gray-100 overflow-hidden">
+  <div class="h-full flex flex-col bg-gray-100 overflow-hidden -m-4 md:-m-6">
     <!-- 顶部导航 -->
     <header class="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between shrink-0 shadow-sm z-10">
       <div class="flex items-center gap-3">
