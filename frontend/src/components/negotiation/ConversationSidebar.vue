@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * ConversationSidebar - 按商户聚合的会话侧边栏
- * 支持三种状态: expanded(展开), mini(收起), hidden(隐藏)
+ * 支持两种状态: expanded(展开), mini(收起)
  */
 import { ref, computed } from 'vue'
 import {
@@ -13,13 +13,13 @@ import {
 import type { MerchantGroup } from '../../composables/useNegotiationWorkspace'
 
 const props = defineProps<{
-  state: 'expanded' | 'mini' | 'hidden'
+  state: 'expanded' | 'mini'
   merchantGroups: MerchantGroup[]
   currentPeerId?: number
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:state', state: 'expanded' | 'mini' | 'hidden'): void
+  (e: 'update:state', state: 'expanded' | 'mini'): void
   (e: 'select', merchant: MerchantGroup): void
 }>()
 
@@ -62,7 +62,6 @@ function formatTime(time?: string): string {
 <template>
   <transition name="sidebar">
     <aside
-      v-show="state !== 'hidden'"
       :class="[
         'sidebar flex flex-col bg-white border-r border-gray-200 transition-all duration-300 shrink-0',
         state === 'expanded' ? 'w-56' : 'w-14'
@@ -104,7 +103,7 @@ function formatTime(time?: string): string {
           <!-- 展开模式 -->
           <template v-if="state === 'expanded'">
             <div class="p-2.5 flex items-start gap-2.5">
-              <div class="w-9 h-9 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
+              <div class="w-9 h-9 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-sm shrink-0">
                 {{ getAvatarChar(merchant.peerName) }}
               </div>
               <div class="flex-1 min-w-0">
@@ -142,7 +141,7 @@ function formatTime(time?: string): string {
           <template v-else>
             <div class="p-1.5 flex flex-col items-center">
               <div class="relative">
-                <div class="w-9 h-9 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-sm">
+                <div class="w-9 h-9 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-sm">
                   {{ getAvatarChar(merchant.peerName) }}
                 </div>
                 <div

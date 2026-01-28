@@ -4,11 +4,11 @@
  * 支持文本消息、报价消息、图片消息、附件消息显示
  * 集成报价操作、附件上传、赠送积分功能
  */
-import { ref, nextTick, watch, onMounted } from 'vue'
+import { ref, nextTick, watch, onMounted, computed } from 'vue'
 import { Send, Paperclip, MoreVertical, DollarSign, Gift, FileText, X, Download, Loader2, CheckCircle, Info, AlertCircle, FileSignature, ExternalLink } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import type { UiMessage } from '../../types/chat/message'
+import { formatMessageTime, shouldShowTimeSeparator, type UiMessage } from '../../types/chat/message'
 import QuoteCard from '../chat/message/QuoteCard.vue'
 import { uploadImage, uploadAttachment, isImageFile, formatFileSize, type FileUploadResponse } from '../../api/file'
 
@@ -49,6 +49,14 @@ const giftPointsAmount = ref(10)
 const giftPointsRemark = ref('')
 const giftingPoints = ref(false)
 
+// 判断是否需要在该消息前显示时间分隔线
+function needsTimeSeparator(index: number): boolean {
+  if (index === 0) return true // 第一条消息总是显示时间
+  const curr = props.messages[index]
+  const prev = props.messages[index - 1]
+  return shouldShowTimeSeparator(prev?.timestamp, curr?.timestamp)
+}
+
 // 获取消息的前一条报价（用于计算差异）
 function getPreviousQuotePayload(index: number): string | undefined {
   for (let i = index - 1; i >= 0; i--) {
@@ -82,17 +90,6 @@ function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault()
     handleSend()
-  }
-}
-
-// 格式化时间
-function formatMessageTime(time?: string): string {
-  if (!time) return ''
-  try {
-    const d = new Date(time)
-    return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  } catch {
-    return ''
   }
 }
 
@@ -310,12 +307,12 @@ defineExpose({ scrollToBottom })
         <div class="relative">
           <div
             v-if="peerAvatar"
-            class="w-8 h-8 rounded-full bg-cover bg-center"
+            class="w-8 h-8 rounded-xl bg-cover bg-center"
             :style="{ backgroundImage: `url(${peerAvatar})` }"
           />
           <div
             v-else
-            class="w-8 h-8 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xs"
+            class="w-8 h-8 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-xs"
           >
             {{ getAvatarChar(peerName) }}
           </div>
@@ -356,6 +353,13 @@ defineExpose({ scrollToBottom })
 
       <!-- 消息列表 -->
       <template v-for="(msg, idx) in messages" :key="msg.id">
+        <!-- 时间分隔线（微信风格） -->
+        <div v-if="needsTimeSeparator(idx)" class="flex justify-center py-2">
+          <span class="text-[11px] text-gray-400 bg-gray-100/80 px-3 py-1 rounded-full">
+            {{ formatMessageTime(msg.timestamp || msg.time) }}
+          </span>
+        </div>
+
         <!-- 普通系统消息 -->
         <div v-if="msg.type === 'system' && !isSystemActionMessage(msg)" class="flex justify-center">
           <span class="text-[10px] font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
@@ -386,7 +390,6 @@ defineExpose({ scrollToBottom })
               class="w-4 h-4 shrink-0"
             />
             <span class="font-medium">{{ msg.content }}</span>
-            <span class="text-[10px] opacity-70 ml-2">{{ formatMessageTime(msg.time) }}</span>
           </div>
         </div>
 
@@ -425,11 +428,6 @@ defineExpose({ scrollToBottom })
             <div class="mt-3 pt-2 border-t border-blue-200/50 text-center">
               <span class="text-[10px] text-blue-600 font-medium">点击查看合同详情 →</span>
             </div>
-
-            <!-- 时间戳 -->
-            <div class="text-right mt-1">
-              <span class="text-[10px] text-gray-400">{{ formatMessageTime(msg.time) }}</span>
-            </div>
           </div>
         </div>
 
@@ -451,34 +449,28 @@ defineExpose({ scrollToBottom })
         <template v-else-if="isImageMessage(msg)">
           <div :class="['flex', msg.type === 'sent' ? 'justify-end' : 'justify-start']">
             <div v-if="msg.type === 'received'" class="flex gap-2 max-w-[70%]">
-              <div class="w-7 h-7 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
+              <div class="w-7 h-7 rounded-lg bg-brand-500 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
                 {{ getAvatarChar(peerName) }}
               </div>
-              <div class="flex flex-col gap-0.5">
-                <div class="bg-white border border-gray-100 p-1 rounded-xl rounded-tl-none shadow-sm overflow-hidden">
-                  <img
-                    v-if="parseFilePayload(msg)"
-                    :src="parseFilePayload(msg)?.fileUrl"
-                    :alt="parseFilePayload(msg)?.fileName"
-                    class="max-w-[200px] max-h-[200px] rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                    @click="openImagePreview(parseFilePayload(msg)?.fileUrl)"
-                  />
-                </div>
-                <span class="text-[10px] text-gray-400 ml-1">{{ formatMessageTime(msg.time) }}</span>
+              <div class="bg-white border border-gray-100 p-1 rounded-xl rounded-tl-none shadow-sm overflow-hidden">
+                <img
+                  v-if="parseFilePayload(msg)"
+                  :src="parseFilePayload(msg)?.fileUrl"
+                  :alt="parseFilePayload(msg)?.fileName"
+                  class="max-w-[200px] max-h-[200px] rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                  @click="openImagePreview(parseFilePayload(msg)?.fileUrl)"
+                />
               </div>
             </div>
-            <div v-else class="flex flex-row-reverse gap-2 max-w-[70%]">
-              <div class="flex flex-col gap-0.5 items-end">
-                <div class="bg-brand-600 p-1 rounded-xl rounded-tr-none shadow-md overflow-hidden">
-                  <img
-                    v-if="parseFilePayload(msg)"
-                    :src="parseFilePayload(msg)?.fileUrl"
-                    :alt="parseFilePayload(msg)?.fileName"
-                    class="max-w-[200px] max-h-[200px] rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                    @click="openImagePreview(parseFilePayload(msg)?.fileUrl)"
-                  />
-                </div>
-                <span class="text-[10px] text-gray-400 mr-1">{{ formatMessageTime(msg.time) }}</span>
+            <div v-else class="max-w-[70%]">
+              <div class="bg-brand-600 p-1 rounded-xl rounded-tr-none shadow-md overflow-hidden">
+                <img
+                  v-if="parseFilePayload(msg)"
+                  :src="parseFilePayload(msg)?.fileUrl"
+                  :alt="parseFilePayload(msg)?.fileName"
+                  class="max-w-[200px] max-h-[200px] rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                  @click="openImagePreview(parseFilePayload(msg)?.fileUrl)"
+                />
               </div>
             </div>
           </div>
@@ -488,67 +480,55 @@ defineExpose({ scrollToBottom })
         <template v-else-if="isAttachmentMessage(msg)">
           <div :class="['flex', msg.type === 'sent' ? 'justify-end' : 'justify-start']">
             <div v-if="msg.type === 'received'" class="flex gap-2 max-w-[85%]">
-              <div class="w-7 h-7 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
+              <div class="w-7 h-7 rounded-lg bg-brand-500 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
                 {{ getAvatarChar(peerName) }}
               </div>
-              <div class="flex flex-col gap-0.5">
-                <a
-                  v-if="parseFilePayload(msg)"
-                  :href="parseFilePayload(msg)?.fileUrl"
-                  target="_blank"
-                  class="bg-white border border-gray-100 px-3 py-2 rounded-xl rounded-tl-none shadow-sm flex items-center gap-2 hover:bg-gray-50 transition-colors"
-                >
-                  <FileText class="w-8 h-8 text-brand-500 shrink-0" />
-                  <div class="flex-1 min-w-0">
-                    <div class="text-sm text-gray-800 truncate">{{ parseFilePayload(msg)?.fileName }}</div>
-                    <div class="text-[10px] text-gray-400">{{ formatFileSize(parseFilePayload(msg)?.size || 0) }}</div>
-                  </div>
-                  <Download class="w-4 h-4 text-gray-400" />
-                </a>
-                <span class="text-[10px] text-gray-400 ml-1">{{ formatMessageTime(msg.time) }}</span>
-              </div>
+              <a
+                v-if="parseFilePayload(msg)"
+                :href="parseFilePayload(msg)?.fileUrl"
+                target="_blank"
+                class="bg-white border border-gray-100 px-3 py-2 rounded-xl rounded-tl-none shadow-sm flex items-center gap-2 hover:bg-gray-50 transition-colors"
+              >
+                <FileText class="w-8 h-8 text-brand-500 shrink-0" />
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm text-gray-800 truncate">{{ parseFilePayload(msg)?.fileName }}</div>
+                  <div class="text-[10px] text-gray-400">{{ formatFileSize(parseFilePayload(msg)?.size || 0) }}</div>
+                </div>
+                <Download class="w-4 h-4 text-gray-400" />
+              </a>
             </div>
-            <div v-else class="flex flex-row-reverse gap-2 max-w-[85%]">
-              <div class="flex flex-col gap-0.5 items-end">
-                <a
-                  v-if="parseFilePayload(msg)"
-                  :href="parseFilePayload(msg)?.fileUrl"
-                  target="_blank"
-                  class="bg-brand-600 px-3 py-2 rounded-xl rounded-tr-none shadow-md flex items-center gap-2 hover:bg-brand-700 transition-colors"
-                >
-                  <FileText class="w-8 h-8 text-white/80 shrink-0" />
-                  <div class="flex-1 min-w-0">
-                    <div class="text-sm text-white truncate">{{ parseFilePayload(msg)?.fileName }}</div>
-                    <div class="text-[10px] text-white/70">{{ formatFileSize(parseFilePayload(msg)?.size || 0) }}</div>
-                  </div>
-                  <Download class="w-4 h-4 text-white/70" />
-                </a>
-                <span class="text-[10px] text-gray-400 mr-1">{{ formatMessageTime(msg.time) }}</span>
-              </div>
+            <div v-else class="max-w-[85%]">
+              <a
+                v-if="parseFilePayload(msg)"
+                :href="parseFilePayload(msg)?.fileUrl"
+                target="_blank"
+                class="bg-brand-600 px-3 py-2 rounded-xl rounded-tr-none shadow-md flex items-center gap-2 hover:bg-brand-700 transition-colors"
+              >
+                <FileText class="w-8 h-8 text-white/80 shrink-0" />
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm text-white truncate">{{ parseFilePayload(msg)?.fileName }}</div>
+                  <div class="text-[10px] text-white/70">{{ formatFileSize(parseFilePayload(msg)?.size || 0) }}</div>
+                </div>
+                <Download class="w-4 h-4 text-white/70" />
+              </a>
             </div>
           </div>
         </template>
 
         <!-- 对方文本消息 -->
         <div v-else-if="msg.type === 'received'" class="flex gap-2 max-w-[85%]">
-          <div class="w-7 h-7 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
+          <div class="w-7 h-7 rounded-lg bg-brand-500 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
             {{ getAvatarChar(peerName) }}
           </div>
-          <div class="flex flex-col gap-0.5">
-            <div class="bg-white border border-gray-100 px-3 py-2 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-800">
-              {{ msg.content }}
-            </div>
-            <span class="text-[10px] text-gray-400 ml-1">{{ formatMessageTime(msg.time) }}</span>
+          <div class="bg-white border border-gray-100 px-3 py-2 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-800">
+            {{ msg.content }}
           </div>
         </div>
 
         <!-- 我的文本消息 -->
-        <div v-else class="flex flex-row-reverse gap-2 max-w-[85%] ml-auto">
-          <div class="flex flex-col gap-0.5 items-end">
-            <div class="bg-brand-600 text-white px-3 py-2 rounded-2xl rounded-tr-none shadow-md text-sm">
-              {{ msg.content }}
-            </div>
-            <span class="text-[10px] text-gray-400 mr-1">{{ formatMessageTime(msg.time) }}</span>
+        <div v-else class="flex justify-end max-w-[85%] ml-auto">
+          <div class="bg-brand-600 text-white px-3 py-2 rounded-2xl rounded-tr-none shadow-md text-sm">
+            {{ msg.content }}
           </div>
         </div>
       </template>
@@ -650,7 +630,7 @@ defineExpose({ scrollToBottom })
           <!-- 弹窗内容 -->
           <div class="p-4">
             <div class="text-center mb-4">
-              <div class="w-12 h-12 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-lg mx-auto mb-2">
+              <div class="w-12 h-12 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-lg mx-auto mb-2">
                 {{ getAvatarChar(peerName) }}
               </div>
               <p class="text-sm text-gray-600">赠送给 <span class="font-bold text-gray-900">{{ peerName }}</span></p>

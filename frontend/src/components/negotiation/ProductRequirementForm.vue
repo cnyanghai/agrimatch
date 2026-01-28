@@ -177,10 +177,6 @@ function updateDynamicParam(key: string, value: string) {
         {{ subjectType === 'SUPPLY' ? '供应详情' : '采购需求' }}
       </h3>
       <div class="flex items-center gap-2">
-        <!-- 预计总金额（收起时显示） -->
-        <span v-if="!isExpanded && estimatedTotal" class="text-xs font-bold text-brand-600">
-          {{ formatCurrency(estimatedTotal) }}
-        </span>
         <component :is="isExpanded ? ChevronUp : ChevronDown" class="w-4 h-4 text-gray-400" />
       </div>
     </div>
@@ -405,27 +401,18 @@ function updateDynamicParam(key: string, value: string) {
       </div>
     </div>
 
-    <!-- 底部总额 + 发送报价按钮（固定） -->
-    <div class="px-3 py-2 bg-brand-50 border-t border-brand-100 shrink-0">
-      <div class="flex items-center justify-between">
-        <div>
-          <span class="text-[10px] text-brand-600">预计总金额</span>
-          <div class="text-base font-bold text-brand-700">
-            {{ estimatedTotal ? formatCurrency(estimatedTotal) : '¥0' }}
-          </div>
-        </div>
-        <button
-          v-if="showSendButton && !readonly"
-          @click="emit('send-quote', { ...form })"
-          :disabled="sending || !form.price || !form.quantity"
-          class="px-4 py-2 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300
-                 disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg
-                 flex items-center gap-1.5 transition-all active:scale-95"
-        >
-          <Send class="w-4 h-4" />
-          {{ sending ? '发送中...' : '发送报价' }}
-        </button>
-      </div>
+    <!-- 底部发送报价按钮（固定） -->
+    <div v-if="showSendButton && !readonly" class="px-3 py-2 bg-brand-50 border-t border-brand-100 shrink-0">
+      <button
+        @click="emit('send-quote', { ...form })"
+        :disabled="sending || !form.price || !form.quantity"
+        class="w-full px-4 py-2 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300
+               disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg
+               flex items-center justify-center gap-1.5 transition-all active:scale-95"
+      >
+        <Send class="w-4 h-4" />
+        {{ sending ? '发送中...' : '发送报价' }}
+      </button>
     </div>
   </div>
 </template>

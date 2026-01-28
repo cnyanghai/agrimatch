@@ -193,12 +193,9 @@ function getSubjectPrice(conv: ChatConversationResponse): string {
 // 格式化时间
 function formatTime(timeStr?: string): string {
   if (!timeStr) return ''
-  try {
-    const d = new Date(timeStr)
-    return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  } catch {
-    return ''
-  }
+  const d = new Date(timeStr)
+  if (isNaN(d.getTime())) return ''
+  return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
 }
 
 // 滚动到底部
@@ -364,7 +361,7 @@ watch(() => messages.messages.value.length, scrollToBottom)
           <ArrowLeft class="w-5 h-5 text-gray-600" />
         </button>
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold">
+          <div class="w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold">
             {{ getAvatarChar(peerInfo.name) }}
           </div>
           <div>
@@ -489,7 +486,7 @@ watch(() => messages.messages.value.length, scrollToBottom)
 
             <!-- 对方消息 -->
             <div v-else-if="msg.type === 'received'" class="flex gap-2 max-w-[75%]">
-              <div class="w-8 h-8 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
+              <div class="w-8 h-8 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
                 {{ getAvatarChar(peerInfo.name) }}
               </div>
               <div class="flex flex-col gap-1">

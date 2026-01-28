@@ -74,7 +74,7 @@ export function useNegotiationWorkspace() {
   const loadingMessages = ref(false)
 
   /** 侧边栏状态 */
-  const sidebarState = ref<'expanded' | 'mini' | 'hidden'>('expanded')
+  const sidebarState = ref<'expanded' | 'mini'>('expanded')
 
   /** 发送中状态 */
   const sending = ref(false)
@@ -852,13 +852,7 @@ export function useNegotiationWorkspace() {
 
   /** 切换侧边栏 */
   function toggleSidebar() {
-    if (sidebarState.value === 'hidden') {
-      sidebarState.value = 'expanded'
-    } else if (sidebarState.value === 'expanded') {
-      sidebarState.value = 'mini'
-    } else {
-      sidebarState.value = 'hidden'
-    }
+    sidebarState.value = sidebarState.value === 'expanded' ? 'mini' : 'expanded'
   }
 
   // ==================== Lifecycle ====================

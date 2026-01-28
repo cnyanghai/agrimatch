@@ -87,21 +87,19 @@ const filteredGroups = computed(() => {
 // 格式化时间
 function formatTime(timeStr?: string): string {
   if (!timeStr) return ''
-  try {
-    const d = new Date(timeStr)
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
+  const d = new Date(timeStr)
+  if (isNaN(d.getTime())) return ''
 
-    if (d >= today) {
-      return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-    } else if (d >= yesterday) {
-      return '昨天'
-    } else {
-      return d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
-    }
-  } catch {
-    return ''
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
+
+  if (d >= today) {
+    return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+  } else if (d >= yesterday) {
+    return '昨天'
+  } else {
+    return d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
   }
 }
 

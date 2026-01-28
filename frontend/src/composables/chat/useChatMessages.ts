@@ -112,6 +112,7 @@ export function useChatMessages(options: UseChatMessagesOptions) {
     tempId: string,
     payloadJson?: string
   ): UiMessage {
+    const now = Date.now()
     const msg: UiMessage = {
       id: tempId,
       conversationId,
@@ -120,7 +121,8 @@ export function useChatMessages(options: UseChatMessagesOptions) {
       content,
       payloadJson,
       status: 'pending',
-      time: formatMessageTime(new Date().toISOString())
+      time: new Date(now).toISOString(),
+      timestamp: now
     }
     messages.value.push(msg)
     return msg

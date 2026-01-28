@@ -37,6 +37,8 @@ export interface UiMessage {
   payloadJson?: string
   quoteStatus?: QuoteStatus | string
   time?: string
+  /** 原始时间戳，用于计算时间间隔 */
+  timestamp?: number
   status?: 'pending' | 'sent' | 'failed'
   fromUserId?: number
   toUserId?: number
@@ -115,6 +117,8 @@ export function toUiMessage(m: ChatMessageResponse, currentUserId: number): UiMe
   else if (mt === 'ATTACHMENT') content = '[附件]'
   else if (mt === 'CONTRACT') content = '[合同]'
 
+  const timestamp = m.createTime ? new Date(m.createTime).getTime() : Date.now()
+
   return {
     id: m.id,
     conversationId: m.conversationId,
@@ -123,19 +127,51 @@ export function toUiMessage(m: ChatMessageResponse, currentUserId: number): UiMe
     content,
     payloadJson: m.payloadJson,
     quoteStatus: m.quoteStatus as QuoteStatus,
-    time: formatMessageTime(m.createTime),
+    time: m.createTime,
+    timestamp: isNaN(timestamp) ? Date.now() : timestamp,
     fromUserId: m.fromUserId,
     toUserId: m.toUserId
   }
 }
 
-/** 格式化消息时间 */
-export function formatMessageTime(createTime?: string): string {
+/** 格式化消息时间（微信风格） */
+export function formatMessageTime(createTime?: string | number): string {
   if (!createTime) return ''
-  try {
-    const d = new Date(createTime)
-    return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
-  } catch {
-    return ''
+  const d = typeof createTime === 'number' ? new Date(createTime) : new Date(createTime)
+  if (isNaN(d.getTime())) return ''
+
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000)
+  const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
+  const thisYear = new Date(now.getFullYear(), 0, 1)
+
+  const timeStr = d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+
+  // 今天：只显示时间
+  if (d >= today) {
+    return timeStr
   }
+  // 昨天
+  if (d >= yesterday) {
+    return `昨天 ${timeStr}`
+  }
+  // 本周（2-7天前）
+  if (d >= weekAgo) {
+    const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+    return `${weekdays[d.getDay()]} ${timeStr}`
+  }
+  // 今年
+  if (d >= thisYear) {
+    return `${d.getMonth() + 1}月${d.getDate()}日 ${timeStr}`
+  }
+  // 跨年
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 ${timeStr}`
+}
+
+/** 判断两条消息是否需要显示时间分隔（间隔超过5分钟） */
+export function shouldShowTimeSeparator(prevTime?: number, currTime?: number): boolean {
+  if (!prevTime || !currTime) return true
+  const fiveMinutes = 5 * 60 * 1000
+  return currTime - prevTime > fiveMinutes
 }

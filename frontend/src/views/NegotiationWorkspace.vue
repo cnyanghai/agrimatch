@@ -12,16 +12,8 @@
  * 6. 跳转第三方电子签章平台完成签署
  */
 import { onMounted, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import {
-  Menu,
-  Wifi,
-  WifiOff,
-  ArrowLeft,
-  MessageCircle,
-  ChevronDown
-} from 'lucide-vue-next'
+import { MessageCircle } from 'lucide-vue-next'
 
 // Composables
 import { useNegotiationWorkspace, type MerchantGroup } from '../composables/useNegotiationWorkspace'
@@ -35,8 +27,6 @@ import {
   type RequirementData
 } from '../components/negotiation'
 import type { UiMessage } from '../types/chat/message'
-
-const router = useRouter()
 
 // ==================== State Management ====================
 
@@ -87,10 +77,6 @@ const {
 
 // ==================== Handlers ====================
 
-function goBack() {
-  router.push('/console')
-}
-
 function handleSendMessage(text: string) {
   sendText(text)
 }
@@ -138,24 +124,6 @@ function handleSelectMerchant(merchant: MerchantGroup) {
   selectMerchant(merchant)
 }
 
-function handleToggleSidebar() {
-  if (sidebarState.value === 'hidden') {
-    sidebarState.value = 'expanded'
-  } else {
-    sidebarState.value = 'hidden'
-  }
-}
-
-function getSubjectName(conv: any): string {
-  if (!conv?.subjectSnapshotJson) return '通用会话'
-  try {
-    const snapshot = JSON.parse(conv.subjectSnapshotJson)
-    return snapshot.productName || snapshot.title || '产品'
-  } catch {
-    return '产品'
-  }
-}
-
 // ==================== Quote Handlers (from chat) ====================
 
 function handleAcceptQuote(msg: UiMessage) {
@@ -195,91 +163,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="h-full flex flex-col bg-gray-100 overflow-hidden -m-4 md:-m-6">
-    <!-- 顶部导航 -->
-    <header class="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between shrink-0 shadow-sm z-10">
-      <div class="flex items-center gap-3">
-        <!-- 侧边栏切换 -->
-        <button
-          v-if="sidebarState === 'hidden'"
-          @click="handleToggleSidebar"
-          class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-1.5"
-        >
-          <Menu class="w-4 h-4 text-gray-600" />
-          <span class="text-xs text-gray-600">商户</span>
-        </button>
-
-        <!-- 返回按钮 -->
-        <button
-          @click="goBack"
-          class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <ArrowLeft class="w-4 h-4 text-gray-600" />
-        </button>
-
-        <!-- 当前会话信息 -->
-        <div v-if="currentConversation" class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-full bg-brand-500 text-white flex items-center justify-center font-bold text-xs">
-            {{ peerInfo.name[0]?.toUpperCase() || '?' }}
-          </div>
-          <div>
-            <h1 class="font-bold text-gray-900 flex items-center gap-1.5 text-sm">
-              {{ peerInfo.name }}
-              <span v-if="peerInfo.company" class="text-gray-400 font-normal text-xs">
-                · {{ peerInfo.company }}
-              </span>
-            </h1>
-            <div class="flex items-center gap-2 text-[11px] text-gray-500">
-              <!-- 当前标的下拉选择 -->
-              <div v-if="currentMerchantConversations.length > 1" class="relative group">
-                <button class="flex items-center gap-1 hover:text-brand-600">
-                  <span>{{ requirementData.productName || '产品议价' }}</span>
-                  <ChevronDown class="w-3 h-3" />
-                </button>
-                <!-- 下拉菜单 -->
-                <div class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[160px] hidden group-hover:block z-20">
-                  <div
-                    v-for="conv in currentMerchantConversations"
-                    :key="conv.id"
-                    :class="[
-                      'px-3 py-1.5 text-xs cursor-pointer',
-                      conv.id === currentConversation?.id
-                        ? 'bg-brand-50 text-brand-600'
-                        : 'hover:bg-gray-50 text-gray-600'
-                    ]"
-                    @click="switchToConversation(conv)"
-                  >
-                    {{ getSubjectName(conv) }}
-                    <span v-if="conv.id === currentConversation?.id" class="text-[10px] text-brand-400 ml-1">当前</span>
-                  </div>
-                </div>
-              </div>
-              <span v-else>{{ requirementData.productName || '产品议价' }}</span>
-
-              <span class="text-gray-300">|</span>
-              <span class="flex items-center gap-1">
-                <component
-                  :is="isConnected ? Wifi : WifiOff"
-                  :class="['w-2.5 h-2.5', isConnected ? 'text-green-500' : 'text-gray-400']"
-                />
-                {{ isConnected ? '已连接' : '连接中' }}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div v-else class="text-gray-500 text-sm">
-          请选择商户
-        </div>
-      </div>
-
-      <!-- 右侧状态 -->
-      <div class="flex items-center gap-2">
-        <div class="flex items-center gap-1 text-[11px] text-gray-500">
-          <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-          系统正常
-        </div>
-      </div>
-    </header>
-
     <!-- 加载状态 -->
     <div v-if="loading" class="flex-1 flex items-center justify-center">
       <div class="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
@@ -312,10 +195,10 @@ onBeforeUnmount(() => {
 
       <!-- 工作区内容 -->
       <template v-else>
-        <!-- 左侧：产品详情 + 聊天 (5:5) -->
+        <!-- 左侧：产品详情 + 聊天 (4:6) -->
         <div class="w-[38%] min-w-[340px] max-w-[440px] flex flex-col p-3 gap-3 overflow-hidden">
-          <!-- 产品需求表单 (50%) - 编辑即调整报价 -->
-          <div class="h-1/2 overflow-auto">
+          <!-- 产品需求表单 (40%) - 编辑即调整报价 -->
+          <div class="h-2/5 overflow-auto">
             <ProductRequirementForm
               :initial-data="requirementData"
               :readonly="!!buyerConfirmed || !!sellerConfirmed"
@@ -327,8 +210,8 @@ onBeforeUnmount(() => {
             />
           </div>
 
-          <!-- 聊天面板 (50%) - 文本沟通 + 附件 + 赠送积分 -->
-          <div class="h-1/2 bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
+          <!-- 聊天面板 (60%) - 文本沟通 + 附件 + 赠送积分 -->
+          <div class="h-3/5 bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
             <ChatPanel
               v-if="!loadingMessages"
               :messages="messages"

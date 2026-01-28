@@ -341,10 +341,5 @@ const expanded = ref(false)
         @cancel="handleCounterCancel"
       />
     </div>
-
-    <!-- 时间戳 -->
-    <div :class="['px-4 py-2 text-[10px]', isSent ? 'text-brand-200 text-right' : 'text-gray-400']">
-      {{ message.time }}
-    </div>
   </div>
 </template>
