@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { Trash2, FileText, Save, Send, List, Package, Truck, Clock, FileCheck, TrendingUp, Plus, X } from 'lucide-vue-next'
-import { createSupply, getNextSupplyNo, createSupplyTemplate, getMySupplyTemplates, deleteSupplyTemplate, type SupplyCreateRequest, type BasisQuoteRequest, type SupplyTemplateResponse } from '../api/supply'
+import { useRouter, useRoute } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Trash2, FileText, Save, Send, List, Package, Truck, Clock, FileCheck, TrendingUp, Plus, X, ChevronDown, ChevronUp, Pencil, Ban, RotateCcw, RefreshCcw, MapPin, DollarSign, Search, MoreHorizontal, Calendar, CreditCard, BoxIcon } from 'lucide-vue-next'
+import { createSupply, getNextSupplyNo, createSupplyTemplate, getMySupplyTemplates, deleteSupplyTemplate, listSupplies, updateSupply, type SupplyCreateRequest, type BasisQuoteRequest, type SupplyTemplateResponse, type SupplyResponse, type SupplyUpdateRequest } from '../api/supply'
 import { listFuturesContracts, type FuturesContractResponse } from '../api/futures'
 import { getProductParams, type ProductParamResponse } from '../api/product'
 import { getMyCompany, type CompanyResponse } from '../api/company'
@@ -14,13 +14,266 @@ import CategoryParamsForm from '../components/CategoryParamsForm.vue'
 import { getSchemaUnitConfig, getCategoryUnitConfig } from '../utils/schemaUnits'
 import TagPicker from '../components/TagPicker.vue'
 import type { TagValue } from '../api/tag'
-import { BaseButton, BaseModal, EmptyState } from '../components/ui'
+import { BaseButton, BaseModal, EmptyState, Skeleton } from '../components/ui'
 import TemplateCommandPalette, { type TemplateItem } from '../components/TemplateCommandPalette.vue'
 import { useCompanyStore } from '../stores/company'
+import { useAuthStore } from '../store/auth'
 
 const router = useRouter()
+const route = useRoute()
 const companyStore = useCompanyStore()
+const authStore = useAuthStore()
 const loading = ref(false)
+
+// ============ Tab 切换 ============
+type TabType = 'publish' | 'published'
+// 根据 URL 参数初始化 Tab
+const initialTab = route.query.tab === 'published' ? 'published' : 'publish'
+const activeTab = ref<TabType>(initialTab)
+
+// ============ 已发布列表相关 ============
+const supplies = ref<SupplyResponse[]>([])
+const listLoading = ref(false)
+const listPagination = reactive({
+  page: 1,
+  size: 10,
+  total: 0
+})
+const listFilters = reactive({
+  categoryName: '',
+  status: null as number | null
+})
+
+const statusOptions = [
+  { value: null, label: '全部', color: 'gray', icon: '○' },
+  { value: 0, label: '发布中', color: 'emerald', icon: '●' },
+  { value: 1, label: '部分成交', color: 'amber', icon: '◐' },
+  { value: 2, label: '已下架', color: 'gray', icon: '○' },
+  { value: 3, label: '全部成交', color: 'emerald', icon: '✓' }
+]
+
+const pagedSupplies = computed(() => {
+  const start = (listPagination.page - 1) * listPagination.size
+  const end = start + listPagination.size
+  return supplies.value.slice(start, end)
+})
+
+async function loadSupplies() {
+  listLoading.value = true
+  try {
+    const companyId = authStore.me?.companyId
+    if (!companyId) {
+      supplies.value = []
+      listPagination.total = 0
+      return
+    }
+    const r = await listSupplies({
+      companyId,
+      categoryName: listFilters.categoryName || undefined,
+      status: listFilters.status ?? undefined,
+      includeExpired: true
+    })
+    if (r.code === 0) {
+      supplies.value = r.data || []
+      listPagination.total = supplies.value.length
+    } else {
+      throw new Error(r.message)
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.message || '加载供应列表失败')
+  } finally {
+    listLoading.value = false
+  }
+}
+
+function handleListFilter() {
+  listPagination.page = 1
+  loadSupplies()
+}
+
+function handlePageChange(page: number) {
+  listPagination.page = page
+}
+
+function getStatusText(status?: number) {
+  return statusOptions.find(o => o.value === status)?.label || '未知'
+}
+
+function getStatusColor(status?: number) {
+  return statusOptions.find(o => o.value === status)?.color || 'gray'
+}
+
+function getStatusIcon(status?: number) {
+  return statusOptions.find(o => o.value === status)?.icon || '○'
+}
+
+// 格式化过期时间
+function formatExpireTime(expireTime?: string): string {
+  if (!expireTime) return ''
+  const expire = new Date(expireTime)
+  const now = new Date()
+  if (expire <= now) return '已过期'
+
+  const diff = expire.getTime() - now.getTime()
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+
+  if (days > 0) return `剩${days}天`
+  if (hours > 0) return `剩${hours}小时`
+  return '即将过期'
+}
+
+// 格式化发布时间
+function formatPublishTime(createTime?: string): string {
+  if (!createTime) return ''
+  const date = new Date(createTime)
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  const minutes = Math.floor(diff / (1000 * 60))
+
+  if (minutes < 1) return '刚刚'
+  if (minutes < 60) return `${minutes}分钟前`
+  if (hours < 24) return `${hours}小时前`
+  if (days < 7) return `${days}天前`
+  return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+}
+
+// 计算成交进度百分比
+function getDealProgress(s: SupplyResponse): number {
+  if (!s.quantity || s.quantity <= 0) return 0
+  const remaining = s.remainingQuantity ?? s.quantity
+  const dealt = s.quantity - remaining
+  return Math.round((dealt / s.quantity) * 100)
+}
+
+// 解析质量要求参数，返回标签数组
+function parseParamsTags(paramsJson?: string): { label: string; value: string }[] {
+  if (!paramsJson) return []
+  try {
+    const params = JSON.parse(paramsJson)
+    if (typeof params !== 'object' || params === null) return []
+    const entries = Object.entries(params).filter(([_, v]) => v !== undefined && v !== '')
+    return entries.slice(0, 5).map(([k, v]) => ({ label: String(k), value: String(v) }))
+  } catch {
+    return []
+  }
+}
+
+// 编辑已发布的供应
+const editOpen = ref(false)
+const saving = ref(false)
+const editing = ref<SupplyResponse | null>(null)
+const editForm = reactive<SupplyUpdateRequest>({
+  origin: undefined,
+  quantity: undefined,
+  exFactoryPrice: undefined,
+  shipAddress: undefined,
+  deliveryMode: undefined,
+  paymentMethod: undefined,
+  invoiceType: undefined,
+  packaging: undefined,
+  storageMethod: undefined,
+  expireMinutes: undefined,
+  paramsJson: undefined,
+  priceRulesJson: undefined,
+  remark: undefined
+})
+
+function openEdit(s: SupplyResponse) {
+  editing.value = s
+  editForm.origin = s.origin
+  editForm.quantity = s.quantity
+  editForm.exFactoryPrice = s.exFactoryPrice
+  editForm.shipAddress = s.shipAddress
+  editForm.deliveryMode = s.deliveryMode
+  editForm.paymentMethod = s.paymentMethod
+  editForm.invoiceType = s.invoiceType
+  editForm.packaging = s.packaging
+  editForm.storageMethod = s.storageMethod
+  editForm.expireMinutes = s.expireMinutes
+  editForm.paramsJson = s.paramsJson
+  editForm.priceRulesJson = s.priceRulesJson
+  editForm.remark = s.remark
+  editOpen.value = true
+}
+
+async function saveEdit() {
+  if (!editing.value?.id) return
+  saving.value = true
+  try {
+    const r = await updateSupply(editing.value.id, {
+      origin: editForm.origin,
+      quantity: editForm.quantity,
+      exFactoryPrice: editForm.exFactoryPrice,
+      shipAddress: editForm.shipAddress,
+      deliveryMode: editForm.deliveryMode,
+      paymentMethod: editForm.paymentMethod,
+      invoiceType: editForm.invoiceType,
+      packaging: editForm.packaging,
+      storageMethod: editForm.storageMethod,
+      expireMinutes: editForm.expireMinutes,
+      paramsJson: editForm.paramsJson,
+      priceRulesJson: editForm.priceRulesJson,
+      remark: editForm.remark
+    })
+    if (r.code !== 0) throw new Error(r.message)
+    ElMessage.success('已保存')
+    editOpen.value = false
+    await loadSupplies()
+  } catch (e: any) {
+    ElMessage.error(e?.message || '保存失败')
+  } finally {
+    saving.value = false
+  }
+}
+
+async function revokeSupply(s: SupplyResponse) {
+  if (!s.id) return
+  try {
+    await ElMessageBox.confirm('下架后该供应将从大厅隐藏，可随时再次发布。', '确认下架？', {
+      confirmButtonText: '下架',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    const r = await updateSupply(s.id, { status: 2 })
+    if (r.code !== 0) throw new Error(r.message)
+    ElMessage.success('已下架')
+    await loadSupplies()
+  } catch (e: any) {
+    if (e === 'cancel' || e === 'close') return
+    ElMessage.error(e?.message || '操作失败')
+  }
+}
+
+async function republishSupply(s: SupplyResponse) {
+  if (!s.id) return
+  try {
+    await ElMessageBox.confirm('将该供应重新发布到大厅，并按有效期重新计时。', '再次发布？', {
+      confirmButtonText: '发布',
+      cancelButtonText: '取消',
+      type: 'info'
+    })
+    const r = await updateSupply(s.id, { status: 0, expireMinutes: s.expireMinutes ?? 4320 })
+    if (r.code !== 0) throw new Error(r.message)
+    ElMessage.success('已再次发布')
+    await loadSupplies()
+  } catch (e: any) {
+    if (e === 'cancel' || e === 'close') return
+    ElMessage.error(e?.message || '操作失败')
+  }
+}
+
+// 模板下拉菜单
+const templateMenuOpen = ref(false)
+
+// 可选区域折叠
+const sectionsCollapsed = reactive({
+  publishInfo: false,
+  tags: true,
+  logistics: false
+})
 const supplyNo = ref<string>('')
 const templatePickerOpen = ref(false)
 
@@ -200,6 +453,17 @@ const publisherName = computed(() => {
 onMounted(async () => {
   await Promise.all([loadCompanyInfo(), loadMeUser(), loadTemplates(), loadFuturesContracts()])
   await loadNextSupplyNo()
+  // 如果初始 Tab 是已发布，自动加载列表
+  if (activeTab.value === 'published') {
+    loadSupplies()
+  }
+})
+
+// Tab 切换时加载对应数据
+watch(activeTab, (tab) => {
+  if (tab === 'published' && supplies.value.length === 0) {
+    loadSupplies()
+  }
 })
 
 // 加载期货合约列表
@@ -443,7 +707,9 @@ async function publishSupply() {
       if (company.value?.id) {
         companyStore.invalidateProfile(company.value.id)
       }
-      router.push('/supply/published')
+      // 切换到已发布Tab并刷新列表
+      activeTab.value = 'published'
+      await loadSupplies()
     } else {
       ElMessage.error(r.message || '发布失败')
     }
@@ -505,6 +771,11 @@ async function confirmSaveTemplate() {
 
 async function deleteTemplate(id: number) {
   try {
+    await ElMessageBox.confirm('确定要删除此模板吗？删除后无法恢复。', '删除确认', {
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
     const res = await deleteSupplyTemplate(id)
     if (res.code === 0) {
       templates.value = templates.value.filter(t => t.id !== id)
@@ -513,6 +784,7 @@ async function deleteTemplate(id: number) {
       ElMessage.error(res.message || '删除失败')
     }
   } catch (e: any) {
+    if (e === 'cancel' || e === 'close') return
     ElMessage.error(e?.message || '删除失败')
   }
 }
@@ -598,32 +870,302 @@ async function applyTemplate(template: SupplyTemplateResponse) {
 
 <template>
   <div class="space-y-6">
-    <!-- 页面标题 -->
+    <!-- 页面标题 + Tab 切换 -->
     <div class="flex items-center justify-between flex-wrap gap-4">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">发布供应</h1>
-        <p class="text-sm text-gray-500 mt-1">填写供应信息并发布到大厅</p>
+      <div class="flex items-center gap-6">
+        <h1 class="text-2xl font-bold text-gray-900">供应管理</h1>
+        <!-- Tab 切换 -->
+        <div class="flex items-center bg-gray-100 rounded-xl p-1">
+          <button
+            :class="[
+              'px-4 py-2 rounded-lg text-sm font-bold transition-all',
+              activeTab === 'publish'
+                ? 'bg-white text-brand-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            ]"
+            @click="activeTab = 'publish'"
+          >
+            <span class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full" :class="activeTab === 'publish' ? 'bg-brand-500' : 'bg-gray-300'"></span>
+              发布供应
+            </span>
+          </button>
+          <button
+            :class="[
+              'px-4 py-2 rounded-lg text-sm font-bold transition-all',
+              activeTab === 'published'
+                ? 'bg-white text-brand-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            ]"
+            @click="activeTab = 'published'"
+          >
+            <span class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full" :class="activeTab === 'published' ? 'bg-brand-500' : 'bg-gray-300'"></span>
+              已发布
+              <span v-if="supplies.length > 0" class="px-1.5 py-0.5 bg-gray-200 text-gray-600 text-[10px] rounded-full">
+                {{ supplies.length }}
+              </span>
+            </span>
+          </button>
+        </div>
       </div>
-      <div class="flex items-center gap-3">
-        <BaseButton type="secondary" size="sm" @click="templatePickerOpen = true">
-          <FileText class="w-4 h-4" />
-          选择模板
-        </BaseButton>
-        <BaseButton type="secondary" size="sm" @click="saveAsTemplate">
-          <Save class="w-4 h-4" />
-          保存模板
-        </BaseButton>
-        <BaseButton type="outline" size="sm" @click="router.push('/supply/published')">
-          <List class="w-4 h-4" />
-          已发布
-        </BaseButton>
+      <!-- 发布Tab的操作按钮 -->
+      <div v-if="activeTab === 'publish'" class="flex items-center gap-3">
+        <!-- 模板下拉菜单 -->
+        <div class="relative">
+          <BaseButton type="secondary" size="sm" @click="templateMenuOpen = !templateMenuOpen">
+            <FileText class="w-4 h-4" />
+            模板
+            <ChevronDown class="w-3 h-3 ml-1" />
+          </BaseButton>
+          <Transition name="dropdown">
+            <div
+              v-if="templateMenuOpen"
+              class="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50"
+              @click="templateMenuOpen = false"
+            >
+              <button
+                class="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                @click="templatePickerOpen = true"
+              >
+                <FileText class="w-4 h-4 text-gray-400" />
+                选择模板
+              </button>
+              <button
+                class="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                @click="saveAsTemplate"
+              >
+                <Save class="w-4 h-4 text-gray-400" />
+                保存为模板
+              </button>
+            </div>
+          </Transition>
+        </div>
         <BaseButton type="primary" size="sm" :loading="loading" @click="publishSupply">
           <Send class="w-4 h-4" />
           发布
         </BaseButton>
       </div>
+      <!-- 已发布Tab的操作按钮 -->
+      <div v-else class="flex items-center gap-3">
+        <BaseButton type="secondary" size="sm" :loading="listLoading" @click="loadSupplies">
+          <RefreshCcw class="w-4 h-4" />
+          刷新
+        </BaseButton>
+        <BaseButton type="primary" size="sm" @click="activeTab = 'publish'">
+          <Plus class="w-4 h-4" />
+          发布新供应
+        </BaseButton>
+      </div>
     </div>
 
+    <!-- 点击外部关闭模板菜单 -->
+    <div v-if="templateMenuOpen" class="fixed inset-0 z-40" @click="templateMenuOpen = false"></div>
+
+    <!-- ========== 已发布 Tab 内容 ========== -->
+    <template v-if="activeTab === 'published'">
+      <!-- 筛选栏 -->
+      <div class="bg-white rounded-xl border border-gray-200 p-4">
+        <div class="flex flex-wrap items-center gap-4">
+          <!-- 搜索框 -->
+          <div class="relative flex-1 min-w-[200px] max-w-[300px]">
+            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              v-model="listFilters.categoryName"
+              type="text"
+              placeholder="搜索品类..."
+              class="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:border-brand-500 outline-none transition-all"
+              @keyup.enter="handleListFilter"
+            />
+          </div>
+
+          <!-- 状态筛选 -->
+          <div class="flex gap-2">
+            <button
+              v-for="opt in statusOptions"
+              :key="opt.value ?? 'all'"
+              :class="[
+                'px-3 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5',
+                listFilters.status === opt.value
+                  ? 'bg-brand-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              ]"
+              @click="listFilters.status = opt.value; handleListFilter()"
+            >
+              <span class="text-[10px]">{{ opt.icon }}</span>
+              {{ opt.label }}
+            </button>
+          </div>
+
+          <!-- 统计 -->
+          <div class="ml-auto">
+            <span class="px-3 py-1.5 bg-gray-50 text-gray-600 text-xs font-bold rounded-full border border-gray-200">
+              共 {{ listPagination.total }} 条
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 供应列表（紧凑表格风格） -->
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <!-- 加载状态 -->
+        <div v-if="listLoading && supplies.length === 0" class="p-6 space-y-4">
+          <Skeleton type="card" />
+          <Skeleton type="card" />
+          <Skeleton type="card" />
+        </div>
+
+        <!-- 空状态 -->
+        <EmptyState
+          v-else-if="supplies.length === 0"
+          type="empty"
+          title="暂无供应信息"
+          description="点击上方「发布供应」标签开始发布"
+          size="md"
+        />
+
+        <!-- 左右分栏卡片列表 -->
+        <div v-else class="p-4 space-y-3">
+          <div
+            v-for="(s, index) in pagedSupplies"
+            :key="s.id"
+            class="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md hover:border-brand-200 transition-all duration-200 animate-stagger-in"
+            :style="{ animationDelay: `${index * 40}ms` }"
+          >
+            <div class="flex gap-4">
+              <!-- 左侧：大图标 -->
+              <div class="shrink-0">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center">
+                  <Package class="w-7 h-7 text-brand-600" />
+                </div>
+              </div>
+
+              <!-- 右侧：信息区域 -->
+              <div class="flex-1 min-w-0">
+                <!-- 第一行：品类名称 + 状态 -->
+                <div class="flex items-center justify-between mb-2">
+                  <h3 class="font-bold text-lg text-gray-900 truncate">{{ s.categoryName }}</h3>
+                  <div class="flex items-center gap-2 shrink-0">
+                    <span
+                      :class="[
+                        'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold',
+                        s.status === 0 ? 'bg-brand-50 text-brand-600' :
+                        s.status === 1 ? 'bg-amber-50 text-amber-600' :
+                        s.status === 3 ? 'bg-emerald-50 text-emerald-600' :
+                        'bg-gray-100 text-gray-500'
+                      ]"
+                    >
+                      <span class="text-[10px]">{{ getStatusIcon(s.status) }}</span>
+                      {{ getStatusText(s.status) }}
+                    </span>
+                    <span v-if="s.status === 0 && s.expireTime" class="text-xs text-gray-400">
+                      {{ formatExpireTime(s.expireTime) }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- 第二行：核心数据 -->
+                <div class="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm mb-3">
+                  <span class="font-semibold text-gray-800">
+                    {{ s.quantity ?? '-' }} <span class="text-gray-500 font-normal">{{ currentUnitConfig.quantityUnit }}</span>
+                  </span>
+                  <span class="text-gray-300">·</span>
+                  <span v-if="s.exFactoryPrice" class="font-bold text-brand-600">
+                    ¥{{ s.exFactoryPrice.toLocaleString() }}<span class="text-gray-400 font-normal text-xs">/{{ currentUnitConfig.quantityUnit }}</span>
+                  </span>
+                  <span v-else class="text-gray-400">面议</span>
+                  <span class="text-gray-300">·</span>
+                  <span class="text-gray-600 flex items-center gap-1">
+                    <MapPin class="w-3.5 h-3.5 text-gray-400" />
+                    {{ s.shipAddress || '—' }}
+                  </span>
+                  <template v-if="s.packaging || s.paymentMethod">
+                    <span class="text-gray-300">·</span>
+                    <span class="text-gray-500">{{ [s.packaging, s.paymentMethod].filter(Boolean).join(' / ') }}</span>
+                  </template>
+                </div>
+
+                <!-- 第三行：质量要求标签 + 操作按钮 -->
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <!-- 质量要求标签药丸 -->
+                    <template v-if="parseParamsTags(s.paramsJson).length > 0">
+                      <span
+                        v-for="(tag, idx) in parseParamsTags(s.paramsJson)"
+                        :key="idx"
+                        class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-xs text-gray-600"
+                      >
+                        <span class="text-gray-400 mr-0.5">{{ tag.label }}</span>
+                        <span class="font-medium">{{ tag.value }}</span>
+                      </span>
+                    </template>
+                    <!-- 部分成交进度 -->
+                    <div v-if="s.status === 1 && s.remainingQuantity != null" class="flex items-center gap-2 ml-2">
+                      <div class="w-20 h-1.5 bg-amber-100 rounded-full overflow-hidden">
+                        <div
+                          class="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
+                          :style="{ width: `${getDealProgress(s)}%` }"
+                        ></div>
+                      </div>
+                      <span class="text-xs text-amber-600 font-medium">{{ getDealProgress(s) }}%</span>
+                    </div>
+                    <!-- 全部成交标记 -->
+                    <div v-else-if="s.status === 3" class="flex items-center gap-1 text-xs text-emerald-600 font-medium ml-2">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      交易完成
+                    </div>
+                  </div>
+
+                  <!-- 操作按钮 -->
+                  <div class="flex items-center gap-2 shrink-0">
+                    <button
+                      v-if="s.status !== 3"
+                      class="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center gap-1"
+                      @click="openEdit(s)"
+                    >
+                      <Pencil class="w-3.5 h-3.5" />
+                      编辑
+                    </button>
+                    <button
+                      v-if="s.status === 0 || s.status === 1"
+                      class="px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors flex items-center gap-1"
+                      @click="revokeSupply(s)"
+                    >
+                      <Ban class="w-3.5 h-3.5" />
+                      下架
+                    </button>
+                    <button
+                      v-else-if="s.status === 2"
+                      class="px-3 py-1.5 rounded-lg text-xs font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 transition-colors flex items-center gap-1"
+                      @click="republishSupply(s)"
+                    >
+                      <RotateCcw class="w-3.5 h-3.5" />
+                      再次发布
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 分页 -->
+          <div v-if="listPagination.total > listPagination.size" class="pt-4 flex justify-center">
+            <el-pagination
+              v-model:current-page="listPagination.page"
+              :page-size="listPagination.size"
+              :total="listPagination.total"
+              layout="prev, pager, next"
+              @current-change="handlePageChange"
+            />
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- ========== 发布 Tab 内容 ========== -->
+    <template v-else>
     <!-- 双栏布局 -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- 左侧表单区域 -->
@@ -887,23 +1429,34 @@ async function applyTemplate(template: SupplyTemplateResponse) {
           </div>
         </div>
 
-        <!-- 产品标签（补充信息） -->
+        <!-- 产品标签（补充信息 - 可折叠） -->
         <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 120ms">
-          <div class="p-5 border-b border-gray-200 flex items-center justify-between">
+          <button
+            class="w-full p-5 border-b border-gray-200 flex items-center justify-between hover:bg-gray-50/50 transition-colors"
+            @click="sectionsCollapsed.tags = !sectionsCollapsed.tags"
+          >
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-5 bg-purple-500 rounded-full"></div>
               <h3 class="text-2xl font-bold text-gray-900">产品标签</h3>
               <span class="text-xs text-gray-400 ml-2">（可选）</span>
+              <span v-if="tagValues.length > 0 && sectionsCollapsed.tags" class="px-2 py-0.5 bg-purple-50 text-purple-600 text-xs font-bold rounded-full ml-2">
+                已选 {{ tagValues.length }} 个
+              </span>
             </div>
-            <span class="text-xs text-gray-400">添加更多产品特性标签</span>
-          </div>
-          <div class="p-5">
-            <TagPicker
-              v-model="tagValues"
-              :category-id="publishForm.categoryId"
-              domain="material"
+            <component
+              :is="sectionsCollapsed.tags ? ChevronDown : ChevronUp"
+              class="w-5 h-5 text-gray-400"
             />
-          </div>
+          </button>
+          <Transition name="collapse">
+            <div v-if="!sectionsCollapsed.tags" class="p-5">
+              <TagPicker
+                v-model="tagValues"
+                :category-id="publishForm.categoryId"
+                domain="material"
+              />
+            </div>
+          </Transition>
         </div>
 
         <!-- 物流与交付 -->
@@ -1129,6 +1682,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         </div>
       </div>
     </div>
+    </template>
 
     <!-- 模板选择面板 (Command Palette 风格) -->
     <TemplateCommandPalette
@@ -1165,10 +1719,187 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         </BaseButton>
       </template>
     </BaseModal>
+
+    <!-- 编辑已发布供应弹窗 -->
+    <BaseModal
+      v-model="editOpen"
+      title="编辑供应信息"
+      size="lg"
+    >
+      <div class="space-y-6">
+        <p class="text-sm text-gray-500">
+          仅修改本条已发布供应，不影响您的公司/个人档案
+        </p>
+
+        <!-- 标的信息 -->
+        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">交易标的</div>
+          <div class="mt-1 font-bold text-gray-900">
+            {{ editing?.categoryName || '-' }}
+            <span v-if="editing?.supplyNo" class="text-sm text-gray-500 font-medium ml-2">{{ editing?.supplyNo }}</span>
+          </div>
+        </div>
+
+        <!-- 表单 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">供应数量（{{ currentUnitConfig.quantityUnit }}）</label>
+            <input
+              v-model.number="editForm.quantity"
+              type="number"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">出厂价（元/{{ currentUnitConfig.quantityUnit }}）</label>
+            <input
+              v-model.number="editForm.exFactoryPrice"
+              type="number"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">产地</label>
+            <input
+              v-model="editForm.origin"
+              type="text"
+              placeholder="例如：山东济南..."
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发货地址</label>
+            <input
+              v-model="editForm.shipAddress"
+              type="text"
+              placeholder="例如：山东省济南市..."
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">交付方式</label>
+            <input
+              v-model="editForm.deliveryMode"
+              type="text"
+              placeholder="例如：到厂 / 自提"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">包装方式</label>
+            <input
+              v-model="editForm.packaging"
+              type="text"
+              placeholder="例如：散装 / 袋装"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">付款方式</label>
+            <select
+              v-model="editForm.paymentMethod"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all bg-white"
+            >
+              <option value="">请选择</option>
+              <option value="现款">现款</option>
+              <option value="账期">账期</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发票类型</label>
+            <select
+              v-model="editForm.invoiceType"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all bg-white"
+            >
+              <option value="">请选择</option>
+              <option value="普通发票">普通发票</option>
+              <option value="增值税发票">增值税发票</option>
+              <option value="不需要发票">不需要发票</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发布有效期</label>
+            <select
+              v-model="editForm.expireMinutes"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all bg-white"
+            >
+              <option :value="60">1小时</option>
+              <option :value="1440">1天</option>
+              <option :value="4320">3天</option>
+              <option :value="10080">7天</option>
+              <option :value="43200">30天</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">备注</label>
+            <textarea
+              v-model="editForm.remark"
+              rows="2"
+              placeholder="补充说明（选填）"
+              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <BaseButton type="secondary" @click="editOpen = false">
+          <X class="w-4 h-4" />
+          取消
+        </BaseButton>
+        <BaseButton type="primary" :loading="saving" @click="saveEdit">
+          保存修改
+        </BaseButton>
+      </template>
+    </BaseModal>
   </div>
 </template>
 
 <style scoped>
+/* 下拉菜单过渡 */
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.15s ease-out;
+}
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* 折叠过渡 */
+.collapse-enter-active,
+.collapse-leave-active {
+  transition: all 0.2s ease-out;
+  overflow: hidden;
+}
+.collapse-enter-from,
+.collapse-leave-to {
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.collapse-enter-to,
+.collapse-leave-from {
+  max-height: 1000px;
+}
+
+/* 入场动画 */
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-stagger-in {
+  animation: stagger-in 0.2s ease-out both;
+}
+
 /* Element Plus 输入控件统一样式 */
 :deep(.neo-input-number .el-input__wrapper),
 :deep(.neo-select .el-select__wrapper) {

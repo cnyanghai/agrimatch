@@ -98,6 +98,9 @@ watch(selectedSchemaCode, (newCode) => {
   cascaderValue.value = undefined
   emit('update:modelValue', null)
   emit('schemaChange', newCode)
+  // 重置自定义弹窗状态
+  customParentId.value = undefined
+  customName.value = ''
 })
 
 // 监听外部 modelValue 变化，同步到内部状态
@@ -327,7 +330,7 @@ onBeforeUnmount(detachListeners)
     </div>
   </div>
 
-  <el-dialog v-model="customDialogOpen" title="自定义品类" width="520px" append-to-body class="!rounded-3xl">
+  <el-dialog v-model="customDialogOpen" title="自定义品类" width="min(90vw, 520px)" append-to-body class="!rounded-3xl">
     <div class="space-y-4 py-2">
       <div v-if="!customParentId">
         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">选择所属大类</label>

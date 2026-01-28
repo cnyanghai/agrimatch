@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
-import { ChevronDown, AlertCircle, HelpCircle } from 'lucide-vue-next'
+import { computed } from 'vue'
+import { HelpCircle } from 'lucide-vue-next'
 import type { ProductParamResponse } from '../api/product'
 
 const props = defineProps<{
@@ -73,7 +73,7 @@ function parseOptions(param: ProductParamResponse): string[] {
         <HelpCircle class="w-6 h-6 text-gray-400" />
       </div>
       <p class="text-sm text-gray-500">该品类暂无预设参数</p>
-      <p class="text-xs text-gray-400 mt-1">您可以在下方添加自定义标签</p>
+      <p class="text-xs text-gray-400 mt-1">如需补充信息，请使用产品标签功能</p>
     </div>
 
     <!-- 分组参数表单 -->

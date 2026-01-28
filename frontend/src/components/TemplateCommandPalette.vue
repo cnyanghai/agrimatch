@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { Search, Trash2, Command, ArrowUp, ArrowDown, CornerDownLeft } from 'lucide-vue-next'
+import { Search, Trash2, Command, ArrowUp, ArrowDown, CornerDownLeft, Package, FileText } from 'lucide-vue-next'
 
 export interface TemplateItem {
   id: number
@@ -90,14 +90,8 @@ function handleKeydown(e: KeyboardEvent) {
       e.preventDefault()
       close()
       break
-    case 'Backspace':
-    case 'Delete':
-      // 仅在搜索框为空时触发删除
-      if (searchQuery.value === '' && filteredTemplates.value[selectedIndex.value]) {
-        e.preventDefault()
-        emit('delete', filteredTemplates.value[selectedIndex.value].id)
-      }
-      break
+    // 移除 Backspace/Delete 快捷键删除功能，防止误触
+    // 用户可通过点击删除按钮删除模板
     default:
       // 数字键 1-9 快速选择
       if (/^[1-9]$/.test(e.key)) {
@@ -195,60 +189,85 @@ onBeforeUnmount(() => {
             </div>
 
             <!-- 模板列表 -->
-            <div ref="listRef" class="max-h-[50vh] overflow-y-auto">
+            <div ref="listRef" class="max-h-[50vh] overflow-y-auto p-3 space-y-2">
               <!-- 空状态 -->
               <div v-if="filteredTemplates.length === 0" class="py-12 text-center">
-                <div class="text-gray-400 text-sm">{{ searchQuery ? '未找到匹配的模板' : emptyText }}</div>
+                <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                  <FileText class="w-7 h-7 text-gray-300" />
+                </div>
+                <div class="text-gray-500 font-medium">{{ searchQuery ? '未找到匹配的模板' : '暂无模板' }}</div>
+                <div class="text-gray-400 text-sm mt-1">{{ searchQuery ? '请尝试其他关键词' : emptyText }}</div>
               </div>
 
-              <!-- 模板项 -->
+              <!-- 模板卡片 -->
               <div
                 v-for="(tpl, index) in filteredTemplates"
                 :key="tpl.id"
                 :data-index="index"
-                class="group flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors"
-                :class="index === selectedIndex ? 'bg-brand-50' : 'hover:bg-gray-50'"
+                class="group relative rounded-xl border-2 p-3 cursor-pointer transition-all duration-150"
+                :class="[
+                  index === selectedIndex
+                    ? 'border-brand-500 bg-brand-50/50 shadow-sm shadow-brand-100'
+                    : 'border-gray-100 bg-white hover:border-gray-200 hover:bg-gray-50/50'
+                ]"
                 @click="selectTemplate(tpl)"
                 @mouseenter="selectedIndex = index"
               >
-                <!-- 快捷键数字 -->
+                <div class="flex items-start gap-3">
+                  <!-- 左侧：图标 + 快捷键 -->
+                  <div class="relative shrink-0">
+                    <div
+                      class="w-11 h-11 rounded-xl flex items-center justify-center transition-colors"
+                      :class="index === selectedIndex ? 'bg-brand-500' : 'bg-gray-100'"
+                    >
+                      <Package class="w-5 h-5" :class="index === selectedIndex ? 'text-white' : 'text-gray-400'" />
+                    </div>
+                    <!-- 快捷键角标 -->
+                    <div
+                      v-if="index < 9"
+                      class="absolute -top-1 -right-1 w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold shadow-sm"
+                      :class="index === selectedIndex ? 'bg-white text-brand-600' : 'bg-gray-700 text-white'"
+                    >
+                      {{ index + 1 }}
+                    </div>
+                  </div>
+
+                  <!-- 中间：主要信息 -->
+                  <div class="flex-1 min-w-0 py-0.5">
+                    <!-- 模板名称 -->
+                    <div class="font-bold text-gray-900 truncate mb-1">{{ tpl.name }}</div>
+                    <!-- 详情行 -->
+                    <div class="flex items-center gap-2 text-sm">
+                      <span class="px-2 py-0.5 bg-gray-100 rounded-md text-xs font-semibold text-gray-600">
+                        {{ tpl.category }}
+                      </span>
+                      <span class="text-gray-300">·</span>
+                      <span class="text-gray-500">
+                        <span class="font-semibold text-gray-700">{{ tpl.quantity || 0 }}</span>
+                        <span class="text-xs ml-0.5">{{ tpl.quantityUnit || '吨' }}</span>
+                      </span>
+                      <span class="text-gray-300">·</span>
+                      <span class="font-semibold" :class="index === selectedIndex ? 'text-brand-600' : 'text-gray-600'">
+                        {{ formatPrice(tpl.price, tpl.priceUnit) }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- 右侧：删除按钮 -->
+                  <button
+                    class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-100 text-gray-400 hover:text-red-500 transition-all"
+                    title="删除模板"
+                    @click="deleteTemplate(tpl.id, $event)"
+                  >
+                    <Trash2 class="w-4 h-4" />
+                  </button>
+                </div>
+
+                <!-- 选中指示器 -->
                 <div
-                  class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 transition-colors"
-                  :class="index === selectedIndex ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-500'"
-                >
-                  {{ index < 9 ? index + 1 : '' }}
-                </div>
-
-                <!-- 模板信息 -->
-                <div class="flex-1 min-w-0 flex items-center gap-3">
-                  <!-- 名称 -->
-                  <div class="font-semibold text-gray-900 truncate max-w-[180px]">{{ tpl.name }}</div>
-
-                  <!-- 品类标签 -->
-                  <div class="px-2 py-0.5 bg-gray-100 rounded text-xs font-medium text-gray-600 shrink-0">
-                    {{ tpl.category }}
-                  </div>
-                </div>
-
-                <!-- 数量和价格 -->
-                <div class="flex items-center gap-4 text-sm shrink-0">
-                  <div class="text-gray-500">
-                    <span class="font-semibold text-gray-700">{{ tpl.quantity || 0 }}</span>
-                    <span class="text-xs ml-0.5">{{ tpl.quantityUnit || '吨' }}</span>
-                  </div>
-                  <div class="font-semibold text-brand-600 min-w-[80px] text-right">
-                    {{ formatPrice(tpl.price, tpl.priceUnit) }}
-                  </div>
-                </div>
-
-                <!-- 删除按钮 -->
-                <button
-                  class="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-100 text-gray-400 hover:text-red-500 transition-all shrink-0"
-                  title="删除模板"
-                  @click="deleteTemplate(tpl.id, $event)"
-                >
-                  <Trash2 class="w-4 h-4" />
-                </button>
+                  v-if="index === selectedIndex"
+                  class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-brand-500 rounded-r-full"
+                ></div>
               </div>
             </div>
 
