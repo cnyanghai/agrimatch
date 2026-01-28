@@ -348,6 +348,11 @@ export function useNegotiationWorkspace() {
     if (type === 'MESSAGE' && message) {
       updateConversationPreview(msgConvId, message)
     }
+
+    // 处理消息已读通知
+    if (type === 'MESSAGES_READ' && data.messageIds && data.readAt) {
+      chatMessages.markMessagesAsRead(data.messageIds, data.readAt)
+    }
   }
 
   /** 更新会话预览 */

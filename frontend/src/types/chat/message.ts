@@ -24,6 +24,7 @@ export interface ChatMessageResponse {
   payloadJson?: string
   quoteStatus?: QuoteStatus | string
   read: boolean
+  readAt?: string
   createTime?: string
 }
 
@@ -46,6 +47,10 @@ export interface UiMessage {
   basisPrice?: number
   /** 期货合约代码（用于基差报价） */
   contractCode?: string
+  /** 是否已读（仅对发送的消息有意义） */
+  read?: boolean
+  /** 已读时间 */
+  readAt?: string
 }
 
 /** 图片消息 payload */
@@ -130,7 +135,9 @@ export function toUiMessage(m: ChatMessageResponse, currentUserId: number): UiMe
     time: m.createTime,
     timestamp: isNaN(timestamp) ? Date.now() : timestamp,
     fromUserId: m.fromUserId,
-    toUserId: m.toUserId
+    toUserId: m.toUserId,
+    read: m.read,
+    readAt: m.readAt
   }
 }
 

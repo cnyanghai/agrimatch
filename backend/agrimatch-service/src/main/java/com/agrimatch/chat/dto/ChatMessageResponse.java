@@ -18,6 +18,7 @@ public class ChatMessageResponse {
     private java.math.BigDecimal basisPrice;
     private String contractCode;
     private boolean read;
+    private LocalDateTime readAt;
     private LocalDateTime createTime;
 
     public Long getId() {
@@ -138,6 +139,14 @@ public class ChatMessageResponse {
 
     public void setRead(boolean read) {
         this.read = read;
+    }
+
+    public LocalDateTime getReadAt() {
+        return readAt;
+    }
+
+    public void setReadAt(LocalDateTime readAt) {
+        this.readAt = readAt;
     }
 
     public LocalDateTime getCreateTime() {

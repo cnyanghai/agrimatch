@@ -57,6 +57,19 @@ function needsTimeSeparator(index: number): boolean {
   return shouldShowTimeSeparator(prev?.timestamp, curr?.timestamp)
 }
 
+// 判断是否为最后一条发送的消息
+function isLastSentMessage(index: number): boolean {
+  const msg = props.messages[index]
+  if (!msg || msg.type !== 'sent') return false
+  // 从后往前找最后一条 sent 消息
+  for (let i = props.messages.length - 1; i >= 0; i--) {
+    if (props.messages[i]?.type === 'sent') {
+      return i === index
+    }
+  }
+  return false
+}
+
 // 获取消息的前一条报价（用于计算差异）
 function getPreviousQuotePayload(index: number): string | undefined {
   for (let i = index - 1; i >= 0; i--) {
@@ -523,9 +536,16 @@ defineExpose({ scrollToBottom })
         </div>
 
         <!-- 我的文本消息 -->
-        <div v-else class="flex justify-end max-w-[85%] ml-auto">
+        <div v-else class="flex flex-col items-end max-w-[85%] ml-auto">
           <div class="bg-brand-600 text-white px-3 py-2 rounded-2xl rounded-tr-none shadow-md text-sm">
             {{ msg.content }}
+          </div>
+          <!-- 已读状态（仅最后一条发送的消息显示） -->
+          <div v-if="isLastSentMessage(idx)" class="flex items-center gap-1 mt-0.5 mr-1">
+            <span v-if="msg.status === 'pending'" class="text-[10px] text-gray-400">发送中...</span>
+            <span v-else-if="msg.status === 'failed'" class="text-[10px] text-red-500">发送失败</span>
+            <span v-else-if="msg.read" class="text-[10px] text-brand-500">已读</span>
+            <span v-else class="text-[10px] text-gray-400">未读</span>
           </div>
         </div>
       </template>

@@ -196,7 +196,14 @@ onBeforeUnmount(() => {
       <!-- 工作区内容 -->
       <template v-else>
         <!-- 左侧：产品详情 + 聊天 (4:6) -->
-        <div class="w-[38%] min-w-[340px] max-w-[440px] flex flex-col p-3 gap-3 overflow-hidden">
+        <div
+          :class="[
+            'flex flex-col p-3 gap-3 overflow-hidden transition-all duration-300',
+            sidebarState === 'mini'
+              ? 'w-[45%] min-w-[380px] max-w-[520px]'
+              : 'w-[38%] min-w-[340px] max-w-[440px]'
+          ]"
+        >
           <!-- 产品需求表单 (40%) - 编辑即调整报价 -->
           <div class="h-2/5 overflow-auto">
             <ProductRequirementForm

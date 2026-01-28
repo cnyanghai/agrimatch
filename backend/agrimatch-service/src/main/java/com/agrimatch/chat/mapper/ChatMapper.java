@@ -43,6 +43,8 @@ public interface ChatMapper {
 
     int markReadInConversation(@Param("conversationId") Long conversationId, @Param("toUserId") Long toUserId);
 
+    List<Long> selectUnreadMessageIds(@Param("conversationId") Long conversationId, @Param("toUserId") Long toUserId);
+
     ConversationUserPair selectConversationUserPair(@Param("conversationId") Long conversationId);
 
     /** 更新消息的 payloadJson */

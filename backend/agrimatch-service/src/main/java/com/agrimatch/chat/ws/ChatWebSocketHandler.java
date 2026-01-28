@@ -3,6 +3,7 @@ package com.agrimatch.chat.ws;
 import com.agrimatch.chat.dto.ChatMessageResponse;
 import com.agrimatch.chat.event.ContractMessageEvent;
 import com.agrimatch.chat.event.MessageUpdateEvent;
+import com.agrimatch.chat.event.MessagesReadEvent;
 import com.agrimatch.chat.event.OfferUpdatedEvent;
 import com.agrimatch.chat.service.ChatService;
 import com.agrimatch.security.JwtTokenUtil;
@@ -134,8 +135,25 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     @EventListener
     public void onMessageUpdate(MessageUpdateEvent event) {
-        broadcastMessageUpdate(event.getConversationId(), event.getAUserId(), event.getBUserId(), 
+        broadcastMessageUpdate(event.getConversationId(), event.getAUserId(), event.getBUserId(),
                               event.getMessageId(), event.getPayloadJson());
+    }
+
+    @EventListener
+    public void onMessagesRead(MessagesReadEvent event) {
+        // 只通知消息发送方（对方已读）
+        String payload;
+        try {
+            payload = objectMapper.writeValueAsString(objectMapper.createObjectNode()
+                    .put("type", "MESSAGES_READ")
+                    .put("conversationId", event.getConversationId())
+                    .put("readAt", event.getReadAt().toString())
+                    .set("messageIds", objectMapper.valueToTree(event.getMessageIds()))
+            );
+        } catch (Exception e) {
+            return;
+        }
+        sendToUser(event.getNotifyUserId(), new TextMessage(payload));
     }
 
     /**

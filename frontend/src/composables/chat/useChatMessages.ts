@@ -208,6 +208,22 @@ export function useChatMessages(options: UseChatMessagesOptions) {
     updateMessage(messageId, { quoteStatus })
   }
 
+  /**
+   * 标记消息为已读（通过 WebSocket 推送）
+   */
+  function markMessagesAsRead(messageIds: number[], readAt: string): void {
+    messageIds.forEach(id => {
+      const idx = messages.value.findIndex(m => m.id === id)
+      if (idx >= 0 && messages.value[idx]) {
+        messages.value.splice(idx, 1, {
+          ...messages.value[idx],
+          read: true,
+          readAt
+        })
+      }
+    })
+  }
+
   // ==================== Computed Properties ====================
 
   /**
@@ -304,6 +320,7 @@ export function useChatMessages(options: UseChatMessagesOptions) {
     handleIncomingMessage,
     handleQuoteStatusUpdate,
     updateQuoteStatus: handleQuoteStatusUpdate,
+    markMessagesAsRead,
 
     // Computed
     peerLatestQuote,

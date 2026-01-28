@@ -63,10 +63,23 @@ function formatTime(time?: string): string {
   <transition name="sidebar">
     <aside
       :class="[
-        'sidebar flex flex-col bg-white border-r border-gray-200 transition-all duration-300 shrink-0',
+        'sidebar relative flex flex-col bg-white border-r border-gray-200 transition-all duration-300 shrink-0',
         state === 'expanded' ? 'w-56' : 'w-14'
       ]"
     >
+      <!-- 侧边悬浮折叠按钮 -->
+      <button
+        @click="toggleState"
+        class="absolute top-1/2 -translate-y-1/2 -right-3 z-10
+               w-6 h-12 bg-white border border-gray-200 border-l-0
+               rounded-r-full shadow-md
+               flex items-center justify-center
+               text-gray-400 hover:text-brand-600 hover:bg-brand-50
+               transition-all duration-200 hover:shadow-lg hover:-right-3.5"
+      >
+        <ChevronLeft v-if="state === 'expanded'" class="w-4 h-4 -ml-0.5" />
+        <ChevronRight v-else class="w-4 h-4 -ml-0.5" />
+      </button>
       <!-- 搜索栏（仅展开时显示） -->
       <div v-if="state === 'expanded'" class="p-2.5 border-b border-gray-100">
         <div class="relative">
@@ -159,17 +172,6 @@ function formatTime(time?: string): string {
         <div v-if="filteredMerchants.length === 0" class="p-4 text-center text-xs text-gray-400">
           暂无会话
         </div>
-      </div>
-
-      <!-- 底部操作 -->
-      <div class="p-2 border-t border-gray-200 flex items-center justify-center">
-        <button
-          class="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-          @click="toggleState"
-        >
-          <ChevronLeft v-if="state === 'expanded'" class="w-3.5 h-3.5" />
-          <ChevronRight v-else class="w-3.5 h-3.5" />
-        </button>
       </div>
     </aside>
   </transition>

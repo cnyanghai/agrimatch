@@ -5,6 +5,7 @@ import com.agrimatch.chat.domain.BusChatMessage;
 import com.agrimatch.chat.dto.ChatConversationResponse;
 import com.agrimatch.chat.dto.ChatMessageResponse;
 import com.agrimatch.chat.dto.ChatPeerResponse;
+import com.agrimatch.chat.event.MessagesReadEvent;
 import com.agrimatch.chat.event.OfferUpdatedEvent;
 import com.agrimatch.chat.mapper.ChatMapper;
 import com.agrimatch.chat.service.ChatService;
@@ -72,6 +73,7 @@ public class ChatServiceImpl implements ChatService {
             r.setBasisPrice(m.getBasisPrice());
             r.setContractCode(m.getContractCode());
             r.setRead(m.getIsRead() != null && m.getIsRead() == 1);
+            r.setReadAt(m.getReadAt());
             r.setCreateTime(m.getCreateTime());
             out.add(r);
         }
@@ -182,6 +184,7 @@ public class ChatServiceImpl implements ChatService {
             r.setBasisPrice(m.getBasisPrice());
             r.setContractCode(m.getContractCode());
             r.setRead(m.getIsRead() != null && m.getIsRead() == 1);
+            r.setReadAt(m.getReadAt());
             r.setCreateTime(m.getCreateTime());
             out.add(r);
         }
@@ -189,9 +192,22 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    @Transactional
     public void markConversationRead(Long userId, Long conversationId) {
-        requireConversationMember(userId, conversationId);
+        ChatMapper.ConversationUserPair pair = requireConversationMember(userId, conversationId);
+
+        // 先查询未读消息ID
+        List<Long> unreadIds = chatMapper.selectUnreadMessageIds(conversationId, userId);
+        if (unreadIds == null || unreadIds.isEmpty()) {
+            return; // 没有未读消息
+        }
+
+        // 标记已读
         chatMapper.markReadInConversation(conversationId, userId);
+
+        // 通知消息发送方（对方）
+        Long notifyUserId = userId.equals(pair.getAUserId()) ? pair.getBUserId() : pair.getAUserId();
+        eventPublisher.publishEvent(new MessagesReadEvent(this, conversationId, userId, notifyUserId, unreadIds));
     }
 
     @Override
@@ -292,6 +308,7 @@ public class ChatServiceImpl implements ChatService {
         r.setBasisPrice(updated.getBasisPrice());
         r.setContractCode(updated.getContractCode());
         r.setRead(updated.getIsRead() != null && updated.getIsRead() == 1);
+        r.setReadAt(updated.getReadAt());
         r.setCreateTime(updated.getCreateTime());
 
         // 发布事件通知 WebSocket 广播
@@ -335,6 +352,7 @@ public class ChatServiceImpl implements ChatService {
         r.setBasisPrice(updated.getBasisPrice());
         r.setContractCode(updated.getContractCode());
         r.setRead(updated.getIsRead() != null && updated.getIsRead() == 1);
+        r.setReadAt(updated.getReadAt());
         r.setCreateTime(updated.getCreateTime());
 
         // 发布事件通知 WebSocket 广播

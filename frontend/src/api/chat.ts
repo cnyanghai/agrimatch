@@ -24,6 +24,7 @@ export interface ChatMessageResponse {
   payloadJson?: string
   quoteStatus?: 'OFFERED' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED' | string
   read: boolean
+  readAt?: string
   createTime?: string
 }
 

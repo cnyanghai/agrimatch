@@ -20,6 +20,7 @@ public class BusChatMessage {
     private java.math.BigDecimal basisPrice;
     private String contractCode;
     private Integer isRead;
+    private LocalDateTime readAt;
     private Integer isDeleted;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
@@ -110,6 +111,14 @@ public class BusChatMessage {
 
     public void setIsRead(Integer isRead) {
         this.isRead = isRead;
+    }
+
+    public LocalDateTime getReadAt() {
+        return readAt;
+    }
+
+    public void setReadAt(LocalDateTime readAt) {
+        this.readAt = readAt;
     }
 
     public Integer getIsDeleted() {
