@@ -15,6 +15,7 @@ import { getSchemaUnitConfig, getCategoryUnitConfig } from '../utils/schemaUnits
 import TagPicker from '../components/TagPicker.vue'
 import type { TagValue } from '../api/tag'
 import { BaseButton, BaseModal, EmptyState } from '../components/ui'
+import TemplateCommandPalette, { type TemplateItem } from '../components/TemplateCommandPalette.vue'
 import { useCompanyStore } from '../stores/company'
 
 const router = useRouter()
@@ -118,18 +119,29 @@ type TemplateJsonData = {
   remark?: string
 }
 
-const templateJsonCache = new Map<number, { json: string; data: TemplateJsonData }>()
-
-function getTemplateJson(template: SupplyTemplateResponse): TemplateJsonData {
-  const key = template.id
-  const json = template.templateJson || ''
-  const cached = templateJsonCache.get(key)
-  if (cached && cached.json === json) return cached.data
-  let data: TemplateJsonData = {}
-  try { data = (JSON.parse(json) ?? {}) as TemplateJsonData } catch { data = {} }
-  templateJsonCache.set(key, { json, data })
-  return data
-}
+// 预解析模板数据，转换为 TemplateItem 格式
+const parsedTemplates = computed<TemplateItem[]>(() =>
+  templates.value.map(t => {
+    let parsed: TemplateJsonData = {}
+    try {
+      parsed = (JSON.parse(t.templateJson || '') ?? {}) as TemplateJsonData
+    } catch {
+      parsed = {}
+    }
+    const schemaConfig = getSchemaUnitConfig(parsed.schemaCode || 'feed')
+    return {
+      id: t.id,
+      name: t.templateName,
+      category: parsed.categoryName || '未分类',
+      quantity: parsed.quantity,
+      quantityUnit: schemaConfig.quantityUnit,
+      price: parsed.exFactoryPrice,
+      priceUnit: schemaConfig.priceUnit,
+      // 保留原始数据用于应用模板
+      _raw: t
+    } as TemplateItem & { _raw: typeof t }
+  })
+)
 
 function formatPrice(p?: number) {
   const n = Number(p)
@@ -329,24 +341,27 @@ async function loadTemplates() {
   }
 }
 
-watch(pickedCategory, async (category) => {
-  if (suspendCategoryWatch.value) return
-  if (category) {
-    publishForm.categoryId = category.id
-    publishForm.categoryName = category.name
-    // 更新业态代码
-    if (category.schemaCode) {
-      selectedSchemaCode.value = category.schemaCode
+watch(
+  () => pickedCategory.value?.id,
+  async (categoryId) => {
+    if (suspendCategoryWatch.value) return
+    const category = pickedCategory.value
+    if (category && categoryId) {
+      publishForm.categoryId = category.id
+      publishForm.categoryName = category.name
+      if (category.schemaCode) {
+        selectedSchemaCode.value = category.schemaCode
+      }
+      await loadCategoryParams(category.id)
+      await loadNextSupplyNo()
+    } else {
+      publishForm.categoryId = undefined
+      publishForm.categoryName = ''
+      categoryParams.value = []
+      dynamicParams.value = {}
     }
-    await loadCategoryParams(category.id)
-    await loadNextSupplyNo()
-  } else {
-    publishForm.categoryId = undefined
-    publishForm.categoryName = ''
-    categoryParams.value = []
-    dynamicParams.value = {}
   }
-}, { deep: true })
+)
 
 async function loadCategoryParams(productId: number) {
   try {
@@ -502,11 +517,16 @@ async function deleteTemplate(id: number) {
   }
 }
 
+// 处理模板选择（从 CommandPalette）
+function handleTemplateSelect(item: TemplateItem & { _raw?: SupplyTemplateResponse }) {
+  if (item._raw) {
+    applyTemplate(item._raw)
+  }
+}
+
 async function applyTemplate(template: SupplyTemplateResponse) {
   try {
     const data = JSON.parse(template.templateJson)
-    publishForm.companyName = data.companyName || publishForm.companyName
-    publisherNameInput.value = data.publisherName || publisherNameInput.value
 
     suspendCategoryWatch.value = true
 
@@ -515,40 +535,48 @@ async function applyTemplate(template: SupplyTemplateResponse) {
       selectedSchemaCode.value = data.schemaCode
     }
 
+    // 批量更新 publishForm，减少重渲染次数
+    Object.assign(publishForm, {
+      companyName: data.companyName || publishForm.companyName,
+      categoryId: data.categoryId,
+      categoryName: data.categoryName || '',
+      exFactoryPrice: data.exFactoryPrice,
+      quantity: data.quantity,
+      packaging: data.packaging || '散装',
+      shipAddress: data.shipAddress || '',
+      deliveryMode: data.deliveryMode || '到厂',
+      paymentMethod: data.paymentMethod || '现款',
+      invoiceType: data.invoiceType || '',
+      expireMinutes: data.expireMinutes || 4320,
+      remark: data.remark || ''
+    })
+
+    publisherNameInput.value = data.publisherName || publisherNameInput.value
     pickedCategory.value = data.categoryId ? {
       id: data.categoryId,
       name: data.categoryName || String(data.categoryId),
       schemaCode: data.schemaCode || 'feed'
     } : null
-    publishForm.categoryId = data.categoryId
-    publishForm.categoryName = data.categoryName || ''
-    publishForm.exFactoryPrice = data.exFactoryPrice
-    publishForm.quantity = data.quantity
-    publishForm.packaging = data.packaging || '散装'
-    publishForm.shipAddress = data.shipAddress || ''
-    publishForm.deliveryMode = data.deliveryMode || '到厂'
-    publishForm.paymentMethod = data.paymentMethod || '现款'
-    publishForm.invoiceType = data.invoiceType || ''
-    publishForm.expireMinutes = data.expireMinutes || 4320
-    publishForm.remark = data.remark || ''
-    
-    if (data.categoryId) await loadCategoryParams(data.categoryId)
-    else { categoryParams.value = []; dynamicParams.value = {} }
 
+    if (data.categoryId) {
+      await loadCategoryParams(data.categoryId)
+    } else {
+      categoryParams.value = []
+      dynamicParams.value = {}
+    }
+
+    // 恢复参数值（必须在 loadCategoryParams 之后）
     if (data.paramsJson) {
       try {
         const paramsData = JSON.parse(data.paramsJson)
-        // 支持新格式 {"参数名": "值"} 和旧格式 {"params": {"ID": {"value": "值"}}}
         const isNewFormat = !paramsData.params && !paramsData.custom
-        
+
         if (isNewFormat) {
-          // 新格式：通过名称找 ID
           Object.entries(paramsData).forEach(([name, value]) => {
             const param = categoryParams.value.find(p => p.paramName === name)
             if (param) dynamicParams.value[param.id] = value
           })
         } else {
-          // 旧格式兼容
           const oldParams = paramsData.params || {}
           Object.entries(oldParams).forEach(([paramId, val]: [string, any]) => {
             const actualValue = (typeof val === 'object' && val !== null && 'value' in val) ? val.value : val
@@ -559,8 +587,8 @@ async function applyTemplate(template: SupplyTemplateResponse) {
     }
 
     suspendCategoryWatch.value = false
-    ElMessage.success('模板已应用')
     templatePickerOpen.value = false
+    ElMessage.success('模板已应用')
   } catch {
     suspendCategoryWatch.value = false
     ElMessage.error('模板数据格式错误')
@@ -1102,54 +1130,15 @@ async function applyTemplate(template: SupplyTemplateResponse) {
       </div>
     </div>
 
-    <!-- 模板选择弹窗 -->
-    <BaseModal v-model="templatePickerOpen" title="选择供应模板" size="lg">
-      <div v-if="templates.length === 0" class="py-8">
-        <EmptyState
-          type="data"
-          title="暂无模板"
-          description="可在发布表单中点击【保存为模板】创建"
-          size="md"
-        />
-      </div>
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div
-          v-for="template in templates"
-          :key="template.id"
-          class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md hover:border-brand-100 transition-all cursor-pointer"
-          @click="applyTemplate(template)"
-        >
-          <div class="flex items-start justify-between gap-3 mb-3">
-            <div class="min-w-0">
-              <div class="font-bold text-gray-900 truncate">{{ template.templateName }}</div>
-              <div class="text-xs text-gray-500 mt-0.5">{{ getTemplateJson(template).categoryName || '未分类' }}</div>
-            </div>
-            <button
-              class="p-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-all"
-              @click.stop="deleteTemplate(template.id)"
-            >
-              <Trash2 class="w-4 h-4" />
-            </button>
-          </div>
-          <div class="grid grid-cols-2 gap-2 text-sm">
-            <div class="bg-gray-50 rounded-lg px-2.5 py-1.5">
-              <div class="text-[10px] text-gray-400">数量</div>
-              <div class="font-bold text-gray-900">{{ getTemplateJson(template).quantity || 0 }}</div>
-            </div>
-            <div class="bg-gray-50 rounded-lg px-2.5 py-1.5">
-              <div class="text-[10px] text-gray-400">单价</div>
-              <div class="font-bold text-brand-600">{{ formatPrice(getTemplateJson(template).exFactoryPrice) }}</div>
-            </div>
-          </div>
-          <div class="mt-2 text-xs text-gray-400">
-            {{ formatDate(template.createTime) }} · 点击使用
-          </div>
-        </div>
-      </div>
-      <template #footer>
-        <BaseButton type="secondary" @click="templatePickerOpen = false">关闭</BaseButton>
-      </template>
-    </BaseModal>
+    <!-- 模板选择面板 (Command Palette 风格) -->
+    <TemplateCommandPalette
+      v-model="templatePickerOpen"
+      :templates="parsedTemplates"
+      title="供应模板"
+      empty-text="暂无模板，可在发布表单中保存"
+      @select="handleTemplateSelect"
+      @delete="deleteTemplate"
+    />
 
     <!-- 保存模板弹窗 -->
     <BaseModal v-model="saveTemplateDialogVisible" title="保存为模板" size="sm">

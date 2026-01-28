@@ -87,8 +87,8 @@ onUnmounted(() => {
         class="fixed inset-0 z-[2000] flex items-center justify-center p-4"
       >
         <!-- 遮罩 -->
-        <div 
-          class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+        <div
+          class="absolute inset-0 bg-slate-900/70"
           @click="onOverlayClick"
         />
         
