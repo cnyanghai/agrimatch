@@ -5,7 +5,7 @@
  * 支持议价时对价格、参数等进行修改
  */
 import { ref, computed, watch, onMounted } from 'vue'
-import { Package, ChevronDown, ChevronUp, Send, MapPin, Truck, CreditCard, FileText, Settings } from 'lucide-vue-next'
+import { Package, Send, MapPin, Truck, CreditCard, FileText, Settings } from 'lucide-vue-next'
 
 export interface RequirementData {
   // 基础信息
@@ -59,8 +59,6 @@ const emit = defineEmits<{
   (e: 'send-quote', data: RequirementData): void
 }>()
 
-// 展开/收起状态
-const isExpanded = ref(true)
 const showAdvanced = ref(false)
 
 // 表单数据
@@ -146,10 +144,6 @@ function formatCurrency(amount: number): string {
   }).format(amount)
 }
 
-function toggleExpand() {
-  isExpanded.value = !isExpanded.value
-}
-
 // 获取动态参数的键值对
 const dynamicParamsList = computed(() => {
   if (!form.value.dynamicParams) return []
@@ -168,21 +162,15 @@ function updateDynamicParam(key: string, value: string) {
 <template>
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full">
     <!-- 头部（固定） -->
-    <div
-      class="px-3 py-2 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 cursor-pointer shrink-0"
-      @click="toggleExpand"
-    >
+    <div class="px-3 py-2 border-b border-gray-100 flex items-center bg-gray-50/50 shrink-0">
       <h3 class="text-sm font-bold text-gray-900 flex items-center gap-1.5">
         <Package class="w-4 h-4 text-brand-600" />
         {{ subjectType === 'SUPPLY' ? '供应详情' : '采购需求' }}
       </h3>
-      <div class="flex items-center gap-2">
-        <component :is="isExpanded ? ChevronUp : ChevronDown" class="w-4 h-4 text-gray-400" />
-      </div>
     </div>
 
     <!-- 表单内容（可滚动） -->
-    <div v-show="isExpanded" class="flex-1 overflow-y-auto p-3 space-y-3">
+    <div class="flex-1 overflow-y-auto p-3 space-y-3">
       <!-- 产品名称 + 品类 -->
       <div class="grid grid-cols-2 gap-2">
         <div>

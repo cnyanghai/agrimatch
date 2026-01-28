@@ -15,7 +15,7 @@ const importers: Record<string, Importer> = {
   talkDetail: () => import('../views/TopicDetailView.vue'),
 
   // 控制台/核心
-  chat: () => import('../views/BusinessChatView.vue'),
+  chat: () => import('../views/NegotiationWorkspace.vue'),
   profile: () => import('../views/AccountSettingsView.vue'),
   console: () => import('../views/DashboardView.vue'),
 }
