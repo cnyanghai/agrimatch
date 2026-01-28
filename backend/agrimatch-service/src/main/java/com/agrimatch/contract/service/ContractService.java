@@ -41,6 +41,16 @@ public interface ContractService {
     void cancel(Long userId, Long contractId, String reason);
 
     byte[] generatePdf(Long viewerUserId, Long id);
+
+    /**
+     * 获取公司合同统计（签订合同数、合作商户数）
+     */
+    ContractStatsResponse getCompanyStats(Long companyId);
+
+    /**
+     * 获取公司合作商家列表
+     */
+    List<PartnerCompanyResponse> getPartnerCompanies(Long companyId);
 }
 
 

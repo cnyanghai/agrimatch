@@ -1414,4 +1414,28 @@ public class ContractServiceImpl implements ContractService {
             return null;
         }
     }
+
+    // ==================== 合作统计相关方法 ====================
+
+    @Override
+    public ContractStatsResponse getCompanyStats(Long companyId) {
+        if (companyId == null) {
+            return new ContractStatsResponse(0L, 0L);
+        }
+        Long signedCount = contractMapper.countSignedContracts(companyId);
+        Long partnerCount = contractMapper.countPartnerCompanies(companyId);
+        return new ContractStatsResponse(
+            signedCount != null ? signedCount : 0L,
+            partnerCount != null ? partnerCount : 0L
+        );
+    }
+
+    @Override
+    public List<PartnerCompanyResponse> getPartnerCompanies(Long companyId) {
+        if (companyId == null) {
+            return Collections.emptyList();
+        }
+        List<PartnerCompanyResponse> list = contractMapper.selectPartnerCompanies(companyId);
+        return list != null ? list : Collections.emptyList();
+    }
 }

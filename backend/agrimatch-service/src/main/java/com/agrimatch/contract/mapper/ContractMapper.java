@@ -2,6 +2,7 @@ package com.agrimatch.contract.mapper;
 
 import com.agrimatch.contract.domain.BusContract;
 import com.agrimatch.contract.dto.ContractQuery;
+import com.agrimatch.contract.dto.PartnerCompanyResponse;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -28,4 +29,13 @@ public interface ContractMapper {
     int logicalDelete(@Param("id") Long id);
     
     String selectMaxContractNoForToday(@Param("datePrefix") String datePrefix);
+
+    /** 统计已签订合同数（status >= 2） */
+    Long countSignedContracts(@Param("companyId") Long companyId);
+
+    /** 统计合作商户数 */
+    Long countPartnerCompanies(@Param("companyId") Long companyId);
+
+    /** 获取合作商家列表 */
+    List<PartnerCompanyResponse> selectPartnerCompanies(@Param("companyId") Long companyId);
 }

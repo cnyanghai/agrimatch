@@ -198,4 +198,44 @@
         LIMIT 1
     </select>
 
+    <!-- 统计已签订合同数（status >= 2 表示已签署及之后状态） -->
+    <select id="countSignedContracts" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM bus_contract
+        WHERE (buyer_company_id = #{companyId} OR seller_company_id = #{companyId})
+          AND status >= 2
+          AND is_deleted = 0
+    </select>
+
+    <!-- 统计合作商户数（去重） -->
+    <select id="countPartnerCompanies" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT partner_id) FROM (
+            SELECT seller_company_id AS partner_id FROM bus_contract
+            WHERE buyer_company_id = #{companyId} AND status >= 2 AND is_deleted = 0
+            UNION
+            SELECT buyer_company_id AS partner_id FROM bus_contract
+            WHERE seller_company_id = #{companyId} AND status >= 2 AND is_deleted = 0
+        ) t
+    </select>
+
+    <!-- 获取合作商家列表（按合同数降序） -->
+    <select id="selectPartnerCompanies" resultType="com.agrimatch.contract.dto.PartnerCompanyResponse">
+        SELECT
+            bc.id AS companyId,
+            bc.company_name AS companyName,
+            COUNT(*) AS contractCount,
+            SUM(c.total_amount) AS totalAmount
+        FROM (
+            SELECT seller_company_id AS partner_id, total_amount FROM bus_contract
+            WHERE buyer_company_id = #{companyId} AND status >= 2 AND is_deleted = 0
+            UNION ALL
+            SELECT buyer_company_id AS partner_id, total_amount FROM bus_contract
+            WHERE seller_company_id = #{companyId} AND status >= 2 AND is_deleted = 0
+        ) c
+        LEFT JOIN bus_company bc ON c.partner_id = bc.id
+        WHERE bc.id IS NOT NULL
+        GROUP BY bc.id, bc.company_name
+        ORDER BY contractCount DESC
+    </select>
+
 </mapper>

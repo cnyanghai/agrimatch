@@ -377,3 +377,31 @@ export async function deleteMilestone(contractId: number, milestoneId: number): 
   const res = await http.delete(`/api/contracts/${contractId}/milestones/${milestoneId}`)
   return res.data
 }
+
+// ==================== 合作统计 APIs ====================
+
+/** 公司合同统计 */
+export interface ContractStats {
+  signedContractCount: number
+  partnerCount: number
+}
+
+/** 合作商家 */
+export interface PartnerCompany {
+  companyId: number
+  companyName: string
+  contractCount: number
+  totalAmount: number
+}
+
+/** 获取公司合同统计 */
+export async function getCompanyContractStats(companyId: number): Promise<Result<ContractStats>> {
+  const res = await http.get(`/api/contracts/stats/company/${companyId}`)
+  return res.data
+}
+
+/** 获取公司合作商家列表 */
+export async function getCompanyPartners(companyId: number): Promise<Result<PartnerCompany[]>> {
+  const res = await http.get(`/api/contracts/partners/company/${companyId}`)
+  return res.data
+}

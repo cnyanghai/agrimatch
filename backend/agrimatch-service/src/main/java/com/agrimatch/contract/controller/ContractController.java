@@ -114,6 +114,24 @@ public class ContractController {
     }
 
     /**
+     * 获取公司合同统计（签订合同数、合作商户数）
+     * 公开接口，无需登录
+     */
+    @GetMapping("/stats/company/{companyId}")
+    public Result<ContractStatsResponse> getCompanyStats(@PathVariable("companyId") @NotNull Long companyId) {
+        return Result.success(contractService.getCompanyStats(companyId));
+    }
+
+    /**
+     * 获取公司合作商家列表
+     * 公开接口，无需登录
+     */
+    @GetMapping("/partners/company/{companyId}")
+    public Result<List<PartnerCompanyResponse>> getPartnerCompanies(@PathVariable("companyId") @NotNull Long companyId) {
+        return Result.success(contractService.getPartnerCompanies(companyId));
+    }
+
+    /**
      * 下载 PDF（MVP：后端生成简单 PDF，响应头附带存证 hash）
      */
     @GetMapping("/{id}/pdf")

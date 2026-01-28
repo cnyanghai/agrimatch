@@ -5,15 +5,15 @@ import { ElMessage } from 'element-plus'
 import { useCompany } from '../composables/useCompany'
 import { useCompanyStore } from '../stores/company'
 import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
-import { listCompanyEvals, type EvalResponse } from '../api/eval'
+import { getCompanyContractStats, getCompanyPartners, type ContractStats, type PartnerCompany } from '../api/contract'
 import { useAuthStore } from '../store/auth'
 import { openChatConversation } from '../api/chat'
 import PublicFooter from '../components/PublicFooter.vue'
-import { 
-  Info, Shield, MapPin, Search, TrendingUp, TrendingDown, 
+import {
+  Info, Shield, MapPin, Search, TrendingUp, TrendingDown,
   Minus, Circle, Heart, MessageCircle, Share2, Factory,
   Building2, User, FileText, Calendar, Star, BarChart3,
-  Briefcase, Award, Package, Truck, Tag
+  Briefcase, Award, Package, Truck, Tag, Handshake, FileSignature
 } from 'lucide-vue-next'
 import CompanySkeleton from '../components/company/CompanySkeleton.vue'
 
@@ -26,7 +26,8 @@ const { loading, error, profile, company, supplies, requirements, loadProfile } 
 const searchKeyword = ref('')
 const isFollowing = ref(false)
 const followLoading = ref(false)
-const evaluations = ref<EvalResponse[]>([])
+const contractStats = ref<ContractStats>({ signedContractCount: 0, partnerCount: 0 })
+const partnerCompanies = ref<PartnerCompany[]>([])
 
 // 证书预览
 const certificatePreviewVisible = ref(false)
@@ -223,34 +224,29 @@ async function loadFollowStatus() {
   }
 }
 
-// 加载公司评价
-async function loadCompanyEvals() {
+// 加载公司合作统计
+async function loadContractStats() {
   if (!company.value?.id) return
 
   try {
-    const r = await listCompanyEvals(company.value.id)
-    if (r.code === 0) {
-      evaluations.value = r.data ?? []
+    const [statsRes, partnersRes] = await Promise.all([
+      getCompanyContractStats(company.value.id),
+      getCompanyPartners(company.value.id)
+    ])
+    if (statsRes.code === 0) {
+      contractStats.value = statsRes.data ?? { signedContractCount: 0, partnerCount: 0 }
+    }
+    if (partnersRes.code === 0) {
+      partnerCompanies.value = partnersRes.data ?? []
     }
   } catch (e) {
-    console.error('Failed to load company evaluations:', e)
+    console.error('Failed to load contract stats:', e)
   }
 }
 
-// 格式化评价时间
-function formatEvalTime(dateStr?: string): string {
-  if (!dateStr) return ''
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diff = now.getTime() - date.getTime()
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-
-  if (days === 0) return '今天'
-  if (days === 1) return '昨天'
-  if (days < 7) return `${days}天前`
-  if (days < 30) return `${Math.floor(days / 7)}周前`
-  if (days < 365) return `${Math.floor(days / 30)}个月前`
-  return `${Math.floor(days / 365)}年前`
+// 跳转到合作商家主页
+function goToPartnerProfile(companyId: number) {
+  router.push(`/company/${companyId}`)
 }
 
 // 关注/取消关注
@@ -400,8 +396,8 @@ async function loadCompanyProfile() {
     }
   }
   
-  // 加载关注状态和评价
-  await Promise.all([loadFollowStatus(), loadCompanyEvals()])
+  // 加载关注状态和合作统计
+  await Promise.all([loadFollowStatus(), loadContractStats()])
 
   // 初始化地图
   setTimeout(() => {
@@ -714,51 +710,63 @@ watch(() => route.params.id, (newId, oldId) => {
                 资信仪表盘
               </h3>
               <div class="space-y-6">
-                <div>
-                  <div class="flex justify-between items-end mb-2">
-                    <span class="text-sm text-slate-500">合同履约率</span>
-                    <span class="text-lg font-bold text-brand-700">99.8%</span>
-                  </div>
-                  <div class="w-full bg-slate-100 rounded-full h-2">
-                    <div class="bg-brand-700 h-2 rounded-full" style="width: 99.8%"></div>
-                  </div>
-                </div>
+                <!-- 统计数据 -->
                 <div class="grid grid-cols-2 gap-4">
-                  <div class="bg-slate-50 p-3 rounded text-center">
-                    <div class="text-xs text-slate-400 mb-1">平均发货时效</div>
-                    <div class="text-base font-bold text-slate-800">1.2天</div>
+                  <div class="bg-slate-50 p-4 rounded-lg text-center">
+                    <div class="flex items-center justify-center gap-1.5 text-xs text-slate-500 mb-2">
+                      <FileSignature class="w-4 h-4" />
+                      累计签订合同
+                    </div>
+                    <div class="text-2xl font-bold text-brand-700">{{ contractStats.signedContractCount }}</div>
+                    <div class="text-xs text-slate-400 mt-1">份</div>
                   </div>
-                  <div class="bg-slate-50 p-3 rounded text-center">
-                    <div class="text-xs text-slate-400 mb-1">买家好评率</div>
-                    <div class="text-base font-bold text-slate-800">4.9/5.0</div>
+                  <div class="bg-slate-50 p-4 rounded-lg text-center">
+                    <div class="flex items-center justify-center gap-1.5 text-xs text-slate-500 mb-2">
+                      <Handshake class="w-4 h-4" />
+                      合作商户
+                    </div>
+                    <div class="text-2xl font-bold text-brand-700">{{ contractStats.partnerCount }}</div>
+                    <div class="text-xs text-slate-400 mt-1">家</div>
                   </div>
                 </div>
+
+                <!-- 合作商家列表 -->
                 <div class="border-t border-slate-100 pt-4">
-                  <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-medium text-slate-700">买家评价 ({{ evaluations.length }})</span>
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-medium text-slate-700 flex items-center gap-1.5">
+                      <Building2 class="w-4 h-4 text-slate-400" />
+                      合作商家
+                    </span>
+                    <span class="text-xs text-slate-400">{{ partnerCompanies.length }}家</span>
                   </div>
-                  <div v-if="evaluations.length > 0" class="space-y-3">
+                  <div v-if="partnerCompanies.length > 0" class="space-y-2 max-h-64 overflow-y-auto">
                     <div
-                      v-for="evalItem in evaluations.slice(0, 3)"
-                      :key="evalItem.id"
-                      class="text-xs p-2 bg-slate-50 rounded"
+                      v-for="partner in partnerCompanies"
+                      :key="partner.companyId"
+                      class="flex items-center justify-between p-2.5 bg-slate-50 rounded-lg hover:bg-brand-50 cursor-pointer transition-colors group"
+                      @click="goToPartnerProfile(partner.companyId)"
                     >
-                      <div class="flex items-center gap-1 mb-1">
-                        <Star
-                          v-for="i in 5"
-                          :key="i"
-                          class="w-3 h-3"
-                          :class="i <= evalItem.stars ? 'text-amber-500 fill-amber-500' : 'text-slate-200'"
-                        />
+                      <div class="flex items-center gap-2 min-w-0">
+                        <div class="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center shrink-0">
+                          <Building2 class="w-4 h-4 text-brand-600" />
+                        </div>
+                        <div class="min-w-0">
+                          <div class="text-sm font-medium text-slate-800 truncate group-hover:text-brand-700">
+                            {{ partner.companyName }}
+                          </div>
+                          <div class="text-xs text-slate-400">
+                            合作 {{ partner.contractCount }} 次
+                          </div>
+                        </div>
                       </div>
-                      <p v-if="evalItem.comment" class="text-slate-600">"{{ evalItem.comment }}"</p>
-                      <div class="text-[10px] text-slate-400 mt-1">
-                        {{ evalItem.fromNickName || evalItem.fromUserName || '匿名用户' }} · {{ formatEvalTime(evalItem.createTime) }}
+                      <div class="text-xs text-slate-400 shrink-0">
+                        ¥{{ (partner.totalAmount / 10000).toFixed(1) }}万
                       </div>
                     </div>
                   </div>
-                  <div v-else class="text-xs text-slate-400 text-center py-4">
-                    暂无评价
+                  <div v-else class="text-xs text-slate-400 text-center py-6">
+                    <Handshake class="w-8 h-8 mx-auto mb-2 text-slate-200" />
+                    暂无合作商家
                   </div>
                 </div>
               </div>
