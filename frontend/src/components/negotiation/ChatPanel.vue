@@ -5,7 +5,7 @@
  * 集成报价操作、附件上传、赠送积分功能
  */
 import { ref, nextTick, watch, onMounted, computed } from 'vue'
-import { Send, Paperclip, MoreVertical, DollarSign, Gift, FileText, X, Download, Loader2, CheckCircle, Info, AlertCircle, FileSignature, ExternalLink } from 'lucide-vue-next'
+import { Send, Paperclip, DollarSign, Gift, FileText, X, Download, Loader2, CheckCircle, Info, AlertCircle, FileSignature, ExternalLink } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { formatMessageTime, shouldShowTimeSeparator, type UiMessage } from '../../types/chat/message'
@@ -332,9 +332,6 @@ defineExpose({ scrollToBottom })
           </p>
         </div>
       </div>
-      <button class="p-1 hover:bg-gray-100 rounded-md text-gray-400 transition-colors">
-        <MoreVertical class="w-4 h-4" />
-      </button>
     </div>
 
     <!-- 消息列表 -->
