@@ -537,7 +537,7 @@ function parseParams(paramsJson?: string): string {
           v-for="r in displayRequirements"
           :key="r.id"
           :ref="(el) => setCardEl(Number(r.id), el as any)"
-          class="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all cursor-pointer hover:shadow-md hover:border-autumn-200"
+          class="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all hover:shadow-md hover:border-autumn-200"
           :class="{ 'ring-2 ring-autumn-500 shadow-lg': focusedId === r.id }"
         >
           <!-- 头部：公司信息 + 操作 -->

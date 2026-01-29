@@ -374,11 +374,6 @@ function calcReferencePrice(contractCode: string, basisPrice: number): number | 
 }
 
 
-// 查看供应详情
-function onViewDetail(s: SupplyResponse) {
-  router.push(`/supplies/${s.id}`)
-}
-
 // 搜索
 function onSearch() {
   currentPage.value = 1 // 重置分页
@@ -622,9 +617,8 @@ function parseParams(paramsJson?: string): string {
             v-for="s in displaySupplies"
             :key="s.id"
             :ref="el => setCardEl(Number(s.id), el as any)"
-            class="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all cursor-pointer hover:shadow-md hover:border-brand-200"
+            class="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all hover:shadow-md hover:border-brand-200"
             :class="{ 'ring-2 ring-brand-500 shadow-lg': focusedId === s.id }"
-            @click="onViewDetail(s)"
           >
             <!-- 头部：公司信息 + 操作 -->
             <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-gray-50/50">
