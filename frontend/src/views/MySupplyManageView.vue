@@ -16,6 +16,7 @@ import TagPicker from '../components/TagPicker.vue'
 import type { TagValue } from '../api/tag'
 import { BaseButton, BaseModal, EmptyState, Skeleton } from '../components/ui'
 import TemplateCommandPalette, { type TemplateItem } from '../components/TemplateCommandPalette.vue'
+import ProductInfoRow from '../components/ProductInfoRow.vue'
 import { useCompanyStore } from '../stores/company'
 import { useAuthStore } from '../store/auth'
 
@@ -1024,7 +1025,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
           size="md"
         />
 
-        <!-- 左右分栏卡片列表 -->
+        <!-- 产品信息列表 -->
         <div v-else class="p-4 space-y-3">
           <div
             v-for="(s, index) in pagedSupplies"
@@ -1032,122 +1033,53 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             class="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md hover:border-brand-200 transition-all duration-200 animate-stagger-in"
             :style="{ animationDelay: `${index * 40}ms` }"
           >
-            <div class="flex gap-4">
-              <!-- 左侧：大图标 -->
-              <div class="shrink-0">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center">
-                  <Package class="w-7 h-7 text-brand-600" />
-                </div>
-              </div>
-
-              <!-- 右侧：信息区域 -->
-              <div class="flex-1 min-w-0">
-                <!-- 第一行：品类名称 + 状态 -->
-                <div class="flex items-center justify-between mb-2">
-                  <h3 class="font-bold text-lg text-gray-900 truncate">{{ s.categoryName }}</h3>
-                  <div class="flex items-center gap-2 shrink-0">
-                    <span
-                      :class="[
-                        'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold',
-                        s.status === 0 ? 'bg-brand-50 text-brand-600' :
-                        s.status === 1 ? 'bg-amber-50 text-amber-600' :
-                        s.status === 3 ? 'bg-emerald-50 text-emerald-600' :
-                        'bg-gray-100 text-gray-500'
-                      ]"
-                    >
-                      <span class="text-[10px]">{{ getStatusIcon(s.status) }}</span>
-                      {{ getStatusText(s.status) }}
-                    </span>
-                    <span v-if="s.status === 0 && s.expireTime" class="text-xs text-gray-400">
-                      {{ formatExpireTime(s.expireTime) }}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- 第二行：核心数据 -->
-                <div class="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm mb-3">
-                  <span class="font-semibold text-gray-800">
-                    {{ s.quantity ?? '-' }} <span class="text-gray-500 font-normal">{{ currentUnitConfig.quantityUnit }}</span>
-                  </span>
-                  <span class="text-gray-300">·</span>
-                  <span v-if="s.exFactoryPrice" class="font-bold text-brand-600">
-                    ¥{{ s.exFactoryPrice.toLocaleString() }}<span class="text-gray-400 font-normal text-xs">/{{ currentUnitConfig.quantityUnit }}</span>
-                  </span>
-                  <span v-else class="text-gray-400">面议</span>
-                  <span class="text-gray-300">·</span>
-                  <span class="text-gray-600 flex items-center gap-1">
-                    <MapPin class="w-3.5 h-3.5 text-gray-400" />
-                    {{ s.shipAddress || '—' }}
-                  </span>
-                  <template v-if="s.packaging || s.paymentMethod">
-                    <span class="text-gray-300">·</span>
-                    <span class="text-gray-500">{{ [s.packaging, s.paymentMethod].filter(Boolean).join(' / ') }}</span>
-                  </template>
-                </div>
-
-                <!-- 第三行：质量要求标签 + 操作按钮 -->
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <!-- 质量要求标签药丸 -->
-                    <template v-if="parseParamsTags(s.paramsJson).length > 0">
-                      <span
-                        v-for="(tag, idx) in parseParamsTags(s.paramsJson)"
-                        :key="idx"
-                        class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-xs text-gray-600"
-                      >
-                        <span class="text-gray-400 mr-0.5">{{ tag.label }}</span>
-                        <span class="font-medium">{{ tag.value }}</span>
-                      </span>
-                    </template>
-                    <!-- 部分成交进度 -->
-                    <div v-if="s.status === 1 && s.remainingQuantity != null" class="flex items-center gap-2 ml-2">
-                      <div class="w-20 h-1.5 bg-amber-100 rounded-full overflow-hidden">
-                        <div
-                          class="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
-                          :style="{ width: `${getDealProgress(s)}%` }"
-                        ></div>
-                      </div>
-                      <span class="text-xs text-amber-600 font-medium">{{ getDealProgress(s) }}%</span>
-                    </div>
-                    <!-- 全部成交标记 -->
-                    <div v-else-if="s.status === 3" class="flex items-center gap-1 text-xs text-emerald-600 font-medium ml-2">
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                      交易完成
-                    </div>
-                  </div>
-
-                  <!-- 操作按钮 -->
-                  <div class="flex items-center gap-2 shrink-0">
-                    <button
-                      v-if="s.status !== 3"
-                      class="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center gap-1"
-                      @click="openEdit(s)"
-                    >
-                      <Pencil class="w-3.5 h-3.5" />
-                      编辑
-                    </button>
-                    <button
-                      v-if="s.status === 0 || s.status === 1"
-                      class="px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors flex items-center gap-1"
-                      @click="revokeSupply(s)"
-                    >
-                      <Ban class="w-3.5 h-3.5" />
-                      下架
-                    </button>
-                    <button
-                      v-else-if="s.status === 2"
-                      class="px-3 py-1.5 rounded-lg text-xs font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 transition-colors flex items-center gap-1"
-                      @click="republishSupply(s)"
-                    >
-                      <RotateCcw class="w-3.5 h-3.5" />
-                      再次发布
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ProductInfoRow
+              :data="{
+                categoryName: s.categoryName || '未知品类',
+                quantity: s.quantity,
+                quantityUnit: currentUnitConfig.quantityUnit,
+                price: s.exFactoryPrice,
+                priceUnit: currentUnitConfig.quantityUnit,
+                address: s.shipAddress,
+                packaging: s.packaging,
+                paymentMethod: s.paymentMethod,
+                paramsJson: s.paramsJson
+              }"
+              type="supply"
+            >
+              <template #status>
+                <span
+                  :class="[
+                    'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap',
+                    s.status === 0 ? 'bg-brand-50 text-brand-600' :
+                    s.status === 1 ? 'bg-amber-50 text-amber-600' :
+                    s.status === 3 ? 'bg-emerald-50 text-emerald-600' :
+                    'bg-gray-100 text-gray-500'
+                  ]"
+                >
+                  {{ getStatusIcon(s.status) }} {{ getStatusText(s.status) }}
+                  <template v-if="s.status === 0 && s.expireTime"> · {{ formatExpireTime(s.expireTime) }}</template>
+                  <template v-if="s.status === 1 && s.remainingQuantity != null"> · {{ getDealProgress(s) }}%</template>
+                </span>
+              </template>
+              <template #actions>
+                <button
+                  v-if="s.status !== 3"
+                  class="px-2 py-0.5 rounded text-[11px] font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+                  @click="openEdit(s)"
+                >编辑</button>
+                <button
+                  v-if="s.status === 0 || s.status === 1"
+                  class="px-2 py-0.5 rounded text-[11px] font-medium text-red-600 hover:bg-red-50 transition-colors"
+                  @click="revokeSupply(s)"
+                >下架</button>
+                <button
+                  v-else-if="s.status === 2"
+                  class="px-2 py-0.5 rounded text-[11px] font-medium text-brand-600 hover:bg-brand-50 transition-colors"
+                  @click="republishSupply(s)"
+                >再发布</button>
+              </template>
+            </ProductInfoRow>
           </div>
 
           <!-- 分页 -->

@@ -16,6 +16,7 @@ import {
   Briefcase, Award, Package, Truck, Tag, Handshake, FileSignature
 } from 'lucide-vue-next'
 import CompanySkeleton from '../components/company/CompanySkeleton.vue'
+import ProductInfoRow from '../components/ProductInfoRow.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -596,87 +597,37 @@ watch(() => route.params.id, (newId, oldId) => {
               </div>
 
               <!-- 货源列表 -->
-              <div v-if="filteredSupplies.length > 0" class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                  <thead class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                    <tr>
-                      <th class="px-3 py-1">基础信息</th>
-                      <th class="px-3 py-1">规格参数</th>
-                      <th class="px-3 py-1">物流交付</th>
-                      <th class="px-3 py-1">操作</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-slate-100">
-                    <tr 
-                      v-for="supply in filteredSupplies"
-                      :key="supply.id"
-                      class="hover:bg-slate-50 transition"
-                    >
-                      <!-- 基础信息列 -->
-                      <td class="px-3 py-1">
-                        <div class="space-y-0.5">
-                          <div>
-                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">名称</div>
-                            <div class="text-sm font-semibold text-slate-800">{{ supply.categoryName }}</div>
-                          </div>
-                          <div>
-                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">价格</div>
-                            <div class="text-sm font-bold text-brand-600">{{ formatPrice(supply) }}</div>
-                          </div>
-                          <div>
-                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">供应量</div>
-                            <div class="text-sm font-semibold text-slate-800">{{ supply.quantity || 0 }}吨</div>
-                          </div>
-                          <div v-if="supply.origin">
-                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">产地</div>
-                            <div class="text-sm font-semibold text-slate-800">{{ supply.origin }}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <!-- 规格参数列 -->
-                      <td class="px-3 py-1">
-                        <div v-if="getParamsList(supply.paramsJson).length > 0" class="flex flex-wrap gap-1">
-                          <span
-                            v-for="param in getParamsList(supply.paramsJson)"
-                            :key="param.key"
-                            class="inline-flex items-center gap-1 px-1 py-0 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700"
-                          >
-                            <span class="font-medium">{{ param.key }}:</span>
-                            <span>{{ param.value }}</span>
-                          </span>
-                        </div>
-                        <span v-else class="text-xs text-slate-400">暂无参数</span>
-                      </td>
-                      <!-- 物流交付列 -->
-                      <td class="px-3 py-1">
-                        <div class="space-y-0.5">
-                          <div v-if="supply.deliveryMode">
-                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">交付方式</div>
-                            <div class="text-sm font-semibold text-slate-700">{{ supply.deliveryMode }}</div>
-                          </div>
-                          <div v-if="supply.packaging">
-                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">包装方式</div>
-                            <div class="text-sm font-semibold text-slate-700">{{ supply.packaging }}</div>
-                          </div>
-                          <div v-if="supply.shipAddress">
-                            <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0">发货地址</div>
-                            <div class="text-sm text-slate-600 truncate max-w-[200px]" :title="supply.shipAddress">{{ supply.shipAddress }}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <!-- 操作列 -->
-                      <td class="px-3 py-1">
-                        <button 
-                          class="flex items-center gap-1.5 px-3 py-1 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg transition-all active:scale-95"
-                          @click="sendInquiry(supply)"
-                        >
-                          <MessageCircle class="w-4 h-4" />
-                          联系商家
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div v-if="filteredSupplies.length > 0" class="p-4 space-y-3">
+                <div
+                  v-for="supply in filteredSupplies"
+                  :key="supply.id"
+                  class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md hover:border-brand-200 transition-all duration-200"
+                >
+                  <ProductInfoRow
+                    :data="{
+                      categoryName: supply.categoryName || '未知品类',
+                      quantity: supply.quantity,
+                      quantityUnit: '吨',
+                      price: supply.exFactoryPrice,
+                      priceUnit: '吨',
+                      address: supply.shipAddress,
+                      packaging: supply.packaging,
+                      paymentMethod: supply.paymentMethod,
+                      paramsJson: supply.paramsJson
+                    }"
+                    type="supply"
+                  >
+                    <template #actions>
+                      <button
+                        class="flex items-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium rounded-lg transition-all active:scale-95"
+                        @click="sendInquiry(supply)"
+                      >
+                        <MessageCircle class="w-3.5 h-3.5" />
+                        联系商家
+                      </button>
+                    </template>
+                  </ProductInfoRow>
+                </div>
               </div>
 
               <!-- 空状态 -->

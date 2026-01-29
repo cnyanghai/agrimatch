@@ -13,6 +13,7 @@ import { getSchemaUnitConfig, getCategoryUnitConfig } from '../utils/schemaUnits
 import type { TagValue } from '../api/tag'
 import { BaseButton, BaseModal, EmptyState, Skeleton } from '../components/ui'
 import TemplateCommandPalette, { type TemplateItem } from '../components/TemplateCommandPalette.vue'
+import ProductInfoRow from '../components/ProductInfoRow.vue'
 import { FileText, Save, List, Send, Package, MapPin, Clock, FileCheck, CreditCard, Trash2, ChevronDown, ChevronUp, Plus, RefreshCcw, Pencil, Ban, RotateCcw, Search, DollarSign, ShoppingCart, X, Calendar } from 'lucide-vue-next'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../store/auth'
@@ -939,7 +940,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
           size="md"
         />
 
-        <!-- 左右分栏卡片列表 -->
+        <!-- 产品信息列表 -->
         <div v-else class="p-4 space-y-3">
           <div
             v-for="(req, index) in pagedRequirements"
@@ -947,122 +948,53 @@ async function applyTemplate(template: RequirementTemplateResponse) {
             class="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md hover:border-autumn-200 transition-all duration-200 animate-stagger-in"
             :style="{ animationDelay: `${index * 40}ms` }"
           >
-            <div class="flex gap-4">
-              <!-- 左侧：大图标 -->
-              <div class="shrink-0">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-autumn-50 to-autumn-100 flex items-center justify-center">
-                  <ShoppingCart class="w-7 h-7 text-autumn-600" />
-                </div>
-              </div>
-
-              <!-- 右侧：信息区域 -->
-              <div class="flex-1 min-w-0">
-                <!-- 第一行：品类名称 + 状态 -->
-                <div class="flex items-center justify-between mb-2">
-                  <h3 class="font-bold text-lg text-gray-900 truncate">{{ req.categoryName }}</h3>
-                  <div class="flex items-center gap-2 shrink-0">
-                    <span
-                      :class="[
-                        'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold',
-                        req.status === 0 ? 'bg-autumn-50 text-autumn-600' :
-                        req.status === 1 ? 'bg-amber-50 text-amber-600' :
-                        req.status === 3 ? 'bg-emerald-50 text-emerald-600' :
-                        'bg-gray-100 text-gray-500'
-                      ]"
-                    >
-                      <span class="text-[10px]">{{ getStatusIcon(req.status) }}</span>
-                      {{ getStatusText(req.status) }}
-                    </span>
-                    <span v-if="req.status === 0 && req.expireTime" class="text-xs text-gray-400">
-                      {{ formatExpireTime(req.expireTime) }}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- 第二行：核心数据 -->
-                <div class="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm mb-3">
-                  <span class="font-semibold text-gray-800">
-                    {{ req.quantity ?? '-' }} <span class="text-gray-500 font-normal">{{ currentUnitConfig.quantityUnit }}</span>
-                  </span>
-                  <span class="text-gray-300">·</span>
-                  <span v-if="req.expectedPrice" class="font-bold text-autumn-600">
-                    ¥{{ req.expectedPrice.toLocaleString() }}<span class="text-gray-400 font-normal text-xs">/{{ currentUnitConfig.quantityUnit }}</span>
-                  </span>
-                  <span v-else class="text-gray-400">面议</span>
-                  <span class="text-gray-300">·</span>
-                  <span class="text-gray-600 flex items-center gap-1">
-                    <MapPin class="w-3.5 h-3.5 text-gray-400" />
-                    {{ req.purchaseAddress || '—' }}
-                  </span>
-                  <template v-if="req.packaging || req.paymentMethod">
-                    <span class="text-gray-300">·</span>
-                    <span class="text-gray-500">{{ [req.packaging, req.paymentMethod].filter(Boolean).join(' / ') }}</span>
-                  </template>
-                </div>
-
-                <!-- 第三行：质量要求标签 + 操作按钮 -->
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <!-- 质量要求标签药丸 -->
-                    <template v-if="parseParamsTags(req.paramsJson).length > 0">
-                      <span
-                        v-for="(tag, idx) in parseParamsTags(req.paramsJson)"
-                        :key="idx"
-                        class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-xs text-gray-600"
-                      >
-                        <span class="text-gray-400 mr-0.5">{{ tag.label }}</span>
-                        <span class="font-medium">{{ tag.value }}</span>
-                      </span>
-                    </template>
-                    <!-- 部分成交进度 -->
-                    <div v-if="req.status === 1 && req.remainingQuantity != null" class="flex items-center gap-2 ml-2">
-                      <div class="w-20 h-1.5 bg-amber-100 rounded-full overflow-hidden">
-                        <div
-                          class="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
-                          :style="{ width: `${getDealProgress(req)}%` }"
-                        ></div>
-                      </div>
-                      <span class="text-xs text-amber-600 font-medium">{{ getDealProgress(req) }}%</span>
-                    </div>
-                    <!-- 全部成交标记 -->
-                    <div v-else-if="req.status === 3" class="flex items-center gap-1 text-xs text-emerald-600 font-medium ml-2">
-                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                      采购完成
-                    </div>
-                  </div>
-
-                  <!-- 操作按钮 -->
-                  <div class="flex items-center gap-2 shrink-0">
-                    <button
-                      v-if="req.status !== 3"
-                      class="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center gap-1"
-                      @click="openEdit(req)"
-                    >
-                      <Pencil class="w-3.5 h-3.5" />
-                      编辑
-                    </button>
-                    <button
-                      v-if="req.status === 0 || req.status === 1"
-                      class="px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors flex items-center gap-1"
-                      @click="revokeRequirement(req)"
-                    >
-                      <Ban class="w-3.5 h-3.5" />
-                      撤销
-                    </button>
-                    <button
-                      v-else-if="req.status === 2"
-                      class="px-3 py-1.5 rounded-lg text-xs font-medium text-autumn-600 bg-autumn-50 hover:bg-autumn-100 transition-colors flex items-center gap-1"
-                      @click="republishRequirement(req)"
-                    >
-                      <RotateCcw class="w-3.5 h-3.5" />
-                      再次发布
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ProductInfoRow
+              :data="{
+                categoryName: req.categoryName || '未知品类',
+                quantity: req.quantity,
+                quantityUnit: currentUnitConfig.quantityUnit,
+                price: req.expectedPrice,
+                priceUnit: currentUnitConfig.quantityUnit,
+                address: req.purchaseAddress,
+                packaging: req.packaging,
+                paymentMethod: req.paymentMethod,
+                paramsJson: req.paramsJson
+              }"
+              type="purchase"
+            >
+              <template #status>
+                <span
+                  :class="[
+                    'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap',
+                    req.status === 0 ? 'bg-autumn-50 text-autumn-600' :
+                    req.status === 1 ? 'bg-amber-50 text-amber-600' :
+                    req.status === 3 ? 'bg-emerald-50 text-emerald-600' :
+                    'bg-gray-100 text-gray-500'
+                  ]"
+                >
+                  {{ getStatusIcon(req.status) }} {{ getStatusText(req.status) }}
+                  <template v-if="req.status === 0 && req.expireTime"> · {{ formatExpireTime(req.expireTime) }}</template>
+                  <template v-if="req.status === 1 && req.remainingQuantity != null"> · {{ getDealProgress(req) }}%</template>
+                </span>
+              </template>
+              <template #actions>
+                <button
+                  v-if="req.status !== 3"
+                  class="px-2 py-0.5 rounded text-[11px] font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+                  @click="openEdit(req)"
+                >编辑</button>
+                <button
+                  v-if="req.status === 0 || req.status === 1"
+                  class="px-2 py-0.5 rounded text-[11px] font-medium text-red-600 hover:bg-red-50 transition-colors"
+                  @click="revokeRequirement(req)"
+                >撤销</button>
+                <button
+                  v-else-if="req.status === 2"
+                  class="px-2 py-0.5 rounded text-[11px] font-medium text-autumn-600 hover:bg-autumn-50 transition-colors"
+                  @click="republishRequirement(req)"
+                >再发布</button>
+              </template>
+            </ProductInfoRow>
           </div>
 
           <!-- 分页 -->
