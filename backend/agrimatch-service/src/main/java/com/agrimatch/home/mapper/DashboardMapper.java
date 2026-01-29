@@ -135,13 +135,14 @@ public interface DashboardMapper {
     Integer countTotalSignedContracts(@Param("userId") Long userId);
 
     /**
-     * 统计累计成交合同金额（已完成 status = 4 的合同总金额）
+     * 统计累计成交合同金额（已签署、履约中、已完成的合同总金额，不含已取消）
      * 通过用户的company_id关联合同
+     * contract.status: 2=已签署, 3=履约中, 4=已完成
      */
     @Select("SELECT COALESCE(SUM(c.total_amount), 0) FROM bus_contract c, sys_user u " +
             "WHERE u.user_id = #{userId} " +
             "AND (c.buyer_company_id = u.company_id OR c.seller_company_id = u.company_id) " +
-            "AND c.status = 4 " +
+            "AND c.status IN (2, 3, 4) " +
             "AND c.is_deleted = 0")
     BigDecimal sumTotalDealAmount(@Param("userId") Long userId);
 }
