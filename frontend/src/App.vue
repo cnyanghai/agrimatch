@@ -3,8 +3,13 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './store/auth'
 import { useUiStore } from './store/ui'
+import { useNotificationStore } from './stores/notification'
+import { useGlobalWebSocket } from './composables/useGlobalWebSocket'
+import { requestNotificationPermission } from './utils/browserNotification'
+import { initAudioContext } from './utils/notificationSound'
 import AuthDialog from './components/AuthDialog.vue'
 import PublicTopNav from './components/PublicTopNav.vue'
+import NotificationToast from './components/notification/NotificationToast.vue'
 import {
   LayoutDashboard, FilePlus, Star, Map,
   MessageSquare, FileCheck, User, LogOut,
@@ -15,6 +20,13 @@ const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
 const ui = useUiStore()
+const notificationStore = useNotificationStore()
+
+// 初始化全局 WebSocket
+const { status: wsStatus } = useGlobalWebSocket()
+
+// 未读消息数
+const unreadCount = computed(() => notificationStore.unreadTotal)
 
 const minimal = computed(() => Boolean(route.meta.minimal))
 const isLoggedIn = computed(() => Boolean(auth.me))
@@ -65,6 +77,18 @@ onMounted(async () => {
   } catch {
     // 未登录/过期：静默即可
   }
+
+  // 请求浏览器通知权限（需要用户交互后才会生效）
+  requestNotificationPermission()
+
+  // 初始化音频上下文（首次用户交互时）
+  const initAudio = () => {
+    initAudioContext()
+    document.removeEventListener('click', initAudio)
+    document.removeEventListener('keydown', initAudio)
+  }
+  document.addEventListener('click', initAudio, { once: true })
+  document.addEventListener('keydown', initAudio, { once: true })
 })
 </script>
 
@@ -117,10 +141,19 @@ onMounted(async () => {
           </button>
 
           <!-- 5. 聊天议价 -->
-          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center gap-3"
+          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center gap-3 relative"
                   :class="route.path==='/chat' || route.path==='/notify' ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/chat')">
-            <MessageSquare class="h-5 w-5" stroke-width="2" />
+            <div class="relative">
+              <MessageSquare class="h-5 w-5" stroke-width="2" />
+              <!-- 未读角标 -->
+              <span
+                v-if="unreadCount > 0"
+                class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1"
+              >
+                {{ unreadCount > 99 ? '99+' : unreadCount }}
+              </span>
+            </div>
             聊天议价
           </button>
 
@@ -169,6 +202,9 @@ onMounted(async () => {
     </div>
 
     <AuthDialog />
+
+    <!-- 全局通知 Toast -->
+    <NotificationToast />
   </div>
 </template>
 

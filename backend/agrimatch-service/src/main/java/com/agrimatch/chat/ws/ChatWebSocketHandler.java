@@ -23,6 +23,8 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -31,7 +33,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final ChatService chatService;
     private final ObjectMapper objectMapper;
 
-    private final Map<Long, WebSocketSession> sessions = new ConcurrentHashMap<>();
+    // 支持同一用户多个连接（全局通知 + 聊天页面）
+    private final Map<Long, Set<WebSocketSession>> sessions = new ConcurrentHashMap<>();
 
     public ChatWebSocketHandler(JwtTokenUtil jwtTokenUtil, ChatService chatService, ObjectMapper objectMapper) {
         this.jwtTokenUtil = jwtTokenUtil;
@@ -47,8 +50,10 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             return;
         }
         session.getAttributes().put("userId", userId);
-        sessions.put(userId, session);
+        // 添加到用户的连接集合（支持多连接）
+        sessions.computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet()).add(session);
         session.sendMessage(new TextMessage("{\"type\":\"CONNECTED\",\"serverTime\":\"" + LocalDateTime.now() + "\"}"));
+        System.out.println("[WS] User " + userId + " connected, total connections: " + sessions.get(userId).size());
     }
 
     @Override
@@ -95,16 +100,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
         var saved = chatService.sendToConversation(fromUserId, conversationId, msgType, content, payloadJson, basisPrice, contractCode);
 
-        // 推送给接收方（在线的话）
-        WebSocketSession toSession = sessions.get(saved.getToUserId());
-        if (toSession != null && toSession.isOpen()) {
-            String payload = objectMapper.writeValueAsString(objectMapper.createObjectNode()
-                    .put("type", "MESSAGE")
-                    .put("conversationId", saved.getConversationId())
-                    .set("message", objectMapper.valueToTree(saved))
-            );
-            toSession.sendMessage(new TextMessage(payload));
-        }
+        // 推送给接收方的所有连接
+        String messagePayload = objectMapper.writeValueAsString(objectMapper.createObjectNode()
+                .put("type", "MESSAGE")
+                .put("conversationId", saved.getConversationId())
+                .set("message", objectMapper.valueToTree(saved))
+        );
+        sendToUser(saved.getToUserId(), new TextMessage(messagePayload));
 
         // 回执给发送方（包含 tempId -> id）
         var ack = objectMapper.createObjectNode()
@@ -119,7 +121,17 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus status) {
         Object uidObj = session.getAttributes().get("userId");
         if (uidObj instanceof Long) {
-            sessions.remove((Long) uidObj);
+            Long userId = (Long) uidObj;
+            Set<WebSocketSession> userSessions = sessions.get(userId);
+            if (userSessions != null) {
+                userSessions.remove(session);
+                // 如果用户没有任何连接了，移除整个条目
+                if (userSessions.isEmpty()) {
+                    sessions.remove(userId);
+                }
+                System.out.println("[WS] User " + userId + " disconnected, remaining connections: " +
+                    (sessions.containsKey(userId) ? sessions.get(userId).size() : 0));
+            }
         }
     }
 
@@ -216,17 +228,24 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void sendToUser(Long userId, TextMessage message) {
-        WebSocketSession session = sessions.get(userId);
-        if (session != null && session.isOpen()) {
-            try {
-                session.sendMessage(message);
-                System.out.println("[WS] Sent message to user " + userId + " successfully");
-            } catch (Exception e) {
-                System.out.println("[WS] Failed to send message to user " + userId + ": " + e.getMessage());
-            }
-        } else {
-            System.out.println("[WS] User " + userId + " is not online (session=" + (session == null ? "null" : "closed") + "), active sessions: " + sessions.keySet());
+        Set<WebSocketSession> userSessions = sessions.get(userId);
+        if (userSessions == null || userSessions.isEmpty()) {
+            System.out.println("[WS] User " + userId + " is not online, active users: " + sessions.keySet());
+            return;
         }
+
+        int sent = 0;
+        for (WebSocketSession session : userSessions) {
+            if (session != null && session.isOpen()) {
+                try {
+                    session.sendMessage(message);
+                    sent++;
+                } catch (Exception e) {
+                    System.out.println("[WS] Failed to send to one connection of user " + userId + ": " + e.getMessage());
+                }
+            }
+        }
+        System.out.println("[WS] Sent message to user " + userId + " via " + sent + "/" + userSessions.size() + " connections");
     }
 
     private Long authenticate(WebSocketSession session) {

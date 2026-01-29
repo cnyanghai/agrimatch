@@ -11,12 +11,14 @@
  * 5. 双方都确认后，生成正式签署合同
  * 6. 跳转第三方电子签章平台完成签署
  */
-import { onMounted, onBeforeUnmount } from 'vue'
+import { onMounted, onBeforeUnmount, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { MessageCircle } from 'lucide-vue-next'
 
 // Composables
 import { useNegotiationWorkspace, type MerchantGroup } from '../composables/useNegotiationWorkspace'
+import { setActiveConversation } from '../composables/useGlobalWebSocket'
+import { useNotificationStore } from '../stores/notification'
 
 // Components
 import ConversationSidebar from '../components/negotiation/ConversationSidebar.vue'
@@ -31,6 +33,7 @@ import type { UiMessage } from '../types/chat/message'
 // ==================== State Management ====================
 
 const workspace = useNegotiationWorkspace()
+const notificationStore = useNotificationStore()
 
 const {
   // State
@@ -152,11 +155,27 @@ function handleDraftContract(_msg: UiMessage) {
 
 // ==================== Lifecycle ====================
 
+// 监听当前会话变化，设置活跃会话和标记已读
+watch(
+  () => currentConversation.value?.id,
+  (conversationId) => {
+    if (conversationId) {
+      // 设置为活跃会话（不弹通知）
+      setActiveConversation(conversationId)
+      // 标记该会话已读
+      notificationStore.markConversationRead(conversationId)
+    }
+  },
+  { immediate: true }
+)
+
 onMounted(() => {
   initialize()
 })
 
 onBeforeUnmount(() => {
+  // 清除活跃会话
+  setActiveConversation(null)
   cleanup()
 })
 </script>
