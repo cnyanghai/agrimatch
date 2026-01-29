@@ -691,6 +691,8 @@ function parseParams(paramsJson?: string): string {
                   <span class="font-black text-brand-600">
                     ¥{{ calcReferencePrice(bq.contractCode, bq.basisPrice)?.toFixed(0) || '-' }}
                   </span>
+                  <span class="text-gray-400">·</span>
+                  <span class="font-medium text-gray-600">{{ bq.remainingQty ?? bq.availableQty }}吨</span>
                 </div>
               </div>
             </div>

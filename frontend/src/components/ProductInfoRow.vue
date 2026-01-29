@@ -131,31 +131,29 @@ const hasActions = computed(() => !!props.data)
 
         <!-- 数据行 -->
         <!-- 品名（无图标时显示） -->
-        <div v-if="!showIcon" class="text-sm font-bold whitespace-nowrap" :class="type === 'supply' ? 'text-brand-700' : 'text-autumn-700'">
+        <div v-if="!showIcon" class="text-[13px] font-semibold whitespace-nowrap" :class="type === 'supply' ? 'text-brand-700' : 'text-autumn-700'">
           {{ data.categoryName }}
         </div>
         <!-- 数量 -->
-        <div class="text-sm whitespace-nowrap">
-          <span class="font-semibold text-gray-800">{{ data.quantity ?? '—' }}</span>
-          <span class="text-gray-500 text-xs ml-0.5">{{ data.quantityUnit || '吨' }}</span>
+        <div class="text-[13px] font-medium text-gray-700 whitespace-nowrap tabular-nums">
+          {{ data.quantity ?? '—' }}<span class="text-gray-400 ml-0.5">{{ data.quantityUnit || '吨' }}</span>
         </div>
 
         <!-- 价格 -->
-        <div class="text-sm whitespace-nowrap">
+        <div class="text-[13px] whitespace-nowrap tabular-nums">
           <span
-            class="font-bold"
+            class="font-semibold"
             :class="type === 'supply' ? 'text-brand-600' : 'text-autumn-600'"
-          >{{ formattedPrice }}</span>
-          <span v-if="data.price && typeof data.price === 'number'" class="text-gray-400 text-xs">/{{ data.priceUnit || '吨' }}</span>
+          >{{ formattedPrice }}</span><span v-if="data.price && typeof data.price === 'number'" class="text-gray-400">/{{ data.priceUnit || '吨' }}</span>
         </div>
 
         <!-- 地址 -->
-        <div class="text-sm text-gray-600 truncate" :title="data.address">
+        <div class="text-[13px] font-medium text-gray-700 truncate" :title="data.address">
           {{ data.address || '—' }}
         </div>
 
         <!-- 包装/付款 -->
-        <div class="text-sm text-gray-600 whitespace-nowrap">
+        <div class="text-[13px] font-medium text-gray-700 whitespace-nowrap">
           {{ tradeTerms }}
         </div>
 
@@ -165,14 +163,14 @@ const hasActions = computed(() => !!props.data)
             <span
               v-for="(tag, idx) in paramTags"
               :key="idx"
-              class="inline-block px-1.5 py-0.5 bg-gray-100 rounded text-[10px] text-gray-600 whitespace-nowrap"
+              class="inline-block px-1.5 py-0.5 bg-gray-50 border border-gray-200 rounded text-[11px] font-medium text-gray-600 whitespace-nowrap"
             >{{ tag }}</span>
           </template>
-          <span v-else class="text-xs text-gray-400">—</span>
+          <span v-else class="text-[13px] font-medium text-gray-400">—</span>
         </div>
 
         <!-- 剩余时长 -->
-        <div class="text-sm text-gray-500 whitespace-nowrap">
+        <div class="text-[13px] font-medium text-gray-700 whitespace-nowrap tabular-nums">
           {{ remainingTime }}
         </div>
 
@@ -186,6 +184,8 @@ const hasActions = computed(() => !!props.data)
           <slot name="actions"></slot>
         </div>
       </div>
+      <!-- 扩展内容插槽（如基差报价详情） -->
+      <slot name="extra"></slot>
     </div>
   </div>
 </template>

@@ -42,7 +42,7 @@ const listPagination = reactive({
 })
 const listFilters = reactive({
   categoryName: '',
-  status: null as number | null
+  status: 0 as number | null  // 默认筛选"发布中"
 })
 
 const statusOptions = [
@@ -57,6 +57,11 @@ const pagedSupplies = computed(() => {
   const start = (listPagination.page - 1) * listPagination.size
   const end = start + listPagination.size
   return supplies.value.slice(start, end)
+})
+
+// 发布中状态的数量（用于Tab显示）
+const activeSuppliesCount = computed(() => {
+  return supplies.value.filter(s => s.status === 0).length
 })
 
 async function loadSupplies() {
@@ -903,8 +908,8 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             <span class="flex items-center gap-2">
               <span class="w-2 h-2 rounded-full" :class="activeTab === 'published' ? 'bg-brand-500' : 'bg-gray-300'"></span>
               已发布
-              <span v-if="supplies.length > 0" class="px-1.5 py-0.5 bg-gray-200 text-gray-600 text-[10px] rounded-full">
-                {{ supplies.length }}
+              <span v-if="activeSuppliesCount > 0" class="px-1.5 py-0.5 bg-brand-100 text-brand-600 text-[10px] rounded-full">
+                {{ activeSuppliesCount }}
               </span>
             </span>
           </button>
@@ -1038,7 +1043,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                 categoryName: s.categoryName || '未知品类',
                 quantity: s.quantity,
                 quantityUnit: currentUnitConfig.quantityUnit,
-                price: s.exFactoryPrice,
+                price: s.priceType === 1 ? '基差报价' : s.exFactoryPrice,
                 priceUnit: currentUnitConfig.quantityUnit,
                 address: s.shipAddress,
                 packaging: s.packaging,
@@ -1048,6 +1053,23 @@ async function applyTemplate(template: SupplyTemplateResponse) {
               }"
               type="supply"
             >
+              <!-- 基差报价详情 -->
+              <template v-if="s.priceType === 1 && s.basisQuotes?.length" #extra>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <div
+                    v-for="bq in (s.basisQuotes || []).slice(0, 3)"
+                    :key="bq.id"
+                    class="inline-flex items-center gap-1.5 px-2 py-1 bg-amber-50 border border-amber-200 rounded-lg text-xs"
+                  >
+                    <span class="font-bold text-gray-700">{{ bq.contractName || bq.contractCode }}</span>
+                    <span :class="bq.basisPrice >= 0 ? 'text-red-500' : 'text-green-500'" class="font-bold">
+                      {{ bq.basisPrice >= 0 ? '+' : '' }}{{ bq.basisPrice }}
+                    </span>
+                    <span class="text-gray-400">·</span>
+                    <span class="font-medium text-gray-600">{{ bq.remainingQty ?? bq.availableQty }}吨</span>
+                  </div>
+                </div>
+              </template>
               <template #status>
                 <span
                   :class="[
@@ -1059,7 +1081,6 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                   ]"
                 >
                   {{ getStatusIcon(s.status) }} {{ getStatusText(s.status) }}
-                  <template v-if="s.status === 0 && s.expireTime"> · {{ formatExpireTime(s.expireTime) }}</template>
                   <template v-if="s.status === 1 && s.remainingQuantity != null"> · {{ getDealProgress(s) }}%</template>
                 </span>
               </template>

@@ -608,7 +608,7 @@ watch(() => route.params.id, (newId, oldId) => {
                       categoryName: supply.categoryName || '未知品类',
                       quantity: supply.quantity,
                       quantityUnit: '吨',
-                      price: supply.exFactoryPrice,
+                      price: supply.priceType === 1 ? '基差报价' : supply.exFactoryPrice,
                       priceUnit: '吨',
                       address: supply.shipAddress,
                       packaging: supply.packaging,
@@ -618,6 +618,23 @@ watch(() => route.params.id, (newId, oldId) => {
                     }"
                     type="supply"
                   >
+                    <!-- 基差报价详情 -->
+                    <template v-if="supply.priceType === 1 && supply.basisQuotes?.length" #extra>
+                      <div class="mt-2 flex flex-wrap gap-2">
+                        <div
+                          v-for="bq in (supply.basisQuotes || []).slice(0, 3)"
+                          :key="bq.id"
+                          class="inline-flex items-center gap-1.5 px-2 py-1 bg-amber-50 border border-amber-200 rounded-lg text-xs"
+                        >
+                          <span class="font-bold text-gray-700">{{ bq.contractName || bq.contractCode }}</span>
+                          <span :class="bq.basisPrice >= 0 ? 'text-red-500' : 'text-green-500'" class="font-bold">
+                            {{ bq.basisPrice >= 0 ? '+' : '' }}{{ bq.basisPrice }}
+                          </span>
+                          <span class="text-gray-400">·</span>
+                          <span class="font-medium text-gray-600">{{ bq.remainingQty ?? bq.availableQty }}吨</span>
+                        </div>
+                      </div>
+                    </template>
                     <template #actions>
                       <button
                         class="flex items-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium rounded-lg transition-all active:scale-95"

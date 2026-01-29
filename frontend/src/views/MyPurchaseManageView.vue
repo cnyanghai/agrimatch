@@ -45,7 +45,7 @@ const listPagination = reactive({
 })
 const listFilters = reactive({
   categoryName: '',
-  status: null as number | null
+  status: 0 as number | null  // 默认筛选"发布中"
 })
 
 const statusOptions = [
@@ -60,6 +60,11 @@ const pagedRequirements = computed(() => {
   const start = (listPagination.page - 1) * listPagination.size
   const end = start + listPagination.size
   return requirements.value.slice(start, end)
+})
+
+// 发布中状态的数量（用于Tab显示）
+const activeRequirementsCount = computed(() => {
+  return requirements.value.filter(r => r.status === 0).length
 })
 
 async function loadRequirements() {
@@ -818,8 +823,8 @@ async function applyTemplate(template: RequirementTemplateResponse) {
             <span class="flex items-center gap-2">
               <span class="w-2 h-2 rounded-full" :class="activeTab === 'published' ? 'bg-autumn-500' : 'bg-gray-300'"></span>
               已发布
-              <span v-if="requirements.length > 0" class="px-1.5 py-0.5 bg-gray-200 text-gray-600 text-[10px] rounded-full">
-                {{ requirements.length }}
+              <span v-if="activeRequirementsCount > 0" class="px-1.5 py-0.5 bg-autumn-100 text-autumn-600 text-[10px] rounded-full">
+                {{ activeRequirementsCount }}
               </span>
             </span>
           </button>
@@ -974,7 +979,6 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                   ]"
                 >
                   {{ getStatusIcon(req.status) }} {{ getStatusText(req.status) }}
-                  <template v-if="req.status === 0 && req.expireTime"> · {{ formatExpireTime(req.expireTime) }}</template>
                   <template v-if="req.status === 1 && req.remainingQuantity != null"> · {{ getDealProgress(req) }}%</template>
                 </span>
               </template>
