@@ -39,6 +39,7 @@ export interface RequirementResponse {
   companyName?: string
   userName?: string
   nickName?: string
+  position?: string  // 公司职务
   categoryName: string
   contractNo?: string
   quantity?: number

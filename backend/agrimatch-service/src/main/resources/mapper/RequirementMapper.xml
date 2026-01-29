@@ -11,6 +11,7 @@
         <result column="company_name" property="companyName"/>
         <result column="user_name" property="userName"/>
         <result column="nick_name" property="nickName"/>
+        <result column="position" property="position"/>
         <result column="category_name" property="categoryName"/>
         <result column="domain" property="domain"/>
         <result column="contract_no" property="contractNo"/>
@@ -54,6 +55,7 @@
             c.company_name AS company_name,
             u.user_name AS user_name,
             u.nick_name AS nick_name,
+            u.position AS position,
             r.category_name, r.domain, r.contract_no, r.quantity, r.expected_price, r.packaging, r.invoice_type, r.payment_method, r.delivery_method, r.params_json, r.tags_json, r.remark,
             r.expire_minutes, r.expire_time,
             r.purchase_lat, r.purchase_lng, r.purchase_address,
@@ -72,6 +74,7 @@
             c.company_name AS company_name,
             u.user_name AS user_name,
             u.nick_name AS nick_name,
+            u.position AS position,
             r.category_name, r.domain, r.contract_no, r.quantity, r.expected_price, r.packaging, r.invoice_type, r.payment_method, r.delivery_method, r.params_json, r.tags_json, r.remark,
             r.expire_minutes, r.expire_time,
             r.purchase_lat, r.purchase_lng, r.purchase_address,

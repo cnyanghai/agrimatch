@@ -12,7 +12,8 @@ import { getSchemaTree, type ProductSchemaVO, type CategoryNode } from '../api/p
 import { getSchemaUnitConfig } from '../utils/schemaUnits'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../store/auth'
-import { Menu } from 'lucide-vue-next'
+import { Menu, MessageCircle } from 'lucide-vue-next'
+import ProductInfoRow from '../components/ProductInfoRow.vue'
 
 const authStore = useAuthStore()
 
@@ -531,79 +532,69 @@ function parseParams(paramsJson?: string): string {
           正在加载需求...
         </div>
 
+        <!-- 采购卡片 -->
         <div
           v-for="r in displayRequirements"
           :key="r.id"
           :ref="(el) => setCardEl(Number(r.id), el as any)"
-          class="purchase-card bg-white rounded-xl p-5 border border-gray-200 transition-all"
-          :class="focusedId === r.id ? 'ring-2 ring-autumn-500/50 bg-autumn-50/40' : 'hover:shadow-md hover:border-autumn-100'"
+          class="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all cursor-pointer hover:shadow-md hover:border-autumn-200"
+          :class="{ 'ring-2 ring-autumn-500 shadow-lg': focusedId === r.id }"
         >
-          <div class="flex flex-col lg:flex-row lg:flex-wrap items-start gap-6 mx-0">
-            <div class="w-full lg:w-52 flex items-center gap-3 shrink-0 border-r border-gray-50 pr-4">
-              <div class="w-12 h-12 bg-autumn-50 text-autumn-700 rounded-lg flex items-center justify-center text-xl font-bold shrink-0">
-                {{ (r.companyName || r.nickName || r.userName || '采')[0] }}
-              </div>
-              <div class="overflow-hidden flex-1">
-                <div class="text-sm font-bold text-gray-900 truncate">{{ r.companyName || '未填写公司' }}</div>
-                <div class="flex items-center gap-1 mt-1">
-                  <span class="bg-autumn-50 text-autumn-600 text-[10px] px-1 py-0.5 rounded">企业用户</span>
-                  <span class="text-[10px] text-gray-400">{{ r.nickName || r.userName || '' }}</span>
-                </div>
-              </div>
-              <!-- 关注按钮 -->
-              <button
-                v-if="authStore.token && r.userId"
-                class="shrink-0 text-xs px-2 py-1 rounded-full border transition-all "
-                :class="isFollowingUser(r.userId) 
-                  ? 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-100' 
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-autumn-300 hover:text-autumn-600'"
-                @click.stop="toggleFollow(r)"
-              >
-                {{ isFollowingUser(r.userId) ? '已关注' : '+ 关注' }}
-              </button>
+          <!-- 头部：公司信息 + 操作 -->
+          <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+            <div class="w-9 h-9 rounded-lg bg-autumn-100 flex items-center justify-center text-autumn-600 shrink-0">
+              <span class="text-sm font-bold">{{ (r.companyName || r.nickName || '采')[0] }}</span>
             </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-gray-900 truncate">{{ r.companyName || '未填写公司' }}</span>
+                <span class="text-gray-300">·</span>
+                <span class="text-xs text-gray-500 truncate">
+                  <template v-if="r.position">{{ r.position }} · </template>{{ r.nickName || r.userName || '' }}
+                </span>
+              </div>
+            </div>
+            <!-- 关注按钮 -->
+            <button
+              v-if="authStore.token && r.userId"
+              class="shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all active:scale-95"
+              :class="isFollowingUser(r.userId)
+                ? 'bg-autumn-50 text-autumn-600 border-autumn-200'
+                : 'bg-white text-gray-500 border-gray-200 hover:border-autumn-300 hover:text-autumn-600'"
+              @click.stop="toggleFollow(r)"
+            >
+              {{ isFollowingUser(r.userId) ? '已关注' : '+ 关注' }}
+            </button>
+            <!-- 报价按钮 -->
+            <button
+              class="shrink-0 flex items-center gap-1.5 px-4 py-1.5 bg-autumn-600 text-white text-xs font-bold rounded-lg hover:bg-autumn-700 transition-all active:scale-95"
+              @click.stop="onQuote(r)"
+            >
+              <MessageCircle class="w-3.5 h-3.5" />
+              立即报价
+            </button>
+          </div>
 
-            <div class="w-full lg:w-[120px] shrink-0">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="bg-red-100 text-red-600 text-[10px] px-1.5 py-0.5 rounded font-bold">急需</span>
-                <span class="text-gray-400 text-[10px]">ID: {{ r.id }}</span>
-              </div>
-              <h3 class="text-lg font-bold text-gray-900 truncate">{{ r.categoryName }}</h3>
-              <div class="mt-1 text-xl font-black text-brand-600 italic">
-                <template v-if="r.expectedPrice != null">
-                  <span class="whitespace-nowrap inline-flex items-baseline gap-1">
-                    <span>意向: ¥{{ r.expectedPrice }}</span>
-                    <span class="text-xs font-normal text-gray-400 not-italic">{{ getRequirementUnitConfig(r).priceUnit }}</span>
-                  </span>
-                </template>
-                <span v-else>面议 / 基差报价</span>
-              </div>
-            </div>
-
-            <div class="flex-1 grid grid-cols-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_190px] gap-4 text-xs py-2 bg-gray-50/50 rounded-lg px-4">
-              <div class="min-w-0">
-                <div class="text-gray-400 mb-0.5">需求数量</div>
-                <div class="font-semibold text-gray-700">{{ r.quantity ?? '-' }} {{ getRequirementUnitConfig(r).quantityUnit }}</div>
-              </div>
-              <div class="min-w-0">
-                <div class="text-gray-400 mb-0.5">收货地</div>
-                <div class="font-semibold text-gray-700 truncate">{{ r.purchaseAddress || '-' }}</div>
-              </div>
-              <div class="min-w-0">
-                <div class="text-gray-400 mb-0.5">指标要求</div>
-                <div class="font-semibold text-gray-700 truncate">{{ parseParams(r.paramsJson) }}</div>
-              </div>
-              <div class="min-w-0">
-                <div class="text-gray-400 mb-0.5">最晚到货</div>
-                <div class="font-semibold text-red-500">-</div>
-              </div>
-            </div>
-
-            <div class="shrink-0 flex flex-col items-center gap-2">
-              <button class="px-8 py-3 bg-brand-600 text-white rounded-xl font-bold text-sm shadow-sm hover:bg-brand-700 transition-all " @click="onQuote(r)">
-                立即报价
-              </button>
-            </div>
+          <!-- 主体：产品信息 -->
+          <div class="p-4">
+            <ProductInfoRow
+              :data="{
+                categoryName: r.categoryName,
+                quantity: r.quantity,
+                quantityUnit: getRequirementUnitConfig(r).quantityUnit,
+                price: r.expectedPrice,
+                priceUnit: getRequirementUnitConfig(r).priceUnit.replace('/', ''),
+                priceLabel: '期望价',
+                address: r.purchaseAddress,
+                addressLabel: '收货地',
+                packaging: r.packaging,
+                paymentMethod: r.paymentMethod,
+                paramsJson: r.paramsJson
+              }"
+              type="purchase"
+              :show-header="true"
+              :show-icon="false"
+            />
           </div>
         </div>
 

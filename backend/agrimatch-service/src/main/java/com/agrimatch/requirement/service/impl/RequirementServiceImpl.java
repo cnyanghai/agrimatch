@@ -220,6 +220,7 @@ public class RequirementServiceImpl implements RequirementService {
         o.setCompanyName(r.getCompanyName());
         o.setUserName(r.getUserName());
         o.setNickName(r.getNickName());
+        o.setPosition(r.getPosition());
         o.setCategoryName(r.getCategoryName());
         o.setContractNo(r.getContractNo());
         o.setQuantity(r.getQuantity());

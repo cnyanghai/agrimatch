@@ -12,6 +12,7 @@ public class BusSupply {
     private String companyName;
     private String userName;
     private String nickName;
+    private String position;  // 公司职务
     private String categoryName;
     private String domain;
     private String supplyNo;
@@ -266,6 +267,14 @@ public class BusSupply {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 }
 

@@ -82,6 +82,7 @@ export interface SupplyResponse {
   companyName?: string
   userName?: string
   nickName?: string
+  position?: string  // 公司职务
   categoryName: string
   schemaCode?: string  // 业态代码：feed, poultry, meat, other
   supplyNo?: string

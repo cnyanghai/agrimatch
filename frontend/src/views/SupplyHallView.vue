@@ -14,7 +14,8 @@ import { getSchemaUnitConfig } from '../utils/schemaUnits'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../store/auth'
 import { Card, StatusBadge } from '../components/ui'
-import { Menu } from 'lucide-vue-next'
+import { Menu, MessageCircle } from 'lucide-vue-next'
+import ProductInfoRow from '../components/ProductInfoRow.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -617,29 +618,29 @@ function parseParams(paramsJson?: string): string {
         </div>
 
           <!-- 供应卡片 -->
-          <Card 
-          v-for="s in displaySupplies"
-          :key="s.id"
+          <div
+            v-for="s in displaySupplies"
+            :key="s.id"
             :ref="el => setCardEl(Number(s.id), el as any)"
-            radius="2xl"
-            padding="none"
-            hover
-            class="flex flex-col lg:flex-row items-stretch lg:items-center gap-6 p-6 group transition-all"
+            class="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all cursor-pointer hover:shadow-md hover:border-brand-200"
             :class="{ 'ring-2 ring-brand-500 shadow-lg': focusedId === s.id }"
             @click="onViewDetail(s)"
-        >
-            <!-- 左侧公司/用户信息 -->
-            <div class="flex items-start gap-3 w-full lg:w-[200px] shrink-0 border-b lg:border-b-0 lg:border-r border-gray-100 pb-4 lg:pb-0 lg:pr-4">
-              <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
+          >
+            <!-- 头部：公司信息 + 操作 -->
+            <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+              <div class="w-9 h-9 rounded-lg bg-brand-100 flex items-center justify-center text-brand-600 shrink-0">
                 <span class="text-sm font-bold">{{ (s.companyName || s.nickName || '户')[0] }}</span>
               </div>
-              <div class="min-w-0 flex-1">
-                <div class="font-bold text-gray-900 truncate hover:text-brand-600 transition-colors" @click.stop="go(`/companies/${s.companyId}`)">
-                  {{ s.companyName || '个人用户' }}
-                </div>
-                <div class="flex items-center gap-1 mt-1">
-                  <StatusBadge type="brand">供应</StatusBadge>
-                  <span class="text-[10px] text-gray-400 truncate">{{ s.nickName || s.userName || '' }}</span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span
+                    class="font-bold text-gray-900 truncate hover:text-brand-600 transition-colors"
+                    @click.stop="go(`/companies/${s.companyId}`)"
+                  >{{ s.companyName || '个人用户' }}</span>
+                  <span class="text-gray-300">·</span>
+                  <span class="text-xs text-gray-500 truncate">
+                    <template v-if="s.position">{{ s.position }} · </template>{{ s.nickName || s.userName || '' }}
+                  </span>
                 </div>
               </div>
               <!-- 关注按钮 -->
@@ -653,82 +654,53 @@ function parseParams(paramsJson?: string): string {
               >
                 {{ isFollowingUser(s.userId) ? '已关注' : '+ 关注' }}
               </button>
-            </div>
-
-            <!-- 产品核心信息 -->
-            <div class="w-full lg:w-auto shrink-0" :class="s.priceType === 1 ? 'lg:min-w-[200px]' : 'lg:w-[120px]'">
-              <div class="flex items-center gap-2 mb-1">
-                <StatusBadge v-if="s.priceType === 1" type="warning">基差</StatusBadge>
-                <StatusBadge v-else type="success">现货</StatusBadge>
-                <span class="text-gray-400 text-[10px]">ID: {{ s.id }}</span>
-              </div>
-              <h3 class="text-lg font-black text-gray-900 truncate">{{ s.categoryName }}</h3>
-              
-              <!-- 现货一口价 -->
-              <div v-if="s.priceType !== 1" class="mt-1 text-xl font-black text-red-600 italic">
-                <span class="whitespace-nowrap inline-flex items-baseline gap-1">
-                  <span>¥{{ s.exFactoryPrice }}</span>
-                  <span class="text-xs font-normal text-gray-400 not-italic">{{ getSupplyUnitConfig(s).priceUnit }}</span>
-                </span>
-              </div>
-              
-              <!-- 基差报价 -->
-              <div v-else class="mt-2 space-y-1.5">
-                <div v-for="bq in (s.basisQuotes || []).slice(0, 3)" :key="bq.id" class="bg-amber-50/50 rounded-lg px-2 py-1.5 border border-amber-100">
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="text-gray-700 font-bold text-[10px]">{{ bq.contractName || bq.contractCode }}</span>
-                    <span class="text-[10px] text-gray-400">{{ bq.availableQty }}吨</span>
-                  </div>
-                  <div class="flex items-center justify-between gap-2 mt-0.5">
-                    <div class="flex flex-col">
-                      <span class="text-[9px] text-gray-500">
-                        期货 ¥{{ getFuturesPrice(bq.contractCode) || '-' }}
-                      </span>
-                      <span class="font-bold text-[10px]" :class="bq.basisPrice >= 0 ? 'text-red-500' : 'text-green-500'">
-                        {{ bq.basisPrice >= 0 ? '+' : '' }}{{ bq.basisPrice }}
-                      </span>
-                    </div>
-                    <div class="text-right">
-                      <div class="text-[8px] text-gray-400 font-bold uppercase">核算价</div>
-                      <span class="font-black text-brand-600 text-sm">
-                        ¥{{ calcReferencePrice(bq.contractCode, bq.basisPrice)?.toFixed(0) || '-' }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 参数详情 -->
-            <div class="flex-1 grid grid-cols-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_190px] gap-4 text-xs py-3 bg-gray-50/50 rounded-2xl px-5">
-              <div class="min-w-0">
-                <div class="text-gray-400 text-[10px] font-bold uppercase mb-1">规格参数</div>
-                <div class="font-bold text-gray-700 truncate">{{ parseParams(s.paramsJson) }}</div>
-              </div>
-              <div class="min-w-0">
-                <div class="text-gray-400 text-[10px] font-bold uppercase mb-1">发货地</div>
-                <div class="font-bold text-gray-700 truncate">{{ s.shipAddress || '-' }}</div>
-              </div>
-              <div class="min-w-0">
-                <div class="text-gray-400 text-[10px] font-bold uppercase mb-1">库存</div>
-                <div class="font-bold text-gray-700 truncate">{{ s.quantity ?? '-' }}{{ getSupplyUnitConfig(s).quantityUnit }}</div>
-              </div>
-              <div class="min-w-0">
-                <div class="text-gray-400 text-[10px] font-bold uppercase mb-1">物流方式</div>
-                <div class="font-bold text-gray-700 truncate">{{ s.deliveryMode || '-' }}</div>
-              </div>
-            </div>
-
-            <!-- 操作 -->
-            <div class="shrink-0 flex flex-col items-center justify-center gap-2">
-              <button 
-                class="w-full lg:w-auto px-10 py-3 bg-brand-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-brand-900/10 hover:bg-brand-700 hover:-translate-y-0.5 transition-all active:scale-95" 
+              <!-- 咨询按钮 -->
+              <button
+                class="shrink-0 flex items-center gap-1.5 px-4 py-1.5 bg-brand-600 text-white text-xs font-bold rounded-lg hover:bg-brand-700 transition-all active:scale-95"
                 @click.stop="onConsult(s)"
               >
+                <MessageCircle class="w-3.5 h-3.5" />
                 立即咨询
               </button>
             </div>
-          </Card>
+
+            <!-- 主体：产品信息 -->
+            <div class="p-4">
+              <ProductInfoRow
+                :data="{
+                  categoryName: s.categoryName,
+                  quantity: s.quantity,
+                  quantityUnit: getSupplyUnitConfig(s).quantityUnit,
+                  price: s.priceType === 1 ? '基差报价' : s.exFactoryPrice,
+                  priceUnit: getSupplyUnitConfig(s).priceUnit.replace('/', ''),
+                  address: s.shipAddress,
+                  packaging: s.packaging,
+                  paymentMethod: s.paymentMethod,
+                  paramsJson: s.paramsJson
+                }"
+                type="supply"
+                :show-header="true"
+                :show-icon="false"
+              />
+              <!-- 基差报价详情（仅基差类型显示） -->
+              <div v-if="s.priceType === 1 && s.basisQuotes?.length" class="mt-3 flex flex-wrap gap-2">
+                <div
+                  v-for="bq in (s.basisQuotes || []).slice(0, 3)"
+                  :key="bq.id"
+                  class="inline-flex items-center gap-2 px-2.5 py-1.5 bg-amber-50 border border-amber-200 rounded-lg text-xs"
+                >
+                  <span class="font-bold text-gray-700">{{ bq.contractName || bq.contractCode }}</span>
+                  <span :class="bq.basisPrice >= 0 ? 'text-red-500' : 'text-green-500'" class="font-bold">
+                    {{ bq.basisPrice >= 0 ? '+' : '' }}{{ bq.basisPrice }}
+                  </span>
+                  <span class="text-gray-400">→</span>
+                  <span class="font-black text-brand-600">
+                    ¥{{ calcReferencePrice(bq.contractCode, bq.basisPrice)?.toFixed(0) || '-' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
 
         <div v-if="!listLoading && supplies.length === 0" class="bg-white rounded-xl border border-gray-200 p-8 text-center">
           <div class="text-gray-400 text-sm mb-2">暂无货源数据</div>

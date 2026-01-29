@@ -298,6 +298,7 @@ public class SupplyServiceImpl implements SupplyService {
         o.setCompanyName(s.getCompanyName());
         o.setUserName(s.getUserName());
         o.setNickName(s.getNickName());
+        o.setPosition(s.getPosition());
         o.setCategoryName(s.getCategoryName());
         o.setSupplyNo(s.getSupplyNo());
         o.setOrigin(s.getOrigin());

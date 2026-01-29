@@ -12,6 +12,7 @@ public class BusRequirement {
     private String companyName;
     private String userName;
     private String nickName;
+    private String position;  // 公司职务
     private String categoryName;
     private String domain;
     private String contractNo;
@@ -248,6 +249,14 @@ public class BusRequirement {
 
     public void setNickName(String nickName) {
         this.nickName = nickName;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 }
 
