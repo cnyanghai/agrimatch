@@ -10,9 +10,9 @@ import { useAuthStore } from '../store/auth'
 import { openChatConversation } from '../api/chat'
 import PublicFooter from '../components/PublicFooter.vue'
 import {
-  Info, Shield, MapPin, Search, TrendingUp, TrendingDown,
+  Info, MapPin, Search, TrendingUp, TrendingDown,
   Minus, Circle, Heart, MessageCircle, Share2, Factory,
-  Building2, User, FileText, Calendar, Star, BarChart3,
+  Building2, User, FileText, Calendar, BarChart3,
   Briefcase, Award, Package, Truck, Tag, Handshake, FileSignature
 } from 'lucide-vue-next'
 import CompanySkeleton from '../components/company/CompanySkeleton.vue'
@@ -430,19 +430,7 @@ watch(() => route.params.id, (newId, oldId) => {
         <div class="w-full px-4 md:px-10">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div class="flex flex-col gap-3">
-              <div class="flex items-center gap-4 flex-wrap">
-                <h1 class="text-2xl font-bold text-gray-900">{{ company.companyName }}</h1>
-                <div class="flex gap-2">
-                  <span class="flex items-center gap-1 bg-brand-100 text-brand-700 text-xs font-bold px-2 py-1 rounded">
-                    <Shield class="w-3 h-3" />
-                    资质已核验
-                  </span>
-                  <span v-if="company.businessScope" class="flex items-center gap-1 bg-autumn-100 text-autumn-700 text-xs font-bold px-2 py-1 rounded">
-                    <Star class="w-3 h-3" />
-                    核心供应商
-                  </span>
-                </div>
-              </div>
+              <h1 class="text-2xl font-bold text-gray-900">{{ company.companyName }}</h1>
               <div class="flex items-center gap-6 text-slate-500 text-sm flex-wrap">
                 <div v-if="company.establishDate || company.createTime" class="flex items-center gap-1">
                   <Calendar class="w-4 h-4" />

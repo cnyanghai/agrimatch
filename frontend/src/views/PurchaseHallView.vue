@@ -573,7 +573,10 @@ function parseParams(paramsJson?: string): string {
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2">
-                <span class="font-bold text-gray-900 truncate">{{ r.companyName || '未填写公司' }}</span>
+                <span
+                  class="font-bold text-gray-900 truncate hover:text-autumn-600 cursor-pointer transition-colors"
+                  @click.stop="go(`/companies/${r.companyId}`)"
+                >{{ r.companyName || '未填写公司' }}</span>
                 <span class="text-gray-300">·</span>
                 <span class="text-xs text-gray-500 truncate">
                   <template v-if="r.position">{{ r.position }} · </template>{{ r.nickName || r.userName || '' }}

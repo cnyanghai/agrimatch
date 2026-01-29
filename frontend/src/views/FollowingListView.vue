@@ -338,15 +338,9 @@ onMounted(() => {
                 <span v-else class="text-3xl font-black text-brand-700">{{ getAvatarText(selectedUser) }}</span>
               </div>
               <div>
-                <div class="flex items-center gap-3 mb-2">
-                  <h2 class="text-2xl font-bold text-gray-900">
-                    {{ selectedUser.companyName || selectedUser.nickName || selectedUser.userName }}
-                  </h2>
-                  <span class="bg-brand-600 text-white text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <span class="w-3 h-3 rounded-full bg-white/30 flex items-center justify-center">✓</span>
-                    平台认证商户
-                  </span>
-                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">
+                  {{ selectedUser.companyName || selectedUser.nickName || selectedUser.userName }}
+                </h2>
                 <div class="flex items-center gap-4 text-sm text-slate-600">
                   <span class="flex items-center gap-1">
                     <span>联系人:</span>

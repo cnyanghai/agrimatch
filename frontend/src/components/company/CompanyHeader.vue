@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { MapPin, Calendar, User, ShieldCheck, MessageCircle, ExternalLink } from 'lucide-vue-next'
+import { MapPin, Calendar, User, MessageCircle, ExternalLink } from 'lucide-vue-next'
 import { vLazy } from '../../directives/lazyLoad'
 
 export interface CompanyHeaderProps {
   companyName: string
-  verified?: boolean
   logo?: string
   size?: 'sm' | 'md' | 'lg'
   province?: string
@@ -20,7 +19,6 @@ const emit = defineEmits<{
 }>()
 
 withDefaults(defineProps<CompanyHeaderProps>(), {
-  verified: false,
   size: 'lg',
   province: '',
   city: '',
@@ -59,15 +57,9 @@ function formatTime(time?: string) {
         </template>
       </div>
       <div class="flex-1 min-w-0">
-        <div class="flex flex-wrap items-center gap-4 mb-4">
-          <h1 class="text-2xl font-bold text-gray-900 tracking-tight">
-            {{ companyName }}
-          </h1>
-          <div v-if="verified" class="flex items-center gap-1.5 bg-brand-500/20 text-brand-400 px-3 py-1 rounded-full text-xs font-bold border border-brand-500/20">
-            <ShieldCheck :size="14" aria-hidden="true" />
-            资质已核验
-          </div>
-        </div>
+        <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-4">
+          {{ companyName }}
+        </h1>
 
         <div class="flex flex-wrap gap-x-8 gap-y-4 text-slate-400 text-sm mb-8">
           <div v-if="province || city || district" class="flex items-center gap-2">

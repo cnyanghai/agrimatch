@@ -654,7 +654,7 @@ function parseParams(paramsJson?: string): string {
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
                   <span
-                    class="font-bold text-gray-900 truncate hover:text-brand-600 transition-colors"
+                    class="font-bold text-gray-900 truncate hover:text-brand-600 cursor-pointer transition-colors"
                     @click.stop="go(`/companies/${s.companyId}`)"
                   >{{ s.companyName || '个人用户' }}</span>
                   <span class="text-gray-300">·</span>
