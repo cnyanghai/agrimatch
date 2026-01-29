@@ -312,7 +312,6 @@ async function loadRequirements() {
   }
 }
 
-
 // 搜索
 function onSearch() {
   currentPage.value = 1 // 重置分页
@@ -589,7 +588,8 @@ function parseParams(paramsJson?: string): string {
                 addressLabel: '收货地',
                 packaging: r.packaging,
                 paymentMethod: r.paymentMethod,
-                paramsJson: r.paramsJson
+                paramsJson: r.paramsJson,
+                expireTime: r.expireTime
               }"
               type="purchase"
               :show-header="true"

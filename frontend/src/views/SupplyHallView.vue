@@ -373,7 +373,6 @@ function calcReferencePrice(contractCode: string, basisPrice: number): number | 
   return futuresPrice + basisPrice
 }
 
-
 // 搜索
 function onSearch() {
   currentPage.value = 1 // 重置分页
@@ -670,7 +669,8 @@ function parseParams(paramsJson?: string): string {
                   address: s.shipAddress,
                   packaging: s.packaging,
                   paymentMethod: s.paymentMethod,
-                  paramsJson: s.paramsJson
+                  paramsJson: s.paramsJson,
+                  expireTime: s.expireTime
                 }"
                 type="supply"
                 :show-header="true"

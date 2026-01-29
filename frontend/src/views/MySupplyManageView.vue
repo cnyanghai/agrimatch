@@ -1043,7 +1043,8 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                 address: s.shipAddress,
                 packaging: s.packaging,
                 paymentMethod: s.paymentMethod,
-                paramsJson: s.paramsJson
+                paramsJson: s.paramsJson,
+                expireTime: s.expireTime
               }"
               type="supply"
             >

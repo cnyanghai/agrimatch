@@ -958,7 +958,8 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                 address: req.purchaseAddress,
                 packaging: req.packaging,
                 paymentMethod: req.paymentMethod,
-                paramsJson: req.paramsJson
+                paramsJson: req.paramsJson,
+                expireTime: req.expireTime
               }"
               type="purchase"
             >

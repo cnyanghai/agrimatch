@@ -613,7 +613,8 @@ watch(() => route.params.id, (newId, oldId) => {
                       address: supply.shipAddress,
                       packaging: supply.packaging,
                       paymentMethod: supply.paymentMethod,
-                      paramsJson: supply.paramsJson
+                      paramsJson: supply.paramsJson,
+                      expireTime: supply.expireTime
                     }"
                     type="supply"
                   >

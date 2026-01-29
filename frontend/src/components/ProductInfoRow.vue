@@ -14,6 +14,7 @@ export interface ProductInfoData {
   packaging?: string
   paymentMethod?: string
   paramsJson?: string
+  expireTime?: string // 过期时间
 }
 
 const props = withDefaults(defineProps<{
@@ -54,6 +55,30 @@ const tradeTerms = computed(() => {
   return terms.length > 0 ? terms.join('/') : '—'
 })
 
+// 计算剩余发布时长
+const remainingTime = computed(() => {
+  const expireTime = props.data.expireTime
+  if (!expireTime) return '长期有效'
+
+  const now = new Date().getTime()
+  const expire = new Date(expireTime).getTime()
+  const diff = expire - now
+
+  if (diff <= 0) return '已过期'
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+
+  if (days > 0) {
+    return `${days}天${hours}小时`
+  } else if (hours > 0) {
+    return `${hours}小时${minutes}分`
+  } else {
+    return `${minutes}分钟`
+  }
+})
+
 // 是否有操作插槽
 const hasActions = computed(() => !!props.data)
 </script>
@@ -78,8 +103,8 @@ const hasActions = computed(() => !!props.data)
         class="product-info-grid"
         :class="[
           showIcon
-            ? ($slots.status && $slots.actions ? 'with-icon-7' : $slots.status || $slots.actions ? 'with-icon-6' : 'with-icon-5')
-            : ($slots.status && $slots.actions ? 'no-icon-8' : $slots.status || $slots.actions ? 'no-icon-7' : 'no-icon-6')
+            ? ($slots.status && $slots.actions ? 'with-icon-8' : $slots.status || $slots.actions ? 'with-icon-7' : 'with-icon-6')
+            : ($slots.status && $slots.actions ? 'no-icon-9' : $slots.status || $slots.actions ? 'no-icon-8' : 'no-icon-7')
         ]"
       >
         <!-- 标题行 -->
@@ -97,6 +122,7 @@ const hasActions = computed(() => !!props.data)
           </div>
           <div class="text-[10px] font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">包装/付款</div>
           <div class="text-[10px] font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">质量指标</div>
+          <div class="text-[10px] font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">剩余时长</div>
           <!-- 状态列标题 -->
           <div v-if="$slots.status" class="text-[10px] font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">状态</div>
           <!-- 操作列标题 -->
@@ -145,6 +171,11 @@ const hasActions = computed(() => !!props.data)
           <span v-else class="text-xs text-gray-400">—</span>
         </div>
 
+        <!-- 剩余时长 -->
+        <div class="text-sm text-gray-500 whitespace-nowrap">
+          {{ remainingTime }}
+        </div>
+
         <!-- 状态插槽 -->
         <div v-if="$slots.status" class="flex items-center">
           <slot name="status"></slot>
@@ -167,25 +198,25 @@ const hasActions = computed(() => !!props.data)
   align-items: center;
 }
 
-/* 有图标时：数量 | 价格 | 地址 | 包装 | 质量 [+ 状态] [+ 操作] */
-.with-icon-5 {
-  grid-template-columns: auto auto minmax(60px, 120px) auto 1fr;
-}
+/* 有图标时：数量 | 价格 | 地址 | 包装 | 质量 | 剩余时长 [+ 状态] [+ 操作] */
 .with-icon-6 {
   grid-template-columns: auto auto minmax(60px, 120px) auto 1fr auto;
 }
 .with-icon-7 {
   grid-template-columns: auto auto minmax(60px, 120px) auto 1fr auto auto;
 }
-
-/* 无图标时：品名 | 数量 | 价格 | 地址 | 包装 | 质量 [+ 状态] [+ 操作] */
-.no-icon-6 {
-  grid-template-columns: auto auto auto minmax(60px, 120px) auto 1fr;
+.with-icon-8 {
+  grid-template-columns: auto auto minmax(60px, 120px) auto 1fr auto auto auto;
 }
+
+/* 无图标时：品名 | 数量 | 价格 | 地址 | 包装 | 质量 | 剩余时长 [+ 状态] [+ 操作] */
 .no-icon-7 {
   grid-template-columns: auto auto auto minmax(60px, 120px) auto 1fr auto;
 }
 .no-icon-8 {
   grid-template-columns: auto auto auto minmax(60px, 120px) auto 1fr auto auto;
+}
+.no-icon-9 {
+  grid-template-columns: auto auto auto minmax(60px, 120px) auto 1fr auto auto auto;
 }
 </style>
