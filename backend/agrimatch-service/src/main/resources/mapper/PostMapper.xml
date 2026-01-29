@@ -140,6 +140,22 @@
         </if>
     </select>
 
+    <update id="updateById" parameterType="com.agrimatch.post.domain.BusPost">
+        UPDATE bus_post
+        SET title = #{title},
+            content = #{content},
+            domain = #{domain},
+            tags_json = #{tagsJson},
+            images_json = #{imagesJson},
+            post_type = #{postType},
+            is_paid = #{isPaid},
+            price = #{price},
+            teaser_length = #{teaserLength},
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
     <update id="logicalDelete">
         UPDATE bus_post
         SET is_deleted = 1,

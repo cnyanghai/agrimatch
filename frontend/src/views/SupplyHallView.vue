@@ -307,15 +307,33 @@ async function loadSupplies() {
     
     let result = res.data || []
     
-    // 前端搜索过滤（关键词搜索）
+    // 前端搜索过滤（关键词搜索 - 全字段匹配）
     if (searchKeyword.value.trim()) {
       const kw = searchKeyword.value.toLowerCase()
-      result = result.filter(s => 
-        s.categoryName?.toLowerCase().includes(kw) ||
-        s.companyName?.toLowerCase().includes(kw) ||
-        s.shipAddress?.toLowerCase().includes(kw) ||
-        s.nickName?.toLowerCase().includes(kw)
-      )
+      result = result.filter(s => {
+        // 基础字段
+        if (s.categoryName?.toLowerCase().includes(kw)) return true
+        if (s.companyName?.toLowerCase().includes(kw)) return true
+        if (s.shipAddress?.toLowerCase().includes(kw)) return true
+        if (s.nickName?.toLowerCase().includes(kw)) return true
+        // 扩展字段：包装、付款、备注、产地
+        if (s.packaging?.toLowerCase().includes(kw)) return true
+        if (s.paymentMethod?.toLowerCase().includes(kw)) return true
+        if (s.remark?.toLowerCase().includes(kw)) return true
+        if (s.origin?.toLowerCase().includes(kw)) return true
+        // 质量参数 paramsJson（搜索参数名和参数值）
+        if (s.paramsJson) {
+          try {
+            const params = JSON.parse(s.paramsJson)
+            for (const [key, value] of Object.entries(params)) {
+              if (key.toLowerCase().includes(kw) || String(value).toLowerCase().includes(kw)) {
+                return true
+              }
+            }
+          } catch { /* ignore */ }
+        }
+        return false
+      })
     }
     
     supplies.value = result
@@ -426,6 +444,15 @@ watch(schemaCodeFromRoute, (newVal) => {
 watch(categoryNameFromRoute, (newVal) => {
   if (newVal !== selectedCategory.value) {
     selectedCategory.value = newVal
+    currentPage.value = 1
+    loadSupplies()
+  }
+})
+
+// 监听搜索关键字变化，清空时自动恢复列表
+watch(searchKeyword, (newVal, oldVal) => {
+  // 当关键字从有值变为空时，自动重新加载
+  if (oldVal && oldVal.trim() && !newVal.trim()) {
     currentPage.value = 1
     loadSupplies()
   }

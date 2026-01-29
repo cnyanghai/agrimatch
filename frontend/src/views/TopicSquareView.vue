@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { requireAuth } from '../utils/requireAuth'
@@ -152,6 +152,13 @@ function stripHtml(html: string | undefined): string {
   if (!html) return ''
   return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
 }
+
+// 监听搜索关键字变化，清空时自动恢复列表
+watch(keyword, (newVal, oldVal) => {
+  if (oldVal && oldVal.trim() && !newVal.trim()) {
+    loadPosts()
+  }
+})
 
 onMounted(() => {
   loadPosts()

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { MapPin, Building2, Package, ShoppingCart, RefreshCw, Search, Navigation, MessageCircle, AlertTriangle, Zap } from 'lucide-vue-next'
@@ -312,6 +312,13 @@ async function refresh() {
 function handleSearch() {
   refresh()
 }
+
+// 监听搜索关键字变化，清空时自动刷新
+watch(keyword, (newVal, oldVal) => {
+  if (oldVal && oldVal.trim() && !newVal.trim()) {
+    refresh()
+  }
+})
 
 onMounted(async () => {
   try {

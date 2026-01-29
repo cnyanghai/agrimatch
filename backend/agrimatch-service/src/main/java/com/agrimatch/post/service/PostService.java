@@ -9,6 +9,8 @@ import java.util.List;
 public interface PostService {
     Long create(Long userId, PostCreateRequest req);
 
+    void update(Long userId, Long id, PostCreateRequest req);
+
     PostResponse getById(Long id);
 
     List<PostResponse> list(PostQuery q);

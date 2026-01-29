@@ -13,6 +13,8 @@ public interface PostMapper {
 
     List<BusPost> selectList(@Param("q") PostQuery q);
 
+    int updateById(BusPost p);
+
     int logicalDelete(@Param("id") Long id);
 }
 

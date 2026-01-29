@@ -91,6 +91,44 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
+    public void update(Long userId, Long id, PostCreateRequest req) {
+        if (userId == null) throw new ApiException(401, "未登录");
+        BusPost existing = postMapper.selectById(id);
+        if (existing == null) throw new ApiException(404, "帖子不存在");
+        if (!existing.getUserId().equals(userId)) {
+            throw new ApiException(403, "无权修改他人的帖子");
+        }
+
+        String postType = StringUtils.hasText(req.getPostType()) ? req.getPostType() : "general";
+
+        BusPost p = new BusPost();
+        p.setId(id);
+        p.setTitle(req.getTitle());
+        p.setContent(emptyToNull(req.getContent()));
+        p.setDomain(req.getDomain() != null ? req.getDomain() : existing.getDomain());
+        p.setTagsJson(req.getTagsJson());
+        p.setImagesJson(emptyToNull(req.getImagesJson()));
+        p.setPostType(postType);
+        p.setIsPaid(false);
+        p.setPrice(null);
+        p.setTeaserLength(null);
+
+        // 付费设置
+        if ("paid".equals(postType)) {
+            p.setIsPaid(true);
+            p.setPrice(req.getPrice());
+            p.setTeaserLength(req.getTeaserLength() != null ? req.getTeaserLength() : 100);
+        }
+
+        int rows = postMapper.updateById(p);
+        if (rows != 1) throw new ApiException(500, "更新失败");
+
+        // 同步标签
+        tagService.syncEntityTags("post", id, p.getDomain(), p.getTagsJson());
+    }
+
+    @Override
     public PostResponse getById(Long id) {
         BusPost p = postMapper.selectById(id);
         if (p == null) throw new ApiException(ResultCode.NOT_FOUND);

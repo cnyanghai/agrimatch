@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +35,13 @@ public class PostController {
     public Result<Long> create(Authentication authentication, @Valid @RequestBody PostCreateRequest req) {
         Long userId = SecurityUtil.requireUserId(authentication);
         return Result.success(postService.create(userId, req));
+    }
+
+    @PutMapping("/{id}")
+    public Result<Void> update(Authentication authentication, @PathVariable("id") @NotNull Long id, @Valid @RequestBody PostCreateRequest req) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        postService.update(userId, id, req);
+        return Result.success();
     }
 
     @GetMapping("/{id}")

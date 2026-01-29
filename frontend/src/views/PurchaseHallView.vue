@@ -285,15 +285,33 @@ async function loadRequirements() {
     
     let result = res.data || []
     
-    // 前端搜索过滤（关键词搜索）
+    // 前端搜索过滤（关键词搜索 - 全字段匹配）
     if (searchKeyword.value.trim()) {
       const kw = searchKeyword.value.toLowerCase()
-      result = result.filter(r => 
-        r.categoryName?.toLowerCase().includes(kw) ||
-        r.companyName?.toLowerCase().includes(kw) ||
-        r.purchaseAddress?.toLowerCase().includes(kw) ||
-        r.nickName?.toLowerCase().includes(kw)
-      )
+      result = result.filter(r => {
+        // 基础字段
+        if (r.categoryName?.toLowerCase().includes(kw)) return true
+        if (r.companyName?.toLowerCase().includes(kw)) return true
+        if (r.purchaseAddress?.toLowerCase().includes(kw)) return true
+        if (r.nickName?.toLowerCase().includes(kw)) return true
+        // 扩展字段：包装、付款、备注、交货方式
+        if (r.packaging?.toLowerCase().includes(kw)) return true
+        if (r.paymentMethod?.toLowerCase().includes(kw)) return true
+        if (r.remark?.toLowerCase().includes(kw)) return true
+        if (r.deliveryMethod?.toLowerCase().includes(kw)) return true
+        // 质量参数 paramsJson（搜索参数名和参数值）
+        if (r.paramsJson) {
+          try {
+            const params = JSON.parse(r.paramsJson)
+            for (const [key, value] of Object.entries(params)) {
+              if (key.toLowerCase().includes(kw) || String(value).toLowerCase().includes(kw)) {
+                return true
+              }
+            }
+          } catch { /* ignore */ }
+        }
+        return false
+      })
     }
     
     requirements.value = result
@@ -348,6 +366,15 @@ watch(schemaCodeFromRoute, (newVal) => {
   if (newVal !== selectedSchemaCode.value) {
     selectedSchemaCode.value = newVal
     selectedCategory.value = null
+    currentPage.value = 1
+    loadRequirements()
+  }
+})
+
+// 监听搜索关键字变化，清空时自动恢复列表
+watch(searchKeyword, (newVal, oldVal) => {
+  // 当关键字从有值变为空时，自动重新加载
+  if (oldVal && oldVal.trim() && !newVal.trim()) {
     currentPage.value = 1
     loadRequirements()
   }
