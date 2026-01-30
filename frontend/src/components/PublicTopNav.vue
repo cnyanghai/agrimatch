@@ -6,7 +6,7 @@ import { useUiStore } from '../store/ui'
 import { LogOut, Settings, ChevronDown, ShoppingBag, Truck } from 'lucide-vue-next'
 import { getSchemaTree, type ProductSchemaVO } from '../api/productSchema'
 import { listTopCompanies, type CompanyCardResponse } from '../api/company'
-import logoWhite from '../assets/logo-white.png'
+import logoWhite from '../assets/logo-white.svg'
 
 const router = useRouter()
 const route = useRoute()
@@ -96,13 +96,10 @@ onMounted(async () => {
       <div class="min-h-11 py-1 flex items-center justify-between gap-6">
         <!-- Left: Logo & Dropdowns (Stacked) -->
         <div class="flex flex-col items-start gap-3">
-          <div class="flex items-center gap-2 cursor-pointer hover:bg-white/10 px-2 py-1.5 rounded-xl transition-all active:scale-95" @click="go('/')">
-            <!-- Logo: NHT 线条图形（白色版本，透明背景） -->
-            <img :src="logoWhite" alt="农汇通" class="h-8 w-auto" />
-            <div class="leading-tight hidden sm:block">
-              <div class="font-bold text-white text-base tracking-wide">农汇通</div>
-              <div class="text-[9px] font-medium text-brand-200/80">农牧供需智能匹配平台</div>
-            </div>
+          <div class="flex items-center gap-1.5 cursor-pointer hover:bg-white/10 px-2 py-1.5 rounded-xl transition-all active:scale-95" @click="go('/')">
+            <!-- Logo: 沃谷黄金谷粒（白色版本，透明背景） -->
+            <img :src="logoWhite" alt="沃谷" class="h-7 w-auto" />
+            <span class="hidden sm:block text-lg font-black text-white tracking-tight">沃谷</span>
           </div>
 
           <!-- Dropdowns Row -->

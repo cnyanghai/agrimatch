@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- 沃谷 Logo: 黄金谷粒 (Golden Valley + Seed) -->
+  <!-- 构造: φ=1.618, V夹角≈63.4° (2×arctan(1/φ)), 种子直径:V宽=1:φ -->
+  <!-- 谷粒 (Seed) -->
+  <circle cx="60" cy="22" r="14" fill="#2D6A4F"/>
+  <!-- 山谷 (Valley) -->
+  <path d="M 25 44 L 60 100 L 95 44" fill="none" stroke="#2D6A4F" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

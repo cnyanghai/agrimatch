@@ -225,7 +225,7 @@ onMounted(() => {
                 {{ greeting }}，{{ auth.me?.nickName || auth.me?.userName || '用户' }}
               </h2>
             <p class="text-gray-500 max-w-lg leading-relaxed">
-              欢迎回到农汇通农牧供应链管理控制台。
+              欢迎回到沃谷农牧供应链管理控制台。
                 <template v-if="totalPending > 0">
                 您当前有 <span class="text-brand-600 font-bold underline decoration-2 underline-offset-4">{{ totalPending }}</span> 项待办事项需要关注。
                 </template>

@@ -469,7 +469,7 @@ onMounted(() => {
               <a href="#" class="hover:text-brand-600 transition-colors">认证入驻</a>
               <a href="#" class="hover:text-brand-600 transition-colors">侵权举报</a>
             </div>
-            <p>© 2026 AgriMatch · 农汇通智库</p>
+            <p>© 2026 WoGu · 沃谷智库</p>
           </div>
         </div>
       </div>

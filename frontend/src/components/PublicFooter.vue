@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
-import logoWhite from '../assets/logo-white.png'
+import logoWhite from '../assets/logo-white.svg'
 
 function openAgreement(type: 'user' | 'privacy') {
   const title = type === 'user' ? '用户协议' : '隐私政策'
@@ -15,9 +15,9 @@ function openAgreement(type: 'user' | 'privacy') {
         <!-- 品牌 -->
         <div class="col-span-1 md:col-span-2">
           <div class="flex items-center gap-2.5 mb-6">
-            <!-- Logo: NHT 线条图形（白色版本，透明背景） -->
-            <img :src="logoWhite" alt="农汇通" class="h-9 w-auto opacity-90" />
-            <span class="text-2xl font-bold text-white tracking-wide">农汇通</span>
+            <!-- Logo: 沃谷黄金谷粒（白色版本，透明背景） -->
+            <img :src="logoWhite" alt="沃谷" class="h-9 w-auto opacity-90" />
+            <span class="text-2xl font-bold text-white tracking-wide">沃谷</span>
           </div>
           <p class="text-sm leading-relaxed max-w-sm mb-8">
             领先的农牧供需智能匹配平台。通过数字化手段连接产业上下游，让农牧人的每一笔交易都更安全、更透明、更简单。
@@ -59,7 +59,7 @@ function openAgreement(type: 'user' | 'privacy') {
       <!-- 底部版权 -->
       <div class="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-[0.2em] font-black">
         <div class="flex items-center gap-4">
-          <p>© 2026 农汇通团队</p>
+          <p>© 2026 沃谷团队</p>
           <div class="hidden md:block w-1 h-1 bg-gray-800 rounded-full"></div>
           <p>连接农牧产业上下游</p>
         </div>

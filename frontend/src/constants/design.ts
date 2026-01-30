@@ -1,6 +1,6 @@
 /**
  * 设计系统常量
- * AgriMatch 统一设计规范
+ * 沃谷 (WoGu) 统一设计规范
  */
 
 // 按钮样式
@@ -36,14 +36,14 @@ export const RADIUS = {
 
 // 颜色语义
 export const COLOR_SEMANTIC = {
-  // 供应侧（若竹色 Ruozhu Green）
+  // 供应侧（沃野绿）
   supply: {
     bg: 'bg-brand-50',
     text: 'text-brand-600',
     border: 'border-brand-200',
     hover: 'hover:bg-brand-100'
   },
-  // 采购侧（秋波蓝 Qiubo Blue）
+  // 采购侧（麦穗金）
   purchase: {
     bg: 'bg-autumn-50',
     text: 'text-autumn-600',

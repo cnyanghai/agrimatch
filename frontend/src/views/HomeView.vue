@@ -573,7 +573,7 @@ onBeforeUnmount(() => {
     <section class="bg-slate-900 py-16 relative overflow-hidden">
       <div class="max-w-7xl mx-auto px-4 text-center">
         <h2 class="text-2xl font-bold text-white mb-4">开启您的专业交易之旅</h2>
-        <p class="text-gray-400 text-sm mb-10 max-w-xl mx-auto">从发现商机到合约履行，AgriMatch 为您提供全流程保障</p>
+        <p class="text-gray-400 text-sm mb-10 max-w-xl mx-auto">从发现商机到合约履行，沃谷为您提供全流程保障</p>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div class="flex flex-col items-center">
