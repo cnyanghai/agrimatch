@@ -27,6 +27,7 @@ import { giftPoints as giftPointsApi } from '../api/points'
 import { createContractFromQuote, type ContractFromQuoteRequest } from '../api/contract'
 import { getMyCompany, getCompanyByUserId, type CompanyResponse } from '../api/company'
 import { getQualityStandards } from '../utils/qualityStandards'
+import { parseProductParams } from '../utils/chat/paramsParser'
 
 /** 议价状态 */
 export type NegotiationStatus = 'INQUIRING' | 'NEGOTIATING' | 'PENDING_CONFIRM' | 'CONFIRMED' | 'SIGNING' | 'COMPLETED'
@@ -230,16 +231,41 @@ export function useNegotiationWorkspace() {
     if (!conv?.subjectSnapshotJson) return {}
     try {
       const snapshot = JSON.parse(conv.subjectSnapshotJson)
+      const isSupply = conv.subjectType === 'SUPPLY'
+
+      // 基差合约：解析全部 basisQuotes
+      let basisQuotes: Array<{ contractCode: string; basisPrice: number; availableQty?: number }> = []
+      let basisPrice: number | undefined
+      let contractCode: string | undefined
+      if (isSupply && snapshot.priceType === 1 && Array.isArray(snapshot.basisQuotes) && snapshot.basisQuotes.length > 0) {
+        basisQuotes = snapshot.basisQuotes.map((q: any) => ({
+          contractCode: q.contractCode || '',
+          basisPrice: q.basisPrice ?? 0,
+          availableQty: q.availableQty ?? q.remainingQty ?? undefined
+        }))
+        basisPrice = basisQuotes[0]?.basisPrice
+        contractCode = basisQuotes[0]?.contractCode
+      }
+
       return {
         productName: snapshot.productName || snapshot.title || '',
         categoryName: snapshot.categoryName || '',
         quantity: snapshot.quantity || snapshot.remainingQuantity || 0,
-        unit: '吨',
-        qualityGrade: snapshot.qualityGrade || '一级品',
+        unit: snapshot.unit || '吨',
+        price: snapshot.price || snapshot.exFactoryPrice || snapshot.expectedPrice,
+        priceType: isSupply ? (snapshot.priceType === 1 ? 'BASIS' : 'SPOT') : undefined,
+        basisPrice,
+        contractCode,
+        basisQuotes,
+        packaging: snapshot.packaging || '',
+        origin: snapshot.origin || '',
         deliveryDate: snapshot.deliveryDate || snapshot.arrivalDate || '',
         deliveryPlace: snapshot.deliveryPlace || snapshot.shipAddress || snapshot.purchaseAddress || '',
-        price: snapshot.price || snapshot.exFactoryPrice || snapshot.expectedPrice,
-        paymentMethod: snapshot.paymentMethod || snapshot.payment_method || '货到付款'
+        deliveryMethod: snapshot.deliveryMethod || snapshot.deliveryMode || '',
+        paymentMethod: snapshot.paymentMethod || '',
+        invoiceType: snapshot.invoiceType || '',
+        dynamicParams: parseProductParams(snapshot.paramsJson),
+        remark: snapshot.remark || ''
       }
     } catch {
       return {}
@@ -328,7 +354,13 @@ export function useNegotiationWorkspace() {
       deliveryPlace: req.deliveryPlace || formatCompanyAddress(isBuyer ? buyerCompany : sellerCompany),
       deliveryDate: req.deliveryDate || '',
       totalAmount: totalAmount,
-      remark: ''
+      remark: '',
+      priceType: req.priceType,
+      basisQuotes: req.basisQuotes?.map(q => ({
+        contractCode: q.contractCode,
+        basisPrice: q.basisPrice,
+        availableQty: q.availableQty
+      }))
     }
   })
 

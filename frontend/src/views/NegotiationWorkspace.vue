@@ -50,6 +50,7 @@ const {
   // Computed
   merchantGroups,
   currentMerchantConversations,
+  activeConversation,
   mergedMessages,
   activeProductName,
   peerInfo,
@@ -217,6 +218,7 @@ onBeforeUnmount(() => {
             <ProductRequirementForm
               :initial-data="requirementData"
               :readonly="!!buyerConfirmed || !!sellerConfirmed"
+              :subject-type="activeConversation?.subjectType === 'SUPPLY' ? 'SUPPLY' : 'NEED'"
               :sending="sending"
               @update="handleRequirementUpdate"
               class="h-full"

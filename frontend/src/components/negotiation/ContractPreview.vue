@@ -39,6 +39,12 @@ export interface QualityStandard {
   value: string
 }
 
+export interface ContractBasisQuote {
+  contractCode: string
+  basisPrice: number
+  availableQty?: number
+}
+
 export interface ContractData {
   contractNo: string
   signDate: string
@@ -51,6 +57,10 @@ export interface ContractData {
   deliveryDate: string
   totalAmount: number
   remark?: string
+  /** 定价方式 */
+  priceType?: 'SPOT' | 'BASIS'
+  /** 基差合约明细（基差定价时） */
+  basisQuotes?: ContractBasisQuote[]
 }
 
 /** 合同状态：草稿 -> 待确认 -> 已确认 -> 签署中 -> 已完成 */
@@ -139,7 +149,9 @@ const documentData = computed((): ContractDocumentData => {
     deliveryDate: c.deliveryDate,
     totalAmount: c.totalAmount,
     remark: c.remark,
-    signingPlace: c.buyer.address || c.seller.address
+    signingPlace: c.buyer.address || c.seller.address,
+    priceType: c.priceType,
+    basisQuotes: c.basisQuotes
   }
 })
 

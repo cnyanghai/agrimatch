@@ -7,6 +7,12 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { Package, Send, MapPin, Truck, CreditCard, FileText, Settings } from 'lucide-vue-next'
 
+export interface BasisQuoteItem {
+  contractCode: string
+  basisPrice: number
+  availableQty?: number
+}
+
 export interface RequirementData {
   // 基础信息
   productName: string
@@ -18,8 +24,9 @@ export interface RequirementData {
   unit: string
   price?: number
   priceType?: 'SPOT' | 'BASIS'  // 一口价 / 基差
-  basisPrice?: number
-  contractCode?: string
+  basisPrice?: number       // 保留向后兼容（第一个合约）
+  contractCode?: string     // 保留向后兼容（第一个合约）
+  basisQuotes?: BasisQuoteItem[]  // 全部基差合约
 
   // 质量规格
   qualityGrade?: string
@@ -77,6 +84,7 @@ const form = ref<RequirementData>({
   priceType: 'SPOT',
   basisPrice: undefined,
   contractCode: '',
+  basisQuotes: [],
   paymentMethod: '货到付款',
   invoiceType: '增值税专用发票',
   dynamicParams: {},
@@ -171,36 +179,22 @@ function updateDynamicParam(key: string, value: string) {
 
     <!-- 表单内容（可滚动） -->
     <div class="flex-1 overflow-y-auto p-3 space-y-3">
-      <!-- 产品名称 + 品类 -->
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">品名</label>
-          <input
-            v-model="form.productName"
-            :readonly="readonly"
-            type="text"
-            class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
-                   focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                   read-only:bg-gray-50 read-only:cursor-default font-medium"
-            :placeholder="readonly ? '-' : '产品名称'"
-          />
-        </div>
-        <div>
-          <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">品类</label>
-          <input
-            v-model="form.categoryName"
-            :readonly="readonly"
-            type="text"
-            class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
-                   focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                   read-only:bg-gray-50 read-only:cursor-default"
-            placeholder="品类"
-          />
-        </div>
+      <!-- 品名（全宽） -->
+      <div>
+        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">品名</label>
+        <input
+          v-model="form.productName"
+          :readonly="readonly"
+          type="text"
+          class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
+                 focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
+                 read-only:bg-gray-50 read-only:cursor-default font-medium"
+          :placeholder="readonly ? '-' : '产品名称'"
+        />
       </div>
 
-      <!-- 数量 + 单位 + 单价 -->
-      <div class="grid grid-cols-3 gap-2">
+      <!-- 一口价模式：数量 + 单位 + 单价 -->
+      <div v-if="form.priceType !== 'BASIS'" class="grid grid-cols-3 gap-2">
         <div>
           <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">数量</label>
           <input
@@ -243,6 +237,66 @@ function updateDynamicParam(key: string, value: string) {
           </div>
         </div>
       </div>
+
+      <!-- 基差模式：出厂价 + 单位 + 合约明细表 -->
+      <template v-if="form.priceType === 'BASIS'">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">出厂价(元)</label>
+            <div class="relative">
+              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">¥</span>
+              <input
+                v-model.number="form.price"
+                :readonly="readonly"
+                type="number"
+                min="0"
+                class="w-full h-8 pl-5 pr-2 text-sm rounded-lg border border-gray-200 bg-white
+                       focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
+                       read-only:bg-gray-50 read-only:cursor-default font-bold"
+                placeholder="0"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">单位</label>
+            <select
+              v-model="form.unit"
+              :disabled="readonly"
+              class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
+                     focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
+                     disabled:bg-gray-50 disabled:cursor-default"
+            >
+              <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 基差合约明细 -->
+        <div v-if="form.basisQuotes && form.basisQuotes.length > 0">
+          <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">基差合约明细</label>
+          <div class="border border-gray-200 rounded-lg overflow-hidden">
+            <table class="w-full text-xs">
+              <thead class="bg-gray-50 text-[10px] uppercase font-semibold text-gray-500">
+                <tr>
+                  <th class="px-2 py-1.5 text-left">合约</th>
+                  <th class="px-2 py-1.5 text-right">基差(元/吨)</th>
+                  <th class="px-2 py-1.5 text-right">数量({{ form.unit }})</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr v-for="(quote, idx) in form.basisQuotes" :key="idx">
+                  <td class="px-2 py-1.5 font-bold text-gray-900">{{ quote.contractCode }}</td>
+                  <td class="px-2 py-1.5 text-right font-mono font-bold"
+                      :class="quote.basisPrice >= 0 ? 'text-red-600' : 'text-green-600'">
+                    {{ quote.basisPrice >= 0 ? '+' : '' }}{{ quote.basisPrice }}
+                  </td>
+                  <td class="px-2 py-1.5 text-right font-mono">{{ quote.availableQty ?? '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </template>
 
       <!-- 包装 + 产地 -->
       <div class="grid grid-cols-2 gap-2">
@@ -357,16 +411,16 @@ function updateDynamicParam(key: string, value: string) {
 
       <!-- 动态参数（产品品类相关） -->
       <div v-if="dynamicParamsList.length > 0">
-        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">品质参数</label>
+        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-2">品质参数</label>
         <div class="grid grid-cols-2 gap-2">
-          <div v-for="param in dynamicParamsList" :key="param.key" class="flex items-center gap-1">
-            <span class="text-xs text-gray-500 w-16 truncate">{{ param.key }}</span>
+          <div v-for="param in dynamicParamsList" :key="param.key">
+            <label class="block text-xs text-gray-500 mb-0.5">{{ param.key }}</label>
             <input
               :value="param.value"
               @input="updateDynamicParam(param.key, ($event.target as HTMLInputElement).value)"
               :readonly="readonly"
               type="text"
-              class="flex-1 h-7 px-2 text-xs rounded border border-gray-200 bg-white
+              class="w-full h-7 px-2 text-xs rounded border border-gray-200 bg-white
                      focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
                      read-only:bg-gray-50"
             />
@@ -393,7 +447,7 @@ function updateDynamicParam(key: string, value: string) {
     <div v-if="showSendButton && !readonly" class="px-3 py-2 bg-brand-50 border-t border-brand-100 shrink-0">
       <button
         @click="emit('send-quote', { ...form })"
-        :disabled="sending || !form.price || !form.quantity"
+        :disabled="sending || (form.priceType === 'BASIS' ? !(form.basisQuotes && form.basisQuotes.length > 0) : (!form.price || !form.quantity))"
         class="w-full px-4 py-2 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300
                disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg
                flex items-center justify-center gap-1.5 transition-all active:scale-95"

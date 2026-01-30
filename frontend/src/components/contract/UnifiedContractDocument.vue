@@ -88,6 +88,10 @@ export interface ContractDocumentData {
   remark?: string
   /** 合同签订地（用于争议解决条款） */
   signingPlace?: string
+  /** 定价方式 */
+  priceType?: 'SPOT' | 'BASIS'
+  /** 基差合约明细（基差定价时） */
+  basisQuotes?: Array<{ contractCode: string; basisPrice: number; availableQty?: number }>
 }
 
 /** 合同状态 */
@@ -355,7 +359,9 @@ function formatDateTime(dateStr: string | undefined): string {
           <h3 class="font-bold text-sm bg-brand-50 p-2 mb-4 px-3 border-l-4 border-brand-600">
             一、产品明细与价格 (Product Details & Pricing)
           </h3>
-          <div class="overflow-hidden rounded-lg border border-gray-200">
+
+          <!-- 一口价模式 -->
+          <div v-if="data.priceType !== 'BASIS'" class="overflow-hidden rounded-lg border border-gray-200">
             <table class="w-full text-sm text-left">
               <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-600 border-b border-gray-200">
                 <tr>
@@ -394,6 +400,48 @@ function formatDateTime(dateStr: string | undefined): string {
               </tfoot>
             </table>
           </div>
+
+          <!-- 基差定价模式 -->
+          <template v-else>
+            <!-- 产品基本信息 -->
+            <div class="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div class="flex items-baseline gap-3">
+                <span class="text-sm font-bold text-gray-900">{{ data.products[0]?.name || '产品' }}</span>
+                <span v-if="data.products[0]?.grade" class="text-xs text-gray-500">{{ data.products[0].grade }}</span>
+              </div>
+              <div v-if="data.products[0]?.unitPrice" class="mt-1 text-xs text-gray-500">
+                出厂价：¥{{ formatCurrency(data.products[0].unitPrice) }} / {{ data.products[0]?.unit || '吨' }}
+              </div>
+              <div class="mt-1 text-[10px] text-gray-400">
+                定价方式：基差定价（最终结算价 = 期货结算价 + 基差）
+              </div>
+            </div>
+
+            <!-- 基差合约明细表 -->
+            <div v-if="data.basisQuotes && data.basisQuotes.length > 0" class="overflow-hidden rounded-lg border border-gray-200">
+              <table class="w-full text-sm text-left">
+                <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-600 border-b border-gray-200">
+                  <tr>
+                    <th class="px-4 py-3">合约代码</th>
+                    <th class="px-4 py-3 text-right">基差 (元/吨)</th>
+                    <th class="px-4 py-3 text-right">数量 ({{ data.products[0]?.unit || '吨' }})</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  <tr v-for="(quote, idx) in data.basisQuotes" :key="idx">
+                    <td class="px-4 py-3 font-bold text-gray-900">{{ quote.contractCode }}</td>
+                    <td class="px-4 py-3 text-right font-mono font-bold"
+                        :class="quote.basisPrice >= 0 ? 'text-red-600' : 'text-green-600'">
+                      {{ quote.basisPrice >= 0 ? '+' : '' }}{{ quote.basisPrice }}
+                    </td>
+                    <td class="px-4 py-3 text-right font-mono">
+                      {{ quote.availableQty != null ? formatCurrency(quote.availableQty) : '-' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </template>
 
           <!-- 产品参数 -->
           <div v-if="data.products[0]?.params && data.products[0].params.length > 0" class="mt-4">
