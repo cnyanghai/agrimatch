@@ -18,6 +18,8 @@ import {
   useChatWebSocket,
   useChatMessages
 } from './chat'
+import { getConversationMessages, type ChatMessageResponse } from '../api/chat'
+import { toUiMessage, type UiMessage } from '../types/chat/message'
 import type { RequirementData } from '../components/negotiation/ProductRequirementForm.vue'
 import type { ContractData, ContractStatus } from '../components/negotiation/ContractPreview.vue'
 import type { FileUploadResponse } from '../api/file'
@@ -85,6 +87,12 @@ export function useNegotiationWorkspace() {
   const buyerConfirmed = ref(false)
   /** 卖方是否已确认条款 */
   const sellerConfirmed = ref(false)
+
+  /** 当前商户所有会话的消息 Map: conversationId -> UiMessage[] */
+  const merchantMessagesMap = ref<Map<number, UiMessage[]>>(new Map())
+
+  /** 当前激活的产品会话 ID */
+  const activeConversationId = ref<number | null>(null)
 
   /** 本地编辑的需求数据（用于实时更新合同预览） */
   const localEditedRequirement = ref<Partial<RequirementData>>({})
@@ -180,6 +188,33 @@ export function useNegotiationWorkspace() {
       .sort((a, b) => (b.lastTime || '').localeCompare(a.lastTime || ''))
   })
 
+  /** 当前激活的会话对象 */
+  const activeConversation = computed<ConversationItem | null>(() => {
+    if (!activeConversationId.value) return currentConversation.value
+    return conversations.value.find(c => c.id === activeConversationId.value) || currentConversation.value
+  })
+
+  /** 当前激活产品名称 */
+  const activeProductName = computed<string>(() => {
+    const conv = activeConversation.value
+    if (!conv?.subjectSnapshotJson) return ''
+    try {
+      const snapshot = JSON.parse(conv.subjectSnapshotJson)
+      return snapshot.productName || snapshot.title || '产品'
+    } catch {
+      return ''
+    }
+  })
+
+  /** 合并所有会话消息为单一时间线（按时间升序） */
+  const mergedMessages = computed<UiMessage[]>(() => {
+    const all: UiMessage[] = []
+    for (const msgs of merchantMessagesMap.value.values()) {
+      all.push(...msgs)
+    }
+    return all.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
+  })
+
   /** 对方信息 */
   const peerInfo = computed(() => {
     if (!currentConversation.value) return { name: '加载中...', company: '' }
@@ -189,11 +224,12 @@ export function useNegotiationWorkspace() {
     }
   })
 
-  /** 从标的快照解析需求数据 */
+  /** 从标的快照解析需求数据（基于激活的会话） */
   const requirementData = computed<Partial<RequirementData>>(() => {
-    if (!currentConversation.value?.subjectSnapshotJson) return {}
+    const conv = activeConversation.value
+    if (!conv?.subjectSnapshotJson) return {}
     try {
-      const snapshot = JSON.parse(currentConversation.value.subjectSnapshotJson)
+      const snapshot = JSON.parse(conv.subjectSnapshotJson)
       return {
         productName: snapshot.productName || snapshot.title || '',
         categoryName: snapshot.categoryName || '',
@@ -249,7 +285,7 @@ export function useNegotiationWorkspace() {
     }
 
     const totalAmount = price * quantity
-    const convId = currentConversation.value?.id || 0
+    const convId = activeConversation.value?.id || currentConversation.value?.id || 0
     const isBuyer = currentIsBuyer.value
 
     // 根据当前用户角色确定买方和卖方信息
@@ -296,9 +332,9 @@ export function useNegotiationWorkspace() {
     }
   })
 
-  /** 当前用户是否为买方 */
+  /** 当前用户是否为买方（基于激活的会话） */
   const currentIsBuyer = computed(() => {
-    return currentConversation.value?.subjectType === 'SUPPLY'
+    return activeConversation.value?.subjectType === 'SUPPLY'
   })
 
   // ==================== WebSocket Handler ====================
@@ -306,11 +342,26 @@ export function useNegotiationWorkspace() {
   function handleWsMessage(data: any) {
     const { type, conversationId: msgConvId, message } = data
 
-    if (type === 'MESSAGE' && message && currentConversation.value && msgConvId === currentConversation.value.id) {
-      chatMessages.handleIncomingMessage(message, currentConversation.value.id)
+    // 检查消息是否属于当前商户的某个会话
+    const isCurrentMerchantConv = currentConversation.value &&
+      merchantMessagesMap.value.has(msgConvId)
 
-      // 检查是否是对方的确认消息
-      if (message.msgType === 'SYSTEM' && message.payloadJson) {
+    if (type === 'MESSAGE' && message && isCurrentMerchantConv) {
+      // 路由消息到 Map 中对应的 conversation
+      handleIncomingMessageToMap(msgConvId, message)
+
+      // 对方就新产品发起咨询时，自动切换到该会话
+      if (activeConversationId.value !== msgConvId) {
+        activateConversation(msgConvId)
+      }
+
+      // 同时更新 chatMessages（兼容旧接口，仅当是激活会话时）
+      if (activeConversationId.value === msgConvId) {
+        chatMessages.handleIncomingMessage(message, msgConvId)
+      }
+
+      // 检查是否是对方的确认消息（仅激活会话）
+      if (activeConversationId.value === msgConvId && message.msgType === 'SYSTEM' && message.payloadJson) {
         try {
           const payload = JSON.parse(message.payloadJson)
           if (payload.action === 'CONFIRM_TERMS') {
@@ -336,10 +387,12 @@ export function useNegotiationWorkspace() {
     }
 
     if (type === 'SENT' && data.tempId && (data.id || data.messageId)) {
+      confirmMessageInMap(data.tempId, data.id || data.messageId)
       chatMessages.confirmMessage(data.tempId, data.id || data.messageId)
     }
 
     if (type === 'ERROR' && data.tempId) {
+      failMessageInMap(data.tempId)
       chatMessages.failMessage(data.tempId)
       ElMessage.error(data.message || '发送失败')
     }
@@ -352,6 +405,8 @@ export function useNegotiationWorkspace() {
     // 处理消息已读通知
     if (type === 'MESSAGES_READ' && data.messageIds && data.readAt) {
       chatMessages.markMessagesAsRead(data.messageIds, data.readAt)
+      // 同时更新 Map 中的消息
+      markMessagesAsReadInMap(data.messageIds, data.readAt)
     }
   }
 
@@ -363,6 +418,84 @@ export function useNegotiationWorkspace() {
       conv.lastTime = message.createTime || new Date().toISOString()
       if (currentConversation.value?.id !== convId) {
         conv.unreadCount = (conv.unreadCount || 0) + 1
+      }
+    }
+  }
+
+  // ==================== Map Helper Functions ====================
+
+  /** 向 Map 中指定会话添加待发送消息 */
+  function addPendingMessageToConv(
+    convId: number,
+    msgType: string,
+    content: string,
+    tempId: string,
+    payloadJson?: string
+  ): UiMessage {
+    const now = Date.now()
+    const msg: UiMessage = {
+      id: tempId,
+      conversationId: convId,
+      type: 'sent',
+      msgType,
+      content,
+      payloadJson,
+      status: 'pending',
+      time: new Date(now).toISOString(),
+      timestamp: now
+    }
+    const msgs = merchantMessagesMap.value.get(convId)
+    if (msgs) {
+      msgs.push(msg)
+    } else {
+      merchantMessagesMap.value.set(convId, [msg])
+    }
+    return msg
+  }
+
+  /** 确认 Map 中的消息发送成功 */
+  function confirmMessageInMap(tempId: string, realId: number) {
+    for (const msgs of merchantMessagesMap.value.values()) {
+      const idx = msgs.findIndex(m => m.id === tempId)
+      if (idx >= 0 && msgs[idx]) {
+        msgs[idx] = { ...msgs[idx], id: realId, status: 'sent' }
+        return
+      }
+    }
+  }
+
+  /** 标记 Map 中的消息发送失败 */
+  function failMessageInMap(tempId: string) {
+    for (const msgs of merchantMessagesMap.value.values()) {
+      const idx = msgs.findIndex(m => m.id === tempId)
+      if (idx >= 0 && msgs[idx]) {
+        msgs[idx] = { ...msgs[idx], status: 'failed' }
+        return
+      }
+    }
+  }
+
+  /** 处理收到的 WebSocket 消息，路由到 Map */
+  function handleIncomingMessageToMap(convId: number, message: ChatMessageResponse) {
+    const userId = auth.me?.userId
+    if (!userId) return
+    const uiMsg = toUiMessage(message, userId)
+    const msgs = merchantMessagesMap.value.get(convId)
+    if (msgs) {
+      msgs.push(uiMsg)
+    } else {
+      merchantMessagesMap.value.set(convId, [uiMsg])
+    }
+  }
+
+  /** 标记 Map 中的消息为已读 */
+  function markMessagesAsReadInMap(messageIds: number[], readAt: string) {
+    for (const msgs of merchantMessagesMap.value.values()) {
+      for (const id of messageIds) {
+        const idx = msgs.findIndex(m => m.id === id)
+        if (idx >= 0 && msgs[idx]) {
+          msgs[idx] = { ...msgs[idx], read: true, readAt }
+        }
       }
     }
   }
@@ -421,6 +554,7 @@ export function useNegotiationWorkspace() {
     peerCompany.value = null
 
     currentConversation.value = conv
+    activeConversationId.value = conv.id
     loadingMessages.value = true
 
     try {
@@ -431,6 +565,9 @@ export function useNegotiationWorkspace() {
       ])
       await markConversationRead(conv.id)
       conv.unreadCount = 0
+
+      // 同步到 merchantMessagesMap
+      merchantMessagesMap.value.set(conv.id, [...chatMessages.messages.value])
 
       // 从消息历史解析确认状态
       parseConfirmationsFromMessages()
@@ -453,14 +590,122 @@ export function useNegotiationWorkspace() {
     })
   }
 
-  /** 选择商户（自动选择该商户的最新会话） */
+  /** 选择商户：并行加载该商户所有会话的消息 */
   async function selectMerchant(merchant: MerchantGroup) {
-    await selectConversation(merchant.latestConversation)
+    const peerId = merchant.peerId
+    // 如果已经选中同一商户，不重复加载
+    if (currentConversation.value?.peerUserId === peerId) return
+
+    // 重置状态
+    buyerConfirmed.value = false
+    sellerConfirmed.value = false
+    contractStatus.value = 'DRAFT'
+    peerCompany.value = null
+    localEditedRequirement.value = {}
+
+    currentConversation.value = merchant.latestConversation
+    activeConversationId.value = merchant.latestConversation.id
+    loadingMessages.value = true
+
+    try {
+      const userId = auth.me?.userId
+      if (!userId) return
+
+      // 并行加载该商户所有会话的消息 + 公司信息
+      const allConvs = merchant.conversations
+      const [, ...msgResults] = await Promise.all([
+        loadCompanyInfo(peerId),
+        ...allConvs.map(async (conv) => {
+          try {
+            const res = await getConversationMessages(conv.id, 50)
+            if (res.code === 0 && res.data) {
+              return {
+                convId: conv.id,
+                messages: res.data.map((m: ChatMessageResponse) => toUiMessage(m, userId)).reverse()
+              }
+            }
+          } catch (e) {
+            console.error(`Load messages for conv ${conv.id} failed:`, e)
+          }
+          return { convId: conv.id, messages: [] as UiMessage[] }
+        })
+      ])
+
+      // 存入 Map
+      const newMap = new Map<number, UiMessage[]>()
+      for (const result of msgResults) {
+        if (result) {
+          newMap.set(result.convId, result.messages)
+        }
+      }
+      merchantMessagesMap.value = newMap
+
+      // 同步 chatMessages（保持兼容）
+      const activeMessages = newMap.get(activeConversationId.value!) || []
+      chatMessages.messages.value = [...activeMessages]
+
+      // 标记所有会话已读
+      await Promise.all(
+        allConvs.map(async (conv) => {
+          try {
+            await markConversationRead(conv.id)
+            conv.unreadCount = 0
+          } catch { /* ignore */ }
+        })
+      )
+
+      // 从激活会话的消息解析确认状态
+      parseConfirmationsFromMessages()
+
+      if (chatMessages.hasAcceptedQuote.value && contractStatus.value === 'DRAFT') {
+        contractStatus.value = 'PENDING_CONFIRM'
+      }
+    } catch (e) {
+      console.error('Load merchant messages failed:', e)
+      ElMessage.error('加载消息失败')
+    } finally {
+      loadingMessages.value = false
+    }
+
+    // 更新路由
+    router.replace({
+      path: '/chat',
+      query: { conversationId: String(activeConversationId.value) }
+    })
   }
 
   /** 切换到商户的某个历史会话 */
   async function switchToConversation(conv: ConversationItem) {
     await selectConversation(conv)
+  }
+
+  /** 激活商户内的某个产品会话（不重新加载消息，仅切换上下文） */
+  function activateConversation(convId: number) {
+    if (activeConversationId.value === convId) return
+    activeConversationId.value = convId
+
+    // 重置合同确认状态
+    buyerConfirmed.value = false
+    sellerConfirmed.value = false
+    contractStatus.value = 'DRAFT'
+    localEditedRequirement.value = {}
+
+    // 同步 chatMessages 到激活的会话消息
+    const msgs = merchantMessagesMap.value.get(convId) || []
+    chatMessages.messages.value = [...msgs]
+
+    // 重新解析确认状态
+    parseConfirmationsFromMessages()
+
+    if (chatMessages.hasAcceptedQuote.value && contractStatus.value === 'DRAFT') {
+      contractStatus.value = 'PENDING_CONFIRM'
+    }
+
+    // 更新路由
+    router.replace({
+      path: '/chat',
+      query: { conversationId: String(convId) }
+    })
   }
 
   /** 打开或创建会话 */
@@ -492,15 +737,18 @@ export function useNegotiationWorkspace() {
 
   /** 发送文本消息 */
   function sendText(text: string) {
-    if (!text.trim() || !currentConversation.value || !webSocket.ensureConnected()) return
+    const convId = activeConversationId.value
+    if (!text.trim() || !convId || !webSocket.ensureConnected()) return
 
     sending.value = true
     const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`
 
-    chatMessages.addPendingMessage(currentConversation.value.id, 'TEXT', text, tempId)
+    addPendingMessageToConv(convId, 'TEXT', text, tempId)
+    chatMessages.addPendingMessage(convId, 'TEXT', text, tempId)
 
-    const sent = webSocket.sendText(currentConversation.value.id, text, tempId)
+    const sent = webSocket.sendText(convId, text, tempId)
     if (!sent) {
+      failMessageInMap(tempId)
       chatMessages.failMessage(tempId)
       ElMessage.error('发送失败')
     }
@@ -510,15 +758,18 @@ export function useNegotiationWorkspace() {
 
   /** 发送报价 */
   function sendQuote(payloadJson: string, previewText: string) {
-    if (!currentConversation.value || !webSocket.ensureConnected()) return
+    const convId = activeConversationId.value
+    if (!convId || !webSocket.ensureConnected()) return
 
     sending.value = true
     const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`
 
-    chatMessages.addPendingMessage(currentConversation.value.id, 'QUOTE', previewText, tempId)
+    addPendingMessageToConv(convId, 'QUOTE', previewText, tempId)
+    chatMessages.addPendingMessage(convId, 'QUOTE', previewText, tempId)
 
-    const sent = webSocket.sendQuote(currentConversation.value.id, payloadJson, previewText, tempId)
+    const sent = webSocket.sendQuote(convId, payloadJson, previewText, tempId)
     if (!sent) {
+      failMessageInMap(tempId)
       chatMessages.failMessage(tempId)
       ElMessage.error('发送失败')
     }
@@ -558,7 +809,8 @@ export function useNegotiationWorkspace() {
 
   /** 发送图片消息 */
   function sendImage(fileData: FileUploadResponse) {
-    if (!currentConversation.value || !webSocket.ensureConnected()) return
+    const convId = activeConversationId.value
+    if (!convId || !webSocket.ensureConnected()) return
 
     sending.value = true
     const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`
@@ -571,10 +823,12 @@ export function useNegotiationWorkspace() {
       mimeType: fileData.mimeType
     })
 
-    chatMessages.addPendingMessage(currentConversation.value.id, 'IMAGE', `[图片] ${fileData.fileName}`, tempId, payloadJson)
+    addPendingMessageToConv(convId, 'IMAGE', `[图片] ${fileData.fileName}`, tempId, payloadJson)
+    chatMessages.addPendingMessage(convId, 'IMAGE', `[图片] ${fileData.fileName}`, tempId, payloadJson)
 
-    const sent = webSocket.sendImage(currentConversation.value.id, payloadJson, tempId)
+    const sent = webSocket.sendImage(convId, payloadJson, tempId)
     if (!sent) {
+      failMessageInMap(tempId)
       chatMessages.failMessage(tempId)
       ElMessage.error('发送失败')
     }
@@ -584,7 +838,8 @@ export function useNegotiationWorkspace() {
 
   /** 发送附件消息 */
   function sendAttachment(fileData: FileUploadResponse) {
-    if (!currentConversation.value || !webSocket.ensureConnected()) return
+    const convId = activeConversationId.value
+    if (!convId || !webSocket.ensureConnected()) return
 
     sending.value = true
     const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`
@@ -597,10 +852,12 @@ export function useNegotiationWorkspace() {
       mimeType: fileData.mimeType
     })
 
-    chatMessages.addPendingMessage(currentConversation.value.id, 'ATTACHMENT', `[附件] ${fileData.fileName}`, tempId, payloadJson)
+    addPendingMessageToConv(convId, 'ATTACHMENT', `[附件] ${fileData.fileName}`, tempId, payloadJson)
+    chatMessages.addPendingMessage(convId, 'ATTACHMENT', `[附件] ${fileData.fileName}`, tempId, payloadJson)
 
-    const sent = webSocket.sendAttachment(currentConversation.value.id, payloadJson, fileData.fileName, tempId)
+    const sent = webSocket.sendAttachment(convId, payloadJson, fileData.fileName, tempId)
     if (!sent) {
+      failMessageInMap(tempId)
       chatMessages.failMessage(tempId)
       ElMessage.error('发送失败')
     }
@@ -610,7 +867,7 @@ export function useNegotiationWorkspace() {
 
   /** 赠送积分给对方 */
   async function giftPoints(toUserId: number, points: number, remark?: string) {
-    if (!currentConversation.value) return
+    if (!activeConversationId.value) return
 
     try {
       const res = await giftPointsApi(toUserId, points, remark)
@@ -629,7 +886,8 @@ export function useNegotiationWorkspace() {
 
   /** 接受报价 */
   async function acceptQuote(messageId: number) {
-    if (!currentConversation.value || !webSocket.ensureConnected()) return
+    const convId = activeConversationId.value
+    if (!convId || !webSocket.ensureConnected()) return
 
     try {
       // 调用后端API确认报价
@@ -644,8 +902,9 @@ export function useNegotiationWorkspace() {
 
       // 发送接受报价的系统消息
       const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`
-      chatMessages.addPendingMessage(currentConversation.value.id, 'TEXT', '已接受报价，可以生成合同', tempId)
-      webSocket.sendText(currentConversation.value.id, '已接受报价，可以生成合同', tempId)
+      addPendingMessageToConv(convId, 'TEXT', '已接受报价，可以生成合同', tempId)
+      chatMessages.addPendingMessage(convId, 'TEXT', '已接受报价，可以生成合同', tempId)
+      webSocket.sendText(convId, '已接受报价，可以生成合同', tempId)
 
       // 更新合同状态
       contractStatus.value = 'PENDING_CONFIRM'
@@ -658,7 +917,7 @@ export function useNegotiationWorkspace() {
 
   /** 拒绝报价 */
   async function rejectQuote(messageId: number) {
-    if (!currentConversation.value || !webSocket.ensureConnected()) return
+    if (!activeConversationId.value || !webSocket.ensureConnected()) return
 
     try {
       // 调用后端API拒绝报价
@@ -709,7 +968,8 @@ export function useNegotiationWorkspace() {
 
   /** 确认合同条款 */
   function confirmContract() {
-    if (!currentConversation.value || !webSocket.ensureConnected()) return
+    const convId = activeConversationId.value
+    if (!convId || !webSocket.ensureConnected()) return
 
     const isBuyer = currentIsBuyer.value
     const role = isBuyer ? 'buyer' : 'seller'
@@ -731,8 +991,9 @@ export function useNegotiationWorkspace() {
     })
     const content = `${roleLabel}已确认合同条款`
 
-    chatMessages.addPendingMessage(currentConversation.value.id, 'SYSTEM', content, tempId, payloadJson)
-    webSocket.sendSystem(currentConversation.value.id, content, payloadJson, tempId)
+    addPendingMessageToConv(convId, 'SYSTEM', content, tempId, payloadJson)
+    chatMessages.addPendingMessage(convId, 'SYSTEM', content, tempId, payloadJson)
+    webSocket.sendSystem(convId, content, payloadJson, tempId)
 
     // 检查是否双方都已确认
     if (buyerConfirmed.value && sellerConfirmed.value) {
@@ -825,7 +1086,8 @@ export function useNegotiationWorkspace() {
         contractStatus.value = 'SIGNING'
 
         // 发送合同消息到聊天
-        if (currentConversation.value && webSocket.ensureConnected()) {
+        const convId = activeConversationId.value
+        if (convId && webSocket.ensureConnected()) {
           const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`
           const contract = contractData.value
           const contractPayload = JSON.stringify({
@@ -836,8 +1098,9 @@ export function useNegotiationWorkspace() {
             status: 1 // PENDING_CONFIRM
           })
 
-          chatMessages.addPendingMessage(currentConversation.value.id, 'CONTRACT', '[合同]', tempId, contractPayload)
-          webSocket.sendContract(currentConversation.value.id, contractPayload, tempId)
+          addPendingMessageToConv(convId, 'CONTRACT', '[合同]', tempId, contractPayload)
+          chatMessages.addPendingMessage(convId, 'CONTRACT', '[合同]', tempId, contractPayload)
+          webSocket.sendContract(convId, contractPayload, tempId)
         }
 
         ElMessage.success('合同已生成，正在跳转到合同详情...')
@@ -914,10 +1177,15 @@ export function useNegotiationWorkspace() {
     contractStatus,
     buyerConfirmed,
     sellerConfirmed,
+    merchantMessagesMap,
+    activeConversationId,
 
     // Computed
     merchantGroups,
     currentMerchantConversations,
+    activeConversation,
+    activeProductName,
+    mergedMessages,
     peerInfo,
     requirementData,
     contractData,
@@ -936,6 +1204,7 @@ export function useNegotiationWorkspace() {
     selectConversation,
     selectMerchant,
     switchToConversation,
+    activateConversation,
     openOrCreateConversation,
     sendText,
     sendQuote,

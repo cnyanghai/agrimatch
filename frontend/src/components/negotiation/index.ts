@@ -5,6 +5,8 @@
 
 export { default as ProductRequirementForm } from './ProductRequirementForm.vue'
 export { default as ChatPanel } from './ChatPanel.vue'
+export { default as MergedChatPanel } from './MergedChatPanel.vue'
+export { default as ProductSegmentCard } from './ProductSegmentCard.vue'
 export { default as ContractPreview } from './ContractPreview.vue'
 export { default as ConversationSidebar } from './ConversationSidebar.vue'
 export { default as QuoteInputPanel } from './QuoteInputPanel.vue'

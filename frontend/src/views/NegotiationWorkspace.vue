@@ -24,7 +24,7 @@ import { useNotificationStore } from '../stores/notification'
 import ConversationSidebar from '../components/negotiation/ConversationSidebar.vue'
 import {
   ProductRequirementForm,
-  ChatPanel,
+  MergedChatPanel,
   ContractPreview,
   type RequirementData
 } from '../components/negotiation'
@@ -45,26 +45,25 @@ const {
   contractStatus,
   buyerConfirmed,
   sellerConfirmed,
+  activeConversationId,
 
   // Computed
   merchantGroups,
   currentMerchantConversations,
+  mergedMessages,
+  activeProductName,
   peerInfo,
   requirementData,
   contractData,
   currentIsBuyer,
-
-  // Messages
-  messages,
 
   // WebSocket
   isConnected,
 
   // Actions
   selectMerchant,
-  switchToConversation,
+  activateConversation,
   sendText,
-  sendQuoteFromForm,
   sendImage,
   sendAttachment,
   giftPoints,
@@ -89,20 +88,6 @@ function handleRequirementUpdate(data: RequirementData) {
   updateLocalRequirement(data)
 }
 
-function handleSendQuote(data: RequirementData) {
-  // 发送当前表单数据作为报价
-  sendQuoteFromForm({
-    price: data.price || 0,
-    quantity: String(data.quantity),
-    unit: data.unit,
-    deliveryPlace: data.deliveryPlace,
-    arrivalDate: data.deliveryDate,
-    paymentMethod: data.paymentMethod || '货到付款',
-    remark: data.remark
-  })
-  ElMessage.success('报价已发送')
-}
-
 function handleSendImage(payload: any) {
   sendImage(payload)
 }
@@ -125,6 +110,10 @@ function handleGenerateFormalContract() {
 
 function handleSelectMerchant(merchant: MerchantGroup) {
   selectMerchant(merchant)
+}
+
+function handleActivateConversation(convId: number) {
+  activateConversation(convId)
 }
 
 // ==================== Quote Handlers (from chat) ====================
@@ -155,9 +144,9 @@ function handleDraftContract(_msg: UiMessage) {
 
 // ==================== Lifecycle ====================
 
-// 监听当前会话变化，设置活跃会话和标记已读
+// 监听激活会话变化，设置活跃会话和标记已读
 watch(
-  () => currentConversation.value?.id,
+  () => activeConversationId.value,
   (conversationId) => {
     if (conversationId) {
       // 设置为活跃会话（不弹通知）
@@ -228,25 +217,25 @@ onBeforeUnmount(() => {
             <ProductRequirementForm
               :initial-data="requirementData"
               :readonly="!!buyerConfirmed || !!sellerConfirmed"
-              :show-send-button="true"
               :sending="sending"
               @update="handleRequirementUpdate"
-              @send-quote="handleSendQuote"
               class="h-full"
             />
           </div>
 
-          <!-- 聊天面板 (60%) - 文本沟通 + 附件 + 赠送积分 -->
+          <!-- 聊天面板 (60%) - 按产品分段的合并聊天视图 -->
           <div class="h-3/5 bg-white rounded-xl shadow-sm overflow-hidden flex flex-col">
-            <ChatPanel
+            <MergedChatPanel
               v-if="!loadingMessages"
-              :messages="messages"
+              :conversations="currentMerchantConversations"
+              :merged-messages="mergedMessages"
+              :active-conversation-id="activeConversationId"
+              :active-product-name="activeProductName"
               :peer-name="peerInfo.name"
               :peer-company="peerInfo.company"
               :peer-user-id="currentConversation?.peerUserId"
               :ws-connected="isConnected"
               :sending="sending"
-              :show-quote-button="false"
               @send="handleSendMessage"
               @send-image="handleSendImage"
               @send-attachment="handleSendAttachment"
@@ -255,6 +244,7 @@ onBeforeUnmount(() => {
               @counter-quote="handleCounterQuote"
               @reject-quote="handleRejectQuote"
               @draft-contract="handleDraftContract"
+              @activate-conversation="handleActivateConversation"
             />
             <div v-else class="flex-1 flex items-center justify-center">
               <div class="w-5 h-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
