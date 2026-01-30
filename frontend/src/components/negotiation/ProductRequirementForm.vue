@@ -11,6 +11,7 @@ export interface BasisQuoteItem {
   contractCode: string
   basisPrice: number
   availableQty?: number
+  referencePrice?: number | null  // 参考价 = 期货最新价 + 基差
 }
 
 export interface RequirementData {
@@ -158,6 +159,20 @@ const dynamicParamsList = computed(() => {
   return Object.entries(form.value.dynamicParams).map(([key, value]) => ({ key, value }))
 })
 
+// 更新基差合约数量
+function updateBasisQuoteQty(idx: number, value: string) {
+  if (!form.value.basisQuotes || !form.value.basisQuotes[idx]) return
+  const qty = parseFloat(value)
+  form.value.basisQuotes[idx].availableQty = isNaN(qty) ? undefined : qty
+}
+
+// 更新基差合约参考价
+function updateBasisQuoteRefPrice(idx: number, value: string) {
+  if (!form.value.basisQuotes || !form.value.basisQuotes[idx]) return
+  const price = parseFloat(value)
+  form.value.basisQuotes[idx].referencePrice = isNaN(price) ? null : price
+}
+
 // 更新动态参数
 function updateDynamicParam(key: string, value: string) {
   if (!form.value.dynamicParams) {
@@ -279,7 +294,8 @@ function updateDynamicParam(key: string, value: string) {
               <thead class="bg-gray-50 text-[10px] uppercase font-semibold text-gray-500">
                 <tr>
                   <th class="px-2 py-1.5 text-left">合约</th>
-                  <th class="px-2 py-1.5 text-right">基差(元/吨)</th>
+                  <th class="px-2 py-1.5 text-right">基差</th>
+                  <th class="px-2 py-1.5 text-right">参考价</th>
                   <th class="px-2 py-1.5 text-right">数量({{ form.unit }})</th>
                 </tr>
               </thead>
@@ -290,7 +306,34 @@ function updateDynamicParam(key: string, value: string) {
                       :class="quote.basisPrice >= 0 ? 'text-red-600' : 'text-green-600'">
                     {{ quote.basisPrice >= 0 ? '+' : '' }}{{ quote.basisPrice }}
                   </td>
-                  <td class="px-2 py-1.5 text-right font-mono">{{ quote.availableQty ?? '-' }}</td>
+                  <td class="px-2 py-1.5 text-right">
+                    <input
+                      :value="quote.referencePrice ?? ''"
+                      @input="updateBasisQuoteRefPrice(idx, ($event.target as HTMLInputElement).value)"
+                      :readonly="readonly"
+                      type="number"
+                      min="0"
+                      class="w-16 h-6 px-1 text-xs text-right rounded border border-gray-200 bg-white
+                             font-mono font-bold text-brand-600
+                             focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
+                             read-only:bg-gray-50 read-only:border-transparent"
+                      placeholder="-"
+                    />
+                  </td>
+                  <td class="px-2 py-1.5 text-right">
+                    <input
+                      :value="quote.availableQty ?? ''"
+                      @input="updateBasisQuoteQty(idx, ($event.target as HTMLInputElement).value)"
+                      :readonly="readonly"
+                      type="number"
+                      min="0"
+                      class="w-16 h-6 px-1 text-xs text-right rounded border border-gray-200 bg-white
+                             font-mono font-bold
+                             focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
+                             read-only:bg-gray-50 read-only:border-transparent"
+                      placeholder="-"
+                    />
+                  </td>
                 </tr>
               </tbody>
             </table>

@@ -12,8 +12,6 @@ import { codeToText } from 'element-china-area-data'
 import SchemaAwareCategoryPicker, { type PickedCategory } from '../components/SchemaAwareCategoryPicker.vue'
 import CategoryParamsForm from '../components/CategoryParamsForm.vue'
 import { getSchemaUnitConfig, getCategoryUnitConfig } from '../utils/schemaUnits'
-import TagPicker from '../components/TagPicker.vue'
-import type { TagValue } from '../api/tag'
 import { BaseButton, BaseModal, EmptyState, Skeleton } from '../components/ui'
 import TemplateCommandPalette, { type TemplateItem } from '../components/TemplateCommandPalette.vue'
 import ProductInfoRow from '../components/ProductInfoRow.vue'
@@ -277,7 +275,6 @@ const templateMenuOpen = ref(false)
 // 可选区域折叠
 const sectionsCollapsed = reactive({
   publishInfo: false,
-  tags: true,
   logistics: false
 })
 const supplyNo = ref<string>('')
@@ -338,7 +335,7 @@ function getProductCodeForCategory(): string | null {
 // 品类相关
 const categoryParams = ref<ProductParamResponse[]>([])
 const dynamicParams = ref<Record<string, any>>({})
-const tagValues = ref<TagValue[]>([])
+const customParams = ref<Array<{ name: string; value: string }>>([])
 
 // 业态与品类选择器
 const selectedSchemaCode = ref<string>('feed')
@@ -629,6 +626,7 @@ watch(
       publishForm.categoryName = ''
       categoryParams.value = []
       dynamicParams.value = {}
+      customParams.value = []
     }
   }
 )
@@ -653,6 +651,11 @@ function buildParamsJson() {
       params[param.paramName] = value
     }
   })
+  customParams.value.forEach(cp => {
+    if (cp.name.trim() && cp.value.trim()) {
+      params[cp.name.trim()] = cp.value.trim()
+    }
+  })
   return JSON.stringify(params)
 }
 
@@ -673,8 +676,7 @@ async function publishSupply() {
   loading.value = true
   try {
     const paramsJson = buildParamsJson()
-    const tagsJson = JSON.stringify(tagValues.value)
-    
+
     // 构建基差报价明细
     let basisQuotesData: BasisQuoteRequest[] | undefined
     if (publishForm.priceType === 1) {
@@ -702,7 +704,6 @@ async function publishSupply() {
       expireMinutes: publishForm.expireMinutes,
       priceRulesJson: publishForm.priceRulesJson || '{}',
       paramsJson,
-      tagsJson,
       remark: publishForm.remark || undefined
     }
     
@@ -1371,46 +1372,15 @@ async function applyTemplate(template: SupplyTemplateResponse) {
               <div class="w-1.5 h-5 bg-brand-500 rounded-full"></div>
               <h3 class="text-2xl font-bold text-gray-900">规格参数</h3>
             </div>
-            <span class="text-xs text-gray-400">
-              <span class="text-red-500">*</span> 为必填项
-            </span>
+            <span class="text-xs text-gray-400">选填</span>
           </div>
           <div class="p-5">
             <CategoryParamsForm
               :params="categoryParams"
               v-model="dynamicParams"
+              v-model:custom-params="customParams"
             />
           </div>
-        </div>
-
-        <!-- 产品标签（补充信息 - 可折叠） -->
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 120ms">
-          <button
-            class="w-full p-5 border-b border-gray-200 flex items-center justify-between hover:bg-gray-50/50 transition-colors"
-            @click="sectionsCollapsed.tags = !sectionsCollapsed.tags"
-          >
-            <div class="flex items-center gap-2">
-              <div class="w-1.5 h-5 bg-purple-500 rounded-full"></div>
-              <h3 class="text-2xl font-bold text-gray-900">产品标签</h3>
-              <span class="text-xs text-gray-400 ml-2">（可选）</span>
-              <span v-if="tagValues.length > 0 && sectionsCollapsed.tags" class="px-2 py-0.5 bg-purple-50 text-purple-600 text-xs font-bold rounded-full ml-2">
-                已选 {{ tagValues.length }} 个
-              </span>
-            </div>
-            <component
-              :is="sectionsCollapsed.tags ? ChevronDown : ChevronUp"
-              class="w-5 h-5 text-gray-400"
-            />
-          </button>
-          <Transition name="collapse">
-            <div v-if="!sectionsCollapsed.tags" class="p-5">
-              <TagPicker
-                v-model="tagValues"
-                :category-id="publishForm.categoryId"
-                domain="material"
-              />
-            </div>
-          </Transition>
         </div>
 
         <!-- 物流与交付 -->
@@ -1615,18 +1585,15 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                   </template>
                 </div>
               </div>
-              <!-- 产品标签预览 -->
-              <div v-if="tagValues.length > 0" class="bg-purple-50/50 rounded-xl p-3 border border-purple-100">
-                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-purple-600">
-                  <FileCheck class="w-3 h-3" />
-                  产品标签
-                </div>
-                <div class="mt-1 flex flex-wrap gap-1">
-                  <span v-for="tag in tagValues" :key="tag.tagId || tag.tagKey" class="text-[10px] bg-white px-1.5 py-0.5 rounded border border-purple-200 text-purple-700">
-                    {{ tag.tagName }}: {{ tag.value }}{{ tag.unit || '' }}
-                  </span>
-                </div>
-              </div>
+              <!-- 自定义参数预览 -->
+              <template v-if="customParams.length > 0">
+                <template v-for="(cp, idx) in customParams" :key="'cp-' + idx">
+                  <div v-if="cp.name.trim() && cp.value.trim()" class="flex items-center gap-2 text-xs">
+                    <span class="text-gray-500">{{ cp.name }}:</span>
+                    <span class="font-bold text-gray-800">{{ cp.value }}</span>
+                  </div>
+                </template>
+              </template>
               <div v-if="previewData.remark" class="bg-gray-50 rounded-xl p-3">
                 <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">备注</div>
                 <div class="mt-1 text-sm text-gray-700">{{ previewData.remark }}</div>

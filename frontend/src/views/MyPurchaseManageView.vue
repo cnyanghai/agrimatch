@@ -8,9 +8,7 @@ import { getMyCompany, type CompanyResponse } from '../api/company'
 import { getMe, type UserResponse } from '../api/user'
 import SchemaAwareCategoryPicker, { type PickedCategory } from '../components/SchemaAwareCategoryPicker.vue'
 import CategoryParamsForm from '../components/CategoryParamsForm.vue'
-import TagPicker from '../components/TagPicker.vue'
 import { getSchemaUnitConfig, getCategoryUnitConfig } from '../utils/schemaUnits'
-import type { TagValue } from '../api/tag'
 import { BaseButton, BaseModal, EmptyState, Skeleton } from '../components/ui'
 import TemplateCommandPalette, { type TemplateItem } from '../components/TemplateCommandPalette.vue'
 import ProductInfoRow from '../components/ProductInfoRow.vue'
@@ -271,7 +269,6 @@ const templateMenuOpen = ref(false)
 // 可选区域折叠
 const sectionsCollapsed = reactive({
   publishInfo: false,
-  tags: true,
   logistics: false
 })
 
@@ -375,7 +372,7 @@ const categoryParams = ref<ProductParamResponse[]>([])
 
 // 动态参数表单
 const dynamicParams = ref<Record<string, any>>({})
-const tagValues = ref<TagValue[]>([])
+const customParams = ref<Array<{ name: string; value: string }>>([])
 
 // 实时预览数据
 const previewData = computed(() => {
@@ -553,6 +550,11 @@ function buildParamsJson() {
       params[param.paramName] = value
     }
   })
+  customParams.value.forEach(cp => {
+    if (cp.name.trim() && cp.value.trim()) {
+      params[cp.name.trim()] = cp.value.trim()
+    }
+  })
   return JSON.stringify(params)
 }
 
@@ -573,8 +575,7 @@ async function publishRequirement() {
   loading.value = true
   try {
     const paramsJson = buildParamsJson()
-    const tagsJson = JSON.stringify(tagValues.value)
-    
+
     const req: RequirementCreateRequest = {
       categoryName: publishForm.categoryName,
       quantity: publishForm.quantity,
@@ -585,7 +586,6 @@ async function publishRequirement() {
       invoiceType: publishForm.invoiceType || undefined,
       deliveryMethod: publishForm.deliveryMethod || undefined,
       paramsJson,
-      tagsJson,
       expireMinutes: publishForm.expireMinutes,
       purchaseAddress: publishForm.purchaseAddress,
       remark: publishForm.remark || undefined
@@ -623,6 +623,7 @@ async function publishRequirement() {
       pickedCategory.value = null
       categoryParams.value = []
       dynamicParams.value = {}
+      customParams.value = []
       await loadNextContractNo()
     } else {
       ElMessage.error(r.message || '发布失败')
@@ -1116,46 +1117,15 @@ async function applyTemplate(template: RequirementTemplateResponse) {
               <div class="w-1.5 h-5 bg-brand-500 rounded-full"></div>
               <h3 class="text-2xl font-bold text-gray-900">质量要求</h3>
             </div>
-            <span class="text-xs text-gray-400">
-              <span class="text-red-500">*</span> 为必填项
-            </span>
+            <span class="text-xs text-gray-400">选填</span>
           </div>
           <div class="p-5">
             <CategoryParamsForm
               :params="categoryParams"
               v-model="dynamicParams"
+              v-model:custom-params="customParams"
             />
           </div>
-        </div>
-
-        <!-- 产品标签（补充信息 - 可折叠） -->
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 120ms">
-          <button
-            class="w-full p-5 border-b border-gray-200 flex items-center justify-between hover:bg-gray-50/50 transition-colors"
-            @click="sectionsCollapsed.tags = !sectionsCollapsed.tags"
-          >
-            <div class="flex items-center gap-2">
-              <div class="w-1.5 h-5 bg-purple-500 rounded-full"></div>
-              <h3 class="text-2xl font-bold text-gray-900">补充标签</h3>
-              <span class="text-xs text-gray-400 ml-2">（可选）</span>
-              <span v-if="tagValues.length > 0 && sectionsCollapsed.tags" class="px-2 py-0.5 bg-purple-50 text-purple-600 text-xs font-bold rounded-full ml-2">
-                已选 {{ tagValues.length }} 个
-              </span>
-            </div>
-            <component
-              :is="sectionsCollapsed.tags ? ChevronDown : ChevronUp"
-              class="w-5 h-5 text-gray-400"
-            />
-          </button>
-          <Transition name="collapse">
-            <div v-if="!sectionsCollapsed.tags" class="p-5">
-              <TagPicker
-                v-model="tagValues"
-                :category-id="publishForm.categoryId"
-                domain="material"
-              />
-            </div>
-          </Transition>
         </div>
 
         <!-- 物流与交付 -->
@@ -1310,17 +1280,22 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                   <div class="mt-1 font-bold text-gray-900">{{ previewData.expireText }}</div>
                 </div>
               </div>
-              <div v-if="tagValues.length > 0" class="bg-gray-50 rounded-xl p-3">
-                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                  <FileCheck class="w-3 h-3" />
-                  参数要求
+              <!-- 自定义参数预览 -->
+              <template v-if="customParams.length > 0">
+                <div class="bg-gray-50 rounded-xl p-3">
+                  <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                    <FileCheck class="w-3 h-3" />
+                    自定义参数
+                  </div>
+                  <div class="mt-1 flex flex-wrap gap-1">
+                    <template v-for="(cp, idx) in customParams" :key="'cp-' + idx">
+                      <span v-if="cp.name.trim() && cp.value.trim()" class="text-[10px] bg-white px-1.5 py-0.5 rounded border border-gray-200 text-gray-600">
+                        {{ cp.name }}: {{ cp.value }}
+                      </span>
+                    </template>
+                  </div>
                 </div>
-                <div class="mt-1 flex flex-wrap gap-1">
-                  <span v-for="tag in tagValues" :key="tag.tagId || tag.tagKey" class="text-[10px] bg-white px-1.5 py-0.5 rounded border border-gray-200 text-gray-600">
-                    {{ tag.tagName }}: {{ tag.value }}{{ tag.unit || '' }}
-                  </span>
-                </div>
-              </div>
+              </template>
               <div v-if="previewData.remark" class="bg-gray-50 rounded-xl p-3">
                 <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">备注</div>
                 <div class="mt-1 text-sm text-gray-700">{{ previewData.remark }}</div>

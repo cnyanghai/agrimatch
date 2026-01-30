@@ -91,7 +91,7 @@ export interface ContractDocumentData {
   /** 定价方式 */
   priceType?: 'SPOT' | 'BASIS'
   /** 基差合约明细（基差定价时） */
-  basisQuotes?: Array<{ contractCode: string; basisPrice: number; availableQty?: number }>
+  basisQuotes?: Array<{ contractCode: string; basisPrice: number; availableQty?: number; referencePrice?: number | null }>
 }
 
 /** 合同状态 */
@@ -424,6 +424,7 @@ function formatDateTime(dateStr: string | undefined): string {
                   <tr>
                     <th class="px-4 py-3">合约代码</th>
                     <th class="px-4 py-3 text-right">基差 (元/吨)</th>
+                    <th class="px-4 py-3 text-right">参考价 (元)</th>
                     <th class="px-4 py-3 text-right">数量 ({{ data.products[0]?.unit || '吨' }})</th>
                   </tr>
                 </thead>
@@ -433,6 +434,9 @@ function formatDateTime(dateStr: string | undefined): string {
                     <td class="px-4 py-3 text-right font-mono font-bold"
                         :class="quote.basisPrice >= 0 ? 'text-red-600' : 'text-green-600'">
                       {{ quote.basisPrice >= 0 ? '+' : '' }}{{ quote.basisPrice }}
+                    </td>
+                    <td class="px-4 py-3 text-right font-mono font-bold text-brand-600">
+                      {{ quote.referencePrice != null ? ('¥' + formatCurrency(quote.referencePrice)) : '-' }}
                     </td>
                     <td class="px-4 py-3 text-right font-mono">
                       {{ quote.availableQty != null ? formatCurrency(quote.availableQty) : '-' }}

@@ -43,6 +43,7 @@ export interface ContractBasisQuote {
   contractCode: string
   basisPrice: number
   availableQty?: number
+  referencePrice?: number | null
 }
 
 export interface ContractData {

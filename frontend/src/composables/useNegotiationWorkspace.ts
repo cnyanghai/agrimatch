@@ -241,7 +241,8 @@ export function useNegotiationWorkspace() {
         basisQuotes = snapshot.basisQuotes.map((q: any) => ({
           contractCode: q.contractCode || '',
           basisPrice: q.basisPrice ?? 0,
-          availableQty: q.availableQty ?? q.remainingQty ?? undefined
+          availableQty: q.availableQty ?? q.remainingQty ?? undefined,
+          referencePrice: q.referencePrice ?? null
         }))
         basisPrice = basisQuotes[0]?.basisPrice
         contractCode = basisQuotes[0]?.contractCode
@@ -359,7 +360,8 @@ export function useNegotiationWorkspace() {
       basisQuotes: req.basisQuotes?.map(q => ({
         contractCode: q.contractCode,
         basisPrice: q.basisPrice,
-        availableQty: q.availableQty
+        availableQty: q.availableQty,
+        referencePrice: q.referencePrice
       }))
     }
   })
