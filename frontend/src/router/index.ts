@@ -45,7 +45,10 @@ const router = createRouter({
 
     // 名录与公司详情
     { path: '/companies/directory', name: 'company-directory', component: () => import('../views/CompanyDirectoryView.vue'), meta: { public: true, minimal: true, title: '企业名录 - 优质供应商与采购商黄页 - 沃谷' } },
-    { path: '/companies/:id', name: 'company-profile', component: () => import('../views/CompanyProfileView.vue'), meta: { public: true, minimal: true, title: '企业主页 - 沃谷' } }
+    { path: '/companies/:id', name: 'company-profile', component: () => import('../views/CompanyProfileView.vue'), meta: { public: true, minimal: true, title: '企业主页 - 沃谷' } },
+
+    // 法律与合规
+    { path: '/legal/:type', name: 'legal', component: () => import('../views/LegalPageView.vue'), meta: { public: true, minimal: true, title: '法律文档 - 沃谷' } }
   ]
 })
 

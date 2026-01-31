@@ -188,10 +188,10 @@ async function onRegister() {
   }
 }
 
-// 打开协议弹窗（简化处理）
+// 打开协议页面（新标签页）
 function openAgreement(type: 'user' | 'privacy') {
-  const title = type === 'user' ? '用户协议' : '隐私政策'
-  ElMessage.info(`${title}详情页面开发中...`)
+  const path = type === 'user' ? '/legal/terms' : '/legal/privacy'
+  window.open(path, '_blank')
 }
 </script>
 
