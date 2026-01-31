@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Plus, Check, Trash2, Sparkles, Upload, Wand2 } from 'lucide-vue-next'
+import { Plus, Check, Trash2, Stamp, ArrowRight } from 'lucide-vue-next'
 import { listSeals, createSeal, setDefaultSeal, deleteSeal, type SealResponse } from '../../api/contract'
 import { vLazy } from '../../directives/lazyLoad'
 import SealUploader from '../seal/SealUploader.vue'
@@ -21,9 +21,8 @@ const creating = ref(false)
 
 // 新建公章表单
 const showCreateForm = ref(false)
-type CreateMode = 'generate' | 'upload'
-const createMode = ref<CreateMode>('generate')
 const uploadedSealUrl = ref('')
+const confirmBtnRef = ref<HTMLButtonElement>()
 
 const newSealForm = ref({
   sealName: '',
@@ -53,7 +52,7 @@ async function handleCreate() {
     ElMessage.warning('请输入公章名称')
     return
   }
-  if (createMode.value === 'upload' && !uploadedSealUrl.value) {
+  if (!uploadedSealUrl.value) {
     ElMessage.warning('请先上传并提取印章图片')
     return
   }
@@ -63,8 +62,8 @@ async function handleCreate() {
     const res = await createSeal({
       sealName: newSealForm.value.sealName,
       sealType: newSealForm.value.sealType,
-      sealUrl: createMode.value === 'upload' ? uploadedSealUrl.value : undefined,
-      generate: createMode.value === 'generate'
+      sealUrl: uploadedSealUrl.value,
+      generate: false
     })
     if (res.code === 0) {
       ElMessage.success('公章创建成功')
@@ -82,13 +81,16 @@ async function handleCreate() {
 
 function resetForm() {
   showCreateForm.value = false
-  createMode.value = 'generate'
   uploadedSealUrl.value = ''
   newSealForm.value = { sealName: '', sealType: 'official' }
 }
 
 function onSealExtracted(url: string) {
   uploadedSealUrl.value = url
+  // 提取完成后，滚动到确认创建按钮并高亮提示
+  nextTick(() => {
+    confirmBtnRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
 }
 
 async function handleSetDefault(id: number) {
@@ -129,9 +131,9 @@ function selectSeal(seal: SealResponse) {
       <div
         v-for="seal in seals"
         :key="seal.id"
-        class="relative bg-white rounded-xl border-2 p-4 cursor-pointer transition-all hover:shadow-md"
+        class="relative bg-white rounded-xl border-2 p-4 transition-all hover:shadow-md"
         :class="[
-          selected === seal.id ? 'border-brand-500 bg-brand-50' : 'border-gray-200 hover:border-gray-200',
+          selected === seal.id ? 'border-brand-500 bg-brand-50' : 'border-gray-200 hover:border-gray-300',
           selectable ? 'cursor-pointer' : 'cursor-default'
         ]"
         @click="selectSeal(seal)"
@@ -150,9 +152,8 @@ function selectSeal(seal: SealResponse) {
         <!-- 公章信息 -->
         <div class="text-sm font-medium text-gray-900 truncate">{{ seal.sealName }}</div>
         <div class="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-          <span v-if="seal.isDefault" class="text-brand-600">默认</span>
+          <span v-if="seal.isDefault" class="text-brand-600 font-medium">默认</span>
           <span>{{ seal.sealType === 'official' ? '公章' : seal.sealType === 'contract' ? '合同章' : '电子章' }}</span>
-          <span v-if="seal.isGenerated" class="text-blue-500">· 系统生成</span>
         </div>
 
         <!-- 选中标记 -->
@@ -196,14 +197,15 @@ function selectSeal(seal: SealResponse) {
     <!-- 空状态 -->
     <div v-else-if="!loading" class="text-center py-12">
       <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gray-100 flex items-center justify-center">
-        <Sparkles class="w-8 h-8 text-gray-300" />
+        <Stamp class="w-8 h-8 text-gray-300" />
       </div>
-      <div class="text-gray-500 mb-4">还没有电子公章</div>
+      <div class="text-gray-500 mb-2">还没有电子公章</div>
+      <div class="text-xs text-gray-400 mb-4">上传公章/合同章的印鉴照片即可创建</div>
       <button
-        class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all"
+        class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all active:scale-95"
         @click="showCreateForm = true"
       >
-        创建电子公章
+        上传印鉴创建
       </button>
     </div>
 
@@ -216,87 +218,98 @@ function selectSeal(seal: SealResponse) {
     <Teleport to="body">
       <div v-if="showCreateForm" class="fixed inset-0 z-[2100] flex items-center justify-center">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="resetForm"></div>
-        <div class="relative bg-white rounded-[24px] shadow-2xl w-full max-w-lg p-6">
-          <h3 class="text-2xl font-bold text-gray-900 mb-4">创建电子公章</h3>
+        <div class="relative bg-white rounded-[24px] shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+          <h3 class="text-2xl font-bold text-gray-900 mb-1">上传印鉴创建公章</h3>
+          <p class="text-sm text-gray-500 mb-5">请在白纸上清晰盖章后拍照上传，系统自动提取红色印章</p>
 
-          <div class="space-y-4">
+          <div class="space-y-5">
+            <!-- Step 1: 基本信息 -->
             <div>
-              <label class="text-sm font-bold text-gray-700 mb-1 block">公章名称</label>
-              <input
-                v-model="newSealForm.sealName"
-                type="text"
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
-                placeholder="如：公司公章"
-              />
-            </div>
-
-            <div>
-              <label class="text-sm font-bold text-gray-700 mb-1 block">公章类型</label>
-              <select
-                v-model="newSealForm.sealType"
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
-              >
-                <option value="official">公章</option>
-                <option value="contract">合同专用章</option>
-              </select>
-            </div>
-
-            <!-- 创建模式切换 -->
-            <div>
-              <label class="text-sm font-bold text-gray-700 mb-2 block">创建方式</label>
-              <div class="grid grid-cols-2 gap-3">
-                <button
-                  :class="[
-                    'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
-                    createMode === 'generate' ? 'border-brand-500 bg-brand-50' : 'border-gray-200 hover:border-gray-300'
-                  ]"
-                  @click="createMode = 'generate'"
-                >
-                  <Wand2 :class="['w-5 h-5', createMode === 'generate' ? 'text-brand-600' : 'text-gray-400']" />
-                  <span :class="['text-xs font-bold', createMode === 'generate' ? 'text-brand-600' : 'text-gray-500']">系统生成</span>
-                  <span class="text-[10px] text-gray-400">根据公司名称自动生成</span>
-                </button>
-                <button
-                  :class="[
-                    'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
-                    createMode === 'upload' ? 'border-brand-500 bg-brand-50' : 'border-gray-200 hover:border-gray-300'
-                  ]"
-                  @click="createMode = 'upload'"
-                >
-                  <Upload :class="['w-5 h-5', createMode === 'upload' ? 'text-brand-600' : 'text-gray-400']" />
-                  <span :class="['text-xs font-bold', createMode === 'upload' ? 'text-brand-600' : 'text-gray-500']">上传印鉴</span>
-                  <span class="text-[10px] text-gray-400">从实物印章照片提取</span>
-                </button>
+              <div class="flex items-center gap-2 mb-3">
+                <div class="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold">1</div>
+                <span class="text-sm font-bold text-gray-700">填写公章信息</span>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="text-xs font-medium text-gray-500 mb-1 block">公章名称</label>
+                  <input
+                    v-model="newSealForm.sealName"
+                    type="text"
+                    class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+                    placeholder="如：公司公章"
+                  />
+                </div>
+                <div>
+                  <label class="text-xs font-medium text-gray-500 mb-1 block">公章类型</label>
+                  <select
+                    v-model="newSealForm.sealType"
+                    class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all"
+                  >
+                    <option value="official">公章</option>
+                    <option value="contract">合同专用章</option>
+                  </select>
+                </div>
               </div>
             </div>
 
-            <!-- 上传印鉴区域 -->
-            <div v-if="createMode === 'upload'">
+            <!-- Step 2: 上传印鉴 -->
+            <div>
+              <div class="flex items-center gap-2 mb-3">
+                <div class="w-6 h-6 rounded-full text-white flex items-center justify-center text-xs font-bold" :class="uploadedSealUrl ? 'bg-brand-600' : 'bg-gray-300'">2</div>
+                <span class="text-sm font-bold text-gray-700">上传印鉴照片</span>
+                <Check v-if="uploadedSealUrl" class="w-4 h-4 text-brand-600" />
+              </div>
               <SealUploader @extracted="onSealExtracted" />
-              <div v-if="uploadedSealUrl" class="mt-3 flex items-center gap-2 text-sm text-brand-600">
-                <Check class="w-4 h-4" />
-                <span class="font-medium">印章已提取并上传</span>
+            </div>
+
+            <!-- Step 3: 确认创建（提取完成后高亮显示） -->
+            <div
+              class="rounded-xl p-4 border-2 transition-all"
+              :class="uploadedSealUrl ? 'border-brand-500 bg-brand-50 animate-pulse-once' : 'border-gray-100 bg-gray-50 opacity-50'"
+            >
+              <div class="flex items-center gap-2 mb-3">
+                <div class="w-6 h-6 rounded-full text-white flex items-center justify-center text-xs font-bold" :class="uploadedSealUrl ? 'bg-brand-600' : 'bg-gray-300'">3</div>
+                <span class="text-sm font-bold text-gray-700">确认创建公章</span>
+                <ArrowRight v-if="uploadedSealUrl" class="w-4 h-4 text-brand-600 animate-bounce-x" />
+              </div>
+              <p class="text-xs text-gray-500 mb-3">确认以上信息无误后，点击下方按钮完成公章创建</p>
+              <div class="flex gap-3">
+                <button
+                  class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-all"
+                  @click="resetForm"
+                >
+                  取消
+                </button>
+                <button
+                  ref="confirmBtnRef"
+                  class="flex-1 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                  :disabled="creating || !uploadedSealUrl || !newSealForm.sealName.trim()"
+                  @click="handleCreate"
+                >
+                  {{ creating ? '创建中...' : '确认创建公章' }}
+                </button>
               </div>
             </div>
-          </div>
-
-          <div class="flex justify-end gap-3 mt-6">
-            <button
-              class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-all"
-              @click="resetForm"
-            >
-              取消
-            </button>
-            <button
-              class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all disabled:opacity-50"
-              :disabled="creating || (createMode === 'upload' && !uploadedSealUrl)"
-              @click="handleCreate"
-            >
-              {{ creating ? '创建中...' : '创建' }}
-            </button>
           </div>
         </div>
       </div>
     </Teleport>
   </div>
 </template>
+
+<style scoped>
+@keyframes pulse-once {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50% { box-shadow: 0 0 0 6px rgba(45, 106, 79, 0.15); }
+}
+.animate-pulse-once {
+  animation: pulse-once 1s ease-in-out 2;
+}
+@keyframes bounce-x {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
+.animate-bounce-x {
+  animation: bounce-x 0.8s ease-in-out infinite;
+}
+</style>

@@ -15,6 +15,7 @@ const originalPreview = ref('')
 const extractedPreview = ref('')
 const processing = ref(false)
 const uploading = ref(false)
+const uploaded = ref(false)
 const dragOver = ref(false)
 const fileInput = ref<HTMLInputElement>()
 
@@ -72,6 +73,7 @@ async function processFile(file: File) {
 function handleReset() {
   originalPreview.value = ''
   extractedPreview.value = ''
+  uploaded.value = false
 }
 
 async function handleConfirm() {
@@ -82,9 +84,9 @@ async function handleConfirm() {
     const file = dataUrlToFile(extractedPreview.value, 'seal-extracted.png')
     const res = await uploadImage(file)
     if (res.code === 0 && res.data) {
-      ElMessage.success('印章上传成功')
+      ElMessage.success('印章提取成功')
+      uploaded.value = true
       emit('extracted', res.data.fileUrl)
-      handleReset()
     } else {
       ElMessage.error(res.message || '上传失败')
     }
@@ -164,12 +166,13 @@ async function handleConfirm() {
           重新上传
         </button>
         <button
+          v-if="!uploaded"
           class="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50"
           :disabled="uploading"
           @click="handleConfirm"
         >
           <Upload v-if="!uploading" class="w-4 h-4" />
-          {{ uploading ? '上传中...' : '确认使用' }}
+          {{ uploading ? '提取中...' : '确认提取' }}
         </button>
       </div>
     </div>

@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Pen, Stamp, Type, Check, FileSignature, Package, ShieldCheck } from 'lucide-vue-next'
+import { Stamp, Check, FileSignature, Package, ShieldCheck } from 'lucide-vue-next'
 import { signContract, getContract, type ContractResponse, type SealResponse } from '../../api/contract'
 import { sendSmsCode } from '../../api/sms'
 import { BaseModal, BaseButton } from '../ui'
-import SignaturePad from './SignaturePad.vue'
 import SealManager from './SealManager.vue'
-import { signData, generateKeyPair } from '../../utils/crypto'
 import { auditLogger } from '../../utils/audit-logger'
 import { ErrorHandler } from '../../utils/error-handler'
 import { useAuthStore } from '../../store/auth'
@@ -29,13 +27,7 @@ const visible = computed({
   set: (val) => emit('update:modelValue', val)
 })
 
-// 签署方式
-type SignMethod = 'typed' | 'handwrite' | 'seal'
-const signMethod = ref<SignMethod>('typed')
-
 // 表单数据
-const typedName = ref('')
-const signatureImage = ref('')
 const loading = ref(false)
 const contract = ref<ContractResponse | null>(null)
 
@@ -119,9 +111,6 @@ watch(() => props.modelValue, async (val) => {
     }
   } else {
     // 重置
-    signMethod.value = 'typed'
-    typedName.value = ''
-    signatureImage.value = ''
     contract.value = null
     selectedSeal.value = null
     smsCode.value = ''
@@ -166,67 +155,36 @@ function onSealSelect(seal: SealResponse) {
 async function handleSign() {
   if (!props.contractId) return
 
-  // 验证
-  if (signMethod.value === 'typed' && !typedName.value.trim()) {
-    ElMessage.warning('请输入您的姓名')
+  if (!selectedSeal.value) {
+    ElMessage.warning('请选择一枚公章')
     return
   }
-  if (signMethod.value === 'handwrite' && !signatureImage.value) {
-    ElMessage.warning('请在画布上签名')
+  if (!smsCode.value || smsCode.value.length !== 6) {
+    ElMessage.warning('请输入6位短信验证码')
     return
-  }
-  if (signMethod.value === 'seal') {
-    if (!selectedSeal.value) {
-      ElMessage.warning('请选择一枚公章')
-      return
-    }
-    if (!smsCode.value || smsCode.value.length !== 6) {
-      ElMessage.warning('请输入6位短信验证码')
-      return
-    }
   }
 
   loading.value = true
   try {
-    const payload: any = {
-      signType: signMethod.value,
-      signerName: typedName.value.trim() || undefined,
-      signatureData: signatureImage.value || undefined
+    const payload = {
+      signType: 'seal' as const,
+      sealId: selectedSeal.value.id,
+      smsCode: smsCode.value
     }
 
-    // 盖章模式追加字段
-    if (signMethod.value === 'seal' && selectedSeal.value) {
-      payload.sealId = selectedSeal.value.id
-      payload.smsCode = smsCode.value
-    }
-
-    let encryptedSignatureData = payload.signatureData
-    if (payload.signatureData) {
-      try {
-        const { privateKey } = await generateKeyPair()
-        encryptedSignatureData = await signData(payload.signatureData, privateKey)
-        auditLogger.log({
-          userId: auth.me?.userId ?? 0,
-          action: 'contract_sign_prepared',
-          resourceType: 'contract',
-          resourceId: props.contractId,
-          details: {
-            contractId: props.contractId,
-            signType: signMethod.value,
-            signerName: payload.signerName,
-            hasSignature: !!payload.signatureData
-          }
-        })
-      } catch (cryptoError) {
-        ErrorHandler.handle(cryptoError)
-        ElMessage.warning('数字签名生成失败，使用原始签名')
+    auditLogger.log({
+      userId: auth.me?.userId ?? 0,
+      action: 'contract_sign_prepared',
+      resourceType: 'contract',
+      resourceId: props.contractId,
+      details: {
+        contractId: props.contractId,
+        signType: 'seal',
+        sealId: selectedSeal.value.id
       }
-    }
-
-    const res = await signContract(props.contractId, {
-      ...payload,
-      signatureData: encryptedSignatureData
     })
+
+    const res = await signContract(props.contractId, payload)
 
     if (res.code === 0) {
       auditLogger.log({
@@ -236,7 +194,7 @@ async function handleSign() {
         resourceId: props.contractId,
         details: {
           contractId: props.contractId,
-          signType: signMethod.value,
+          signType: 'seal',
           success: true
         }
       })
@@ -251,7 +209,7 @@ async function handleSign() {
         resourceId: props.contractId,
         details: {
           contractId: props.contractId,
-          signType: signMethod.value,
+          signType: 'seal',
           success: false,
           error: res.message
         }
@@ -275,18 +233,13 @@ async function handleSign() {
     loading.value = false
   }
 }
-
-// 接收手写签名
-function onSignatureChange(data: string) {
-  signatureImage.value = data
-}
 </script>
 
 <template>
   <BaseModal
     v-model="visible"
     title="签署合同"
-    subtitle="电子签署"
+    subtitle="公章签署"
     size="md"
   >
     <!-- 头部图标 -->
@@ -319,99 +272,30 @@ function onSignatureChange(data: string) {
       </div>
     </div>
 
-    <!-- 签署方式选择 -->
-    <div class="space-y-4">
-      <div class="text-xs font-bold text-gray-500 uppercase tracking-wider">选择签署方式</div>
-
-      <div class="grid grid-cols-3 gap-3">
-        <button
-          :class="[
-            'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
-            signMethod === 'typed'
-              ? 'border-brand-500 bg-brand-50'
-              : 'border-gray-200 hover:border-gray-200 bg-white'
-          ]"
-          @click="signMethod = 'typed'"
-        >
-          <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', signMethod === 'typed' ? 'bg-brand-100' : 'bg-gray-100']">
-            <Type :class="['w-5 h-5', signMethod === 'typed' ? 'text-brand-600' : 'text-gray-500']" />
-          </div>
-          <span :class="['text-xs font-bold', signMethod === 'typed' ? 'text-brand-600' : 'text-gray-600']">打字签名</span>
-        </button>
-
-        <button
-          :class="[
-            'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
-            signMethod === 'handwrite'
-              ? 'border-brand-500 bg-brand-50'
-              : 'border-gray-200 hover:border-gray-200 bg-white'
-          ]"
-          @click="signMethod = 'handwrite'"
-        >
-          <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', signMethod === 'handwrite' ? 'bg-brand-100' : 'bg-gray-100']">
-            <Pen :class="['w-5 h-5', signMethod === 'handwrite' ? 'text-brand-600' : 'text-gray-500']" />
-          </div>
-          <span :class="['text-xs font-bold', signMethod === 'handwrite' ? 'text-brand-600' : 'text-gray-600']">手写签名</span>
-        </button>
-
-        <button
-          :class="[
-            'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
-            signMethod === 'seal'
-              ? 'border-brand-500 bg-brand-50'
-              : 'border-gray-200 hover:border-gray-200 bg-white'
-          ]"
-          @click="signMethod = 'seal'"
-        >
-          <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', signMethod === 'seal' ? 'bg-brand-100' : 'bg-gray-100']">
-            <Stamp :class="['w-5 h-5', signMethod === 'seal' ? 'text-brand-600' : 'text-gray-500']" />
-          </div>
-          <span :class="['text-xs font-bold', signMethod === 'seal' ? 'text-brand-600' : 'text-gray-600']">公司盖章</span>
-        </button>
-      </div>
-
-      <!-- 打字签名 -->
-      <div v-if="signMethod === 'typed'" class="mt-4">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">请输入您的真实姓名</label>
-        <input
-          v-model="typedName"
-          type="text"
-          placeholder="例如：张三"
-          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-center text-xl font-bold"
-        />
-        <p class="text-xs text-gray-400 mt-2 text-center">
-          打字签名具有同等法律效力
-        </p>
-      </div>
-
-      <!-- 手写签名 -->
-      <div v-if="signMethod === 'handwrite'" class="mt-4">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">请在下方区域手写签名</label>
-        <SignaturePad
-          :width="360"
-          :height="150"
-          @update:model-value="onSignatureChange"
-        />
-      </div>
-
-      <!-- 公司盖章 -->
-      <div v-if="signMethod === 'seal'" class="mt-4 space-y-4">
-        <!-- 选择印章 -->
-        <div>
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">选择印章</label>
-          <SealManager
-            selectable
-            :selected="selectedSeal?.id ?? null"
-            @select="onSealSelect"
-          />
+    <!-- 签署流程：选择印章 + 短信验证 -->
+    <div class="space-y-5">
+      <!-- Step 1: 选择印章 -->
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold">1</div>
+          <span class="text-sm font-bold text-gray-700">选择签署印章</span>
+          <Stamp class="w-4 h-4 text-gray-400" />
         </div>
+        <SealManager
+          selectable
+          :selected="selectedSeal?.id ?? null"
+          @select="onSealSelect"
+        />
+      </div>
 
-        <!-- 短信验证 -->
+      <!-- Step 2: 短信验证 -->
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <div class="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold">2</div>
+          <span class="text-sm font-bold text-gray-700">短信验证确认</span>
+          <ShieldCheck class="w-4 h-4 text-gray-400" />
+        </div>
         <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-          <div class="flex items-center gap-2 mb-3">
-            <ShieldCheck class="w-4 h-4 text-brand-600" />
-            <span class="text-sm font-bold text-gray-700">短信验证</span>
-          </div>
           <p class="text-xs text-gray-500 mb-3">
             为确保签署安全，需向手机号 <span class="font-bold text-gray-700">{{ maskedPhone || '未绑定' }}</span> 发送验证码确认
           </p>
@@ -445,11 +329,11 @@ function onSignatureChange(data: string) {
         type="primary"
         block
         :loading="loading"
-        :disabled="signMethod === 'seal' && (!selectedSeal || smsCode.length !== 6)"
+        :disabled="!selectedSeal || smsCode.length !== 6"
         @click="handleSign"
       >
         <Check class="w-4 h-4" />
-        确认签署
+        确认盖章签署
       </BaseButton>
     </template>
   </BaseModal>
