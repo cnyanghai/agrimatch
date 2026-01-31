@@ -93,7 +93,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="h-screen flex flex-col overflow-hidden bg-gray-50">
+  <div class="h-screen flex flex-col overflow-hidden bg-neutral-50">
     <!-- Global Navigation -->
     <PublicTopNav v-if="!hideNav" />
 
@@ -104,12 +104,12 @@ onMounted(async () => {
 
     <div v-else class="flex-1 flex overflow-hidden">
       <!-- Sidebar -->
-      <aside v-if="isLoggedIn" class="hidden md:flex w-52 shrink-0 flex-col bg-white border-r border-gray-200 overflow-y-auto">
+      <aside v-if="isLoggedIn" class="hidden md:flex w-52 shrink-0 flex-col bg-white border-r border-neutral-200 overflow-y-auto">
         <!-- 核心功能（8大模块） -->
       <div class="px-3 py-2 flex-1">
         <nav class="space-y-1">
           <!-- 1. 控制台首页 -->
-          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center gap-3"
+          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
                   :class="route.path==='/console' ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/console')">
             <LayoutDashboard class="h-5 w-5" stroke-width="2" />
@@ -117,7 +117,7 @@ onMounted(async () => {
           </button>
 
           <!-- 2. 发布信息 -->
-          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center gap-3"
+          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
                   :class="route.path==='/console/publish' ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/console/publish')">
             <FilePlus class="h-5 w-5" stroke-width="2" />
@@ -125,7 +125,7 @@ onMounted(async () => {
           </button>
 
           <!-- 3. 关注列表 -->
-          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center gap-3"
+          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
                   :class="route.path==='/console/following' ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/console/following')">
             <Star class="h-5 w-5" stroke-width="2" />
@@ -133,7 +133,7 @@ onMounted(async () => {
           </button>
 
           <!-- 4. 地图找商 -->
-          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center gap-3"
+          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
                   :class="route.path==='/map' ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/map')">
             <Map class="h-5 w-5" stroke-width="2" />
@@ -141,7 +141,7 @@ onMounted(async () => {
           </button>
 
           <!-- 5. 聊天议价 -->
-          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center gap-3 relative"
+          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3 relative"
                   :class="route.path==='/chat' || route.path==='/notify' ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/chat')">
             <div class="relative">
@@ -149,7 +149,7 @@ onMounted(async () => {
               <!-- 未读角标 -->
               <span
                 v-if="unreadCount > 0"
-                class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1"
+                class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-error-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1"
               >
                 {{ unreadCount > 99 ? '99+' : unreadCount }}
               </span>
@@ -158,7 +158,7 @@ onMounted(async () => {
           </button>
 
           <!-- 6. 合同管理 -->
-          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center gap-3"
+          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
                   :class="route.path.startsWith('/contracts') ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/contracts')">
             <FileCheck class="h-5 w-5" stroke-width="2" />
@@ -166,7 +166,7 @@ onMounted(async () => {
           </button>
 
           <!-- 7. 用户资料 -->
-          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center gap-3"
+          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
                   :class="route.path==='/profile' ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/profile')">
             <User class="h-5 w-5" stroke-width="2" />
@@ -174,7 +174,7 @@ onMounted(async () => {
           </button>
 
           <!-- 8. 会员积分 -->
-          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center gap-3"
+          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
                   :class="route.path.startsWith('/points') ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/points')">
             <Coins class="h-5 w-5" stroke-width="2" />
@@ -184,9 +184,9 @@ onMounted(async () => {
       </div>
 
       <!-- 底部区域 -->
-      <div class="px-3 py-2 mt-auto border-t border-gray-200">
+      <div class="px-3 py-2 mt-auto border-t border-neutral-200">
         <nav class="space-y-1">
-          <button class="w-full text-left px-4 py-2.5 rounded-xl transition-all text-gray-500 hover:text-red-600 hover:bg-red-50 flex items-center gap-3"
+          <button class="w-full text-left px-4 py-2.5 rounded-xl transition-all text-neutral-500 hover:text-error-600 hover:bg-error-50 flex items-center gap-3"
                   @click="logout">
             <LogOut class="h-5 w-5" stroke-width="2" />
             退出登录

@@ -66,10 +66,10 @@ function getCompanyType(c: MapCompanyMarkerResponse): 'supply' | 'requirement' |
 // 获取类型对应的颜色
 function getTypeColor(type: string) {
   switch (type) {
-    case 'supply': return { bar: 'bg-brand-500', bg: 'bg-brand-50', text: 'text-brand-600', gradient: 'from-brand-500 to-teal-600' }
-    case 'requirement': return { bar: 'bg-blue-500', bg: 'bg-blue-50', text: 'text-blue-600', gradient: 'from-blue-500 to-indigo-600' }
-    case 'both': return { bar: 'bg-gradient-to-b from-brand-500 to-blue-500', bg: 'bg-purple-50', text: 'text-purple-600', gradient: 'from-purple-500 to-pink-600' }
-    default: return { bar: 'bg-gray-300', bg: 'bg-gray-50', text: 'text-gray-500', gradient: 'from-gray-400 to-gray-500' }
+    case 'supply': return { bar: 'bg-brand-500', bg: 'bg-brand-50', text: 'text-brand-600', gradient: 'from-brand-500 to-brand-600' }
+    case 'requirement': return { bar: 'bg-action-500', bg: 'bg-action-50', text: 'text-action-600', gradient: 'from-action-500 to-action-700' }
+    case 'both': return { bar: 'bg-gradient-to-b from-brand-500 to-action-500', bg: 'bg-action-50', text: 'text-action-600', gradient: 'from-action-500 to-accent-600' }
+    default: return { bar: 'bg-neutral-300', bg: 'bg-neutral-50', text: 'text-neutral-500', gradient: 'from-neutral-400 to-neutral-500' }
   }
 }
 
@@ -129,15 +129,15 @@ function renderMarkers() {
     if (!c.lat || !c.lng) continue
     
     const type = getCompanyType(c)
-    let markerColor = '#10b981' // emerald for supply
-    if (type === 'requirement') markerColor = '#3b82f6' // blue
-    if (type === 'both') markerColor = '#8b5cf6' // purple
+    let markerColor = '#2D6A4F' // brand-600 for supply
+    if (type === 'requirement') markerColor = '#2563eb' // action-600
+    if (type === 'both') markerColor = '#2563eb' // action-600
     
     // 自定义标记图标
     const markerContent = `
       <div style="
         width: 32px; height: 32px;
-        background: linear-gradient(135deg, ${markerColor}, ${type === 'both' ? '#3b82f6' : markerColor});
+        background: linear-gradient(135deg, ${markerColor}, ${type === 'both' ? '#1d4ed8' : markerColor});
         border-radius: 50% 50% 50% 0;
         transform: rotate(-45deg);
         box-shadow: 0 4px 12px ${markerColor}40;
@@ -187,15 +187,15 @@ function focusCompany(c: MapCompanyMarkerResponse) {
 function openInfo(c: MapCompanyMarkerResponse, marker: any) {
   const type = getCompanyType(c)
   const typeColors = {
-    supply: { bg: '#10b981', light: '#ecfdf5' },
-    requirement: { bg: '#3b82f6', light: '#eff6ff' },
-    both: { bg: '#8b5cf6', light: '#f5f3ff' },
-    none: { bg: '#6b7280', light: '#f9fafb' }
+    supply: { bg: '#2D6A4F', light: '#f0f7f4' },
+    requirement: { bg: '#2563eb', light: '#eff6ff' },
+    both: { bg: '#2563eb', light: '#eff6ff' },
+    none: { bg: '#71717a', light: '#fafafa' }
   }
   const color = typeColors[type]
   
   const supplyCats = (c.supplyCategories ?? []).slice(0, 5).map(cat => 
-    `<span style="display:inline-block;padding:2px 8px;margin:2px;background:#ecfdf5;color:#059669;border-radius:12px;font-size:12px;">${escapeHtml(cat)}</span>`
+    `<span style="display:inline-block;padding:2px 8px;margin:2px;background:#f0f7f4;color:#2D6A4F;border-radius:12px;font-size:12px;">${escapeHtml(cat)}</span>`
   ).join('')
   
   const reqCats = (c.requirementCategories ?? []).slice(0, 5).map(cat => 
@@ -213,7 +213,7 @@ function openInfo(c: MapCompanyMarkerResponse, marker: any) {
       font-family: system-ui, -apple-system, sans-serif;
     ">
       <div style="
-        background: linear-gradient(135deg, ${color.bg}, ${type === 'both' ? '#3b82f6' : color.bg});
+        background: linear-gradient(135deg, ${color.bg}, ${type === 'both' ? '#1d4ed8' : color.bg});
         padding: 16px;
         color: white;
       ">
@@ -223,25 +223,25 @@ function openInfo(c: MapCompanyMarkerResponse, marker: any) {
       
       <div style="padding:16px;">
         <div style="display:flex;gap:12px;margin-bottom:12px;">
-          <div onclick="window.__mapViewSupply && window.__mapViewSupply(${c.companyId})" style="flex:1;background:#ecfdf5;padding:10px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#ecfdf5'">
-            <div style="font-size:20px;font-weight:700;color:#059669;">${c.supplyCount ?? 0}</div>
-            <div style="font-size:12px;color:#6b7280;">供应发布</div>
+          <div onclick="window.__mapViewSupply && window.__mapViewSupply(${c.companyId})" style="flex:1;background:#f0f7f4;padding:10px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#daeee3'" onmouseout="this.style.background='#f0f7f4'">
+            <div style="font-size:20px;font-weight:700;color:#2D6A4F;">${c.supplyCount ?? 0}</div>
+            <div style="font-size:12px;color:#71717a;">供应发布</div>
           </div>
           <div onclick="window.__mapViewNeed && window.__mapViewNeed(${c.companyId})" style="flex:1;background:#eff6ff;padding:10px;border-radius:12px;text-align:center;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
             <div style="font-size:20px;font-weight:700;color:#2563eb;">${c.requirementCount ?? 0}</div>
-            <div style="font-size:12px;color:#6b7280;">采购需求</div>
+            <div style="font-size:12px;color:#71717a;">采购需求</div>
           </div>
         </div>
         
-        ${supplyCats ? `<div style="margin-bottom:8px;"><div style="font-size:12px;color:#6b7280;margin-bottom:4px;">供应品类</div>${supplyCats}</div>` : ''}
-        ${reqCats ? `<div><div style="font-size:12px;color:#6b7280;margin-bottom:4px;">采购品类</div>${reqCats}</div>` : ''}
+        ${supplyCats ? `<div style="margin-bottom:8px;"><div style="font-size:12px;color:#71717a;margin-bottom:4px;">供应品类</div>${supplyCats}</div>` : ''}
+        ${reqCats ? `<div><div style="font-size:12px;color:#71717a;margin-bottom:4px;">采购品类</div>${reqCats}</div>` : ''}
       </div>
       
       <div style="padding:0 16px 16px;display:flex;gap:8px;">
         <button onclick="window.__mapViewChat && window.__mapViewChat(${c.companyId}, '${escapeHtml(c.companyName)}')" style="
           flex:1;
           padding:10px;
-          background:linear-gradient(135deg,#059669,#0d9488);
+          background:linear-gradient(135deg,#2D6A4F,#1a4532);
           color:white;
           border:none;
           border-radius:10px;
@@ -335,29 +335,29 @@ onMounted(async () => {
     <!-- 标题区 -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-teal-600 flex items-center justify-center shadow-md shadow-brand-500/20">
+        <h1 class="text-2xl font-bold text-neutral-900 flex items-center gap-2">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-md shadow-brand-500/20">
             <MapPin class="w-5 h-5 text-white" />
           </div>
           全域供需地图
         </h1>
-        <p class="text-sm text-gray-500 mt-1 ml-12">发现全国优质供应商和采购商，一图览全局</p>
+        <p class="text-sm text-neutral-500 mt-1 ml-12">发现全国优质供应商和采购商，一图览全局</p>
       </div>
       
       <!-- 搜索框 -->
       <div class="flex items-center gap-3">
         <div class="relative">
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
           <input
             v-model="keyword"
             type="text"
             placeholder="搜索公司名称或地址..."
-            class="w-64 pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all text-sm"
+            class="w-64 pl-10 pr-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all text-sm"
             @keyup.enter="handleSearch"
           />
         </div>
         <button
-          class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-700 hover:to-teal-700 text-white text-sm font-bold rounded-xl transition-all  shadow-md shadow-brand-500/20"
+          class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-brand-600 to-brand-600 hover:from-brand-700 hover:to-brand-700 text-white text-sm font-bold rounded-xl transition-all  shadow-md shadow-brand-500/20"
           :disabled="loading"
           @click="refresh"
         >
@@ -368,17 +368,17 @@ onMounted(async () => {
     </div>
     
     <!-- API Key 缺失提示 -->
-    <div v-if="!hasKey" class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+    <div v-if="!hasKey" class="bg-warning-50 border border-warning-200 rounded-xl p-5">
       <div class="flex items-start gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
-          <AlertTriangle class="w-5 h-5 text-amber-600" />
+        <div class="w-10 h-10 rounded-xl bg-warning-100 flex items-center justify-center shrink-0">
+          <AlertTriangle class="w-5 h-5 text-warning-600" />
         </div>
         <div>
-          <div class="font-bold text-amber-800 mb-2">地图功能需要配置高德 JS API Key</div>
-          <div class="text-sm text-amber-700 space-y-1">
-            <p>1. 访问 <a href="https://lbs.amap.com/" target="_blank" class="text-blue-600 underline">高德开放平台</a> 注册账号并创建应用</p>
+          <div class="font-bold text-warning-800 mb-2">地图功能需要配置高德 JS API Key</div>
+          <div class="text-sm text-warning-700 space-y-1">
+            <p>1. 访问 <a href="https://lbs.amap.com/" target="_blank" class="text-action-600 underline">高德开放平台</a> 注册账号并创建应用</p>
             <p>2. 申请 "Web端(JS API)" 类型的 Key</p>
-            <p>3. 在 <code class="bg-amber-100 px-1.5 py-0.5 rounded text-xs">frontend/.env</code> 中添加 <code class="bg-amber-100 px-1.5 py-0.5 rounded text-xs">VITE_AMAP_JS_KEY=您的Key</code></p>
+            <p>3. 在 <code class="bg-warning-100 px-1.5 py-0.5 rounded text-xs">frontend/.env</code> 中添加 <code class="bg-warning-100 px-1.5 py-0.5 rounded text-xs">VITE_AMAP_JS_KEY=您的Key</code></p>
             <p>4. 重启前端开发服务器</p>
           </div>
         </div>
@@ -386,21 +386,21 @@ onMounted(async () => {
     </div>
     
     <!-- 筛选器 -->
-    <div class="bg-white rounded-xl border border-gray-200 p-4">
+    <div class="bg-white rounded-xl border border-neutral-200 p-4">
       <div class="flex items-center justify-between flex-wrap gap-4">
         <div class="flex gap-2">
           <button
             :class="[
               'px-4 py-2 text-sm font-bold rounded-xl transition-all flex items-center gap-2',
               filterType === 'all' 
-                ? 'bg-gray-900 text-white shadow-md' 
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                ? 'bg-neutral-900 text-white shadow-md' 
+                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
             ]"
             @click="filterType = 'all'; renderMarkers()"
           >
             <Building2 class="w-4 h-4" />
             全部
-            <span class="px-1.5 py-0.5 text-[10px] rounded-full" :class="filterType === 'all' ? 'bg-white/20' : 'bg-gray-200'">{{ stats.total }}</span>
+            <span class="px-1.5 py-0.5 text-[10px] rounded-full" :class="filterType === 'all' ? 'bg-white/20' : 'bg-neutral-200'">{{ stats.total }}</span>
           </button>
           
           <button
@@ -421,33 +421,33 @@ onMounted(async () => {
             :class="[
               'px-4 py-2 text-sm font-bold rounded-xl transition-all flex items-center gap-2',
               filterType === 'requirement' 
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
-                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                ? 'bg-action-600 text-white shadow-md shadow-action-500/20' 
+                : 'bg-action-50 text-action-600 hover:bg-action-100'
             ]"
             @click="filterType = 'requirement'; renderMarkers()"
           >
             <ShoppingCart class="w-4 h-4" />
             有需求
-            <span class="px-1.5 py-0.5 text-[10px] rounded-full" :class="filterType === 'requirement' ? 'bg-white/20' : 'bg-blue-100'">{{ stats.hasRequirement }}</span>
+            <span class="px-1.5 py-0.5 text-[10px] rounded-full" :class="filterType === 'requirement' ? 'bg-white/20' : 'bg-action-100'">{{ stats.hasRequirement }}</span>
           </button>
           
           <button
             :class="[
               'px-4 py-2 text-sm font-bold rounded-xl transition-all flex items-center gap-2',
               filterType === 'both' 
-                ? 'bg-purple-600 text-white shadow-md shadow-purple-500/20' 
-                : 'bg-purple-50 text-purple-600 hover:bg-purple-100'
+                ? 'bg-action-600 text-white shadow-md shadow-action-500/20' 
+                : 'bg-action-50 text-action-600 hover:bg-action-100'
             ]"
             @click="filterType = 'both'; renderMarkers()"
           >
             <Zap class="w-4 h-4" />
             供需兼有
-            <span class="px-1.5 py-0.5 text-[10px] rounded-full" :class="filterType === 'both' ? 'bg-white/20' : 'bg-purple-100'">{{ stats.hasBoth }}</span>
+            <span class="px-1.5 py-0.5 text-[10px] rounded-full" :class="filterType === 'both' ? 'bg-white/20' : 'bg-action-100'">{{ stats.hasBoth }}</span>
           </button>
         </div>
         
-        <div class="text-sm text-gray-500">
-          已标注 <span class="font-bold text-gray-900">{{ stats.withCoords }}</span> 家公司
+        <div class="text-sm text-neutral-500">
+          已标注 <span class="font-bold text-neutral-900">{{ stats.withCoords }}</span> 家公司
         </div>
       </div>
     </div>
@@ -455,19 +455,19 @@ onMounted(async () => {
     <!-- 主体内容 -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- 地图区域 -->
-      <div class="lg:col-span-3 bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+      <div class="lg:col-span-3 bg-white rounded-xl border border-neutral-200 overflow-hidden shadow-sm">
         <div ref="mapRef" class="h-[600px] w-full"></div>
       </div>
       
       <!-- 公司列表 -->
-      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div class="p-4 border-b border-gray-200 bg-gray-50/50">
+      <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+        <div class="p-4 border-b border-neutral-200 bg-neutral-50/50">
           <div class="flex items-center justify-between">
-            <h3 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Building2 class="w-4 h-4 text-gray-500" />
+            <h3 class="text-2xl font-bold text-neutral-900 flex items-center gap-2">
+              <Building2 class="w-4 h-4 text-neutral-500" />
               公司列表
             </h3>
-            <span class="text-xs text-gray-500">{{ filtered.length }} 家</span>
+            <span class="text-xs text-neutral-500">{{ filtered.length }} 家</span>
           </div>
         </div>
         
@@ -487,7 +487,7 @@ onMounted(async () => {
           <div
             v-for="c in filtered"
             :key="c.companyId"
-            class="company-card group flex border-b border-gray-50 last:border-b-0 hover:bg-gray-50/50 transition-all cursor-pointer"
+            class="company-card group flex border-b border-neutral-50 last:border-b-0 hover:bg-neutral-50/50 transition-all cursor-pointer"
             @click="focusCompany(c)"
           >
             <!-- 左侧状态色条 -->
@@ -500,8 +500,8 @@ onMounted(async () => {
               <!-- 公司名称 -->
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
-                  <div class="font-bold text-gray-900 truncate">{{ c.companyName }}</div>
-                  <div class="text-xs text-gray-500 truncate mt-0.5">{{ c.address || '地址未填写' }}</div>
+                  <div class="font-bold text-neutral-900 truncate">{{ c.companyName }}</div>
+                  <div class="text-xs text-neutral-500 truncate mt-0.5">{{ c.address || '地址未填写' }}</div>
                 </div>
               </div>
               
@@ -511,9 +511,9 @@ onMounted(async () => {
                   <Package class="w-3 h-3 text-brand-600" />
                   <span class="text-xs font-bold text-brand-600">{{ c.supplyCount ?? 0 }}</span>
                 </div>
-                <div class="flex items-center gap-1.5 px-2 py-1 bg-blue-50 rounded-lg">
-                  <ShoppingCart class="w-3 h-3 text-blue-600" />
-                  <span class="text-xs font-bold text-blue-600">{{ c.requirementCount ?? 0 }}</span>
+                <div class="flex items-center gap-1.5 px-2 py-1 bg-action-50 rounded-lg">
+                  <ShoppingCart class="w-3 h-3 text-action-600" />
+                  <span class="text-xs font-bold text-action-600">{{ c.requirementCount ?? 0 }}</span>
                 </div>
               </div>
               
@@ -522,20 +522,20 @@ onMounted(async () => {
                 <span 
                   v-for="cat in [...(c.supplyCategories ?? []).slice(0, 2), ...(c.requirementCategories ?? []).slice(0, 2)]" 
                   :key="cat"
-                  class="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full"
+                  class="text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-full"
                 >
                   {{ cat }}
                 </span>
                 <span 
                   v-if="(c.supplyCategories?.length ?? 0) + (c.requirementCategories?.length ?? 0) > 4"
-                  class="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-400 rounded-full"
+                  class="text-[10px] px-2 py-0.5 bg-neutral-100 text-neutral-400 rounded-full"
                 >
                   +{{ (c.supplyCategories?.length ?? 0) + (c.requirementCategories?.length ?? 0) - 4 }}
                 </span>
               </div>
               
               <!-- 坐标缺失提示 -->
-              <div v-if="!c.lat || !c.lng" class="flex items-center gap-1.5 mt-3 text-amber-600">
+              <div v-if="!c.lat || !c.lng" class="flex items-center gap-1.5 mt-3 text-warning-600">
                 <AlertTriangle class="w-3.5 h-3.5" />
                 <span class="text-[10px]">坐标缺失，请完善公司档案</span>
               </div>
@@ -543,7 +543,7 @@ onMounted(async () => {
               <!-- 操作按钮 -->
               <div v-else class="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
-                  class="flex items-center gap-1 px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-medium rounded-lg transition-all"
+                  class="flex items-center gap-1 px-2.5 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 text-xs font-medium rounded-lg transition-all"
                   @click.stop="focusCompany(c)"
                 >
                   <Navigation class="w-3 h-3" />
@@ -562,11 +562,11 @@ onMounted(async () => {
           
           <!-- 空状态 -->
           <div v-if="filtered.length === 0 && !loading" class="p-8 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-gray-100 flex items-center justify-center">
-              <Building2 class="w-8 h-8 text-gray-300" />
+            <div class="w-16 h-16 mx-auto mb-4 rounded-xl bg-neutral-100 flex items-center justify-center">
+              <Building2 class="w-8 h-8 text-neutral-300" />
             </div>
-            <p class="text-sm font-medium text-gray-500">暂无符合条件的公司</p>
-            <p class="text-xs text-gray-400 mt-1">尝试调整筛选条件</p>
+            <p class="text-sm font-medium text-neutral-500">暂无符合条件的公司</p>
+            <p class="text-xs text-neutral-400 mt-1">尝试调整筛选条件</p>
           </div>
         </div>
       </div>

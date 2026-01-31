@@ -211,36 +211,36 @@ function openAgreement(type: 'user' | 'privacy') {
     
     <!-- 标题 -->
     <template #title>
-      <div class="text-xl font-bold text-gray-900">欢迎使用</div>
-      <div class="text-[10px] font-bold text-gray-400 tracking-widest mt-0.5">沃谷 · 农牧供需智能匹配平台</div>
+      <div class="text-xl font-bold text-neutral-900">欢迎使用</div>
+      <div class="text-[10px] font-bold text-neutral-400 tracking-widest mt-0.5">沃谷 · 农牧供需智能匹配平台</div>
     </template>
 
-    <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+    <div class="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
       <el-tabs v-model="activeTab" class="auth-tabs">
         <!-- 登录 Tab -->
         <el-tab-pane name="login" label="登录">
           <div class="space-y-4">
-            <div class="bg-white p-6 rounded-xl border border-gray-200">
-              <div class="text-sm font-bold text-gray-900 mb-4">账号密码登录</div>
+            <div class="bg-white p-6 rounded-xl border border-neutral-200">
+              <div class="text-sm font-bold text-neutral-900 mb-4">账号密码登录</div>
 
               <el-input v-model="loginForm.phoneOrUser" placeholder="手机号/用户名" class="mb-3">
-                <template #prefix><Phone class="text-gray-400" :size="16" :stroke-width="2" /></template>
+                <template #prefix><Phone class="text-neutral-400" :size="16" :stroke-width="2" /></template>
               </el-input>
               <el-input v-model="loginForm.password" placeholder="密码" show-password class="mb-3">
-                <template #prefix><KeyRound class="text-gray-400" :size="16" :stroke-width="2" /></template>
+                <template #prefix><KeyRound class="text-neutral-400" :size="16" :stroke-width="2" /></template>
               </el-input>
               
               <!-- 图形验证码 -->
               <div class="flex gap-3 items-center">
                 <el-input v-model="loginForm.captchaCode" placeholder="验证码" class="flex-1" maxlength="4">
-                  <template #prefix><ShieldCheck class="text-gray-400" :size="16" :stroke-width="2" /></template>
+                  <template #prefix><ShieldCheck class="text-neutral-400" :size="16" :stroke-width="2" /></template>
                 </el-input>
                 <div 
-                  class="h-10 w-28 rounded-xl border border-gray-200 overflow-hidden cursor-pointer flex items-center justify-center bg-gray-50 hover:border-brand-300 transition-all"
+                  class="h-10 w-28 rounded-xl border border-neutral-200 overflow-hidden cursor-pointer flex items-center justify-center bg-neutral-50 hover:border-brand-300 transition-all"
                   @click="refreshCaptcha"
                   :title="'点击刷新验证码'"
                 >
-                  <div v-if="captcha.loading" class="flex items-center gap-1 text-gray-400">
+                  <div v-if="captcha.loading" class="flex items-center gap-1 text-neutral-400">
                     <RefreshCw class="animate-spin" :size="14" :stroke-width="2" />
                     <span class="text-xs">加载中</span>
                   </div>
@@ -250,7 +250,7 @@ function openAgreement(type: 'user' | 'privacy') {
                     alt="验证码" 
                     class="h-full w-full object-cover"
                   />
-                  <div v-else class="flex items-center gap-1 text-gray-400">
+                  <div v-else class="flex items-center gap-1 text-neutral-400">
                     <ImageIcon :size="14" :stroke-width="2" />
                     <span class="text-xs">点击获取</span>
                   </div>
@@ -276,17 +276,17 @@ function openAgreement(type: 'user' | 'privacy') {
         <!-- 注册 Tab -->
         <el-tab-pane name="register" label="注册">
           <!-- 注册成功状态 -->
-          <div v-if="registerSuccess" class="bg-white p-8 rounded-xl border border-gray-200 text-center">
+          <div v-if="registerSuccess" class="bg-white p-8 rounded-xl border border-neutral-200 text-center">
             <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-brand-100 flex items-center justify-center animate-bounce">
               <CheckCircle class="text-brand-600" :size="32" :stroke-width="2" />
             </div>
-            <div class="text-xl font-bold text-gray-900 mb-2">注册成功！</div>
-            <div class="text-sm text-gray-500">正在为您跳转...</div>
+            <div class="text-xl font-bold text-neutral-900 mb-2">注册成功！</div>
+            <div class="text-sm text-neutral-500">正在为您跳转...</div>
           </div>
 
           <!-- 注册表单 -->
           <div v-else class="space-y-4">
-            <div class="bg-white p-6 rounded-xl border border-gray-200">
+            <div class="bg-white p-6 rounded-xl border border-neutral-200">
               <!-- 极简提示 -->
               <div class="flex items-center gap-2 mb-4 p-3 bg-brand-50 rounded-xl border border-brand-100">
                 <Sparkles class="text-brand-600 shrink-0" :size="16" :stroke-width="2" />
@@ -295,31 +295,31 @@ function openAgreement(type: 'user' | 'privacy') {
 
               <!-- 手机号 -->
               <el-input v-model="registerForm.phone" placeholder="手机号" class="mb-3" maxlength="11">
-                <template #prefix><Phone class="text-gray-400" :size="16" :stroke-width="2" /></template>
+                <template #prefix><Phone class="text-neutral-400" :size="16" :stroke-width="2" /></template>
               </el-input>
 
               <!-- 密码 -->
               <el-input v-model="registerForm.password" placeholder="设置密码（至少6位）" show-password class="mb-3">
-                <template #prefix><KeyRound class="text-gray-400" :size="16" :stroke-width="2" /></template>
+                <template #prefix><KeyRound class="text-neutral-400" :size="16" :stroke-width="2" /></template>
               </el-input>
 
               <!-- 密码强度提示 -->
               <div v-if="registerForm.password" class="mb-3">
                 <div class="flex items-center gap-2">
-                  <div class="flex-1 h-1 rounded-full bg-gray-100 overflow-hidden">
+                  <div class="flex-1 h-1 rounded-full bg-neutral-100 overflow-hidden">
                     <div 
                       class="h-full transition-all duration-300"
                       :class="[
-                        registerForm.password.length < 6 ? 'w-1/4 bg-red-400' :
-                        registerForm.password.length < 8 ? 'w-2/4 bg-amber-400' :
+                        registerForm.password.length < 6 ? 'w-1/4 bg-error-400' :
+                        registerForm.password.length < 8 ? 'w-2/4 bg-warning-400' :
                         registerForm.password.length < 12 ? 'w-3/4 bg-brand-400' :
                         'w-full bg-brand-600'
                       ]"
                     />
                   </div>
                   <span class="text-xs font-medium" :class="[
-                    registerForm.password.length < 6 ? 'text-red-500' :
-                    registerForm.password.length < 8 ? 'text-amber-500' :
+                    registerForm.password.length < 6 ? 'text-error-500' :
+                    registerForm.password.length < 8 ? 'text-warning-500' :
                     'text-brand-600'
                   ]">
                     {{ registerForm.password.length < 6 ? '弱' : registerForm.password.length < 8 ? '中' : '强' }}
@@ -330,14 +330,14 @@ function openAgreement(type: 'user' | 'privacy') {
               <!-- 图形验证码 -->
               <div class="flex gap-3 items-center">
                 <el-input v-model="registerForm.captchaCode" placeholder="验证码" class="flex-1" maxlength="4">
-                  <template #prefix><ShieldCheck class="text-gray-400" :size="16" :stroke-width="2" /></template>
+                  <template #prefix><ShieldCheck class="text-neutral-400" :size="16" :stroke-width="2" /></template>
                 </el-input>
                 <div 
-                  class="h-10 w-28 rounded-xl border border-gray-200 overflow-hidden cursor-pointer flex items-center justify-center bg-gray-50 hover:border-brand-300 transition-all"
+                  class="h-10 w-28 rounded-xl border border-neutral-200 overflow-hidden cursor-pointer flex items-center justify-center bg-neutral-50 hover:border-brand-300 transition-all"
                   @click="refreshCaptcha"
                   :title="'点击刷新验证码'"
                 >
-                  <div v-if="captcha.loading" class="flex items-center gap-1 text-gray-400">
+                  <div v-if="captcha.loading" class="flex items-center gap-1 text-neutral-400">
                     <RefreshCw class="animate-spin" :size="14" :stroke-width="2" />
                     <span class="text-xs">加载中</span>
                   </div>
@@ -347,7 +347,7 @@ function openAgreement(type: 'user' | 'privacy') {
                     alt="验证码" 
                     class="h-full w-full object-cover"
                   />
-                  <div v-else class="flex items-center gap-1 text-gray-400">
+                  <div v-else class="flex items-center gap-1 text-neutral-400">
                     <ImageIcon :size="14" :stroke-width="2" />
                     <span class="text-xs">点击获取</span>
                   </div>

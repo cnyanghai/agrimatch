@@ -36,7 +36,7 @@ function getUserCategory(user: FollowedUser) {
 
   if (hasSupply) return { text: '供应商', class: 'text-brand-700' }
   if (hasRequirement) return { text: '采购商', class: 'text-autumn-700' }
-  return { text: '商户', class: 'text-gray-700' }
+  return { text: '商户', class: 'text-neutral-700' }
 }
 
 // 筛选后的用户列表
@@ -238,7 +238,7 @@ onMounted(() => {
       <!-- 列表头部 -->
       <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
         <div class="flex items-center gap-2">
-          <h2 class="text-2xl font-bold text-gray-900">关注列表</h2>
+          <h2 class="text-2xl font-bold text-neutral-900">关注列表</h2>
           <span class="bg-brand-100 text-brand-700 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
             {{ followedUsers.length }}
           </span>
@@ -298,7 +298,7 @@ onMounted(() => {
             @click="selectUser(user)"
           >
             <div class="flex justify-between items-start mb-1">
-              <h3 class="text-base font-bold text-gray-900">
+              <h3 class="text-base font-bold text-neutral-900">
                 {{ user.companyName || user.nickName || user.userName }}
               </h3>
               <span :class="['text-[10px] px-1.5 py-0.5 rounded font-bold', getUserCategory(user).class.replace('text-', 'bg-').replace('-700', '-100'), getUserCategory(user).class]">
@@ -314,11 +314,11 @@ onMounted(() => {
 
         <!-- 空状态 -->
         <div v-else class="flex flex-col items-center justify-center py-16 px-4 text-center">
-          <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-            <Heart class="w-8 h-8 text-gray-300" />
+          <div class="w-16 h-16 bg-neutral-50 rounded-full flex items-center justify-center mb-4">
+            <Heart class="w-8 h-8 text-neutral-300" />
           </div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-1">暂无关注</h3>
-          <p class="text-xs text-gray-500">
+          <h3 class="text-2xl font-bold text-neutral-900 mb-1">暂无关注</h3>
+          <p class="text-xs text-neutral-500">
             {{ searchKeyword ? '未找到匹配的商户' : '您还没有关注任何商户' }}
           </p>
         </div>
@@ -338,7 +338,7 @@ onMounted(() => {
                 <span v-else class="text-3xl font-black text-brand-700">{{ getAvatarText(selectedUser) }}</span>
               </div>
               <div>
-                <h2 class="text-2xl font-bold text-gray-900 mb-2">
+                <h2 class="text-2xl font-bold text-neutral-900 mb-2">
                   {{ selectedUser.companyName || selectedUser.nickName || selectedUser.userName }}
                 </h2>
                 <div class="flex items-center gap-4 text-sm text-slate-600">
@@ -382,7 +382,7 @@ onMounted(() => {
           <!-- 供应信息 -->
           <section v-if="selectedUserSupplies.length > 0" class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
             <div class="px-5 py-3 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
-              <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+              <h3 class="text-base font-bold text-neutral-900 flex items-center gap-2">
                 <FileText class="w-4 h-4 text-brand-700" />
                 供应信息 ({{ selectedUserSupplies.length }})
               </h3>
@@ -432,7 +432,7 @@ onMounted(() => {
           <!-- 采购需求 -->
           <section v-if="selectedUserRequirements.length > 0" class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
             <div class="px-5 py-3 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
-              <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+              <h3 class="text-base font-bold text-neutral-900 flex items-center gap-2">
                 <FileText class="w-4 h-4 text-autumn-600" />
                 采购需求 ({{ selectedUserRequirements.length }})
               </h3>
@@ -484,11 +484,11 @@ onMounted(() => {
             v-if="selectedUserSupplies.length === 0 && selectedUserRequirements.length === 0"
             class="bg-white rounded-lg border border-slate-200 p-12 text-center"
           >
-            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FileText class="w-8 h-8 text-gray-300" />
+            <div class="w-16 h-16 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText class="w-8 h-8 text-neutral-300" />
             </div>
-            <h3 class="text-lg font-bold text-gray-900 mb-1">暂无动态</h3>
-            <p class="text-xs text-gray-500">该商户暂未发布供应或采购信息</p>
+            <h3 class="text-lg font-bold text-neutral-900 mb-1">暂无动态</h3>
+            <p class="text-xs text-neutral-500">该商户暂未发布供应或采购信息</p>
           </div>
         </div>
       </div>
@@ -496,11 +496,11 @@ onMounted(() => {
       <!-- 未选中用户时的空状态 -->
       <div v-else class="flex-1 flex items-center justify-center">
         <div class="text-center">
-          <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Heart class="w-12 h-12 text-gray-300" />
+          <div class="w-24 h-24 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Heart class="w-12 h-12 text-neutral-300" />
           </div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-2">选择一个商户查看详情</h3>
-          <p class="text-sm text-gray-500">从左侧列表中选择您关注的商户</p>
+          <h3 class="text-2xl font-bold text-neutral-900 mb-2">选择一个商户查看详情</h3>
+          <p class="text-sm text-neutral-500">从左侧列表中选择您关注的商户</p>
         </div>
       </div>
     </section>

@@ -65,14 +65,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-gray-50 min-h-screen">
+  <div class="bg-neutral-50 min-h-screen">
     <header class="bg-white border-b sticky top-0 z-30 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <button @click="router.back()" class="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors">
+        <button @click="router.back()" class="flex items-center gap-2 text-neutral-500 hover:text-neutral-900 transition-colors">
           <ArrowLeft :size="20" />
           <span class="font-bold">返回</span>
         </button>
-        <h1 class="text-lg font-black text-gray-900 flex items-center gap-2">
+        <h1 class="text-lg font-black text-neutral-900 flex items-center gap-2">
           <Users :size="20" class="text-brand-600" />
           我的关注
         </h1>
@@ -89,7 +89,7 @@ onMounted(() => {
             :key="user.userId"
             padding="none"
             radius="2xl"
-            class="group transition-all hover:shadow-lg border-none ring-1 ring-gray-100"
+            class="group transition-all hover:shadow-lg border-none ring-1 ring-neutral-100"
           >
             <div class="p-6">
               <div class="flex items-center gap-6">
@@ -106,18 +106,18 @@ onMounted(() => {
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-3 mb-2">
                     <h3
-                      class="text-lg font-black text-gray-900 cursor-pointer hover:text-brand-600 transition-colors"
+                      class="text-lg font-black text-neutral-900 cursor-pointer hover:text-brand-600 transition-colors"
                       @click="go(`/users/${user.userId}/posts`)"
                     >
                       {{ user.nickName || user.userName }}
                     </h3>
                     <ExpertBadge v-if="user.position?.includes('专家')" />
                   </div>
-                  <p class="text-sm text-gray-500 mb-2">
+                  <p class="text-sm text-neutral-500 mb-2">
                     {{ user.position || '行业同仁' }}
                     <span v-if="user.companyName"> · {{ user.companyName }}</span>
                   </p>
-                  <p class="text-xs text-gray-400">
+                  <p class="text-xs text-neutral-400">
                     关注于 {{ formatTime(user.followTime) }}
                   </p>
                 </div>
@@ -132,7 +132,7 @@ onMounted(() => {
                     查看动态
                   </button>
                   <button
-                    class="flex items-center gap-2 px-5 py-2.5 border border-gray-200 text-gray-500 rounded-xl text-sm font-bold hover:bg-gray-50 hover:text-red-500 hover:border-red-200 transition-all active:scale-95"
+                    class="flex items-center gap-2 px-5 py-2.5 border border-neutral-200 text-neutral-500 rounded-xl text-sm font-bold hover:bg-neutral-50 hover:text-error-500 hover:border-error-200 transition-all active:scale-95"
                     :disabled="unfollowingId === user.userId"
                     @click.stop="handleUnfollow(user)"
                   >
@@ -147,11 +147,11 @@ onMounted(() => {
 
         <!-- 空状态 -->
         <div v-else-if="!loading" class="py-24 text-center">
-          <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
+          <div class="w-24 h-24 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-6 text-neutral-300">
             <Users :size="48" />
           </div>
-          <h3 class="text-xl font-black text-gray-900 mb-2">暂无关注</h3>
-          <p class="text-sm text-gray-500 mb-8 max-w-xs mx-auto">
+          <h3 class="text-xl font-black text-neutral-900 mb-2">暂无关注</h3>
+          <p class="text-sm text-neutral-500 mb-8 max-w-xs mx-auto">
             关注感兴趣的用户，及时获取他们发布的精彩内容
           </p>
           <button

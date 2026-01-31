@@ -32,29 +32,29 @@ const stats = computed(() => [
     icon: ShoppingCart,
     label: '需求',
     value: props.requirementCount,
-    color: 'text-blue-600',
-    bg: 'bg-blue-50'
+    color: 'text-action-600',
+    bg: 'bg-action-50'
   },
   {
     icon: Star,
     label: '信用分',
     value: props.creditScore,
-    color: 'text-amber-600',
-    bg: 'bg-amber-50'
+    color: 'text-warning-600',
+    bg: 'bg-warning-50'
   },
   {
     icon: TrendingUp,
     label: '成交',
     value: props.dealCount,
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-50'
+    color: 'text-brand-600',
+    bg: 'bg-brand-50'
   },
   {
     icon: Users,
     label: '关注',
     value: props.followerCount,
-    color: 'text-purple-600',
-    bg: 'bg-purple-50'
+    color: 'text-action-600',
+    bg: 'bg-action-50'
   }
 ])
 </script>
@@ -73,7 +73,7 @@ const stats = computed(() => [
       <component :is="stat.icon" :class="[stat.color, layout === 'horizontal' ? 'w-5 h-5' : 'w-6 h-6 mb-2']" aria-hidden="true" />
       <div :class="[layout === 'horizontal' ? '' : 'text-center']">
         <div :class="['font-bold', stat.color]">{{ stat.value }}</div>
-        <div class="text-xs text-gray-500">{{ stat.label }}</div>
+        <div class="text-xs text-neutral-500">{{ stat.label }}</div>
       </div>
     </div>
   </section>

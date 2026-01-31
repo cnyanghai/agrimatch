@@ -43,10 +43,10 @@ const isWarning = computed(() => remaining.value > 0 && remaining.value <= warni
 const isCritical = computed(() => remaining.value > 0 && remaining.value <= criticalThreshold.value)
 
 const statusColor = computed(() => {
-  if (isExpired.value) return 'text-gray-400'
-  if (isCritical.value) return 'text-red-500'
-  if (isWarning.value) return 'text-amber-500'
-  return 'text-gray-500'
+  if (isExpired.value) return 'text-neutral-400'
+  if (isCritical.value) return 'text-error-500'
+  if (isWarning.value) return 'text-warning-500'
+  return 'text-neutral-500'
 })
 
 function startTimer() {

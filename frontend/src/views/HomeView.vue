@@ -62,8 +62,8 @@ const domains = [
     name: '农牧加工',
     desc: '肉禽分割、禽蛋、水产成品...',
     icon: Factory,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
+    color: 'text-accent-600',
+    bgColor: 'bg-accent-50',
     tags: ['#分割部位', '#温控', '#保质期']
   },
   {
@@ -71,8 +71,8 @@ const domains = [
     name: '装备物流',
     desc: '料车、风机、农机、包装...',
     icon: Cog,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
+    color: 'text-action-600',
+    bgColor: 'bg-action-50',
     tags: ['#载重', '#马力', '#保修']
   }
 ]
@@ -221,7 +221,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="bg-neutral-50 text-neutral-900 min-h-screen">
     <!-- Hero -->
     <section class="relative min-h-[600px] flex items-center justify-center overflow-hidden">
       <!-- Background Image with Parallax-like effect -->
@@ -249,7 +249,7 @@ onBeforeUnmount(() => {
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-500">重塑农牧供应链</span>
         </h1>
         
-        <p class="text-lg md:text-xl text-gray-300 mb-12 max-w-2xl leading-relaxed animate-slide-up" style="animation-delay: 200ms">
+        <p class="text-lg md:text-xl text-neutral-300 mb-12 max-w-2xl leading-relaxed animate-slide-up" style="animation-delay: 200ms">
           链接全国优质饲料、兽药、养殖设备供应商，提供在线合同签约及交流服务
         </p>
 
@@ -262,7 +262,7 @@ onBeforeUnmount(() => {
                 v-model="searchKeyword"
                 type="text"
                 placeholder="搜索玉米、豆粕、疫苗、自动喂料机、型号..."
-                class="w-full bg-transparent border-none outline-none text-white placeholder:text-gray-400/80 py-4 px-3 text-lg"
+                class="w-full bg-transparent border-none outline-none text-white placeholder:text-neutral-400/80 py-4 px-3 text-lg"
                 @keyup.enter="onSearch"
               />
             </div>
@@ -276,8 +276,8 @@ onBeforeUnmount(() => {
           </div>
           
           <!-- Hot Search Tags -->
-          <div class="flex flex-wrap justify-center gap-4 mt-6 text-xs font-medium text-gray-400">
-            <span class="text-gray-500">热门搜索:</span>
+          <div class="flex flex-wrap justify-center gap-4 mt-6 text-xs font-medium text-neutral-400">
+            <span class="text-neutral-500">热门搜索:</span>
             <button class="hover:text-brand-400 transition-colors">优质豆粕</button>
             <button class="hover:text-brand-400 transition-colors">智能喂料系统</button>
             <button class="hover:text-brand-400 transition-colors">疫苗直供</button>
@@ -294,8 +294,8 @@ onBeforeUnmount(() => {
             <Users :size="22" />
           </div>
           <div class="min-w-0">
-            <div class="text-2xl font-black text-gray-900 tabular-nums">{{ stats?.userCount ?? '12,800' }}</div>
-            <div class="text-[10px] font-semibold text-gray-400 mt-0.5">平台用户</div>
+            <div class="text-2xl font-black text-neutral-900 tabular-nums">{{ stats?.userCount ?? '12,800' }}</div>
+            <div class="text-[10px] font-semibold text-neutral-400 mt-0.5">平台用户</div>
           </div>
         </div>
         <div class="bg-white/80 backdrop-blur-lg p-5 rounded-xl shadow-lg shadow-black/5 border border-white/60 flex items-center gap-4 group hover:bg-white hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
@@ -303,8 +303,8 @@ onBeforeUnmount(() => {
             <Factory :size="22" />
           </div>
           <div class="min-w-0">
-            <div class="text-2xl font-black text-gray-900 tabular-nums">{{ stats?.supplierCount ?? '5,200' }}</div>
-            <div class="text-[10px] font-semibold text-gray-400 mt-0.5">认证供应商</div>
+            <div class="text-2xl font-black text-neutral-900 tabular-nums">{{ stats?.supplierCount ?? '5,200' }}</div>
+            <div class="text-[10px] font-semibold text-neutral-400 mt-0.5">认证供应商</div>
           </div>
         </div>
         <div class="bg-white/80 backdrop-blur-lg p-5 rounded-xl shadow-lg shadow-black/5 border border-white/60 flex items-center gap-4 group hover:bg-white hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
@@ -312,8 +312,8 @@ onBeforeUnmount(() => {
             <Building2 :size="22" />
           </div>
           <div class="min-w-0">
-            <div class="text-2xl font-black text-gray-900 tabular-nums">{{ stats?.buyerCount ?? '860' }}</div>
-            <div class="text-[10px] font-semibold text-gray-400 mt-0.5">大宗采购商</div>
+            <div class="text-2xl font-black text-neutral-900 tabular-nums">{{ stats?.buyerCount ?? '860' }}</div>
+            <div class="text-[10px] font-semibold text-neutral-400 mt-0.5">大宗采购商</div>
           </div>
         </div>
         <div class="bg-white/80 backdrop-blur-lg p-5 rounded-xl shadow-lg shadow-black/5 border border-white/60 flex items-center gap-4 group hover:bg-white hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
@@ -321,8 +321,8 @@ onBeforeUnmount(() => {
             <TrendingUp :size="22" />
           </div>
           <div class="min-w-0">
-            <div class="text-2xl font-black text-gray-900 tabular-nums">{{ stats?.dealCount ?? '3,680' }}</div>
-            <div class="text-[10px] font-semibold text-gray-400 mt-0.5">累计成交</div>
+            <div class="text-2xl font-black text-neutral-900 tabular-nums">{{ stats?.dealCount ?? '3,680' }}</div>
+            <div class="text-[10px] font-semibold text-neutral-400 mt-0.5">累计成交</div>
           </div>
         </div>
       </div>
@@ -334,13 +334,13 @@ onBeforeUnmount(() => {
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div class="max-w-2xl">
             <div class="inline-block px-3 py-1 rounded-lg bg-brand-50 text-brand-600 text-xs font-bold uppercase tracking-wider mb-4">核心业务范围</div>
-            <h2 class="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
+            <h2 class="text-3xl md:text-4xl font-black text-neutral-900 tracking-tight">
               覆盖从种苗培育到<br/>
               加工流通的 <span class="text-brand-600">全链路物资</span>
             </h2>
           </div>
           <button 
-            class="group flex items-center gap-3 px-6 py-3 rounded-xl bg-gray-50 hover:bg-brand-50 text-sm font-bold text-gray-600 hover:text-brand-600 transition-all active:scale-95"
+            class="group flex items-center gap-3 px-6 py-3 rounded-xl bg-neutral-50 hover:bg-brand-50 text-sm font-bold text-neutral-600 hover:text-brand-600 transition-all active:scale-95"
             @click="go('/categories')"
           >
             浏览全部分类
@@ -380,7 +380,7 @@ onBeforeUnmount(() => {
               </div>
             </div>
             <div class="flex items-end justify-between relative z-10">
-              <p class="text-gray-400 text-sm max-w-[200px]">优质种禽、种蛋、鱼苗及畜种资源调度。</p>
+              <p class="text-neutral-400 text-sm max-w-[200px]">优质种禽、种蛋、鱼苗及畜种资源调度。</p>
               <div class="flex gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
                 <span class="w-1.5 h-1.5 rounded-full bg-brand-500/30"></span>
@@ -390,29 +390,29 @@ onBeforeUnmount(() => {
 
           <!-- Small Bento Card (农牧加工) -->
           <div
-            class="group relative overflow-hidden rounded-3xl bg-orange-50 border border-orange-100 cursor-pointer p-6 flex flex-col justify-between hover:border-orange-200 transition-all"
+            class="group relative overflow-hidden rounded-3xl bg-accent-50 border border-accent-100 cursor-pointer p-6 flex flex-col justify-between hover:border-accent-200 transition-all"
             @click="go(`/hall/supply?schemaCode=process`)"
           >
-            <div class="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600">
+            <div class="w-12 h-12 rounded-2xl bg-accent-100 flex items-center justify-center text-accent-600">
               <Factory :size="24" />
             </div>
             <div>
-              <h4 class="font-black text-gray-900 mb-1">农牧加工</h4>
-              <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">成品/半成品流通</p>
+              <h4 class="font-black text-neutral-900 mb-1">农牧加工</h4>
+              <p class="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">成品/半成品流通</p>
             </div>
           </div>
 
           <!-- Small Bento Card (装备物流) -->
           <div
-            class="group relative overflow-hidden rounded-3xl bg-blue-50 border border-blue-100 cursor-pointer p-6 flex flex-col justify-between hover:border-blue-200 transition-all"
+            class="group relative overflow-hidden rounded-3xl bg-action-50 border border-action-100 cursor-pointer p-6 flex flex-col justify-between hover:border-action-200 transition-all"
             @click="go(`/hall/supply?schemaCode=equipment`)"
           >
-            <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
+            <div class="w-12 h-12 rounded-2xl bg-action-100 flex items-center justify-center text-action-600">
               <Cog :size="24" />
             </div>
             <div>
-              <h4 class="font-black text-gray-900 mb-1">装备物流</h4>
-              <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">自动化养殖系统</p>
+              <h4 class="font-black text-neutral-900 mb-1">装备物流</h4>
+              <p class="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">自动化养殖系统</p>
             </div>
           </div>
         </div>
@@ -427,7 +427,7 @@ onBeforeUnmount(() => {
           <h2 class="text-2xl font-bold text-white tracking-tight">
             发现优质 <span class="text-brand-400">供应商</span> 与 <span class="text-autumn-400">采购商</span>
           </h2>
-          <p class="text-gray-400 text-sm mt-2">连接全国农牧行业核心企业资源</p>
+          <p class="text-neutral-400 text-sm mt-2">连接全国农牧行业核心企业资源</p>
         </div>
 
         <!-- 双列并排 -->
@@ -458,7 +458,7 @@ onBeforeUnmount(() => {
                 class="group h-12 rounded-lg bg-white/5 hover:bg-brand-500/20 border border-white/10 hover:border-brand-500/50 flex items-center justify-center cursor-pointer transition-all"
                 @click="go(`/companies/${s.id}`)"
               >
-                <span class="font-medium text-gray-300 group-hover:text-white text-xs truncate px-2">{{ s.companyName }}</span>
+                <span class="font-medium text-neutral-300 group-hover:text-white text-xs truncate px-2">{{ s.companyName }}</span>
               </div>
             </div>
           </div>
@@ -489,7 +489,7 @@ onBeforeUnmount(() => {
                 class="group h-12 rounded-lg bg-white/5 hover:bg-autumn-500/20 border border-white/10 hover:border-autumn-500/50 flex items-center justify-center cursor-pointer transition-all"
                 @click="go(`/companies/${b.id}`)"
               >
-                <span class="font-medium text-gray-300 group-hover:text-white text-xs truncate px-2">{{ b.companyName }}</span>
+                <span class="font-medium text-neutral-300 group-hover:text-white text-xs truncate px-2">{{ b.companyName }}</span>
               </div>
             </div>
           </div>
@@ -498,17 +498,17 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 话题广场 -->
-    <section class="bg-gray-50 py-12">
+    <section class="bg-neutral-50 py-12">
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
           <div>
-            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">话题广场</h2>
-            <p class="text-gray-500 mt-2 max-w-2xl text-sm leading-relaxed">
+            <h2 class="text-2xl font-bold text-neutral-900 tracking-tight">话题广场</h2>
+            <p class="text-neutral-500 mt-2 max-w-2xl text-sm leading-relaxed">
               行业资讯、市场动态、经验分享，了解农牧行业最新信息
             </p>
           </div>
           <button
-            class="group flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-brand-600 transition-colors active:scale-95"
+            class="group flex items-center gap-2 text-sm font-bold text-neutral-500 hover:text-brand-600 transition-colors active:scale-95"
             @click="go('/talks')"
           >
             查看更多
@@ -517,49 +517,49 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="hotTopicsLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div v-for="i in 4" :key="i" class="bg-white rounded-xl border border-gray-200 animate-pulse overflow-hidden">
-            <div class="aspect-video bg-gray-100"></div>
+          <div v-for="i in 4" :key="i" class="bg-white rounded-xl border border-neutral-200 animate-pulse overflow-hidden">
+            <div class="aspect-video bg-neutral-100"></div>
             <div class="p-5 space-y-3">
-              <div class="h-4 bg-gray-100 rounded w-3/4"></div>
-              <div class="h-4 bg-gray-100 rounded w-1/2"></div>
+              <div class="h-4 bg-neutral-100 rounded w-3/4"></div>
+              <div class="h-4 bg-neutral-100 rounded w-1/2"></div>
             </div>
           </div>
         </div>
-        <div v-else-if="hotTopics.length === 0" class="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
-          <div class="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-3">
-            <MessageCircle :size="28" class="text-gray-300" />
+        <div v-else-if="hotTopics.length === 0" class="text-center py-16 bg-white rounded-xl border border-dashed border-neutral-200">
+          <div class="w-14 h-14 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <MessageCircle :size="28" class="text-neutral-300" />
           </div>
-          <p class="text-gray-400 text-sm">暂无热门话题</p>
+          <p class="text-neutral-400 text-sm">暂无热门话题</p>
         </div>
         <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <div
             v-for="post in hotTopics.slice(0, 4)"
             :key="post.id"
-            class="group bg-white rounded-xl border border-gray-200 hover:shadow-lg hover:border-brand-200 transition-all cursor-pointer overflow-hidden flex flex-col"
+            class="group bg-white rounded-xl border border-neutral-200 hover:shadow-lg hover:border-brand-200 transition-all cursor-pointer overflow-hidden flex flex-col"
             @click="go(`/talks/${post.id}`)"
           >
             <!-- 封面图 -->
-            <div class="aspect-video overflow-hidden bg-gray-100 relative">
+            <div class="aspect-video overflow-hidden bg-neutral-100 relative">
               <img :src="getPostCover(post)" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
             </div>
 
             <!-- 内容 -->
             <div class="p-5 flex-1 flex flex-col">
-              <h3 class="text-base font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-brand-600 transition-colors leading-snug">
+              <h3 class="text-base font-bold text-neutral-900 mb-2 line-clamp-2 group-hover:text-brand-600 transition-colors leading-snug">
                 {{ post.title }}
               </h3>
-              <p class="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-4 flex-1">
+              <p class="text-xs text-neutral-500 leading-relaxed line-clamp-2 mb-4 flex-1">
                 {{ stripHtml(post.content) || '暂无内容摘要' }}
               </p>
               <!-- 作者信息 -->
-              <div class="flex items-center gap-2 pt-3 border-t border-gray-100">
+              <div class="flex items-center gap-2 pt-3 border-t border-neutral-100">
                 <div class="w-7 h-7 rounded-full bg-brand-500 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
                   {{ avatarText(post) }}
                 </div>
                 <div class="min-w-0">
-                  <div class="text-xs font-medium text-gray-900 truncate">{{ displayName(post) }}</div>
-                  <div class="text-[10px] text-gray-400">{{ formatTime(post.createTime) }}</div>
+                  <div class="text-xs font-medium text-neutral-900 truncate">{{ displayName(post) }}</div>
+                  <div class="text-[10px] text-neutral-400">{{ formatTime(post.createTime) }}</div>
                 </div>
               </div>
             </div>
@@ -578,7 +578,7 @@ onBeforeUnmount(() => {
         <div class="text-center mb-10">
           <p class="text-xs font-bold text-brand-400 uppercase tracking-widest mb-3">Why WoGu</p>
           <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">一站式农牧供应链服务平台</h2>
-          <p class="text-gray-400 text-sm max-w-lg mx-auto">从供需对接到合约履行，从行业交流到企业合作——沃谷为您构建完整的数字化交易生态</p>
+          <p class="text-neutral-400 text-sm max-w-lg mx-auto">从供需对接到合约履行，从行业交流到企业合作——沃谷为您构建完整的数字化交易生态</p>
         </div>
 
         <!-- 6 大能力网格 -->
@@ -589,7 +589,7 @@ onBeforeUnmount(() => {
               <Search :size="22" class="text-brand-400" />
             </div>
             <h4 class="text-base font-bold text-white mb-2">智能匹配</h4>
-            <p class="text-sm text-gray-400 leading-relaxed">基于品类、规格、区域等多维度，精准连接供需双方，让商机主动找到您</p>
+            <p class="text-sm text-neutral-400 leading-relaxed">基于品类、规格、区域等多维度，精准连接供需双方，让商机主动找到您</p>
           </div>
 
           <!-- 在线议价 -->
@@ -598,43 +598,43 @@ onBeforeUnmount(() => {
               <MessageCircle :size="22" class="text-autumn-400" />
             </div>
             <h4 class="text-base font-bold text-white mb-2">在线议价</h4>
-            <p class="text-sm text-gray-400 leading-relaxed">实时聊天直谈，结构化报价单，高效达成交易意向，告别低效电话沟通</p>
+            <p class="text-sm text-neutral-400 leading-relaxed">实时聊天直谈，结构化报价单，高效达成交易意向，告别低效电话沟通</p>
           </div>
 
           <!-- 电子签约 -->
           <div class="group bg-white/[.04] border border-white/[.08] rounded-2xl p-5 hover:bg-white/[.07] hover:-translate-y-1 transition-all duration-300">
-            <div class="w-12 h-12 rounded-xl bg-purple-400/15 flex items-center justify-center mb-4">
-              <ShieldCheck :size="22" class="text-purple-400" />
+            <div class="w-12 h-12 rounded-xl bg-action-400/15 flex items-center justify-center mb-4">
+              <ShieldCheck :size="22" class="text-action-400" />
             </div>
             <h4 class="text-base font-bold text-white mb-2">电子签约</h4>
-            <p class="text-sm text-gray-400 leading-relaxed">合法合规的电子合同与电子印章，在线签署即时生效，保障双方权益</p>
+            <p class="text-sm text-neutral-400 leading-relaxed">合法合规的电子合同与电子印章，在线签署即时生效，保障双方权益</p>
           </div>
 
           <!-- 话题社区 -->
           <div class="group bg-white/[.04] border border-white/[.08] rounded-2xl p-5 hover:bg-white/[.07] hover:-translate-y-1 transition-all duration-300">
-            <div class="w-12 h-12 rounded-xl bg-sky-400/15 flex items-center justify-center mb-4">
-              <Users :size="22" class="text-sky-400" />
+            <div class="w-12 h-12 rounded-xl bg-action-400/15 flex items-center justify-center mb-4">
+              <Users :size="22" class="text-action-400" />
             </div>
             <h4 class="text-base font-bold text-white mb-2">话题社区</h4>
-            <p class="text-sm text-gray-400 leading-relaxed">行业资讯、经验分享、市场动态，与同行深度交流，构建专业人脉圈</p>
+            <p class="text-sm text-neutral-400 leading-relaxed">行业资讯、经验分享、市场动态，与同行深度交流，构建专业人脉圈</p>
           </div>
 
           <!-- 企业名录 -->
           <div class="group bg-white/[.04] border border-white/[.08] rounded-2xl p-5 hover:bg-white/[.07] hover:-translate-y-1 transition-all duration-300">
-            <div class="w-12 h-12 rounded-xl bg-emerald-400/15 flex items-center justify-center mb-4">
-              <Building2 :size="22" class="text-emerald-400" />
+            <div class="w-12 h-12 rounded-xl bg-brand-400/15 flex items-center justify-center mb-4">
+              <Building2 :size="22" class="text-brand-400" />
             </div>
             <h4 class="text-base font-bold text-white mb-2">企业名录</h4>
-            <p class="text-sm text-gray-400 leading-relaxed">发现优质供应商与采购商，查看企业主页与资质，让合作更有信心</p>
+            <p class="text-sm text-neutral-400 leading-relaxed">发现优质供应商与采购商，查看企业主页与资质，让合作更有信心</p>
           </div>
 
           <!-- 积分奖励 -->
           <div class="group bg-white/[.04] border border-white/[.08] rounded-2xl p-5 hover:bg-white/[.07] hover:-translate-y-1 transition-all duration-300">
-            <div class="w-12 h-12 rounded-xl bg-amber-400/15 flex items-center justify-center mb-4">
-              <Gift :size="22" class="text-amber-400" />
+            <div class="w-12 h-12 rounded-xl bg-warning-400/15 flex items-center justify-center mb-4">
+              <Gift :size="22" class="text-warning-400" />
             </div>
             <h4 class="text-base font-bold text-white mb-2">积分奖励</h4>
-            <p class="text-sm text-gray-400 leading-relaxed">完成交易赚取积分，积分商城兑换好礼，交易越多回馈越丰厚</p>
+            <p class="text-sm text-neutral-400 leading-relaxed">完成交易赚取积分，积分商城兑换好礼，交易越多回馈越丰厚</p>
           </div>
         </div>
 

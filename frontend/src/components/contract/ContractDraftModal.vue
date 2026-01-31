@@ -259,66 +259,66 @@ function handleCreateError(message: string) {
 
     <div class="space-y-6">
       <!-- 交易信息卡片 -->
-      <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+      <div class="bg-neutral-50 rounded-xl p-5 border border-neutral-200">
         <div class="flex items-center gap-2 mb-4">
           <div class="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center">
             <FileText class="w-4 h-4 text-brand-600" />
           </div>
-          <span class="font-bold text-gray-900">交易信息</span>
+          <span class="font-bold text-neutral-900">交易信息</span>
         </div>
         
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-1">
-            <div class="text-xs text-gray-400">甲方（买方）</div>
+            <div class="text-xs text-neutral-400">甲方（买方）</div>
             <div class="flex items-center gap-2">
-              <Building2 class="w-4 h-4 text-gray-400" />
-              <span class="font-medium text-gray-900">{{ partyA || '待确定' }}</span>
+              <Building2 class="w-4 h-4 text-neutral-400" />
+              <span class="font-medium text-neutral-900">{{ partyA || '待确定' }}</span>
             </div>
           </div>
           <div class="space-y-1">
-            <div class="text-xs text-gray-400">乙方（卖方）</div>
+            <div class="text-xs text-neutral-400">乙方（卖方）</div>
             <div class="flex items-center gap-2">
-              <Building2 class="w-4 h-4 text-gray-400" />
-              <span class="font-medium text-gray-900">{{ partyB || '待确定' }}</span>
+              <Building2 class="w-4 h-4 text-neutral-400" />
+              <span class="font-medium text-neutral-900">{{ partyB || '待确定' }}</span>
             </div>
           </div>
           <div class="space-y-1">
-            <div class="text-xs text-gray-400">产品名称</div>
+            <div class="text-xs text-neutral-400">产品名称</div>
             <div class="flex items-center gap-2">
-              <Package class="w-4 h-4 text-gray-400" />
-              <span class="font-medium text-gray-900">{{ productName || '-' }}</span>
+              <Package class="w-4 h-4 text-neutral-400" />
+              <span class="font-medium text-neutral-900">{{ productName || '-' }}</span>
             </div>
           </div>
           <div class="space-y-1">
-            <div class="text-xs text-gray-400">数量</div>
-            <span class="font-medium text-gray-900">{{ quantity || '-' }} {{ unit || '吨' }}</span>
+            <div class="text-xs text-neutral-400">数量</div>
+            <span class="font-medium text-neutral-900">{{ quantity || '-' }} {{ unit || '吨' }}</span>
           </div>
           <div class="space-y-1">
-            <div class="text-xs text-gray-400">{{ basisPrice !== undefined ? '定价机制' : '成交单价 (元/吨)' }}</div>
+            <div class="text-xs text-neutral-400">{{ basisPrice !== undefined ? '定价机制' : '成交单价 (元/吨)' }}</div>
             <div class="flex flex-col gap-0.5">
               <template v-if="basisPrice !== undefined">
-                <span class="font-bold text-gray-900 text-base">
+                <span class="font-bold text-neutral-900 text-base">
                   基差 {{ basisPrice > 0 ? '+' : '' }}{{ basisPrice }}
-                  <span class="text-xs text-gray-400 font-normal">({{ contractCode }})</span>
+                  <span class="text-xs text-neutral-400 font-normal">({{ contractCode }})</span>
                 </span>
-                <span v-if="futuresPrice !== undefined" class="text-[10px] text-gray-500 leading-tight">
+                <span v-if="futuresPrice !== undefined" class="text-[10px] text-neutral-500 leading-tight">
                   当前核算价: <span class="text-brand-600 font-bold">¥{{ (futuresPrice + basisPrice).toFixed(2) }}</span>
-                  <span class="text-gray-300 ml-1">(盘面 ¥{{ futuresPrice }})</span>
+                  <span class="text-neutral-300 ml-1">(盘面 ¥{{ futuresPrice }})</span>
                 </span>
-                <span v-else class="text-[10px] text-gray-400 leading-tight">
+                <span v-else class="text-[10px] text-neutral-400 leading-tight">
                   核算公式: 盘面价 {{ basisPrice > 0 ? '+' : '' }}{{ basisPrice }}
                 </span>
               </template>
               <template v-else>
-                <span class="font-bold text-gray-900 text-base">¥{{ unitPrice || '-' }}</span>
+                <span class="font-bold text-neutral-900 text-base">¥{{ unitPrice || '-' }}</span>
               </template>
             </div>
           </div>
           <div class="space-y-1">
-            <div class="text-xs text-gray-400">预估总金额</div>
+            <div class="text-xs text-neutral-400">预估总金额</div>
             <span class="font-bold text-brand-600 text-lg">
               <template v-if="basisPrice !== undefined">
-                待结算 <span class="text-[10px] font-normal text-gray-400">(根据签署时刻盘面核算)</span>
+                待结算 <span class="text-[10px] font-normal text-neutral-400">(根据签署时刻盘面核算)</span>
               </template>
               <template v-else>
                 ¥{{ totalAmount }}
@@ -329,33 +329,33 @@ function handleCreateError(message: string) {
       </div>
 
       <!-- 详细规格参数 -->
-      <div v-if="displayParams.length > 0" class="bg-gray-50/50 rounded-[24px] p-5 border border-gray-100/50">
+      <div v-if="displayParams.length > 0" class="bg-neutral-50/50 rounded-[24px] p-5 border border-neutral-100/50">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
-              <Package class="w-4 h-4 text-amber-600" />
+            <div class="w-8 h-8 rounded-lg bg-warning-50 flex items-center justify-center">
+              <Package class="w-4 h-4 text-warning-600" />
             </div>
-            <span class="font-bold text-gray-900">质量标准与规格</span>
+            <span class="font-bold text-neutral-900">质量标准与规格</span>
           </div>
-          <div class="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full uppercase tracking-widest">
+          <div class="text-[10px] font-bold text-warning-600 bg-warning-50 px-2 py-0.5 rounded-full uppercase tracking-widest">
             Specifications
           </div>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <div v-for="p in displayParams" :key="p.name" class="flex flex-col gap-1 bg-white px-3 py-2 rounded-xl border border-gray-200 shadow-sm">
-            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{{ p.name }}</span>
-            <span class="text-xs font-black text-gray-700 truncate">{{ p.value }}</span>
+          <div v-for="p in displayParams" :key="p.name" class="flex flex-col gap-1 bg-white px-3 py-2 rounded-xl border border-neutral-200 shadow-sm">
+            <span class="text-[10px] font-bold text-neutral-400 uppercase tracking-tight">{{ p.name }}</span>
+            <span class="text-xs font-black text-neutral-700 truncate">{{ p.value }}</span>
           </div>
         </div>
       </div>
 
       <!-- 合同标题 -->
       <div class="space-y-2">
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">合同标题</label>
+        <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider">合同标题</label>
         <input 
           v-model="form.title"
           type="text"
-          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+          class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
           :placeholder="defaultTitle"
         />
       </div>
@@ -363,25 +363,25 @@ function handleCreateError(message: string) {
       <!-- 交付信息 -->
       <div class="grid grid-cols-2 gap-4">
         <div class="space-y-2">
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-            <Calendar class="w-4 h-4 text-gray-400" />
+          <label class="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
+            <Calendar class="w-4 h-4 text-neutral-400" />
             交付日期
           </label>
           <input 
             v-model="form.deliveryDate"
             type="date"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+            class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
           />
         </div>
         <div class="space-y-2">
-          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-            <MapPin class="w-4 h-4 text-gray-400" />
+          <label class="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
+            <MapPin class="w-4 h-4 text-neutral-400" />
             交付地点
           </label>
           <input 
             v-model="form.deliveryAddress"
             type="text"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+            class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
             :placeholder="deliveryPlace || '请输入交付地点'"
           />
         </div>
@@ -389,37 +389,37 @@ function handleCreateError(message: string) {
 
       <!-- 付款方式 -->
       <div class="space-y-2">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-          <CreditCard class="w-4 h-4 text-gray-400" />
+        <label class="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
+          <CreditCard class="w-4 h-4 text-neutral-400" />
           付款方式
         </label>
         <input 
           v-model="form.paymentMethod"
           type="text"
-          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+          class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
           :placeholder="paymentMethod || '请输入付款方式'"
         />
       </div>
 
       <!-- 合同条款 -->
       <div class="space-y-2">
-        <label class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-          <FileEdit class="w-4 h-4 text-gray-400" />
+        <label class="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-2">
+          <FileEdit class="w-4 h-4 text-neutral-400" />
           合同条款
         </label>
         <textarea 
           v-model="form.terms"
           rows="10"
-          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none font-mono text-sm"
+          class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-xl focus:border-brand-500 outline-none transition-all resize-none font-mono text-sm"
           :placeholder="defaultTerms"
         ></textarea>
-        <div class="text-xs text-gray-400">留空将使用默认条款模板</div>
+        <div class="text-xs text-neutral-400">留空将使用默认条款模板</div>
       </div>
     </div>
 
     <!-- 底部操作 -->
     <template #footer>
-      <div class="flex-1 text-sm text-gray-500">
+      <div class="flex-1 text-sm text-neutral-500">
         创建后可在合同管理中心继续编辑
       </div>
       <BaseButton type="secondary" @click="visible = false">

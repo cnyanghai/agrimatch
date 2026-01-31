@@ -101,18 +101,18 @@ onUnmounted(() => {
           class="animate-zoom-in"
         >
           <!-- 头部 -->
-          <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
+          <div class="sticky top-0 bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between z-10">
             <div class="flex items-center gap-3">
               <!-- 图标插槽 -->
               <slot name="icon" />
               
               <div>
                 <!-- 小标签 -->
-                <div v-if="subtitle" class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">
+                <div v-if="subtitle" class="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-0.5">
                   {{ subtitle }}
                 </div>
                 <!-- 标题 -->
-                <h2 v-if="title" class="text-2xl font-bold text-gray-900">{{ title }}</h2>
+                <h2 v-if="title" class="text-2xl font-bold text-neutral-900">{{ title }}</h2>
                 <!-- 自定义标题插槽 -->
                 <slot name="title" />
               </div>
@@ -121,10 +121,10 @@ onUnmounted(() => {
             <!-- 关闭按钮 -->
             <button 
               v-if="showClose"
-              class="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all "
+              class="w-10 h-10 rounded-xl bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center transition-all "
               @click="close"
             >
-              <X class="w-5 h-5 text-gray-500" />
+              <X class="w-5 h-5 text-neutral-500" />
             </button>
           </div>
 
@@ -136,7 +136,7 @@ onUnmounted(() => {
           <!-- 底部 -->
           <div 
             v-if="showFooter" 
-            class="sticky bottom-0 px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3"
+            class="sticky bottom-0 px-6 py-4 bg-neutral-50 border-t border-neutral-200 flex justify-end gap-3"
           >
             <slot name="footer">
               <!-- 默认底部内容（可被覆盖） -->

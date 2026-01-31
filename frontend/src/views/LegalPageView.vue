@@ -44,19 +44,19 @@ const navItems: { type: PageType; label: string }[] = [
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-neutral-50">
     <!-- 顶栏 -->
-    <div class="bg-white border-b border-gray-200 sticky top-0 z-30">
+    <div class="bg-white border-b border-neutral-200 sticky top-0 z-30">
       <div class="max-w-6xl mx-auto px-4 h-14 flex items-center gap-4">
         <button
-          class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+          class="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
           @click="router.push('/')"
         >
           <ChevronLeft class="w-4 h-4" />
           返回首页
         </button>
-        <div class="w-px h-5 bg-gray-200"></div>
-        <span class="text-sm font-bold text-gray-900">{{ currentMeta.title }}</span>
+        <div class="w-px h-5 bg-neutral-200"></div>
+        <span class="text-sm font-bold text-neutral-900">{{ currentMeta.title }}</span>
       </div>
     </div>
 
@@ -65,12 +65,12 @@ const navItems: { type: PageType; label: string }[] = [
       <!-- 左侧导航 -->
       <aside class="hidden lg:block w-56 shrink-0">
         <div class="sticky top-24 space-y-1">
-          <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 px-3">法律文档</div>
+          <div class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-3 px-3">法律文档</div>
           <button
             v-for="nav in navItems"
             :key="nav.type"
             class="w-full text-left px-3 py-2 rounded-lg text-sm transition-all"
-            :class="pageType === nav.type ? 'bg-brand-50 text-brand-700 font-bold' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'"
+            :class="pageType === nav.type ? 'bg-brand-50 text-brand-700 font-bold' : 'text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100'"
             @click="router.push(`/legal/${nav.type}`)"
           >
             {{ nav.label }}
@@ -81,15 +81,15 @@ const navItems: { type: PageType; label: string }[] = [
       <!-- 右侧正文 -->
       <main class="flex-1 min-w-0">
         <!-- 页头 -->
-        <div class="bg-white rounded-2xl border border-gray-200 p-8 mb-6">
+        <div class="bg-white rounded-2xl border border-neutral-200 p-8 mb-6">
           <div class="flex items-start gap-4">
             <div class="w-12 h-12 rounded-xl bg-brand-50 flex items-center justify-center shrink-0">
               <component :is="currentMeta.icon" class="w-6 h-6 text-brand-600" />
             </div>
             <div>
-              <h1 class="text-2xl font-bold text-gray-900">{{ currentMeta.title }}</h1>
-              <p class="text-sm text-gray-500 mt-1">{{ currentMeta.subtitle }}</p>
-              <div class="flex items-center gap-4 mt-3 text-xs text-gray-400">
+              <h1 class="text-2xl font-bold text-neutral-900">{{ currentMeta.title }}</h1>
+              <p class="text-sm text-neutral-500 mt-1">{{ currentMeta.subtitle }}</p>
+              <div class="flex items-center gap-4 mt-3 text-xs text-neutral-400">
                 <span>生效日期：{{ EFFECTIVE_DATE }}</span>
                 <span>运营主体：{{ COMPANY_NAME }}</span>
               </div>
@@ -98,11 +98,11 @@ const navItems: { type: PageType; label: string }[] = [
         </div>
 
         <!-- 正文容器 -->
-        <div class="bg-white rounded-2xl border border-gray-200 p-8 legal-content">
+        <div class="bg-white rounded-2xl border border-neutral-200 p-8 legal-content">
 
           <!-- ==================== 用户协议 ==================== -->
           <template v-if="pageType === 'terms'">
-            <p class="text-sm text-gray-500 mb-8">欢迎您使用{{ PLATFORM_NAME }}平台！请您仔细阅读以下协议条款。注册或使用本平台即表示您已充分理解并同意本协议全部内容。</p>
+            <p class="text-sm text-neutral-500 mb-8">欢迎您使用{{ PLATFORM_NAME }}平台！请您仔细阅读以下协议条款。注册或使用本平台即表示您已充分理解并同意本协议全部内容。</p>
 
             <h2 id="t1" data-anchor class="anchor-heading">一、定义与服务范围</h2>
             <p>1.1 「{{ PLATFORM_NAME }}平台」是指由{{ COMPANY_NAME }}（以下简称"本公司"）运营的农牧原料数字化交易撮合平台，包括但不限于网站、移动端应用及相关技术服务。</p>
@@ -143,7 +143,7 @@ const navItems: { type: PageType; label: string }[] = [
             <p>7.2 用户在协议变更后继续使用平台服务的，视为接受变更后的协议。</p>
             <p>7.3 用户可随时申请注销账号。注销后，本公司将在合理期限内删除用户个人信息（法律法规要求保留的除外）。</p>
 
-            <div class="mt-10 pt-6 border-t border-gray-200 text-sm text-gray-500">
+            <div class="mt-10 pt-6 border-t border-neutral-200 text-sm text-neutral-500">
               <p>{{ COMPANY_NAME }}</p>
               <p>生效日期：{{ EFFECTIVE_DATE }}</p>
             </div>
@@ -151,7 +151,7 @@ const navItems: { type: PageType; label: string }[] = [
 
           <!-- ==================== 隐私政策 ==================== -->
           <template v-else-if="pageType === 'privacy'">
-            <p class="text-sm text-gray-500 mb-8">{{ COMPANY_NAME }}（以下简称"我们"）深知个人信息对您的重要性，将尽全力保护您的个人信息安全。请您仔细阅读本隐私政策。</p>
+            <p class="text-sm text-neutral-500 mb-8">{{ COMPANY_NAME }}（以下简称"我们"）深知个人信息对您的重要性，将尽全力保护您的个人信息安全。请您仔细阅读本隐私政策。</p>
 
             <h2 id="p1" data-anchor class="anchor-heading">一、我们收集的信息</h2>
             <h3>1.1 您主动提供的信息</h3>
@@ -218,7 +218,7 @@ const navItems: { type: PageType; label: string }[] = [
             <h2 id="p8" data-anchor class="anchor-heading">八、政策更新</h2>
             <p>我们可能适时修订本隐私政策。重大变更将通过平台公告、站内消息等方式通知您。</p>
 
-            <div class="mt-10 pt-6 border-t border-gray-200 text-sm text-gray-500">
+            <div class="mt-10 pt-6 border-t border-neutral-200 text-sm text-neutral-500">
               <p>{{ COMPANY_NAME }}</p>
               <p>生效日期：{{ EFFECTIVE_DATE }}</p>
             </div>
@@ -226,7 +226,7 @@ const navItems: { type: PageType; label: string }[] = [
 
           <!-- ==================== 电子签约法律效力 ==================== -->
           <template v-else-if="pageType === 'e-signature'">
-            <p class="text-sm text-gray-500 mb-8">本文阐述{{ PLATFORM_NAME }}平台电子合同与电子签章的法律效力依据及技术保障措施。</p>
+            <p class="text-sm text-neutral-500 mb-8">本文阐述{{ PLATFORM_NAME }}平台电子合同与电子签章的法律效力依据及技术保障措施。</p>
 
             <h2 id="e1" data-anchor class="anchor-heading">一、法律依据</h2>
             <p>{{ PLATFORM_NAME }}平台的电子签约服务依据以下法律法规：</p>
@@ -253,27 +253,27 @@ const navItems: { type: PageType; label: string }[] = [
             <p>根据《电子签名法》第十三条，可靠电子签名需满足以下条件，本平台均予以满足：</p>
             <table class="w-full text-sm border-collapse my-4">
               <thead>
-                <tr class="border-b-2 border-gray-200">
-                  <th class="py-3 text-left font-bold text-gray-700">法定要求</th>
-                  <th class="py-3 text-left font-bold text-gray-700">平台实现</th>
+                <tr class="border-b-2 border-neutral-200">
+                  <th class="py-3 text-left font-bold text-neutral-700">法定要求</th>
+                  <th class="py-3 text-left font-bold text-neutral-700">平台实现</th>
                 </tr>
               </thead>
               <tbody>
-                <tr class="border-b border-gray-100">
-                  <td class="py-3 text-gray-600">电子签名为签名人专有</td>
-                  <td class="py-3 text-gray-600">印章与企业账号绑定，仅授权人员可使用</td>
+                <tr class="border-b border-neutral-100">
+                  <td class="py-3 text-neutral-600">电子签名为签名人专有</td>
+                  <td class="py-3 text-neutral-600">印章与企业账号绑定，仅授权人员可使用</td>
                 </tr>
-                <tr class="border-b border-gray-100">
-                  <td class="py-3 text-gray-600">签署时电子签名仅由签名人控制</td>
-                  <td class="py-3 text-gray-600">签署需输入手机短信验证码，确保签名人亲自操作</td>
+                <tr class="border-b border-neutral-100">
+                  <td class="py-3 text-neutral-600">签署时电子签名仅由签名人控制</td>
+                  <td class="py-3 text-neutral-600">签署需输入手机短信验证码，确保签名人亲自操作</td>
                 </tr>
-                <tr class="border-b border-gray-100">
-                  <td class="py-3 text-gray-600">签署后对签名的任何改动可被发现</td>
-                  <td class="py-3 text-gray-600">合同签署后锁定，系统记录完整审计日志</td>
+                <tr class="border-b border-neutral-100">
+                  <td class="py-3 text-neutral-600">签署后对签名的任何改动可被发现</td>
+                  <td class="py-3 text-neutral-600">合同签署后锁定，系统记录完整审计日志</td>
                 </tr>
                 <tr>
-                  <td class="py-3 text-gray-600">签署后对内容的任何改动可被发现</td>
-                  <td class="py-3 text-gray-600">合同内容签署后不可修改，保留原始数据记录</td>
+                  <td class="py-3 text-neutral-600">签署后对内容的任何改动可被发现</td>
+                  <td class="py-3 text-neutral-600">合同内容签署后不可修改，保留原始数据记录</td>
                 </tr>
               </tbody>
             </table>
@@ -288,7 +288,7 @@ const navItems: { type: PageType; label: string }[] = [
             <p>5.2 如发生争议，电子合同及平台签署日志可作为有效的电子证据。</p>
             <p>5.3 根据《民事诉讼法》第六十六条，电子数据属于法定证据类型之一。</p>
 
-            <div class="mt-10 pt-6 border-t border-gray-200 text-sm text-gray-500">
+            <div class="mt-10 pt-6 border-t border-neutral-200 text-sm text-neutral-500">
               <p>{{ COMPANY_NAME }}</p>
               <p>生效日期：{{ EFFECTIVE_DATE }}</p>
             </div>
@@ -296,7 +296,7 @@ const navItems: { type: PageType; label: string }[] = [
 
           <!-- ==================== 免责声明 ==================== -->
           <template v-else-if="pageType === 'disclaimer'">
-            <p class="text-sm text-gray-500 mb-8">在使用{{ PLATFORM_NAME }}平台前，请仔细阅读以下免责声明。</p>
+            <p class="text-sm text-neutral-500 mb-8">在使用{{ PLATFORM_NAME }}平台前，请仔细阅读以下免责声明。</p>
 
             <h2 id="d1" data-anchor class="anchor-heading">一、平台角色声明</h2>
             <p>1.1 {{ PLATFORM_NAME }}平台是农牧原料供需信息撮合服务平台，为买卖双方提供信息展示、智能匹配、在线沟通和电子签约等技术服务。</p>
@@ -304,8 +304,8 @@ const navItems: { type: PageType; label: string }[] = [
             <p>1.3 平台上展示的产品信息由发布用户自行提供，本公司不对信息的真实性、准确性和合法性作出保证。</p>
 
             <h2 id="d2" data-anchor class="anchor-heading">二、交易风险提示</h2>
-            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 my-4">
-              <p class="text-sm text-amber-800 font-medium">农牧原料交易涉及价格波动、质量差异、运输损耗等风险，请用户在交易前审慎评估。</p>
+            <div class="bg-warning-50 border border-warning-200 rounded-xl p-4 my-4">
+              <p class="text-sm text-warning-800 font-medium">农牧原料交易涉及价格波动、质量差异、运输损耗等风险，请用户在交易前审慎评估。</p>
             </div>
             <p>2.1 <strong>价格风险：</strong>农牧产品价格受市场供需、季节、政策等因素影响，可能发生较大波动。平台展示的价格仅为报价参考，不构成价格承诺。</p>
             <p>2.2 <strong>质量风险：</strong>本平台不对交易标的的质量、数量、规格等进行实物验证。建议买方在交易前要求卖方提供质量检测报告，或约定到货验收标准。</p>
@@ -330,7 +330,7 @@ const navItems: { type: PageType; label: string }[] = [
             <p>5.1 在法律允许的最大范围内，本公司对因使用或无法使用本平台而导致的任何间接损失、利润损失、数据损失不承担责任。</p>
             <p>5.2 本公司对平台服务承担的全部责任，不超过相关用户向本公司支付的服务费用（如有）。</p>
 
-            <div class="mt-10 pt-6 border-t border-gray-200 text-sm text-gray-500">
+            <div class="mt-10 pt-6 border-t border-neutral-200 text-sm text-neutral-500">
               <p>{{ COMPANY_NAME }}</p>
               <p>生效日期：{{ EFFECTIVE_DATE }}</p>
             </div>
@@ -338,37 +338,37 @@ const navItems: { type: PageType; label: string }[] = [
 
           <!-- ==================== 商务合作 ==================== -->
           <template v-else-if="pageType === 'cooperation'">
-            <p class="text-sm text-gray-500 mb-8">{{ PLATFORM_NAME }}致力于构建农牧产业数字化生态，欢迎各类合作伙伴洽谈合作。</p>
+            <p class="text-sm text-neutral-500 mb-8">{{ PLATFORM_NAME }}致力于构建农牧产业数字化生态，欢迎各类合作伙伴洽谈合作。</p>
 
             <h2 id="c1" data-anchor class="anchor-heading">一、合作方向</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
-              <div class="border border-gray-200 rounded-xl p-5">
-                <h3 class="font-bold text-gray-900 mb-2">产业链合作</h3>
-                <p class="text-sm text-gray-600">饲料厂、养殖场、贸易商、加工企业等产业上下游企业的批量入驻及定制化服务合作。</p>
+              <div class="border border-neutral-200 rounded-xl p-5">
+                <h3 class="font-bold text-neutral-900 mb-2">产业链合作</h3>
+                <p class="text-sm text-neutral-600">饲料厂、养殖场、贸易商、加工企业等产业上下游企业的批量入驻及定制化服务合作。</p>
               </div>
-              <div class="border border-gray-200 rounded-xl p-5">
-                <h3 class="font-bold text-gray-900 mb-2">物流服务合作</h3>
-                <p class="text-sm text-gray-600">物流公司、车队、仓储企业的运力接入合作，为平台用户提供配套物流服务。</p>
+              <div class="border border-neutral-200 rounded-xl p-5">
+                <h3 class="font-bold text-neutral-900 mb-2">物流服务合作</h3>
+                <p class="text-sm text-neutral-600">物流公司、车队、仓储企业的运力接入合作，为平台用户提供配套物流服务。</p>
               </div>
-              <div class="border border-gray-200 rounded-xl p-5">
-                <h3 class="font-bold text-gray-900 mb-2">金融服务合作</h3>
-                <p class="text-sm text-gray-600">银行、保理公司、保险机构等金融服务方的合作，为用户提供供应链金融产品。</p>
+              <div class="border border-neutral-200 rounded-xl p-5">
+                <h3 class="font-bold text-neutral-900 mb-2">金融服务合作</h3>
+                <p class="text-sm text-neutral-600">银行、保理公司、保险机构等金融服务方的合作，为用户提供供应链金融产品。</p>
               </div>
-              <div class="border border-gray-200 rounded-xl p-5">
-                <h3 class="font-bold text-gray-900 mb-2">技术与数据合作</h3>
-                <p class="text-sm text-gray-600">行情数据、质检机构、行业协会等的数据接入和标准共建合作。</p>
+              <div class="border border-neutral-200 rounded-xl p-5">
+                <h3 class="font-bold text-neutral-900 mb-2">技术与数据合作</h3>
+                <p class="text-sm text-neutral-600">行情数据、质检机构、行业协会等的数据接入和标准共建合作。</p>
               </div>
             </div>
 
             <h2 id="c2" data-anchor class="anchor-heading">二、联系方式</h2>
-            <div class="bg-gray-50 rounded-xl border border-gray-200 p-6 my-4 space-y-4">
+            <div class="bg-neutral-50 rounded-xl border border-neutral-200 p-6 my-4 space-y-4">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center">
                   <Mail class="w-5 h-5 text-brand-600" />
                 </div>
                 <div>
-                  <div class="text-xs text-gray-400 font-medium">商务合作邮箱</div>
+                  <div class="text-xs text-neutral-400 font-medium">商务合作邮箱</div>
                   <a :href="`mailto:${SERVICE_EMAIL}`" class="text-sm font-bold text-brand-600 hover:underline">{{ SERVICE_EMAIL }}</a>
                 </div>
               </div>
@@ -377,8 +377,8 @@ const navItems: { type: PageType; label: string }[] = [
                   <Clock class="w-5 h-5 text-brand-600" />
                 </div>
                 <div>
-                  <div class="text-xs text-gray-400 font-medium">工作时间</div>
-                  <div class="text-sm font-bold text-gray-900">周一至周五 9:00 - 18:00</div>
+                  <div class="text-xs text-neutral-400 font-medium">工作时间</div>
+                  <div class="text-sm font-bold text-neutral-900">周一至周五 9:00 - 18:00</div>
                 </div>
               </div>
               <div class="flex items-center gap-3">
@@ -386,28 +386,28 @@ const navItems: { type: PageType; label: string }[] = [
                   <MapPin class="w-5 h-5 text-brand-600" />
                 </div>
                 <div>
-                  <div class="text-xs text-gray-400 font-medium">公司地址</div>
-                  <div class="text-sm font-bold text-gray-900">天津市东丽区</div>
+                  <div class="text-xs text-neutral-400 font-medium">公司地址</div>
+                  <div class="text-sm font-bold text-neutral-900">天津市东丽区</div>
                 </div>
               </div>
             </div>
 
-            <p class="text-sm text-gray-500 mt-6">来函请注明合作方向、公司名称及联系方式，我们将在3个工作日内回复。</p>
+            <p class="text-sm text-neutral-500 mt-6">来函请注明合作方向、公司名称及联系方式，我们将在3个工作日内回复。</p>
           </template>
 
           <!-- ==================== 意见反馈 ==================== -->
           <template v-else-if="pageType === 'feedback'">
-            <p class="text-sm text-gray-500 mb-8">感谢您使用{{ PLATFORM_NAME }}平台！如果您在使用过程中遇到任何问题或有改进建议，欢迎随时联系我们。</p>
+            <p class="text-sm text-neutral-500 mb-8">感谢您使用{{ PLATFORM_NAME }}平台！如果您在使用过程中遇到任何问题或有改进建议，欢迎随时联系我们。</p>
 
             <h2 id="f1" data-anchor class="anchor-heading">联系方式</h2>
 
-            <div class="bg-gray-50 rounded-xl border border-gray-200 p-6 my-4 space-y-4">
+            <div class="bg-neutral-50 rounded-xl border border-neutral-200 p-6 my-4 space-y-4">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center">
                   <Mail class="w-5 h-5 text-brand-600" />
                 </div>
                 <div>
-                  <div class="text-xs text-gray-400 font-medium">客服邮箱</div>
+                  <div class="text-xs text-neutral-400 font-medium">客服邮箱</div>
                   <a :href="`mailto:${SERVICE_EMAIL}?subject=沃谷平台意见反馈`" class="text-sm font-bold text-brand-600 hover:underline">{{ SERVICE_EMAIL }}</a>
                 </div>
               </div>
@@ -416,8 +416,8 @@ const navItems: { type: PageType; label: string }[] = [
                   <Clock class="w-5 h-5 text-brand-600" />
                 </div>
                 <div>
-                  <div class="text-xs text-gray-400 font-medium">服务时间</div>
-                  <div class="text-sm font-bold text-gray-900">周一至周五 9:00 - 18:00</div>
+                  <div class="text-xs text-neutral-400 font-medium">服务时间</div>
+                  <div class="text-sm font-bold text-neutral-900">周一至周五 9:00 - 18:00</div>
                 </div>
               </div>
             </div>
@@ -430,7 +430,7 @@ const navItems: { type: PageType; label: string }[] = [
               <li><strong>截图/录屏：</strong>如有异常界面，请附上截图</li>
               <li><strong>您的联系方式：</strong>便于我们回复您</li>
             </ul>
-            <p class="text-sm text-gray-500 mt-4">我们将在1-3个工作日内通过邮件回复您的反馈。感谢您的支持！</p>
+            <p class="text-sm text-neutral-500 mt-4">我们将在1-3个工作日内通过邮件回复您的反馈。感谢您的支持！</p>
           </template>
 
         </div>
@@ -445,21 +445,21 @@ const navItems: { type: PageType; label: string }[] = [
 <style scoped>
 /* 法律文档排版 */
 .legal-content h2 {
-  @apply text-lg font-bold text-gray-900 mt-8 mb-4 pb-2 border-b border-gray-100;
+  @apply text-lg font-bold text-neutral-900 mt-8 mb-4 pb-2 border-b border-neutral-100;
 }
 .legal-content h2:first-child,
 .legal-content p + h2:first-of-type {
   @apply mt-0;
 }
 .legal-content h3 {
-  @apply text-sm font-bold text-gray-700 mt-5 mb-2;
+  @apply text-sm font-bold text-neutral-700 mt-5 mb-2;
 }
 .legal-content p {
-  @apply text-sm text-gray-600 leading-relaxed mb-3;
+  @apply text-sm text-neutral-600 leading-relaxed mb-3;
 }
 .legal-content ul,
 .legal-content ol {
-  @apply text-sm text-gray-600 leading-relaxed mb-4 pl-5 space-y-1.5;
+  @apply text-sm text-neutral-600 leading-relaxed mb-4 pl-5 space-y-1.5;
 }
 .legal-content ul {
   @apply list-disc;
@@ -474,6 +474,6 @@ const navItems: { type: PageType; label: string }[] = [
   @apply text-sm;
 }
 .legal-content strong {
-  @apply text-gray-800;
+  @apply text-neutral-800;
 }
 </style>

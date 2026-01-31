@@ -795,20 +795,20 @@ async function applyTemplate(template: RequirementTemplateResponse) {
     <!-- 页面标题 + Tab 切换 -->
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-6">
-        <h1 class="text-2xl font-bold text-gray-900">采购管理</h1>
+        <h1 class="text-2xl font-bold text-neutral-900">采购管理</h1>
         <!-- Tab 切换 -->
-        <div class="flex items-center bg-gray-100 rounded-xl p-1">
+        <div class="flex items-center bg-neutral-100 rounded-xl p-1">
           <button
             :class="[
               'px-4 py-2 rounded-lg text-sm font-bold transition-all',
               activeTab === 'publish'
                 ? 'bg-white text-autumn-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                : 'text-neutral-500 hover:text-neutral-700'
             ]"
             @click="activeTab = 'publish'"
           >
             <span class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full" :class="activeTab === 'publish' ? 'bg-autumn-500' : 'bg-gray-300'"></span>
+              <span class="w-2 h-2 rounded-full" :class="activeTab === 'publish' ? 'bg-autumn-500' : 'bg-neutral-300'"></span>
               发布采购
             </span>
           </button>
@@ -817,12 +817,12 @@ async function applyTemplate(template: RequirementTemplateResponse) {
               'px-4 py-2 rounded-lg text-sm font-bold transition-all',
               activeTab === 'published'
                 ? 'bg-white text-autumn-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                : 'text-neutral-500 hover:text-neutral-700'
             ]"
             @click="activeTab = 'published'"
           >
             <span class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full" :class="activeTab === 'published' ? 'bg-autumn-500' : 'bg-gray-300'"></span>
+              <span class="w-2 h-2 rounded-full" :class="activeTab === 'published' ? 'bg-autumn-500' : 'bg-neutral-300'"></span>
               已发布
               <span v-if="activeRequirementsCount > 0" class="px-1.5 py-0.5 bg-autumn-100 text-autumn-600 text-[10px] rounded-full">
                 {{ activeRequirementsCount }}
@@ -843,21 +843,21 @@ async function applyTemplate(template: RequirementTemplateResponse) {
           <Transition name="dropdown">
             <div
               v-if="templateMenuOpen"
-              class="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50"
+              class="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg border border-neutral-200 py-1 z-50"
               @click="templateMenuOpen = false"
             >
               <button
-                class="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                class="w-full px-4 py-2.5 text-left text-sm font-medium text-neutral-700 hover:bg-neutral-50 flex items-center gap-2"
                 @click="templatePickerOpen = true"
               >
-                <FileText class="w-4 h-4 text-gray-400" />
+                <FileText class="w-4 h-4 text-neutral-400" />
                 选择模板
               </button>
               <button
-                class="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                class="w-full px-4 py-2.5 text-left text-sm font-medium text-neutral-700 hover:bg-neutral-50 flex items-center gap-2"
                 @click="saveAsTemplate"
               >
-                <Save class="w-4 h-4 text-gray-400" />
+                <Save class="w-4 h-4 text-neutral-400" />
                 保存为模板
               </button>
             </div>
@@ -887,16 +887,16 @@ async function applyTemplate(template: RequirementTemplateResponse) {
     <!-- ========== 已发布 Tab 内容 ========== -->
     <template v-if="activeTab === 'published'">
       <!-- 筛选栏 -->
-      <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <div class="bg-white rounded-xl border border-neutral-200 p-4">
         <div class="flex flex-wrap items-center gap-4">
           <!-- 搜索框 -->
           <div class="relative flex-1 min-w-[200px] max-w-[300px]">
-            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <input
               v-model="listFilters.categoryName"
               type="text"
               placeholder="搜索品类..."
-              class="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:border-autumn-500 outline-none transition-all"
+              class="w-full pl-10 pr-4 py-2.5 border-2 border-neutral-200 rounded-xl text-sm focus:border-autumn-500 outline-none transition-all"
               @keyup.enter="handleListFilter"
             />
           </div>
@@ -910,7 +910,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                 'px-3 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5',
                 listFilters.status === opt.value
                   ? 'bg-autumn-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
               ]"
               @click="listFilters.status = opt.value; handleListFilter()"
             >
@@ -921,7 +921,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
 
           <!-- 统计 -->
           <div class="ml-auto">
-            <span class="px-3 py-1.5 bg-gray-50 text-gray-600 text-xs font-bold rounded-full border border-gray-200">
+            <span class="px-3 py-1.5 bg-neutral-50 text-neutral-600 text-xs font-bold rounded-full border border-neutral-200">
               共 {{ listPagination.total }} 条
             </span>
           </div>
@@ -929,7 +929,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
       </div>
 
       <!-- 需求列表（紧凑表格风格） -->
-      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
         <!-- 加载状态 -->
         <div v-if="listLoading && requirements.length === 0" class="p-6 space-y-4">
           <Skeleton type="card" />
@@ -951,7 +951,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
           <div
             v-for="(req, index) in pagedRequirements"
             :key="req.id"
-            class="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md hover:border-autumn-200 transition-all duration-200 animate-stagger-in"
+            class="bg-white rounded-2xl border border-neutral-200 p-4 hover:shadow-md hover:border-autumn-200 transition-all duration-200 animate-stagger-in"
             :style="{ animationDelay: `${index * 40}ms` }"
           >
             <ProductInfoRow
@@ -974,9 +974,9 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                   :class="[
                     'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap',
                     req.status === 0 ? 'bg-autumn-50 text-autumn-600' :
-                    req.status === 1 ? 'bg-amber-50 text-amber-600' :
-                    req.status === 3 ? 'bg-emerald-50 text-emerald-600' :
-                    'bg-gray-100 text-gray-500'
+                    req.status === 1 ? 'bg-warning-50 text-warning-600' :
+                    req.status === 3 ? 'bg-brand-50 text-brand-600' :
+                    'bg-neutral-100 text-neutral-500'
                   ]"
                 >
                   {{ getStatusIcon(req.status) }} {{ getStatusText(req.status) }}
@@ -986,12 +986,12 @@ async function applyTemplate(template: RequirementTemplateResponse) {
               <template #actions>
                 <button
                   v-if="req.status !== 3"
-                  class="px-2 py-0.5 rounded text-[11px] font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+                  class="px-2 py-0.5 rounded text-[11px] font-medium text-neutral-600 hover:bg-neutral-100 transition-colors"
                   @click="openEdit(req)"
                 >编辑</button>
                 <button
                   v-if="req.status === 0 || req.status === 1"
-                  class="px-2 py-0.5 rounded text-[11px] font-medium text-red-600 hover:bg-red-50 transition-colors"
+                  class="px-2 py-0.5 rounded text-[11px] font-medium text-error-600 hover:bg-error-50 transition-colors"
                   @click="revokeRequirement(req)"
                 >撤销</button>
                 <button
@@ -1024,54 +1024,54 @@ async function applyTemplate(template: RequirementTemplateResponse) {
       <!-- 左侧表单区域 -->
       <div class="lg:col-span-2 space-y-6">
         <!-- 发布信息 -->
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-          <div class="p-5 border-b border-gray-200 flex items-center gap-2">
+        <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-neutral-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-slate-900 rounded-full"></div>
-            <h3 class="text-2xl font-bold text-gray-900">发布信息</h3>
+            <h3 class="text-2xl font-bold text-neutral-900">发布信息</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">公司名称</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">公司名称</label>
                 <input
                   v-model="publishForm.companyName"
                   type="text"
                   placeholder="默认使用公司名称"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">采购人</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">采购人</label>
                 <input
                   v-model="purchaserNameInput"
                   type="text"
                   placeholder="默认使用个人信息"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
                 />
               </div>
             </div>
             <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">交付地址</label>
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">交付地址</label>
               <input
                 v-model="publishForm.purchaseAddress"
                 type="text"
                 placeholder="请输入交付/收货地址"
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
+                class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
               />
             </div>
-            <p class="text-xs text-gray-400">以上信息仅用于本次发布，不会修改您的公司/个人资料</p>
+            <p class="text-xs text-neutral-400">以上信息仅用于本次发布，不会修改您的公司/个人资料</p>
           </div>
         </div>
 
         <!-- 基础信息 -->
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 50ms">
-          <div class="p-5 border-b border-gray-200 flex items-center gap-2">
+        <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in" style="animation-delay: 50ms">
+          <div class="p-5 border-b border-neutral-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-brand-600 rounded-full"></div>
-            <h3 class="text-2xl font-bold text-gray-900">基础信息</h3>
+            <h3 class="text-2xl font-bold text-neutral-900">基础信息</h3>
           </div>
           <div class="p-5 space-y-4">
             <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
                 业态与品类 <span class="text-red-500">*</span>
               </label>
               <SchemaAwareCategoryPicker
@@ -1081,7 +1081,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
                   {{ currentUnitConfig.quantityLabel }} <span class="text-red-500">*</span>
                 </label>
                 <el-input-number
@@ -1094,7 +1094,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
                   {{ currentUnitConfig.priceLabel.replace('出厂价', '期望价') }}
                 </label>
                 <el-input-number
@@ -1111,13 +1111,13 @@ async function applyTemplate(template: RequirementTemplateResponse) {
         </div>
 
         <!-- 质量要求 -->
-        <div v-if="categoryParams.length > 0" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 100ms">
-          <div class="p-5 border-b border-gray-200 flex items-center justify-between">
+        <div v-if="categoryParams.length > 0" class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in" style="animation-delay: 100ms">
+          <div class="p-5 border-b border-neutral-200 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-5 bg-brand-500 rounded-full"></div>
-              <h3 class="text-2xl font-bold text-gray-900">质量要求</h3>
+              <h3 class="text-2xl font-bold text-neutral-900">质量要求</h3>
             </div>
-            <span class="text-xs text-gray-400">选填</span>
+            <span class="text-xs text-neutral-400">选填</span>
           </div>
           <div class="p-5">
             <CategoryParamsForm
@@ -1129,15 +1129,15 @@ async function applyTemplate(template: RequirementTemplateResponse) {
         </div>
 
         <!-- 物流与交付 -->
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 150ms">
-          <div class="p-5 border-b border-gray-200 flex items-center gap-2">
-            <div class="w-1.5 h-5 bg-amber-500 rounded-full"></div>
-            <h3 class="text-2xl font-bold text-gray-900">物流与交付</h3>
+        <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in" style="animation-delay: 150ms">
+          <div class="p-5 border-b border-neutral-200 flex items-center gap-2">
+            <div class="w-1.5 h-5 bg-warning-500 rounded-full"></div>
+            <h3 class="text-2xl font-bold text-neutral-900">物流与交付</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发布有效期</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">发布有效期</label>
                 <el-select v-model="publishForm.expireMinutes" clearable class="w-full neo-select">
                   <el-option label="1小时" :value="60" />
                   <el-option label="1天" :value="1440" />
@@ -1147,7 +1147,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                 </el-select>
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">包装方式</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">包装方式</label>
                 <el-select v-model="publishForm.packaging" class="w-full neo-select">
                   <el-option
                     v-for="opt in currentSchemaConfig.packagingOptions"
@@ -1158,7 +1158,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                 </el-select>
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">交货方式</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">交货方式</label>
                 <el-select v-model="publishForm.deliveryMethod" clearable class="w-full neo-select">
                   <el-option
                     v-for="opt in currentSchemaConfig.deliveryOptions"
@@ -1171,14 +1171,14 @@ async function applyTemplate(template: RequirementTemplateResponse) {
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">付款方式</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">付款方式</label>
                 <el-select v-model="publishForm.paymentMethod" class="w-full neo-select">
                   <el-option label="现款" value="现款" />
                   <el-option label="账期" value="账期" />
                 </el-select>
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发票类型</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">发票类型</label>
                 <el-select v-model="publishForm.invoiceType" clearable class="w-full neo-select">
                   <el-option label="普通发票" value="普通发票" />
                   <el-option label="增值税发票" value="增值税发票" />
@@ -1187,12 +1187,12 @@ async function applyTemplate(template: RequirementTemplateResponse) {
               </div>
             </div>
             <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">补充说明</label>
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">补充说明</label>
               <textarea
                 v-model="publishForm.remark"
                 rows="3"
                 placeholder="备注（可选）"
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all resize-none"
+                class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all resize-none"
               ></textarea>
             </div>
             <div class="flex justify-end gap-3 pt-2">
@@ -1211,10 +1211,10 @@ async function applyTemplate(template: RequirementTemplateResponse) {
       
       <!-- 右侧预览区域 -->
       <div class="lg:col-span-1">
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden sticky top-24 animate-fade-in" style="animation-delay: 200ms">
-          <div class="p-5 border-b border-gray-200">
-            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">summary</div>
-            <h3 class="text-2xl font-bold text-gray-900 mt-1">发布前确认</h3>
+        <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden sticky top-24 animate-fade-in" style="animation-delay: 200ms">
+          <div class="p-5 border-b border-neutral-200">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">summary</div>
+            <h3 class="text-2xl font-bold text-neutral-900 mt-1">发布前确认</h3>
           </div>
           
           <div class="p-5 max-h-[70vh] overflow-y-auto">
@@ -1228,13 +1228,13 @@ async function applyTemplate(template: RequirementTemplateResponse) {
             </div>
             <div v-else class="space-y-3">
               <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 rounded-xl p-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">公司</div>
-                  <div class="mt-1 font-bold text-gray-900 truncate text-sm">{{ publishForm.companyName || '未指定' }}</div>
+                <div class="bg-neutral-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">公司</div>
+                  <div class="mt-1 font-bold text-neutral-900 truncate text-sm">{{ publishForm.companyName || '未指定' }}</div>
                 </div>
-                <div class="bg-gray-50 rounded-xl p-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">采购人</div>
-                  <div class="mt-1 font-bold text-gray-900 truncate text-sm">{{ purchaserNameInput || purchaserName }}</div>
+                <div class="bg-neutral-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">采购人</div>
+                  <div class="mt-1 font-bold text-neutral-900 truncate text-sm">{{ purchaserNameInput || purchaserName }}</div>
                 </div>
               </div>
               <div class="bg-brand-50 rounded-xl p-3 border border-brand-100">
@@ -1245,60 +1245,60 @@ async function applyTemplate(template: RequirementTemplateResponse) {
                 <div class="mt-1 font-bold text-brand-700">{{ previewData.categoryName }}</div>
               </div>
               <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 rounded-xl p-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">数量</div>
-                  <div class="mt-1 font-bold text-gray-900">{{ previewData.quantity }} {{ currentUnitConfig.quantityUnit }}</div>
+                <div class="bg-neutral-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">数量</div>
+                  <div class="mt-1 font-bold text-neutral-900">{{ previewData.quantity }} {{ currentUnitConfig.quantityUnit }}</div>
                 </div>
-                <div class="bg-gray-50 rounded-xl p-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">期望价</div>
+                <div class="bg-neutral-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">期望价</div>
                   <div class="mt-1 font-bold text-brand-600">
                     <span v-if="previewData.expectedPrice != null">¥{{ previewData.expectedPrice }}/{{ currentUnitConfig.priceUnit }}</span>
-                    <span v-else class="text-gray-500">面议</span>
+                    <span v-else class="text-neutral-500">面议</span>
                   </div>
                 </div>
               </div>
-              <div class="bg-gray-50 rounded-xl p-3">
-                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+              <div class="bg-neutral-50 rounded-xl p-3">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
                   <MapPin class="w-3 h-3" />
                   交付地址
                 </div>
-                <div class="mt-1 font-bold text-gray-900 text-sm">{{ previewData.purchaseAddress }}</div>
+                <div class="mt-1 font-bold text-neutral-900 text-sm">{{ previewData.purchaseAddress }}</div>
               </div>
               <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 rounded-xl p-3">
-                  <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                <div class="bg-neutral-50 rounded-xl p-3">
+                  <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
                     <CreditCard class="w-3 h-3" />
                     付款
                   </div>
-                  <div class="mt-1 font-bold text-gray-900">{{ publishForm.paymentMethod || '现款' }}</div>
+                  <div class="mt-1 font-bold text-neutral-900">{{ publishForm.paymentMethod || '现款' }}</div>
                 </div>
-                <div class="bg-gray-50 rounded-xl p-3">
-                  <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                <div class="bg-neutral-50 rounded-xl p-3">
+                  <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
                     <Clock class="w-3 h-3" />
                     有效期
                   </div>
-                  <div class="mt-1 font-bold text-gray-900">{{ previewData.expireText }}</div>
+                  <div class="mt-1 font-bold text-neutral-900">{{ previewData.expireText }}</div>
                 </div>
               </div>
               <!-- 自定义参数预览 -->
               <template v-if="customParams.length > 0">
-                <div class="bg-gray-50 rounded-xl p-3">
-                  <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                <div class="bg-neutral-50 rounded-xl p-3">
+                  <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
                     <FileCheck class="w-3 h-3" />
                     自定义参数
                   </div>
                   <div class="mt-1 flex flex-wrap gap-1">
                     <template v-for="(cp, idx) in customParams" :key="'cp-' + idx">
-                      <span v-if="cp.name.trim() && cp.value.trim()" class="text-[10px] bg-white px-1.5 py-0.5 rounded border border-gray-200 text-gray-600">
+                      <span v-if="cp.name.trim() && cp.value.trim()" class="text-[10px] bg-white px-1.5 py-0.5 rounded border border-neutral-200 text-neutral-600">
                         {{ cp.name }}: {{ cp.value }}
                       </span>
                     </template>
                   </div>
                 </div>
               </template>
-              <div v-if="previewData.remark" class="bg-gray-50 rounded-xl p-3">
-                <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">备注</div>
-                <div class="mt-1 text-sm text-gray-700">{{ previewData.remark }}</div>
+              <div v-if="previewData.remark" class="bg-neutral-50 rounded-xl p-3">
+                <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">备注</div>
+                <div class="mt-1 text-sm text-neutral-700">{{ previewData.remark }}</div>
               </div>
             </div>
           </div>
@@ -1320,16 +1320,16 @@ async function applyTemplate(template: RequirementTemplateResponse) {
     <!-- 保存为模板弹窗 -->
     <BaseModal v-model="saveTemplateDialogVisible" title="保存为模板" size="sm">
       <div class="space-y-4">
-        <p class="text-xs text-gray-500">用于一键复用本次发布的品类、条款与指标配置</p>
+        <p class="text-xs text-neutral-500">用于一键复用本次发布的品类、条款与指标配置</p>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
             模板名称 <span class="text-red-500">*</span>
           </label>
           <input
             v-model="templateNameInput"
             type="text"
             placeholder="例如：玉米到厂-现款-常规指标"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
             @keyup.enter="confirmSaveTemplate"
           />
         </div>
@@ -1349,51 +1349,51 @@ async function applyTemplate(template: RequirementTemplateResponse) {
       size="lg"
     >
       <div class="space-y-6">
-        <p class="text-sm text-gray-500">
+        <p class="text-sm text-neutral-500">
           仅修改本条已发布需求，不影响您的公司/个人档案
         </p>
 
         <!-- 标的信息 -->
-        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
-          <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">采购标的</div>
-          <div class="mt-1 font-bold text-gray-900">
+        <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-200">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">采购标的</div>
+          <div class="mt-1 font-bold text-neutral-900">
             {{ editing?.categoryName || '-' }}
-            <span v-if="editing?.contractNo" class="text-sm text-gray-500 font-medium ml-2">{{ editing?.contractNo }}</span>
+            <span v-if="editing?.contractNo" class="text-sm text-neutral-500 font-medium ml-2">{{ editing?.contractNo }}</span>
           </div>
         </div>
 
         <!-- 表单 -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">采购数量（吨）</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">采购数量（吨）</label>
             <input
               v-model.number="editForm.quantity"
               type="number"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">期望价格（元/吨）</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">期望价格（元/吨）</label>
             <input
               v-model.number="editForm.expectedPrice"
               type="number"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">包装方式</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">包装方式</label>
             <input
               v-model="editForm.packaging"
               type="text"
               placeholder="例如：散装 / 袋装"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">付款方式</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">付款方式</label>
             <select
               v-model="editForm.paymentMethod"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all bg-white"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all bg-white"
             >
               <option value="">请选择</option>
               <option value="现款">现款</option>
@@ -1401,10 +1401,10 @@ async function applyTemplate(template: RequirementTemplateResponse) {
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发票类型</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">发票类型</label>
             <select
               v-model="editForm.invoiceType"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all bg-white"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all bg-white"
             >
               <option value="">请选择</option>
               <option value="普通发票">普通发票</option>
@@ -1413,20 +1413,20 @@ async function applyTemplate(template: RequirementTemplateResponse) {
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">交货方式</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">交货方式</label>
             <select
               v-model="editForm.deliveryMethod"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all bg-white"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all bg-white"
             >
               <option value="">请选择</option>
               <option v-for="opt in currentSchemaConfig.deliveryOptions" :key="opt" :value="opt">{{ opt }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发布有效期</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">发布有效期</label>
             <select
               v-model="editForm.expireMinutes"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all bg-white"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all bg-white"
             >
               <option :value="60">1小时</option>
               <option :value="1440">1天</option>
@@ -1436,21 +1436,21 @@ async function applyTemplate(template: RequirementTemplateResponse) {
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">交付地址</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">交付地址</label>
             <input
               v-model="editForm.purchaseAddress"
               type="text"
               placeholder="例如：北京市朝阳区..."
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all"
             />
           </div>
           <div class="md:col-span-2">
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">备注</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">备注</label>
             <textarea
               v-model="editForm.remark"
               rows="2"
               placeholder="补充说明（选填）"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-autumn-500 outline-none transition-all resize-none"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-autumn-500 outline-none transition-all resize-none"
             ></textarea>
           </div>
         </div>
@@ -1517,7 +1517,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
 /* Neo-Minimal 风格：输入控件 */
 :deep(.neo-input-number .el-input__wrapper),
 :deep(.neo-select .el-select__wrapper) {
-  border: 2px solid rgb(243 244 246); /* gray-100 */
+  border: 2px solid rgb(243 244 246); /* neutral-100 */
   border-radius: 12px; /* rounded-xl */
   box-shadow: none;
   background-color: #fff;
@@ -1532,7 +1532,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
 
 :deep(.neo-input-number .el-input__wrapper:hover),
 :deep(.neo-select .el-select__wrapper:hover) {
-  border-color: rgb(229 231 235); /* gray-200 */
+  border-color: rgb(229 231 235); /* neutral-200 */
 }
 
 :deep(.neo-input-number),

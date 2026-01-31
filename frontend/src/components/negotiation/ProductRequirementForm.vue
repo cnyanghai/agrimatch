@@ -183,10 +183,10 @@ function updateDynamicParam(key: string, value: string) {
 </script>
 
 <template>
-  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col h-full">
+  <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden flex flex-col h-full">
     <!-- 头部（固定） -->
-    <div class="px-3 py-2 border-b border-gray-100 flex items-center bg-gray-50/50 shrink-0">
-      <h3 class="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+    <div class="px-3 py-2 border-b border-neutral-100 flex items-center bg-neutral-50/50 shrink-0">
+      <h3 class="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
         <Package class="w-4 h-4 text-brand-600" />
         {{ subjectType === 'SUPPLY' ? '供应详情' : '采购需求' }}
       </h3>
@@ -196,14 +196,14 @@ function updateDynamicParam(key: string, value: string) {
     <div class="flex-1 overflow-y-auto p-3 space-y-3">
       <!-- 品名（全宽） -->
       <div>
-        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">品名</label>
+        <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">品名</label>
         <input
           v-model="form.productName"
           :readonly="readonly"
           type="text"
-          class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
+          class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
                  focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                 read-only:bg-gray-50 read-only:cursor-default font-medium"
+                 read-only:bg-neutral-50 read-only:cursor-default font-medium"
           :placeholder="readonly ? '-' : '产品名称'"
         />
       </div>
@@ -211,42 +211,42 @@ function updateDynamicParam(key: string, value: string) {
       <!-- 一口价模式：数量 + 单位 + 单价 -->
       <div v-if="form.priceType !== 'BASIS'" class="grid grid-cols-3 gap-2">
         <div>
-          <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">数量</label>
+          <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">数量</label>
           <input
             v-model.number="form.quantity"
             :readonly="readonly"
             type="number"
             min="0"
-            class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
+            class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
                    focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                   read-only:bg-gray-50 read-only:cursor-default font-bold"
+                   read-only:bg-neutral-50 read-only:cursor-default font-bold"
             placeholder="0"
           />
         </div>
         <div>
-          <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">单位</label>
+          <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">单位</label>
           <select
             v-model="form.unit"
             :disabled="readonly"
-            class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
+            class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
                    focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                   disabled:bg-gray-50 disabled:cursor-default"
+                   disabled:bg-neutral-50 disabled:cursor-default"
           >
             <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
           </select>
         </div>
         <div>
-          <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">单价(元)</label>
+          <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">单价(元)</label>
           <div class="relative">
-            <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">¥</span>
+            <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-neutral-400">¥</span>
             <input
               v-model.number="form.price"
               :readonly="readonly"
               type="number"
               min="0"
-              class="w-full h-8 pl-5 pr-2 text-sm rounded-lg border border-gray-200 bg-white
+              class="w-full h-8 pl-5 pr-2 text-sm rounded-lg border border-neutral-200 bg-white
                      focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                     read-only:bg-gray-50 read-only:cursor-default font-bold"
+                     read-only:bg-neutral-50 read-only:cursor-default font-bold"
               placeholder="0"
             />
           </div>
@@ -257,29 +257,29 @@ function updateDynamicParam(key: string, value: string) {
       <template v-if="form.priceType === 'BASIS'">
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">出厂价(元)</label>
+            <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">出厂价(元)</label>
             <div class="relative">
-              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">¥</span>
+              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-neutral-400">¥</span>
               <input
                 v-model.number="form.price"
                 :readonly="readonly"
                 type="number"
                 min="0"
-                class="w-full h-8 pl-5 pr-2 text-sm rounded-lg border border-gray-200 bg-white
+                class="w-full h-8 pl-5 pr-2 text-sm rounded-lg border border-neutral-200 bg-white
                        focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                       read-only:bg-gray-50 read-only:cursor-default font-bold"
+                       read-only:bg-neutral-50 read-only:cursor-default font-bold"
                 placeholder="0"
               />
             </div>
           </div>
           <div>
-            <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">单位</label>
+            <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">单位</label>
             <select
               v-model="form.unit"
               :disabled="readonly"
-              class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
+              class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
                      focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                     disabled:bg-gray-50 disabled:cursor-default"
+                     disabled:bg-neutral-50 disabled:cursor-default"
             >
               <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
             </select>
@@ -288,10 +288,10 @@ function updateDynamicParam(key: string, value: string) {
 
         <!-- 基差合约明细 -->
         <div v-if="form.basisQuotes && form.basisQuotes.length > 0">
-          <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">基差合约明细</label>
-          <div class="border border-gray-200 rounded-lg overflow-hidden">
+          <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">基差合约明细</label>
+          <div class="border border-neutral-200 rounded-lg overflow-hidden">
             <table class="w-full text-xs">
-              <thead class="bg-gray-50 text-[10px] uppercase font-semibold text-gray-500">
+              <thead class="bg-neutral-50 text-[10px] uppercase font-semibold text-neutral-500">
                 <tr>
                   <th class="px-2 py-1.5 text-left">合约</th>
                   <th class="px-2 py-1.5 text-right">基差</th>
@@ -299,9 +299,9 @@ function updateDynamicParam(key: string, value: string) {
                   <th class="px-2 py-1.5 text-right">数量({{ form.unit }})</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-100">
+              <tbody class="divide-y divide-neutral-100">
                 <tr v-for="(quote, idx) in form.basisQuotes" :key="idx">
-                  <td class="px-2 py-1.5 font-bold text-gray-900">{{ quote.contractCode }}</td>
+                  <td class="px-2 py-1.5 font-bold text-neutral-900">{{ quote.contractCode }}</td>
                   <td class="px-2 py-1.5 text-right font-mono font-bold"
                       :class="quote.basisPrice >= 0 ? 'text-red-600' : 'text-green-600'">
                     {{ quote.basisPrice >= 0 ? '+' : '' }}{{ quote.basisPrice }}
@@ -313,10 +313,10 @@ function updateDynamicParam(key: string, value: string) {
                       :readonly="readonly"
                       type="number"
                       min="0"
-                      class="w-16 h-6 px-1 text-xs text-right rounded border border-gray-200 bg-white
+                      class="w-16 h-6 px-1 text-xs text-right rounded border border-neutral-200 bg-white
                              font-mono font-bold text-brand-600
                              focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                             read-only:bg-gray-50 read-only:border-transparent"
+                             read-only:bg-neutral-50 read-only:border-transparent"
                       placeholder="-"
                     />
                   </td>
@@ -327,10 +327,10 @@ function updateDynamicParam(key: string, value: string) {
                       :readonly="readonly"
                       type="number"
                       min="0"
-                      class="w-16 h-6 px-1 text-xs text-right rounded border border-gray-200 bg-white
+                      class="w-16 h-6 px-1 text-xs text-right rounded border border-neutral-200 bg-white
                              font-mono font-bold
                              focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                             read-only:bg-gray-50 read-only:border-transparent"
+                             read-only:bg-neutral-50 read-only:border-transparent"
                       placeholder="-"
                     />
                   </td>
@@ -344,28 +344,28 @@ function updateDynamicParam(key: string, value: string) {
       <!-- 包装 + 产地 -->
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">
+          <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">
             <Settings class="w-3 h-3 inline mr-0.5" />包装
           </label>
           <select
             v-model="form.packaging"
             :disabled="readonly"
-            class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
+            class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
                    focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                   disabled:bg-gray-50 disabled:cursor-default"
+                   disabled:bg-neutral-50 disabled:cursor-default"
           >
             <option v-for="opt in packagingOptions" :key="opt" :value="opt">{{ opt }}</option>
           </select>
         </div>
         <div>
-          <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">产地</label>
+          <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">产地</label>
           <input
             v-model="form.origin"
             :readonly="readonly"
             type="text"
-            class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
+            class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
                    focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                   read-only:bg-gray-50 read-only:cursor-default"
+                   read-only:bg-neutral-50 read-only:cursor-default"
             placeholder="产地"
           />
         </div>
@@ -374,26 +374,26 @@ function updateDynamicParam(key: string, value: string) {
       <!-- 交货日期 + 交货地点 -->
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">交货日期</label>
+          <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">交货日期</label>
           <input
             v-model="form.deliveryDate"
             :readonly="readonly"
             type="date"
-            class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
+            class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
                    focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                   read-only:bg-gray-50 read-only:cursor-default"
+                   read-only:bg-neutral-50 read-only:cursor-default"
           />
         </div>
         <div>
-          <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">
+          <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">
             <Truck class="w-3 h-3 inline mr-0.5" />交货方式
           </label>
           <select
             v-model="form.deliveryMethod"
             :disabled="readonly"
-            class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
+            class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
                    focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                   disabled:bg-gray-50 disabled:cursor-default"
+                   disabled:bg-neutral-50 disabled:cursor-default"
           >
             <option v-for="opt in deliveryMethodOptions" :key="opt" :value="opt">{{ opt }}</option>
           </select>
@@ -402,16 +402,16 @@ function updateDynamicParam(key: string, value: string) {
 
       <!-- 交货地点 -->
       <div>
-        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">
+        <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">
           <MapPin class="w-3 h-3 inline mr-0.5" />交货地点
         </label>
         <input
           v-model="form.deliveryPlace"
           :readonly="readonly"
           type="text"
-          class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
+          class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
                  focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                 read-only:bg-gray-50 read-only:cursor-default"
+                 read-only:bg-neutral-50 read-only:cursor-default"
           :placeholder="readonly ? '-' : '详细地址'"
         />
       </div>
@@ -419,15 +419,15 @@ function updateDynamicParam(key: string, value: string) {
       <!-- 付款方式 + 发票类型 -->
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">
+          <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">
             <CreditCard class="w-3 h-3 inline mr-0.5" />付款方式
           </label>
           <select
             v-model="form.paymentMethod"
             :disabled="readonly"
-            class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
+            class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
                    focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                   disabled:bg-gray-50 disabled:cursor-default"
+                   disabled:bg-neutral-50 disabled:cursor-default"
           >
             <option v-for="opt in paymentOptions" :key="opt.value" :value="opt.value">
               {{ opt.label }}
@@ -435,15 +435,15 @@ function updateDynamicParam(key: string, value: string) {
           </select>
         </div>
         <div>
-          <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">
+          <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">
             <FileText class="w-3 h-3 inline mr-0.5" />发票类型
           </label>
           <select
             v-model="form.invoiceType"
             :disabled="readonly"
-            class="w-full h-8 px-2 text-sm rounded-lg border border-gray-200 bg-white
+            class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
                    focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                   disabled:bg-gray-50 disabled:cursor-default"
+                   disabled:bg-neutral-50 disabled:cursor-default"
           >
             <option v-for="opt in invoiceOptions" :key="opt.value" :value="opt.value">
               {{ opt.label }}
@@ -454,18 +454,18 @@ function updateDynamicParam(key: string, value: string) {
 
       <!-- 动态参数（产品品类相关） -->
       <div v-if="dynamicParamsList.length > 0">
-        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-2">品质参数</label>
+        <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-2">品质参数</label>
         <div class="grid grid-cols-2 gap-2">
           <div v-for="param in dynamicParamsList" :key="param.key">
-            <label class="block text-xs text-gray-500 mb-0.5">{{ param.key }}</label>
+            <label class="block text-xs text-neutral-500 mb-0.5">{{ param.key }}</label>
             <input
               :value="param.value"
               @input="updateDynamicParam(param.key, ($event.target as HTMLInputElement).value)"
               :readonly="readonly"
               type="text"
-              class="w-full h-7 px-2 text-xs rounded border border-gray-200 bg-white
+              class="w-full h-7 px-2 text-xs rounded border border-neutral-200 bg-white
                      focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                     read-only:bg-gray-50"
+                     read-only:bg-neutral-50"
             />
           </div>
         </div>
@@ -473,14 +473,14 @@ function updateDynamicParam(key: string, value: string) {
 
       <!-- 备注 -->
       <div>
-        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">备注</label>
+        <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">备注</label>
         <textarea
           v-model="form.remark"
           :readonly="readonly"
           rows="2"
-          class="w-full px-2 py-1.5 text-sm rounded-lg border border-gray-200 bg-white resize-none
+          class="w-full px-2 py-1.5 text-sm rounded-lg border border-neutral-200 bg-white resize-none
                  focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                 read-only:bg-gray-50 read-only:cursor-default"
+                 read-only:bg-neutral-50 read-only:cursor-default"
           placeholder="其他说明..."
         />
       </div>
@@ -491,7 +491,7 @@ function updateDynamicParam(key: string, value: string) {
       <button
         @click="emit('send-quote', { ...form })"
         :disabled="sending || (form.priceType === 'BASIS' ? !(form.basisQuotes && form.basisQuotes.length > 0) : (!form.price || !form.quantity))"
-        class="w-full px-4 py-2 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300
+        class="w-full px-4 py-2 bg-brand-600 hover:bg-brand-700 disabled:bg-neutral-300
                disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg
                flex items-center justify-center gap-1.5 transition-all active:scale-95"
       >

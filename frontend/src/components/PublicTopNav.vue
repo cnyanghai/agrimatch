@@ -112,17 +112,17 @@ onMounted(async () => {
               <template #dropdown>
                 <div class="flex w-[520px] h-[480px] overflow-hidden bg-white rounded-2xl shadow-2xl">
                   <!-- Sidebar: 业态列表 -->
-                  <div class="w-40 bg-gray-50/80 border-r border-gray-100 py-3 overflow-y-auto">
+                  <div class="w-40 bg-neutral-50/80 border-r border-neutral-100 py-3 overflow-y-auto">
                     <div
                       v-for="schema in schemaTree"
                       :key="schema.schemaCode"
                       class="px-4 py-2.5 mx-2 rounded-lg cursor-pointer transition-all flex items-center justify-between group text-[13px]"
-                      :class="activeSchemaCode === schema.schemaCode ? 'bg-white text-brand-600 font-medium shadow-sm' : 'text-gray-600 hover:bg-white/60'"
+                      :class="activeSchemaCode === schema.schemaCode ? 'bg-white text-brand-600 font-medium shadow-sm' : 'text-neutral-600 hover:bg-white/60'"
                       @mouseenter="activeSchemaCode = schema.schemaCode"
                       @click="goToHall(schema.schemaCode)"
                     >
                       <span>{{ schema.schemaName }}</span>
-                      <ChevronDown :size="12" class="-rotate-90 text-gray-300 group-hover:text-brand-500 transition-colors" />
+                      <ChevronDown :size="12" class="-rotate-90 text-neutral-300 group-hover:text-brand-500 transition-colors" />
                     </div>
                   </div>
 
@@ -132,26 +132,26 @@ onMounted(async () => {
                       <template v-for="group in buildGroups(activeSchema)" :key="group.titleNode.id">
                         <!-- 一级分类 -->
                         <div
-                          class="px-5 py-2.5 cursor-pointer transition-all flex items-center justify-between group text-[13px] font-medium text-gray-800 hover:bg-gray-50 hover:text-brand-600"
+                          class="px-5 py-2.5 cursor-pointer transition-all flex items-center justify-between group text-[13px] font-medium text-neutral-800 hover:bg-neutral-50 hover:text-brand-600"
                           @click="goToHall(group.schemaCode, group.titleNode.name)"
                         >
                           <span>{{ group.title }}</span>
-                          <ChevronDown :size="12" class="-rotate-90 text-gray-300 group-hover:text-brand-500 transition-colors" />
+                          <ChevronDown :size="12" class="-rotate-90 text-neutral-300 group-hover:text-brand-500 transition-colors" />
                         </div>
                         <!-- 二级/三级分类 -->
                         <div
                           v-for="item in group.items"
                           :key="item.id"
-                          class="px-5 pl-9 py-2 cursor-pointer transition-all flex items-center justify-between group text-[13px] text-gray-500 hover:bg-gray-50 hover:text-brand-600"
+                          class="px-5 pl-9 py-2 cursor-pointer transition-all flex items-center justify-between group text-[13px] text-neutral-500 hover:bg-neutral-50 hover:text-brand-600"
                           @click="goToHall(group.schemaCode, item.name)"
                         >
                           <span>{{ item.name }}</span>
-                          <ChevronDown :size="10" class="-rotate-90 text-gray-200 group-hover:text-brand-400 transition-colors" />
+                          <ChevronDown :size="10" class="-rotate-90 text-neutral-200 group-hover:text-brand-400 transition-colors" />
                         </div>
                       </template>
 
                       <!-- Empty State -->
-                      <div v-if="!activeSchema.categories?.length" class="py-16 text-center text-gray-400 text-sm">
+                      <div v-if="!activeSchema.categories?.length" class="py-16 text-center text-neutral-400 text-sm">
                         该业态下暂无分类
                       </div>
                     </div>
@@ -167,19 +167,19 @@ onMounted(async () => {
               </button>
               <template #dropdown>
                 <div class="p-5 w-[600px] bg-white rounded-2xl shadow-2xl">
-                  <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+                  <div class="flex items-center justify-between mb-4 pb-3 border-b border-neutral-100">
                     <div class="flex items-center gap-2 text-brand-600">
                       <Truck :size="18" />
                       <span class="font-semibold text-sm">优质供应商</span>
                     </div>
-                    <span class="text-xs text-gray-400">TOP 50</span>
+                    <span class="text-xs text-neutral-400">TOP 50</span>
                   </div>
 
                   <div class="grid grid-cols-3 gap-x-6 gap-y-1 mb-5">
                     <button
                       v-for="s in topSuppliers"
                       :key="s.id"
-                      class="text-left text-[13px] text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-all truncate py-2 px-2 rounded-lg active:scale-95"
+                      class="text-left text-[13px] text-neutral-600 hover:text-brand-600 hover:bg-brand-50 transition-all truncate py-2 px-2 rounded-lg active:scale-95"
                       @click.stop="() => { router.push(`/companies/${s.id}`) }"
                     >
                       {{ s.companyName }}
@@ -204,19 +204,19 @@ onMounted(async () => {
               </button>
               <template #dropdown>
                 <div class="p-5 w-[600px] bg-white rounded-2xl shadow-2xl">
-                  <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+                  <div class="flex items-center justify-between mb-4 pb-3 border-b border-neutral-100">
                     <div class="flex items-center gap-2 text-autumn-600">
                       <ShoppingBag :size="18" />
                       <span class="font-semibold text-sm">优质采购商</span>
                     </div>
-                    <span class="text-xs text-gray-400">TOP 50</span>
+                    <span class="text-xs text-neutral-400">TOP 50</span>
                   </div>
 
                   <div class="grid grid-cols-3 gap-x-6 gap-y-1 mb-5">
                     <button
                       v-for="b in topBuyers"
                       :key="b.id"
-                      class="text-left text-[13px] text-gray-600 hover:text-autumn-600 hover:bg-autumn-50 transition-all truncate py-2 px-2 rounded-lg active:scale-95"
+                      class="text-left text-[13px] text-neutral-600 hover:text-autumn-600 hover:bg-autumn-50 transition-all truncate py-2 px-2 rounded-lg active:scale-95"
                       @click.stop="() => { router.push(`/companies/${b.id}`) }"
                     >
                       {{ b.companyName }}
@@ -272,7 +272,7 @@ onMounted(async () => {
                       </div>
                     </el-dropdown-item>
                     <el-dropdown-item divided @click="onLogout">
-                      <div class="flex items-center gap-2 text-red-600">
+                      <div class="flex items-center gap-2 text-error-600">
                         <LogOut :size="16" :stroke-width="2" />
                         注销
                       </div>

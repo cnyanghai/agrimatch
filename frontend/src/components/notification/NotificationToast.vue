@@ -51,7 +51,7 @@ const iconComponent = computed(() => {
     >
       <div
         v-if="show && toast"
-        class="fixed top-20 right-4 z-50 max-w-sm w-full bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden cursor-pointer hover:shadow-xl transition-shadow"
+        class="fixed top-20 right-4 z-50 max-w-sm w-full bg-white rounded-xl shadow-2xl border border-neutral-100 overflow-hidden cursor-pointer hover:shadow-xl transition-shadow"
         @click="handleClick"
       >
         <!-- 顶部颜色条 -->
@@ -59,8 +59,8 @@ const iconComponent = computed(() => {
           class="h-1"
           :class="{
             'bg-brand-500': toast.type === 'chat',
-            'bg-blue-500': toast.type === 'contract',
-            'bg-amber-500': toast.type === 'system'
+            'bg-action-500': toast.type === 'contract',
+            'bg-warning-500': toast.type === 'system'
           }"
         />
 
@@ -70,8 +70,8 @@ const iconComponent = computed(() => {
             class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
             :class="{
               'bg-brand-100 text-brand-600': toast.type === 'chat',
-              'bg-blue-100 text-blue-600': toast.type === 'contract',
-              'bg-amber-100 text-amber-600': toast.type === 'system'
+              'bg-action-100 text-action-600': toast.type === 'contract',
+              'bg-warning-100 text-warning-600': toast.type === 'system'
             }"
           >
             <component :is="iconComponent" class="w-5 h-5" />
@@ -80,15 +80,15 @@ const iconComponent = computed(() => {
           <!-- 内容 -->
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between gap-2">
-              <h4 class="font-bold text-gray-900 truncate">{{ toast.title }}</h4>
-              <span class="text-xs text-gray-400 shrink-0">刚刚</span>
+              <h4 class="font-bold text-neutral-900 truncate">{{ toast.title }}</h4>
+              <span class="text-xs text-neutral-400 shrink-0">刚刚</span>
             </div>
-            <p class="text-sm text-gray-600 mt-1 line-clamp-2">{{ toast.content }}</p>
+            <p class="text-sm text-neutral-600 mt-1 line-clamp-2">{{ toast.content }}</p>
           </div>
 
           <!-- 关闭按钮 -->
           <button
-            class="shrink-0 w-6 h-6 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+            class="shrink-0 w-6 h-6 rounded-full hover:bg-neutral-100 flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition-colors"
             @click="handleClose"
           >
             <X class="w-4 h-4" />
@@ -96,7 +96,7 @@ const iconComponent = computed(() => {
         </div>
 
         <!-- 点击提示 -->
-        <div class="px-4 pb-3 text-xs text-gray-400">
+        <div class="px-4 pb-3 text-xs text-neutral-400">
           点击查看详情
         </div>
       </div>

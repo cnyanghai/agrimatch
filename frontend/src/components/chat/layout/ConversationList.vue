@@ -91,17 +91,17 @@ function getSubjectTypeLabel(type?: string): string {
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-gray-50/50">
+  <div class="h-full flex flex-col bg-neutral-50/50">
     <!-- 搜索栏 -->
-    <div class="px-4 py-3 bg-white border-b border-gray-100 space-y-3">
+    <div class="px-4 py-3 bg-white border-b border-neutral-100 space-y-3">
       <div class="relative">
-        <el-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Search /></el-icon>
+        <el-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"><Search /></el-icon>
         <input
           :value="searchKeyword"
           @input="emit('update:searchKeyword', ($event.target as HTMLInputElement).value)"
           type="text"
           placeholder="搜索联系人或消息"
-          class="w-full pl-9 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-all"
+          class="w-full pl-9 pr-3 py-2 text-sm bg-neutral-50 border border-neutral-200 rounded-lg focus:bg-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-all"
         />
       </div>
 
@@ -123,19 +123,19 @@ function getSubjectTypeLabel(type?: string): string {
 
       <!-- 空状态 -->
       <div v-else-if="timeGroups.length === 0" class="flex flex-col items-center justify-center py-12 px-4 text-center">
-        <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-3">
-          <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="w-16 h-16 rounded-2xl bg-neutral-100 flex items-center justify-center mb-3">
+          <svg class="w-8 h-8 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         </div>
-        <p class="text-sm text-gray-500">暂无会话</p>
-        <p class="text-xs text-gray-400 mt-1">从供应或采购列表发起沟通</p>
+        <p class="text-sm text-neutral-500">暂无会话</p>
+        <p class="text-xs text-neutral-400 mt-1">从供应或采购列表发起沟通</p>
       </div>
 
       <!-- 按时间分组 -->
       <template v-else>
         <div v-for="group in timeGroups" :key="group.label" class="mb-2">
-          <div class="px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest sticky top-0 bg-gray-50/90 backdrop-blur-sm">
+          <div class="px-4 py-2 text-[10px] font-bold text-neutral-400 uppercase tracking-widest sticky top-0 bg-neutral-50/90 backdrop-blur-sm">
             {{ group.label }}
           </div>
 
@@ -162,20 +162,20 @@ function getSubjectTypeLabel(type?: string): string {
               <!-- 信息 -->
               <div class="flex-1 min-w-0">
                 <div class="flex items-center justify-between">
-                  <span class="font-medium text-gray-900 truncate">
+                  <span class="font-medium text-neutral-900 truncate">
                     {{ peer.peerNickName || peer.peerUserName || '用户' }}
                   </span>
-                  <span class="text-[10px] text-gray-400 shrink-0 ml-2">
+                  <span class="text-[10px] text-neutral-400 shrink-0 ml-2">
                     {{ formatTimeLabel(peer.lastTime) }}
                   </span>
                 </div>
                 <div class="flex items-center justify-between mt-0.5">
-                  <span class="text-xs text-gray-500 truncate">
+                  <span class="text-xs text-neutral-500 truncate">
                     {{ peer.peerCompanyName || truncateContent(peer.lastContent) }}
                   </span>
                   <span
                     v-if="peer.totalUnread > 0"
-                    class="ml-2 px-1.5 min-w-[18px] h-[18px] text-[10px] font-bold text-white bg-red-500 rounded-full flex items-center justify-center shrink-0"
+                    class="ml-2 px-1.5 min-w-[18px] h-[18px] text-[10px] font-bold text-white bg-error-500 rounded-full flex items-center justify-center shrink-0"
                   >
                     {{ peer.totalUnread > 99 ? '99+' : peer.totalUnread }}
                   </span>
@@ -186,13 +186,13 @@ function getSubjectTypeLabel(type?: string): string {
             <!-- 该联系人下的会话列表（展开时显示） -->
             <div
               v-if="activePeerId === peer.peerUserId && currentPeerConversations.length > 1"
-              class="bg-white border-y border-gray-100"
+              class="bg-white border-y border-neutral-100"
             >
               <div
                 v-for="conv in currentPeerConversations"
                 :key="conv.id"
                 @click.stop="emit('switch-conversation', conv.id)"
-                class="flex items-center gap-2 pl-14 pr-4 py-2 cursor-pointer transition-all hover:bg-gray-50"
+                class="flex items-center gap-2 pl-14 pr-4 py-2 cursor-pointer transition-all hover:bg-neutral-50"
                 :class="{ 'bg-brand-50/50': activeConversationId === conv.id }"
               >
                 <!-- 状态指示器 -->
@@ -200,7 +200,7 @@ function getSubjectTypeLabel(type?: string): string {
                   :is="getStatusIcon(getConversationStatus(conv.id))"
                   :class="[
                     'w-3.5 h-3.5 shrink-0',
-                    BUSINESS_STATUS_MAP[getConversationStatus(conv.id)]?.color || 'text-gray-400'
+                    BUSINESS_STATUS_MAP[getConversationStatus(conv.id)]?.color || 'text-neutral-400'
                   ]"
                   :title="BUSINESS_STATUS_MAP[getConversationStatus(conv.id)]?.label"
                 />
@@ -213,16 +213,16 @@ function getSubjectTypeLabel(type?: string): string {
                 >
                   {{ getSubjectTypeLabel(conv.subjectType) }}
                 </span>
-                <span class="text-xs text-gray-600 truncate flex-1">
+                <span class="text-xs text-neutral-600 truncate flex-1">
                   {{ truncateContent(conv.lastContent, 15) || '新会话' }}
                 </span>
                 <span
                   v-if="conv.unreadCount && conv.unreadCount > 0"
-                  class="w-2 h-2 bg-red-500 rounded-full shrink-0"
+                  class="w-2 h-2 bg-error-500 rounded-full shrink-0"
                 ></span>
                 <el-dropdown trigger="click" @click.stop>
-                  <button class="p-1 rounded hover:bg-gray-200 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <el-icon class="text-gray-400"><MoreFilled /></el-icon>
+                  <button class="p-1 rounded hover:bg-neutral-200 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <el-icon class="text-neutral-400"><MoreFilled /></el-icon>
                   </button>
                   <template #dropdown>
                     <el-dropdown-menu>
@@ -239,7 +239,7 @@ function getSubjectTypeLabel(type?: string): string {
                         v-if="getConversationStatus(conv.id) !== 'PENDING'"
                         @click="emit('change-conversation-status', conv.id, 'PENDING')"
                       >
-                        <div class="flex items-center gap-2 text-amber-600">
+                        <div class="flex items-center gap-2 text-warning-600">
                           <Clock class="w-4 h-4" />
                           标为待跟进
                         </div>
@@ -257,7 +257,7 @@ function getSubjectTypeLabel(type?: string): string {
                         v-if="getConversationStatus(conv.id) !== 'ON_HOLD'"
                         @click="emit('change-conversation-status', conv.id, 'ON_HOLD')"
                       >
-                        <div class="flex items-center gap-2 text-gray-500">
+                        <div class="flex items-center gap-2 text-neutral-500">
                           <Pause class="w-4 h-4" />
                           标为暂缓
                         </div>
@@ -266,7 +266,7 @@ function getSubjectTypeLabel(type?: string): string {
                         v-if="getConversationStatus(conv.id) !== 'CLOSED'"
                         @click="emit('change-conversation-status', conv.id, 'CLOSED')"
                       >
-                        <div class="flex items-center gap-2 text-red-500">
+                        <div class="flex items-center gap-2 text-error-500">
                           <XCircle class="w-4 h-4" />
                           关闭会话
                         </div>
@@ -285,11 +285,11 @@ function getSubjectTypeLabel(type?: string): string {
     <div
       v-if="archivedCount && archivedCount > 0"
       @click="emit('show-archived')"
-      class="px-4 py-3 bg-white border-t border-gray-100 flex items-center gap-2 cursor-pointer hover:bg-gray-50 transition-colors"
+      class="px-4 py-3 bg-white border-t border-neutral-100 flex items-center gap-2 cursor-pointer hover:bg-neutral-50 transition-colors"
     >
-      <el-icon class="text-gray-400"><FolderOpened /></el-icon>
-      <span class="text-sm text-gray-600">已归档会话</span>
-      <span class="ml-auto text-xs text-gray-400">{{ archivedCount }}</span>
+      <el-icon class="text-neutral-400"><FolderOpened /></el-icon>
+      <span class="text-sm text-neutral-600">已归档会话</span>
+      <span class="ml-auto text-xs text-neutral-400">{{ archivedCount }}</span>
     </div>
   </div>
 </template>

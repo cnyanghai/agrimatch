@@ -39,7 +39,7 @@ function toggleCollapse() {
     <button
       v-if="isMobile"
       @click="toggleCollapse"
-      class="w-full flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-gray-200 font-bold text-gray-900 text-sm"
+      class="w-full flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-neutral-200 font-bold text-neutral-900 text-sm"
       :aria-expanded="!isCollapsed"
       aria-controls="sidebar-content"
     >
@@ -50,7 +50,7 @@ function toggleCollapse() {
       <component
         :is="isCollapsed ? ChevronDown : ChevronUp"
         :size="18"
-        class="text-gray-400 transition-transform"
+        class="text-neutral-400 transition-transform"
         aria-hidden="true"
       />
     </button>
@@ -61,55 +61,55 @@ function toggleCollapse() {
       class="space-y-4 lg:space-y-8"
       :class="{ 'lg:space-y-8': !isMobile }"
     >
-    <section v-if="showMap" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" aria-labelledby="map-heading">
-      <div class="p-6 border-b border-gray-50">
-        <h3 id="map-heading" class="font-bold text-gray-900 flex items-center gap-2">
+    <section v-if="showMap" class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden" aria-labelledby="map-heading">
+      <div class="p-6 border-b border-neutral-50">
+        <h3 id="map-heading" class="font-bold text-neutral-900 flex items-center gap-2">
           <MapPin :size="18" class="text-red-500" aria-hidden="true" />
           公司位置
         </h3>
       </div>
       <div 
-        class="aspect-square bg-gray-100 flex items-center justify-center text-gray-400 italic p-8 text-center text-sm"
+        class="aspect-square bg-neutral-100 flex items-center justify-center text-neutral-400 italic p-8 text-center text-sm"
         role="img"
         :aria-label="`公司位置: ${address || '暂无地址信息'}`"
       >
         <div class="space-y-4">
           <MapPin :size="48" class="mx-auto opacity-20" aria-hidden="true" />
           <p>{{ address || '暂无地址信息' }}</p>
-          <div v-if="lng || lat" class="text-[10px] bg-white text-gray-500 px-3 py-1 rounded-full shadow-sm">
+          <div v-if="lng || lat" class="text-[10px] bg-white text-neutral-500 px-3 py-1 rounded-full shadow-sm">
             经度: {{ lng?.toFixed(4) }} | 纬度: {{ lat?.toFixed(4) }}
           </div>
         </div>
       </div>
     </section>
 
-    <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6" aria-labelledby="contact-heading">
-      <h3 id="contact-heading" class="font-bold text-gray-900 mb-4">公司信息</h3>
+    <section class="bg-white rounded-xl shadow-sm border border-neutral-200 p-6" aria-labelledby="contact-heading">
+      <h3 id="contact-heading" class="font-bold text-neutral-900 mb-4">公司信息</h3>
       <div class="space-y-4">
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center">
+          <div class="w-8 h-8 bg-neutral-50 rounded-lg flex items-center justify-center">
             <ShieldCheck :size="16" class="text-brand-600" aria-hidden="true" />
           </div>
           <div class="text-sm">
-            <div class="text-[10px] text-gray-400 uppercase font-bold">法人</div>
-            <div class="font-bold text-gray-900">{{ legalPerson || '-' }}</div>
+            <div class="text-[10px] text-neutral-400 uppercase font-bold">法人</div>
+            <div class="font-bold text-neutral-900">{{ legalPerson || '-' }}</div>
           </div>
         </div>
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center">
-            <Globe :size="16" class="text-blue-600" aria-hidden="true" />
+          <div class="w-8 h-8 bg-neutral-50 rounded-lg flex items-center justify-center">
+            <Globe :size="16" class="text-action-600" aria-hidden="true" />
           </div>
           <div class="text-sm">
-            <div class="text-[10px] text-gray-400 uppercase font-bold">信用代码</div>
-            <div class="font-bold text-gray-900 truncate max-w-[200px]" :title="licenseNo || '-'">{{ licenseNo || '-' }}</div>
+            <div class="text-[10px] text-neutral-400 uppercase font-bold">信用代码</div>
+            <div class="font-bold text-neutral-900 truncate max-w-[200px]" :title="licenseNo || '-'">{{ licenseNo || '-' }}</div>
           </div>
         </div>
       </div>
     </section>
 
-    <section v-if="businessScope" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6" aria-labelledby="scope-heading">
-      <h3 id="scope-heading" class="font-bold text-gray-900 mb-4">经营范围</h3>
-      <p class="text-sm text-gray-600 leading-relaxed">{{ businessScope }}</p>
+    <section v-if="businessScope" class="bg-white rounded-xl shadow-sm border border-neutral-200 p-6" aria-labelledby="scope-heading">
+      <h3 id="scope-heading" class="font-bold text-neutral-900 mb-4">经营范围</h3>
+      <p class="text-sm text-neutral-600 leading-relaxed">{{ businessScope }}</p>
     </section>
 
     <section class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-8 text-white shadow-md" aria-labelledby="trust-heading">

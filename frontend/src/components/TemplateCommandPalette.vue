@@ -170,19 +170,19 @@ onBeforeUnmount(() => {
 
         <!-- 命令面板 -->
         <div class="relative w-full max-w-xl mx-4 animate-palette-in">
-          <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+          <div class="bg-white rounded-2xl shadow-2xl border border-neutral-200 overflow-hidden">
             <!-- 搜索头部 -->
-            <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
-              <Search class="w-5 h-5 text-gray-400 shrink-0" />
+            <div class="flex items-center gap-3 px-4 py-3 border-b border-neutral-100">
+              <Search class="w-5 h-5 text-neutral-400 shrink-0" />
               <input
                 ref="inputRef"
                 v-model="searchQuery"
                 type="text"
-                class="flex-1 text-base outline-none placeholder:text-gray-400"
+                class="flex-1 text-base outline-none placeholder:text-neutral-400"
                 :placeholder="`搜索${title}...`"
                 @keydown="handleKeydown"
               />
-              <div class="flex items-center gap-1 text-[10px] text-gray-400 font-mono bg-gray-100 px-1.5 py-0.5 rounded">
+              <div class="flex items-center gap-1 text-[10px] text-neutral-400 font-mono bg-neutral-100 px-1.5 py-0.5 rounded">
                 <Command class="w-3 h-3" />
                 <span>K</span>
               </div>
@@ -192,11 +192,11 @@ onBeforeUnmount(() => {
             <div ref="listRef" class="max-h-[50vh] overflow-y-auto p-3 space-y-2">
               <!-- 空状态 -->
               <div v-if="filteredTemplates.length === 0" class="py-12 text-center">
-                <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                  <FileText class="w-7 h-7 text-gray-300" />
+                <div class="w-14 h-14 bg-neutral-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                  <FileText class="w-7 h-7 text-neutral-300" />
                 </div>
-                <div class="text-gray-500 font-medium">{{ searchQuery ? '未找到匹配的模板' : '暂无模板' }}</div>
-                <div class="text-gray-400 text-sm mt-1">{{ searchQuery ? '请尝试其他关键词' : emptyText }}</div>
+                <div class="text-neutral-500 font-medium">{{ searchQuery ? '未找到匹配的模板' : '暂无模板' }}</div>
+                <div class="text-neutral-400 text-sm mt-1">{{ searchQuery ? '请尝试其他关键词' : emptyText }}</div>
               </div>
 
               <!-- 模板卡片 -->
@@ -208,7 +208,7 @@ onBeforeUnmount(() => {
                 :class="[
                   index === selectedIndex
                     ? 'border-brand-500 bg-brand-50/50 shadow-sm shadow-brand-100'
-                    : 'border-gray-100 bg-white hover:border-gray-200 hover:bg-gray-50/50'
+                    : 'border-neutral-100 bg-white hover:border-neutral-200 hover:bg-neutral-50/50'
                 ]"
                 @click="selectTemplate(tpl)"
                 @mouseenter="selectedIndex = index"
@@ -218,15 +218,15 @@ onBeforeUnmount(() => {
                   <div class="relative shrink-0">
                     <div
                       class="w-11 h-11 rounded-xl flex items-center justify-center transition-colors"
-                      :class="index === selectedIndex ? 'bg-brand-500' : 'bg-gray-100'"
+                      :class="index === selectedIndex ? 'bg-brand-500' : 'bg-neutral-100'"
                     >
-                      <Package class="w-5 h-5" :class="index === selectedIndex ? 'text-white' : 'text-gray-400'" />
+                      <Package class="w-5 h-5" :class="index === selectedIndex ? 'text-white' : 'text-neutral-400'" />
                     </div>
                     <!-- 快捷键角标 -->
                     <div
                       v-if="index < 9"
                       class="absolute -top-1 -right-1 w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold shadow-sm"
-                      :class="index === selectedIndex ? 'bg-white text-brand-600' : 'bg-gray-700 text-white'"
+                      :class="index === selectedIndex ? 'bg-white text-brand-600' : 'bg-neutral-700 text-white'"
                     >
                       {{ index + 1 }}
                     </div>
@@ -235,19 +235,19 @@ onBeforeUnmount(() => {
                   <!-- 中间：主要信息 -->
                   <div class="flex-1 min-w-0 py-0.5">
                     <!-- 模板名称 -->
-                    <div class="font-bold text-gray-900 truncate mb-1">{{ tpl.name }}</div>
+                    <div class="font-bold text-neutral-900 truncate mb-1">{{ tpl.name }}</div>
                     <!-- 详情行 -->
                     <div class="flex items-center gap-2 text-sm">
-                      <span class="px-2 py-0.5 bg-gray-100 rounded-md text-xs font-semibold text-gray-600">
+                      <span class="px-2 py-0.5 bg-neutral-100 rounded-md text-xs font-semibold text-neutral-600">
                         {{ tpl.category }}
                       </span>
-                      <span class="text-gray-300">·</span>
-                      <span class="text-gray-500">
-                        <span class="font-semibold text-gray-700">{{ tpl.quantity || 0 }}</span>
+                      <span class="text-neutral-300">·</span>
+                      <span class="text-neutral-500">
+                        <span class="font-semibold text-neutral-700">{{ tpl.quantity || 0 }}</span>
                         <span class="text-xs ml-0.5">{{ tpl.quantityUnit || '吨' }}</span>
                       </span>
-                      <span class="text-gray-300">·</span>
-                      <span class="font-semibold" :class="index === selectedIndex ? 'text-brand-600' : 'text-gray-600'">
+                      <span class="text-neutral-300">·</span>
+                      <span class="font-semibold" :class="index === selectedIndex ? 'text-brand-600' : 'text-neutral-600'">
                         {{ formatPrice(tpl.price, tpl.priceUnit) }}
                       </span>
                     </div>
@@ -255,7 +255,7 @@ onBeforeUnmount(() => {
 
                   <!-- 右侧：删除按钮 -->
                   <button
-                    class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-100 text-gray-400 hover:text-red-500 transition-all"
+                    class="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-error-100 text-neutral-400 hover:text-error-500 transition-all"
                     title="删除模板"
                     @click="deleteTemplate(tpl.id, $event)"
                   >
@@ -272,29 +272,29 @@ onBeforeUnmount(() => {
             </div>
 
             <!-- 底部快捷键提示 -->
-            <div class="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-t border-gray-100 text-[11px] text-gray-400">
+            <div class="flex items-center justify-between px-4 py-2.5 bg-neutral-50 border-t border-neutral-100 text-[11px] text-neutral-400">
               <div class="flex items-center gap-4">
                 <div class="flex items-center gap-1.5">
                   <div class="flex gap-0.5">
-                    <kbd class="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-mono shadow-sm"><ArrowUp class="w-3 h-3" /></kbd>
-                    <kbd class="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-mono shadow-sm"><ArrowDown class="w-3 h-3" /></kbd>
+                    <kbd class="px-1.5 py-0.5 bg-white border border-neutral-200 rounded text-[10px] font-mono shadow-sm"><ArrowUp class="w-3 h-3" /></kbd>
+                    <kbd class="px-1.5 py-0.5 bg-white border border-neutral-200 rounded text-[10px] font-mono shadow-sm"><ArrowDown class="w-3 h-3" /></kbd>
                   </div>
                   <span>导航</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                  <kbd class="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-mono shadow-sm"><CornerDownLeft class="w-3 h-3" /></kbd>
+                  <kbd class="px-1.5 py-0.5 bg-white border border-neutral-200 rounded text-[10px] font-mono shadow-sm"><CornerDownLeft class="w-3 h-3" /></kbd>
                   <span>选择</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                  <kbd class="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-mono shadow-sm">1-9</kbd>
+                  <kbd class="px-1.5 py-0.5 bg-white border border-neutral-200 rounded text-[10px] font-mono shadow-sm">1-9</kbd>
                   <span>快捷</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                  <kbd class="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-mono shadow-sm">ESC</kbd>
+                  <kbd class="px-1.5 py-0.5 bg-white border border-neutral-200 rounded text-[10px] font-mono shadow-sm">ESC</kbd>
                   <span>关闭</span>
                 </div>
               </div>
-              <div class="text-gray-300">
+              <div class="text-neutral-300">
                 {{ filteredTemplates.length }} 个模板
               </div>
             </div>

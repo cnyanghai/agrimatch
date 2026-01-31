@@ -38,7 +38,7 @@ async function onToggle() {
 <template>
   <button 
     class="flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
-    :class="isCollected ? 'text-amber-500' : 'text-gray-400 hover:text-amber-500'"
+    :class="isCollected ? 'text-warning-500' : 'text-neutral-400 hover:text-warning-500'"
     :disabled="loading"
     @click.stop="onToggle"
   >

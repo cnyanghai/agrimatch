@@ -121,7 +121,7 @@ defineExpose({
 
 <template>
   <div class="signature-pad-wrapper">
-    <div class="relative rounded-xl border-2 border-dashed border-gray-200 bg-white overflow-hidden">
+    <div class="relative rounded-xl border-2 border-dashed border-neutral-200 bg-white overflow-hidden">
       <canvas
         ref="canvasRef"
         :width="canvasWidth"
@@ -143,14 +143,14 @@ defineExpose({
         v-if="isEmpty" 
         class="absolute inset-0 flex items-center justify-center pointer-events-none"
       >
-        <span class="text-gray-300 text-lg font-medium">请在此处签名</span>
+        <span class="text-neutral-300 text-lg font-medium">请在此处签名</span>
       </div>
     </div>
     
     <!-- 工具栏 -->
     <div class="mt-2 flex items-center justify-end gap-2">
       <button 
-        class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
+        class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-all"
         @click="clear"
       >
         <RotateCcw class="w-3.5 h-3.5" />

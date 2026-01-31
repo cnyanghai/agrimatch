@@ -48,32 +48,32 @@ function goToProfile() {
 
 <template>
   <div v-if="showGuide" class="profile-guide-card">
-    <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-5 relative overflow-hidden">
+    <div class="bg-gradient-to-br from-warning-50 to-accent-50 rounded-xl border border-warning-200 p-5 relative overflow-hidden">
       <!-- 装饰背景 -->
-      <div class="absolute top-0 right-0 w-32 h-32 bg-amber-100/50 rounded-full -translate-y-1/2 translate-x-1/2" />
-      <div class="absolute bottom-0 left-0 w-24 h-24 bg-orange-100/50 rounded-full translate-y-1/2 -translate-x-1/2" />
+      <div class="absolute top-0 right-0 w-32 h-32 bg-warning-100/50 rounded-full -translate-y-1/2 translate-x-1/2" />
+      <div class="absolute bottom-0 left-0 w-24 h-24 bg-accent-100/50 rounded-full translate-y-1/2 -translate-x-1/2" />
       
       <div class="relative">
         <!-- 标题 -->
         <div class="flex items-center gap-3 mb-4">
-          <div class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center">
-            <Sparkles class="text-amber-600" :size="20" :stroke-width="2" />
+          <div class="w-10 h-10 rounded-xl bg-warning-100 border border-warning-200 flex items-center justify-center">
+            <Sparkles class="text-warning-600" :size="20" :stroke-width="2" />
           </div>
           <div>
-            <div class="text-sm font-bold text-gray-900">完善您的资料</div>
-            <div class="text-xs text-gray-500">解锁全部功能，提升可信度</div>
+            <div class="text-sm font-bold text-neutral-900">完善您的资料</div>
+            <div class="text-xs text-neutral-500">解锁全部功能，提升可信度</div>
           </div>
         </div>
 
         <!-- 进度条 -->
         <div class="mb-4">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-xs font-medium text-gray-500">资料完善度</span>
-            <span class="text-xs font-bold text-amber-600">{{ profileStatus?.completionRate }}%</span>
+            <span class="text-xs font-medium text-neutral-500">资料完善度</span>
+            <span class="text-xs font-bold text-warning-600">{{ profileStatus?.completionRate }}%</span>
           </div>
-          <div class="h-2 bg-amber-100 rounded-full overflow-hidden">
+          <div class="h-2 bg-warning-100 rounded-full overflow-hidden">
             <div 
-              class="h-full bg-gradient-to-r from-amber-400 to-orange-400 rounded-full transition-all duration-500"
+              class="h-full bg-gradient-to-r from-warning-400 to-accent-400 rounded-full transition-all duration-500"
               :style="{ width: `${profileStatus?.completionRate}%` }"
             />
           </div>
@@ -86,22 +86,22 @@ function goToProfile() {
             :key="field"
             class="flex items-center gap-2 p-2 bg-white/60 rounded-lg"
           >
-            <div class="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center">
+            <div class="w-5 h-5 rounded-full bg-warning-100 flex items-center justify-center">
               <component 
                 :is="field === '公司名称' ? Building2 : field === '联系人姓名' ? User : MapPin"
-                class="text-amber-600"
+                class="text-warning-600"
                 :size="12"
                 :stroke-width="2"
               />
             </div>
-            <span class="text-xs font-medium text-gray-600">{{ field }}</span>
-            <span class="text-xs text-amber-600 ml-auto">待完善</span>
+            <span class="text-xs font-medium text-neutral-600">{{ field }}</span>
+            <span class="text-xs text-warning-600 ml-auto">待完善</span>
           </div>
         </div>
 
         <!-- 操作按钮 -->
         <button 
-          class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-bold text-sm transition-all active:scale-[0.98] shadow-md shadow-amber-500/20"
+          class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-warning-500 to-accent-500 hover:from-warning-600 hover:to-accent-600 text-white rounded-xl font-bold text-sm transition-all active:scale-[0.98] shadow-md shadow-warning-500/20"
           @click="goToProfile"
         >
           立即完善

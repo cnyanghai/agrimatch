@@ -17,7 +17,7 @@ const sizeClasses: Record<string, string> = {
 // 颜色映射
 const colorClasses: Record<string, string> = {
   brand: 'border-brand-200 border-t-brand-600',
-  gray: 'border-gray-200 border-t-gray-600',
+  gray: 'border-neutral-200 border-t-neutral-600',
   white: 'border-white/30 border-t-white'
 }
 </script>

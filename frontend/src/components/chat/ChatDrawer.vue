@@ -237,12 +237,12 @@ watch(
     :modal-class="'chat-drawer-mask'"
     @close="close"
   >
-    <div class="h-full flex flex-col bg-gray-50">
+    <div class="h-full flex flex-col bg-neutral-50">
       <!-- header simplified -->
-      <div class="px-5 py-3 bg-white border-b border-gray-200 flex items-center justify-between gap-4">
+      <div class="px-5 py-3 bg-white border-b border-neutral-200 flex items-center justify-between gap-4">
         <div class="min-w-0">
-          <div class="font-bold text-gray-900 truncate leading-tight">{{ title }}</div>
-          <div class="text-[10px] text-gray-400 mt-0.5">
+          <div class="font-bold text-neutral-900 truncate leading-tight">{{ title }}</div>
+          <div class="text-[10px] text-neutral-400 mt-0.5">
             {{ websocket.isConnected.value ? '● 在线' : '连接中…' }}
           </div>
         </div>
@@ -254,14 +254,14 @@ watch(
             转入沟通中心
             <ArrowUpRight class="w-3.5 h-3.5" />
           </button>
-          <button class="p-1.5 rounded-lg hover:bg-gray-100 transition-all " @click="close">
-            <X class="w-5 h-5 text-gray-500" />
+          <button class="p-1.5 rounded-lg hover:bg-neutral-100 transition-all " @click="close">
+            <X class="w-5 h-5 text-neutral-500" />
           </button>
         </div>
       </div>
 
       <!-- 简化的标的摘要 -->
-      <div v-if="subjectSnapshotJson" class="px-5 py-2 bg-gray-100 border-b border-gray-200 text-xs text-gray-600 flex items-center gap-2">
+      <div v-if="subjectSnapshotJson" class="px-5 py-2 bg-neutral-100 border-b border-neutral-200 text-xs text-neutral-600 flex items-center gap-2">
         <span class="inline-block w-1.5 h-1.5 rounded-full" :class="subjectType === 'SUPPLY' ? 'bg-brand-500' : 'bg-autumn-500'"></span>
         <span class="truncate">{{ subjectSummary }}</span>
       </div>
@@ -272,25 +272,25 @@ watch(
           <div v-for="(m, idx) in messages" :key="m.id" class="flex flex-col">
             <!-- 简化时间显示 -->
             <div v-if="idx === 0 || m.time !== messages[idx-1]?.time" class="self-center my-2">
-              <span class="text-[10px] text-gray-400">{{ m.time }}</span>
+              <span class="text-[10px] text-neutral-400">{{ m.time }}</span>
             </div>
 
             <div class="flex" :class="m.type === 'sent' ? 'justify-end' : m.type === 'system' ? 'justify-center' : 'justify-start'">
-              <div v-if="m.type === 'system'" class="px-4 py-1.5 bg-gray-200/80 text-gray-500 text-[10px] rounded-full">
+              <div v-if="m.type === 'system'" class="px-4 py-1.5 bg-neutral-200/80 text-neutral-500 text-[10px] rounded-full">
                 {{ m.content }}
               </div>
               <div v-else-if="m.type === 'received'" class="max-w-[85%]">
                 <!-- 报价消息简化为链接 -->
                 <div v-if="(m.msgType || '').toUpperCase() === 'QUOTE'"
-                     class="bg-white rounded-lg rounded-tl-sm px-4 py-2.5 border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50 transition-all"
+                     class="bg-white rounded-lg rounded-tl-sm px-4 py-2.5 border border-neutral-200 shadow-sm cursor-pointer hover:bg-neutral-50 transition-all"
                      @click="goToChatCenter">
                   <div class="flex items-center gap-2 text-sm text-brand-600">
                     <MessageCircle class="w-4 h-4" />
                     <span class="font-medium">收到报价单</span>
-                    <span class="text-gray-400 text-xs">点击查看详情 →</span>
+                    <span class="text-neutral-400 text-xs">点击查看详情 →</span>
                   </div>
                 </div>
-                <div v-else class="bg-white rounded-lg rounded-tl-sm px-4 py-2.5 border border-gray-200 shadow-sm text-sm text-gray-800">
+                <div v-else class="bg-white rounded-lg rounded-tl-sm px-4 py-2.5 border border-neutral-200 shadow-sm text-sm text-neutral-800">
                   {{ m.content }}
                 </div>
               </div>
@@ -308,24 +308,24 @@ watch(
                 <div v-else class="bg-brand-600 text-white rounded-lg rounded-tr-sm px-4 py-2.5 shadow-sm text-sm">
                   {{ m.content }}
                 </div>
-                <div v-if="m.status === 'pending'" class="text-[10px] text-gray-400 mt-1">发送中…</div>
+                <div v-if="m.status === 'pending'" class="text-[10px] text-neutral-400 mt-1">发送中…</div>
               </div>
             </div>
           </div>
         </template>
-        <div v-else class="py-20 text-center text-gray-400">
+        <div v-else class="py-20 text-center text-neutral-400">
           暂无会话
         </div>
       </div>
 
       <!-- 简化的输入区域 -->
-      <div class="p-4 bg-white border-t border-gray-200">
+      <div class="p-4 bg-white border-t border-neutral-200">
         <div class="flex items-end gap-3">
           <textarea
             v-model="messageInput"
             rows="1"
             placeholder="输入消息…"
-            class="flex-1 resize-none border-2 border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-brand-500 transition-all"
+            class="flex-1 resize-none border-2 border-neutral-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-brand-500 transition-all"
             @keydown.enter.prevent="sendMessage"
           />
           <button
@@ -339,7 +339,7 @@ watch(
         <!-- 引导提示 -->
         <div class="mt-3 text-center">
           <button
-            class="text-xs text-gray-400 hover:text-brand-600 transition-all"
+            class="text-xs text-neutral-400 hover:text-brand-600 transition-all"
             @click="goToChatCenter"
           >
             💡 需要发送报价、图片或附件？<span class="font-medium text-brand-600">转入沟通中心</span>

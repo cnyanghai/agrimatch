@@ -47,7 +47,7 @@ function handleSign() {
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+  <div class="bg-white rounded-2xl border border-neutral-200 shadow-lg overflow-hidden">
     <!-- 头部 -->
     <div class="px-5 py-4 bg-gradient-to-r from-brand-600 to-brand-700 text-white">
       <div class="flex items-center gap-3">
@@ -66,8 +66,8 @@ function handleSign() {
       <div class="w-16 h-16 rounded-full bg-brand-100 flex items-center justify-center mx-auto mb-4">
         <Check class="w-8 h-8 text-brand-600" />
       </div>
-      <div class="text-lg font-bold text-gray-900 mb-1">您已完成签署</div>
-      <div class="text-sm text-gray-500">等待另一方完成签署后合同即可生效</div>
+      <div class="text-lg font-bold text-neutral-900 mb-1">您已完成签署</div>
+      <div class="text-sm text-neutral-500">等待另一方完成签署后合同即可生效</div>
       <button
         @click="emit('view-full')"
         class="mt-4 px-6 py-2 text-sm font-medium text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
@@ -81,15 +81,15 @@ function handleSign() {
       <!-- 合同摘要 -->
       <div class="px-5 py-4 space-y-3">
         <div class="flex justify-between items-center">
-          <span class="text-sm text-gray-500">交易标的</span>
-          <span class="text-sm font-medium text-gray-900">{{ contract.productName }}</span>
+          <span class="text-sm text-neutral-500">交易标的</span>
+          <span class="text-sm font-medium text-neutral-900">{{ contract.productName }}</span>
         </div>
         <div class="flex justify-between items-center">
-          <span class="text-sm text-gray-500">交易数量</span>
-          <span class="text-sm font-medium text-gray-900">{{ contract.quantity }} {{ contract.unit }}</span>
+          <span class="text-sm text-neutral-500">交易数量</span>
+          <span class="text-sm font-medium text-neutral-900">{{ contract.quantity }} {{ contract.unit }}</span>
         </div>
         <div class="flex justify-between items-center">
-          <span class="text-sm text-gray-500">合同金额</span>
+          <span class="text-sm text-neutral-500">合同金额</span>
           <span class="text-lg font-bold text-brand-600">
             <template v-if="contract.basisPrice !== undefined && contract.basisPrice !== null && contract.basisPrice !== ''">
               待结算
@@ -102,11 +102,11 @@ function handleSign() {
       </div>
 
       <!-- 签署身份 -->
-      <div class="px-5 py-3 bg-gray-50 border-y border-gray-100">
+      <div class="px-5 py-3 bg-neutral-50 border-y border-neutral-100">
         <div class="flex items-center gap-2">
-          <FileText class="w-4 h-4 text-gray-400" />
-          <span class="text-sm text-gray-600">
-            您将以 <span class="font-bold text-gray-900">{{ role }}</span> 身份签署此合同
+          <FileText class="w-4 h-4 text-neutral-400" />
+          <span class="text-sm text-neutral-600">
+            您将以 <span class="font-bold text-neutral-900">{{ role }}</span> 身份签署此合同
           </span>
         </div>
       </div>
@@ -118,10 +118,10 @@ function handleSign() {
             <input
               type="checkbox"
               v-model="confirmed"
-              class="w-5 h-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
+              class="w-5 h-5 rounded border-neutral-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
             />
           </div>
-          <span class="text-sm text-gray-600 leading-relaxed">
+          <span class="text-sm text-neutral-600 leading-relaxed">
             我已阅读并同意
             <button
               @click.prevent="emit('view-full')"
@@ -136,19 +136,19 @@ function handleSign() {
 
       <!-- 提示 -->
       <div class="px-5 pb-4">
-        <div class="flex items-start gap-2 p-3 bg-amber-50 rounded-lg">
-          <AlertCircle class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-          <p class="text-xs text-amber-700">
+        <div class="flex items-start gap-2 p-3 bg-warning-50 rounded-lg">
+          <AlertCircle class="w-4 h-4 text-warning-500 shrink-0 mt-0.5" />
+          <p class="text-xs text-warning-700">
             电子签名具有法律效力。签署后合同将发送至双方，请确认信息准确无误。
           </p>
         </div>
       </div>
 
       <!-- 操作按钮 -->
-      <div class="px-5 py-4 bg-gray-50 border-t border-gray-100 flex gap-3">
+      <div class="px-5 py-4 bg-neutral-50 border-t border-neutral-100 flex gap-3">
         <button
           @click="emit('cancel')"
-          class="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all active:scale-95"
+          class="flex-1 px-4 py-3 bg-white border border-neutral-200 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition-all active:scale-95"
         >
           取消
         </button>
@@ -166,11 +166,11 @@ function handleSign() {
 
     <!-- 不可签署状态 -->
     <div v-else class="px-5 py-8 text-center">
-      <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-        <X class="w-8 h-8 text-gray-400" />
+      <div class="w-16 h-16 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-4">
+        <X class="w-8 h-8 text-neutral-400" />
       </div>
-      <div class="text-lg font-medium text-gray-900 mb-1">无法签署</div>
-      <div class="text-sm text-gray-500">当前合同状态不允许签署操作</div>
+      <div class="text-lg font-medium text-neutral-900 mb-1">无法签署</div>
+      <div class="text-sm text-neutral-500">当前合同状态不允许签署操作</div>
     </div>
   </div>
 </template>

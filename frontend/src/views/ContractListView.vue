@@ -43,12 +43,12 @@ const statusConfig: Record<number, {
   bgColor: string
   borderColor: string
 }> = {
-  0: { label: '草稿', color: 'text-gray-600', bgColor: 'bg-gray-100', borderColor: 'border-gray-200' },
-  1: { label: '待签署', color: 'text-amber-700', bgColor: 'bg-amber-100', borderColor: 'border-amber-200' },
+  0: { label: '草稿', color: 'text-neutral-600', bgColor: 'bg-neutral-100', borderColor: 'border-neutral-200' },
+  1: { label: '待签署', color: 'text-warning-700', bgColor: 'bg-warning-100', borderColor: 'border-warning-200' },
   2: { label: '已签署', color: 'text-brand-700', bgColor: 'bg-brand-100', borderColor: 'border-brand-200' },
   3: { label: '履行中', color: 'text-autumn-700', bgColor: 'bg-autumn-100', borderColor: 'border-autumn-200' },
   4: { label: '已完成', color: 'text-green-700', bgColor: 'bg-green-100', borderColor: 'border-green-200' },
-  5: { label: '已取消', color: 'text-red-700', bgColor: 'bg-red-100', borderColor: 'border-red-200' }
+  5: { label: '已取消', color: 'text-error-700', bgColor: 'bg-error-100', borderColor: 'border-error-200' }
 }
 
 // 状态图标组件映射
@@ -344,8 +344,8 @@ onMounted(() => {
     <!-- 页面标题 -->
     <div class="flex flex-wrap justify-between items-end gap-4 mb-8">
       <div class="flex flex-col gap-2">
-        <h1 class="text-3xl font-black text-gray-900 tracking-tight">合同管理中心</h1>
-        <p class="text-gray-500">管理并追踪所有采购、销售合同，实时洞察交易状态</p>
+        <h1 class="text-3xl font-black text-neutral-900 tracking-tight">合同管理中心</h1>
+        <p class="text-neutral-500">管理并追踪所有采购、销售合同，实时洞察交易状态</p>
       </div>
       <button
         class="flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold transition-all shadow-sm"
@@ -361,16 +361,16 @@ onMounted(() => {
       <!-- 左侧：筛选 & 表格 -->
       <div class="flex-1 min-w-0">
         <!-- Tab + 筛选栏 -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+        <div class="bg-white rounded-xl shadow-sm border border-neutral-100 mb-6">
           <!-- Tab 导航 -->
-          <div class="flex border-b border-gray-100 px-6">
+          <div class="flex border-b border-neutral-100 px-6">
             <button
               v-for="tab in tabs"
               :key="tab.key"
               class="py-4 px-4 text-sm font-medium transition-colors border-b-2 -mb-px"
               :class="activeTab === tab.key
                 ? 'border-brand-600 text-brand-600 font-bold'
-                : 'border-transparent text-gray-500 hover:text-gray-700'"
+                : 'border-transparent text-neutral-500 hover:text-neutral-700'"
               @click="switchTab(tab.key)"
             >
               {{ tab.label }} ({{ getTabCount(tab.key) }})
@@ -380,8 +380,8 @@ onMounted(() => {
           <!-- 筛选栏 -->
           <div class="p-4 flex flex-wrap items-center gap-3">
             <!-- 状态筛选 -->
-            <div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5 border border-gray-100">
-              <span class="text-xs text-gray-400 uppercase font-bold">状态</span>
+            <div class="flex items-center gap-2 bg-neutral-50 rounded-lg px-3 py-1.5 border border-neutral-100">
+              <span class="text-xs text-neutral-400 uppercase font-bold">状态</span>
               <select
                 v-model="filterStatus"
                 class="bg-transparent border-none focus:ring-0 text-sm py-0 pl-0 pr-6 font-medium cursor-pointer"
@@ -398,18 +398,18 @@ onMounted(() => {
 
             <!-- 搜索框 -->
             <div class="flex-1 min-w-[200px] relative">
-              <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
               <input
                 v-model="searchKeyword"
                 type="text"
                 placeholder="搜索合同编号、产品名称或交易对手..."
-                class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
+                class="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-100 rounded-lg text-sm focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
               />
             </div>
 
             <!-- 重置按钮 -->
             <button
-              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-200 transition-colors"
+              class="px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg text-sm font-bold hover:bg-neutral-200 transition-colors"
               @click="resetFilters"
             >
               重置筛选
@@ -418,10 +418,10 @@ onMounted(() => {
         </div>
 
         <!-- 表格 -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
           <!-- 加载状态 -->
           <div v-if="loading" class="p-6">
-            <div v-for="i in 5" :key="i" class="flex gap-4 py-4 border-b border-gray-50 last:border-0">
+            <div v-for="i in 5" :key="i" class="flex gap-4 py-4 border-b border-neutral-50 last:border-0">
               <Skeleton type="text" class="!w-32" />
               <Skeleton type="text" class="!w-40" />
               <Skeleton type="text" class="!w-32" />
@@ -433,18 +433,18 @@ onMounted(() => {
 
           <!-- 空状态 -->
           <div v-else-if="filteredContracts.length === 0" class="p-12 text-center">
-            <div class="w-20 h-20 mx-auto rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-4">
-              <FileText class="w-10 h-10 text-gray-400" />
+            <div class="w-20 h-20 mx-auto rounded-xl bg-gradient-to-br from-neutral-100 to-neutral-200 flex items-center justify-center mb-4">
+              <FileText class="w-10 h-10 text-neutral-400" />
             </div>
-            <p class="text-lg font-bold text-gray-700">暂无合同</p>
-            <p class="text-sm text-gray-400 mt-2">在聊天中确认报价后可起草合同</p>
+            <p class="text-lg font-bold text-neutral-700">暂无合同</p>
+            <p class="text-sm text-neutral-400 mt-2">在聊天中确认报价后可起草合同</p>
           </div>
 
           <!-- 表格内容 -->
           <template v-else>
             <table class="w-full text-left border-collapse">
               <thead>
-                <tr class="bg-gray-50 text-gray-500 text-xs font-bold uppercase tracking-wider">
+                <tr class="bg-neutral-50 text-neutral-500 text-xs font-bold uppercase tracking-wider">
                   <th class="px-6 py-4">合同编号</th>
                   <th class="px-6 py-4">产品/标题</th>
                   <th class="px-6 py-4">交易对手</th>
@@ -454,19 +454,19 @@ onMounted(() => {
                   <th class="px-6 py-4 text-right">操作</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-100">
+              <tbody class="divide-y divide-neutral-100">
                 <tr
                   v-for="contract in paginatedContracts"
                   :key="contract.id"
-                  class="hover:bg-gray-50 transition-colors cursor-pointer"
+                  class="hover:bg-neutral-50 transition-colors cursor-pointer"
                   @click="viewContract(contract.id)"
                 >
-                  <td class="px-6 py-4 text-sm font-mono text-gray-500">
+                  <td class="px-6 py-4 text-sm font-mono text-neutral-500">
                     {{ contract.contractNo || '-' }}
                   </td>
-                  <td class="px-6 py-4 text-sm font-bold text-gray-900">
+                  <td class="px-6 py-4 text-sm font-bold text-neutral-900">
                     {{ contract.productName || '-' }}
-                    <span v-if="contract.quantity" class="text-gray-400 font-normal ml-2">
+                    <span v-if="contract.quantity" class="text-neutral-400 font-normal ml-2">
                       {{ contract.quantity }}{{ contract.unit }}
                     </span>
                   </td>
@@ -475,10 +475,10 @@ onMounted(() => {
                       {{ getCounterparty(contract) }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                  <td class="px-6 py-4 text-sm font-medium text-neutral-900">
                     ¥{{ formatAmount(contract.totalAmount) }}
                   </td>
-                  <td class="px-6 py-4 text-sm text-gray-500">
+                  <td class="px-6 py-4 text-sm text-neutral-500">
                     {{ formatDate(contract.createTime) }}
                   </td>
                   <td class="px-6 py-4 text-center">
@@ -508,14 +508,14 @@ onMounted(() => {
                       </button>
                       <button
                         v-if="contract.status === 0"
-                        class="text-red-500 hover:text-red-600"
+                        class="text-error-500 hover:text-error-600"
                         @click="handleDelete(contract)"
                       >
                         删除
                       </button>
                       <button
                         v-if="contract.status === 0 || contract.status === 1"
-                        class="text-amber-600 hover:text-amber-700"
+                        class="text-warning-600 hover:text-warning-700"
                         @click="handleCancel(contract)"
                       >
                         取消
@@ -527,33 +527,33 @@ onMounted(() => {
             </table>
 
             <!-- 分页 -->
-            <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-              <p class="text-xs text-gray-500">
+            <div class="px-6 py-4 border-t border-neutral-100 flex items-center justify-between">
+              <p class="text-xs text-neutral-500">
                 显示第 {{ (currentPage - 1) * pageSize + 1 }} 至 {{ Math.min(currentPage * pageSize, filteredContracts.length) }} 条，共 {{ filteredContracts.length }} 条记录
               </p>
               <div class="flex gap-1">
                 <button
-                  class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-400 disabled:opacity-50"
+                  class="w-8 h-8 flex items-center justify-center rounded border border-neutral-200 text-neutral-400 disabled:opacity-50"
                   :disabled="currentPage === 1"
                   @click="goToPage(currentPage - 1)"
                 >
                   <ChevronLeft class="w-4 h-4" />
                 </button>
                 <template v-for="(page, idx) in pageNumbers" :key="idx">
-                  <span v-if="page === '...'" class="px-1 text-gray-400 flex items-center">...</span>
+                  <span v-if="page === '...'" class="px-1 text-neutral-400 flex items-center">...</span>
                   <button
                     v-else
                     class="w-8 h-8 flex items-center justify-center rounded text-xs font-bold transition-colors"
                     :class="page === currentPage
                       ? 'bg-brand-600 text-white'
-                      : 'border border-gray-200 text-gray-600 hover:bg-gray-50'"
+                      : 'border border-neutral-200 text-neutral-600 hover:bg-neutral-50'"
                     @click="goToPage(page as number)"
                   >
                     {{ page }}
                   </button>
                 </template>
                 <button
-                  class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-600 disabled:opacity-50 disabled:text-gray-400"
+                  class="w-8 h-8 flex items-center justify-center rounded border border-neutral-200 text-neutral-600 disabled:opacity-50 disabled:text-neutral-400"
                   :disabled="currentPage === totalPages"
                   @click="goToPage(currentPage + 1)"
                 >
@@ -568,7 +568,7 @@ onMounted(() => {
       <!-- 右侧边栏 -->
       <aside class="w-80 flex-shrink-0 flex flex-col gap-6">
         <!-- 合同统计 -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="bg-white rounded-xl shadow-sm border border-neutral-100 p-6">
           <h3 class="text-sm font-bold mb-6 flex items-center gap-2">
             <BarChart3 class="w-4 h-4 text-brand-600" />
             合同统计
@@ -576,29 +576,29 @@ onMounted(() => {
           <div class="space-y-6">
             <!-- 待结算总额 -->
             <div>
-              <p class="text-xs text-gray-500 mb-1">待结算总额 (CNY)</p>
+              <p class="text-xs text-neutral-500 mb-1">待结算总额 (CNY)</p>
               <p class="text-2xl font-black text-brand-600">¥{{ formatAmount(stats.pendingTotal) }}</p>
             </div>
 
             <!-- 网格统计 -->
             <div class="grid grid-cols-2 gap-4">
-              <div class="bg-gray-50 p-3 rounded-lg">
-                <p class="text-[10px] text-gray-500 uppercase font-bold">本月新增</p>
+              <div class="bg-neutral-50 p-3 rounded-lg">
+                <p class="text-[10px] text-neutral-500 uppercase font-bold">本月新增</p>
                 <p class="text-lg font-bold">{{ stats.monthlyNew }} 份</p>
               </div>
-              <div class="bg-gray-50 p-3 rounded-lg">
-                <p class="text-[10px] text-gray-500 uppercase font-bold">完成率</p>
+              <div class="bg-neutral-50 p-3 rounded-lg">
+                <p class="text-[10px] text-neutral-500 uppercase font-bold">完成率</p>
                 <p class="text-lg font-bold">{{ stats.executionRate }}%</p>
               </div>
             </div>
 
             <!-- 进度条 -->
-            <div class="pt-4 border-t border-gray-100">
+            <div class="pt-4 border-t border-neutral-100">
               <div class="flex justify-between items-center text-xs mb-2">
-                <span class="text-gray-500">履约中合同占比</span>
+                <span class="text-neutral-500">履约中合同占比</span>
                 <span class="font-bold">{{ stats.total > 0 ? Math.round((stats.executing / stats.total) * 100) : 0 }}%</span>
               </div>
-              <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div class="w-full h-1.5 bg-neutral-100 rounded-full overflow-hidden">
                 <div
                   class="h-full bg-autumn-500 transition-all"
                   :style="{ width: `${stats.total > 0 ? (stats.executing / stats.total) * 100 : 0}%` }"
@@ -609,21 +609,21 @@ onMounted(() => {
         </div>
 
         <!-- 待办提醒 -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div class="bg-white rounded-xl shadow-sm border border-neutral-100 p-6">
           <h3 class="text-sm font-bold mb-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <AlertCircle class="w-4 h-4 text-amber-500" />
+              <AlertCircle class="w-4 h-4 text-warning-500" />
               待办提醒
             </div>
             <span
               v-if="todoItems.length > 0"
-              class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full"
+              class="bg-error-500 text-white text-[10px] px-1.5 py-0.5 rounded-full"
             >
               {{ todoItems.length }}
             </span>
           </h3>
 
-          <div v-if="todoItems.length === 0" class="text-center py-6 text-gray-400 text-sm">
+          <div v-if="todoItems.length === 0" class="text-center py-6 text-neutral-400 text-sm">
             暂无待办事项
           </div>
 
@@ -637,9 +637,9 @@ onMounted(() => {
               <div
                 class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                 :class="{
-                  'bg-amber-50 text-amber-600': item.type === 'sign',
+                  'bg-warning-50 text-warning-600': item.type === 'sign',
                   'bg-autumn-50 text-autumn-600': item.type === 'execute',
-                  'bg-red-50 text-red-600': item.type === 'warning'
+                  'bg-error-50 text-error-600': item.type === 'warning'
                 }"
               >
                 <Pen v-if="item.type === 'sign'" class="w-4 h-4" />
@@ -647,17 +647,17 @@ onMounted(() => {
                 <AlertCircle v-else class="w-4 h-4" />
               </div>
               <div class="min-w-0">
-                <p class="text-sm font-bold text-gray-900 group-hover:text-brand-600 transition-colors truncate">
+                <p class="text-sm font-bold text-neutral-900 group-hover:text-brand-600 transition-colors truncate">
                   {{ item.title }}
                 </p>
-                <p class="text-xs text-gray-400 mt-1">{{ item.desc }}</p>
+                <p class="text-xs text-neutral-400 mt-1">{{ item.desc }}</p>
               </div>
             </div>
           </div>
 
           <button
             v-if="stats.pending > 0 || stats.executing > 0"
-            class="w-full mt-6 py-2 text-xs font-bold text-gray-500 hover:text-brand-600 border border-dashed border-gray-200 rounded-lg transition-colors"
+            class="w-full mt-6 py-2 text-xs font-bold text-neutral-500 hover:text-brand-600 border border-dashed border-neutral-200 rounded-lg transition-colors"
             @click="switchTab('pending')"
           >
             查看全部待办

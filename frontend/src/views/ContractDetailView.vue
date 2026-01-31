@@ -246,20 +246,20 @@ onMounted(() => {
     <div class="mb-6 flex items-center justify-between">
       <div class="flex items-center gap-4">
         <button
-          class="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+          class="w-10 h-10 rounded-xl bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center transition-colors"
           @click="router.push('/contracts')"
         >
-          <ArrowLeft class="w-5 h-5 text-gray-600" />
+          <ArrowLeft class="w-5 h-5 text-neutral-600" />
         </button>
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">合同详情</h1>
-          <p class="text-sm text-gray-500 mt-0.5">{{ contract?.contractNo || '...' }}</p>
+          <h1 class="text-2xl font-bold text-neutral-900">合同详情</h1>
+          <p class="text-sm text-neutral-500 mt-0.5">{{ contract?.contractNo || '...' }}</p>
         </div>
       </div>
 
       <div class="flex gap-3">
         <button
-          class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold rounded-xl transition-all"
+          class="flex items-center gap-2 px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-sm font-bold rounded-xl transition-all"
           @click="loadContract"
         >
           <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
@@ -295,12 +295,12 @@ onMounted(() => {
     <div class="space-y-6">
       <!-- 加载状态 -->
       <div v-if="loading" class="flex items-center justify-center py-20">
-        <div class="text-gray-400">加载中...</div>
+        <div class="text-neutral-400">加载中...</div>
       </div>
 
       <div v-else-if="contract && documentData" class="max-w-5xl mx-auto space-y-6">
         <!-- 履约进度（已签署及之后的状态显示） -->
-        <div v-if="contract.status >= 2" class="bg-white rounded-xl border border-gray-200 p-6">
+        <div v-if="contract.status >= 2" class="bg-white rounded-xl border border-neutral-200 p-6">
           <MilestoneList
             ref="milestoneListRef"
             :contract-id="contract.id"
@@ -332,15 +332,15 @@ onMounted(() => {
         </div>
 
         <!-- PDF 哈希 -->
-        <div v-if="contract.pdfHash" class="bg-white rounded-xl border border-gray-200 p-6">
+        <div v-if="contract.pdfHash" class="bg-white rounded-xl border border-neutral-200 p-6">
           <div class="flex items-center gap-2 mb-3">
-            <Scale class="w-4 h-4 text-gray-500" />
-            <h3 class="text-sm font-bold text-gray-900">合同防伪码</h3>
+            <Scale class="w-4 h-4 text-neutral-500" />
+            <h3 class="text-sm font-bold text-neutral-900">合同防伪码</h3>
           </div>
-          <div class="bg-gray-50 rounded-xl p-3 font-mono text-xs text-gray-600 break-all">
+          <div class="bg-neutral-50 rounded-xl p-3 font-mono text-xs text-neutral-600 break-all">
             {{ contract.pdfHash }}
           </div>
-          <p class="text-xs text-gray-400 mt-2">
+          <p class="text-xs text-neutral-400 mt-2">
             此哈希值基于 SHA-256 算法生成，可用于验证合同 PDF 文件的完整性和真实性
           </p>
         </div>

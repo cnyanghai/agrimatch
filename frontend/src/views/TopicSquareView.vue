@@ -169,7 +169,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="bg-neutral-50 text-neutral-900 min-h-screen">
 
     <!-- 头部：知乎风格沉浸式 -->
     <header class="bg-white border-b sticky top-0 z-30 shadow-sm">
@@ -187,7 +187,7 @@ onMounted(() => {
                 ] as const)"
                 :key="tab.id"
                 class="relative h-16 px-1 flex items-center gap-1.5 text-sm font-bold transition-all group"
-                :class="activeTab === tab.id ? 'text-brand-600' : 'text-gray-500 hover:text-gray-900'"
+                :class="activeTab === tab.id ? 'text-brand-600' : 'text-neutral-500 hover:text-neutral-900'"
                 @click="onTabChange(tab.id)"
               >
                 <component :is="tab.icon" :size="16" :stroke-width="activeTab === tab.id ? 3 : 2" />
@@ -203,10 +203,10 @@ onMounted(() => {
                 v-model="keyword"
                 type="text" 
                 placeholder="搜索你感兴趣的话题..." 
-                class="w-full h-10 bg-gray-100 border-none rounded-full px-10 text-sm outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
+                class="w-full h-10 bg-neutral-100 border-none rounded-full px-10 text-sm outline-none focus:ring-2 focus:ring-brand-500/20 transition-all"
                 @keyup.enter="onSearch"
               />
-              <Search class="w-4 h-4 text-gray-400 absolute left-4 top-3 group-focus-within:text-brand-500 transition-colors" />
+              <Search class="w-4 h-4 text-neutral-400 absolute left-4 top-3 group-focus-within:text-brand-500 transition-colors" />
             </div>
           </div>
 
@@ -228,23 +228,23 @@ onMounted(() => {
         <div class="lg:col-span-8 space-y-4">
           
           <!-- 快速发布入口 (知乎风格集成卡片) -->
-          <Card padding="none" radius="2xl" class="overflow-hidden mb-6 border-none shadow-sm ring-1 ring-gray-100">
+          <Card padding="none" radius="2xl" class="overflow-hidden mb-6 border-none shadow-sm ring-1 ring-neutral-100">
             <div class="p-4 flex items-center gap-4">
-              <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold">
+              <div class="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-400 font-bold">
                 {{ displayName[0] }}
               </div>
               <button 
-                class="flex-1 h-10 bg-gray-100 rounded-lg px-4 text-left text-sm text-gray-400 font-medium hover:bg-gray-200 transition-colors"
+                class="flex-1 h-10 bg-neutral-100 rounded-lg px-4 text-left text-sm text-neutral-400 font-medium hover:bg-neutral-200 transition-colors"
                 @click="onPublishTalk"
               >
                 有什么行业见解想分享给大家？
               </button>
-              <div class="flex items-center gap-4 text-gray-400">
+              <div class="flex items-center gap-4 text-neutral-400">
                 <button class="hover:text-brand-600 transition-colors flex flex-col items-center" @click="onPublishTalk">
                   <MessageSquare :size="20" />
                   <span class="text-[10px] mt-0.5 font-bold">发文章</span>
                 </button>
-                <button class="hover:text-orange-500 transition-colors flex flex-col items-center" @click="onPublishTalk">
+                <button class="hover:text-accent-500 transition-colors flex flex-col items-center" @click="onPublishTalk">
                   <Plus :size="20" />
                   <span class="text-[10px] mt-0.5 font-bold">提问</span>
                 </button>
@@ -259,7 +259,7 @@ onMounted(() => {
               :key="post.id"
               padding="none"
               radius="2xl"
-              class="group transition-all hover:shadow-xl hover:shadow-brand-900/5 cursor-pointer border-none ring-1 ring-gray-100"
+              class="group transition-all hover:shadow-xl hover:shadow-brand-900/5 cursor-pointer border-none ring-1 ring-neutral-100"
               @click="go(`/talks/${post.id}`)"
             >
               <div class="p-4">
@@ -270,10 +270,10 @@ onMounted(() => {
                       <img v-if="post.avatar" :src="post.avatar" alt="头像" class="w-full h-full object-cover" />
                       <span v-else>{{ (post.nickName || post.userName || '?')[0] }}</span>
                     </div>
-                    <span class="text-xs font-bold text-gray-700 group-hover/author:text-brand-600 transition-colors">{{ post.nickName || post.userName }}</span>
+                    <span class="text-xs font-bold text-neutral-700 group-hover/author:text-brand-600 transition-colors">{{ post.nickName || post.userName }}</span>
                     <ExpertBadge v-if="post.isExpert" />
-                    <span class="text-gray-300 mx-1">·</span>
-                    <span class="text-xs text-gray-400">{{ formatTime(post.createTime) }}</span>
+                    <span class="text-neutral-300 mx-1">·</span>
+                    <span class="text-xs text-neutral-400">{{ formatTime(post.createTime) }}</span>
                   </div>
                   
                   <div class="flex items-center gap-2">
@@ -285,26 +285,26 @@ onMounted(() => {
                 <!-- 标题与摘要 -->
                 <div class="flex gap-6">
                   <div class="flex-1">
-                    <h3 class="text-lg font-black text-gray-900 mb-2 group-hover:text-brand-600 transition-colors">
+                    <h3 class="text-lg font-black text-neutral-900 mb-2 group-hover:text-brand-600 transition-colors">
                       {{ post.title }}
                     </h3>
-                    <p class="text-sm text-gray-500 leading-relaxed line-clamp-3 mb-3">
+                    <p class="text-sm text-neutral-500 leading-relaxed line-clamp-3 mb-3">
                       {{ stripHtml(post.content) }}
                     </p>
                   </div>
-                  <div class="w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-gray-100">
+                  <div class="w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-neutral-100">
                     <img :src="getPostCover(post)" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                 </div>
 
                 <!-- 交互行 -->
-                <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
+                <div class="flex items-center justify-between mt-3 pt-3 border-t border-neutral-50">
                   <div class="flex items-center gap-4">
-                    <button class="flex items-center gap-1.5 text-xs font-bold transition-all" :class="post.likedByMe ? 'text-red-500' : 'text-gray-400 hover:text-red-500'">
+                    <button class="flex items-center gap-1.5 text-xs font-bold transition-all" :class="post.likedByMe ? 'text-red-500' : 'text-neutral-400 hover:text-red-500'">
                       <Heart :size="18" :fill="post.likedByMe ? 'currentColor' : 'none'" />
                       {{ post.likeCount ?? 0 }}
                     </button>
-                    <button class="flex items-center gap-1.5 text-gray-400 hover:text-brand-600 text-xs font-bold transition-all">
+                    <button class="flex items-center gap-1.5 text-neutral-400 hover:text-brand-600 text-xs font-bold transition-all">
                       <MessageSquare :size="18" />
                       {{ post.commentCount ?? 0 }}
                     </button>
@@ -319,11 +319,11 @@ onMounted(() => {
 
             <!-- 空状态 -->
             <div v-if="!loading && posts.length === 0" class="py-24 text-center">
-              <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
+              <div class="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-6 text-neutral-300">
                 <MessageSquare :size="40" />
               </div>
-              <h3 class="text-lg font-bold text-gray-900 mb-2">暂无相关话题</h3>
-              <p class="text-sm text-gray-500 mb-8">换个搜索词或者去别的板块看看吧</p>
+              <h3 class="text-lg font-bold text-neutral-900 mb-2">暂无相关话题</h3>
+              <p class="text-sm text-neutral-500 mb-8">换个搜索词或者去别的板块看看吧</p>
               <button class="bg-brand-600 text-white px-8 py-2.5 rounded-xl font-bold transition-all active:scale-95" @click="activeTab = 'all'; loadPosts()">
                 返回全部话题
               </button>
@@ -335,7 +335,7 @@ onMounted(() => {
         <div class="lg:col-span-4 space-y-6">
           
           <!-- 我的帖子入口 -->
-          <Card v-if="isLoggedIn" radius="2xl" class="border-none shadow-sm ring-1 ring-gray-100 overflow-hidden mb-6">
+          <Card v-if="isLoggedIn" radius="2xl" class="border-none shadow-sm ring-1 ring-neutral-100 overflow-hidden mb-6">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center text-xs font-black shadow-lg shadow-brand-600/20 overflow-hidden">
@@ -343,8 +343,8 @@ onMounted(() => {
                   <span v-else>{{ displayName[0] }}</span>
                 </div>
                 <div>
-                  <p class="text-sm font-bold text-gray-900">{{ displayName }}</p>
-                  <p class="text-[10px] text-gray-400 font-medium">我的内容</p>
+                  <p class="text-sm font-bold text-neutral-900">{{ displayName }}</p>
+                  <p class="text-[10px] text-neutral-400 font-medium">我的内容</p>
                 </div>
               </div>
               <button 
@@ -357,9 +357,9 @@ onMounted(() => {
           </Card>
 
           <!-- 我的关注模块 -->
-          <Card radius="2xl" class="border-none shadow-sm ring-1 ring-gray-100 overflow-hidden">
+          <Card radius="2xl" class="border-none shadow-sm ring-1 ring-neutral-100 overflow-hidden">
             <div class="flex items-center justify-between mb-6">
-              <h4 class="text-base font-black text-gray-900 flex items-center gap-2">
+              <h4 class="text-base font-black text-neutral-900 flex items-center gap-2">
                 <div class="w-1.5 h-4 bg-brand-600 rounded-full"></div>
                 我的关注
               </h4>
@@ -377,21 +377,21 @@ onMounted(() => {
                   <span v-else>{{ (user.nickName || user.userName || '?')[0] }}</span>
                 </div>
                 <div class="min-w-0 flex-1">
-                  <div class="font-bold text-sm text-gray-900 truncate">
+                  <div class="font-bold text-sm text-neutral-900 truncate">
                     {{ user.nickName || user.userName }}
                   </div>
-                  <p class="text-[10px] text-gray-400 truncate mt-0.5">{{ user.position || '行业同仁' }} · {{ user.companyName || '个人' }}</p>
+                  <p class="text-[10px] text-neutral-400 truncate mt-0.5">{{ user.position || '行业同仁' }} · {{ user.companyName || '个人' }}</p>
                 </div>
-                <ArrowRight :size="14" class="text-gray-300 group-hover/exp:text-brand-600 transition-colors" />
+                <ArrowRight :size="14" class="text-neutral-300 group-hover/exp:text-brand-600 transition-colors" />
               </div>
             </div>
 
             <!-- 空状态 -->
             <div v-else-if="isLoggedIn" class="py-8 text-center">
-              <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+              <div class="w-12 h-12 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-4 text-neutral-300">
                 <Users :size="24" />
               </div>
-              <p class="text-xs text-gray-400 mb-4">关注感兴趣的用户，这里会显示他们的动态</p>
+              <p class="text-xs text-neutral-400 mb-4">关注感兴趣的用户，这里会显示他们的动态</p>
               <button 
                 class="bg-brand-600 text-white px-6 py-2 rounded-xl text-xs font-black transition-all active:scale-95"
                 @click="onTabChange('all')"
@@ -400,10 +400,10 @@ onMounted(() => {
 
             <!-- 未登录 -->
             <div v-else class="py-8 text-center">
-              <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+              <div class="w-12 h-12 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-4 text-neutral-300">
                 <Users :size="24" />
               </div>
-              <p class="text-xs text-gray-400 mb-4">登录后查看你的关注列表</p>
+              <p class="text-xs text-neutral-400 mb-4">登录后查看你的关注列表</p>
               <button 
                 class="border border-brand-600 text-brand-600 px-6 py-2 rounded-xl text-xs font-black transition-all active:scale-95 hover:bg-brand-50"
                 @click="requireAuth('/talks')"
@@ -412,10 +412,10 @@ onMounted(() => {
           </Card>
 
           <!-- 我的收藏模块 -->
-          <Card radius="2xl" class="border-none shadow-sm ring-1 ring-gray-100 overflow-hidden">
+          <Card radius="2xl" class="border-none shadow-sm ring-1 ring-neutral-100 overflow-hidden">
             <div class="flex items-center justify-between mb-6">
-              <h4 class="text-base font-black text-gray-900 flex items-center gap-2">
-                <Star :size="18" class="text-amber-500" fill="currentColor" />
+              <h4 class="text-base font-black text-neutral-900 flex items-center gap-2">
+                <Star :size="18" class="text-warning-500" fill="currentColor" />
                 我的收藏
               </h4>
               <button 
@@ -428,10 +428,10 @@ onMounted(() => {
             <div v-if="isLoggedIn && collectedPosts.length > 0" class="space-y-5">
               <div v-for="post in collectedPosts" :key="post.id" class="flex gap-3 cursor-pointer group/hot" @click="go(`/talks/${post.id}`)">
                 <div class="min-w-0 flex-1">
-                  <div class="text-sm font-bold text-gray-700 line-clamp-2 group-hover/hot:text-brand-600 transition-colors">
+                  <div class="text-sm font-bold text-neutral-700 line-clamp-2 group-hover/hot:text-brand-600 transition-colors">
                     {{ post.title }}
                   </div>
-                  <div class="flex items-center gap-3 mt-1 text-[10px] text-gray-400 font-medium">
+                  <div class="flex items-center gap-3 mt-1 text-[10px] text-neutral-400 font-medium">
                     <span class="flex items-center gap-1"><Heart :size="10" /> {{ post.likeCount || 0 }} 赞同</span>
                     <span>{{ formatTime(post.createTime) }}</span>
                   </div>
@@ -441,19 +441,19 @@ onMounted(() => {
 
             <!-- 空状态 -->
             <div v-else-if="isLoggedIn" class="py-8 text-center">
-              <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+              <div class="w-12 h-12 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-4 text-neutral-300">
                 <Star :size="24" />
               </div>
-              <p class="text-xs text-gray-400 mb-2">还没有收藏任何文章</p>
-              <p class="text-[10px] text-gray-400">收藏精彩文章，方便下次阅读</p>
+              <p class="text-xs text-neutral-400 mb-2">还没有收藏任何文章</p>
+              <p class="text-[10px] text-neutral-400">收藏精彩文章，方便下次阅读</p>
             </div>
 
             <!-- 未登录 -->
             <div v-else class="py-8 text-center">
-              <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+              <div class="w-12 h-12 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-4 text-neutral-300">
                 <Star :size="24" />
               </div>
-              <p class="text-xs text-gray-400 mb-4">登录后同步你的收藏夹</p>
+              <p class="text-xs text-neutral-400 mb-4">登录后同步你的收藏夹</p>
               <button 
                 class="border border-brand-600 text-brand-600 px-6 py-2 rounded-xl text-xs font-black transition-all active:scale-95 hover:bg-brand-50"
                 @click="requireAuth('/talks')"
@@ -462,7 +462,7 @@ onMounted(() => {
           </Card>
 
           <!-- 社区公约 -->
-          <div class="px-4 text-[10px] text-gray-400 font-medium leading-relaxed">
+          <div class="px-4 text-[10px] text-neutral-400 font-medium leading-relaxed">
             <div class="flex flex-wrap gap-x-4 gap-y-2 mb-4">
               <a href="#" class="hover:text-brand-600 transition-colors">社区指南</a>
               <a href="#" class="hover:text-brand-600 transition-colors">版权申明</a>

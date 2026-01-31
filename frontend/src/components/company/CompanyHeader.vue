@@ -43,7 +43,7 @@ function formatTime(time?: string) {
   <header class="bg-slate-900 rounded-2xl overflow-hidden shadow-2xl mb-12 text-white relative">
     <div class="absolute inset-0 opacity-10 pointer-events-none" aria-hidden="true">
       <div class="absolute top-0 right-0 w-96 h-96 bg-brand-500 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
-      <div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-500 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
+      <div class="absolute bottom-0 left-0 w-64 h-64 bg-action-500 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
     </div>
     <div class="relative z-10 p-8 md:p-12 flex flex-col md:flex-row gap-10 items-start">
       <div
@@ -57,7 +57,7 @@ function formatTime(time?: string) {
         </template>
       </div>
       <div class="flex-1 min-w-0">
-        <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-4">
+        <h1 class="text-2xl font-bold text-neutral-900 tracking-tight mb-4">
           {{ companyName }}
         </h1>
 
@@ -67,11 +67,11 @@ function formatTime(time?: string) {
             {{ province }} · {{ city }} · {{ district }}
           </div>
           <div v-if="createTime" class="flex items-center gap-2">
-            <Calendar :size="16" class="text-blue-500" aria-hidden="true" />
+            <Calendar :size="16" class="text-action-500" aria-hidden="true" />
             入驻时间：{{ formatTime(createTime) }}
           </div>
           <div v-if="legalPerson" class="flex items-center gap-2">
-            <User :size="16" class="text-purple-500" aria-hidden="true" />
+            <User :size="16" class="text-action-500" aria-hidden="true" />
             法人：{{ legalPerson }}
           </div>
         </div>

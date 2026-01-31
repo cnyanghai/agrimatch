@@ -143,9 +143,9 @@ const consoleModules = computed(() => [
 // 统计数据 - 纯展示信息，不可点击
 const statsData = computed(() => [
   { label: '我的发布', value: dashboard.value?.myActiveListingCount ?? 0, unit: '个活跃', icon: FilePlus, iconBg: 'bg-brand-50', iconColor: 'text-brand-500' },
-  { label: '执行中合同', value: dashboard.value?.activeContractCount ?? 0, unit: '份', icon: FileCheck, iconBg: 'bg-blue-50', iconColor: 'text-blue-500' },
-  { label: '累计签署', value: dashboard.value?.totalSignedContractCount ?? 0, unit: '份合同', icon: FileText, iconBg: 'bg-purple-50', iconColor: 'text-purple-500' },
-  { label: '累计成交', value: formatAmount(dashboard.value?.totalDealAmount), unit: '元', icon: Coins, iconBg: 'bg-amber-50', iconColor: 'text-amber-500' }
+  { label: '执行中合同', value: dashboard.value?.activeContractCount ?? 0, unit: '份', icon: FileCheck, iconBg: 'bg-action-50', iconColor: 'text-action-500' },
+  { label: '累计签署', value: dashboard.value?.totalSignedContractCount ?? 0, unit: '份合同', icon: FileText, iconBg: 'bg-action-50', iconColor: 'text-action-500' },
+  { label: '累计成交', value: formatAmount(dashboard.value?.totalDealAmount), unit: '元', icon: Coins, iconBg: 'bg-warning-50', iconColor: 'text-warning-500' }
 ])
 
 // 获取图标容器的样式类（统一为 slate 风格，与首页对齐）
@@ -157,10 +157,10 @@ function getIconClass() {
 // 深色待办面板的背景色
 function getPendingBgClass(color?: string): string {
   const map: Record<string, string> = {
-    amber: 'bg-amber-500/20',
-    red: 'bg-red-500/20',
-    blue: 'bg-blue-500/20',
-    purple: 'bg-purple-500/20'
+    amber: 'bg-warning-500/20',
+    red: 'bg-error-500/20',
+    blue: 'bg-action-500/20',
+    purple: 'bg-action-500/20'
   }
   return map[color || 'amber'] || map.amber
 }
@@ -168,10 +168,10 @@ function getPendingBgClass(color?: string): string {
 // 深色待办面板的图标色
 function getPendingIconClass(color?: string): string {
   const map: Record<string, string> = {
-    amber: 'text-amber-400',
-    red: 'text-red-400',
-    blue: 'text-blue-400',
-    purple: 'text-purple-400'
+    amber: 'text-warning-400',
+    red: 'text-error-400',
+    blue: 'text-action-400',
+    purple: 'text-action-400'
   }
   return map[color || 'amber'] || map.amber
 }
@@ -221,10 +221,10 @@ onMounted(() => {
         <Card radius="2xl" padding="lg" shadow="sm" class="lg:col-span-3 relative overflow-hidden group">
           <div class="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-brand-50/50 to-transparent"></div>
           <div class="relative z-10">
-            <h2 class="text-3xl font-black text-gray-900 mb-2 tracking-tight">
+            <h2 class="text-3xl font-black text-neutral-900 mb-2 tracking-tight">
                 {{ greeting }}，{{ auth.me?.nickName || auth.me?.userName || '用户' }}
               </h2>
-            <p class="text-gray-500 max-w-lg leading-relaxed">
+            <p class="text-neutral-500 max-w-lg leading-relaxed">
               欢迎回到沃谷农牧供应链管理控制台。
                 <template v-if="totalPending > 0">
                 您当前有 <span class="text-brand-600 font-bold underline decoration-2 underline-offset-4">{{ totalPending }}</span> 项待办事项需要关注。
@@ -317,7 +317,7 @@ onMounted(() => {
             </div>
           </div>
           <div class="flex items-baseline gap-2">
-            <span class="text-3xl font-black text-gray-900">{{ stat.value ?? 0 }}</span>
+            <span class="text-3xl font-black text-neutral-900">{{ stat.value ?? 0 }}</span>
             <span class="text-xs text-slate-400">{{ stat.unit }}</span>
           </div>
         </div>
@@ -338,7 +338,7 @@ onMounted(() => {
 
           <!-- 标题与描述 -->
           <div class="pr-6">
-            <h4 class="font-bold text-gray-900 group-hover:text-brand-600 transition-colors mb-0.5 text-sm">
+            <h4 class="font-bold text-neutral-900 group-hover:text-brand-600 transition-colors mb-0.5 text-sm">
               {{ module.title }}
             </h4>
             <p class="text-[10px] text-slate-400 leading-tight">
@@ -354,7 +354,7 @@ onMounted(() => {
           <!-- 角标 -->
           <div v-if="module.badge" :class="[
             'absolute top-3 right-3 min-w-5 h-5 px-1.5 rounded-full text-[9px] font-bold flex items-center justify-center shadow-sm',
-            module.badgeType === 'points' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'
+            module.badgeType === 'points' ? 'bg-warning-500 text-white' : 'bg-error-500 text-white'
           ]">
             {{ module.badgeType === 'points' ? module.badge.toLocaleString() : (module.badge > 99 ? '99+' : module.badge) }}
           </div>

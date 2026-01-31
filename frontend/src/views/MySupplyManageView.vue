@@ -880,20 +880,20 @@ async function applyTemplate(template: SupplyTemplateResponse) {
     <!-- 页面标题 + Tab 切换 -->
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div class="flex items-center gap-6">
-        <h1 class="text-2xl font-bold text-gray-900">供应管理</h1>
+        <h1 class="text-2xl font-bold text-neutral-900">供应管理</h1>
         <!-- Tab 切换 -->
-        <div class="flex items-center bg-gray-100 rounded-xl p-1">
+        <div class="flex items-center bg-neutral-100 rounded-xl p-1">
           <button
             :class="[
               'px-4 py-2 rounded-lg text-sm font-bold transition-all',
               activeTab === 'publish'
                 ? 'bg-white text-brand-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                : 'text-neutral-500 hover:text-neutral-700'
             ]"
             @click="activeTab = 'publish'"
           >
             <span class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full" :class="activeTab === 'publish' ? 'bg-brand-500' : 'bg-gray-300'"></span>
+              <span class="w-2 h-2 rounded-full" :class="activeTab === 'publish' ? 'bg-brand-500' : 'bg-neutral-300'"></span>
               发布供应
             </span>
           </button>
@@ -902,12 +902,12 @@ async function applyTemplate(template: SupplyTemplateResponse) {
               'px-4 py-2 rounded-lg text-sm font-bold transition-all',
               activeTab === 'published'
                 ? 'bg-white text-brand-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                : 'text-neutral-500 hover:text-neutral-700'
             ]"
             @click="activeTab = 'published'"
           >
             <span class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full" :class="activeTab === 'published' ? 'bg-brand-500' : 'bg-gray-300'"></span>
+              <span class="w-2 h-2 rounded-full" :class="activeTab === 'published' ? 'bg-brand-500' : 'bg-neutral-300'"></span>
               已发布
               <span v-if="activeSuppliesCount > 0" class="px-1.5 py-0.5 bg-brand-100 text-brand-600 text-[10px] rounded-full">
                 {{ activeSuppliesCount }}
@@ -928,21 +928,21 @@ async function applyTemplate(template: SupplyTemplateResponse) {
           <Transition name="dropdown">
             <div
               v-if="templateMenuOpen"
-              class="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-200 py-1 z-50"
+              class="absolute right-0 mt-2 w-40 bg-white rounded-xl shadow-lg border border-neutral-200 py-1 z-50"
               @click="templateMenuOpen = false"
             >
               <button
-                class="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                class="w-full px-4 py-2.5 text-left text-sm font-medium text-neutral-700 hover:bg-neutral-50 flex items-center gap-2"
                 @click="templatePickerOpen = true"
               >
-                <FileText class="w-4 h-4 text-gray-400" />
+                <FileText class="w-4 h-4 text-neutral-400" />
                 选择模板
               </button>
               <button
-                class="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                class="w-full px-4 py-2.5 text-left text-sm font-medium text-neutral-700 hover:bg-neutral-50 flex items-center gap-2"
                 @click="saveAsTemplate"
               >
-                <Save class="w-4 h-4 text-gray-400" />
+                <Save class="w-4 h-4 text-neutral-400" />
                 保存为模板
               </button>
             </div>
@@ -972,16 +972,16 @@ async function applyTemplate(template: SupplyTemplateResponse) {
     <!-- ========== 已发布 Tab 内容 ========== -->
     <template v-if="activeTab === 'published'">
       <!-- 筛选栏 -->
-      <div class="bg-white rounded-xl border border-gray-200 p-4">
+      <div class="bg-white rounded-xl border border-neutral-200 p-4">
         <div class="flex flex-wrap items-center gap-4">
           <!-- 搜索框 -->
           <div class="relative flex-1 min-w-[200px] max-w-[300px]">
-            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <input
               v-model="listFilters.categoryName"
               type="text"
               placeholder="搜索品类..."
-              class="w-full pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:border-brand-500 outline-none transition-all"
+              class="w-full pl-10 pr-4 py-2.5 border-2 border-neutral-200 rounded-xl text-sm focus:border-brand-500 outline-none transition-all"
               @keyup.enter="handleListFilter"
             />
           </div>
@@ -995,7 +995,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                 'px-3 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5',
                 listFilters.status === opt.value
                   ? 'bg-brand-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
               ]"
               @click="listFilters.status = opt.value; handleListFilter()"
             >
@@ -1006,7 +1006,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
 
           <!-- 统计 -->
           <div class="ml-auto">
-            <span class="px-3 py-1.5 bg-gray-50 text-gray-600 text-xs font-bold rounded-full border border-gray-200">
+            <span class="px-3 py-1.5 bg-neutral-50 text-neutral-600 text-xs font-bold rounded-full border border-neutral-200">
               共 {{ listPagination.total }} 条
             </span>
           </div>
@@ -1014,7 +1014,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
       </div>
 
       <!-- 供应列表（紧凑表格风格） -->
-      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
         <!-- 加载状态 -->
         <div v-if="listLoading && supplies.length === 0" class="p-6 space-y-4">
           <Skeleton type="card" />
@@ -1036,7 +1036,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
           <div
             v-for="(s, index) in pagedSupplies"
             :key="s.id"
-            class="bg-white rounded-2xl border border-gray-200 p-4 hover:shadow-md hover:border-brand-200 transition-all duration-200 animate-stagger-in"
+            class="bg-white rounded-2xl border border-neutral-200 p-4 hover:shadow-md hover:border-brand-200 transition-all duration-200 animate-stagger-in"
             :style="{ animationDelay: `${index * 40}ms` }"
           >
             <ProductInfoRow
@@ -1060,14 +1060,14 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                   <div
                     v-for="bq in (s.basisQuotes || []).slice(0, 3)"
                     :key="bq.id"
-                    class="inline-flex items-center gap-1.5 px-2 py-1 bg-amber-50 border border-amber-200 rounded-lg text-xs"
+                    class="inline-flex items-center gap-1.5 px-2 py-1 bg-warning-50 border border-warning-200 rounded-lg text-xs"
                   >
-                    <span class="font-bold text-gray-700">{{ bq.contractName || bq.contractCode }}</span>
+                    <span class="font-bold text-neutral-700">{{ bq.contractName || bq.contractCode }}</span>
                     <span :class="bq.basisPrice >= 0 ? 'text-red-500' : 'text-green-500'" class="font-bold">
                       {{ bq.basisPrice >= 0 ? '+' : '' }}{{ bq.basisPrice }}
                     </span>
-                    <span class="text-gray-400">·</span>
-                    <span class="font-medium text-gray-600">{{ bq.remainingQty ?? bq.availableQty }}吨</span>
+                    <span class="text-neutral-400">·</span>
+                    <span class="font-medium text-neutral-600">{{ bq.remainingQty ?? bq.availableQty }}吨</span>
                   </div>
                 </div>
               </template>
@@ -1076,9 +1076,9 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                   :class="[
                     'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap',
                     s.status === 0 ? 'bg-brand-50 text-brand-600' :
-                    s.status === 1 ? 'bg-amber-50 text-amber-600' :
-                    s.status === 3 ? 'bg-emerald-50 text-emerald-600' :
-                    'bg-gray-100 text-gray-500'
+                    s.status === 1 ? 'bg-warning-50 text-warning-600' :
+                    s.status === 3 ? 'bg-brand-50 text-brand-600' :
+                    'bg-neutral-100 text-neutral-500'
                   ]"
                 >
                   {{ getStatusIcon(s.status) }} {{ getStatusText(s.status) }}
@@ -1088,12 +1088,12 @@ async function applyTemplate(template: SupplyTemplateResponse) {
               <template #actions>
                 <button
                   v-if="s.status !== 3"
-                  class="px-2 py-0.5 rounded text-[11px] font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+                  class="px-2 py-0.5 rounded text-[11px] font-medium text-neutral-600 hover:bg-neutral-100 transition-colors"
                   @click="openEdit(s)"
                 >编辑</button>
                 <button
                   v-if="s.status === 0 || s.status === 1"
-                  class="px-2 py-0.5 rounded text-[11px] font-medium text-red-600 hover:bg-red-50 transition-colors"
+                  class="px-2 py-0.5 rounded text-[11px] font-medium text-error-600 hover:bg-error-50 transition-colors"
                   @click="revokeSupply(s)"
                 >下架</button>
                 <button
@@ -1126,55 +1126,55 @@ async function applyTemplate(template: SupplyTemplateResponse) {
       <!-- 左侧表单区域 -->
       <div class="lg:col-span-2 space-y-6">
         <!-- 发布信息 -->
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-          <div class="p-5 border-b border-gray-200 flex items-center gap-2">
+        <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-neutral-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-slate-900 rounded-full"></div>
-            <h3 class="text-2xl font-bold text-gray-900">发布信息</h3>
+            <h3 class="text-2xl font-bold text-neutral-900">发布信息</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">公司名称</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">公司名称</label>
                 <input
                   v-model="publishForm.companyName"
                   type="text"
                   placeholder="默认使用公司名称"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发布人</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">发布人</label>
                 <input
                   v-model="publisherNameInput"
                   type="text"
                   placeholder="默认使用个人信息"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
             </div>
             <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发货地址</label>
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">发货地址</label>
               <input
                 v-model="publishForm.shipAddress"
                 type="text"
                 placeholder="请输入发货地址"
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
               />
             </div>
-            <p class="text-xs text-gray-400">以上信息仅用于本次发布，不会修改您的公司/个人资料</p>
+            <p class="text-xs text-neutral-400">以上信息仅用于本次发布，不会修改您的公司/个人资料</p>
           </div>
         </div>
 
         <!-- 基础信息 -->
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 50ms">
-          <div class="p-5 border-b border-gray-200 flex items-center gap-2">
+        <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in" style="animation-delay: 50ms">
+          <div class="p-5 border-b border-neutral-200 flex items-center gap-2">
             <div class="w-1.5 h-5 bg-brand-600 rounded-full"></div>
-            <h3 class="text-2xl font-bold text-gray-900">基础信息</h3>
+            <h3 class="text-2xl font-bold text-neutral-900">基础信息</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="space-y-4">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
                   业态与品类 <span class="text-red-500">*</span>
                 </label>
                 <SchemaAwareCategoryPicker
@@ -1185,7 +1185,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
                   {{ currentUnitConfig.quantityLabel }}
                 </label>
                 <el-input-number
@@ -1198,14 +1198,14 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                 />
               </div>
               <div v-if="showBasisOption">
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">报价方式</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">报价方式</label>
                 <el-radio-group v-model="publishForm.priceType" class="w-full">
                   <el-radio-button :value="0" class="flex-1">现货一口价</el-radio-button>
                   <el-radio-button :value="1" class="flex-1">基差报价</el-radio-button>
                 </el-radio-group>
               </div>
               <div v-else>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
                   {{ currentUnitConfig.priceLabel }} <span class="text-red-500">*</span>
                 </label>
                 <el-input-number
@@ -1222,7 +1222,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             <!-- 现货一口价输入 -->
             <div v-if="showBasisOption && publishForm.priceType === 0" class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
                   {{ currentUnitConfig.priceLabel }} <span class="text-red-500">*</span>
                 </label>
                 <el-input-number
@@ -1240,12 +1240,12 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             <div v-if="showBasisOption && publishForm.priceType === 1" class="space-y-4">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                  <TrendingUp class="w-4 h-4 text-amber-500" />
-                  <span class="text-sm font-bold text-gray-700">基差报价明细</span>
+                  <TrendingUp class="w-4 h-4 text-warning-500" />
+                  <span class="text-sm font-bold text-neutral-700">基差报价明细</span>
                 </div>
                 <button
                   type="button"
-                  class="flex items-center gap-1 px-3 py-1.5 bg-amber-50 text-amber-600 rounded-lg text-sm font-bold hover:bg-amber-100 transition-all"
+                  class="flex items-center gap-1 px-3 py-1.5 bg-warning-50 text-warning-600 rounded-lg text-sm font-bold hover:bg-warning-100 transition-all"
                   @click="addBasisQuote"
                 >
                   <Plus class="w-4 h-4" />
@@ -1253,16 +1253,16 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                 </button>
               </div>
               
-              <div class="bg-amber-50/50 rounded-xl p-4 border border-amber-100">
-                <div v-if="basisQuotes.length === 0" class="text-center py-4 text-gray-500 text-sm">
+              <div class="bg-warning-50/50 rounded-xl p-4 border border-warning-100">
+                <div v-if="basisQuotes.length === 0" class="text-center py-4 text-neutral-500 text-sm">
                   点击"添加合约"开始配置基差报价
                 </div>
                 <div v-else class="space-y-4">
-                  <div v-for="(quote, index) in basisQuotes" :key="index" class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm transition-all hover:shadow-md">
+                  <div v-for="(quote, index) in basisQuotes" :key="index" class="bg-white rounded-xl p-4 border border-neutral-200 shadow-sm transition-all hover:shadow-md">
                     <div class="flex flex-col md:flex-row md:items-start gap-4">
                       <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="space-y-1">
-                          <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">1. 选择期货合约</label>
+                          <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest">1. 选择期货合约</label>
                           <el-select v-model="quote.contractCode" placeholder="选择活跃合约" class="w-full neo-select" filterable>
                             <el-option
                               v-for="c in getAvailableContracts(quote.contractCode)"
@@ -1275,14 +1275,14 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                                 <div class="flex items-center gap-2">
                                   <span v-if="c.lastPrice" class="text-xs font-bold">¥{{ c.lastPrice }}</span>
                                   <span v-if="c.isTrading" class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
-                                  <span v-else class="text-[8px] text-gray-400">已收盘</span>
+                                  <span v-else class="text-[8px] text-neutral-400">已收盘</span>
                                 </div>
                               </div>
                             </el-option>
                           </el-select>
                         </div>
                         <div class="space-y-1">
-                          <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">2. 设定基差 (元/吨)</label>
+                          <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest">2. 设定基差 (元/吨)</label>
                           <el-input-number 
                             v-model="quote.basisPrice" 
                             :step="5" 
@@ -1293,7 +1293,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                           />
                         </div>
                         <div class="space-y-1">
-                          <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">3. 合约可售量 (吨)</label>
+                          <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-widest">3. 合约可售量 (吨)</label>
                           <el-input-number v-model="quote.availableQty" :min="0" :step="100" :controls="false" placeholder="输入分配量" class="w-full neo-input-number" />
                         </div>
                         <div class="bg-brand-50/50 rounded-xl p-3 border border-brand-100 flex flex-col justify-center">
@@ -1305,14 +1305,14 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                               </span>
                               <span class="text-xs font-bold text-brand-500">/吨</span>
                             </template>
-                            <span v-else class="text-sm font-bold text-gray-400 italic">等待选择合约</span>
+                            <span v-else class="text-sm font-bold text-neutral-400 italic">等待选择合约</span>
                           </div>
                         </div>
                       </div>
                       
                       <button
                         type="button"
-                        class="self-end md:self-start p-2.5 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all shrink-0  shadow-sm"
+                        class="self-end md:self-start p-2.5 rounded-xl bg-error-50 text-error-500 hover:bg-error-500 hover:text-white transition-all shrink-0  shadow-sm"
                         title="移除此合约"
                         @click="removeBasisQuote(index)"
                       >
@@ -1321,42 +1321,42 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                     </div>
 
                     <!-- 行情实时面板 -->
-                    <div v-if="quote.contractCode && getContractByCode(quote.contractCode)" class="mt-4 pt-4 border-t border-dashed border-gray-200 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs">
+                    <div v-if="quote.contractCode && getContractByCode(quote.contractCode)" class="mt-4 pt-4 border-t border-dashed border-neutral-200 flex flex-wrap items-center gap-y-2 gap-x-6 text-xs">
                       <div class="flex items-center gap-2">
                         <div 
                           class="w-1.5 h-1.5 rounded-full" 
-                          :class="getContractByCode(quote.contractCode)?.isTrading ? 'bg-brand-500 animate-pulse' : 'bg-gray-400'"
+                          :class="getContractByCode(quote.contractCode)?.isTrading ? 'bg-brand-500 animate-pulse' : 'bg-neutral-400'"
                         ></div>
-                        <span class="text-gray-500 font-medium">
+                        <span class="text-neutral-500 font-medium">
                           {{ getContractByCode(quote.contractCode)?.isTrading ? '期货实时报价' : '盘面参考价' }}:
                         </span>
-                        <span class="font-black text-gray-900 text-sm italic">¥{{ getContractByCode(quote.contractCode)?.lastPrice || '-' }}</span>
-                        <span v-if="!getContractByCode(quote.contractCode)?.isTrading" class="text-[10px] text-gray-400 font-bold bg-gray-100 px-1.5 py-0.5 rounded ml-1">
+                        <span class="font-black text-neutral-900 text-sm italic">¥{{ getContractByCode(quote.contractCode)?.lastPrice || '-' }}</span>
+                        <span v-if="!getContractByCode(quote.contractCode)?.isTrading" class="text-[10px] text-neutral-400 font-bold bg-neutral-100 px-1.5 py-0.5 rounded ml-1">
                           {{ getContractByCode(quote.contractCode)?.lastPrice === getContractByCode(quote.contractCode)?.prevClose ? '昨收' : '已收盘' }}
                         </span>
                       </div>
                       
                       <div v-if="quote.basisPrice !== undefined" class="flex items-center gap-2">
-                        <span class="text-gray-500 font-medium">当前基差:</span>
+                        <span class="text-neutral-500 font-medium">当前基差:</span>
                         <span class="font-black px-2 py-0.5 rounded" :class="(quote.basisPrice || 0) >= 0 ? 'bg-red-50 text-red-600' : 'bg-brand-50 text-brand-600'">
                           {{ (quote.basisPrice || 0) >= 0 ? '+' : '' }}{{ quote.basisPrice }}
                         </span>
                       </div>
                       
-                      <div v-if="getContractByCode(quote.contractCode)?.priceUpdateTime" class="ml-auto flex items-center gap-1 text-gray-400">
+                      <div v-if="getContractByCode(quote.contractCode)?.priceUpdateTime" class="ml-auto flex items-center gap-1 text-neutral-400">
                         <Clock class="w-3 h-3" />
                         <span>数据更新: {{ new Date(getContractByCode(quote.contractCode)!.priceUpdateTime!).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="mt-4 space-y-2 bg-amber-50 p-4 rounded-xl border border-amber-100/50">
-                  <div class="flex items-start gap-2 text-xs text-amber-700">
-                    <div class="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1 shrink-0"></div>
+                <div class="mt-4 space-y-2 bg-warning-50 p-4 rounded-xl border border-warning-100/50">
+                  <div class="flex items-start gap-2 text-xs text-warning-700">
+                    <div class="w-1.5 h-1.5 rounded-full bg-warning-500 mt-1 shrink-0"></div>
                     <p class="font-medium">核心公式：核算远期价 = 期货盘面报价 + 您设定的基差（升水为正，贴水为负）。</p>
                   </div>
-                  <div class="flex items-start gap-2 text-xs text-amber-600/80 italic">
-                    <div class="w-1.5 h-1.5 rounded-full bg-amber-400/50 mt-1 shrink-0"></div>
+                  <div class="flex items-start gap-2 text-xs text-warning-600/80 italic">
+                    <div class="w-1.5 h-1.5 rounded-full bg-warning-400/50 mt-1 shrink-0"></div>
                     <p>法律提示：基差报价随盘面实时变动，最终结算以成交时点盘面价+基差为准。如遇休盘，最新价将参考前一交易日收盘价。</p>
                   </div>
                 </div>
@@ -1366,13 +1366,13 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         </div>
 
         <!-- 规格参数 -->
-        <div v-if="categoryParams.length > 0" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 100ms">
-          <div class="p-5 border-b border-gray-200 flex items-center justify-between">
+        <div v-if="categoryParams.length > 0" class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in" style="animation-delay: 100ms">
+          <div class="p-5 border-b border-neutral-200 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-5 bg-brand-500 rounded-full"></div>
-              <h3 class="text-2xl font-bold text-gray-900">规格参数</h3>
+              <h3 class="text-2xl font-bold text-neutral-900">规格参数</h3>
             </div>
-            <span class="text-xs text-gray-400">选填</span>
+            <span class="text-xs text-neutral-400">选填</span>
           </div>
           <div class="p-5">
             <CategoryParamsForm
@@ -1384,15 +1384,15 @@ async function applyTemplate(template: SupplyTemplateResponse) {
         </div>
 
         <!-- 物流与交付 -->
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in" style="animation-delay: 150ms">
-          <div class="p-5 border-b border-gray-200 flex items-center gap-2">
-            <div class="w-1.5 h-5 bg-amber-500 rounded-full"></div>
-            <h3 class="text-2xl font-bold text-gray-900">物流与交付</h3>
+        <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in" style="animation-delay: 150ms">
+          <div class="p-5 border-b border-neutral-200 flex items-center gap-2">
+            <div class="w-1.5 h-5 bg-warning-500 rounded-full"></div>
+            <h3 class="text-2xl font-bold text-neutral-900">物流与交付</h3>
           </div>
           <div class="p-5 space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发布有效期</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">发布有效期</label>
                 <el-select v-model="publishForm.expireMinutes" clearable class="w-full neo-select">
                   <el-option label="1小时" :value="60" />
                   <el-option label="1天" :value="1440" />
@@ -1402,7 +1402,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                 </el-select>
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">包装方式</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">包装方式</label>
                 <el-select v-model="publishForm.packaging" class="w-full neo-select">
                   <el-option
                     v-for="opt in currentSchemaConfig.packagingOptions"
@@ -1413,7 +1413,7 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                 </el-select>
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">交付方式</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">交付方式</label>
                 <el-select v-model="publishForm.deliveryMode" class="w-full neo-select">
                   <el-option
                     v-for="opt in currentSchemaConfig.deliveryOptions"
@@ -1426,14 +1426,14 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">付款方式</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">付款方式</label>
                 <el-select v-model="publishForm.paymentMethod" class="w-full neo-select">
                   <el-option label="现款" value="现款" />
                   <el-option label="账期" value="账期" />
                 </el-select>
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发票类型</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">发票类型</label>
                 <el-select v-model="publishForm.invoiceType" clearable class="w-full neo-select">
                   <el-option label="普通发票" value="普通发票" />
                   <el-option label="增值税发票" value="增值税发票" />
@@ -1442,12 +1442,12 @@ async function applyTemplate(template: SupplyTemplateResponse) {
               </div>
             </div>
             <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">补充说明</label>
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">补充说明</label>
               <textarea
                 v-model="publishForm.remark"
                 rows="3"
                 placeholder="备注（可选）"
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+                class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
               ></textarea>
             </div>
             <div class="flex justify-end gap-3 pt-2">
@@ -1466,10 +1466,10 @@ async function applyTemplate(template: SupplyTemplateResponse) {
       
       <!-- 右侧预览区域 -->
       <div class="lg:col-span-1">
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden sticky top-24 animate-fade-in" style="animation-delay: 200ms">
-          <div class="p-5 border-b border-gray-200">
-            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">summary</div>
-            <h3 class="text-2xl font-bold text-gray-900 mt-1">发布前确认</h3>
+        <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden sticky top-24 animate-fade-in" style="animation-delay: 200ms">
+          <div class="p-5 border-b border-neutral-200">
+            <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">summary</div>
+            <h3 class="text-2xl font-bold text-neutral-900 mt-1">发布前确认</h3>
           </div>
           
           <div class="p-5 max-h-[70vh] overflow-y-auto">
@@ -1483,13 +1483,13 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             </div>
             <div v-else class="space-y-3">
               <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 rounded-xl p-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">公司</div>
-                  <div class="mt-1 font-bold text-gray-900 truncate text-sm">{{ publishForm.companyName || '未指定' }}</div>
+                <div class="bg-neutral-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">公司</div>
+                  <div class="mt-1 font-bold text-neutral-900 truncate text-sm">{{ publishForm.companyName || '未指定' }}</div>
                 </div>
-                <div class="bg-gray-50 rounded-xl p-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">发布人</div>
-                  <div class="mt-1 font-bold text-gray-900 truncate text-sm">{{ publisherNameInput || publisherName }}</div>
+                <div class="bg-neutral-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">发布人</div>
+                  <div class="mt-1 font-bold text-neutral-900 truncate text-sm">{{ publisherNameInput || publisherName }}</div>
                 </div>
               </div>
               <div class="bg-brand-50 rounded-xl p-3 border border-brand-100">
@@ -1500,37 +1500,37 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                 <div class="mt-1 font-bold text-brand-700">{{ previewData.categoryName }}</div>
               </div>
               <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 rounded-xl p-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">数量</div>
-                  <div class="mt-1 font-bold text-gray-900">{{ previewData.quantity }} {{ currentUnitConfig.quantityUnit }}</div>
+                <div class="bg-neutral-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">数量</div>
+                  <div class="mt-1 font-bold text-neutral-900">{{ previewData.quantity }} {{ currentUnitConfig.quantityUnit }}</div>
                 </div>
-                <div v-if="publishForm.priceType === 0" class="bg-gray-50 rounded-xl p-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">单价</div>
+                <div v-if="publishForm.priceType === 0" class="bg-neutral-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">单价</div>
                   <div class="mt-1 font-bold text-brand-600">
                     <span v-if="previewData.exFactoryPrice != null">¥{{ previewData.exFactoryPrice }}/{{ currentUnitConfig.quantityUnit }}</span>
-                    <span v-else class="text-gray-500">面议</span>
+                    <span v-else class="text-neutral-500">面议</span>
                   </div>
                 </div>
-                <div v-else class="bg-amber-50 rounded-xl p-3 border border-amber-100">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-amber-600">报价方式</div>
-                  <div class="mt-1 font-bold text-amber-700">基差报价</div>
+                <div v-else class="bg-warning-50 rounded-xl p-3 border border-warning-100">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-warning-600">报价方式</div>
+                  <div class="mt-1 font-bold text-warning-700">基差报价</div>
                 </div>
               </div>
               <!-- 基差报价预览 -->
-              <div v-if="publishForm.priceType === 1 && basisQuotes.length > 0" class="bg-amber-50/50 rounded-xl p-3 border border-amber-100">
-                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-2">
+              <div v-if="publishForm.priceType === 1 && basisQuotes.length > 0" class="bg-warning-50/50 rounded-xl p-3 border border-warning-100">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-warning-600 mb-2">
                   <TrendingUp class="w-3 h-3" />
                   基差明细
                 </div>
                 <div class="space-y-2">
-                  <div v-for="(quote, index) in basisQuotes.filter(q => q.contractCode)" :key="index" class="bg-white rounded-lg p-2 border border-amber-100">
+                  <div v-for="(quote, index) in basisQuotes.filter(q => q.contractCode)" :key="index" class="bg-white rounded-lg p-2 border border-warning-100">
                     <div class="flex items-center justify-between text-sm">
-                      <span class="font-medium text-gray-700">{{ getContractByCode(quote.contractCode)?.contractName || quote.contractCode }}</span>
+                      <span class="font-medium text-neutral-700">{{ getContractByCode(quote.contractCode)?.contractName || quote.contractCode }}</span>
                       <span class="font-bold" :class="(quote.basisPrice || 0) >= 0 ? 'text-red-600' : 'text-green-600'">
                         {{ (quote.basisPrice || 0) >= 0 ? '+' : '' }}{{ quote.basisPrice }}
                       </span>
                     </div>
-                    <div class="flex items-center justify-between text-xs text-gray-500 mt-1">
+                    <div class="flex items-center justify-between text-xs text-neutral-500 mt-1">
                       <span>
                         期货 ¥{{ getContractByCode(quote.contractCode)?.lastPrice || '-' }} → 
                         <span class="font-bold text-brand-600">核算 ¥{{ calcReferencePrice(quote.contractCode, quote.basisPrice) || '-' }}</span>
@@ -1540,34 +1540,34 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                   </div>
                 </div>
               </div>
-              <div class="bg-gray-50 rounded-xl p-3">
-                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+              <div class="bg-neutral-50 rounded-xl p-3">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
                   <Truck class="w-3 h-3" />
                   发货地址
                 </div>
-                <div class="mt-1 font-bold text-gray-900 text-sm">{{ previewData.shipAddress }}</div>
+                <div class="mt-1 font-bold text-neutral-900 text-sm">{{ previewData.shipAddress }}</div>
               </div>
               <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 rounded-xl p-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">交付</div>
-                  <div class="mt-1 font-bold text-gray-900">{{ previewData.deliveryMode }}</div>
+                <div class="bg-neutral-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">交付</div>
+                  <div class="mt-1 font-bold text-neutral-900">{{ previewData.deliveryMode }}</div>
                 </div>
-                <div class="bg-gray-50 rounded-xl p-3">
-                  <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                <div class="bg-neutral-50 rounded-xl p-3">
+                  <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-neutral-400">
                     <Clock class="w-3 h-3" />
                     有效期
                   </div>
-                  <div class="mt-1 font-bold text-gray-900">{{ previewData.expireText }}</div>
+                  <div class="mt-1 font-bold text-neutral-900">{{ previewData.expireText }}</div>
                 </div>
               </div>
               <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 rounded-xl p-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">付款方式</div>
-                  <div class="mt-1 font-bold text-gray-900">{{ publishForm.paymentMethod || '现款' }}</div>
+                <div class="bg-neutral-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">付款方式</div>
+                  <div class="mt-1 font-bold text-neutral-900">{{ publishForm.paymentMethod || '现款' }}</div>
                 </div>
-                <div v-if="publishForm.invoiceType" class="bg-gray-50 rounded-xl p-3">
-                  <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">发票类型</div>
-                  <div class="mt-1 font-bold text-gray-900">{{ publishForm.invoiceType }}</div>
+                <div v-if="publishForm.invoiceType" class="bg-neutral-50 rounded-xl p-3">
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">发票类型</div>
+                  <div class="mt-1 font-bold text-neutral-900">{{ publishForm.invoiceType }}</div>
                 </div>
               </div>
               <!-- 规格参数预览 -->
@@ -1579,8 +1579,8 @@ async function applyTemplate(template: SupplyTemplateResponse) {
                 <div class="mt-2 space-y-1">
                   <template v-for="param in categoryParams" :key="param.id">
                     <div v-if="dynamicParams[param.id]" class="flex items-center gap-2 text-xs">
-                      <span class="text-gray-500">{{ param.paramName }}:</span>
-                      <span class="font-bold text-gray-800">{{ dynamicParams[param.id] }}{{ param.unit || '' }}</span>
+                      <span class="text-neutral-500">{{ param.paramName }}:</span>
+                      <span class="font-bold text-neutral-800">{{ dynamicParams[param.id] }}{{ param.unit || '' }}</span>
                     </div>
                   </template>
                 </div>
@@ -1589,14 +1589,14 @@ async function applyTemplate(template: SupplyTemplateResponse) {
               <template v-if="customParams.length > 0">
                 <template v-for="(cp, idx) in customParams" :key="'cp-' + idx">
                   <div v-if="cp.name.trim() && cp.value.trim()" class="flex items-center gap-2 text-xs">
-                    <span class="text-gray-500">{{ cp.name }}:</span>
-                    <span class="font-bold text-gray-800">{{ cp.value }}</span>
+                    <span class="text-neutral-500">{{ cp.name }}:</span>
+                    <span class="font-bold text-neutral-800">{{ cp.value }}</span>
                   </div>
                 </template>
               </template>
-              <div v-if="previewData.remark" class="bg-gray-50 rounded-xl p-3">
-                <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">备注</div>
-                <div class="mt-1 text-sm text-gray-700">{{ previewData.remark }}</div>
+              <div v-if="previewData.remark" class="bg-neutral-50 rounded-xl p-3">
+                <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">备注</div>
+                <div class="mt-1 text-sm text-neutral-700">{{ previewData.remark }}</div>
               </div>
             </div>
           </div>
@@ -1618,16 +1618,16 @@ async function applyTemplate(template: SupplyTemplateResponse) {
     <!-- 保存模板弹窗 -->
     <BaseModal v-model="saveTemplateDialogVisible" title="保存为模板" size="sm">
       <div class="space-y-4">
-        <p class="text-sm text-gray-500">用于一键复用本次发布的品类、条款与指标配置</p>
+        <p class="text-sm text-neutral-500">用于一键复用本次发布的品类、条款与指标配置</p>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
             模板名称 <span class="text-red-500">*</span>
           </label>
           <input
             v-model="templateNameInput"
             type="text"
             placeholder="例如：玉米到厂-现款-常规指标"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             @keyup.enter="confirmSaveTemplate"
           />
         </div>
@@ -1648,78 +1648,78 @@ async function applyTemplate(template: SupplyTemplateResponse) {
       size="lg"
     >
       <div class="space-y-6">
-        <p class="text-sm text-gray-500">
+        <p class="text-sm text-neutral-500">
           仅修改本条已发布供应，不影响您的公司/个人档案
         </p>
 
         <!-- 标的信息 -->
-        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
-          <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">交易标的</div>
-          <div class="mt-1 font-bold text-gray-900">
+        <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-200">
+          <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">交易标的</div>
+          <div class="mt-1 font-bold text-neutral-900">
             {{ editing?.categoryName || '-' }}
-            <span v-if="editing?.supplyNo" class="text-sm text-gray-500 font-medium ml-2">{{ editing?.supplyNo }}</span>
+            <span v-if="editing?.supplyNo" class="text-sm text-neutral-500 font-medium ml-2">{{ editing?.supplyNo }}</span>
           </div>
         </div>
 
         <!-- 表单 -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">供应数量（{{ currentUnitConfig.quantityUnit }}）</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">供应数量（{{ currentUnitConfig.quantityUnit }}）</label>
             <input
               v-model.number="editForm.quantity"
               type="number"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">出厂价（元/{{ currentUnitConfig.quantityUnit }}）</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">出厂价（元/{{ currentUnitConfig.quantityUnit }}）</label>
             <input
               v-model.number="editForm.exFactoryPrice"
               type="number"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">产地</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">产地</label>
             <input
               v-model="editForm.origin"
               type="text"
               placeholder="例如：山东济南..."
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发货地址</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">发货地址</label>
             <input
               v-model="editForm.shipAddress"
               type="text"
               placeholder="例如：山东省济南市..."
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">交付方式</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">交付方式</label>
             <input
               v-model="editForm.deliveryMode"
               type="text"
               placeholder="例如：到厂 / 自提"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">包装方式</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">包装方式</label>
             <input
               v-model="editForm.packaging"
               type="text"
               placeholder="例如：散装 / 袋装"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">付款方式</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">付款方式</label>
             <select
               v-model="editForm.paymentMethod"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all bg-white"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all bg-white"
             >
               <option value="">请选择</option>
               <option value="现款">现款</option>
@@ -1727,10 +1727,10 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发票类型</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">发票类型</label>
             <select
               v-model="editForm.invoiceType"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all bg-white"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all bg-white"
             >
               <option value="">请选择</option>
               <option value="普通发票">普通发票</option>
@@ -1739,10 +1739,10 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             </select>
           </div>
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">发布有效期</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">发布有效期</label>
             <select
               v-model="editForm.expireMinutes"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all bg-white"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all bg-white"
             >
               <option :value="60">1小时</option>
               <option :value="1440">1天</option>
@@ -1752,12 +1752,12 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             </select>
           </div>
           <div class="md:col-span-2">
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">备注</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">备注</label>
             <textarea
               v-model="editForm.remark"
               rows="2"
               placeholder="补充说明（选填）"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
             ></textarea>
           </div>
         </div>

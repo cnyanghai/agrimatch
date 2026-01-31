@@ -585,8 +585,8 @@ const navItems = [
     <!-- 页面标题 -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">用户资料</h1>
-        <p class="text-sm text-gray-500 mt-1">管理账户信息和公司资料</p>
+        <h1 class="text-2xl font-bold text-neutral-900">用户资料</h1>
+        <p class="text-sm text-neutral-500 mt-1">管理账户信息和公司资料</p>
       </div>
     </div>
 
@@ -594,7 +594,7 @@ const navItems = [
     <div class="flex gap-6">
       <!-- 左侧垂直导航 -->
       <aside class="w-64 shrink-0">
-        <nav class="bg-white rounded-xl border border-gray-200 p-2 space-y-1">
+        <nav class="bg-white rounded-xl border border-neutral-200 p-2 space-y-1">
           <button
             v-for="item in navItems"
             :key="item.key"
@@ -602,7 +602,7 @@ const navItems = [
               'w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3',
               activeTab === item.key
                 ? 'bg-brand-50 text-brand-700 font-bold'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'
             ]"
             @click="activeTab = item.key"
           >
@@ -616,23 +616,23 @@ const navItems = [
       <div class="flex-1 min-w-0">
 
         <!-- 个人资料 -->
-        <div v-show="activeTab === 'profile'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-          <div class="p-5 border-b border-gray-200">
-            <h3 class="text-2xl font-bold text-gray-900">个人资料</h3>
-            <p class="text-sm text-gray-500 mt-1">修改后点击保存生效</p>
+        <div v-show="activeTab === 'profile'" class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-neutral-200">
+            <h3 class="text-2xl font-bold text-neutral-900">个人资料</h3>
+            <p class="text-sm text-neutral-500 mt-1">修改后点击保存生效</p>
           </div>
           
           <div class="p-6 space-y-6">
             <!-- 头像上传 -->
             <div>
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">个人头像</label>
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">个人头像</label>
               <div class="flex items-center gap-4">
                 <div class="relative">
                   <img
                     v-if="userForm.avatar"
                     :src="userForm.avatar"
                     alt="头像"
-                    class="w-20 h-20 rounded-lg object-cover border-2 border-gray-200"
+                    class="w-20 h-20 rounded-lg object-cover border-2 border-neutral-200"
                   />
                   <div
                     v-else
@@ -641,14 +641,14 @@ const navItems = [
                     {{ avatarText }}
                   </div>
                   <label
-                    class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-sm hover:bg-gray-50 transition-all flex items-center justify-center cursor-pointer"
+                    class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-white border border-neutral-200 shadow-sm hover:bg-neutral-50 transition-all flex items-center justify-center cursor-pointer"
                     :class="{ 'opacity-50 pointer-events-none': avatarUploading }"
                   >
-                    <Upload class="w-3.5 h-3.5 text-gray-500" />
+                    <Upload class="w-3.5 h-3.5 text-neutral-500" />
                     <input type="file" class="hidden" accept="image/*" @change="handleAvatarUpload" />
                   </label>
                 </div>
-                <div class="text-xs text-gray-400">
+                <div class="text-xs text-neutral-400">
                   <p>支持 JPG/PNG 格式</p>
                   <p>建议尺寸 200x200px，大小不超过 5MB</p>
                 </div>
@@ -658,36 +658,36 @@ const navItems = [
             <!-- 表单 -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
                   姓名/昵称 <span class="text-red-500">*</span>
                 </label>
                 <input
                   v-model="userForm.displayName"
                   type="text"
                   placeholder="请输入姓名/昵称"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">手机号码</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">手机号码</label>
                 <input
                   v-model="userForm.phonenumber"
                   type="text"
                   placeholder="请输入手机号"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">公司职务</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">公司职务</label>
                 <input
                   v-model="userForm.position"
                   type="text"
                   placeholder="如：采购经理、销售总监"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">出生年月</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">出生年月</label>
                 <el-date-picker
                   v-model="userForm.birthDate"
                   type="date"
@@ -699,7 +699,7 @@ const navItems = [
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">性别</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">性别</label>
                 <div class="flex gap-4">
                   <label
                     v-for="opt in genderOptions"
@@ -708,7 +708,7 @@ const navItems = [
                       'flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 cursor-pointer transition-all',
                       userForm.gender === opt.value 
                         ? 'border-brand-500 bg-brand-50 text-brand-600' 
-                        : 'border-gray-200 hover:border-gray-200'
+                        : 'border-neutral-200 hover:border-neutral-200'
                     ]"
                   >
                     <input
@@ -724,19 +724,19 @@ const navItems = [
             </div>
             
             <div class="max-w-3xl">
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">个人介绍</label>
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">个人介绍</label>
               <textarea
                 v-model="userForm.bio"
                 rows="3"
                 maxlength="500"
                 placeholder="简单介绍一下自己，让合作伙伴更好地了解您"
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+                class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
               ></textarea>
-              <p class="text-xs text-gray-400 mt-1 text-right">{{ userForm.bio?.length || 0 }}/500</p>
+              <p class="text-xs text-neutral-400 mt-1 text-right">{{ userForm.bio?.length || 0 }}/500</p>
             </div>
 
             <!-- 保存按钮 -->
-            <div v-if="userDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
+            <div v-if="userDirty" class="pt-6 border-t border-neutral-200 flex justify-end gap-3">
               <BaseButton type="secondary" size="sm" :disabled="loading" @click="resetUserForm">取消</BaseButton>
               <BaseButton type="primary" size="sm" :loading="loading" @click="saveUserInfo">保存</BaseButton>
             </div>
@@ -744,54 +744,54 @@ const navItems = [
         </div>
 
         <!-- 公司主页 -->
-        <div v-show="activeTab === 'company'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-          <div class="p-5 border-b border-gray-200">
-            <h3 class="text-2xl font-bold text-gray-900">公司主页</h3>
-            <p class="text-sm text-gray-500 mt-1">完善公司信息以便开展业务，这些信息将展示在公司主页</p>
+        <div v-show="activeTab === 'company'" class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-neutral-200">
+            <h3 class="text-2xl font-bold text-neutral-900">公司主页</h3>
+            <p class="text-sm text-neutral-500 mt-1">完善公司信息以便开展业务，这些信息将展示在公司主页</p>
           </div>
           
           <div class="p-6 space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
                   公司名称 <span class="text-red-500">*</span>
                 </label>
                 <input
                   v-model="companyForm.companyName"
                   type="text"
                   placeholder="请输入公司全称"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">统一社会信用代码</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">统一社会信用代码</label>
                 <input
                   v-model="companyForm.licenseNo"
                   type="text"
                   placeholder="请输入统一社会信用代码"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">法定代表人</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">法定代表人</label>
                 <input
                   v-model="companyForm.legalPerson"
                   type="text"
                   placeholder="请输入法定代表人"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">注册资本</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">注册资本</label>
                 <input
                   v-model="companyForm.registeredCapital"
                   type="text"
                   placeholder="如：1000万元"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">成立日期</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">成立日期</label>
                 <el-date-picker
                   v-model="companyForm.establishDate"
                   type="date"
@@ -803,16 +803,16 @@ const navItems = [
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">公司规模</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">公司规模</label>
                 <input
                   v-model="companyForm.scale"
                   type="text"
                   placeholder="如：100-500人"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
               <div class="md:col-span-2">
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">所在地区</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">所在地区</label>
                 <el-cascader
                   v-model="regionValue"
                   :options="regionData"
@@ -825,73 +825,73 @@ const navItems = [
             </div>
             
             <div class="max-w-3xl">
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">详细地址</label>
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">详细地址</label>
               <input
                 v-model="companyForm.address"
                 type="text"
                 placeholder="请输入详细地址（街道、门牌号等）"
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
               />
             </div>
 
             <div class="max-w-3xl">
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">经营范围</label>
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">经营范围</label>
               <textarea
                 v-model="companyForm.businessScope"
                 rows="3"
                 placeholder="请输入公司经营范围"
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+                class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
               ></textarea>
             </div>
 
             <!-- 公司介绍 -->
             <div class="max-w-3xl">
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">公司介绍</label>
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">公司介绍</label>
               <textarea
                 v-model="companyForm.companyIntro"
                 rows="5"
                 placeholder="请输入公司介绍（用于展示在商业主页的企业介绍部分）"
-                class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+                class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
               ></textarea>
             </div>
 
             <!-- 人才招聘 -->
             <div class="max-w-3xl">
               <div class="flex items-center justify-between mb-4">
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">人才招聘</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider">人才招聘</label>
                 <BaseButton type="secondary" size="sm" @click="openRecruitmentDialog('create')">
                   <Plus class="w-4 h-4" />
                   添加岗位
                 </BaseButton>
               </div>
-              <div v-if="recruitments.length === 0" class="text-sm text-gray-400 py-4 text-center border-2 border-dashed border-gray-200 rounded-lg">
+              <div v-if="recruitments.length === 0" class="text-sm text-neutral-400 py-4 text-center border-2 border-dashed border-neutral-200 rounded-lg">
                 暂无招聘信息，点击上方按钮添加
               </div>
               <div v-else class="space-y-3">
                 <div
                   v-for="item in recruitments"
                   :key="item.id"
-                  class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-start justify-between gap-4"
+                  class="p-4 bg-neutral-50 rounded-lg border border-neutral-200 flex items-start justify-between gap-4"
                 >
                   <div class="flex-1">
-                    <div class="font-bold text-gray-900 mb-1">{{ item.position }}</div>
-                    <div class="text-sm text-gray-500 mb-1">{{ item.requirements }}</div>
+                    <div class="font-bold text-neutral-900 mb-1">{{ item.position }}</div>
+                    <div class="text-sm text-neutral-500 mb-1">{{ item.requirements }}</div>
                     <div class="text-sm text-brand-600 font-bold">{{ item.salary }}</div>
                   </div>
                   <div class="flex gap-2">
                     <button
-                      class="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                      class="p-2 hover:bg-neutral-200 rounded-lg transition-colors"
                       @click="openRecruitmentDialog('edit', item)"
                       title="编辑"
                     >
-                      <Edit2 class="w-4 h-4 text-gray-600" />
+                      <Edit2 class="w-4 h-4 text-neutral-600" />
                     </button>
                     <button
-                      class="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      class="p-2 hover:bg-error-50 rounded-lg transition-colors"
                       @click="removeRecruitment(item.id)"
                       title="删除"
                     >
-                      <Trash2 class="w-4 h-4 text-red-500" />
+                      <Trash2 class="w-4 h-4 text-error-500" />
                     </button>
                   </div>
                 </div>
@@ -900,18 +900,18 @@ const navItems = [
 
         <!-- 营业执照上传 -->
         <div class="max-w-3xl">
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">营业执照</label>
+          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">营业执照</label>
           <div class="flex items-start gap-4">
             <!-- 上传区域 -->
             <div v-if="!companyForm.licenseImgUrl" class="relative">
               <label 
-                class="flex flex-col items-center justify-center w-40 h-32 border-2 border-dashed border-gray-200 rounded-lg cursor-pointer hover:border-brand-400 hover:bg-brand-50/50 transition-all"
+                class="flex flex-col items-center justify-center w-40 h-32 border-2 border-dashed border-neutral-200 rounded-lg cursor-pointer hover:border-brand-400 hover:bg-brand-50/50 transition-all"
                 :class="{ 'opacity-50 pointer-events-none': licenseUploading }"
               >
-                <FileText v-if="!licenseUploading" class="w-8 h-8 text-gray-300 mb-2" />
+                <FileText v-if="!licenseUploading" class="w-8 h-8 text-neutral-300 mb-2" />
                 <div v-else class="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-2" />
-                <span class="text-xs text-gray-400 font-bold">{{ licenseUploading ? '上传中...' : '点击上传' }}</span>
-                <span class="text-[10px] text-gray-300 mt-1">支持 JPG/PNG</span>
+                <span class="text-xs text-neutral-400 font-bold">{{ licenseUploading ? '上传中...' : '点击上传' }}</span>
+                <span class="text-[10px] text-neutral-300 mt-1">支持 JPG/PNG</span>
                 <input 
                   type="file" 
                   class="hidden" 
@@ -926,7 +926,7 @@ const navItems = [
               <img 
                 :src="companyForm.licenseImgUrl" 
                 alt="营业执照" 
-                class="w-40 h-32 object-cover rounded-lg border-2 border-gray-200"
+                class="w-40 h-32 object-cover rounded-lg border-2 border-neutral-200"
               />
               <!-- 操作遮罩 -->
               <div class="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
@@ -936,7 +936,7 @@ const navItems = [
                   @click="licensePreview = true"
                   title="预览"
                 >
-                  <ZoomIn class="w-4 h-4 text-gray-700" />
+                  <ZoomIn class="w-4 h-4 text-neutral-700" />
                 </button>
                 <button 
                   type="button"
@@ -944,7 +944,7 @@ const navItems = [
                   @click="removeLicenseImage"
                   title="删除"
                 >
-                  <X class="w-4 h-4 text-red-500" />
+                  <X class="w-4 h-4 text-error-500" />
                 </button>
               </div>
               <!-- 上传成功标记 -->
@@ -954,7 +954,7 @@ const navItems = [
             </div>
             
             <!-- 说明文字 -->
-            <div class="flex-1 text-xs text-gray-400 space-y-1 pt-2">
+            <div class="flex-1 text-xs text-neutral-400 space-y-1 pt-2">
               <p>• 请上传清晰的营业执照原件照片</p>
               <p>• 图片大小不超过 10MB</p>
               <p>• 上传后仅供平台审核使用</p>
@@ -966,30 +966,30 @@ const navItems = [
         <div
           :class="[
             'flex items-center gap-4 p-4 rounded-lg',
-            company?.id ? 'bg-brand-50' : 'bg-amber-50'
+            company?.id ? 'bg-brand-50' : 'bg-warning-50'
           ]"
         >
           <div
             :class="[
               'w-10 h-10 rounded-lg flex items-center justify-center',
-              company?.id ? 'bg-brand-100' : 'bg-amber-100'
+              company?.id ? 'bg-brand-100' : 'bg-warning-100'
             ]"
           >
             <Check v-if="company?.id" class="w-5 h-5 text-brand-600" />
-            <AlertTriangle v-else class="w-5 h-5 text-amber-600" />
+            <AlertTriangle v-else class="w-5 h-5 text-warning-600" />
           </div>
           <div>
-            <div :class="['font-bold', company?.id ? 'text-brand-800' : 'text-amber-800']">
+            <div :class="['font-bold', company?.id ? 'text-brand-800' : 'text-warning-800']">
               {{ company?.id ? '公司信息已完善' : '公司信息未完善' }}
             </div>
-            <div :class="['text-sm', company?.id ? 'text-brand-600' : 'text-amber-600']">
+            <div :class="['text-sm', company?.id ? 'text-brand-600' : 'text-warning-600']">
               {{ company?.id ? '您的公司信息已保存，可以正常使用平台功能' : '请完善公司信息，以便更好地使用平台功能' }}
             </div>
           </div>
         </div>
 
         <!-- 保存按钮 -->
-        <div v-if="companyDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
+        <div v-if="companyDirty" class="pt-6 border-t border-neutral-200 flex justify-end gap-3">
           <BaseButton type="secondary" size="sm" :disabled="loading" @click="resetCompanyForm">取消</BaseButton>
           <BaseButton type="primary" size="sm" :loading="loading" @click="saveCompanyInfo">保存</BaseButton>
         </div>
@@ -997,23 +997,23 @@ const navItems = [
         </div>
 
         <!-- 资质证照 -->
-        <div v-show="activeTab === 'credentials'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-          <div class="p-5 border-b border-gray-200">
-            <h3 class="text-2xl font-bold text-gray-900">资质证照</h3>
-            <p class="text-sm text-gray-500 mt-1">上传公司相关资质证书，提升企业信誉</p>
+        <div v-show="activeTab === 'credentials'" class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-neutral-200">
+            <h3 class="text-2xl font-bold text-neutral-900">资质证照</h3>
+            <p class="text-sm text-neutral-500 mt-1">上传公司相关资质证书，提升企业信誉</p>
           </div>
           
           <div class="p-6 space-y-6">
             <div class="max-w-3xl">
-              <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">其他资质证书</label>
+              <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">其他资质证书</label>
               <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <label
-                  class="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-200 rounded-lg cursor-pointer hover:border-brand-400 hover:bg-brand-50/50 transition-all"
+                  class="flex flex-col items-center justify-center h-32 border-2 border-dashed border-neutral-200 rounded-lg cursor-pointer hover:border-brand-400 hover:bg-brand-50/50 transition-all"
                   :class="{ 'opacity-50 pointer-events-none': certificateUploading }"
                 >
-                  <Upload v-if="!certificateUploading" class="w-8 h-8 text-gray-300 mb-2" />
+                  <Upload v-if="!certificateUploading" class="w-8 h-8 text-neutral-300 mb-2" />
                   <div v-else class="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-2" />
-                  <span class="text-xs text-gray-400 font-bold">{{ certificateUploading ? '上传中...' : '上传证书' }}</span>
+                  <span class="text-xs text-neutral-400 font-bold">{{ certificateUploading ? '上传中...' : '上传证书' }}</span>
                   <input type="file" class="hidden" accept="image/*" @change="handleCertificateUpload" />
                 </label>
                 <div
@@ -1021,22 +1021,22 @@ const navItems = [
                   :key="index"
                   class="relative group h-32"
                 >
-                  <img :src="url" alt="资质证书" class="w-full h-full object-cover rounded-lg border-2 border-gray-200" />
+                  <img :src="url" alt="资质证书" class="w-full h-full object-cover rounded-lg border-2 border-neutral-200" />
                   <div class="absolute inset-0 bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <button
                       class="w-8 h-8 bg-white/90 rounded-lg flex items-center justify-center hover:bg-white transition-colors"
                       @click="removeCertificate(index)"
                       title="删除"
                     >
-                      <X class="w-4 h-4 text-red-500" />
+                      <X class="w-4 h-4 text-error-500" />
                     </button>
                   </div>
                 </div>
               </div>
-              <p class="text-xs text-gray-400 mt-2">支持 JPG/PNG 格式，单张不超过 10MB</p>
+              <p class="text-xs text-neutral-400 mt-2">支持 JPG/PNG 格式，单张不超过 10MB</p>
             </div>
 
-            <div v-if="companyDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
+            <div v-if="companyDirty" class="pt-6 border-t border-neutral-200 flex justify-end gap-3">
               <BaseButton type="secondary" size="sm" :disabled="loading" @click="resetCompanyForm">取消</BaseButton>
               <BaseButton type="primary" size="sm" :loading="loading" @click="saveCompanyInfo">保存</BaseButton>
             </div>
@@ -1044,10 +1044,10 @@ const navItems = [
         </div>
 
         <!-- 电子印章 -->
-        <div v-show="activeTab === 'seal'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-          <div class="p-5 border-b border-gray-200">
-            <h3 class="text-2xl font-bold text-gray-900">电子印章</h3>
-            <p class="text-sm text-gray-500 mt-1">管理公司电子公章和合同章，用于合同签署</p>
+        <div v-show="activeTab === 'seal'" class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-neutral-200">
+            <h3 class="text-2xl font-bold text-neutral-900">电子印章</h3>
+            <p class="text-sm text-neutral-500 mt-1">管理公司电子公章和合同章，用于合同签署</p>
           </div>
           <div class="p-6">
             <SealManager />
@@ -1055,12 +1055,12 @@ const navItems = [
         </div>
 
         <!-- 车辆管理 -->
-        <div v-show="activeTab === 'vehicles'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-          <div class="p-5 border-b border-gray-200">
+        <div v-show="activeTab === 'vehicles'" class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-neutral-200">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="text-2xl font-bold text-gray-900">车辆管理</h3>
-                <p class="text-sm text-gray-500 mt-1">管理公司常用车辆信息，方便快速选择</p>
+                <h3 class="text-2xl font-bold text-neutral-900">车辆管理</h3>
+                <p class="text-sm text-neutral-500 mt-1">管理公司常用车辆信息，方便快速选择</p>
               </div>
               <BaseButton type="primary" size="sm" @click="openVehicleDialog('create')">
                 <Plus class="w-4 h-4" />
@@ -1070,8 +1070,8 @@ const navItems = [
           </div>
           
           <div class="p-6">
-            <div v-if="vehicles.length === 0" class="text-center py-12 text-gray-400">
-              <Truck class="w-16 h-16 mx-auto mb-4 text-gray-300" />
+            <div v-if="vehicles.length === 0" class="text-center py-12 text-neutral-400">
+              <Truck class="w-16 h-16 mx-auto mb-4 text-neutral-300" />
               <p>暂无车辆信息</p>
               <p class="text-sm mt-2">点击上方按钮添加常用车辆</p>
             </div>
@@ -1079,11 +1079,11 @@ const navItems = [
               <div
                 v-for="v in vehicles"
                 :key="v.id"
-                class="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                class="p-4 bg-neutral-50 rounded-lg border border-neutral-200"
               >
                 <div class="flex items-start justify-between mb-3">
                   <div class="flex items-center gap-2">
-                    <div class="font-bold text-gray-900">{{ v.plateNumber }}</div>
+                    <div class="font-bold text-neutral-900">{{ v.plateNumber }}</div>
                     <span
                       v-if="v.isDefault"
                       class="px-2 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-700"
@@ -1093,22 +1093,22 @@ const navItems = [
                   </div>
                   <div class="flex gap-2">
                     <button
-                      class="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
+                      class="p-1.5 hover:bg-neutral-200 rounded-lg transition-colors"
                       @click="openVehicleDialog('edit', v)"
                       title="编辑"
                     >
-                      <Edit2 class="w-4 h-4 text-gray-600" />
+                      <Edit2 class="w-4 h-4 text-neutral-600" />
                     </button>
                     <button
-                      class="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
+                      class="p-1.5 hover:bg-error-50 rounded-lg transition-colors"
                       @click="removeVehicle(v.id)"
                       title="删除"
                     >
-                      <Trash2 class="w-4 h-4 text-red-500" />
+                      <Trash2 class="w-4 h-4 text-error-500" />
                     </button>
                   </div>
                 </div>
-                <div class="space-y-1 text-sm text-gray-600">
+                <div class="space-y-1 text-sm text-neutral-600">
                   <div>司机：{{ v.driverName }}</div>
                   <div>电话：{{ v.driverPhone }}</div>
                   <div v-if="v.vehicleType">车型：{{ v.vehicleType }}</div>
@@ -1125,51 +1125,51 @@ const navItems = [
         </div>
 
         <!-- 账户安全 -->
-        <div v-show="activeTab === 'security'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
-          <div class="p-5 border-b border-gray-200">
-            <h3 class="text-2xl font-bold text-gray-900">修改密码</h3>
-            <p class="text-sm text-gray-500 mt-1">定期更换密码可以保护账户安全</p>
+        <div v-show="activeTab === 'security'" class="bg-white rounded-xl border border-neutral-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-neutral-200">
+            <h3 class="text-2xl font-bold text-neutral-900">修改密码</h3>
+            <p class="text-sm text-neutral-500 mt-1">定期更换密码可以保护账户安全</p>
           </div>
           
           <div class="p-6 space-y-6">
             <div class="max-w-md space-y-4">
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">新密码</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">新密码</label>
                 <input
                   v-model="passwordForm.newPassword"
                   type="password"
                   placeholder="请输入新密码（至少6位）"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">确认新密码</label>
+                <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">确认新密码</label>
                 <input
                   v-model="passwordForm.confirmPassword"
                   type="password"
                   placeholder="请再次输入新密码"
-                  class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+                  class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
                 />
               </div>
             </div>
 
             <!-- 保存按钮 -->
-            <div v-if="passwordDirty" class="pt-6 border-t border-gray-200 flex justify-end gap-3">
+            <div v-if="passwordDirty" class="pt-6 border-t border-neutral-200 flex justify-end gap-3">
               <BaseButton type="secondary" size="sm" :disabled="loading" @click="resetPasswordForm">取消</BaseButton>
               <BaseButton type="primary" size="sm" :loading="loading" @click="changePassword">保存</BaseButton>
             </div>
           </div>
 
           <!-- 最近登录日志 -->
-          <div class="border-t border-gray-100 bg-gray-50/30 p-6">
+          <div class="border-t border-neutral-100 bg-neutral-50/30 p-6">
             <div class="flex items-center justify-between mb-6">
               <div class="flex items-center gap-2">
                 <History class="w-5 h-5 text-brand-600" />
-                <h4 class="font-bold text-gray-900">最近登录日志</h4>
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-2">Recent Logins</span>
+                <h4 class="font-bold text-neutral-900">最近登录日志</h4>
+                <span class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest ml-2">Recent Logins</span>
               </div>
               <button 
-                class="p-1.5 hover:bg-gray-200 rounded-lg transition-all text-gray-400 hover:text-brand-600"
+                class="p-1.5 hover:bg-neutral-200 rounded-lg transition-all text-neutral-400 hover:text-brand-600"
                 :class="{ 'animate-spin text-brand-600': loginLogsLoading }"
                 @click="fetchLoginLogs"
                 title="刷新日志"
@@ -1179,26 +1179,26 @@ const navItems = [
             </div>
 
             <div v-if="loginLogsLoading" class="flex justify-center py-8">
-              <div class="flex items-center gap-2 text-gray-400 text-sm">
+              <div class="flex items-center gap-2 text-neutral-400 text-sm">
                 <RefreshCw class="w-4 h-4 animate-spin" />
                 <span>加载中...</span>
               </div>
             </div>
-            <div v-else-if="loginLogs.length === 0" class="text-center py-12 bg-white rounded-xl border border-gray-100 shadow-sm">
-              <ShieldCheck class="w-12 h-12 text-gray-200 mx-auto mb-3" />
-              <p class="text-gray-400 text-sm font-medium">暂无登录记录</p>
+            <div v-else-if="loginLogs.length === 0" class="text-center py-12 bg-white rounded-xl border border-neutral-100 shadow-sm">
+              <ShieldCheck class="w-12 h-12 text-neutral-200 mx-auto mb-3" />
+              <p class="text-neutral-400 text-sm font-medium">暂无登录记录</p>
             </div>
             <div v-else class="grid grid-cols-1 gap-3">
               <div 
                 v-for="log in loginLogs" 
                 :key="log.infoId"
-                class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:border-brand-200 hover:shadow-md"
+                class="bg-white p-4 rounded-xl border border-neutral-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:border-brand-200 hover:shadow-md"
               >
                 <div class="flex items-center gap-4">
                   <div 
                     :class="[
                       'w-10 h-10 rounded-lg flex items-center justify-center shrink-0',
-                      log.status === '0' ? 'bg-brand-50 text-brand-600' : 'bg-red-50 text-red-600'
+                      log.status === '0' ? 'bg-brand-50 text-brand-600' : 'bg-error-50 text-error-600'
                     ]"
                   >
                     <Monitor v-if="log.status === '0'" class="w-5 h-5" />
@@ -1206,34 +1206,34 @@ const navItems = [
                   </div>
                   <div>
                     <div class="flex items-center gap-2">
-                      <span class="font-bold text-gray-900">{{ log.browser }} / {{ log.os }}</span>
+                      <span class="font-bold text-neutral-900">{{ log.browser }} / {{ log.os }}</span>
                       <span 
                         :class="[
                           'text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider',
-                          log.status === '0' ? 'bg-brand-100 text-brand-700' : 'bg-red-100 text-red-700'
+                          log.status === '0' ? 'bg-brand-100 text-brand-700' : 'bg-error-100 text-error-700'
                         ]"
                       >
                         {{ log.status === '0' ? '成功' : '失败' }}
                       </span>
                     </div>
                     <div class="flex items-center gap-3 mt-1">
-                      <div class="flex items-center gap-1 text-xs text-gray-400">
+                      <div class="flex items-center gap-1 text-xs text-neutral-400">
                         <MapPin class="w-3 h-3" />
                         <span>{{ log.ipaddr }}</span>
                       </div>
-                      <div class="flex items-center gap-1 text-xs text-gray-400">
+                      <div class="flex items-center gap-1 text-xs text-neutral-400">
                         <Calendar class="w-3 h-3" />
                         <span>{{ log.loginTime }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="text-xs font-medium text-gray-400 md:text-right">
+                <div class="text-xs font-medium text-neutral-400 md:text-right">
                   {{ log.msg }}
                 </div>
               </div>
             </div>
-            <p class="text-[10px] text-gray-400 mt-6 text-center italic">
+            <p class="text-[10px] text-neutral-400 mt-6 text-center italic">
               * 仅展示最近 10 条登录记录，如发现异常登录请及时修改密码。
             </p>
           </div>
@@ -1251,57 +1251,57 @@ const navItems = [
     >
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">司机姓名 <span class="text-red-500">*</span></label>
+          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">司机姓名 <span class="text-red-500">*</span></label>
           <input
             v-model="vehicleForm.driverName"
             type="text"
             placeholder="请输入司机姓名"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
           />
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">身份证号 <span class="text-red-500">*</span></label>
+          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">身份证号 <span class="text-red-500">*</span></label>
           <input
             v-model="vehicleForm.driverIdCard"
             type="text"
             placeholder="请输入身份证号"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
           />
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">车牌号 <span class="text-red-500">*</span></label>
+          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">车牌号 <span class="text-red-500">*</span></label>
           <input
             v-model="vehicleForm.plateNumber"
             type="text"
             placeholder="请输入车牌号"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
           />
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">联系电话 <span class="text-red-500">*</span></label>
+          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">联系电话 <span class="text-red-500">*</span></label>
           <input
             v-model="vehicleForm.driverPhone"
             type="text"
             placeholder="请输入联系电话"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
           />
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">车型</label>
+          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">车型</label>
           <input
             v-model="vehicleForm.vehicleType"
             type="text"
             placeholder="如：厢式货车、半挂车"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
           />
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">备注</label>
+          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">备注</label>
           <textarea
             v-model="vehicleForm.remark"
             rows="2"
             placeholder="其他备注信息"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+            class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
           ></textarea>
         </div>
       </div>
@@ -1322,30 +1322,30 @@ const navItems = [
     >
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">岗位名称 <span class="text-red-500">*</span></label>
+          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">岗位名称 <span class="text-red-500">*</span></label>
           <input
             v-model="recruitmentForm.position"
             type="text"
             placeholder="如：销售经理、采购专员"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
           />
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">任职要求</label>
+          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">任职要求</label>
           <textarea
             v-model="recruitmentForm.requirements"
             rows="4"
             placeholder="请输入任职要求"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
+            class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all resize-none"
           ></textarea>
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">薪资待遇</label>
+          <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">薪资待遇</label>
           <input
             v-model="recruitmentForm.salary"
             type="text"
             placeholder="如：5000-8000元/月"
-            class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all"
+            class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
           />
         </div>
       </div>

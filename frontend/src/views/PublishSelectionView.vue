@@ -30,15 +30,15 @@ const requirementFeatures = [
   <div class="space-y-6">
     <!-- 页面标题 -->
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">发布信息</h1>
-      <p class="text-sm text-gray-500 mt-1">选择发布类型，快速发布您的供应或采购信息</p>
+      <h1 class="text-2xl font-bold text-neutral-900">发布信息</h1>
+      <p class="text-sm text-neutral-500 mt-1">选择发布类型，快速发布您的供应或采购信息</p>
     </div>
 
     <!-- 双选卡片 -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- 发布供应 -->
       <div
-        class="group relative bg-white rounded-2xl border-2 border-gray-100 p-8 hover:border-brand-200 hover:shadow-xl transition-all cursor-pointer overflow-hidden"
+        class="group relative bg-white rounded-2xl border-2 border-neutral-100 p-8 hover:border-brand-200 hover:shadow-xl transition-all cursor-pointer overflow-hidden"
         @click="goToPublishSupply"
       >
         <!-- 背景装饰 -->
@@ -51,10 +51,10 @@ const requirementFeatures = [
               <Package class="w-8 h-8 text-white" />
             </div>
             <div>
-              <h2 class="text-2xl font-bold text-gray-900 group-hover:text-brand-600 transition-colors">
+              <h2 class="text-2xl font-bold text-neutral-900 group-hover:text-brand-600 transition-colors">
                 发布供应
               </h2>
-              <p class="text-sm text-gray-500">我有货，寻找买家</p>
+              <p class="text-sm text-neutral-500">我有货，寻找买家</p>
             </div>
           </div>
 
@@ -63,7 +63,7 @@ const requirementFeatures = [
             <li
               v-for="(feature, index) in supplyFeatures"
               :key="index"
-              class="flex items-center gap-3 text-sm text-gray-600"
+              class="flex items-center gap-3 text-sm text-neutral-600"
             >
               <div class="w-6 h-6 rounded-lg bg-brand-50 flex items-center justify-center shrink-0">
                 <component :is="feature.icon" class="w-4 h-4 text-brand-600" />
@@ -85,7 +85,7 @@ const requirementFeatures = [
 
       <!-- 发布采购 -->
       <div
-        class="group relative bg-white rounded-2xl border-2 border-gray-100 p-8 hover:border-autumn-200 hover:shadow-xl transition-all cursor-pointer overflow-hidden"
+        class="group relative bg-white rounded-2xl border-2 border-neutral-100 p-8 hover:border-autumn-200 hover:shadow-xl transition-all cursor-pointer overflow-hidden"
         @click="goToPublishRequirement"
       >
         <!-- 背景装饰 -->
@@ -98,10 +98,10 @@ const requirementFeatures = [
               <ShoppingCart class="w-8 h-8 text-white" />
             </div>
             <div>
-              <h2 class="text-2xl font-bold text-gray-900 group-hover:text-autumn-600 transition-colors">
+              <h2 class="text-2xl font-bold text-neutral-900 group-hover:text-autumn-600 transition-colors">
                 发布采购
               </h2>
-              <p class="text-sm text-gray-500">我要货，寻找卖家</p>
+              <p class="text-sm text-neutral-500">我要货，寻找卖家</p>
             </div>
           </div>
 
@@ -110,7 +110,7 @@ const requirementFeatures = [
             <li
               v-for="(feature, index) in requirementFeatures"
               :key="index"
-              class="flex items-center gap-3 text-sm text-gray-600"
+              class="flex items-center gap-3 text-sm text-neutral-600"
             >
               <div class="w-6 h-6 rounded-lg bg-autumn-50 flex items-center justify-center shrink-0">
                 <component :is="feature.icon" class="w-4 h-4 text-autumn-600" />

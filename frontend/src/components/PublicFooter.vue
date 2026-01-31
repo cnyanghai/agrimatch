@@ -5,7 +5,7 @@ import logoWhite from '../assets/logo-white.svg'
 </script>
 
 <template>
-  <footer class="bg-slate-950 text-gray-500 w-full">
+  <footer class="bg-slate-950 text-neutral-500 w-full">
     <!-- 主体区域 -->
     <div class="max-w-7xl mx-auto px-4 py-16">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8">
@@ -19,7 +19,7 @@ import logoWhite from '../assets/logo-white.svg'
             农牧供需智能匹配平台<br />让每一笔交易更安全、更透明
           </p>
           <div class="flex items-center gap-2 text-xs">
-            <Mail class="w-3.5 h-3.5 text-gray-600" />
+            <Mail class="w-3.5 h-3.5 text-neutral-600" />
             <a href="mailto:cnyanghai@icloud.com" class="hover:text-brand-400 transition-colors">cnyanghai@icloud.com</a>
           </div>
         </div>
@@ -54,12 +54,12 @@ import logoWhite from '../assets/logo-white.svg'
             <li><RouterLink to="/legal/cooperation" class="hover:text-brand-400 transition-colors">商务合作</RouterLink></li>
             <li><RouterLink to="/legal/feedback" class="hover:text-brand-400 transition-colors">意见反馈</RouterLink></li>
             <li class="flex items-start gap-2 !mt-5 pt-4 border-t border-white/5">
-              <Clock class="w-3.5 h-3.5 text-gray-600 mt-0.5 shrink-0" />
-              <span class="text-gray-400 leading-relaxed">周一至周五<br />9:00 - 18:00</span>
+              <Clock class="w-3.5 h-3.5 text-neutral-600 mt-0.5 shrink-0" />
+              <span class="text-neutral-400 leading-relaxed">周一至周五<br />9:00 - 18:00</span>
             </li>
             <li class="flex items-start gap-2">
-              <MapPin class="w-3.5 h-3.5 text-gray-600 mt-0.5 shrink-0" />
-              <span class="text-gray-400">天津市东丽区</span>
+              <MapPin class="w-3.5 h-3.5 text-neutral-600 mt-0.5 shrink-0" />
+              <span class="text-neutral-400">天津市东丽区</span>
             </li>
           </ul>
         </div>
@@ -68,14 +68,14 @@ import logoWhite from '../assets/logo-white.svg'
 
     <!-- 底部版权 -->
     <div class="border-t border-white/5">
-      <div class="max-w-7xl mx-auto px-4 py-5 flex flex-col md:flex-row justify-between items-center gap-3 text-[11px] text-gray-600">
+      <div class="max-w-7xl mx-auto px-4 py-5 flex flex-col md:flex-row justify-between items-center gap-3 text-[11px] text-neutral-600">
         <p>© 2026 天津市东丽区农汇通网络科技信息咨询厅</p>
-        <div class="flex items-center gap-1 text-gray-700">
-          <RouterLink to="/legal/terms" class="hover:text-gray-400 transition-colors">用户协议</RouterLink>
-          <span class="text-gray-800">·</span>
-          <RouterLink to="/legal/privacy" class="hover:text-gray-400 transition-colors">隐私政策</RouterLink>
-          <span class="text-gray-800">·</span>
-          <RouterLink to="/legal/disclaimer" class="hover:text-gray-400 transition-colors">免责声明</RouterLink>
+        <div class="flex items-center gap-1 text-neutral-700">
+          <RouterLink to="/legal/terms" class="hover:text-neutral-400 transition-colors">用户协议</RouterLink>
+          <span class="text-neutral-800">·</span>
+          <RouterLink to="/legal/privacy" class="hover:text-neutral-400 transition-colors">隐私政策</RouterLink>
+          <span class="text-neutral-800">·</span>
+          <RouterLink to="/legal/disclaimer" class="hover:text-neutral-400 transition-colors">免责声明</RouterLink>
         </div>
       </div>
     </div>

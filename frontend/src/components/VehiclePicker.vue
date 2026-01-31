@@ -87,17 +87,17 @@ onMounted(() => {
     <!-- 标题行 -->
     <div class="flex items-center justify-between mb-3">
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-          <Truck class="w-4 h-4 text-blue-600" />
+        <div class="w-8 h-8 rounded-lg bg-action-50 flex items-center justify-center">
+          <Truck class="w-4 h-4 text-action-600" />
         </div>
-        <span class="text-sm font-bold text-gray-700">提货车辆信息</span>
+        <span class="text-sm font-bold text-neutral-700">提货车辆信息</span>
       </div>
       
       <!-- 常用车辆下拉 -->
       <div class="relative">
         <button
           type="button"
-          class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-lg text-xs font-bold text-gray-600 transition-all"
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-50 hover:bg-neutral-100 rounded-lg text-xs font-bold text-neutral-600 transition-all"
           @click="dropdownOpen = !dropdownOpen"
         >
           <span>选择常用车辆</span>
@@ -107,12 +107,12 @@ onMounted(() => {
         <!-- 下拉菜单 -->
         <div 
           v-if="dropdownOpen"
-          class="absolute right-0 top-full mt-1 w-72 bg-white rounded-xl border border-gray-200 shadow-md z-50 overflow-hidden"
+          class="absolute right-0 top-full mt-1 w-72 bg-white rounded-xl border border-neutral-200 shadow-md z-50 overflow-hidden"
         >
-          <div v-if="loading" class="p-4 text-center text-gray-400 text-sm">
+          <div v-if="loading" class="p-4 text-center text-neutral-400 text-sm">
             加载中...
           </div>
-          <div v-else-if="vehicles.length === 0" class="p-4 text-center text-gray-400 text-sm">
+          <div v-else-if="vehicles.length === 0" class="p-4 text-center text-neutral-400 text-sm">
             暂无常用车辆
           </div>
           <div v-else class="max-h-64 overflow-y-auto">
@@ -120,17 +120,17 @@ onMounted(() => {
               v-for="v in vehicles"
               :key="v.id"
               type="button"
-              class="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-50 last:border-b-0 transition-colors"
+              class="w-full px-4 py-3 text-left hover:bg-neutral-50 border-b border-neutral-50 last:border-b-0 transition-colors"
               @click="selectVehicle(v)"
             >
               <div class="flex items-center justify-between mb-1">
-                <span class="font-bold text-gray-900">{{ v.plateNumber }}</span>
-                <span v-if="v.isDefault" class="flex items-center gap-0.5 text-amber-500">
+                <span class="font-bold text-neutral-900">{{ v.plateNumber }}</span>
+                <span v-if="v.isDefault" class="flex items-center gap-0.5 text-warning-500">
                   <Star class="w-3 h-3" fill="currentColor" />
                   <span class="text-[10px] font-bold">默认</span>
                 </span>
               </div>
-              <div class="text-xs text-gray-500">
+              <div class="text-xs text-neutral-500">
                 {{ v.driverName }} · {{ v.driverPhone }}
               </div>
             </button>
@@ -139,7 +139,7 @@ onMounted(() => {
           <!-- 手动输入选项 -->
           <button
             type="button"
-            class="w-full px-4 py-3 text-left hover:bg-brand-50 border-t border-gray-200 flex items-center gap-2 text-brand-600"
+            class="w-full px-4 py-3 text-left hover:bg-brand-50 border-t border-neutral-200 flex items-center gap-2 text-brand-600"
             @click="switchToManual"
           >
             <Plus class="w-4 h-4" />
@@ -152,50 +152,50 @@ onMounted(() => {
     <!-- 车辆信息表单 -->
     <div class="grid grid-cols-2 gap-3">
       <div>
-        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+        <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">
           司机姓名 <span class="text-red-500">*</span>
         </label>
         <input
           v-model="form.driverName"
           type="text"
           placeholder="请输入司机姓名"
-          class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+          class="w-full px-3 py-2 border-2 border-neutral-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
           @input="emitChange"
         />
       </div>
       <div>
-        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+        <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">
           身份证号 <span class="text-red-500">*</span>
         </label>
         <input
           v-model="form.driverIdCard"
           type="text"
           placeholder="请输入身份证号"
-          class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+          class="w-full px-3 py-2 border-2 border-neutral-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
           @input="emitChange"
         />
       </div>
       <div>
-        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+        <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">
           车牌号 <span class="text-red-500">*</span>
         </label>
         <input
           v-model="form.plateNumber"
           type="text"
           placeholder="例如：鄂A12345"
-          class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm uppercase"
+          class="w-full px-3 py-2 border-2 border-neutral-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm uppercase"
           @input="emitChange"
         />
       </div>
       <div>
-        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+        <label class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1">
           联系电话 <span class="text-red-500">*</span>
         </label>
         <input
           v-model="form.driverPhone"
           type="tel"
           placeholder="请输入联系电话"
-          class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+          class="w-full px-3 py-2 border-2 border-neutral-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
           @input="emitChange"
         />
       </div>

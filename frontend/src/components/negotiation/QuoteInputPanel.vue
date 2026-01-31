@@ -107,25 +107,25 @@ function handleSubmit() {
     >
       <div class="w-full max-w-lg bg-white rounded-t-2xl shadow-2xl overflow-hidden">
         <!-- 头部 -->
-        <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+        <div class="px-4 py-3 border-b border-neutral-100 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <DollarSign class="w-5 h-5 text-brand-600" />
-            <h3 class="font-bold text-gray-900">发送报价</h3>
+            <h3 class="font-bold text-neutral-900">发送报价</h3>
           </div>
           <button
             @click="emit('close')"
-            class="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+            class="p-1.5 hover:bg-neutral-100 rounded-lg text-neutral-400 hover:text-neutral-600 transition-colors"
           >
             <X class="w-5 h-5" />
           </button>
         </div>
 
         <!-- 产品信息 -->
-        <div v-if="requirementData?.productName" class="px-4 py-3 bg-gray-50 border-b border-gray-100">
+        <div v-if="requirementData?.productName" class="px-4 py-3 bg-neutral-50 border-b border-neutral-100">
           <div class="flex items-center gap-2">
             <Package class="w-4 h-4 text-brand-500" />
-            <span class="font-medium text-gray-900">{{ requirementData.productName }}</span>
-            <span v-if="requirementData.qualityGrade" class="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded">
+            <span class="font-medium text-neutral-900">{{ requirementData.productName }}</span>
+            <span v-if="requirementData.qualityGrade" class="text-xs text-neutral-500 bg-neutral-200 px-2 py-0.5 rounded">
               {{ requirementData.qualityGrade }}
             </span>
           </div>
@@ -136,7 +136,7 @@ function handleSubmit() {
           <!-- 价格和数量 -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-gray-500 mb-1">
+              <label class="block text-xs font-medium text-neutral-500 mb-1">
                 <DollarSign class="w-3 h-3 inline mr-1" />
                 单价 (元)
               </label>
@@ -145,24 +145,24 @@ function handleSubmit() {
                 type="number"
                 min="0"
                 step="0.01"
-                class="w-full h-10 px-3 text-lg font-bold border border-gray-200 rounded-lg
+                class="w-full h-10 px-3 text-lg font-bold border border-neutral-200 rounded-lg
                        focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                 placeholder="0.00"
               />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-500 mb-1">数量</label>
+              <label class="block text-xs font-medium text-neutral-500 mb-1">数量</label>
               <div class="flex gap-2">
                 <input
                   v-model="form.quantity"
                   type="text"
-                  class="flex-1 h-10 px-3 text-lg font-bold border border-gray-200 rounded-lg
+                  class="flex-1 h-10 px-3 text-lg font-bold border border-neutral-200 rounded-lg
                          focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                   placeholder="0"
                 />
                 <select
                   v-model="form.unit"
-                  class="w-16 h-10 px-2 border border-gray-200 rounded-lg text-sm
+                  class="w-16 h-10 px-2 border border-neutral-200 rounded-lg text-sm
                          focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                 >
                   <option v-for="u in unitOptions" :key="u" :value="u">{{ u }}</option>
@@ -174,27 +174,27 @@ function handleSubmit() {
           <!-- 交货信息 -->
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-gray-500 mb-1">
+              <label class="block text-xs font-medium text-neutral-500 mb-1">
                 <MapPin class="w-3 h-3 inline mr-1" />
                 交货地点
               </label>
               <input
                 v-model="form.deliveryPlace"
                 type="text"
-                class="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm
+                class="w-full h-10 px-3 border border-neutral-200 rounded-lg text-sm
                        focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
                 placeholder="输入地址"
               />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-500 mb-1">
+              <label class="block text-xs font-medium text-neutral-500 mb-1">
                 <Calendar class="w-3 h-3 inline mr-1" />
                 交货日期
               </label>
               <input
                 v-model="form.arrivalDate"
                 type="date"
-                class="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm
+                class="w-full h-10 px-3 border border-neutral-200 rounded-lg text-sm
                        focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
               />
             </div>
@@ -202,7 +202,7 @@ function handleSubmit() {
 
           <!-- 付款方式 -->
           <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1">
+            <label class="block text-xs font-medium text-neutral-500 mb-1">
               <CreditCard class="w-3 h-3 inline mr-1" />
               付款方式
             </label>
@@ -215,7 +215,7 @@ function handleSubmit() {
                   'px-3 py-1.5 text-sm rounded-lg border transition-all',
                   form.paymentMethod === opt
                     ? 'border-brand-500 bg-brand-50 text-brand-700 font-medium'
-                    : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                    : 'border-neutral-200 text-neutral-600 hover:border-neutral-300'
                 ]"
               >
                 {{ opt }}
@@ -225,11 +225,11 @@ function handleSubmit() {
 
           <!-- 备注 -->
           <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1">备注（可选）</label>
+            <label class="block text-xs font-medium text-neutral-500 mb-1">备注（可选）</label>
             <textarea
               v-model="form.remark"
               rows="2"
-              class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none
+              class="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm resize-none
                      focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500"
               placeholder="添加备注..."
             />
@@ -237,15 +237,15 @@ function handleSubmit() {
         </div>
 
         <!-- 底部操作 -->
-        <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+        <div class="px-4 py-3 bg-neutral-50 border-t border-neutral-100 flex items-center justify-between">
           <div>
-            <span class="text-xs text-gray-500">预计总金额</span>
+            <span class="text-xs text-neutral-500">预计总金额</span>
             <div class="text-lg font-bold text-brand-600">{{ formatCurrency(totalAmount) }}</div>
           </div>
           <div class="flex gap-2">
             <button
               @click="emit('close')"
-              class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              class="px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
             >
               取消
             </button>

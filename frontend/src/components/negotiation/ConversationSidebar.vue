@@ -63,7 +63,7 @@ function formatTime(time?: string): string {
   <transition name="sidebar">
     <aside
       :class="[
-        'sidebar relative flex flex-col bg-white border-r border-gray-200 transition-all duration-300 shrink-0',
+        'sidebar relative flex flex-col bg-white border-r border-neutral-200 transition-all duration-300 shrink-0',
         state === 'expanded' ? 'w-56' : 'w-14'
       ]"
     >
@@ -71,31 +71,31 @@ function formatTime(time?: string): string {
       <button
         @click="toggleState"
         class="absolute top-1/2 -translate-y-1/2 -right-3 z-10
-               w-6 h-12 bg-white border border-gray-200 border-l-0
+               w-6 h-12 bg-white border border-neutral-200 border-l-0
                rounded-r-full shadow-md
                flex items-center justify-center
-               text-gray-400 hover:text-brand-600 hover:bg-brand-50
+               text-neutral-400 hover:text-brand-600 hover:bg-brand-50
                transition-all duration-200 hover:shadow-lg hover:-right-3.5"
       >
         <ChevronLeft v-if="state === 'expanded'" class="w-4 h-4 -ml-0.5" />
         <ChevronRight v-else class="w-4 h-4 -ml-0.5" />
       </button>
       <!-- 搜索栏（仅展开时显示） -->
-      <div v-if="state === 'expanded'" class="p-2.5 border-b border-gray-100">
+      <div v-if="state === 'expanded'" class="p-2.5 border-b border-neutral-100">
         <div class="relative">
-          <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+          <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
           <input
             v-model="searchQuery"
             placeholder="搜索商户..."
-            class="w-full h-8 pl-8 pr-2 text-xs border border-gray-200 rounded-lg
+            class="w-full h-8 pl-8 pr-2 text-xs border border-neutral-200 rounded-lg
                    focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500"
           />
         </div>
       </div>
 
       <!-- Mini 模式搜索按钮 -->
-      <div v-else class="p-2 border-b border-gray-100 flex justify-center">
-        <button class="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50">
+      <div v-else class="p-2 border-b border-neutral-100 flex justify-center">
+        <button class="p-1.5 text-neutral-400 hover:text-neutral-600 rounded-lg hover:bg-neutral-50">
           <Search class="w-4 h-4" />
         </button>
       </div>
@@ -106,10 +106,10 @@ function formatTime(time?: string): string {
           v-for="merchant in filteredMerchants"
           :key="merchant.peerId"
           :class="[
-            'cursor-pointer transition-colors border-b border-gray-50',
+            'cursor-pointer transition-colors border-b border-neutral-50',
             currentPeerId === merchant.peerId
               ? 'bg-brand-50 border-l-2 border-l-brand-500'
-              : 'hover:bg-gray-50 border-l-2 border-l-transparent'
+              : 'hover:bg-neutral-50 border-l-2 border-l-transparent'
           ]"
           @click="$emit('select', merchant)"
         >
@@ -121,14 +121,14 @@ function formatTime(time?: string): string {
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center justify-between">
-                  <span class="font-medium text-sm text-gray-900 truncate">
+                  <span class="font-medium text-sm text-neutral-900 truncate">
                     {{ merchant.peerName }}
                   </span>
-                  <span class="text-[10px] text-gray-400 shrink-0 ml-1">
+                  <span class="text-[10px] text-neutral-400 shrink-0 ml-1">
                     {{ formatTime(merchant.lastTime) }}
                   </span>
                 </div>
-                <div v-if="merchant.peerCompany" class="text-[10px] text-gray-400 truncate">
+                <div v-if="merchant.peerCompany" class="text-[10px] text-neutral-400 truncate">
                   {{ merchant.peerCompany }}
                 </div>
                 <div class="flex items-center gap-1 mt-0.5">
@@ -137,13 +137,13 @@ function formatTime(time?: string): string {
                     {{ merchant.currentSubjectName }}
                   </span>
                 </div>
-                <div class="text-[11px] text-gray-400 truncate mt-0.5">
+                <div class="text-[11px] text-neutral-400 truncate mt-0.5">
                   {{ merchant.lastContent || '暂无消息' }}
                 </div>
               </div>
               <div
                 v-if="merchant.totalUnread"
-                class="w-4 h-4 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold shrink-0"
+                class="w-4 h-4 bg-error-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold shrink-0"
               >
                 {{ merchant.totalUnread > 9 ? '9+' : merchant.totalUnread }}
               </div>
@@ -159,7 +159,7 @@ function formatTime(time?: string): string {
                 </div>
                 <div
                   v-if="merchant.totalUnread"
-                  class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-red-500 text-white text-[8px] rounded-full flex items-center justify-center font-bold"
+                  class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-error-500 text-white text-[8px] rounded-full flex items-center justify-center font-bold"
                 >
                   {{ merchant.totalUnread > 9 ? '!' : merchant.totalUnread }}
                 </div>
@@ -169,7 +169,7 @@ function formatTime(time?: string): string {
         </div>
 
         <!-- 空状态 -->
-        <div v-if="filteredMerchants.length === 0" class="p-4 text-center text-xs text-gray-400">
+        <div v-if="filteredMerchants.length === 0" class="p-4 text-center text-xs text-neutral-400">
           暂无会话
         </div>
       </div>

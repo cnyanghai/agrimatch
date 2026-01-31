@@ -57,7 +57,7 @@ const roundedClasses: Record<string, string> = {
     
     <!-- 卡片骨架 -->
     <template v-else-if="type === 'card'">
-      <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+      <div class="bg-white rounded-xl border border-neutral-200 p-5 space-y-4">
         <div class="flex items-center gap-3">
           <div class="skeleton w-10 h-10 rounded-xl" />
           <div class="flex-1 space-y-2">

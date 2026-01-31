@@ -171,7 +171,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-gray-100 overflow-hidden -m-4 md:-m-6">
+  <div class="h-full flex flex-col bg-neutral-100 overflow-hidden -m-4 md:-m-6">
     <!-- 加载状态 -->
     <div v-if="loading" class="flex-1 flex items-center justify-center">
       <div class="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
@@ -191,12 +191,12 @@ onBeforeUnmount(() => {
       <!-- 空状态 -->
       <div
         v-if="!currentConversation"
-        class="flex-1 flex items-center justify-center bg-gray-50"
+        class="flex-1 flex items-center justify-center bg-neutral-50"
       >
         <div class="text-center">
-          <MessageCircle class="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <h3 class="text-base font-medium text-gray-600 mb-1">选择一个商户开始议价</h3>
-          <p class="text-xs text-gray-400">
+          <MessageCircle class="w-12 h-12 text-neutral-300 mx-auto mb-3" />
+          <h3 class="text-base font-medium text-neutral-600 mb-1">选择一个商户开始议价</h3>
+          <p class="text-xs text-neutral-400">
             从左侧选择商户，或从供应/采购详情页发起
           </p>
         </div>

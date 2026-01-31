@@ -250,23 +250,23 @@ async function handleSign() {
     </template>
 
     <!-- 合同信息 -->
-    <div v-if="contract" class="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-5">
-      <div class="text-xs text-gray-500 mb-1">合同编号</div>
-      <div class="font-bold text-gray-900">{{ contract.contractNo }}</div>
-      <div class="flex justify-between items-center mt-2 border-b border-gray-200 pb-3 mb-3">
-        <span class="text-sm text-gray-600">{{ contract.productName }}</span>
+    <div v-if="contract" class="bg-neutral-50 rounded-xl p-4 border border-neutral-200 mb-5">
+      <div class="text-xs text-neutral-500 mb-1">合同编号</div>
+      <div class="font-bold text-neutral-900">{{ contract.contractNo }}</div>
+      <div class="flex justify-between items-center mt-2 border-b border-neutral-200 pb-3 mb-3">
+        <span class="text-sm text-neutral-600">{{ contract.productName }}</span>
         <span class="text-sm font-bold text-brand-600">¥{{ contract.totalAmount?.toLocaleString() }}</span>
       </div>
 
       <!-- 规格参数摘要 -->
       <div v-if="qualitySpecs.length > 0" class="space-y-2">
-        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+        <div class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest flex items-center gap-1">
           <Package class="w-3 h-3" /> 质量标准
         </div>
         <div class="flex flex-wrap gap-2">
-          <div v-for="spec in qualitySpecs" :key="spec.name" class="bg-white px-2 py-1 rounded-lg border border-gray-200 text-[10px] flex items-center gap-1.5 shadow-sm">
-            <span class="text-gray-400 font-medium">{{ spec.name }}:</span>
-            <span class="text-gray-700 font-bold">{{ spec.value }}</span>
+          <div v-for="spec in qualitySpecs" :key="spec.name" class="bg-white px-2 py-1 rounded-lg border border-neutral-200 text-[10px] flex items-center gap-1.5 shadow-sm">
+            <span class="text-neutral-400 font-medium">{{ spec.name }}:</span>
+            <span class="text-neutral-700 font-bold">{{ spec.value }}</span>
           </div>
         </div>
       </div>
@@ -278,8 +278,8 @@ async function handleSign() {
       <div>
         <div class="flex items-center gap-2 mb-3">
           <div class="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold">1</div>
-          <span class="text-sm font-bold text-gray-700">选择签署印章</span>
-          <Stamp class="w-4 h-4 text-gray-400" />
+          <span class="text-sm font-bold text-neutral-700">选择签署印章</span>
+          <Stamp class="w-4 h-4 text-neutral-400" />
         </div>
         <SealManager
           selectable
@@ -292,12 +292,12 @@ async function handleSign() {
       <div>
         <div class="flex items-center gap-2 mb-3">
           <div class="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold">2</div>
-          <span class="text-sm font-bold text-gray-700">短信验证确认</span>
-          <ShieldCheck class="w-4 h-4 text-gray-400" />
+          <span class="text-sm font-bold text-neutral-700">短信验证确认</span>
+          <ShieldCheck class="w-4 h-4 text-neutral-400" />
         </div>
-        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-          <p class="text-xs text-gray-500 mb-3">
-            为确保签署安全，需向手机号 <span class="font-bold text-gray-700">{{ maskedPhone || '未绑定' }}</span> 发送验证码确认
+        <div class="bg-neutral-50 border border-neutral-200 rounded-xl p-4">
+          <p class="text-xs text-neutral-500 mb-3">
+            为确保签署安全，需向手机号 <span class="font-bold text-neutral-700">{{ maskedPhone || '未绑定' }}</span> 发送验证码确认
           </p>
           <div class="flex gap-3">
             <input
@@ -306,7 +306,7 @@ async function handleSign() {
               inputmode="numeric"
               maxlength="6"
               placeholder="请输入6位验证码"
-              class="flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-center text-lg font-bold tracking-widest"
+              class="flex-1 px-4 py-2.5 border-2 border-neutral-200 rounded-xl focus:border-brand-500 outline-none transition-all text-center text-lg font-bold tracking-widest"
             />
             <button
               class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 text-sm"

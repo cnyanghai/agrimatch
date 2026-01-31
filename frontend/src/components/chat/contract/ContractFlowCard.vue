@@ -64,16 +64,16 @@ function formatAmount(val: number | string): string {
 </script>
 
 <template>
-  <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden max-w-[360px]">
+  <div class="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden max-w-[360px]">
     <!-- 头部 -->
-    <div class="px-4 py-3 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100">
+    <div class="px-4 py-3 bg-gradient-to-r from-slate-50 to-neutral-50 border-b border-neutral-100">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center">
           <FileText class="w-5 h-5 text-white" />
         </div>
         <div class="flex-1 min-w-0">
-          <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">采购合同</div>
-          <div class="text-sm font-bold text-gray-900 truncate">{{ contract.contractNo }}</div>
+          <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">采购合同</div>
+          <div class="text-sm font-bold text-neutral-900 truncate">{{ contract.contractNo }}</div>
         </div>
         <span :class="['text-[10px] font-bold px-2.5 py-1 rounded-full', statusInfo.color]">
           {{ statusInfo.label }}
@@ -82,7 +82,7 @@ function formatAmount(val: number | string): string {
     </div>
 
     <!-- 进度条 -->
-    <div v-if="!isCancelled" class="px-4 py-4 border-b border-gray-100">
+    <div v-if="!isCancelled" class="px-4 py-4 border-b border-neutral-100">
       <div class="flex items-center justify-between mb-2">
         <template v-for="(step, index) in steps" :key="step.key">
           <!-- 步骤节点 -->
@@ -94,7 +94,7 @@ function formatAmount(val: number | string): string {
                   ? 'bg-brand-500 text-white'
                   : index === currentStepIndex
                     ? 'bg-brand-500 text-white ring-4 ring-brand-100'
-                    : 'bg-gray-100 text-gray-400'
+                    : 'bg-neutral-100 text-neutral-400'
               ]"
             >
               <CheckCircle v-if="index < currentStepIndex" class="w-4 h-4" />
@@ -103,7 +103,7 @@ function formatAmount(val: number | string): string {
             <span
               :class="[
                 'mt-1.5 text-[10px] font-medium',
-                index <= currentStepIndex ? 'text-brand-600' : 'text-gray-400'
+                index <= currentStepIndex ? 'text-brand-600' : 'text-neutral-400'
               ]"
             >
               {{ step.label }}
@@ -115,7 +115,7 @@ function formatAmount(val: number | string): string {
             v-if="index < steps.length - 1"
             :class="[
               'flex-1 h-0.5 mx-1 transition-all',
-              index < currentStepIndex ? 'bg-brand-500' : 'bg-gray-200'
+              index < currentStepIndex ? 'bg-brand-500' : 'bg-neutral-200'
             ]"
           ></div>
         </template>
@@ -123,45 +123,45 @@ function formatAmount(val: number | string): string {
     </div>
 
     <!-- 签署状态 -->
-    <div class="px-4 py-3 border-b border-gray-100">
+    <div class="px-4 py-3 border-b border-neutral-100">
       <div class="flex gap-3">
         <!-- 买方签署状态 -->
-        <div class="flex-1 bg-gray-50 rounded-xl p-3 text-center">
-          <div class="text-[10px] text-gray-400 mb-1">买方</div>
+        <div class="flex-1 bg-neutral-50 rounded-xl p-3 text-center">
+          <div class="text-[10px] text-neutral-400 mb-1">买方</div>
           <div class="flex items-center justify-center gap-1">
             <template v-if="contract.buyerSigned">
               <Check class="w-4 h-4 text-brand-500" />
               <span class="text-xs font-medium text-brand-600">已签署</span>
             </template>
             <template v-else>
-              <Clock class="w-4 h-4 text-amber-500" />
-              <span class="text-xs font-medium text-amber-600">待签署</span>
+              <Clock class="w-4 h-4 text-warning-500" />
+              <span class="text-xs font-medium text-warning-600">待签署</span>
             </template>
           </div>
-          <div class="text-[10px] text-gray-400 mt-1 truncate">{{ contract.buyerCompanyName }}</div>
+          <div class="text-[10px] text-neutral-400 mt-1 truncate">{{ contract.buyerCompanyName }}</div>
         </div>
 
         <!-- 卖方签署状态 -->
-        <div class="flex-1 bg-gray-50 rounded-xl p-3 text-center">
-          <div class="text-[10px] text-gray-400 mb-1">卖方</div>
+        <div class="flex-1 bg-neutral-50 rounded-xl p-3 text-center">
+          <div class="text-[10px] text-neutral-400 mb-1">卖方</div>
           <div class="flex items-center justify-center gap-1">
             <template v-if="contract.sellerSigned">
               <Check class="w-4 h-4 text-brand-500" />
               <span class="text-xs font-medium text-brand-600">已签署</span>
             </template>
             <template v-else>
-              <Clock class="w-4 h-4 text-amber-500" />
-              <span class="text-xs font-medium text-amber-600">待签署</span>
+              <Clock class="w-4 h-4 text-warning-500" />
+              <span class="text-xs font-medium text-warning-600">待签署</span>
             </template>
           </div>
-          <div class="text-[10px] text-gray-400 mt-1 truncate">{{ contract.sellerCompanyName }}</div>
+          <div class="text-[10px] text-neutral-400 mt-1 truncate">{{ contract.sellerCompanyName }}</div>
         </div>
       </div>
     </div>
 
     <!-- 合同金额 -->
     <div class="px-4 py-3 flex items-center justify-between">
-      <span class="text-xs text-gray-500">合同金额</span>
+      <span class="text-xs text-neutral-500">合同金额</span>
       <span class="text-lg font-bold text-brand-600">
         <template v-if="contract.basisPrice !== undefined && contract.basisPrice !== null && contract.basisPrice !== ''">
           待结算
@@ -173,10 +173,10 @@ function formatAmount(val: number | string): string {
     </div>
 
     <!-- 操作按钮 -->
-    <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex gap-2">
+    <div class="px-4 py-3 bg-neutral-50 border-t border-neutral-100 flex gap-2">
       <button
         @click="emit('view')"
-        class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-50 transition-all active:scale-95"
+        class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white border border-neutral-200 rounded-xl text-xs font-bold text-neutral-700 hover:bg-neutral-50 transition-all active:scale-95"
       >
         <FileText class="w-4 h-4" />
         查看详情

@@ -6,24 +6,24 @@
 // 按钮样式
 export const BUTTON_STYLES = {
   primary: 'bg-brand-600 hover:bg-brand-700 text-white',
-  secondary: 'bg-gray-100 hover:bg-gray-200 text-gray-700',
-  outline: 'border border-gray-200 hover:bg-gray-50 text-gray-700',
-  danger: 'bg-red-50 hover:bg-red-100 text-red-600',
-  ghost: 'hover:bg-gray-100 text-gray-600',
+  secondary: 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700',
+  outline: 'border border-neutral-200 hover:bg-neutral-50 text-neutral-700',
+  danger: 'bg-error-50 hover:bg-error-100 text-error-600',
+  ghost: 'hover:bg-neutral-100 text-neutral-600',
   base: 'px-4 py-2 rounded-lg font-bold transition-all active:scale-95'
 } as const
 
 // 卡片样式
 export const CARD_STYLES = {
-  base: 'bg-white rounded-2xl border border-gray-100',
+  base: 'bg-white rounded-2xl border border-neutral-100',
   interactive: 'hover:shadow-md hover:border-brand-100 hover:-translate-y-1 transition-all cursor-pointer',
   elevated: 'shadow-sm'
 } as const
 
 // 空状态样式
 export const EMPTY_STATE = {
-  iconContainer: 'w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center',
-  icon: 'w-10 h-10 text-gray-300'
+  iconContainer: 'w-20 h-20 bg-neutral-50 rounded-full flex items-center justify-center',
+  icon: 'w-10 h-10 text-neutral-300'
 } as const
 
 // 圆角规范
@@ -52,17 +52,17 @@ export const COLOR_SEMANTIC = {
   },
   // 警告
   warning: {
-    bg: 'bg-amber-50',
-    text: 'text-amber-600',
-    border: 'border-amber-200',
-    hover: 'hover:bg-amber-100'
+    bg: 'bg-warning-50',
+    text: 'text-warning-600',
+    border: 'border-warning-200',
+    hover: 'hover:bg-warning-100'
   },
   // 错误
   error: {
-    bg: 'bg-red-50',
-    text: 'text-red-600',
-    border: 'border-red-200',
-    hover: 'hover:bg-red-100'
+    bg: 'bg-error-50',
+    text: 'text-error-600',
+    border: 'border-error-200',
+    hover: 'hover:bg-error-100'
   },
   // 成功
   success: {
@@ -90,11 +90,11 @@ export const SHADOWS = {
 
 // 文字规范
 export const TEXT_STYLES = {
-  heading1: 'text-3xl font-black text-gray-900',
-  heading2: 'text-2xl font-bold text-gray-900',
-  heading3: 'text-xl font-bold text-gray-900',
-  heading4: 'text-lg font-bold text-gray-900',
-  body: 'text-sm text-gray-700',
-  caption: 'text-xs text-gray-500',
-  label: 'text-[10px] font-bold text-gray-400 uppercase tracking-wider'
+  heading1: 'text-3xl font-black text-neutral-900',
+  heading2: 'text-2xl font-bold text-neutral-900',
+  heading3: 'text-xl font-bold text-neutral-900',
+  heading4: 'text-lg font-bold text-neutral-900',
+  body: 'text-sm text-neutral-700',
+  caption: 'text-xs text-neutral-500',
+  label: 'text-[10px] font-bold text-neutral-400 uppercase tracking-wider'
 } as const

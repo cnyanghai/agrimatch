@@ -87,7 +87,7 @@ function getTxTypeInfo(txType: string) {
 function getDeltaColor(delta: number): string {
   if (delta > 0) return 'text-brand-600'
   if (delta < 0) return 'text-red-500'
-  return 'text-gray-400'
+  return 'text-neutral-400'
 }
 
 // 格式化变动
@@ -285,14 +285,14 @@ onUnmounted(() => {
       <div class="flex items-center gap-3">
         <div>
           <div class="flex items-center gap-2 mb-1">
-            <h1 class="text-2xl font-bold text-gray-900">会员积分</h1>
+            <h1 class="text-2xl font-bold text-neutral-900">会员积分</h1>
             <!-- 认证会员标识 -->
-            <div class="flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-amber-400 to-amber-500 text-white rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm">
+            <div class="flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-warning-400 to-warning-500 text-white rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm">
               <Crown class="w-3 h-3" />
               <span>认证会员</span>
             </div>
           </div>
-          <p class="text-sm text-gray-500">管理您的积分余额、充值与兑换</p>
+          <p class="text-sm text-neutral-500">管理您的积分余额、充值与兑换</p>
         </div>
       </div>
       <div class="flex items-center gap-3">
@@ -307,24 +307,24 @@ onUnmounted(() => {
     </div>
 
     <!-- 会员权益说明卡片 -->
-    <div class="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-lg border border-amber-200 p-5">
+    <div class="bg-gradient-to-br from-warning-50 to-warning-100/50 rounded-lg border border-warning-200 p-5">
       <div class="flex items-start gap-4">
-        <div class="w-12 h-12 rounded-lg bg-amber-500 flex items-center justify-center shrink-0">
+        <div class="w-12 h-12 rounded-lg bg-warning-500 flex items-center justify-center shrink-0">
           <ShieldCheck class="w-6 h-6 text-white" />
         </div>
         <div class="flex-1">
-          <h3 class="text-2xl font-bold text-gray-900 mb-2">认证会员权益</h3>
+          <h3 class="text-2xl font-bold text-neutral-900 mb-2">认证会员权益</h3>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-            <div class="flex items-center gap-2 text-gray-700">
-              <Check class="w-4 h-4 text-amber-600" />
+            <div class="flex items-center gap-2 text-neutral-700">
+              <Check class="w-4 h-4 text-warning-600" />
               <span>合同保障优先</span>
             </div>
-            <div class="flex items-center gap-2 text-gray-700">
-              <Check class="w-4 h-4 text-amber-600" />
+            <div class="flex items-center gap-2 text-neutral-700">
+              <Check class="w-4 h-4 text-warning-600" />
               <span>平台推荐优先</span>
             </div>
-            <div class="flex items-center gap-2 text-gray-700">
-              <Check class="w-4 h-4 text-amber-600" />
+            <div class="flex items-center gap-2 text-neutral-700">
+              <Check class="w-4 h-4 text-warning-600" />
               <span>专属客服支持</span>
             </div>
           </div>
@@ -374,19 +374,19 @@ onUnmounted(() => {
     </div>
 
     <!-- 积分商城入口 -->
-    <div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-all cursor-pointer group"
+    <div class="bg-white rounded-lg border border-neutral-200 p-6 hover:shadow-md transition-all cursor-pointer group"
          @click="router.push('/points/mall')">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div class="w-14 h-14 rounded-lg bg-gradient-to-br from-accent-500 to-accent-600 flex items-center justify-center group-hover:scale-110 transition-transform">
             <ShoppingBag class="w-7 h-7 text-white" />
           </div>
           <div>
-            <h3 class="text-2xl font-bold text-gray-900 group-hover:text-orange-600 transition-colors mb-1">积分商城</h3>
-            <p class="text-sm text-gray-500">使用积分兑换精美商品</p>
+            <h3 class="text-2xl font-bold text-neutral-900 group-hover:text-accent-600 transition-colors mb-1">积分商城</h3>
+            <p class="text-sm text-neutral-500">使用积分兑换精美商品</p>
           </div>
         </div>
-        <div class="flex items-center gap-2 text-gray-400 group-hover:text-orange-500 transition-colors">
+        <div class="flex items-center gap-2 text-neutral-400 group-hover:text-accent-500 transition-colors">
           <span class="text-sm font-bold">进入商城</span>
           <ArrowRight class="w-4 h-4" />
         </div>
@@ -396,21 +396,21 @@ onUnmounted(() => {
     <!-- 操作区 -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- 充值卡片 -->
-      <div class="bg-white rounded-lg border border-gray-200 p-6 hover-card animate-stagger-in">
+      <div class="bg-white rounded-lg border border-neutral-200 p-6 hover-card animate-stagger-in">
         <div class="flex items-center gap-3 mb-4">
           <div class="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center">
             <ArrowUpCircle class="w-5 h-5 text-brand-600" />
           </div>
           <div>
-            <h3 class="text-2xl font-bold text-gray-900">充值积分</h3>
-            <p class="text-xs text-gray-500">支持微信、支付宝扫码</p>
+            <h3 class="text-2xl font-bold text-neutral-900">充值积分</h3>
+            <p class="text-xs text-neutral-500">支持微信、支付宝扫码</p>
           </div>
         </div>
         
         <div class="space-y-4">
           <!-- 金额快选 -->
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">选择金额</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">选择金额</label>
             <div class="grid grid-cols-5 gap-2">
               <button
                 v-for="amount in rechargeAmounts"
@@ -419,7 +419,7 @@ onUnmounted(() => {
                   'py-2 rounded-lg text-sm font-bold transition-all ',
                   rechargeVal === amount 
                     ? 'bg-brand-600 text-white shadow-md shadow-brand-100' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                 ]"
                 @click="rechargeVal = amount"
               >
@@ -430,7 +430,7 @@ onUnmounted(() => {
           
           <!-- 自定义金额 -->
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
               或自定义金额（元）
             </label>
             <input
@@ -438,22 +438,22 @@ onUnmounted(() => {
               type="number"
               min="1"
               :max="limits.rechargeMax"
-              class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:border-brand-500 outline-none transition-all text-lg font-bold text-center"
+              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all text-lg font-bold text-center"
               placeholder="请输入金额"
             />
-            <p class="text-xs text-gray-400 mt-1 text-center">单次上限 {{ limits.rechargeMax.toLocaleString() }} 元</p>
+            <p class="text-xs text-neutral-400 mt-1 text-center">单次上限 {{ limits.rechargeMax.toLocaleString() }} 元</p>
           </div>
           
           <!-- 支付方式 -->
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">支付方式</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">支付方式</label>
             <div class="grid grid-cols-2 gap-3">
               <button
                 :class="[
                   'flex items-center justify-center gap-2 py-3 rounded-lg font-bold transition-all  border-2',
                   payChannel === 'wechat' 
                     ? 'border-brand-500 bg-brand-50 text-brand-700' 
-                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-200'
+                    : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-200'
                 ]"
                 @click="payChannel = 'wechat'"
               >
@@ -466,8 +466,8 @@ onUnmounted(() => {
                 :class="[
                   'flex items-center justify-center gap-2 py-3 rounded-lg font-bold transition-all  border-2',
                   payChannel === 'alipay' 
-                    ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-200'
+                    ? 'border-action-500 bg-action-50 text-action-700' 
+                    : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-200'
                 ]"
                 @click="payChannel = 'alipay'"
               >
@@ -493,21 +493,21 @@ onUnmounted(() => {
       </div>
 
       <!-- 兑换卡片 -->
-      <div class="bg-white rounded-lg border border-gray-200 p-6 hover-card animate-stagger-in">
+      <div class="bg-white rounded-lg border border-neutral-200 p-6 hover-card animate-stagger-in">
         <div class="flex items-center gap-3 mb-4">
           <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
             <CreditCard class="w-5 h-5 text-red-600" />
           </div>
           <div>
-            <h3 class="text-2xl font-bold text-gray-900">兑换京东购物卡</h3>
-            <p class="text-xs text-gray-500">1积分 = 1元面值</p>
+            <h3 class="text-2xl font-bold text-neutral-900">兑换京东购物卡</h3>
+            <p class="text-xs text-neutral-500">1积分 = 1元面值</p>
           </div>
         </div>
         
         <div class="space-y-4">
           <!-- 面额选择 -->
           <div>
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">选择面额</label>
+            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">选择面额</label>
             <div class="grid grid-cols-4 gap-2">
               <button
                 v-for="face in jdCardFaces"
@@ -516,7 +516,7 @@ onUnmounted(() => {
                   'py-3 rounded-lg text-sm font-bold transition-all  border-2',
                   selectedJdFace === face 
                     ? 'border-red-500 bg-red-50 text-red-700' 
-                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-200',
+                    : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-200',
                   (me?.pointsBalance ?? 0) < face ? 'opacity-50 cursor-not-allowed' : ''
                 ]"
                 :disabled="(me?.pointsBalance ?? 0) < face"
@@ -528,25 +528,25 @@ onUnmounted(() => {
           </div>
           
           <!-- 积分信息 -->
-          <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+          <div class="bg-neutral-50 rounded-lg p-4 space-y-2">
             <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-500">当前积分</span>
-              <span class="font-bold text-gray-900">{{ formatNumber(me?.pointsBalance ?? 0) }}</span>
+              <span class="text-neutral-500">当前积分</span>
+              <span class="font-bold text-neutral-900">{{ formatNumber(me?.pointsBalance ?? 0) }}</span>
             </div>
             <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-500">需消耗积分</span>
+              <span class="text-neutral-500">需消耗积分</span>
               <span class="font-bold text-red-600">-{{ selectedJdFace }}</span>
             </div>
-            <div class="border-t border-gray-200 pt-2 flex items-center justify-between text-sm">
-              <span class="text-gray-500">兑换后剩余</span>
-              <span class="font-bold text-gray-900">{{ formatNumber((me?.pointsBalance ?? 0) - selectedJdFace) }}</span>
+            <div class="border-t border-neutral-200 pt-2 flex items-center justify-between text-sm">
+              <span class="text-neutral-500">兑换后剩余</span>
+              <span class="font-bold text-neutral-900">{{ formatNumber((me?.pointsBalance ?? 0) - selectedJdFace) }}</span>
             </div>
           </div>
           
           <!-- 安全提示 -->
-          <div class="flex items-start gap-2 p-3 bg-amber-50 rounded-lg border border-amber-100">
-            <ShieldCheck class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <p class="text-xs text-amber-700">兑换需要短信验证码确认，卡密将立即显示，请妥善保管。</p>
+          <div class="flex items-start gap-2 p-3 bg-warning-50 rounded-lg border border-warning-100">
+            <ShieldCheck class="w-4 h-4 text-warning-600 shrink-0 mt-0.5" />
+            <p class="text-xs text-warning-700">兑换需要短信验证码确认，卡密将立即显示，请妥善保管。</p>
           </div>
           
           <BaseButton 
@@ -563,16 +563,16 @@ onUnmounted(() => {
     </div>
 
     <!-- 流水记录 -->
-    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden animate-stagger-in">
-      <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+    <div class="bg-white rounded-lg border border-neutral-200 overflow-hidden animate-stagger-in">
+      <div class="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div class="w-1.5 h-5 bg-brand-500 rounded-full"></div>
-          <h3 class="text-2xl font-bold text-gray-900">交易记录</h3>
-          <span v-if="txs.length > 0" class="text-xs text-gray-400">
+          <h3 class="text-2xl font-bold text-neutral-900">交易记录</h3>
+          <span v-if="txs.length > 0" class="text-xs text-neutral-400">
             共 {{ txs.length }} 条
           </span>
         </div>
-        <Clock class="w-4 h-4 text-gray-400" />
+        <Clock class="w-4 h-4 text-neutral-400" />
       </div>
       
       <!-- 加载状态 -->
@@ -591,11 +591,11 @@ onUnmounted(() => {
       />
       
       <!-- 交易列表 -->
-      <div v-else class="divide-y divide-gray-50">
+      <div v-else class="divide-y divide-neutral-50">
         <div 
           v-for="(tx, index) in txs" 
           :key="tx.id"
-          class="px-6 py-4 hover:bg-gray-50 transition-colors animate-stagger-in"
+          class="px-6 py-4 hover:bg-neutral-50 transition-colors animate-stagger-in"
           :style="{ animationDelay: `${index * 30}ms` }"
         >
           <div class="flex items-center gap-4">
@@ -615,7 +615,7 @@ onUnmounted(() => {
             <!-- 信息 -->
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2">
-                <span class="font-bold text-gray-900">{{ getTxTypeInfo(tx.txType).label }}</span>
+                <span class="font-bold text-neutral-900">{{ getTxTypeInfo(tx.txType).label }}</span>
                 <span 
                   :class="[
                     'px-2 py-0.5 rounded-full text-[10px] font-bold uppercase',
@@ -625,7 +625,7 @@ onUnmounted(() => {
                   #{{ tx.id }}
                 </span>
               </div>
-              <p class="text-sm text-gray-500 truncate">{{ tx.remark || '无备注' }}</p>
+              <p class="text-sm text-neutral-500 truncate">{{ tx.remark || '无备注' }}</p>
             </div>
             
             <!-- 变动 -->
@@ -633,7 +633,7 @@ onUnmounted(() => {
               <div v-if="tx.pointsDelta !== 0" class="flex items-center gap-1 justify-end">
                 <TrendingUp v-if="tx.pointsDelta > 0" class="w-4 h-4 text-brand-500" />
                 <TrendingDown v-else-if="tx.pointsDelta < 0" class="w-4 h-4 text-red-500" />
-                <Minus v-else class="w-4 h-4 text-gray-400" />
+                <Minus v-else class="w-4 h-4 text-neutral-400" />
                 <span :class="['font-bold', getDeltaColor(tx.pointsDelta)]">
                   {{ formatDelta(tx.pointsDelta) }} 积分
                 </span>
@@ -645,7 +645,7 @@ onUnmounted(() => {
                   {{ formatDelta(tx.cnyDelta) }} 元
                 </span>
               </div>
-              <p class="text-xs text-gray-400 mt-1">{{ formatTime(tx.createTime) }}</p>
+              <p class="text-xs text-neutral-400 mt-1">{{ formatTime(tx.createTime) }}</p>
             </div>
           </div>
         </div>
@@ -664,17 +664,17 @@ onUnmounted(() => {
     >
       <div class="p-6 text-center">
         <div v-if="payStatus === 'pending'">
-          <h3 class="text-2xl font-bold text-gray-900 mb-2">扫码支付</h3>
-          <p class="text-sm text-gray-500 mb-6">请使用{{ payChannel === 'wechat' ? '微信' : '支付宝' }}扫描二维码完成支付</p>
+          <h3 class="text-2xl font-bold text-neutral-900 mb-2">扫码支付</h3>
+          <p class="text-sm text-neutral-500 mb-6">请使用{{ payChannel === 'wechat' ? '微信' : '支付宝' }}扫描二维码完成支付</p>
           
-          <div class="inline-block p-4 bg-white rounded-lg border-2 border-gray-200 shadow-md mb-4">
+          <div class="inline-block p-4 bg-white rounded-lg border-2 border-neutral-200 shadow-md mb-4">
             <img :src="payQrCode" alt="支付二维码" class="w-48 h-48" />
           </div>
           
           <div class="text-2xl font-black text-brand-600 mb-2">¥{{ rechargeVal }}</div>
-          <p class="text-xs text-gray-400">订单号：{{ payOrderNo }}</p>
+          <p class="text-xs text-neutral-400">订单号：{{ payOrderNo }}</p>
           
-          <div class="flex items-center justify-center gap-2 mt-4 text-amber-600">
+          <div class="flex items-center justify-center gap-2 mt-4 text-warning-600">
             <RefreshCw class="w-4 h-4 animate-spin" />
             <span class="text-sm">等待支付中...</span>
           </div>
@@ -684,28 +684,28 @@ onUnmounted(() => {
           <div class="w-16 h-16 mx-auto rounded-full bg-brand-100 flex items-center justify-center mb-4">
             <Check class="w-8 h-8 text-brand-600" />
           </div>
-          <h3 class="text-2xl font-bold text-gray-900">支付成功</h3>
-          <p class="text-sm text-gray-500 mt-2">积分已到账</p>
+          <h3 class="text-2xl font-bold text-neutral-900">支付成功</h3>
+          <p class="text-sm text-neutral-500 mt-2">积分已到账</p>
         </div>
         
         <div v-else class="py-8">
-          <div class="w-16 h-16 mx-auto rounded-full bg-red-100 flex items-center justify-center mb-4">
-            <X class="w-8 h-8 text-red-600" />
+          <div class="w-16 h-16 mx-auto rounded-full bg-error-100 flex items-center justify-center mb-4">
+            <X class="w-8 h-8 text-error-600" />
           </div>
-          <h3 class="text-2xl font-bold text-gray-900">支付超时</h3>
-          <p class="text-sm text-gray-500 mt-2">请重新发起支付</p>
+          <h3 class="text-2xl font-bold text-neutral-900">支付超时</h3>
+          <p class="text-sm text-neutral-500 mt-2">请重新发起支付</p>
         </div>
         
         <button
           v-if="payStatus !== 'pending'"
-          class="mt-6 px-6 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold text-gray-700 transition-all "
+          class="mt-6 px-6 py-2 bg-neutral-100 hover:bg-neutral-200 rounded-lg font-bold text-neutral-700 transition-all "
           @click="closePayDialog"
         >
           关闭
         </button>
         <button
           v-else
-          class="mt-6 px-6 py-2 border border-gray-200 hover:bg-gray-50 rounded-lg font-bold text-gray-500 transition-all "
+          class="mt-6 px-6 py-2 border border-neutral-200 hover:bg-neutral-50 rounded-lg font-bold text-neutral-500 transition-all "
           @click="closePayDialog"
         >
           取消支付
@@ -730,24 +730,24 @@ onUnmounted(() => {
             <div class="w-16 h-16 mx-auto rounded-lg bg-red-50 flex items-center justify-center mb-4">
               <CreditCard class="w-8 h-8 text-red-600" />
             </div>
-            <h3 class="text-2xl font-bold text-gray-900">兑换京东购物卡</h3>
-            <p class="text-sm text-gray-500 mt-1">面额 ¥{{ selectedJdFace }}</p>
+            <h3 class="text-2xl font-bold text-neutral-900">兑换京东购物卡</h3>
+            <p class="text-sm text-neutral-500 mt-1">面额 ¥{{ selectedJdFace }}</p>
           </div>
           
-          <div class="bg-gray-50 rounded-lg p-4 space-y-2 mb-6">
+          <div class="bg-neutral-50 rounded-lg p-4 space-y-2 mb-6">
             <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-500">消耗积分</span>
+              <span class="text-neutral-500">消耗积分</span>
               <span class="font-bold text-red-600">{{ selectedJdFace }} 积分</span>
             </div>
             <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-500">获得卡密</span>
-              <span class="font-bold text-gray-900">京东购物卡 ¥{{ selectedJdFace }}</span>
+              <span class="text-neutral-500">获得卡密</span>
+              <span class="font-bold text-neutral-900">京东购物卡 ¥{{ selectedJdFace }}</span>
             </div>
           </div>
           
           <div class="flex gap-3">
             <button
-              class="flex-1 py-3 rounded-lg font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all "
+              class="flex-1 py-3 rounded-lg font-bold bg-neutral-100 hover:bg-neutral-200 text-neutral-700 transition-all "
               @click="closeRedeemDialog"
             >
               取消
@@ -764,11 +764,11 @@ onUnmounted(() => {
         <!-- 步骤2：短信验证 -->
         <template v-else-if="redeemStep === 'verify'">
           <div class="text-center mb-6">
-            <div class="w-16 h-16 mx-auto rounded-lg bg-blue-50 flex items-center justify-center mb-4">
-              <Smartphone class="w-8 h-8 text-blue-600" />
+            <div class="w-16 h-16 mx-auto rounded-lg bg-action-50 flex items-center justify-center mb-4">
+              <Smartphone class="w-8 h-8 text-action-600" />
             </div>
-            <h3 class="text-2xl font-bold text-gray-900">短信验证</h3>
-            <p class="text-sm text-gray-500 mt-1">请输入手机收到的验证码</p>
+            <h3 class="text-2xl font-bold text-neutral-900">短信验证</h3>
+            <p class="text-sm text-neutral-500 mt-1">请输入手机收到的验证码</p>
           </div>
           
           <div class="space-y-4 mb-6">
@@ -777,7 +777,7 @@ onUnmounted(() => {
                 v-model="smsCode"
                 type="text"
                 maxlength="6"
-                class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 outline-none transition-all text-center text-xl font-bold tracking-widest"
+                class="flex-1 px-4 py-3 border-2 border-neutral-200 rounded-lg focus:border-action-500 outline-none transition-all text-center text-xl font-bold tracking-widest"
                 placeholder="000000"
               />
               <button
@@ -785,8 +785,8 @@ onUnmounted(() => {
                 :class="[
                   'px-4 py-3 rounded-lg font-bold transition-all  whitespace-nowrap',
                   smsCountdown > 0 
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed' 
+                    : 'bg-action-600 hover:bg-action-700 text-white'
                 ]"
                 @click="sendSmsCode"
               >
@@ -797,7 +797,7 @@ onUnmounted(() => {
           
           <div class="flex gap-3">
             <button
-              class="flex-1 py-3 rounded-lg font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all "
+              class="flex-1 py-3 rounded-lg font-bold bg-neutral-100 hover:bg-neutral-200 text-neutral-700 transition-all "
               @click="redeemStep = 'select'"
             >
               返回
@@ -808,7 +808,7 @@ onUnmounted(() => {
                 'flex-1 py-3 rounded-lg font-bold transition-all ',
                 smsCode.length === 6 && !creating
                   ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
               ]"
               @click="confirmRedeem"
             >
@@ -823,8 +823,8 @@ onUnmounted(() => {
             <div class="w-16 h-16 mx-auto rounded-lg bg-brand-50 flex items-center justify-center mb-4">
               <Check class="w-8 h-8 text-brand-600" />
             </div>
-            <h3 class="text-2xl font-bold text-gray-900">兑换成功</h3>
-            <p class="text-sm text-gray-500 mt-1">京东购物卡 ¥{{ redeemResult.faceValue }}</p>
+            <h3 class="text-2xl font-bold text-neutral-900">兑换成功</h3>
+            <p class="text-sm text-neutral-500 mt-1">京东购物卡 ¥{{ redeemResult.faceValue }}</p>
           </div>
           
           <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-lg p-6 text-white mb-6">
@@ -837,7 +837,7 @@ onUnmounted(() => {
               'w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ',
               cardCodeCopied 
                 ? 'bg-brand-600 text-white' 
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
             ]"
             @click="copyCardCode"
           >
@@ -845,10 +845,10 @@ onUnmounted(() => {
             {{ cardCodeCopied ? '已复制' : '复制卡密' }}
           </button>
           
-          <p class="text-xs text-gray-400 text-center mt-4">请妥善保管卡密，前往京东官网充值使用</p>
+          <p class="text-xs text-neutral-400 text-center mt-4">请妥善保管卡密，前往京东官网充值使用</p>
           
           <button
-            class="w-full mt-4 py-3 rounded-lg font-bold border border-gray-200 hover:bg-gray-50 text-gray-700 transition-all "
+            class="w-full mt-4 py-3 rounded-lg font-bold border border-neutral-200 hover:bg-neutral-50 text-neutral-700 transition-all "
             @click="closeRedeemDialog"
           >
             完成
@@ -862,16 +862,16 @@ onUnmounted(() => {
 <style scoped>
 /* 动态颜色类 - Tailwind 无法动态生成，需要手动定义 */
 .bg-brand-50 { background-color: rgb(236 253 245); }
-.bg-blue-50 { background-color: rgb(239 246 255); }
-.bg-purple-50 { background-color: rgb(250 245 255); }
-.bg-amber-50 { background-color: rgb(255 251 235); }
+.bg-action-50 { background-color: rgb(239 246 255); }
+.bg-action-50 { background-color: rgb(250 245 255); }
+.bg-warning-50 { background-color: rgb(255 251 235); }
 .bg-red-50 { background-color: rgb(254 242 242); }
-.bg-gray-50 { background-color: rgb(249 250 251); }
+.bg-neutral-50 { background-color: rgb(249 250 251); }
 
 .text-brand-600 { color: rgb(5 150 105); }
-.text-blue-600 { color: rgb(37 99 235); }
-.text-purple-600 { color: rgb(147 51 234); }
-.text-amber-600 { color: rgb(217 119 6); }
+.text-action-600 { color: rgb(37 99 235); }
+.text-action-600 { color: rgb(147 51 234); }
+.text-warning-600 { color: rgb(217 119 6); }
 .text-red-600 { color: rgb(220 38 38); }
-.text-gray-600 { color: rgb(75 85 99); }
+.text-neutral-600 { color: rgb(75 85 99); }
 </style>

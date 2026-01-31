@@ -135,7 +135,7 @@ function handleCounterQuoteSubmit(payload: { price?: number; basisPrice?: number
     <!-- 系统消息 -->
     <div
       v-if="isSystem"
-      class="px-3 py-1.5 bg-gray-100 rounded-full text-xs text-gray-500"
+      class="px-3 py-1.5 bg-neutral-100 rounded-full text-xs text-neutral-500"
     >
       {{ message.content }}
     </div>
@@ -168,7 +168,7 @@ function handleCounterQuoteSubmit(payload: { price?: number; basisPrice?: number
           v-else-if="msgType === 'IMAGE'"
           :class="[
             'rounded-xl p-1.5 shadow-sm',
-            isSent ? 'bg-brand-600' : 'bg-white border border-gray-200'
+            isSent ? 'bg-brand-600' : 'bg-white border border-neutral-200'
           ]"
         >
           <img
@@ -178,7 +178,7 @@ function handleCounterQuoteSubmit(payload: { price?: number; basisPrice?: number
             class="max-w-[280px] max-h-[200px] rounded-lg cursor-pointer hover:opacity-90 transition-opacity object-cover"
             @click="emit('preview-image', parseImagePayload(message.payloadJson)?.fileUrl || '')"
           />
-          <div v-else :class="['text-sm', isSent ? 'text-white/80' : 'text-gray-500']">[图片加载失败]</div>
+          <div v-else :class="['text-sm', isSent ? 'text-white/80' : 'text-neutral-500']">[图片加载失败]</div>
         </div>
 
         <!-- 附件消息 -->
@@ -186,7 +186,7 @@ function handleCounterQuoteSubmit(payload: { price?: number; basisPrice?: number
           v-else-if="msgType === 'ATTACHMENT'"
           :class="[
             'rounded-xl px-4 py-3 shadow-sm',
-            isSent ? 'bg-brand-600' : 'bg-white border border-gray-200'
+            isSent ? 'bg-brand-600' : 'bg-white border border-neutral-200'
           ]"
         >
           <div class="flex items-center gap-3">
@@ -199,10 +199,10 @@ function handleCounterQuoteSubmit(payload: { price?: number; basisPrice?: number
               <Document :class="['w-5 h-5', isSent ? 'text-white' : 'text-action-600']" />
             </div>
             <div class="flex-1 min-w-0">
-              <div :class="['text-sm font-medium truncate', isSent ? 'text-white' : 'text-gray-900']">
+              <div :class="['text-sm font-medium truncate', isSent ? 'text-white' : 'text-neutral-900']">
                 {{ parseAttachmentPayload(message.payloadJson)?.fileName || '附件' }}
               </div>
-              <div :class="['text-xs', isSent ? 'text-brand-100/80' : 'text-gray-400']">
+              <div :class="['text-xs', isSent ? 'text-brand-100/80' : 'text-neutral-400']">
                 {{ formatFileSize(parseAttachmentPayload(message.payloadJson)?.size || 0) }}
               </div>
             </div>
@@ -234,7 +234,7 @@ function handleCounterQuoteSubmit(payload: { price?: number; basisPrice?: number
             'px-4 py-2.5 rounded-2xl shadow-sm',
             isSent
               ? 'bg-brand-600 text-white rounded-tr-sm'
-              : 'bg-white text-gray-900 border border-gray-200 rounded-tl-sm'
+              : 'bg-white text-neutral-900 border border-neutral-200 rounded-tl-sm'
           ]"
         >
           <p class="text-sm whitespace-pre-wrap break-words">{{ message.content }}</p>
@@ -248,13 +248,13 @@ function handleCounterQuoteSubmit(payload: { price?: number; basisPrice?: number
           isSent ? 'flex-row-reverse' : 'flex-row'
         ]"
       >
-        <span class="text-[10px] text-gray-400">{{ message.time }}</span>
+        <span class="text-[10px] text-neutral-400">{{ message.time }}</span>
 
         <!-- 发送状态 -->
         <template v-if="isSent">
-          <Loading v-if="message.status === 'pending'" class="w-3 h-3 text-gray-400 animate-spin" />
+          <Loading v-if="message.status === 'pending'" class="w-3 h-3 text-neutral-400 animate-spin" />
           <Check v-else-if="message.status === 'sent'" class="w-3 h-3 text-brand-500" />
-          <Warning v-else-if="message.status === 'failed'" class="w-3 h-3 text-red-500" />
+          <Warning v-else-if="message.status === 'failed'" class="w-3 h-3 text-error-500" />
         </template>
       </div>
     </div>

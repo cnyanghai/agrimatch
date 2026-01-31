@@ -186,20 +186,20 @@ function getSystemMessageStyle(payload: SystemMessagePayload | null): {
   borderColor: string
 } {
   if (!payload) {
-    return { icon: 'info', bgColor: 'bg-gray-50', textColor: 'text-gray-600', borderColor: 'border-gray-200' }
+    return { icon: 'info', bgColor: 'bg-neutral-50', textColor: 'text-neutral-600', borderColor: 'border-neutral-200' }
   }
 
   switch (payload.action) {
     case 'CONFIRM_TERMS':
       return { icon: 'check', bgColor: 'bg-brand-50', textColor: 'text-brand-700', borderColor: 'border-brand-200' }
     case 'CONTRACT_CREATED':
-      return { icon: 'check', bgColor: 'bg-blue-50', textColor: 'text-blue-700', borderColor: 'border-blue-200' }
+      return { icon: 'check', bgColor: 'bg-action-50', textColor: 'text-action-700', borderColor: 'border-action-200' }
     case 'QUOTE_ACCEPTED':
       return { icon: 'check', bgColor: 'bg-green-50', textColor: 'text-green-700', borderColor: 'border-green-200' }
     case 'QUOTE_REJECTED':
-      return { icon: 'alert', bgColor: 'bg-red-50', textColor: 'text-red-600', borderColor: 'border-red-200' }
+      return { icon: 'alert', bgColor: 'bg-error-50', textColor: 'text-error-600', borderColor: 'border-error-200' }
     default:
-      return { icon: 'info', bgColor: 'bg-gray-50', textColor: 'text-gray-600', borderColor: 'border-gray-200' }
+      return { icon: 'info', bgColor: 'bg-neutral-50', textColor: 'text-neutral-600', borderColor: 'border-neutral-200' }
   }
 }
 
@@ -314,7 +314,7 @@ defineExpose({ scrollToBottom })
 <template>
   <div class="flex flex-col h-full">
     <!-- 聊天头部 -->
-    <div class="px-3 py-2 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between shrink-0">
+    <div class="px-3 py-2 border-b border-neutral-100 bg-neutral-50/50 flex items-center justify-between shrink-0">
       <div class="flex items-center gap-2">
         <!-- 对方头像 -->
         <div class="relative">
@@ -333,14 +333,14 @@ defineExpose({ scrollToBottom })
           <div
             :class="[
               'absolute bottom-0 right-0 w-2 h-2 rounded-full border-2 border-white',
-              wsConnected ? 'bg-green-500' : 'bg-gray-300'
+              wsConnected ? 'bg-green-500' : 'bg-neutral-300'
             ]"
           />
         </div>
         <!-- 对方信息 -->
         <div>
-          <h4 class="text-sm font-bold text-gray-900">{{ peerName }}</h4>
-          <p class="text-[10px] text-gray-500">
+          <h4 class="text-sm font-bold text-neutral-900">{{ peerName }}</h4>
+          <p class="text-[10px] text-neutral-500">
             {{ peerCompany || (wsConnected ? '在线' : '离线') }}
           </p>
         </div>
@@ -350,12 +350,12 @@ defineExpose({ scrollToBottom })
     <!-- 消息列表 -->
     <div
       ref="chatContainerRef"
-      class="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50"
+      class="flex-1 overflow-y-auto p-3 space-y-3 bg-neutral-50"
     >
       <!-- 空状态 -->
       <div
         v-if="messages.length === 0"
-        class="flex flex-col items-center justify-center h-full text-center text-gray-400"
+        class="flex flex-col items-center justify-center h-full text-center text-neutral-400"
       >
         <p class="text-sm">开始与 {{ peerName }} 协商</p>
         <p class="text-xs mt-1">发送消息或报价开始议价</p>
@@ -365,14 +365,14 @@ defineExpose({ scrollToBottom })
       <template v-for="(msg, idx) in messages" :key="msg.id">
         <!-- 时间分隔线（微信风格） -->
         <div v-if="needsTimeSeparator(idx)" class="flex justify-center py-2">
-          <span class="text-[11px] text-gray-400 bg-gray-100/80 px-3 py-1 rounded-full">
+          <span class="text-[11px] text-neutral-400 bg-neutral-100/80 px-3 py-1 rounded-full">
             {{ formatMessageTime(msg.timestamp || msg.time) }}
           </span>
         </div>
 
         <!-- 普通系统消息 -->
         <div v-if="msg.type === 'system' && !isSystemActionMessage(msg)" class="flex justify-center">
-          <span class="text-[10px] font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+          <span class="text-[10px] font-medium text-neutral-400 bg-neutral-100 px-2 py-0.5 rounded-full">
             {{ msg.content }}
           </span>
         </div>
@@ -407,36 +407,36 @@ defineExpose({ scrollToBottom })
         <div v-else-if="isContractMessage(msg)" class="flex justify-center my-3">
           <div
             v-if="parseContractPayload(msg)"
-            class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 shadow-sm max-w-[85%] w-80 cursor-pointer hover:shadow-md transition-all"
+            class="bg-gradient-to-br from-action-50 to-action-100 border border-action-200 rounded-xl p-4 shadow-sm max-w-[85%] w-80 cursor-pointer hover:shadow-md transition-all"
             @click="goToContract(parseContractPayload(msg)?.contractId)"
           >
             <!-- 卡片头部 -->
             <div class="flex items-center gap-2 mb-3">
-              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-action-500 to-action-700 flex items-center justify-center">
                 <FileSignature class="w-5 h-5 text-white" />
               </div>
               <div class="flex-1">
-                <h4 class="text-sm font-bold text-gray-900">交易合同</h4>
-                <p class="text-xs text-gray-500">{{ parseContractPayload(msg)?.contractNo || '生成中...' }}</p>
+                <h4 class="text-sm font-bold text-neutral-900">交易合同</h4>
+                <p class="text-xs text-neutral-500">{{ parseContractPayload(msg)?.contractNo || '生成中...' }}</p>
               </div>
-              <ExternalLink class="w-4 h-4 text-blue-500" />
+              <ExternalLink class="w-4 h-4 text-action-500" />
             </div>
 
             <!-- 合同信息 -->
             <div class="space-y-1.5 text-xs">
               <div v-if="parseContractPayload(msg)?.productName" class="flex justify-between">
-                <span class="text-gray-500">商品:</span>
-                <span class="text-gray-900 font-medium">{{ parseContractPayload(msg)?.productName }}</span>
+                <span class="text-neutral-500">商品:</span>
+                <span class="text-neutral-900 font-medium">{{ parseContractPayload(msg)?.productName }}</span>
               </div>
               <div v-if="parseContractPayload(msg)?.totalAmount" class="flex justify-between">
-                <span class="text-gray-500">合同金额:</span>
+                <span class="text-neutral-500">合同金额:</span>
                 <span class="text-brand-600 font-bold">¥{{ parseContractPayload(msg)?.totalAmount?.toLocaleString() }}</span>
               </div>
             </div>
 
             <!-- 底部提示 -->
-            <div class="mt-3 pt-2 border-t border-blue-200/50 text-center">
-              <span class="text-[10px] text-blue-600 font-medium">点击查看合同详情 →</span>
+            <div class="mt-3 pt-2 border-t border-action-200/50 text-center">
+              <span class="text-[10px] text-action-600 font-medium">点击查看合同详情 →</span>
             </div>
           </div>
         </div>
@@ -462,7 +462,7 @@ defineExpose({ scrollToBottom })
               <div class="w-7 h-7 rounded-lg bg-brand-500 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
                 {{ getAvatarChar(peerName) }}
               </div>
-              <div class="bg-white border border-gray-100 p-1 rounded-xl rounded-tl-none shadow-sm overflow-hidden">
+              <div class="bg-white border border-neutral-100 p-1 rounded-xl rounded-tl-none shadow-sm overflow-hidden">
                 <img
                   v-if="parseFilePayload(msg)"
                   :src="parseFilePayload(msg)?.fileUrl"
@@ -497,14 +497,14 @@ defineExpose({ scrollToBottom })
                 v-if="parseFilePayload(msg)"
                 :href="parseFilePayload(msg)?.fileUrl"
                 target="_blank"
-                class="bg-white border border-gray-100 px-3 py-2 rounded-xl rounded-tl-none shadow-sm flex items-center gap-2 hover:bg-gray-50 transition-colors"
+                class="bg-white border border-neutral-100 px-3 py-2 rounded-xl rounded-tl-none shadow-sm flex items-center gap-2 hover:bg-neutral-50 transition-colors"
               >
                 <FileText class="w-8 h-8 text-brand-500 shrink-0" />
                 <div class="flex-1 min-w-0">
-                  <div class="text-sm text-gray-800 truncate">{{ parseFilePayload(msg)?.fileName }}</div>
-                  <div class="text-[10px] text-gray-400">{{ formatFileSize(parseFilePayload(msg)?.size || 0) }}</div>
+                  <div class="text-sm text-neutral-800 truncate">{{ parseFilePayload(msg)?.fileName }}</div>
+                  <div class="text-[10px] text-neutral-400">{{ formatFileSize(parseFilePayload(msg)?.size || 0) }}</div>
                 </div>
-                <Download class="w-4 h-4 text-gray-400" />
+                <Download class="w-4 h-4 text-neutral-400" />
               </a>
             </div>
             <div v-else class="max-w-[85%]">
@@ -530,7 +530,7 @@ defineExpose({ scrollToBottom })
           <div class="w-7 h-7 rounded-lg bg-brand-500 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
             {{ getAvatarChar(peerName) }}
           </div>
-          <div class="bg-white border border-gray-100 px-3 py-2 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-800">
+          <div class="bg-white border border-neutral-100 px-3 py-2 rounded-2xl rounded-tl-none shadow-sm text-sm text-neutral-800">
             {{ msg.content }}
           </div>
         </div>
@@ -542,27 +542,27 @@ defineExpose({ scrollToBottom })
           </div>
           <!-- 已读状态（仅最后一条发送的消息显示） -->
           <div v-if="isLastSentMessage(idx)" class="flex items-center gap-1 mt-0.5 mr-1">
-            <span v-if="msg.status === 'pending'" class="text-[10px] text-gray-400">发送中...</span>
-            <span v-else-if="msg.status === 'failed'" class="text-[10px] text-red-500">发送失败</span>
+            <span v-if="msg.status === 'pending'" class="text-[10px] text-neutral-400">发送中...</span>
+            <span v-else-if="msg.status === 'failed'" class="text-[10px] text-error-500">发送失败</span>
             <span v-else-if="msg.read" class="text-[10px] text-brand-500">已读</span>
-            <span v-else class="text-[10px] text-gray-400">未读</span>
+            <span v-else class="text-[10px] text-neutral-400">未读</span>
           </div>
         </div>
       </template>
     </div>
 
     <!-- 输入区域 -->
-    <div class="p-2 bg-white border-t border-gray-100 shrink-0">
+    <div class="p-2 bg-white border-t border-neutral-100 shrink-0">
       <!-- 上传进度条 -->
       <div v-if="uploading" class="mb-2 flex items-center gap-2">
         <Loader2 class="w-4 h-4 text-brand-500 animate-spin" />
-        <div class="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+        <div class="flex-1 h-1.5 bg-neutral-200 rounded-full overflow-hidden">
           <div
             class="h-full bg-brand-500 transition-all duration-200"
             :style="{ width: `${uploadProgress}%` }"
           />
         </div>
-        <span class="text-xs text-gray-500">{{ uploadProgress }}%</span>
+        <span class="text-xs text-neutral-500">{{ uploadProgress }}%</span>
       </div>
 
       <div class="flex items-center gap-1.5">
@@ -589,7 +589,7 @@ defineExpose({ scrollToBottom })
         <button
           @click="triggerFileInput"
           :disabled="uploading"
-          class="p-2 text-gray-400 hover:text-brand-600 hover:bg-gray-50 rounded-lg transition-colors disabled:opacity-50"
+          class="p-2 text-neutral-400 hover:text-brand-600 hover:bg-neutral-50 rounded-lg transition-colors disabled:opacity-50"
           title="发送图片/附件"
         >
           <Paperclip class="w-5 h-5" />
@@ -598,7 +598,7 @@ defineExpose({ scrollToBottom })
         <!-- 赠送积分按钮 -->
         <button
           @click="openGiftPointsDialog"
-          class="p-2 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+          class="p-2 text-warning-500 hover:text-warning-600 hover:bg-warning-50 rounded-lg transition-colors"
           title="赠送积分"
         >
           <Gift class="w-5 h-5" />
@@ -609,7 +609,7 @@ defineExpose({ scrollToBottom })
             v-model="messageInput"
             @keydown="handleKeydown"
             type="text"
-            class="w-full h-9 px-3 rounded-lg bg-gray-50 border-none focus:ring-1 focus:ring-brand-500 text-sm"
+            class="w-full h-9 px-3 rounded-lg bg-neutral-50 border-none focus:ring-1 focus:ring-brand-500 text-sm"
             placeholder="输入消息..."
             :disabled="sending || uploading"
           />
@@ -617,7 +617,7 @@ defineExpose({ scrollToBottom })
         <button
           @click="handleSend"
           :disabled="!messageInput.trim() || sending || uploading"
-          class="h-9 px-3 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300 disabled:cursor-not-allowed
+          class="h-9 px-3 bg-brand-600 hover:bg-brand-700 disabled:bg-neutral-300 disabled:cursor-not-allowed
                  text-white rounded-lg font-medium text-sm flex items-center gap-1 transition-colors"
         >
           <Send class="w-4 h-4" />
@@ -634,7 +634,7 @@ defineExpose({ scrollToBottom })
       >
         <div class="bg-white rounded-xl shadow-2xl w-80 overflow-hidden">
           <!-- 弹窗头部 -->
-          <div class="px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white flex items-center justify-between">
+          <div class="px-4 py-3 bg-gradient-to-r from-warning-500 to-accent-500 text-white flex items-center justify-between">
             <div class="flex items-center gap-2">
               <Gift class="w-5 h-5" />
               <span class="font-bold">赠送积分</span>
@@ -650,12 +650,12 @@ defineExpose({ scrollToBottom })
               <div class="w-12 h-12 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-lg mx-auto mb-2">
                 {{ getAvatarChar(peerName) }}
               </div>
-              <p class="text-sm text-gray-600">赠送给 <span class="font-bold text-gray-900">{{ peerName }}</span></p>
+              <p class="text-sm text-neutral-600">赠送给 <span class="font-bold text-neutral-900">{{ peerName }}</span></p>
             </div>
 
             <!-- 积分数量 -->
             <div class="mb-4">
-              <label class="text-xs text-gray-500 block mb-1">积分数量</label>
+              <label class="text-xs text-neutral-500 block mb-1">积分数量</label>
               <div class="flex items-center gap-2">
                 <button
                   v-for="amount in [10, 50, 100, 200]"
@@ -664,8 +664,8 @@ defineExpose({ scrollToBottom })
                   :class="[
                     'flex-1 h-9 rounded-lg text-sm font-medium transition-all',
                     giftPointsAmount === amount
-                      ? 'bg-amber-500 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      ? 'bg-warning-500 text-white'
+                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
                   ]"
                 >
                   {{ amount }}
@@ -676,7 +676,7 @@ defineExpose({ scrollToBottom })
                   v-model.number="giftPointsAmount"
                   type="number"
                   min="1"
-                  class="w-full h-9 px-3 rounded-lg border border-gray-200 focus:ring-1 focus:ring-amber-500 focus:border-amber-500 text-sm"
+                  class="w-full h-9 px-3 rounded-lg border border-neutral-200 focus:ring-1 focus:ring-warning-500 focus:border-warning-500 text-sm"
                   placeholder="自定义数量"
                 />
               </div>
@@ -684,11 +684,11 @@ defineExpose({ scrollToBottom })
 
             <!-- 备注 -->
             <div class="mb-4">
-              <label class="text-xs text-gray-500 block mb-1">备注（可选）</label>
+              <label class="text-xs text-neutral-500 block mb-1">备注（可选）</label>
               <input
                 v-model="giftPointsRemark"
                 type="text"
-                class="w-full h-9 px-3 rounded-lg border border-gray-200 focus:ring-1 focus:ring-amber-500 focus:border-amber-500 text-sm"
+                class="w-full h-9 px-3 rounded-lg border border-neutral-200 focus:ring-1 focus:ring-warning-500 focus:border-warning-500 text-sm"
                 placeholder="感谢您的合作！"
               />
             </div>
@@ -697,8 +697,8 @@ defineExpose({ scrollToBottom })
             <button
               @click="confirmGiftPoints"
               :disabled="giftPointsAmount <= 0 || giftingPoints"
-              class="w-full h-10 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600
-                     disabled:from-gray-300 disabled:to-gray-400 text-white font-bold rounded-lg
+              class="w-full h-10 bg-gradient-to-r from-warning-500 to-accent-500 hover:from-warning-600 hover:to-accent-600
+                     disabled:from-neutral-300 disabled:to-neutral-400 text-white font-bold rounded-lg
                      flex items-center justify-center gap-2 transition-all"
             >
               <Gift class="w-4 h-4" />

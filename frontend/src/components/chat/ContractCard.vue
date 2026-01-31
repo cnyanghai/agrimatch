@@ -58,16 +58,16 @@ const isCompleted = computed(() => props.payload.status === 4)
 </script>
 
 <template>
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden max-w-[320px]">
+  <div class="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden max-w-[320px]">
     <!-- 头部 -->
-    <div class="px-4 py-3 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
+    <div class="px-4 py-3 bg-gradient-to-r from-slate-50 to-neutral-50 border-b border-neutral-200">
       <div class="flex items-center gap-2">
         <div class="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center">
           <FileText class="w-4 h-4 text-white" />
         </div>
         <div class="flex-1 min-w-0">
-          <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">采购合同</div>
-          <div class="text-sm font-bold text-gray-900 truncate">{{ payload.contractNo }}</div>
+          <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">采购合同</div>
+          <div class="text-sm font-bold text-neutral-900 truncate">{{ payload.contractNo }}</div>
         </div>
         <span :class="['text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1', statusInfo.color]">
           <CheckCircle v-if="isCompleted" class="w-3 h-3" />
@@ -78,14 +78,14 @@ const isCompleted = computed(() => props.payload.status === 4)
     </div>
 
     <!-- 进度条 -->
-    <div v-if="!isCancelled" class="px-4 py-2 bg-gray-50/50">
+    <div v-if="!isCancelled" class="px-4 py-2 bg-neutral-50/50">
       <div class="flex gap-1">
         <div
           v-for="i in 4"
           :key="i"
           :class="[
             'flex-1 h-1 rounded-full transition-all',
-            i <= progressSteps ? 'bg-brand-500' : 'bg-gray-200'
+            i <= progressSteps ? 'bg-brand-500' : 'bg-neutral-200'
           ]"
         ></div>
       </div>
@@ -94,10 +94,10 @@ const isCompleted = computed(() => props.payload.status === 4)
     <!-- 内容 -->
     <div class="p-4 space-y-3">
       <!-- 产品信息 -->
-      <div class="bg-gray-50 rounded-xl p-3">
-        <div class="text-xs text-gray-500 mb-1">交易标的</div>
-        <div class="font-bold text-gray-900">{{ payload.productName }}</div>
-        <div class="text-sm text-gray-600 mt-1">
+      <div class="bg-neutral-50 rounded-xl p-3">
+        <div class="text-xs text-neutral-500 mb-1">交易标的</div>
+        <div class="font-bold text-neutral-900">{{ payload.productName }}</div>
+        <div class="text-sm text-neutral-600 mt-1">
           <template v-if="payload.basisPrice !== undefined && payload.basisPrice !== null && payload.basisPrice !== ''">
             {{ payload.quantity }} {{ payload.unit }} · 基差 {{ (Number(payload.basisPrice) > 0 ? '+' : '') + payload.basisPrice }} ({{ payload.contractCode }})
           </template>
@@ -109,7 +109,7 @@ const isCompleted = computed(() => props.payload.status === 4)
       
       <!-- 金额 -->
       <div class="flex items-center justify-between">
-        <span class="text-xs text-gray-500">合同金额</span>
+        <span class="text-xs text-neutral-500">合同金额</span>
         <span class="text-lg font-bold text-brand-600">
           <template v-if="payload.basisPrice !== undefined && payload.basisPrice !== null && payload.basisPrice !== ''">
             待结算
@@ -122,22 +122,22 @@ const isCompleted = computed(() => props.payload.status === 4)
       
       <!-- 签署状态 -->
       <div class="flex gap-2">
-        <div class="flex-1 bg-gray-50 rounded-lg p-2 text-center">
-          <div class="text-[10px] text-gray-400 mb-1">买方</div>
+        <div class="flex-1 bg-neutral-50 rounded-lg p-2 text-center">
+          <div class="text-[10px] text-neutral-400 mb-1">买方</div>
           <div class="flex items-center justify-center gap-1">
             <Check v-if="payload.buyerSigned" class="w-3.5 h-3.5 text-brand-500" />
-            <Clock v-else class="w-3.5 h-3.5 text-amber-500" />
-            <span :class="['text-xs font-medium', payload.buyerSigned ? 'text-brand-600' : 'text-amber-600']">
+            <Clock v-else class="w-3.5 h-3.5 text-warning-500" />
+            <span :class="['text-xs font-medium', payload.buyerSigned ? 'text-brand-600' : 'text-warning-600']">
               {{ payload.buyerSigned ? '已签署' : '待签署' }}
             </span>
           </div>
         </div>
-        <div class="flex-1 bg-gray-50 rounded-lg p-2 text-center">
-          <div class="text-[10px] text-gray-400 mb-1">卖方</div>
+        <div class="flex-1 bg-neutral-50 rounded-lg p-2 text-center">
+          <div class="text-[10px] text-neutral-400 mb-1">卖方</div>
           <div class="flex items-center justify-center gap-1">
             <Check v-if="payload.sellerSigned" class="w-3.5 h-3.5 text-brand-500" />
-            <Clock v-else class="w-3.5 h-3.5 text-amber-500" />
-            <span :class="['text-xs font-medium', payload.sellerSigned ? 'text-brand-600' : 'text-amber-600']">
+            <Clock v-else class="w-3.5 h-3.5 text-warning-500" />
+            <span :class="['text-xs font-medium', payload.sellerSigned ? 'text-brand-600' : 'text-warning-600']">
               {{ payload.sellerSigned ? '已签署' : '待签署' }}
             </span>
           </div>
@@ -146,9 +146,9 @@ const isCompleted = computed(() => props.payload.status === 4)
     </div>
     
     <!-- 操作按钮 -->
-    <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex gap-2">
+    <div class="px-4 py-3 bg-neutral-50 border-t border-neutral-200 flex gap-2">
       <button
-        class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-50 transition-all "
+        class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white border border-neutral-200 rounded-xl text-xs font-bold text-neutral-700 hover:bg-neutral-50 transition-all "
         @click="emit('view', payload.contractId)"
       >
         <Eye class="w-3.5 h-3.5" />

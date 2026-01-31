@@ -183,7 +183,7 @@ const expanded = ref(false)
       'rounded-2xl overflow-hidden shadow-lg transition-all duration-300',
       isSent
         ? 'bg-gradient-to-br from-brand-600 to-brand-700'
-        : 'bg-white border border-gray-200'
+        : 'bg-white border border-neutral-200'
     ]"
     style="max-width: 360px;"
   >
@@ -191,7 +191,7 @@ const expanded = ref(false)
     <div
       :class="[
         'px-4 py-2.5 flex items-center justify-between',
-        isSent ? 'bg-brand-700/50' : 'bg-gray-50 border-b border-gray-100'
+        isSent ? 'bg-brand-700/50' : 'bg-neutral-50 border-b border-neutral-100'
       ]"
     >
       <div class="flex items-center gap-2">
@@ -214,16 +214,16 @@ const expanded = ref(false)
       <QuoteValidityTimer
         v-if="hasExpiry && status === 'OFFERED'"
         :remaining-ms="remainingTime!"
-        :class="isSent ? 'text-white/80' : 'text-gray-500'"
+        :class="isSent ? 'text-white/80' : 'text-neutral-500'"
       />
     </div>
 
     <!-- 产品信息 -->
-    <div v-if="subjectName" :class="['px-4 py-3 border-b', isSent ? 'border-brand-500/30' : 'border-gray-100']">
-      <div :class="['font-bold', isSent ? 'text-white' : 'text-gray-900']">
+    <div v-if="subjectName" :class="['px-4 py-3 border-b', isSent ? 'border-brand-500/30' : 'border-neutral-100']">
+      <div :class="['font-bold', isSent ? 'text-white' : 'text-neutral-900']">
         {{ subjectName }}
       </div>
-      <div v-if="subjectLocation" :class="['text-xs mt-0.5', isSent ? 'text-brand-100' : 'text-gray-500']">
+      <div v-if="subjectLocation" :class="['text-xs mt-0.5', isSent ? 'text-brand-100' : 'text-neutral-500']">
         {{ subjectLocation }}
       </div>
     </div>
@@ -238,10 +238,10 @@ const expanded = ref(false)
             'flex-1 rounded-xl p-3 text-center',
             isSent
               ? 'bg-white/10'
-              : field.highlight ? 'bg-brand-50' : 'bg-gray-50'
+              : field.highlight ? 'bg-brand-50' : 'bg-neutral-50'
           ]"
         >
-          <div :class="['text-[10px] font-medium uppercase tracking-wider mb-1', isSent ? 'text-brand-100' : 'text-gray-400']">
+          <div :class="['text-[10px] font-medium uppercase tracking-wider mb-1', isSent ? 'text-brand-100' : 'text-neutral-400']">
             {{ field.label }}
           </div>
           <div :class="['text-lg font-bold', isSent ? 'text-white' : 'text-brand-700']">
@@ -257,12 +257,12 @@ const expanded = ref(false)
     </div>
 
     <!-- 次要字段（可展开） -->
-    <div v-if="secondaryFields.length > 0" :class="['border-t', isSent ? 'border-brand-500/30' : 'border-gray-100']">
+    <div v-if="secondaryFields.length > 0" :class="['border-t', isSent ? 'border-brand-500/30' : 'border-neutral-100']">
       <button
         @click="expanded = !expanded"
         :class="[
           'w-full px-4 py-2 text-xs font-medium flex items-center justify-center gap-1 transition-colors',
-          isSent ? 'text-brand-100 hover:bg-white/5' : 'text-gray-500 hover:bg-gray-50'
+          isSent ? 'text-brand-100 hover:bg-white/5' : 'text-neutral-500 hover:bg-neutral-50'
         ]"
       >
         {{ expanded ? '收起详情' : '展开详情' }}
@@ -276,15 +276,15 @@ const expanded = ref(false)
 
       <div
         v-show="expanded"
-        :class="['px-4 pb-4 space-y-2', isSent ? 'bg-brand-700/30' : 'bg-gray-50']"
+        :class="['px-4 pb-4 space-y-2', isSent ? 'bg-brand-700/30' : 'bg-neutral-50']"
       >
         <div
           v-for="field in secondaryFields"
           :key="field.key"
           class="flex justify-between text-xs"
         >
-          <span :class="isSent ? 'text-brand-100/70' : 'text-gray-400'">{{ field.label }}</span>
-          <span :class="isSent ? 'text-white' : 'text-gray-700'">{{ field.value }}</span>
+          <span :class="isSent ? 'text-brand-100/70' : 'text-neutral-400'">{{ field.label }}</span>
+          <span :class="isSent ? 'text-white' : 'text-neutral-700'">{{ field.value }}</span>
         </div>
       </div>
     </div>
@@ -292,7 +292,7 @@ const expanded = ref(false)
     <!-- 操作按钮 -->
     <div
       v-if="(canAccept || canDraftContract) && !showInlineCounter"
-      :class="['px-4 py-3 border-t flex gap-2', isSent ? 'border-brand-500/30' : 'border-gray-100']"
+      :class="['px-4 py-3 border-t flex gap-2', isSent ? 'border-brand-500/30' : 'border-neutral-100']"
     >
       <template v-if="canAccept">
         <button
@@ -304,14 +304,14 @@ const expanded = ref(false)
         </button>
         <button
           @click="handleCounterClick"
-          class="px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+          class="px-4 py-2.5 bg-neutral-100 text-neutral-700 text-sm font-medium rounded-xl hover:bg-neutral-200 transition-all flex items-center justify-center gap-1.5 active:scale-95"
         >
           <Edit class="w-4 h-4" />
           还价
         </button>
         <button
           @click="emit('reject')"
-          class="px-3 py-2.5 text-gray-400 hover:text-red-500 transition-colors"
+          class="px-3 py-2.5 text-neutral-400 hover:text-error-500 transition-colors"
         >
           <X class="w-5 h-5" />
         </button>
@@ -329,7 +329,7 @@ const expanded = ref(false)
     </div>
 
     <!-- 内联还价表单 -->
-    <div v-if="showInlineCounter && canAccept" class="p-3 border-t border-gray-100">
+    <div v-if="showInlineCounter && canAccept" class="p-3 border-t border-neutral-100">
       <InlineCounterQuote
         :original-fields="displayFields"
         :original-price="originalPrice"

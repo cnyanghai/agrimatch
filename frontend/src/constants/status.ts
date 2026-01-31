@@ -1,10 +1,10 @@
 export const CONTRACT_STATUS_CONFIG = {
-  DRAFT: { value: 0, label: '草稿', color: 'text-gray-600', bgColor: 'bg-gray-100', barColor: 'bg-gray-400', bgGradient: 'from-gray-400 to-gray-500', icon: 'FileEdit' },
-  PENDING: { value: 1, label: '待签署', color: 'text-amber-600', bgColor: 'bg-amber-50', barColor: 'bg-amber-500', bgGradient: 'from-amber-400 to-orange-500', icon: 'FileClock' },
+  DRAFT: { value: 0, label: '草稿', color: 'text-neutral-600', bgColor: 'bg-neutral-100', barColor: 'bg-neutral-400', bgGradient: 'from-neutral-400 to-neutral-500', icon: 'FileEdit' },
+  PENDING: { value: 1, label: '待签署', color: 'text-warning-600', bgColor: 'bg-warning-50', barColor: 'bg-warning-500', bgGradient: 'from-warning-400 to-accent-500', icon: 'FileClock' },
   SIGNED: { value: 2, label: '已签署', color: 'text-brand-600', bgColor: 'bg-brand-50', barColor: 'bg-brand-500', bgGradient: 'from-brand-400 to-brand-600', icon: 'FileCheck' },
-  EXECUTING: { value: 3, label: '履约中', color: 'text-blue-600', bgColor: 'bg-blue-50', barColor: 'bg-blue-500', bgGradient: 'from-blue-400 to-blue-600', icon: 'FileBox' },
+  EXECUTING: { value: 3, label: '履约中', color: 'text-action-600', bgColor: 'bg-action-50', barColor: 'bg-action-500', bgGradient: 'from-action-400 to-action-600', icon: 'FileBox' },
   COMPLETED: { value: 4, label: '已完成', color: 'text-brand-700', bgColor: 'bg-brand-100', barColor: 'bg-brand-600', bgGradient: 'from-brand-500 to-brand-700', icon: 'FileCheck2' },
-  CANCELLED: { value: 5, label: '已取消', color: 'text-red-500', bgColor: 'bg-red-50', barColor: 'bg-red-500', bgGradient: 'from-red-400 to-red-600', icon: 'FileX' }
+  CANCELLED: { value: 5, label: '已取消', color: 'text-error-500', bgColor: 'bg-error-50', barColor: 'bg-error-500', bgGradient: 'from-error-400 to-error-600', icon: 'FileX' }
 } as const
 
 export const CONTRACT_STATUS_MAP: Record<number, { label: string; color: string; bgColor: string }> = {
@@ -17,11 +17,11 @@ export const CONTRACT_STATUS_MAP: Record<number, { label: string; color: string;
 }
 
 export const MILESTONE_STATUS_CONFIG = {
-  PENDING: { value: 0, label: '待执行', color: 'text-gray-600', bgColor: 'bg-gray-100', icon: 'Circle' },
-  IN_PROGRESS: { value: 1, label: '进行中', color: 'text-blue-600', bgColor: 'bg-blue-50', icon: 'CircleDot' },
-  SUBMITTED: { value: 2, label: '已提交', color: 'text-amber-600', bgColor: 'bg-amber-50', icon: 'Clock' },
+  PENDING: { value: 0, label: '待执行', color: 'text-neutral-600', bgColor: 'bg-neutral-100', icon: 'Circle' },
+  IN_PROGRESS: { value: 1, label: '进行中', color: 'text-action-600', bgColor: 'bg-action-50', icon: 'CircleDot' },
+  SUBMITTED: { value: 2, label: '已提交', color: 'text-warning-600', bgColor: 'bg-warning-50', icon: 'Clock' },
   APPROVED: { value: 3, label: '已确认', color: 'text-brand-600', bgColor: 'bg-brand-50', icon: 'CircleCheck' },
-  REJECTED: { value: 4, label: '已驳回', color: 'text-red-500', bgColor: 'bg-red-50', icon: 'CircleX' }
+  REJECTED: { value: 4, label: '已驳回', color: 'text-error-500', bgColor: 'bg-error-50', icon: 'CircleX' }
 } as const
 
 export const MILESTONE_STATUS_MAP: Record<number, { label: string; color: string; bgColor: string }> = {
@@ -33,10 +33,10 @@ export const MILESTONE_STATUS_MAP: Record<number, { label: string; color: string
 }
 
 export const CHAT_OFFER_STATUS_CONFIG = {
-  PENDING: { value: 0, label: '待确认', color: 'text-amber-600', bgColor: 'bg-amber-50', icon: 'Clock' },
+  PENDING: { value: 0, label: '待确认', color: 'text-warning-600', bgColor: 'bg-warning-50', icon: 'Clock' },
   ACCEPTED: { value: 1, label: '已接受', color: 'text-brand-600', bgColor: 'bg-brand-50', icon: 'CheckCircle' },
-  REJECTED: { value: 2, label: '已拒绝', color: 'text-red-500', bgColor: 'bg-red-50', icon: 'XCircle' },
-  EXPIRED: { value: 3, label: '已过期', color: 'text-gray-500', bgColor: 'bg-gray-100', icon: 'AlertCircle' }
+  REJECTED: { value: 2, label: '已拒绝', color: 'text-error-500', bgColor: 'bg-error-50', icon: 'XCircle' },
+  EXPIRED: { value: 3, label: '已过期', color: 'text-neutral-500', bgColor: 'bg-neutral-100', icon: 'AlertCircle' }
 } as const
 
 export const CHAT_OFFER_STATUS_MAP: Record<number, { label: string; color: string; bgColor: string }> = {

@@ -26,8 +26,8 @@ function getDiffIcon(diff: QuoteFieldDiff) {
 
 function getDiffColor(diff: QuoteFieldDiff) {
   if (diff.type === 'added') return 'text-brand-600 bg-brand-50'
-  if (diff.type === 'removed') return 'text-red-500 bg-red-50'
-  return 'text-amber-600 bg-amber-50'
+  if (diff.type === 'removed') return 'text-error-500 bg-error-50'
+  return 'text-warning-600 bg-warning-50'
 }
 
 function formatDiffValue(diff: QuoteFieldDiff): string {
@@ -78,7 +78,7 @@ function getPriceTrend(diff: QuoteFieldDiff): 'up' | 'down' | null {
       <!-- 价格趋势图标 -->
       <TrendingUp
         v-if="getPriceTrend(diff) === 'up'"
-        class="w-3 h-3 text-rose-500"
+        class="w-3 h-3 text-accent-500"
       />
       <TrendingDown
         v-else-if="getPriceTrend(diff) === 'down'"
@@ -94,7 +94,7 @@ function getPriceTrend(diff: QuoteFieldDiff): 'up' | 'down' | null {
       v-if="hiddenCount > 0"
       :class="[
         'inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-medium',
-        isSent ? 'bg-white/10 text-white/70' : 'bg-gray-100 text-gray-500'
+        isSent ? 'bg-white/10 text-white/70' : 'bg-neutral-100 text-neutral-500'
       ]"
     >
       +{{ hiddenCount }} 项变更

@@ -93,8 +93,8 @@ function getEntityTypeClass(type: string) {
   switch (type) {
     case 'supply': return 'bg-brand-50 text-brand-700 border-brand-100'
     case 'requirement': return 'bg-autumn-50 text-autumn-700 border-autumn-100'
-    case 'post': return 'bg-purple-50 text-purple-700 border-purple-100'
-    default: return 'bg-gray-50 text-gray-700 border-gray-100'
+    case 'post': return 'bg-action-50 text-action-700 border-action-100'
+    default: return 'bg-neutral-50 text-neutral-700 border-neutral-100'
   }
 }
 
@@ -118,23 +118,23 @@ watch(() => route.query, (newQuery) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col">
+  <div class="min-h-screen bg-neutral-50 flex flex-col">
     <!-- Search Header -->
-    <div class="bg-white border-b border-gray-200 sticky top-0 z-30">
+    <div class="bg-white border-b border-neutral-200 sticky top-0 z-30">
       <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex flex-col md:flex-row items-center gap-4">
           <div class="relative flex-1 w-full">
-            <Search class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search class="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 w-5 h-5" />
             <input
               v-model="keyword"
               type="text"
               placeholder="搜索全站资源、标签、商户..."
-              class="w-full pl-12 pr-4 py-3 bg-gray-100 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none"
+              class="w-full pl-12 pr-4 py-3 bg-neutral-100 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none"
               @keyup.enter="handleSearch"
             />
           </div>
           <div class="flex items-center gap-2 w-full md:w-auto">
-            <select v-model="entityType" class="px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20" @change="handleSearch">
+            <select v-model="entityType" class="px-4 py-3 bg-white border border-neutral-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-500/20" @change="handleSearch">
               <option value="">全部类型</option>
               <option value="supply">供应信息</option>
               <option value="requirement">采购需求</option>
@@ -153,7 +153,7 @@ watch(() => route.query, (newQuery) => {
       <aside class="w-full lg:w-64 shrink-0 space-y-8">
         <!-- Domains -->
         <div>
-          <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <h3 class="text-sm font-bold text-neutral-900 uppercase tracking-wider mb-4 flex items-center gap-2">
             <Filter class="w-4 h-4 text-brand-600" />
             产业板块
           </h3>
@@ -168,7 +168,7 @@ watch(() => route.query, (newQuery) => {
               ]"
               :key="d.key"
               class="w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium transition-all"
-              :class="domain === d.key ? 'bg-brand-50 text-brand-700' : 'text-gray-600 hover:bg-gray-100'"
+              :class="domain === d.key ? 'bg-brand-50 text-brand-700' : 'text-neutral-600 hover:bg-neutral-100'"
               @click="domain = d.key; handleSearch()"
             >
               {{ d.name }}
@@ -178,7 +178,7 @@ watch(() => route.query, (newQuery) => {
 
         <!-- Hot Tags -->
         <div v-if="hotTags.length > 0">
-          <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <h3 class="text-sm font-bold text-neutral-900 uppercase tracking-wider mb-4 flex items-center gap-2">
             <TagIcon class="w-4 h-4 text-brand-600" />
             热门标签
           </h3>
@@ -187,7 +187,7 @@ watch(() => route.query, (newQuery) => {
               v-for="tag in hotTags"
               :key="tag.id"
               class="px-3 py-1.5 rounded-lg text-xs font-medium border transition-all"
-              :class="tagFilters[tag.tagKey] ? 'bg-brand-500 text-white border-brand-500' : 'bg-white text-gray-600 border-gray-200 hover:border-brand-300'"
+              :class="tagFilters[tag.tagKey] ? 'bg-brand-500 text-white border-brand-500' : 'bg-white text-neutral-600 border-neutral-200 hover:border-brand-300'"
               @click="toggleTag(tag)"
             >
               {{ tag.tagName }}
@@ -200,14 +200,14 @@ watch(() => route.query, (newQuery) => {
       <main class="flex-1 min-w-0">
         <!-- Status Info -->
         <div class="flex items-center justify-between mb-6">
-          <div class="text-sm text-gray-500">
-            找到约 <span class="font-bold text-gray-900">{{ total }}</span> 个结果
+          <div class="text-sm text-neutral-500">
+            找到约 <span class="font-bold text-neutral-900">{{ total }}</span> 个结果
           </div>
           <div class="flex items-center gap-2">
-            <button class="p-2 text-gray-400 hover:text-brand-600 rounded-lg hover:bg-white transition-all">
+            <button class="p-2 text-neutral-400 hover:text-brand-600 rounded-lg hover:bg-white transition-all">
               <LayoutGrid class="w-5 h-5" />
             </button>
-            <button class="p-2 text-brand-600 bg-white shadow-sm rounded-lg border border-gray-100 transition-all">
+            <button class="p-2 text-brand-600 bg-white shadow-sm rounded-lg border border-neutral-100 transition-all">
               <List class="w-5 h-5" />
             </button>
           </div>
@@ -215,24 +215,24 @@ watch(() => route.query, (newQuery) => {
 
         <!-- Results List -->
         <div v-if="loading" class="space-y-4">
-          <div v-for="i in 3" :key="i" class="bg-white rounded-2xl p-6 border border-gray-100 animate-pulse">
+          <div v-for="i in 3" :key="i" class="bg-white rounded-2xl p-6 border border-neutral-100 animate-pulse">
             <div class="flex gap-6">
-              <div class="w-32 h-24 bg-gray-50 rounded-xl"></div>
+              <div class="w-32 h-24 bg-neutral-50 rounded-xl"></div>
               <div class="flex-1 space-y-4">
-                <div class="h-6 bg-gray-50 rounded w-3/4"></div>
-                <div class="h-4 bg-gray-50 rounded w-1/2"></div>
-                <div class="h-4 bg-gray-50 rounded w-1/4"></div>
+                <div class="h-6 bg-neutral-50 rounded w-3/4"></div>
+                <div class="h-4 bg-neutral-50 rounded w-1/2"></div>
+                <div class="h-4 bg-neutral-50 rounded w-1/4"></div>
               </div>
             </div>
           </div>
         </div>
 
-        <div v-else-if="results.length === 0" class="bg-white rounded-2xl py-20 text-center border border-dashed border-gray-200">
-          <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Search class="w-10 h-10 text-gray-300" />
+        <div v-else-if="results.length === 0" class="bg-white rounded-2xl py-20 text-center border border-dashed border-neutral-200">
+          <div class="w-20 h-20 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Search class="w-10 h-10 text-neutral-300" />
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">未找到匹配结果</h3>
-          <p class="text-gray-500 max-w-xs mx-auto">请尝试调整关键词或筛选条件，或通过更广泛的领域进行搜索。</p>
+          <h3 class="text-xl font-bold text-neutral-900 mb-2">未找到匹配结果</h3>
+          <p class="text-neutral-500 max-w-xs mx-auto">请尝试调整关键词或筛选条件，或通过更广泛的领域进行搜索。</p>
           <button class="mt-8 text-brand-600 font-bold hover:underline" @click="keyword = ''; domain = ''; entityType = ''; handleSearch()">
             重置搜索
           </button>
@@ -242,7 +242,7 @@ watch(() => route.query, (newQuery) => {
           <div
             v-for="item in results"
             :key="`${item.entityType}-${item.entityId}`"
-            class="group bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-xl hover:border-brand-500/30 transition-all cursor-pointer"
+            class="group bg-white rounded-2xl p-6 border border-neutral-100 hover:shadow-xl hover:border-brand-500/30 transition-all cursor-pointer"
             @click="router.push(item.entityType === 'post' ? `/talks/${item.entityId}` : (item.entityType === 'supply' ? `/hall/supply?id=${item.entityId}` : `/hall/need?id=${item.entityId}`))"
           >
             <div class="flex flex-col md:flex-row gap-6">
@@ -252,27 +252,27 @@ watch(() => route.query, (newQuery) => {
                   <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border" :class="getEntityTypeClass(item.entityType)">
                     {{ getEntityTypeName(item.entityType) }}
                   </span>
-                  <div class="flex items-center gap-1 text-[10px] text-gray-400">
+                  <div class="flex items-center gap-1 text-[10px] text-neutral-400">
                     <Clock class="w-3 h-3" />
                     {{ formatTime(item.createTime) }}
                   </div>
                 </div>
                 
-                <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-brand-600 transition-colors truncate">
+                <h3 class="text-lg font-bold text-neutral-900 mb-2 group-hover:text-brand-600 transition-colors truncate">
                   {{ item.title }}
                 </h3>
                 
-                <p class="text-sm text-gray-500 line-clamp-2 mb-4 leading-relaxed">
+                <p class="text-sm text-neutral-500 line-clamp-2 mb-4 leading-relaxed">
                   {{ item.content || '暂无详细描述...' }}
                 </p>
 
                 <div class="flex flex-wrap items-center gap-y-3 gap-x-6">
-                  <div class="flex items-center gap-2 text-xs font-medium text-gray-600">
-                    <Building2 class="w-4 h-4 text-gray-400" />
+                  <div class="flex items-center gap-2 text-xs font-medium text-neutral-600">
+                    <Building2 class="w-4 h-4 text-neutral-400" />
                     {{ item.companyName || '个人用户' }}
                   </div>
-                  <div class="flex items-center gap-2 text-xs font-medium text-gray-600">
-                    <User class="w-4 h-4 text-gray-400" />
+                  <div class="flex items-center gap-2 text-xs font-medium text-neutral-600">
+                    <User class="w-4 h-4 text-neutral-400" />
                     {{ item.userName }}
                   </div>
                 </div>
@@ -280,7 +280,7 @@ watch(() => route.query, (newQuery) => {
 
               <!-- Action -->
               <div class="flex items-center shrink-0">
-                <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-brand-50 group-hover:text-brand-600 transition-all">
+                <div class="w-10 h-10 rounded-full bg-neutral-50 flex items-center justify-center text-neutral-400 group-hover:bg-brand-50 group-hover:text-brand-600 transition-all">
                   <ChevronRight class="w-5 h-5" />
                 </div>
               </div>

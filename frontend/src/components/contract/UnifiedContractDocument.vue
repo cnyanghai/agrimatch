@@ -154,14 +154,14 @@ const emit = defineEmits<{
 // 状态配置
 const statusConfig = computed(() => {
   const configs: Record<ContractStatus, { label: string; color: string; bgColor: string }> = {
-    DRAFT: { label: '草稿', color: 'text-orange-600', bgColor: 'bg-orange-100' },
-    PENDING_CONFIRM: { label: '待确认', color: 'text-amber-600', bgColor: 'bg-amber-100' },
+    DRAFT: { label: '草稿', color: 'text-accent-600', bgColor: 'bg-accent-100' },
+    PENDING_CONFIRM: { label: '待确认', color: 'text-warning-600', bgColor: 'bg-warning-100' },
     CONFIRMED: { label: '条款已确认', color: 'text-brand-600', bgColor: 'bg-brand-100' },
-    PENDING_SIGN: { label: '待签署', color: 'text-amber-600', bgColor: 'bg-amber-100' },
+    PENDING_SIGN: { label: '待签署', color: 'text-warning-600', bgColor: 'bg-warning-100' },
     SIGNED: { label: '已签署', color: 'text-brand-600', bgColor: 'bg-brand-100' },
     EXECUTING: { label: '履约中', color: 'text-autumn-600', bgColor: 'bg-autumn-100' },
     COMPLETED: { label: '已完成', color: 'text-brand-700', bgColor: 'bg-brand-200' },
-    CANCELLED: { label: '已取消', color: 'text-red-600', bgColor: 'bg-red-100' }
+    CANCELLED: { label: '已取消', color: 'text-error-600', bgColor: 'bg-error-100' }
   }
   return configs[props.status] || configs.DRAFT
 })
@@ -230,13 +230,13 @@ function formatDateTime(dateStr: string | undefined): string {
 <template>
   <div class="unified-contract-document">
     <!-- 合同文档 -->
-    <div class="bg-white rounded-xl shadow-xl border border-gray-200 relative overflow-hidden">
+    <div class="bg-white rounded-xl shadow-xl border border-neutral-200 relative overflow-hidden">
       <!-- DRAFT 水印 -->
       <div
         v-if="showWatermark && !printMode"
         class="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden z-10"
       >
-        <div class="text-[100px] font-bold text-gray-200/60 rotate-[-30deg] select-none uppercase tracking-widest">
+        <div class="text-[100px] font-bold text-neutral-200/60 rotate-[-30deg] select-none uppercase tracking-widest">
           DRAFT
         </div>
       </div>
@@ -244,11 +244,11 @@ function formatDateTime(dateStr: string | undefined): string {
       <!-- 合同内容 -->
       <div class="relative p-8 md:p-10 lg:px-14">
         <!-- ========== 合同头部 ========== -->
-        <div class="text-center mb-10 border-b-2 border-gray-800 pb-6">
+        <div class="text-center mb-10 border-b-2 border-neutral-800 pb-6">
           <h1 class="text-2xl md:text-3xl font-bold tracking-wide mb-2 font-serif">
             购销合同
           </h1>
-          <p class="text-sm text-gray-500">Purchase and Sale Contract</p>
+          <p class="text-sm text-neutral-500">Purchase and Sale Contract</p>
           <div class="mt-4 flex justify-between text-sm">
             <span>合同编号: <span class="font-mono font-medium">{{ data.contractNo }}</span></span>
             <span>签订日期: {{ formatDate(data.signDate || data.createTime) }}</span>
@@ -277,34 +277,34 @@ function formatDateTime(dateStr: string | undefined): string {
             </h3>
             <div class="text-sm space-y-2 pl-3">
               <p class="flex items-start gap-2">
-                <span class="text-gray-500 w-20 shrink-0">公司名称:</span>
-                <strong class="text-gray-900">{{ data.buyer.companyName }}</strong>
+                <span class="text-neutral-500 w-20 shrink-0">公司名称:</span>
+                <strong class="text-neutral-900">{{ data.buyer.companyName }}</strong>
               </p>
               <p v-if="data.buyer.licenseNo" class="flex items-start gap-2">
-                <span class="text-gray-500 w-20 shrink-0">统一信用码:</span>
-                <span class="font-mono text-gray-700">{{ data.buyer.licenseNo }}</span>
+                <span class="text-neutral-500 w-20 shrink-0">统一信用码:</span>
+                <span class="font-mono text-neutral-700">{{ data.buyer.licenseNo }}</span>
               </p>
               <p v-if="data.buyer.contactName" class="flex items-start gap-2">
-                <User class="w-4 h-4 text-gray-400 mt-0.5" />
+                <User class="w-4 h-4 text-neutral-400 mt-0.5" />
                 <span>{{ data.buyer.contactName }}
-                  <span v-if="data.buyer.contactTitle" class="text-gray-400">({{ data.buyer.contactTitle }})</span>
+                  <span v-if="data.buyer.contactTitle" class="text-neutral-400">({{ data.buyer.contactTitle }})</span>
                 </span>
               </p>
               <p v-if="data.buyer.phone" class="flex items-start gap-2">
-                <Phone class="w-4 h-4 text-gray-400 mt-0.5" />
+                <Phone class="w-4 h-4 text-neutral-400 mt-0.5" />
                 <span>{{ data.buyer.phone }}</span>
               </p>
               <p v-if="data.buyer.address" class="flex items-start gap-2">
-                <MapPin class="w-4 h-4 text-gray-400 mt-0.5" />
-                <span class="text-gray-600">{{ data.buyer.address }}</span>
+                <MapPin class="w-4 h-4 text-neutral-400 mt-0.5" />
+                <span class="text-neutral-600">{{ data.buyer.address }}</span>
               </p>
               <!-- 银行信息 -->
-              <div v-if="data.buyer.bankInfo" class="mt-3 p-3 bg-gray-50 rounded-lg">
-                <div class="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
+              <div v-if="data.buyer.bankInfo" class="mt-3 p-3 bg-neutral-50 rounded-lg">
+                <div class="flex items-center gap-1.5 text-xs text-neutral-500 mb-2">
                   <Landmark class="w-3.5 h-3.5" />
                   银行账户
                 </div>
-                <div class="text-xs space-y-1 text-gray-700">
+                <div class="text-xs space-y-1 text-neutral-700">
                   <p v-if="data.buyer.bankInfo.bankName">开户行: {{ data.buyer.bankInfo.bankName }}</p>
                   <p v-if="data.buyer.bankInfo.accountName">户名: {{ data.buyer.bankInfo.accountName }}</p>
                   <p v-if="data.buyer.bankInfo.accountNo">账号: <span class="font-mono">{{ data.buyer.bankInfo.accountNo }}</span></p>
@@ -321,34 +321,34 @@ function formatDateTime(dateStr: string | undefined): string {
             </h3>
             <div class="text-sm space-y-2 pl-3">
               <p class="flex items-start gap-2">
-                <span class="text-gray-500 w-20 shrink-0">公司名称:</span>
-                <strong class="text-gray-900">{{ data.seller.companyName }}</strong>
+                <span class="text-neutral-500 w-20 shrink-0">公司名称:</span>
+                <strong class="text-neutral-900">{{ data.seller.companyName }}</strong>
               </p>
               <p v-if="data.seller.licenseNo" class="flex items-start gap-2">
-                <span class="text-gray-500 w-20 shrink-0">统一信用码:</span>
-                <span class="font-mono text-gray-700">{{ data.seller.licenseNo }}</span>
+                <span class="text-neutral-500 w-20 shrink-0">统一信用码:</span>
+                <span class="font-mono text-neutral-700">{{ data.seller.licenseNo }}</span>
               </p>
               <p v-if="data.seller.contactName" class="flex items-start gap-2">
-                <User class="w-4 h-4 text-gray-400 mt-0.5" />
+                <User class="w-4 h-4 text-neutral-400 mt-0.5" />
                 <span>{{ data.seller.contactName }}
-                  <span v-if="data.seller.contactTitle" class="text-gray-400">({{ data.seller.contactTitle }})</span>
+                  <span v-if="data.seller.contactTitle" class="text-neutral-400">({{ data.seller.contactTitle }})</span>
                 </span>
               </p>
               <p v-if="data.seller.phone" class="flex items-start gap-2">
-                <Phone class="w-4 h-4 text-gray-400 mt-0.5" />
+                <Phone class="w-4 h-4 text-neutral-400 mt-0.5" />
                 <span>{{ data.seller.phone }}</span>
               </p>
               <p v-if="data.seller.address" class="flex items-start gap-2">
-                <MapPin class="w-4 h-4 text-gray-400 mt-0.5" />
-                <span class="text-gray-600">{{ data.seller.address }}</span>
+                <MapPin class="w-4 h-4 text-neutral-400 mt-0.5" />
+                <span class="text-neutral-600">{{ data.seller.address }}</span>
               </p>
               <!-- 银行信息 -->
-              <div v-if="data.seller.bankInfo" class="mt-3 p-3 bg-gray-50 rounded-lg">
-                <div class="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
+              <div v-if="data.seller.bankInfo" class="mt-3 p-3 bg-neutral-50 rounded-lg">
+                <div class="flex items-center gap-1.5 text-xs text-neutral-500 mb-2">
                   <Landmark class="w-3.5 h-3.5" />
                   银行账户
                 </div>
-                <div class="text-xs space-y-1 text-gray-700">
+                <div class="text-xs space-y-1 text-neutral-700">
                   <p v-if="data.seller.bankInfo.bankName">开户行: {{ data.seller.bankInfo.bankName }}</p>
                   <p v-if="data.seller.bankInfo.accountName">户名: {{ data.seller.bankInfo.accountName }}</p>
                   <p v-if="data.seller.bankInfo.accountNo">账号: <span class="font-mono">{{ data.seller.bankInfo.accountNo }}</span></p>
@@ -365,9 +365,9 @@ function formatDateTime(dateStr: string | undefined): string {
           </h3>
 
           <!-- 一口价模式 -->
-          <div v-if="data.priceType !== 'BASIS'" class="overflow-hidden rounded-lg border border-gray-200">
+          <div v-if="data.priceType !== 'BASIS'" class="overflow-hidden rounded-lg border border-neutral-200">
             <table class="w-full text-sm text-left">
-              <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-600 border-b border-gray-200">
+              <thead class="bg-neutral-50 text-xs uppercase font-bold text-neutral-600 border-b border-neutral-200">
                 <tr>
                   <th class="px-4 py-3">产品名称</th>
                   <th class="px-4 py-3">规格等级</th>
@@ -376,17 +376,17 @@ function formatDateTime(dateStr: string | undefined): string {
                   <th class="px-4 py-3 text-right">金额 (元)</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-100">
+              <tbody class="divide-y divide-neutral-100">
                 <tr v-for="(product, idx) in data.products" :key="idx">
                   <td class="px-4 py-3">
-                    <div class="font-medium text-gray-900">{{ product.name }}</div>
-                    <div v-if="product.categoryName" class="text-xs text-gray-500">{{ product.categoryName }}</div>
+                    <div class="font-medium text-neutral-900">{{ product.name }}</div>
+                    <div v-if="product.categoryName" class="text-xs text-neutral-500">{{ product.categoryName }}</div>
                   </td>
-                  <td class="px-4 py-3 text-gray-600">{{ product.grade || '-' }}</td>
-                  <td class="px-4 py-3 text-right font-mono bg-gray-50/50">
+                  <td class="px-4 py-3 text-neutral-600">{{ product.grade || '-' }}</td>
+                  <td class="px-4 py-3 text-right font-mono bg-neutral-50/50">
                     {{ formatCurrency(product.quantity) }} {{ product.unit }}
                   </td>
-                  <td class="px-4 py-3 text-right font-mono bg-gray-50/50">
+                  <td class="px-4 py-3 text-right font-mono bg-neutral-50/50">
                     {{ formatCurrency(product.unitPrice) }}
                   </td>
                   <td class="px-4 py-3 text-right font-mono font-bold">
@@ -394,7 +394,7 @@ function formatDateTime(dateStr: string | undefined): string {
                   </td>
                 </tr>
               </tbody>
-              <tfoot class="bg-gray-50 font-bold border-t border-gray-200">
+              <tfoot class="bg-neutral-50 font-bold border-t border-neutral-200">
                 <tr>
                   <td class="px-4 py-3 text-right" colspan="4">合计 (Total Amount):</td>
                   <td class="px-4 py-3 text-right text-brand-600 text-base font-mono">
@@ -408,23 +408,23 @@ function formatDateTime(dateStr: string | undefined): string {
           <!-- 基差定价模式 -->
           <template v-else>
             <!-- 产品基本信息 -->
-            <div class="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div class="mb-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200">
               <div class="flex items-baseline gap-3">
-                <span class="text-sm font-bold text-gray-900">{{ data.products[0]?.name || '产品' }}</span>
-                <span v-if="data.products[0]?.grade" class="text-xs text-gray-500">{{ data.products[0].grade }}</span>
+                <span class="text-sm font-bold text-neutral-900">{{ data.products[0]?.name || '产品' }}</span>
+                <span v-if="data.products[0]?.grade" class="text-xs text-neutral-500">{{ data.products[0].grade }}</span>
               </div>
-              <div v-if="data.products[0]?.unitPrice" class="mt-1 text-xs text-gray-500">
+              <div v-if="data.products[0]?.unitPrice" class="mt-1 text-xs text-neutral-500">
                 出厂价：¥{{ formatCurrency(data.products[0].unitPrice) }} / {{ data.products[0]?.unit || '吨' }}
               </div>
-              <div class="mt-1 text-[10px] text-gray-400">
+              <div class="mt-1 text-[10px] text-neutral-400">
                 定价方式：基差定价（最终结算价 = 期货结算价 + 基差）
               </div>
             </div>
 
             <!-- 基差合约明细表 -->
-            <div v-if="data.basisQuotes && data.basisQuotes.length > 0" class="overflow-hidden rounded-lg border border-gray-200">
+            <div v-if="data.basisQuotes && data.basisQuotes.length > 0" class="overflow-hidden rounded-lg border border-neutral-200">
               <table class="w-full text-sm text-left">
-                <thead class="bg-gray-50 text-xs uppercase font-bold text-gray-600 border-b border-gray-200">
+                <thead class="bg-neutral-50 text-xs uppercase font-bold text-neutral-600 border-b border-neutral-200">
                   <tr>
                     <th class="px-4 py-3">合约代码</th>
                     <th class="px-4 py-3 text-right">基差 (元/吨)</th>
@@ -432,9 +432,9 @@ function formatDateTime(dateStr: string | undefined): string {
                     <th class="px-4 py-3 text-right">数量 ({{ data.products[0]?.unit || '吨' }})</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-neutral-100">
                   <tr v-for="(quote, idx) in data.basisQuotes" :key="idx">
-                    <td class="px-4 py-3 font-bold text-gray-900">{{ quote.contractCode }}</td>
+                    <td class="px-4 py-3 font-bold text-neutral-900">{{ quote.contractCode }}</td>
                     <td class="px-4 py-3 text-right font-mono font-bold"
                         :class="quote.basisPrice >= 0 ? 'text-red-600' : 'text-green-600'">
                       {{ quote.basisPrice >= 0 ? '+' : '' }}{{ quote.basisPrice }}
@@ -453,15 +453,15 @@ function formatDateTime(dateStr: string | undefined): string {
 
           <!-- 产品参数 -->
           <div v-if="data.products[0]?.params && data.products[0].params.length > 0" class="mt-4">
-            <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">产品参数</div>
+            <div class="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">产品参数</div>
             <div class="grid grid-cols-3 gap-3">
               <div
                 v-for="param in data.products[0].params"
                 :key="param.label"
-                class="p-3 bg-gray-50 rounded-lg"
+                class="p-3 bg-neutral-50 rounded-lg"
               >
-                <div class="text-xs text-gray-500">{{ param.label }}</div>
-                <div class="text-sm font-medium text-gray-900">{{ param.value }}</div>
+                <div class="text-xs text-neutral-500">{{ param.label }}</div>
+                <div class="text-sm font-medium text-neutral-900">{{ param.value }}</div>
               </div>
             </div>
           </div>
@@ -472,7 +472,7 @@ function formatDateTime(dateStr: string | undefined): string {
           <h3 class="font-bold text-sm bg-brand-50 p-2 mb-3 px-3 border-l-4 border-brand-600">
             二、质量标准 (Quality Standards)
           </h3>
-          <ul class="list-disc list-inside text-sm space-y-2 text-gray-700 bg-gray-50 p-4 rounded-lg border border-gray-100">
+          <ul class="list-disc list-inside text-sm space-y-2 text-neutral-700 bg-neutral-50 p-4 rounded-lg border border-neutral-100">
             <li v-for="(std, idx) in data.qualityStandards" :key="idx">
               <span class="font-medium">{{ std.label }}:</span> {{ std.value }}
             </li>
@@ -484,7 +484,7 @@ function formatDateTime(dateStr: string | undefined): string {
           <h3 class="font-bold text-sm bg-brand-50 p-2 mb-3 px-3 border-l-4 border-brand-600">
             三、付款方式 (Payment Method)
           </h3>
-          <p class="text-sm text-gray-700 pl-3">{{ data.paymentMethod }}</p>
+          <p class="text-sm text-neutral-700 pl-3">{{ data.paymentMethod }}</p>
         </div>
 
         <!-- ========== 四、交货与验收 ========== -->
@@ -492,7 +492,7 @@ function formatDateTime(dateStr: string | undefined): string {
           <h3 class="font-bold text-sm bg-brand-50 p-2 mb-3 px-3 border-l-4 border-brand-600">
             四、交货与验收 (Delivery & Acceptance)
           </h3>
-          <div class="text-sm space-y-2 pl-3 text-gray-700">
+          <div class="text-sm space-y-2 pl-3 text-neutral-700">
             <p v-if="data.deliveryAddress">
               <span class="font-medium">交货地点:</span> {{ data.deliveryAddress }}
             </p>
@@ -511,7 +511,7 @@ function formatDateTime(dateStr: string | undefined): string {
             <h3 class="font-bold text-sm bg-slate-100 p-2 mb-3 px-3 border-l-4 border-slate-500">
               {{ term.number }}、{{ term.titleCn }} ({{ term.titleEn }})
             </h3>
-            <div class="text-sm text-gray-700 pl-3 whitespace-pre-line leading-relaxed">
+            <div class="text-sm text-neutral-700 pl-3 whitespace-pre-line leading-relaxed">
               {{ term.content }}
             </div>
           </div>
@@ -519,29 +519,29 @@ function formatDateTime(dateStr: string | undefined): string {
 
         <!-- ========== 备注 ========== -->
         <div v-if="data.remark" class="mb-8">
-          <h3 class="font-bold text-sm bg-gray-100 p-2 mb-3 px-3 border-l-4 border-gray-400">
+          <h3 class="font-bold text-sm bg-neutral-100 p-2 mb-3 px-3 border-l-4 border-neutral-400">
             {{ showLegalTerms ? '九' : '五' }}、备注 (Remarks)
           </h3>
-          <p class="text-sm text-gray-600 pl-3">{{ data.remark }}</p>
+          <p class="text-sm text-neutral-600 pl-3">{{ data.remark }}</p>
         </div>
 
         <!-- ========== 法律提示 ========== -->
-        <div v-if="showLegalTerms && !printMode" class="mb-8 p-4 bg-amber-50 rounded-xl border border-amber-200">
+        <div v-if="showLegalTerms && !printMode" class="mb-8 p-4 bg-warning-50 rounded-xl border border-warning-200">
           <div class="flex items-start gap-3">
-            <AlertTriangle class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+            <AlertTriangle class="w-5 h-5 text-warning-500 shrink-0 mt-0.5" />
             <div>
-              <div class="text-sm font-bold text-amber-700">法律提示</div>
-              <div class="text-xs text-amber-600 mt-1">{{ LEGAL_NOTICE }}</div>
+              <div class="text-sm font-bold text-warning-700">法律提示</div>
+              <div class="text-xs text-warning-600 mt-1">{{ LEGAL_NOTICE }}</div>
             </div>
           </div>
         </div>
 
         <!-- ========== 条款确认区域 ========== -->
-        <div v-if="showConfirmArea && !printMode" class="mt-12 pt-8 border-t border-gray-300">
-          <h3 class="font-bold text-sm bg-gray-100 p-2 mb-4 px-3 border-l-4 border-gray-400">
+        <div v-if="showConfirmArea && !printMode" class="mt-12 pt-8 border-t border-neutral-300">
+          <h3 class="font-bold text-sm bg-neutral-100 p-2 mb-4 px-3 border-l-4 border-neutral-400">
             条款确认 (Terms Confirmation)
           </h3>
-          <p class="text-xs text-gray-500 mb-4 pl-3">
+          <p class="text-xs text-neutral-500 mb-4 pl-3">
             双方确认上述条款后，可生成正式签署合同。正式合同将包含完整的法律约束条款。
           </p>
 
@@ -553,8 +553,8 @@ function formatDateTime(dateStr: string | undefined): string {
                 buyerConfirmed
                   ? 'border border-brand-200 bg-brand-50/50'
                   : canConfirm && currentIsBuyer
-                    ? 'border-2 border-dashed border-gray-300 bg-gray-50 cursor-pointer hover:border-brand-500 hover:bg-brand-50/30 group'
-                    : 'border-2 border-dashed border-gray-200 bg-gray-50/50 opacity-60'
+                    ? 'border-2 border-dashed border-neutral-300 bg-neutral-50 cursor-pointer hover:border-brand-500 hover:bg-brand-50/30 group'
+                    : 'border-2 border-dashed border-neutral-200 bg-neutral-50/50 opacity-60'
               ]"
               @click="currentIsBuyer && canConfirm && emit('confirm')"
             >
@@ -563,8 +563,8 @@ function formatDateTime(dateStr: string | undefined): string {
                 <span class="text-sm font-medium text-brand-600">买方已确认条款</span>
               </template>
               <template v-else>
-                <FileSignature class="w-8 h-8 text-gray-300 group-hover:text-brand-500 mb-2 transition-colors" />
-                <span class="text-sm font-medium text-gray-500 group-hover:text-brand-600 transition-colors">
+                <FileSignature class="w-8 h-8 text-neutral-300 group-hover:text-brand-500 mb-2 transition-colors" />
+                <span class="text-sm font-medium text-neutral-500 group-hover:text-brand-600 transition-colors">
                   {{ currentIsBuyer ? '点击确认条款 (买方)' : '等待买方确认' }}
                 </span>
               </template>
@@ -577,8 +577,8 @@ function formatDateTime(dateStr: string | undefined): string {
                 sellerConfirmed
                   ? 'border border-brand-200 bg-brand-50/50'
                   : canConfirm && !currentIsBuyer
-                    ? 'border-2 border-dashed border-gray-300 bg-gray-50 cursor-pointer hover:border-brand-500 hover:bg-brand-50/30 group'
-                    : 'border-2 border-dashed border-gray-200 bg-gray-50/50 opacity-60'
+                    ? 'border-2 border-dashed border-neutral-300 bg-neutral-50 cursor-pointer hover:border-brand-500 hover:bg-brand-50/30 group'
+                    : 'border-2 border-dashed border-neutral-200 bg-neutral-50/50 opacity-60'
               ]"
               @click="!currentIsBuyer && canConfirm && emit('confirm')"
             >
@@ -587,8 +587,8 @@ function formatDateTime(dateStr: string | undefined): string {
                 <span class="text-sm font-medium text-brand-600">卖方已确认条款</span>
               </template>
               <template v-else>
-                <FileSignature class="w-8 h-8 text-gray-300 group-hover:text-brand-500 mb-2 transition-colors" />
-                <span class="text-sm font-medium text-gray-500 group-hover:text-brand-600 transition-colors">
+                <FileSignature class="w-8 h-8 text-neutral-300 group-hover:text-brand-500 mb-2 transition-colors" />
+                <span class="text-sm font-medium text-neutral-500 group-hover:text-brand-600 transition-colors">
                   {{ !currentIsBuyer ? '点击确认条款 (卖方)' : '等待卖方确认' }}
                 </span>
               </template>
@@ -622,15 +622,15 @@ function formatDateTime(dateStr: string | undefined): string {
         </div>
 
         <!-- ========== 签署区域 ========== -->
-        <div v-if="showSignArea" class="mt-12 pt-8 border-t-2 border-gray-300">
+        <div v-if="showSignArea" class="mt-12 pt-8 border-t-2 border-neutral-300">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- 买方签署 -->
             <div class="text-center">
-              <h4 class="font-bold text-sm text-gray-700 mb-4">甲方（买方）签章</h4>
+              <h4 class="font-bold text-sm text-neutral-700 mb-4">甲方（买方）签章</h4>
               <div
                 :class="[
                   'h-32 rounded-lg flex flex-col items-center justify-center',
-                  buyerSigned ? 'bg-brand-50/50' : 'bg-gray-50 border-2 border-dashed border-gray-200'
+                  buyerSigned ? 'bg-brand-50/50' : 'bg-neutral-50 border-2 border-dashed border-neutral-200'
                 ]"
               >
                 <template v-if="buyerSigned">
@@ -647,25 +647,25 @@ function formatDateTime(dateStr: string | undefined): string {
                       {{ data.buyer.companyName.slice(0, 4) }}<br/>合同章
                     </span>
                   </div>
-                  <div class="text-xs text-gray-500 mt-2">
+                  <div class="text-xs text-neutral-500 mt-2">
                     签署时间: {{ formatDateTime(buyerSignTime) }}
                   </div>
                 </template>
                 <template v-else>
-                  <Clock class="w-8 h-8 text-gray-300 mb-2" />
-                  <span class="text-sm text-gray-400">待签署</span>
+                  <Clock class="w-8 h-8 text-neutral-300 mb-2" />
+                  <span class="text-sm text-neutral-400">待签署</span>
                 </template>
               </div>
-              <p class="text-xs text-gray-500 mt-2">{{ data.buyer.companyName }}</p>
+              <p class="text-xs text-neutral-500 mt-2">{{ data.buyer.companyName }}</p>
             </div>
 
             <!-- 卖方签署 -->
             <div class="text-center">
-              <h4 class="font-bold text-sm text-gray-700 mb-4">乙方（卖方）签章</h4>
+              <h4 class="font-bold text-sm text-neutral-700 mb-4">乙方（卖方）签章</h4>
               <div
                 :class="[
                   'h-32 rounded-lg flex flex-col items-center justify-center',
-                  sellerSigned ? 'bg-brand-50/50' : 'bg-gray-50 border-2 border-dashed border-gray-200'
+                  sellerSigned ? 'bg-brand-50/50' : 'bg-neutral-50 border-2 border-dashed border-neutral-200'
                 ]"
               >
                 <template v-if="sellerSigned">
@@ -682,16 +682,16 @@ function formatDateTime(dateStr: string | undefined): string {
                       {{ data.seller.companyName.slice(0, 4) }}<br/>合同章
                     </span>
                   </div>
-                  <div class="text-xs text-gray-500 mt-2">
+                  <div class="text-xs text-neutral-500 mt-2">
                     签署时间: {{ formatDateTime(sellerSignTime) }}
                   </div>
                 </template>
                 <template v-else>
-                  <Clock class="w-8 h-8 text-gray-300 mb-2" />
-                  <span class="text-sm text-gray-400">待签署</span>
+                  <Clock class="w-8 h-8 text-neutral-300 mb-2" />
+                  <span class="text-sm text-neutral-400">待签署</span>
                 </template>
               </div>
-              <p class="text-xs text-gray-500 mt-2">{{ data.seller.companyName }}</p>
+              <p class="text-xs text-neutral-500 mt-2">{{ data.seller.companyName }}</p>
             </div>
           </div>
 

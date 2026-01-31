@@ -60,7 +60,7 @@ const typeBgColor = computed(() => {
       'flex items-center gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition-all duration-200 select-none',
       active
         ? 'bg-brand-50 border-brand-300 shadow-sm'
-        : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+        : 'bg-white border-neutral-200 hover:bg-neutral-50 hover:border-neutral-300'
     ]"
     @click="$emit('click')"
   >
@@ -68,7 +68,7 @@ const typeBgColor = computed(() => {
     <div
       :class="[
         'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
-        active ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-500'
+        active ? 'bg-brand-500 text-white' : 'bg-neutral-100 text-neutral-500'
       ]"
     >
       <Package class="w-4 h-4" />
@@ -77,7 +77,7 @@ const typeBgColor = computed(() => {
     <!-- 产品信息 -->
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-1.5">
-        <span class="text-sm font-bold text-gray-900 truncate">{{ productName }}</span>
+        <span class="text-sm font-bold text-neutral-900 truncate">{{ productName }}</span>
         <span :class="['text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0', typeBgColor]">
           {{ typeLabel }}
         </span>
@@ -88,14 +88,14 @@ const typeBgColor = computed(() => {
           议价中
         </span>
       </div>
-      <div class="flex items-center gap-2 mt-0.5 text-[11px] text-gray-500">
+      <div class="flex items-center gap-2 mt-0.5 text-[11px] text-neutral-500">
         <span v-if="price" class="flex items-center gap-0.5">
           <Banknote class="w-3 h-3" />{{ price }}
         </span>
         <span v-if="quantity" class="flex items-center gap-0.5">
           <ArrowUpDown class="w-3 h-3" />{{ quantity }}
         </span>
-        <span class="text-gray-400">{{ messagesCount }}条消息</span>
+        <span class="text-neutral-400">{{ messagesCount }}条消息</span>
       </div>
     </div>
   </div>

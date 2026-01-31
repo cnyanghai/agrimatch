@@ -104,17 +104,17 @@ async function handleConfirm() {
     <div v-if="!originalPreview">
       <div
         class="border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all"
-        :class="dragOver ? 'border-brand-500 bg-brand-50' : 'border-gray-200 hover:border-brand-300 hover:bg-brand-50/30'"
+        :class="dragOver ? 'border-brand-500 bg-brand-50' : 'border-neutral-200 hover:border-brand-300 hover:bg-brand-50/30'"
         @dragover="handleDragOver"
         @dragleave="handleDragLeave"
         @drop="handleDrop"
         @click="fileInput?.click()"
       >
-        <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gray-100 flex items-center justify-center">
-          <ImagePlus class="w-7 h-7 text-gray-400" />
+        <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-neutral-100 flex items-center justify-center">
+          <ImagePlus class="w-7 h-7 text-neutral-400" />
         </div>
-        <div class="text-sm font-medium text-gray-600 mb-1">点击或拖拽上传印章照片</div>
-        <div class="text-xs text-gray-400">支持 JPG/PNG，不超过 5MB</div>
+        <div class="text-sm font-medium text-neutral-600 mb-1">点击或拖拽上传印章照片</div>
+        <div class="text-xs text-neutral-400">支持 JPG/PNG，不超过 5MB</div>
       </div>
       <input
         ref="fileInput"
@@ -125,8 +125,8 @@ async function handleConfirm() {
       />
 
       <!-- 提示 -->
-      <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mt-3">
-        <div class="text-xs text-amber-700 leading-relaxed">
+      <div class="bg-warning-50 border border-warning-200 rounded-xl p-3 mt-3">
+        <div class="text-xs text-warning-700 leading-relaxed">
           <span class="font-bold">使用说明：</span>请在白纸上清晰地盖上公章/合同章，然后拍照上传。系统将自动提取红色印章部分。
         </div>
       </div>
@@ -137,20 +137,20 @@ async function handleConfirm() {
       <div class="grid grid-cols-2 gap-4">
         <!-- 原图 -->
         <div>
-          <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">原图</div>
-          <div class="aspect-square rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden">
+          <div class="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">原图</div>
+          <div class="aspect-square rounded-xl border border-neutral-200 bg-neutral-50 flex items-center justify-center overflow-hidden">
             <img :src="originalPreview" class="max-w-full max-h-full object-contain" alt="原图" />
           </div>
         </div>
 
         <!-- 提取效果 -->
         <div>
-          <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">提取效果</div>
+          <div class="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">提取效果</div>
           <div
-            class="aspect-square rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden"
+            class="aspect-square rounded-xl border border-neutral-200 flex items-center justify-center overflow-hidden"
             style="background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwIiBoZWlnaHQ9IjEwIiBmaWxsPSIjZjBmMGYwIi8+PHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIGZpbGw9IiNmMGYwZjAiLz48L3N2Zz4='); background-size: 20px 20px;"
           >
-            <div v-if="processing" class="text-sm text-gray-400">提取中...</div>
+            <div v-if="processing" class="text-sm text-neutral-400">提取中...</div>
             <img v-else-if="extractedPreview" :src="extractedPreview" class="max-w-full max-h-full object-contain" alt="提取效果" />
           </div>
         </div>
@@ -159,7 +159,7 @@ async function handleConfirm() {
       <!-- 操作按钮 -->
       <div v-if="extractedPreview" class="flex justify-end gap-3">
         <button
-          class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-all active:scale-95"
+          class="flex items-center gap-2 px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-xl transition-all active:scale-95"
           @click="handleReset"
         >
           <RotateCcw class="w-4 h-4" />

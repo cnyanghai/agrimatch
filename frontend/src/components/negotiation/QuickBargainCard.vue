@@ -62,7 +62,7 @@ watch(() => props.state.currentPrice, (val) => {
 const quickAdjustments = [
   { label: '-5%', value: -0.05, color: 'text-red-600 bg-red-50 hover:bg-red-100' },
   { label: '-3%', value: -0.03, color: 'text-red-500 bg-red-50 hover:bg-red-100' },
-  { label: '-1%', value: -0.01, color: 'text-orange-500 bg-orange-50 hover:bg-orange-100' },
+  { label: '-1%', value: -0.01, color: 'text-accent-500 bg-accent-50 hover:bg-accent-100' },
   { label: '+1%', value: 0.01, color: 'text-brand-500 bg-brand-50 hover:bg-brand-100' },
   { label: '+3%', value: 0.03, color: 'text-brand-600 bg-brand-50 hover:bg-brand-100' },
   { label: '+5%', value: 0.05, color: 'text-brand-700 bg-brand-50 hover:bg-brand-100' },
@@ -104,11 +104,11 @@ const canSubmit = computed(() => {
 // 状态配置
 const statusConfig = computed(() => {
   const configs: Record<string, { label: string; color: string; icon: any }> = {
-    IDLE: { label: '待报价', color: 'text-gray-500 bg-gray-100', icon: Clock },
-    MY_TURN: { label: '等待我方报价', color: 'text-amber-600 bg-amber-100', icon: Clock },
-    PEER_TURN: { label: '等待对方回复', color: 'text-blue-600 bg-blue-100', icon: Clock },
+    IDLE: { label: '待报价', color: 'text-neutral-500 bg-neutral-100', icon: Clock },
+    MY_TURN: { label: '等待我方报价', color: 'text-warning-600 bg-warning-100', icon: Clock },
+    PEER_TURN: { label: '等待对方回复', color: 'text-action-600 bg-action-100', icon: Clock },
     ACCEPTED: { label: '已成交', color: 'text-green-600 bg-green-100', icon: Check },
-    REJECTED: { label: '已拒绝', color: 'text-red-600 bg-red-100', icon: X },
+    REJECTED: { label: '已拒绝', color: 'text-error-600 bg-error-100', icon: X },
   }
   return configs[props.state.status] || configs.IDLE
 })
@@ -123,14 +123,14 @@ function formatCurrency(amount: number): string {
 </script>
 
 <template>
-  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+  <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden shadow-sm">
     <!-- 头部：产品信息 + 状态 -->
-    <div class="px-4 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+    <div class="px-4 py-3 bg-neutral-50 border-b border-neutral-100 flex items-center justify-between">
       <div class="flex items-center gap-2">
         <Package class="w-5 h-5 text-brand-600" />
         <div>
-          <span class="font-bold text-gray-900">{{ state.productName }}</span>
-          <span v-if="state.productGrade" class="ml-2 text-xs text-gray-500 bg-gray-200 px-1.5 py-0.5 rounded">
+          <span class="font-bold text-neutral-900">{{ state.productName }}</span>
+          <span v-if="state.productGrade" class="ml-2 text-xs text-neutral-500 bg-neutral-200 px-1.5 py-0.5 rounded">
             {{ state.productGrade }}
           </span>
         </div>
@@ -147,19 +147,19 @@ function formatCurrency(amount: number): string {
       <div class="flex items-center justify-between mb-4">
         <!-- 挂牌价 -->
         <div class="text-center">
-          <div class="text-[10px] text-gray-400 uppercase">挂牌价</div>
-          <div class="text-lg font-mono text-gray-400 line-through">
+          <div class="text-[10px] text-neutral-400 uppercase">挂牌价</div>
+          <div class="text-lg font-mono text-neutral-400 line-through">
             ¥{{ formatCurrency(state.listPrice) }}
           </div>
         </div>
 
-        <ArrowRight class="w-5 h-5 text-gray-300" />
+        <ArrowRight class="w-5 h-5 text-neutral-300" />
 
         <!-- 当前报价输入 -->
         <div class="text-center flex-1 max-w-[160px]">
-          <div class="text-[10px] text-gray-500 uppercase mb-1">我的报价</div>
+          <div class="text-[10px] text-neutral-500 uppercase mb-1">我的报价</div>
           <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">¥</span>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 font-bold">¥</span>
             <input
               v-model.number="editPrice"
               type="number"
@@ -167,7 +167,7 @@ function formatCurrency(amount: number): string {
               :disabled="state.status === 'PEER_TURN' || state.status === 'ACCEPTED'"
               class="w-full h-12 pl-8 pr-3 text-xl font-bold text-center border-2 border-brand-200 rounded-xl
                      focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20
-                     disabled:bg-gray-50 disabled:text-gray-400"
+                     disabled:bg-neutral-50 disabled:text-neutral-400"
             />
           </div>
           <!-- 变化指示 -->
@@ -184,8 +184,8 @@ function formatCurrency(amount: number): string {
 
         <!-- 对方报价（如果有） -->
         <div v-if="state.peerLastPrice" class="text-center">
-          <div class="text-[10px] text-gray-400 uppercase">对方报价</div>
-          <div class="text-lg font-mono text-gray-700 font-bold">
+          <div class="text-[10px] text-neutral-400 uppercase">对方报价</div>
+          <div class="text-lg font-mono text-neutral-700 font-bold">
             ¥{{ formatCurrency(state.peerLastPrice) }}
           </div>
         </div>
@@ -193,7 +193,7 @@ function formatCurrency(amount: number): string {
 
       <!-- 快捷调整按钮 -->
       <div v-if="state.status !== 'ACCEPTED' && state.status !== 'PEER_TURN'" class="mb-4">
-        <div class="text-[10px] text-gray-400 uppercase mb-2">快速调整</div>
+        <div class="text-[10px] text-neutral-400 uppercase mb-2">快速调整</div>
         <div class="flex flex-wrap gap-2">
           <button
             v-for="adj in quickAdjustments"
@@ -205,7 +205,7 @@ function formatCurrency(amount: number): string {
           </button>
           <button
             @click="resetPrice"
-            class="px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200"
+            class="px-3 py-1.5 text-xs font-medium text-neutral-500 bg-neutral-100 rounded-lg hover:bg-neutral-200"
           >
             重置
           </button>
@@ -213,25 +213,25 @@ function formatCurrency(amount: number): string {
       </div>
 
       <!-- 数量和总额 -->
-      <div class="flex items-center justify-between py-3 border-t border-gray-100">
-        <div class="text-sm text-gray-600">
+      <div class="flex items-center justify-between py-3 border-t border-neutral-100">
+        <div class="text-sm text-neutral-600">
           数量: <span class="font-bold">{{ state.quantity }} {{ state.unit }}</span>
         </div>
         <div class="text-right">
-          <div class="text-[10px] text-gray-400">预计总额</div>
+          <div class="text-[10px] text-neutral-400">预计总额</div>
           <div class="text-xl font-bold text-brand-600">¥{{ formatCurrency(totalAmount) }}</div>
         </div>
       </div>
     </div>
 
     <!-- 操作按钮 -->
-    <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex gap-2">
+    <div class="px-4 py-3 bg-neutral-50 border-t border-neutral-100 flex gap-2">
       <!-- 我方回合：发送报价 -->
       <template v-if="state.status === 'IDLE' || state.status === 'MY_TURN'">
         <button
           @click="emit('submit', editPrice)"
           :disabled="!canSubmit || sending"
-          class="flex-1 h-11 bg-brand-600 hover:bg-brand-700 disabled:bg-gray-300
+          class="flex-1 h-11 bg-brand-600 hover:bg-brand-700 disabled:bg-neutral-300
                  text-white font-bold rounded-xl flex items-center justify-center gap-2
                  transition-all active:scale-[0.98]"
         >
@@ -242,7 +242,7 @@ function formatCurrency(amount: number): string {
 
       <!-- 对方回合：等待中 -->
       <template v-else-if="state.status === 'PEER_TURN'">
-        <div class="flex-1 h-11 bg-gray-100 text-gray-500 font-medium rounded-xl
+        <div class="flex-1 h-11 bg-neutral-100 text-neutral-500 font-medium rounded-xl
                     flex items-center justify-center gap-2">
           <Clock class="w-4 h-4 animate-pulse" />
           等待对方回复...
@@ -262,7 +262,7 @@ function formatCurrency(amount: number): string {
         <button
           @click="emit('submit', editPrice)"
           :disabled="!canSubmit || sending"
-          class="flex-1 h-11 bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300
+          class="flex-1 h-11 bg-warning-500 hover:bg-warning-600 disabled:bg-neutral-300
                  text-white font-bold rounded-xl flex items-center justify-center gap-2
                  transition-all active:scale-[0.98]"
         >
@@ -270,7 +270,7 @@ function formatCurrency(amount: number): string {
         </button>
         <button
           @click="emit('reject')"
-          class="h-11 px-4 bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium rounded-xl
+          class="h-11 px-4 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 font-medium rounded-xl
                  flex items-center justify-center transition-all"
         >
           <X class="w-4 h-4" />

@@ -95,20 +95,20 @@ export type ContractStatus = 0 | 1 | 2 | 3 | 4 | 5
 
 /** 合同状态映射 */
 export const CONTRACT_STATUS_MAP: Record<ContractStatus, { label: string; color: string }> = {
-  0: { label: '草稿', color: 'text-gray-500 bg-gray-100' },
-  1: { label: '待签署', color: 'text-amber-600 bg-amber-50' },
+  0: { label: '草稿', color: 'text-neutral-500 bg-neutral-100' },
+  1: { label: '待签署', color: 'text-warning-600 bg-warning-50' },
   2: { label: '已签署', color: 'text-brand-600 bg-brand-50' },
-  3: { label: '履约中', color: 'text-blue-600 bg-blue-50' },
+  3: { label: '履约中', color: 'text-action-600 bg-action-50' },
   4: { label: '已完成', color: 'text-brand-700 bg-brand-100' },
-  5: { label: '已取消', color: 'text-red-500 bg-red-50' }
+  5: { label: '已取消', color: 'text-error-500 bg-error-50' }
 }
 
 /** 报价状态徽章 */
 export const QUOTE_STATUS_BADGE: Record<QuoteStatus, { label: string; color: string; bgColor: string }> = {
-  OFFERED: { label: '待确认', color: 'text-amber-600', bgColor: 'bg-amber-50' },
+  OFFERED: { label: '待确认', color: 'text-warning-600', bgColor: 'bg-warning-50' },
   ACCEPTED: { label: '已接受', color: 'text-brand-600', bgColor: 'bg-brand-50' },
-  REJECTED: { label: '已拒绝', color: 'text-red-500', bgColor: 'bg-red-50' },
-  EXPIRED: { label: '已过期', color: 'text-gray-500', bgColor: 'bg-gray-100' }
+  REJECTED: { label: '已拒绝', color: 'text-error-500', bgColor: 'bg-error-50' },
+  EXPIRED: { label: '已过期', color: 'text-neutral-500', bgColor: 'bg-neutral-100' }
 }
 
 /** 将后端消息转换为 UI 消息 */

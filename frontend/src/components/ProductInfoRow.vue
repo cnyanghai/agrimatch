@@ -94,7 +94,7 @@ const hasActions = computed(() => !!props.data)
         <Package v-if="type === 'supply'" class="w-5 h-5 text-brand-600" />
         <ShoppingCart v-else class="w-5 h-5 text-autumn-600" />
       </div>
-      <span class="text-xs font-bold text-gray-900 text-center leading-tight line-clamp-2">{{ data.categoryName }}</span>
+      <span class="text-xs font-bold text-neutral-900 text-center leading-tight line-clamp-2">{{ data.categoryName }}</span>
     </div>
 
     <!-- 右侧：数据格 + 状态 + 操作 -->
@@ -110,23 +110,23 @@ const hasActions = computed(() => !!props.data)
         <!-- 标题行 -->
         <template v-if="showHeader">
           <!-- 品名列标题（无图标时显示） -->
-          <div v-if="!showIcon" class="text-[10px] font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">品名</div>
-          <div class="text-[10px] font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+          <div v-if="!showIcon" class="text-[10px] font-medium text-neutral-400 uppercase tracking-wider whitespace-nowrap">品名</div>
+          <div class="text-[10px] font-medium text-neutral-400 uppercase tracking-wider whitespace-nowrap">
             {{ type === 'supply' ? '供应量' : '采购量' }}
           </div>
-          <div class="text-[10px] font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+          <div class="text-[10px] font-medium text-neutral-400 uppercase tracking-wider whitespace-nowrap">
             {{ data.priceLabel || (type === 'supply' ? '出厂价' : '期望价') }}
           </div>
-          <div class="text-[10px] font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">
+          <div class="text-[10px] font-medium text-neutral-400 uppercase tracking-wider whitespace-nowrap">
             {{ data.addressLabel || (type === 'supply' ? '发货地' : '收货地') }}
           </div>
-          <div class="text-[10px] font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">包装/付款</div>
-          <div class="text-[10px] font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">质量指标</div>
-          <div class="text-[10px] font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">剩余时长</div>
+          <div class="text-[10px] font-medium text-neutral-400 uppercase tracking-wider whitespace-nowrap">包装/付款</div>
+          <div class="text-[10px] font-medium text-neutral-400 uppercase tracking-wider whitespace-nowrap">质量指标</div>
+          <div class="text-[10px] font-medium text-neutral-400 uppercase tracking-wider whitespace-nowrap">剩余时长</div>
           <!-- 状态列标题 -->
-          <div v-if="$slots.status" class="text-[10px] font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">状态</div>
+          <div v-if="$slots.status" class="text-[10px] font-medium text-neutral-400 uppercase tracking-wider whitespace-nowrap">状态</div>
           <!-- 操作列标题 -->
-          <div v-if="$slots.actions" class="text-[10px] font-medium text-gray-400 uppercase tracking-wider whitespace-nowrap">操作</div>
+          <div v-if="$slots.actions" class="text-[10px] font-medium text-neutral-400 uppercase tracking-wider whitespace-nowrap">操作</div>
         </template>
 
         <!-- 数据行 -->
@@ -135,8 +135,8 @@ const hasActions = computed(() => !!props.data)
           {{ data.categoryName }}
         </div>
         <!-- 数量 -->
-        <div class="text-[13px] font-medium text-gray-700 whitespace-nowrap tabular-nums">
-          {{ data.quantity ?? '—' }}<span class="text-gray-400 ml-0.5">{{ data.quantityUnit || '吨' }}</span>
+        <div class="text-[13px] font-medium text-neutral-700 whitespace-nowrap tabular-nums">
+          {{ data.quantity ?? '—' }}<span class="text-neutral-400 ml-0.5">{{ data.quantityUnit || '吨' }}</span>
         </div>
 
         <!-- 价格 -->
@@ -144,16 +144,16 @@ const hasActions = computed(() => !!props.data)
           <span
             class="font-semibold"
             :class="type === 'supply' ? 'text-brand-600' : 'text-autumn-600'"
-          >{{ formattedPrice }}</span><span v-if="data.price && typeof data.price === 'number'" class="text-gray-400">/{{ data.priceUnit || '吨' }}</span>
+          >{{ formattedPrice }}</span><span v-if="data.price && typeof data.price === 'number'" class="text-neutral-400">/{{ data.priceUnit || '吨' }}</span>
         </div>
 
         <!-- 地址 -->
-        <div class="text-[13px] font-medium text-gray-700 truncate" :title="data.address">
+        <div class="text-[13px] font-medium text-neutral-700 truncate" :title="data.address">
           {{ data.address || '—' }}
         </div>
 
         <!-- 包装/付款 -->
-        <div class="text-[13px] font-medium text-gray-700 whitespace-nowrap">
+        <div class="text-[13px] font-medium text-neutral-700 whitespace-nowrap">
           {{ tradeTerms }}
         </div>
 
@@ -163,14 +163,14 @@ const hasActions = computed(() => !!props.data)
             <span
               v-for="(tag, idx) in paramTags"
               :key="idx"
-              class="inline-block px-1.5 py-0.5 bg-gray-50 border border-gray-200 rounded text-[11px] font-medium text-gray-600 whitespace-nowrap"
+              class="inline-block px-1.5 py-0.5 bg-neutral-50 border border-neutral-200 rounded text-[11px] font-medium text-neutral-600 whitespace-nowrap"
             >{{ tag }}</span>
           </template>
-          <span v-else class="text-[13px] font-medium text-gray-400">—</span>
+          <span v-else class="text-[13px] font-medium text-neutral-400">—</span>
         </div>
 
         <!-- 剩余时长 -->
-        <div class="text-[13px] font-medium text-gray-700 whitespace-nowrap tabular-nums">
+        <div class="text-[13px] font-medium text-neutral-700 whitespace-nowrap tabular-nums">
           {{ remainingTime }}
         </div>
 

@@ -96,9 +96,9 @@ function getCategoryIcon(category: string) {
 function getCategoryColor(category: string) {
   switch (category) {
     case 'card': return 'bg-autumn-50 text-autumn-600'
-    case 'gift': return 'bg-purple-50 text-purple-600'
+    case 'gift': return 'bg-action-50 text-action-600'
     case 'service': return 'bg-brand-50 text-brand-600'
-    default: return 'bg-gray-50 text-gray-600'
+    default: return 'bg-neutral-50 text-neutral-600'
   }
 }
 
@@ -159,14 +159,14 @@ onMounted(() => {
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-4">
         <button
-          class="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+          class="w-10 h-10 rounded-xl bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center transition-colors"
           @click="router.back()"
         >
-          <ArrowLeft class="w-5 h-5 text-gray-600" />
+          <ArrowLeft class="w-5 h-5 text-neutral-600" />
         </button>
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">积分商城</h1>
-          <p class="text-sm text-gray-500 mt-1">使用积分兑换精美商品</p>
+          <h1 class="text-2xl font-bold text-neutral-900">积分商城</h1>
+          <p class="text-sm text-neutral-500 mt-1">使用积分兑换精美商品</p>
         </div>
       </div>
       <div class="flex items-center gap-3">
@@ -193,7 +193,7 @@ onMounted(() => {
           'px-4 py-2 rounded-xl font-bold text-sm whitespace-nowrap transition-all',
           selectedCategory === cat.key
             ? 'bg-brand-600 text-white shadow-md'
-            : 'bg-white border border-gray-200 text-gray-600 hover:border-brand-300'
+            : 'bg-white border border-neutral-200 text-neutral-600 hover:border-brand-300'
         ]"
         @click="selectedCategory = cat.key as any"
       >
@@ -203,25 +203,25 @@ onMounted(() => {
 
     <!-- 商品网格 -->
     <div v-if="loading && filteredProducts.length === 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div v-for="i in 6" :key="i" class="bg-white rounded-2xl border border-gray-100 p-6">
+      <div v-for="i in 6" :key="i" class="bg-white rounded-2xl border border-neutral-100 p-6">
         <Skeleton type="card" />
       </div>
     </div>
 
-    <div v-else-if="filteredProducts.length === 0" class="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-      <Package class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-      <h3 class="text-2xl font-bold text-gray-900 mb-2">暂无商品</h3>
-      <p class="text-sm text-gray-500">该分类下暂无可用商品</p>
+    <div v-else-if="filteredProducts.length === 0" class="bg-white rounded-2xl border border-neutral-100 p-12 text-center">
+      <Package class="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+      <h3 class="text-2xl font-bold text-neutral-900 mb-2">暂无商品</h3>
+      <p class="text-sm text-neutral-500">该分类下暂无可用商品</p>
     </div>
 
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <div
         v-for="product in filteredProducts"
         :key="product.id"
-            class="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-brand-200 transition-all"
+            class="group bg-white rounded-2xl border border-neutral-100 overflow-hidden hover:shadow-lg hover:border-brand-200 transition-all"
       >
         <!-- 商品图片区域 -->
-        <div class="relative h-48 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div class="relative h-48 bg-gradient-to-br from-neutral-50 to-neutral-100 flex items-center justify-center">
           <component
             :is="getCategoryIcon(product.category)"
             :class="['w-16 h-16', getCategoryColor(product.category).split(' ')[1]]"
@@ -236,8 +236,8 @@ onMounted(() => {
                 'px-2 py-0.5 rounded-full text-[10px] font-bold uppercase',
                 tag === '热门' ? 'bg-red-500 text-white' :
                 tag === '推荐' ? 'bg-brand-500 text-white' :
-                tag === '限时' ? 'bg-orange-500 text-white' :
-                'bg-gray-500 text-white'
+                tag === '限时' ? 'bg-accent-500 text-white' :
+                'bg-neutral-500 text-white'
               ]"
             >
               {{ tag }}
@@ -247,21 +247,21 @@ onMounted(() => {
 
         <!-- 商品信息 -->
         <div class="p-6">
-          <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-brand-600 transition-colors">
+          <h3 class="text-lg font-bold text-neutral-900 mb-2 group-hover:text-brand-600 transition-colors">
             {{ product.name }}
           </h3>
-          <p class="text-sm text-gray-500 mb-4 line-clamp-2">
+          <p class="text-sm text-neutral-500 mb-4 line-clamp-2">
             {{ product.description }}
           </p>
 
           <!-- 价格与库存 -->
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2">
-              <Coins class="w-4 h-4 text-amber-500" />
-              <span class="text-lg font-black text-gray-900">{{ product.points }}</span>
-              <span class="text-sm text-gray-500">积分</span>
+              <Coins class="w-4 h-4 text-warning-500" />
+              <span class="text-lg font-black text-neutral-900">{{ product.points }}</span>
+              <span class="text-sm text-neutral-500">积分</span>
             </div>
-            <span class="text-xs text-gray-400">库存 {{ product.stock }}</span>
+            <span class="text-xs text-neutral-400">库存 {{ product.stock }}</span>
           </div>
 
           <!-- 兑换按钮 -->

@@ -123,7 +123,7 @@ defineExpose({
     <!-- 会话列表（桌面端始终显示，移动端根据状态显示） -->
     <div
       :class="[
-        'w-full lg:w-80 xl:w-96 shrink-0 border-r border-gray-200',
+        'w-full lg:w-80 xl:w-96 shrink-0 border-r border-neutral-200',
         isMobile && showChatOnMobile ? 'hidden' : 'block'
       ]"
     >

@@ -218,39 +218,39 @@ onBeforeUnmount(() => {
 <template>
   <div class="min-h-screen bg-white flex flex-col">
     <!-- 顶部导航栏 -->
-    <header class="h-14 border-b border-gray-100 flex items-center justify-between px-6 bg-white sticky top-0 z-50">
+    <header class="h-14 border-b border-neutral-100 flex items-center justify-between px-6 bg-white sticky top-0 z-50">
       <div class="flex items-center gap-4">
         <button
-          class="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
+          class="flex items-center gap-2 text-neutral-500 hover:text-neutral-900 transition-colors"
           @click="close"
         >
           <ArrowLeft :size="20" />
           <span class="text-sm font-medium">返回</span>
         </button>
-        <div class="w-px h-5 bg-gray-200"></div>
-        <h1 class="text-base font-bold text-gray-900">发布话题</h1>
+        <div class="w-px h-5 bg-neutral-200"></div>
+        <h1 class="text-base font-bold text-neutral-900">发布话题</h1>
       </div>
 
       <div class="flex items-center gap-4">
         <!-- 类型选择 -->
-        <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+        <div class="flex items-center gap-1 bg-neutral-100 p-1 rounded-lg">
           <button
             class="px-4 py-1.5 rounded-md text-sm font-medium transition-all"
-            :class="postType === 'general' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+            :class="postType === 'general' ? 'bg-white text-brand-600 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'"
             @click="postType = 'general'"
           >
             普通话题
           </button>
           <button
             class="px-4 py-1.5 rounded-md text-sm font-medium transition-all"
-            :class="postType === 'paid' ? 'bg-white text-amber-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+            :class="postType === 'paid' ? 'bg-white text-warning-600 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'"
             @click="postType = 'paid'"
           >
             专家文章
           </button>
           <button
             class="px-4 py-1.5 rounded-md text-sm font-medium transition-all"
-            :class="postType === 'poll' ? 'bg-white text-brand-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+            :class="postType === 'poll' ? 'bg-white text-brand-600 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'"
             @click="postType = 'poll'"
           >
             发起投票
@@ -269,7 +269,7 @@ onBeforeUnmount(() => {
     </header>
 
     <!-- 工具栏 - 固定在顶部导航下方 -->
-    <div class="border-b border-gray-100 bg-white sticky top-14 z-40">
+    <div class="border-b border-neutral-100 bg-white sticky top-14 z-40">
       <div class="max-w-4xl mx-auto px-6">
         <Toolbar
           class="editor-toolbar"
@@ -288,12 +288,12 @@ onBeforeUnmount(() => {
           v-model="title"
           type="text"
           placeholder="请输入标题"
-          class="w-full text-2xl font-bold placeholder:text-gray-300 outline-none border-none bg-transparent"
+          class="w-full text-2xl font-bold placeholder:text-neutral-300 outline-none border-none bg-transparent"
           maxlength="100"
         />
 
         <!-- 分隔线 -->
-        <div class="h-px bg-gray-100 my-4"></div>
+        <div class="h-px bg-neutral-100 my-4"></div>
 
         <!-- 编辑器内容区（无边框，与标题融为一体） -->
         <div class="editor-wrapper">
@@ -309,18 +309,18 @@ onBeforeUnmount(() => {
     </main>
 
     <!-- 底部工具栏 -->
-    <footer class="border-t border-gray-100 bg-gray-50 px-6 py-4 sticky bottom-0 z-40">
+    <footer class="border-t border-neutral-100 bg-neutral-50 px-6 py-4 sticky bottom-0 z-40">
       <div class="max-w-4xl mx-auto flex items-center justify-between">
         <!-- 左侧：封面图上传 -->
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-3">
-            <span class="text-sm text-gray-500">封面图</span>
+            <span class="text-sm text-neutral-500">封面图</span>
             <div class="flex gap-2">
               <!-- 已上传的封面图 -->
               <div
                 v-for="(img, idx) in coverImages"
                 :key="idx"
-                class="relative w-14 h-14 rounded-lg overflow-hidden group border border-gray-200"
+                class="relative w-14 h-14 rounded-lg overflow-hidden group border border-neutral-200"
               >
                 <img :src="img" class="w-full h-full object-cover" />
                 <button
@@ -334,7 +334,7 @@ onBeforeUnmount(() => {
               <!-- 上传按钮 -->
               <button
                 v-if="coverImages.length < 1"
-                class="w-14 h-14 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 hover:border-brand-400 hover:text-brand-500 transition-colors"
+                class="w-14 h-14 rounded-lg border-2 border-dashed border-neutral-300 flex items-center justify-center text-neutral-400 hover:border-brand-400 hover:text-brand-500 transition-colors"
                 :disabled="uploadingCover"
                 @click="triggerCoverUpload"
               >
@@ -342,7 +342,7 @@ onBeforeUnmount(() => {
                 <ImagePlus v-else :size="20" />
               </button>
             </div>
-            <span class="text-xs text-gray-400">建议尺寸 16:9</span>
+            <span class="text-xs text-neutral-400">建议尺寸 16:9</span>
           </div>
 
           <input
@@ -355,25 +355,25 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- 右侧：付费设置 -->
-        <div v-if="showPaidSettings" class="flex items-center gap-4 bg-amber-50 rounded-lg px-4 py-2 border border-amber-200">
-          <Coins :size="16" class="text-amber-600" />
+        <div v-if="showPaidSettings" class="flex items-center gap-4 bg-warning-50 rounded-lg px-4 py-2 border border-warning-200">
+          <Coins :size="16" class="text-warning-600" />
           <div class="flex items-center gap-3">
             <div class="flex items-center gap-2">
-              <span class="text-sm text-amber-700">阅读价格</span>
+              <span class="text-sm text-warning-700">阅读价格</span>
               <el-input-number v-model="price" :min="0.1" :max="999" :precision="1" :step="1" size="small" class="!w-24" />
-              <span class="text-sm text-amber-600">积分</span>
+              <span class="text-sm text-warning-600">积分</span>
             </div>
-            <div class="w-px h-5 bg-amber-200"></div>
+            <div class="w-px h-5 bg-warning-200"></div>
             <div class="flex items-center gap-2">
-              <span class="text-sm text-amber-700">免费预览</span>
+              <span class="text-sm text-warning-700">免费预览</span>
               <el-input-number v-model="teaserLength" :min="20" :max="1000" :step="10" size="small" class="!w-24" />
-              <span class="text-sm text-amber-600">字</span>
+              <span class="text-sm text-warning-600">字</span>
             </div>
           </div>
         </div>
 
         <!-- 非付费时显示提示 -->
-        <div v-else class="text-sm text-gray-400">
+        <div v-else class="text-sm text-neutral-400">
           支持粘贴或拖拽图片到编辑器
         </div>
       </div>

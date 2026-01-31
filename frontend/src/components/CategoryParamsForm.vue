@@ -91,11 +91,11 @@ function updateCustomParam(idx: number, field: 'name' | 'value', val: string) {
   <div class="space-y-6">
     <!-- 无参数提示 -->
     <div v-if="params.length === 0" class="text-center py-8">
-      <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-        <HelpCircle class="w-6 h-6 text-gray-400" />
+      <div class="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3">
+        <HelpCircle class="w-6 h-6 text-neutral-400" />
       </div>
-      <p class="text-sm text-gray-500">该品类暂无预设参数</p>
-      <p class="text-xs text-gray-400 mt-1">可点击下方按钮添加自定义参数</p>
+      <p class="text-sm text-neutral-500">该品类暂无预设参数</p>
+      <p class="text-xs text-neutral-400 mt-1">可点击下方按钮添加自定义参数</p>
     </div>
 
     <!-- 分组参数表单 -->
@@ -103,13 +103,13 @@ function updateCustomParam(idx: number, field: 'name' | 'value', val: string) {
       <!-- 分组标题 -->
       <div class="flex items-center gap-2">
         <div class="w-1 h-4 rounded-full" :class="{
-          'bg-purple-500': group.key === 'breed',
-          'bg-blue-500': group.key === 'biology',
+          'bg-action-500': group.key === 'breed',
+          'bg-action-500': group.key === 'biology',
           'bg-brand-500': group.key === 'quality',
-          'bg-amber-500': group.key === 'logistics',
-          'bg-rose-500': group.key === 'trade'
+          'bg-warning-500': group.key === 'logistics',
+          'bg-accent-500': group.key === 'trade'
         }"></div>
-        <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">{{ group.label }}</span>
+        <span class="text-xs font-bold text-neutral-500 uppercase tracking-wider">{{ group.label }}</span>
       </div>
 
       <!-- 参数网格 -->
@@ -117,12 +117,12 @@ function updateCustomParam(idx: number, field: 'name' | 'value', val: string) {
         <div
           v-for="param in group.params"
           :key="param.id"
-          class="bg-white border border-gray-200 rounded-xl p-4 hover:border-brand-200 transition-all"
+          class="bg-white border border-neutral-200 rounded-xl p-4 hover:border-brand-200 transition-all"
         >
           <!-- 参数标签 -->
-          <label class="flex items-center gap-1.5 text-xs font-bold text-gray-600 mb-2">
+          <label class="flex items-center gap-1.5 text-xs font-bold text-neutral-600 mb-2">
             {{ param.paramName }}
-            <span v-if="param.unit" class="text-gray-400 font-normal">（{{ param.unit }}）</span>
+            <span v-if="param.unit" class="text-neutral-400 font-normal">（{{ param.unit }}）</span>
           </label>
 
           <!-- 下拉选择类型 (paramType = 1) -->
@@ -149,7 +149,7 @@ function updateCustomParam(idx: number, field: 'name' | 'value', val: string) {
             :value="getValue(param.id)"
             @input="(e: Event) => updateValue(param.id, (e.target as HTMLInputElement).value)"
             :placeholder="param.placeholder || `请输入${param.paramName}`"
-            class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-brand-500 focus:bg-white outline-none transition-all"
+            class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:border-brand-500 focus:bg-white outline-none transition-all"
           />
         </div>
       </div>
@@ -158,8 +158,8 @@ function updateCustomParam(idx: number, field: 'name' | 'value', val: string) {
     <!-- 自定义参数 -->
     <div v-if="customParams !== undefined" class="space-y-3">
       <div class="flex items-center gap-2">
-        <div class="w-1 h-4 rounded-full bg-gray-400"></div>
-        <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">自定义参数</span>
+        <div class="w-1 h-4 rounded-full bg-neutral-400"></div>
+        <span class="text-xs font-bold text-neutral-500 uppercase tracking-wider">自定义参数</span>
       </div>
 
       <!-- 已添加的自定义参数列表 -->
@@ -174,19 +174,19 @@ function updateCustomParam(idx: number, field: 'name' | 'value', val: string) {
             :value="cp.name"
             @input="(e: Event) => updateCustomParam(idx, 'name', (e.target as HTMLInputElement).value)"
             placeholder="参数名"
-            class="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-brand-500 focus:bg-white outline-none transition-all"
+            class="flex-1 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:border-brand-500 focus:bg-white outline-none transition-all"
           />
           <input
             type="text"
             :value="cp.value"
             @input="(e: Event) => updateCustomParam(idx, 'value', (e.target as HTMLInputElement).value)"
             placeholder="参数值"
-            class="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-brand-500 focus:bg-white outline-none transition-all"
+            class="flex-1 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:border-brand-500 focus:bg-white outline-none transition-all"
           />
           <button
             type="button"
             @click="removeCustomParam(idx)"
-            class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            class="p-1.5 text-neutral-400 hover:text-error-500 hover:bg-error-50 rounded-lg transition-colors"
           >
             <X class="w-4 h-4" />
           </button>

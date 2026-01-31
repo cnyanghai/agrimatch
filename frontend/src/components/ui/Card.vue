@@ -24,7 +24,7 @@ const cardClasses = computed(() => {
     default: 'bg-white dark:bg-slate-900',
     interactive: 'bg-white dark:bg-slate-900 cursor-pointer',
     info: 'bg-autumn-50/50 dark:bg-autumn-900/20',
-    warning: 'bg-amber-50/50 dark:bg-amber-900/20',
+    warning: 'bg-warning-50/50 dark:bg-warning-900/20',
     success: 'bg-brand-50/50 dark:bg-brand-900/20',
     glass: 'bg-white/10 backdrop-blur-xl border-white/20',
     slate: 'bg-slate-900 text-white'
@@ -63,7 +63,7 @@ const cardClasses = computed(() => {
   ]
 
   if (props.border && props.variant !== 'glass') {
-    classes.push('border border-gray-100 dark:border-slate-800')
+    classes.push('border border-neutral-100 dark:border-slate-800')
   }
 
   if (props.hover) {

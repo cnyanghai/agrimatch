@@ -141,33 +141,33 @@ watch(visible, (val) => {
   >
     <!-- 头部图标 -->
     <template #icon>
-      <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-        <Upload class="w-5 h-5 text-blue-600" />
+      <div class="w-10 h-10 rounded-xl bg-action-50 flex items-center justify-center">
+        <Upload class="w-5 h-5 text-action-600" />
       </div>
     </template>
 
     <!-- 自定义标题 -->
     <template #title>
-      <div class="text-xl font-bold text-gray-900">提交履约凭证</div>
-      <p class="text-xs text-gray-500 mt-0.5">{{ milestone?.milestoneName }}</p>
+      <div class="text-xl font-bold text-neutral-900">提交履约凭证</div>
+      <p class="text-xs text-neutral-500 mt-0.5">{{ milestone?.milestoneName }}</p>
     </template>
 
     <div class="space-y-5">
       <!-- 完成日期 -->
       <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+        <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
           实际完成日期
         </label>
         <input
           v-model="form.actualDate"
           type="date"
-          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
+          class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm"
         />
       </div>
       
       <!-- 凭证上传 -->
       <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+        <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
           凭证图片 <span class="text-red-500">*</span>
         </label>
         
@@ -189,7 +189,7 @@ watch(visible, (val) => {
           >
             <img v-lazy="url" alt="凭证" class="w-full h-full object-cover" />
             <button
-              class="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              class="absolute top-1 right-1 w-6 h-6 bg-error-500 hover:bg-error-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               @click="removeEvidence(index)"
             >
               <Trash2 class="w-3.5 h-3.5 text-white" />
@@ -199,31 +199,31 @@ watch(visible, (val) => {
           <!-- 上传按钮 -->
           <button
             v-if="form.evidenceUrls.length < 9"
-            class="aspect-square rounded-xl border-2 border-dashed border-gray-200 hover:border-brand-500 hover:bg-brand-50/50 flex flex-col items-center justify-center gap-1 transition-colors"
+            class="aspect-square rounded-xl border-2 border-dashed border-neutral-200 hover:border-brand-500 hover:bg-brand-50/50 flex flex-col items-center justify-center gap-1 transition-colors"
             :disabled="uploading"
             @click="triggerFileInput"
           >
-            <Upload v-if="!uploading" class="w-6 h-6 text-gray-400" />
-            <div v-else class="w-6 h-6 border-2 border-gray-300 border-t-brand-500 rounded-full animate-spin" />
-            <span class="text-xs text-gray-400">{{ uploading ? '上传中' : '上传' }}</span>
+            <Upload v-if="!uploading" class="w-6 h-6 text-neutral-400" />
+            <div v-else class="w-6 h-6 border-2 border-neutral-300 border-t-brand-500 rounded-full animate-spin" />
+            <span class="text-xs text-neutral-400">{{ uploading ? '上传中' : '上传' }}</span>
           </button>
         </div>
         
-        <p class="text-xs text-gray-400 mt-2">
+        <p class="text-xs text-neutral-400 mt-2">
           支持 JPG、PNG 格式，最多 9 张
         </p>
       </div>
       
       <!-- 备注 -->
       <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+        <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
           备注说明
         </label>
         <textarea
           v-model="form.remark"
           rows="2"
           placeholder="可选，补充说明..."
-          class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm resize-none"
+          class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-xl focus:border-brand-500 outline-none transition-all text-sm resize-none"
         />
       </div>
     </div>

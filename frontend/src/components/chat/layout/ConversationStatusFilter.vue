@@ -17,9 +17,9 @@ const statusOptions = computed(() => [
     value: 'ALL' as const,
     label: '全部',
     icon: List,
-    color: 'text-gray-600',
-    bgColor: 'bg-gray-100',
-    activeColor: 'bg-gray-600',
+    color: 'text-neutral-600',
+    bgColor: 'bg-neutral-100',
+    activeColor: 'bg-neutral-600',
     count: props.statusCounts.ALL
   },
   {
@@ -35,9 +35,9 @@ const statusOptions = computed(() => [
     value: 'PENDING' as const,
     label: '待跟进',
     icon: Clock,
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50',
-    activeColor: 'bg-amber-500',
+    color: 'text-warning-600',
+    bgColor: 'bg-warning-50',
+    activeColor: 'bg-warning-500',
     count: props.statusCounts.PENDING
   },
   {
@@ -53,18 +53,18 @@ const statusOptions = computed(() => [
     value: 'ON_HOLD' as const,
     label: '暂缓',
     icon: Pause,
-    color: 'text-gray-500',
-    bgColor: 'bg-gray-100',
-    activeColor: 'bg-gray-500',
+    color: 'text-neutral-500',
+    bgColor: 'bg-neutral-100',
+    activeColor: 'bg-neutral-500',
     count: props.statusCounts.ON_HOLD
   },
   {
     value: 'CLOSED' as const,
     label: '关闭',
     icon: XCircle,
-    color: 'text-red-500',
-    bgColor: 'bg-red-50',
-    activeColor: 'bg-red-500',
+    color: 'text-error-500',
+    bgColor: 'bg-error-50',
+    activeColor: 'bg-error-500',
     count: props.statusCounts.CLOSED
   }
 ])

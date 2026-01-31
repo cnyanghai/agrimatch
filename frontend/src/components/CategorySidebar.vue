@@ -96,8 +96,8 @@ watch(() => currentSchema.value, () => {
 <template>
   <div class="h-full flex flex-col bg-white">
     <!-- 业态选择区 -->
-    <div class="p-4 border-b border-gray-100">
-      <div class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">产品业态</div>
+    <div class="p-4 border-b border-neutral-100">
+      <div class="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">产品业态</div>
       <div class="grid grid-cols-2 gap-2">
         <button
           v-for="schema in schemaTree"
@@ -109,7 +109,7 @@ watch(() => currentSchema.value, () => {
               ? themeColor === 'brand'
                 ? 'border-brand-500 bg-brand-50 text-brand-700'
                 : 'border-autumn-500 bg-autumn-50 text-autumn-700'
-              : 'border-gray-100 hover:border-gray-200 text-gray-600 hover:bg-gray-50'
+              : 'border-neutral-100 hover:border-neutral-200 text-neutral-600 hover:bg-neutral-50'
           ]"
         >
           <component
@@ -125,7 +125,7 @@ watch(() => currentSchema.value, () => {
     <div class="flex-1 overflow-y-auto">
       <div class="p-4">
         <div class="flex items-center justify-between mb-3">
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">品类分类</span>
+          <span class="text-xs font-bold text-neutral-400 uppercase tracking-wider">品类分类</span>
           <button
             v-if="selectedCategory"
             @click="selectCategory(null)"
@@ -147,7 +147,7 @@ watch(() => currentSchema.value, () => {
               ? themeColor === 'brand'
                 ? 'bg-brand-50 text-brand-700'
                 : 'bg-autumn-50 text-autumn-700'
-              : 'text-gray-600 hover:bg-gray-50'
+              : 'text-neutral-600 hover:bg-neutral-50'
           ]"
         >
           全部品类
@@ -166,19 +166,19 @@ watch(() => currentSchema.value, () => {
                     ? themeColor === 'brand'
                       ? 'bg-brand-50 text-brand-700 font-medium'
                       : 'bg-autumn-50 text-autumn-700 font-medium'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    : 'text-neutral-700 hover:bg-neutral-50'
                 ]"
               >
                 <!-- 展开/折叠图标 -->
                 <template v-if="node.children?.length">
-                  <ChevronDown v-if="isExpanded(node.id)" class="w-4 h-4 text-gray-400 shrink-0" />
-                  <ChevronRight v-else class="w-4 h-4 text-gray-400 shrink-0" />
+                  <ChevronDown v-if="isExpanded(node.id)" class="w-4 h-4 text-neutral-400 shrink-0" />
+                  <ChevronRight v-else class="w-4 h-4 text-neutral-400 shrink-0" />
                 </template>
                 <span v-else class="w-4 shrink-0"></span>
 
                 <span class="flex-1 text-left truncate">{{ node.name }}</span>
 
-                <span v-if="getCategoryCount(node)" class="text-xs text-gray-400">
+                <span v-if="getCategoryCount(node)" class="text-xs text-neutral-400">
                   {{ getCategoryCount(node) }}
                 </span>
               </button>
@@ -186,7 +186,7 @@ watch(() => currentSchema.value, () => {
               <!-- 二级分类 -->
               <div
                 v-if="node.children?.length && isExpanded(node.id)"
-                class="ml-4 pl-2 border-l border-gray-100"
+                class="ml-4 pl-2 border-l border-neutral-100"
               >
                 <template v-for="child in node.children" :key="child.id">
                   <button
@@ -197,11 +197,11 @@ watch(() => currentSchema.value, () => {
                         ? themeColor === 'brand'
                           ? 'bg-brand-50 text-brand-700 font-medium'
                           : 'bg-autumn-50 text-autumn-700 font-medium'
-                        : 'text-gray-600 hover:bg-gray-50'
+                        : 'text-neutral-600 hover:bg-neutral-50'
                     ]"
                   >
                     <span class="flex-1 text-left truncate">{{ child.name }}</span>
-                    <span v-if="getCategoryCount(child)" class="text-xs text-gray-400">
+                    <span v-if="getCategoryCount(child)" class="text-xs text-neutral-400">
                       {{ getCategoryCount(child) }}
                     </span>
                   </button>
@@ -209,7 +209,7 @@ watch(() => currentSchema.value, () => {
                   <!-- 三级分类 -->
                   <div
                     v-if="child.children?.length"
-                    class="ml-4 pl-2 border-l border-gray-100"
+                    class="ml-4 pl-2 border-l border-neutral-100"
                   >
                     <button
                       v-for="grandChild in child.children"
@@ -221,7 +221,7 @@ watch(() => currentSchema.value, () => {
                           ? themeColor === 'brand'
                             ? 'bg-brand-50 text-brand-700 font-medium'
                             : 'bg-autumn-50 text-autumn-700 font-medium'
-                          : 'text-gray-500 hover:bg-gray-50'
+                          : 'text-neutral-500 hover:bg-neutral-50'
                       ]"
                     >
                       <span class="flex-1 text-left truncate">{{ grandChild.name }}</span>
@@ -234,15 +234,15 @@ watch(() => currentSchema.value, () => {
         </div>
 
         <!-- 空状态 -->
-        <div v-else class="text-center py-8 text-gray-400 text-sm">
+        <div v-else class="text-center py-8 text-neutral-400 text-sm">
           暂无品类数据
         </div>
       </div>
     </div>
 
     <!-- 底部筛选区（预留） -->
-    <div class="p-4 border-t border-gray-100 hidden lg:block">
-      <div class="text-xs text-gray-400 text-center">
+    <div class="p-4 border-t border-neutral-100 hidden lg:block">
+      <div class="text-xs text-neutral-400 text-center">
         更多筛选条件开发中...
       </div>
     </div>

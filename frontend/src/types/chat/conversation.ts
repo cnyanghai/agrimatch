@@ -35,8 +35,8 @@ export const BUSINESS_STATUS_MAP: Record<ConversationBusinessStatus, BusinessSta
   PENDING: {
     label: '待跟进',
     icon: 'Clock',
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50',
+    color: 'text-warning-600',
+    bgColor: 'bg-warning-50',
     description: '等待对方回复'
   },
   COMPLETED: {
@@ -49,15 +49,15 @@ export const BUSINESS_STATUS_MAP: Record<ConversationBusinessStatus, BusinessSta
   ON_HOLD: {
     label: '暂缓',
     icon: 'Pause',
-    color: 'text-gray-500',
-    bgColor: 'bg-gray-100',
+    color: 'text-neutral-500',
+    bgColor: 'bg-neutral-100',
     description: '用户主动暂停'
   },
   CLOSED: {
     label: '已关闭',
     icon: 'XCircle',
-    color: 'text-red-500',
-    bgColor: 'bg-red-50',
+    color: 'text-error-500',
+    bgColor: 'bg-error-50',
     description: '无法达成协议'
   }
 }
@@ -354,16 +354,16 @@ export function getPeerDisplayName(peer: Pick<PeerGroup, 'peerNickName' | 'peerU
 
 /** 获取头像颜色（基于名称哈希） */
 export function getAvatarColor(name?: string): string {
-  if (!name) return 'bg-gray-400'
+  if (!name) return 'bg-neutral-400'
   const colors = [
     'bg-brand-500',
     'bg-autumn-500',
-    'bg-blue-500',
-    'bg-purple-500',
-    'bg-pink-500',
-    'bg-orange-500',
-    'bg-teal-500',
-    'bg-indigo-500'
+    'bg-action-500',
+    'bg-action-700',
+    'bg-accent-400',
+    'bg-accent-600',
+    'bg-brand-700',
+    'bg-warning-500'
   ]
   let hash = 0
   for (let i = 0; i < name.length; i++) {

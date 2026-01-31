@@ -86,8 +86,8 @@ onMounted(refresh)
     <!-- 页面标题 -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">消息通知</h1>
-        <p class="text-sm text-gray-500 mt-1">点赞、评论、系统消息汇总</p>
+        <h1 class="text-2xl font-bold text-neutral-900">消息通知</h1>
+        <p class="text-sm text-neutral-500 mt-1">点赞、评论、系统消息汇总</p>
       </div>
       <div class="flex items-center gap-3">
         <!-- 未读数量标签 -->
@@ -95,8 +95,8 @@ onMounted(refresh)
           :class="[
             'px-3 py-1.5 text-xs font-bold rounded-full border',
             unreadCount > 0 
-              ? 'bg-red-50 text-red-600 border-red-100' 
-              : 'bg-gray-50 text-gray-500 border-gray-100'
+              ? 'bg-error-50 text-error-600 border-error-100'
+              : 'bg-neutral-50 text-neutral-500 border-neutral-100'
           ]"
         >
           {{ unreadCount > 0 ? `${unreadCount} 条未读` : '全部已读' }}
@@ -121,7 +121,7 @@ onMounted(refresh)
     </div>
 
     <!-- 通知列表 -->
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
       <!-- 加载状态 -->
       <div v-if="loading && list.length === 0" class="p-6 space-y-4">
         <Skeleton type="card" />
@@ -139,13 +139,13 @@ onMounted(refresh)
       />
       
       <!-- 通知卡片列表 -->
-      <div v-else class="divide-y divide-gray-50">
+      <div v-else class="divide-y divide-neutral-50">
         <div 
           v-for="(notify, index) in list" 
           :key="notify.id"
           :class="[
             'p-5 transition-all cursor-pointer animate-stagger-in',
-            notify.read ? 'bg-white hover:bg-gray-50' : 'bg-brand-50/30 hover:bg-brand-50/50'
+            notify.read ? 'bg-white hover:bg-neutral-50' : 'bg-brand-50/30 hover:bg-brand-50/50'
           ]"
           :style="{ animationDelay: `${index * 30}ms` }"
           @click="onRead(notify)"
@@ -167,7 +167,7 @@ onMounted(refresh)
             <!-- 内容 -->
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
-                <h3 :class="['text-2xl font-bold', notify.read ? 'text-gray-700' : 'text-gray-900']">
+                <h3 :class="['text-2xl font-bold', notify.read ? 'text-neutral-700' : 'text-neutral-900']">
                   {{ notify.title || getNotifyTypeInfo(notify.type).label }}
                 </h3>
                 <span 
@@ -179,14 +179,14 @@ onMounted(refresh)
                   {{ getNotifyTypeInfo(notify.type).label }}
                 </span>
                 <!-- 未读标记 -->
-                <span v-if="!notify.read" class="w-2 h-2 rounded-full bg-red-500"></span>
+                <span v-if="!notify.read" class="w-2 h-2 rounded-full bg-error-500"></span>
               </div>
               
-              <p :class="['text-sm line-clamp-2', notify.read ? 'text-gray-500' : 'text-gray-600']">
+              <p :class="['text-sm line-clamp-2', notify.read ? 'text-neutral-500' : 'text-neutral-600']">
                 {{ notify.content || '无详细内容' }}
               </p>
               
-              <div class="flex items-center gap-2 mt-2 text-xs text-gray-400">
+              <div class="flex items-center gap-2 mt-2 text-xs text-neutral-400">
                 <Clock class="w-3 h-3" />
                 <span>{{ formatTime(notify.createTime) }}</span>
                 <span v-if="notify.read" class="flex items-center gap-1 text-brand-500">
@@ -224,17 +224,17 @@ onMounted(refresh)
 
 <style scoped>
 /* 动态颜色类 */
-.bg-pink-50 { background-color: rgb(253 242 248); }
-.bg-blue-50 { background-color: rgb(239 246 255); }
-.bg-amber-50 { background-color: rgb(255 251 235); }
+.bg-accent-50 { background-color: rgb(253 242 248); }
+.bg-action-50 { background-color: rgb(239 246 255); }
+.bg-warning-50 { background-color: rgb(255 251 235); }
 .bg-brand-50 { background-color: rgb(236 253 245); }
-.bg-gray-50 { background-color: rgb(249 250 251); }
+.bg-neutral-50 { background-color: rgb(249 250 251); }
 
-.text-pink-600 { color: rgb(219 39 119); }
-.text-blue-600 { color: rgb(37 99 235); }
-.text-amber-600 { color: rgb(217 119 6); }
+.text-accent-600 { color: rgb(219 39 119); }
+.text-action-600 { color: rgb(37 99 235); }
+.text-warning-600 { color: rgb(217 119 6); }
 .text-brand-600 { color: rgb(5 150 105); }
-.text-gray-600 { color: rgb(75 85 99); }
+.text-neutral-600 { color: rgb(75 85 99); }
 
 .line-clamp-2 {
   display: -webkit-box;

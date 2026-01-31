@@ -435,7 +435,7 @@ function parseParams(paramsJson?: string): string {
 </script>
 
 <template>
-  <div class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="bg-neutral-50 text-neutral-900 min-h-screen">
 
     <!-- 公司筛选提示 -->
     <div v-if="companyIdFilter" class="bg-autumn-50 border-b border-autumn-100">
@@ -461,7 +461,7 @@ function parseParams(paramsJson?: string): string {
         <div class="flex gap-3">
           <!-- 移动端侧边栏切换按钮 -->
           <button
-            class="lg:hidden flex items-center justify-center w-11 h-11 border-2 border-gray-200 rounded-xl hover:border-autumn-500 hover:text-autumn-600 transition-all"
+            class="lg:hidden flex items-center justify-center w-11 h-11 border-2 border-neutral-200 rounded-xl hover:border-autumn-500 hover:text-autumn-600 transition-all"
             @click="mobileSidebarOpen = true"
           >
             <Menu class="w-5 h-5" />
@@ -471,10 +471,10 @@ function parseParams(paramsJson?: string): string {
               v-model="searchKeyword"
               type="text"
               placeholder="搜索您想供应的品种、求购区域或指标要求..."
-              class="w-full border-2 border-gray-200 rounded-xl py-2.5 px-10 focus:border-autumn-500 outline-none transition-all"
+              class="w-full border-2 border-neutral-200 rounded-xl py-2.5 px-10 focus:border-autumn-500 outline-none transition-all"
               @keyup.enter="onSearch"
             />
-            <svg class="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <svg class="w-5 h-5 absolute left-3 top-3 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           </div>
           <button
             class="px-6 py-2.5 bg-autumn-600 text-white rounded-xl font-bold hover:bg-autumn-700 transition-all"
@@ -485,7 +485,7 @@ function parseParams(paramsJson?: string): string {
         </div>
         <!-- 当前筛选状态 -->
         <div v-if="selectedSchemaCode || selectedCategory" class="flex items-center gap-2 mt-3 text-xs">
-          <span class="text-gray-400">当前筛选:</span>
+          <span class="text-neutral-400">当前筛选:</span>
           <span v-if="selectedSchemaCode" class="px-2 py-0.5 bg-autumn-50 text-autumn-700 rounded-full">
             {{ schemaTree.find(s => s.schemaCode === selectedSchemaCode)?.schemaName }}
           </span>
@@ -493,7 +493,7 @@ function parseParams(paramsJson?: string): string {
             {{ selectedCategory }}
           </span>
           <button
-            class="text-gray-400 hover:text-autumn-600 ml-1"
+            class="text-neutral-400 hover:text-autumn-600 ml-1"
             @click="selectedSchemaCode = null; selectedCategory = null; loadRequirements()"
           >
             清除
@@ -505,7 +505,7 @@ function parseParams(paramsJson?: string): string {
     <!-- 主体布局：侧边栏 + 列表 -->
     <div class="max-w-7xl mx-auto flex">
       <!-- 左侧边栏（桌面端） -->
-      <aside class="hidden lg:block w-64 shrink-0 border-r border-gray-100 bg-white sticky top-0 h-[calc(100vh-120px)] overflow-hidden">
+      <aside class="hidden lg:block w-64 shrink-0 border-r border-neutral-100 bg-white sticky top-0 h-[calc(100vh-120px)] overflow-hidden">
         <CategorySidebar
           :schema-tree="schemaTree"
           v-model:selected-schema-code="selectedSchemaCode"
@@ -530,10 +530,10 @@ function parseParams(paramsJson?: string): string {
             v-if="mobileSidebarOpen"
             class="fixed left-0 top-0 bottom-0 w-72 bg-white z-50 lg:hidden shadow-2xl"
           >
-            <div class="flex items-center justify-between p-4 border-b border-gray-100">
-              <span class="font-bold text-gray-900">筛选条件</span>
+            <div class="flex items-center justify-between p-4 border-b border-neutral-100">
+              <span class="font-bold text-neutral-900">筛选条件</span>
               <button
-                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100"
+                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-100"
                 @click="mobileSidebarOpen = false"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -554,7 +554,7 @@ function parseParams(paramsJson?: string): string {
       <!-- 右侧列表区 -->
       <main class="flex-1 px-4 py-6 min-w-0">
       <div class="space-y-4">
-        <div v-if="listLoading" class="bg-white rounded-xl border border-gray-200 p-8 text-gray-400 text-sm">
+        <div v-if="listLoading" class="bg-white rounded-xl border border-neutral-200 p-8 text-neutral-400 text-sm">
           正在加载需求...
         </div>
 
@@ -563,22 +563,22 @@ function parseParams(paramsJson?: string): string {
           v-for="r in displayRequirements"
           :key="r.id"
           :ref="(el) => setCardEl(Number(r.id), el as any)"
-          class="bg-white rounded-xl border border-gray-200 overflow-hidden transition-all hover:shadow-md hover:border-autumn-200"
+          class="bg-white rounded-xl border border-neutral-200 overflow-hidden transition-all hover:shadow-md hover:border-autumn-200"
           :class="{ 'ring-2 ring-autumn-500 shadow-lg': focusedId === r.id }"
         >
           <!-- 头部：公司信息 + 操作 -->
-          <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+          <div class="flex items-center gap-3 px-4 py-3 border-b border-neutral-100 bg-neutral-50/50">
             <div class="w-9 h-9 rounded-lg bg-autumn-100 flex items-center justify-center text-autumn-600 shrink-0">
               <span class="text-sm font-bold">{{ (r.companyName || r.nickName || '采')[0] }}</span>
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2">
                 <span
-                  class="font-bold text-gray-900 truncate hover:text-autumn-600 cursor-pointer transition-colors"
+                  class="font-bold text-neutral-900 truncate hover:text-autumn-600 cursor-pointer transition-colors"
                   @click.stop="go(`/companies/${r.companyId}`)"
                 >{{ r.companyName || '未填写公司' }}</span>
-                <span class="text-gray-300">·</span>
-                <span class="text-xs text-gray-500 truncate">
+                <span class="text-neutral-300">·</span>
+                <span class="text-xs text-neutral-500 truncate">
                   <template v-if="r.position">{{ r.position }} · </template>{{ r.nickName || r.userName || '' }}
                 </span>
               </div>
@@ -589,7 +589,7 @@ function parseParams(paramsJson?: string): string {
               class="shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all active:scale-95"
               :class="isFollowingUser(r.userId)
                 ? 'bg-autumn-50 text-autumn-600 border-autumn-200'
-                : 'bg-white text-gray-500 border-gray-200 hover:border-autumn-300 hover:text-autumn-600'"
+                : 'bg-white text-neutral-500 border-neutral-200 hover:border-autumn-300 hover:text-autumn-600'"
               @click.stop="toggleFollow(r)"
             >
               {{ isFollowingUser(r.userId) ? '已关注' : '+ 关注' }}
@@ -628,9 +628,9 @@ function parseParams(paramsJson?: string): string {
           </div>
         </div>
 
-        <div v-if="!listLoading && requirements.length === 0" class="bg-white rounded-xl border border-gray-200 p-8 text-center">
-          <div class="text-gray-400 text-sm mb-2">暂无采购需求</div>
-          <div class="text-xs text-gray-300">
+        <div v-if="!listLoading && requirements.length === 0" class="bg-white rounded-xl border border-neutral-200 p-8 text-center">
+          <div class="text-neutral-400 text-sm mb-2">暂无采购需求</div>
+          <div class="text-xs text-neutral-300">
             {{ selectedCategory ? `没有找到「${selectedCategory}」相关的采购需求` : '请尝试调整筛选条件' }}
           </div>
         </div>
@@ -649,7 +649,7 @@ function parseParams(paramsJson?: string): string {
       </div>
       
       <!-- 数据统计 -->
-      <div v-if="total > 0" class="text-center mt-4 text-xs text-gray-400">
+      <div v-if="total > 0" class="text-center mt-4 text-xs text-neutral-400">
         共 {{ total }} 条采购需求
         <span v-if="selectedCategory" class="ml-2">· 当前筛选：{{ selectedCategory }}</span>
       </div>

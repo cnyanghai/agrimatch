@@ -417,7 +417,7 @@ watch(() => route.params.id, (newId, oldId) => {
 </script>
 
 <template>
-  <div class="bg-gray-50 min-h-screen flex flex-col">
+  <div class="bg-neutral-50 min-h-screen flex flex-col">
     <!-- Loading State -->
     <div v-if="loading" class="w-full px-4 md:px-10 py-12">
       <CompanySkeleton type="profile" />
@@ -430,7 +430,7 @@ watch(() => route.params.id, (newId, oldId) => {
         <div class="w-full px-4 md:px-10">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div class="flex flex-col gap-3">
-              <h1 class="text-2xl font-bold text-gray-900">{{ company.companyName }}</h1>
+              <h1 class="text-2xl font-bold text-neutral-900">{{ company.companyName }}</h1>
               <div class="flex items-center gap-6 text-slate-500 text-sm flex-wrap">
                 <div v-if="company.establishDate || company.createTime" class="flex items-center gap-1">
                   <Calendar class="w-4 h-4" />
@@ -484,7 +484,7 @@ watch(() => route.params.id, (newId, oldId) => {
           <aside class="space-y-6">
             <!-- 企业介绍 -->
             <section class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm">
-              <h3 class="text-2xl font-bold text-gray-900 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+              <h3 class="text-2xl font-bold text-neutral-900 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
                 <Info class="w-5 h-5 text-brand-700" />
                 企业介绍
               </h3>
@@ -513,7 +513,7 @@ watch(() => route.params.id, (newId, oldId) => {
 
             <!-- 人才招聘 -->
             <section v-if="recruitments.length > 0" class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm">
-              <h3 class="text-2xl font-bold text-gray-900 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+              <h3 class="text-2xl font-bold text-neutral-900 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
                 <Briefcase class="w-5 h-5 text-brand-700" />
                 人才招聘
               </h3>
@@ -541,7 +541,7 @@ watch(() => route.params.id, (newId, oldId) => {
 
             <!-- 资质证书 -->
             <section v-if="certificates.length > 0" class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm">
-              <h3 class="text-2xl font-bold text-gray-900 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+              <h3 class="text-2xl font-bold text-neutral-900 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
                 <Award class="w-5 h-5 text-brand-700" />
                 资质证书
               </h3>
@@ -567,7 +567,7 @@ watch(() => route.params.id, (newId, oldId) => {
             <!-- 产品名录 -->
             <section class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
               <div class="p-5 border-b border-slate-200 flex justify-between items-center">
-                <h3 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <h3 class="text-2xl font-bold text-neutral-900 flex items-center gap-2">
                   <FileText class="w-5 h-5 text-brand-700" />
                   产品名录 ({{ supplies.length }})
                 </h3>
@@ -589,7 +589,7 @@ watch(() => route.params.id, (newId, oldId) => {
                 <div
                   v-for="supply in filteredSupplies"
                   :key="supply.id"
-                  class="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md hover:border-brand-200 transition-all duration-200"
+                  class="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-brand-200 transition-all duration-200"
                 >
                   <ProductInfoRow
                     :data="{
@@ -612,14 +612,14 @@ watch(() => route.params.id, (newId, oldId) => {
                         <div
                           v-for="bq in (supply.basisQuotes || []).slice(0, 3)"
                           :key="bq.id"
-                          class="inline-flex items-center gap-1.5 px-2 py-1 bg-amber-50 border border-amber-200 rounded-lg text-xs"
+                          class="inline-flex items-center gap-1.5 px-2 py-1 bg-warning-50 border border-warning-200 rounded-lg text-xs"
                         >
-                          <span class="font-bold text-gray-700">{{ bq.contractName || bq.contractCode }}</span>
+                          <span class="font-bold text-neutral-700">{{ bq.contractName || bq.contractCode }}</span>
                           <span :class="bq.basisPrice >= 0 ? 'text-red-500' : 'text-green-500'" class="font-bold">
                             {{ bq.basisPrice >= 0 ? '+' : '' }}{{ bq.basisPrice }}
                           </span>
-                          <span class="text-gray-400">·</span>
-                          <span class="font-medium text-gray-600">{{ bq.remainingQty ?? bq.availableQty }}吨</span>
+                          <span class="text-neutral-400">·</span>
+                          <span class="font-medium text-neutral-600">{{ bq.remainingQty ?? bq.availableQty }}吨</span>
                         </div>
                       </div>
                     </template>
@@ -638,13 +638,13 @@ watch(() => route.params.id, (newId, oldId) => {
 
               <!-- 空状态 -->
               <div v-else class="p-12 text-center">
-                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FileText class="w-8 h-8 text-gray-300" />
+                <div class="w-16 h-16 bg-neutral-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText class="w-8 h-8 text-neutral-300" />
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-1">
+                <h3 class="text-2xl font-bold text-neutral-900 mb-1">
                   {{ searchKeyword ? '未找到匹配的产品' : '暂无在售货源' }}
                 </h3>
-                <p class="text-xs text-gray-500">
+                <p class="text-xs text-neutral-500">
                   {{ searchKeyword ? '请尝试其他搜索词' : '该企业暂时没有在售的货源信息' }}
                 </p>
               </div>
@@ -662,7 +662,7 @@ watch(() => route.params.id, (newId, oldId) => {
           <aside class="space-y-6">
             <!-- 资信仪表盘 -->
             <section class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm">
-              <h3 class="text-2xl font-bold text-gray-900 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+              <h3 class="text-2xl font-bold text-neutral-900 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
                 <BarChart3 class="w-5 h-5 text-brand-700" />
                 资信仪表盘
               </h3>
@@ -731,7 +731,7 @@ watch(() => route.params.id, (newId, oldId) => {
 
             <!-- 厂区位置 -->
             <section class="bg-white rounded-lg border border-slate-200 p-5 shadow-sm overflow-hidden">
-              <h3 class="text-2xl font-bold text-gray-900 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
+              <h3 class="text-2xl font-bold text-neutral-900 border-b border-slate-100 pb-3 mb-4 flex items-center gap-2">
                 <MapPin class="w-5 h-5 text-brand-700" />
                 厂区位置
               </h3>
@@ -755,8 +755,8 @@ watch(() => route.params.id, (newId, oldId) => {
 
     <!-- Error State -->
     <div v-else-if="error" class="flex-1 max-w-7xl mx-auto px-4 py-20 text-center">
-      <h3 class="text-2xl font-bold text-gray-900 mb-2">加载失败</h3>
-      <p class="text-sm text-gray-500">{{ error }}</p>
+      <h3 class="text-2xl font-bold text-neutral-900 mb-2">加载失败</h3>
+      <p class="text-sm text-neutral-500">{{ error }}</p>
     </div>
 
     <!-- 项目底部组件 -->

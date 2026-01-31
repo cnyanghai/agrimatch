@@ -70,15 +70,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-gray-50 min-h-screen">
+  <div class="bg-neutral-50 min-h-screen">
     <header class="bg-white border-b sticky top-0 z-30 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <button @click="router.back()" class="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors">
+        <button @click="router.back()" class="flex items-center gap-2 text-neutral-500 hover:text-neutral-900 transition-colors">
           <ArrowLeft :size="20" />
           <span class="font-bold">返回</span>
         </button>
-        <h1 class="text-lg font-black text-gray-900 flex items-center gap-2">
-          <Star :size="20" class="text-amber-500" fill="currentColor" />
+        <h1 class="text-lg font-black text-neutral-900 flex items-center gap-2">
+          <Star :size="20" class="text-warning-500" fill="currentColor" />
           我的收藏
         </h1>
         <div class="w-20"></div> <!-- Spacer -->
@@ -92,7 +92,7 @@ onMounted(() => {
           :key="post.id"
           padding="none"
           radius="2xl"
-          class="group transition-all hover:shadow-xl hover:shadow-brand-900/5 cursor-pointer border-none ring-1 ring-gray-100"
+          class="group transition-all hover:shadow-xl hover:shadow-brand-900/5 cursor-pointer border-none ring-1 ring-neutral-100"
           @click="go(`/talks/${post.id}`)"
         >
           <div class="p-6">
@@ -105,10 +105,10 @@ onMounted(() => {
                 </div>
                 <div>
                   <div class="flex items-center gap-2">
-                    <span class="text-sm font-bold text-gray-900 hover:text-brand-600 transition-colors">{{ post.nickName || post.userName }}</span>
+                    <span class="text-sm font-bold text-neutral-900 hover:text-brand-600 transition-colors">{{ post.nickName || post.userName }}</span>
                     <ExpertBadge v-if="post.isExpert" />
                   </div>
-                  <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{{ formatTime(post.createTime) }}</p>
+                  <p class="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">{{ formatTime(post.createTime) }}</p>
                 </div>
               </div>
               <div class="flex items-center gap-2">
@@ -119,25 +119,25 @@ onMounted(() => {
 
             <div class="flex gap-8">
               <div class="flex-1">
-                <h4 class="text-xl font-black text-gray-900 mb-2 group-hover:text-brand-600 transition-colors line-clamp-2">
+                <h4 class="text-xl font-black text-neutral-900 mb-2 group-hover:text-brand-600 transition-colors line-clamp-2">
                   {{ post.title }}
                 </h4>
-                <p class="text-sm text-gray-500 leading-relaxed line-clamp-2 mb-4">
+                <p class="text-sm text-neutral-500 leading-relaxed line-clamp-2 mb-4">
                   {{ stripHtml(post.content) }}
                 </p>
               </div>
-              <div class="w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-gray-100">
+              <div class="w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-neutral-100">
                 <img :src="getPostCover(post)" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
               </div>
             </div>
 
-            <div class="flex items-center justify-between mt-2 pt-4 border-t border-gray-50">
+            <div class="flex items-center justify-between mt-2 pt-4 border-t border-neutral-50">
               <div class="flex items-center gap-6">
-                <div class="flex items-center gap-1.5 text-gray-400 text-xs font-bold">
+                <div class="flex items-center gap-1.5 text-neutral-400 text-xs font-bold">
                   <Heart :size="16" :fill="post.likedByMe ? 'currentColor' : 'none'" :class="{'text-red-500': post.likedByMe}" />
                   {{ post.likeCount || 0 }} 赞同
                 </div>
-                <div class="flex items-center gap-1.5 text-gray-400 text-xs font-bold">
+                <div class="flex items-center gap-1.5 text-neutral-400 text-xs font-bold">
                   <MessageSquare :size="16" />
                   {{ post.commentCount || 0 }} 评论
                 </div>
@@ -154,11 +154,11 @@ onMounted(() => {
 
         <!-- 空状态 -->
         <div v-if="!loading && posts.length === 0" class="py-24 text-center">
-          <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
+          <div class="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-6 text-neutral-300">
             <Star :size="40" />
           </div>
-          <h3 class="text-lg font-bold text-gray-900 mb-2">暂无收藏</h3>
-          <p class="text-sm text-gray-500 mb-8">看到感兴趣的内容，点击收藏方便以后查阅</p>
+          <h3 class="text-lg font-bold text-neutral-900 mb-2">暂无收藏</h3>
+          <p class="text-sm text-neutral-500 mb-8">看到感兴趣的内容，点击收藏方便以后查阅</p>
           <button class="bg-brand-600 text-white px-8 py-2.5 rounded-xl font-bold transition-all active:scale-95" @click="go('/talks')">
             去广场逛逛
           </button>

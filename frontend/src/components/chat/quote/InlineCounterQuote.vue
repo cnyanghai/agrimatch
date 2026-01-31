@@ -51,7 +51,7 @@ watch(() => props.originalQuantity, (val) => {
 const quickPercentages = [
   { label: '-5%', value: -0.05, color: 'text-red-600 bg-red-50 hover:bg-red-100' },
   { label: '-3%', value: -0.03, color: 'text-red-500 bg-red-50 hover:bg-red-100' },
-  { label: '-1%', value: -0.01, color: 'text-orange-500 bg-orange-50 hover:bg-orange-100' },
+  { label: '-1%', value: -0.01, color: 'text-accent-500 bg-accent-50 hover:bg-accent-100' },
   { label: '+1%', value: 0.01, color: 'text-brand-500 bg-brand-50 hover:bg-brand-100' },
   { label: '+3%', value: 0.03, color: 'text-brand-600 bg-brand-50 hover:bg-brand-100' },
   { label: '+5%', value: 0.05, color: 'text-brand-700 bg-brand-50 hover:bg-brand-100' }
@@ -134,24 +134,24 @@ function resetToOriginal() {
 </script>
 
 <template>
-  <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+  <div class="bg-neutral-50 rounded-xl border border-neutral-200 overflow-hidden">
     <!-- 头部 -->
-    <div class="px-4 py-3 bg-white border-b border-gray-100 flex items-center justify-between">
+    <div class="px-4 py-3 bg-white border-b border-neutral-100 flex items-center justify-between">
       <div class="flex items-center gap-2">
         <Percent class="w-4 h-4 text-brand-600" />
-        <span class="text-sm font-bold text-gray-900">快速还价</span>
+        <span class="text-sm font-bold text-neutral-900">快速还价</span>
       </div>
       <button
         @click="emit('cancel')"
-        class="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+        class="p-1 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-neutral-600 transition-colors"
       >
         <X class="w-4 h-4" />
       </button>
     </div>
 
     <!-- 快捷百分比按钮 -->
-    <div class="px-4 py-3 border-b border-gray-100">
-      <div class="text-[10px] font-medium text-gray-500 uppercase tracking-wider mb-2">快捷调整</div>
+    <div class="px-4 py-3 border-b border-neutral-100">
+      <div class="text-[10px] font-medium text-neutral-500 uppercase tracking-wider mb-2">快捷调整</div>
       <div class="flex flex-wrap gap-2">
         <button
           v-for="pct in quickPercentages"
@@ -166,7 +166,7 @@ function resetToOriginal() {
         </button>
         <button
           @click="resetToOriginal"
-          class="px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
+          class="px-3 py-1.5 text-xs font-medium text-neutral-500 bg-neutral-100 rounded-lg hover:bg-neutral-200 transition-all"
         >
           重置
         </button>
@@ -177,7 +177,7 @@ function resetToOriginal() {
     <div class="px-4 py-3 space-y-3">
       <!-- 价格/基差输入 -->
       <div>
-        <label class="text-[10px] font-medium text-gray-500 uppercase tracking-wider">
+        <label class="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">
           {{ isBasis ? '基差价格' : '单价 (元/吨)' }}
         </label>
         <div class="mt-1 flex items-center gap-2">
@@ -185,7 +185,7 @@ function resetToOriginal() {
             v-if="isBasis"
             v-model.number="adjustedBasisPrice"
             type="number"
-            class="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none"
+            class="flex-1 px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none"
             :placeholder="String(originalBasisPrice || 0)"
           />
           <input
@@ -193,7 +193,7 @@ function resetToOriginal() {
             v-model.number="adjustedPrice"
             type="number"
             step="0.01"
-            class="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none"
+            class="flex-1 px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none"
             :placeholder="String(originalPrice || 0)"
           />
           <!-- 变化指示 -->
@@ -213,32 +213,32 @@ function resetToOriginal() {
 
       <!-- 数量输入 -->
       <div>
-        <label class="text-[10px] font-medium text-gray-500 uppercase tracking-wider">数量</label>
+        <label class="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">数量</label>
         <input
           v-model="adjustedQuantity"
           type="text"
-          class="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none"
+          class="mt-1 w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none"
           :placeholder="originalQuantity || '输入数量'"
         />
       </div>
 
       <!-- 备注输入 -->
       <div>
-        <label class="text-[10px] font-medium text-gray-500 uppercase tracking-wider">备注（可选）</label>
+        <label class="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">备注（可选）</label>
         <textarea
           v-model="remark"
           rows="2"
-          class="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none resize-none"
+          class="mt-1 w-full px-3 py-2 text-sm border border-neutral-200 rounded-lg focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none resize-none"
           placeholder="添加备注说明..."
         />
       </div>
     </div>
 
     <!-- 底部操作 -->
-    <div class="px-4 py-3 bg-white border-t border-gray-100 flex items-center justify-end gap-2">
+    <div class="px-4 py-3 bg-white border-t border-neutral-100 flex items-center justify-end gap-2">
       <button
         @click="emit('cancel')"
-        class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+        class="px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
       >
         取消
       </button>

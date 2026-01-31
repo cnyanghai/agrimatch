@@ -73,25 +73,25 @@ const currentSizeClasses = sizeClasses[props.size] ?? sizeClasses['md']!
     <!-- 图标 -->
     <div 
       :class="[
-        'mx-auto mb-4 rounded-xl bg-gray-50 flex items-center justify-center',
+        'mx-auto mb-4 rounded-xl bg-neutral-50 flex items-center justify-center',
         currentSizeClasses.icon
       ]"
     >
       <slot name="icon">
         <component 
           :is="iconMap[type]" 
-          class="w-1/2 h-1/2 text-gray-300"
+          class="w-1/2 h-1/2 text-neutral-300"
         />
       </slot>
     </div>
     
     <!-- 标题 -->
-    <h3 :class="['font-bold text-gray-900 mb-2', currentSizeClasses.title]">
+    <h3 :class="['font-bold text-neutral-900 mb-2', currentSizeClasses.title]">
       {{ title || defaultContent[type]?.title || '暂无数据' }}
     </h3>
     
     <!-- 描述 -->
-    <p :class="['text-gray-500 mb-6', currentSizeClasses.desc]">
+    <p :class="['text-neutral-500 mb-6', currentSizeClasses.desc]">
       {{ description || defaultContent[type]?.description || '数据为空' }}
     </p>
     

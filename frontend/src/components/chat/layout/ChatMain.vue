@@ -101,31 +101,31 @@ defineExpose({
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-gray-50">
+  <div class="h-full flex flex-col bg-neutral-50">
     <!-- 顶部栏 -->
-    <div class="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 shrink-0">
+    <div class="bg-white border-b border-neutral-200 px-4 py-3 flex items-center gap-3 shrink-0">
       <!-- 返回按钮（移动端） -->
       <button
         v-if="showBackButton"
         @click="emit('back')"
-        class="p-2 -ml-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden"
+        class="p-2 -ml-2 rounded-lg hover:bg-neutral-100 transition-colors lg:hidden"
       >
-        <ArrowLeft class="w-5 h-5 text-gray-600" />
+        <ArrowLeft class="w-5 h-5 text-neutral-600" />
       </button>
 
       <!-- 对方信息 -->
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2">
-          <span class="font-bold text-gray-900 truncate">{{ peerDisplayName || '选择会话' }}</span>
+          <span class="font-bold text-neutral-900 truncate">{{ peerDisplayName || '选择会话' }}</span>
           <button
             v-if="conversation"
             @click="emit('toggle-follow')"
-            class="p-1 rounded hover:bg-gray-100 transition-colors"
+            class="p-1 rounded hover:bg-neutral-100 transition-colors"
           >
             <component
               :is="isFollowing ? StarFilled : Star"
               class="w-4 h-4"
-              :class="isFollowing ? 'text-amber-500' : 'text-gray-400'"
+              :class="isFollowing ? 'text-warning-500' : 'text-neutral-400'"
             />
           </button>
         </div>
@@ -133,10 +133,10 @@ defineExpose({
           <div
             :class="[
               'w-2 h-2 rounded-full',
-              wsConnected ? 'bg-brand-500' : 'bg-gray-300'
+              wsConnected ? 'bg-brand-500' : 'bg-neutral-300'
             ]"
           ></div>
-          <span class="text-xs text-gray-500">
+          <span class="text-xs text-neutral-500">
             {{ wsConnected ? '已连接' : '连接中...' }}
           </span>
         </div>
@@ -147,7 +147,7 @@ defineExpose({
         <button
           v-if="quoteCount && quoteCount > 0"
           @click="emit('open-quote-timeline')"
-          class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all flex items-center gap-1"
+          class="px-3 py-1.5 text-xs font-medium text-neutral-600 bg-neutral-100 rounded-lg hover:bg-neutral-200 transition-all flex items-center gap-1"
         >
           <span>报价历史</span>
           <span class="px-1.5 py-0.5 text-[10px] font-bold bg-brand-100 text-brand-600 rounded-full">
@@ -156,7 +156,7 @@ defineExpose({
         </button>
         <button
           @click="emit('open-subject-detail')"
-          class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all"
+          class="px-3 py-1.5 text-xs font-medium text-neutral-600 bg-neutral-100 rounded-lg hover:bg-neutral-200 transition-all"
         >
           查看标的
         </button>
@@ -171,20 +171,20 @@ defineExpose({
     </div>
 
     <!-- 交易进度条 -->
-    <div v-if="transactionStep && transactionStep > 0" class="bg-white border-b border-gray-100 px-4 py-2">
+    <div v-if="transactionStep && transactionStep > 0" class="bg-white border-b border-neutral-100 px-4 py-2">
       <div class="flex items-center gap-2">
-        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">交易进度</span>
+        <span class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">交易进度</span>
         <div class="flex-1 flex items-center gap-1">
           <template v-for="i in 5" :key="i">
             <div
               :class="[
                 'h-1 flex-1 rounded-full transition-all',
-                i <= transactionStep ? 'bg-brand-500' : 'bg-gray-200'
+                i <= transactionStep ? 'bg-brand-500' : 'bg-neutral-200'
               ]"
             ></div>
           </template>
         </div>
-        <span class="text-xs text-gray-500">{{ transactionStep }}/5</span>
+        <span class="text-xs text-neutral-500">{{ transactionStep }}/5</span>
       </div>
     </div>
 
@@ -200,13 +200,13 @@ defineExpose({
 
       <!-- 空状态 -->
       <div v-else-if="!conversation" class="flex flex-col items-center justify-center h-full text-center">
-        <div class="w-20 h-20 rounded-3xl bg-gray-100 flex items-center justify-center mb-4">
-          <svg class="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="w-20 h-20 rounded-3xl bg-neutral-100 flex items-center justify-center mb-4">
+          <svg class="w-10 h-10 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         </div>
-        <p class="text-lg font-medium text-gray-600 mb-1">选择一个会话开始聊天</p>
-        <p class="text-sm text-gray-400">从左侧列表选择联系人</p>
+        <p class="text-lg font-medium text-neutral-600 mb-1">选择一个会话开始聊天</p>
+        <p class="text-sm text-neutral-400">从左侧列表选择联系人</p>
       </div>
 
       <!-- 消息列表 -->
@@ -232,26 +232,26 @@ defineExpose({
     </div>
 
     <!-- 输入区域 -->
-    <div v-if="conversation" class="bg-white border-t border-gray-200 p-4 shrink-0">
+    <div v-if="conversation" class="bg-white border-t border-neutral-200 p-4 shrink-0">
       <!-- 工具栏 -->
       <div class="flex items-center gap-2 mb-3">
         <button
           @click="emit('send-image')"
-          class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-all"
+          class="p-2 rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 transition-all"
           title="发送图片"
         >
           <Picture class="w-5 h-5" />
         </button>
         <button
           @click="emit('send-attachment')"
-          class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-all"
+          class="p-2 rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 transition-all"
           title="发送附件"
         >
           <Document class="w-5 h-5" />
         </button>
         <button
           @click="emit('send-gift')"
-          class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-all"
+          class="p-2 rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700 transition-all"
           title="赠送积分"
         >
           <Position class="w-5 h-5" />
@@ -274,7 +274,7 @@ defineExpose({
           @keydown="handleKeydown"
           rows="1"
           placeholder="输入消息..."
-          class="flex-1 px-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl resize-none focus:bg-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-all"
+          class="flex-1 px-4 py-2.5 text-sm bg-neutral-50 border border-neutral-200 rounded-xl resize-none focus:bg-white focus:border-brand-500 focus:ring-1 focus:ring-brand-500/20 outline-none transition-all"
           style="min-height: 42px; max-height: 120px;"
         ></textarea>
         <button

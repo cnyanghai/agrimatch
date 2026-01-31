@@ -335,21 +335,21 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-gray-50 text-gray-900 min-h-screen">
+  <div class="bg-neutral-50 text-neutral-900 min-h-screen">
     <header class="bg-white border-b sticky top-0 z-30 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <button @click="router.back()" class="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors">
+        <button @click="router.back()" class="flex items-center gap-2 text-neutral-500 hover:text-neutral-900 transition-colors">
           <ArrowLeft :size="20" />
           <span class="font-bold">返回</span>
         </button>
-        <h1 class="text-lg font-black text-gray-900">话题详情</h1>
+        <h1 class="text-lg font-black text-neutral-900">话题详情</h1>
         <div class="w-20"></div> <!-- Spacer for centering -->
       </div>
     </header>
 
     <main class="max-w-4xl mx-auto px-4 py-8" v-loading="loading">
       <!-- 话题内容 -->
-      <div v-if="post" class="bg-white rounded-[32px] p-10 border border-gray-100 shadow-sm mb-8">
+      <div v-if="post" class="bg-white rounded-[32px] p-10 border border-neutral-100 shadow-sm mb-8">
         <div class="flex items-center justify-between mb-10">
           <div class="flex items-center gap-4 cursor-pointer group/author" @click="onAuthorClick">
             <div class="w-14 h-14 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-xl font-black shadow-lg shadow-brand-600/20 group-hover/author:scale-105 transition-transform overflow-hidden">
@@ -358,10 +358,10 @@ onMounted(() => {
             </div>
             <div>
               <div class="flex items-center gap-2 mb-1">
-                <span class="font-black text-gray-900 text-lg group-hover/author:text-brand-600 transition-colors">{{ post.nickName || post.userName || '匿名用户' }}</span>
+                <span class="font-black text-neutral-900 text-lg group-hover/author:text-brand-600 transition-colors">{{ post.nickName || post.userName || '匿名用户' }}</span>
                 <ExpertBadge v-if="post.isExpert" />
               </div>
-              <div class="text-xs text-gray-400 font-bold uppercase tracking-wider">{{ formatTime(post.createTime) }} · {{ post.companyName || '个人作者' }}</div>
+              <div class="text-xs text-neutral-400 font-bold uppercase tracking-wider">{{ formatTime(post.createTime) }} · {{ post.companyName || '个人作者' }}</div>
             </div>
           </div>
           <div class="flex items-center gap-3">
@@ -370,14 +370,14 @@ onMounted(() => {
             <!-- 作者操作按钮 -->
             <div v-if="post.userId === auth.me?.userId" class="flex items-center gap-2">
               <button
-                class="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-200 text-gray-600 text-xs font-black hover:bg-gray-50 hover:border-brand-200 hover:text-brand-600 transition-all active:scale-95"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-neutral-200 text-neutral-600 text-xs font-black hover:bg-neutral-50 hover:border-brand-200 hover:text-brand-600 transition-all active:scale-95"
                 @click="onEditPost"
               >
                 <Edit3 :size="14" />
                 编辑
               </button>
               <button
-                class="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-red-100 text-red-500 text-xs font-black hover:bg-red-50 transition-all active:scale-95"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-error-100 text-error-500 text-xs font-black hover:bg-error-50 transition-all active:scale-95"
                 @click="onDeletePost"
               >
                 <Trash2 :size="14" />
@@ -389,7 +389,7 @@ onMounted(() => {
               v-else
               class="px-6 py-2 rounded-lg border text-xs font-black transition-all active:scale-95 disabled:opacity-50"
               :class="isFollowing
-                ? 'bg-gray-100 border-gray-200 text-gray-500 hover:bg-gray-200'
+                ? 'bg-neutral-100 border-neutral-200 text-neutral-500 hover:bg-neutral-200'
                 : 'border-brand-200 text-brand-600 hover:bg-brand-50'"
               :disabled="followLoading"
               @click="onToggleFollow"
@@ -399,29 +399,29 @@ onMounted(() => {
           </div>
         </div>
 
-        <h1 class="text-3xl font-black text-gray-900 mb-8 leading-tight">{{ post.title }}</h1>
+        <h1 class="text-3xl font-black text-neutral-900 mb-8 leading-tight">{{ post.title }}</h1>
         
         <div class="prose max-w-none mb-12">
           <!-- 正文区：处理付费逻辑 -->
           <template v-if="showPaywall">
-            <div class="text-gray-700 leading-relaxed mb-8 opacity-60 italic">{{ teaserContent }}</div>
+            <div class="text-neutral-700 leading-relaxed mb-8 opacity-60 italic">{{ teaserContent }}</div>
             <PaywallOverlay :price="post.price" @purchase="onPurchase" />
           </template>
           <template v-else>
             <!-- 富文本内容渲染 -->
-            <div class="post-content text-gray-700 leading-relaxed text-lg" v-html="post.content"></div>
+            <div class="post-content text-neutral-700 leading-relaxed text-lg" v-html="post.content"></div>
           </template>
         </div>
 
         <!-- 互动操作 -->
-        <div class="flex items-center justify-between pt-8 border-t border-gray-100">
+        <div class="flex items-center justify-between pt-8 border-t border-neutral-100">
           <div class="flex items-center gap-8">
             <button
               :class="[
                 'flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-black transition-all active:scale-95',
                 post.likedByMe
                   ? 'bg-red-50 text-red-600'
-                  : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+                  : 'bg-neutral-50 text-neutral-500 hover:bg-neutral-100'
               ]"
               :disabled="liking"
               @click="onToggleLike"
@@ -430,7 +430,7 @@ onMounted(() => {
               {{ post.likeCount ?? 0 }} 赞同
             </button>
             
-            <button class="flex items-center gap-2 text-gray-400 hover:text-brand-600 transition-colors text-sm font-bold">
+            <button class="flex items-center gap-2 text-neutral-400 hover:text-brand-600 transition-colors text-sm font-bold">
               <MessageSquare :size="18" />
               {{ post.commentCount ?? 0 }} 条评论
             </button>
@@ -439,11 +439,11 @@ onMounted(() => {
           </div>
 
           <div class="flex items-center gap-4">
-            <button class="p-2 text-gray-400 hover:text-brand-600 transition-colors" title="分享" @click="handleShare">
+            <button class="p-2 text-neutral-400 hover:text-brand-600 transition-colors" title="分享" @click="handleShare">
               <Share2 :size="20" />
             </button>
             <button
-              class="flex items-center gap-2 px-6 py-2.5 bg-amber-50 text-amber-600 rounded-lg text-sm font-black hover:bg-amber-100 transition-all active:scale-95"
+              class="flex items-center gap-2 px-6 py-2.5 bg-warning-50 text-warning-600 rounded-lg text-sm font-black hover:bg-warning-100 transition-all active:scale-95"
               @click="openTipDialog"
             >
               <Gift :size="18" />
@@ -454,15 +454,15 @@ onMounted(() => {
       </div>
 
       <!-- 评论区域 -->
-      <div class="bg-white rounded-[32px] p-10 border border-gray-100 shadow-sm mb-8">
-        <h2 class="text-xl font-black text-gray-900 mb-8">互动讨论 ({{ comments.length }})</h2>
+      <div class="bg-white rounded-[32px] p-10 border border-neutral-100 shadow-sm mb-8">
+        <h2 class="text-xl font-black text-neutral-900 mb-8">互动讨论 ({{ comments.length }})</h2>
         
         <!-- 发表评论 -->
-        <div class="mb-8 pb-8 border-b border-gray-200">
+        <div class="mb-8 pb-8 border-b border-neutral-200">
           <textarea
             v-model="commentText"
             placeholder="写下你的评论..."
-            class="w-full h-24 p-4 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
+            class="w-full h-24 p-4 border border-neutral-200 rounded-lg resize-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none"
             :disabled="commenting"
           ></textarea>
           <div class="flex justify-end mt-4">
@@ -477,7 +477,7 @@ onMounted(() => {
         </div>
 
         <!-- 评论列表 -->
-        <div v-if="comments.length === 0" class="text-center py-12 text-gray-400">
+        <div v-if="comments.length === 0" class="text-center py-12 text-neutral-400">
           暂无评论，快来发表第一条评论吧！
         </div>
         
@@ -485,7 +485,7 @@ onMounted(() => {
           <div
             v-for="comment in comments"
             :key="comment.id"
-            class="flex gap-4 pb-6 border-b border-gray-50 last:border-b-0"
+            class="flex gap-4 pb-6 border-b border-neutral-50 last:border-b-0"
           >
             <div 
               class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 bg-brand-100 text-brand-600"
@@ -494,11 +494,11 @@ onMounted(() => {
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-2">
-                <span class="font-bold text-gray-900">{{ comment.nickName || comment.userName || '匿名用户' }}</span>
-                <span class="text-xs text-gray-400">{{ formatTime(comment.createTime) }}</span>
-                <span v-if="comment.companyName" class="text-xs text-gray-400">· {{ comment.companyName }}</span>
+                <span class="font-bold text-neutral-900">{{ comment.nickName || comment.userName || '匿名用户' }}</span>
+                <span class="text-xs text-neutral-400">{{ formatTime(comment.createTime) }}</span>
+                <span v-if="comment.companyName" class="text-xs text-neutral-400">· {{ comment.companyName }}</span>
               </div>
-              <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ comment.content }}</p>
+              <p class="text-neutral-700 leading-relaxed whitespace-pre-wrap">{{ comment.content }}</p>
             </div>
           </div>
         </div>
@@ -518,37 +518,37 @@ onMounted(() => {
       <template #header>
         <div class="flex items-center justify-between">
           <div>
-            <div class="text-[10px] font-bold uppercase tracking-widest text-gray-400">积分打赏</div>
-            <div class="text-xl font-bold text-gray-900">打赏作者</div>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-neutral-400">积分打赏</div>
+            <div class="text-xl font-bold text-neutral-900">打赏作者</div>
           </div>
           <button 
-            class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all "
+            class="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center transition-all "
             @click="tipDialogOpen = false"
           >
-            <span class="text-gray-500 text-sm">✕</span>
+            <span class="text-neutral-500 text-sm">✕</span>
           </button>
         </div>
       </template>
 
       <div v-if="post" class="space-y-5">
         <!-- 作者信息卡片 -->
-        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+        <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-200">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold text-lg shrink-0 overflow-hidden">
               <img v-if="post.avatar" :src="post.avatar" alt="头像" class="w-full h-full object-cover" />
               <span v-else>{{ (post.nickName || post.userName || '?')[0] }}</span>
             </div>
             <div class="flex-1 min-w-0">
-              <div class="font-bold text-gray-900 truncate">{{ post.nickName || post.userName || '作者' }}</div>
-              <div v-if="post.companyName" class="text-xs text-gray-400 truncate mt-0.5">{{ post.companyName }}</div>
-              <div class="text-xs text-gray-400 mt-0.5">积分将直接转入对方账户</div>
+              <div class="font-bold text-neutral-900 truncate">{{ post.nickName || post.userName || '作者' }}</div>
+              <div v-if="post.companyName" class="text-xs text-neutral-400 truncate mt-0.5">{{ post.companyName }}</div>
+              <div class="text-xs text-neutral-400 mt-0.5">积分将直接转入对方账户</div>
             </div>
           </div>
         </div>
         
         <!-- 积分数量 -->
         <div>
-          <label class="block text-sm font-bold text-gray-700 mb-2">打赏积分</label>
+          <label class="block text-sm font-bold text-neutral-700 mb-2">打赏积分</label>
           <el-input-number
             v-model="tipForm.points"
             :min="1"
@@ -561,7 +561,7 @@ onMounted(() => {
 
         <!-- 留言输入 -->
         <div>
-          <label class="block text-sm font-bold text-gray-700 mb-2">打赏留言 <span class="text-gray-400 font-normal">(可选)</span></label>
+          <label class="block text-sm font-bold text-neutral-700 mb-2">打赏留言 <span class="text-neutral-400 font-normal">(可选)</span></label>
           <el-input
             v-model="tipForm.remark"
             type="textarea"
@@ -574,8 +574,8 @@ onMounted(() => {
         </div>
         
         <!-- 快捷选择 -->
-        <div class="pt-4 border-t border-gray-200">
-          <div class="text-xs text-gray-400 mb-3">快捷选择</div>
+        <div class="pt-4 border-t border-neutral-200">
+          <div class="text-xs text-neutral-400 mb-3">快捷选择</div>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="amt in [5, 10, 50, 100]"
@@ -583,7 +583,7 @@ onMounted(() => {
               class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
               :class="tipForm.points === amt
                 ? 'bg-brand-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'"
               @click="tipForm.points = amt"
             >
               {{ amt }} 积分
