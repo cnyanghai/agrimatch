@@ -66,6 +66,8 @@ export interface ContractResponse {
   sellerSignTime?: string
   buyerSigned?: boolean
   sellerSigned?: boolean
+  buyerSealUrl?: string
+  sellerSealUrl?: string
   pdfHash?: string
   pdfUrl?: string
   createTime: string
@@ -172,6 +174,7 @@ export interface ContractSignRequest {
   typedName?: string
   signerName?: string
   signerTitle?: string
+  smsCode?: string  // 短信验证码（盖章时必填）
 }
 
 export interface ContractQuery {

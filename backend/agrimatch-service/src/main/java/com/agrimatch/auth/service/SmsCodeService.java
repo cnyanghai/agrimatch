@@ -44,7 +44,7 @@ public class SmsCodeService {
 
     public void send(String phone, int type) {
         if (!StringUtils.hasText(phone)) throw new ApiException(400, "手机号不能为空");
-        if (type < 1 || type > 3) throw new ApiException(400, "验证码类型不合法");
+        if (type < 1 || type > 4) throw new ApiException(400, "验证码类型不合法");
 
         String key = key(phone, type);
         Entry old = store.get(key);
@@ -63,7 +63,7 @@ public class SmsCodeService {
 
     public void verifyOrThrow(String phone, int type, String smsCode) {
         if (!StringUtils.hasText(phone)) throw new ApiException(400, "手机号不能为空");
-        if (type < 1 || type > 3) throw new ApiException(400, "验证码类型不合法");
+        if (type < 1 || type > 4) throw new ApiException(400, "验证码类型不合法");
         if (!StringUtils.hasText(smsCode)) throw new ApiException(400, "请输入验证码");
 
         String code = smsCode.trim();

@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AgriMatch (农汇通) is a B2B agricultural commodities trading platform connecting suppliers and buyers. It's a full-stack application with a Vue 3 frontend and Spring Boot backend.
+沃谷 (WoGu) is a B2B agricultural commodities trading platform connecting suppliers and buyers. It's a full-stack application with a Vue 3 frontend and Spring Boot backend.
 
 ## Build and Development Commands
 
@@ -72,8 +72,24 @@ All backend APIs return `Result<T>` wrapper with `code`, `message`, and `data` f
 Cookie-based session authentication. Frontend uses `/api/auth/me` to restore session state.
 
 ### Color System (Tailwind)
-- `brand-*` (若竹色 Ruozhu Green): Primary brand color, supplier-side (#84BB9F)
-- `autumn-*` (秋波蓝 Qiubo Blue): Secondary color, buyer-side (#A5CCDC)
+
+品牌名：沃谷 (WoGu)，标语：农牧供需智能匹配平台
+
+| Token | 名称 | 主色值 | 用途 |
+|-------|------|--------|------|
+| `brand-*` | 沃野绿 | `#2D6A4F` (600) | 主品牌色，供应侧，按钮/CTA/导航 |
+| `autumn-*` | 麦穗金 | `#D4A373` (400) | 采购侧辅助色 |
+| `accent-*` | 赭石橙 | `#E76F51` (400) | 价格/强调/警示 |
+| `action-*` | 行动蓝 | `#2563eb` (600) | 蓝色 CTA 备用 |
+
+关键色阶用法：
+- `brand-50` ~ `brand-100`: 浅色背景、hover 态
+- `brand-600`: 主按钮、品牌文字（核心色）
+- `brand-700`: 导航栏背景
+- `autumn-50` ~ `autumn-100`: 采购侧浅色背景
+- `autumn-400` ~ `autumn-500`: 采购侧文字/图标
+- `accent-400`: 价格数字、重要提示
+- `bg-stone-50`: 页面内容区背景（代替纯白，降低对比度）
 
 ### UI Conventions
 - Rounded corners: `rounded-xl` (12px) for cards, `rounded-lg` (8px) for buttons/inputs

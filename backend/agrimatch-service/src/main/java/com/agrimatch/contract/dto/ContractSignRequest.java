@@ -10,6 +10,7 @@ public class ContractSignRequest {
     private String typedName;       // 打字签名的名字
     private String signerName;      // 签署人姓名
     private String signerTitle;     // 签署人职位
+    private String smsCode;         // 短信验证码（盖章时必填）
 
     public String getSignType() { return signType; }
     public void setSignType(String signType) { this.signType = signType; }
@@ -28,5 +29,8 @@ public class ContractSignRequest {
 
     public String getSignerTitle() { return signerTitle; }
     public void setSignerTitle(String signerTitle) { this.signerTitle = signerTitle; }
+
+    public String getSmsCode() { return smsCode; }
+    public void setSmsCode(String smsCode) { this.smsCode = smsCode; }
 }
 

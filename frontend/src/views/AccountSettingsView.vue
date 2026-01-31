@@ -5,11 +5,12 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { useAuthStore } from '../store/auth'
 import { updateMe, type UserUpdateRequest, getLoginLogs, type LoginLogResponse } from '../api/user'
 import { getMyCompany, createCompany, updateCompany, type CompanyResponse, type CompanyCreateRequest } from '../api/company'
-import { User, Building2, Lock, Check, Upload, AlertTriangle, RefreshCw, Truck, ChevronRight, FileText, X, ZoomIn, Award, Calendar, Users, Plus, Trash2, Edit2, Star, ShieldCheck, History, Monitor, MapPin } from 'lucide-vue-next'
+import { User, Building2, Lock, Check, Upload, AlertTriangle, RefreshCw, Truck, ChevronRight, FileText, X, ZoomIn, Award, Calendar, Users, Plus, Trash2, Edit2, Star, ShieldCheck, History, Monitor, MapPin, Stamp } from 'lucide-vue-next'
 import { BaseButton } from '../components/ui'
 import { regionData, codeToText } from 'element-china-area-data'
 import { uploadImage } from '../api/file'
 import { listVehicles, createVehicle, updateVehicle, deleteVehicle, setDefaultVehicle, type VehicleResponse, type VehicleCreateRequest } from '../api/vehicle'
+import SealManager from '../components/contract/SealManager.vue'
 
 const auth = useAuthStore()
 const loading = ref(false)
@@ -573,6 +574,7 @@ const navItems = [
   { key: 'profile', label: '个人资料', icon: User },
   { key: 'company', label: '公司主页', icon: Building2 },
   { key: 'credentials', label: '资质证照', icon: Award },
+  { key: 'seal', label: '电子印章', icon: Stamp },
   { key: 'vehicles', label: '车辆管理', icon: Truck },
   { key: 'security', label: '账号安全', icon: Lock }
 ]
@@ -1038,6 +1040,17 @@ const navItems = [
               <BaseButton type="secondary" size="sm" :disabled="loading" @click="resetCompanyForm">取消</BaseButton>
               <BaseButton type="primary" size="sm" :loading="loading" @click="saveCompanyInfo">保存</BaseButton>
             </div>
+          </div>
+        </div>
+
+        <!-- 电子印章 -->
+        <div v-show="activeTab === 'seal'" class="bg-white rounded-xl border border-gray-200 overflow-hidden animate-fade-in">
+          <div class="p-5 border-b border-gray-200">
+            <h3 class="text-2xl font-bold text-gray-900">电子印章</h3>
+            <p class="text-sm text-gray-500 mt-1">管理公司电子公章和合同章，用于合同签署</p>
+          </div>
+          <div class="p-6">
+            <SealManager />
           </div>
         </div>
 

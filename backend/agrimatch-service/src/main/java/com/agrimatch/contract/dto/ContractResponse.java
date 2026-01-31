@@ -64,7 +64,9 @@ public class ContractResponse {
     private LocalDateTime sellerSignTime;
     private Boolean buyerSigned;
     private Boolean sellerSigned;
-    
+    private String buyerSealUrl;
+    private String sellerSealUrl;
+
     private String pdfHash;
     private String pdfUrl;
 
@@ -190,6 +192,12 @@ public class ContractResponse {
 
     public Boolean getSellerSigned() { return sellerSigned; }
     public void setSellerSigned(Boolean sellerSigned) { this.sellerSigned = sellerSigned; }
+
+    public String getBuyerSealUrl() { return buyerSealUrl; }
+    public void setBuyerSealUrl(String buyerSealUrl) { this.buyerSealUrl = buyerSealUrl; }
+
+    public String getSellerSealUrl() { return sellerSealUrl; }
+    public void setSellerSealUrl(String sellerSealUrl) { this.sellerSealUrl = sellerSealUrl; }
 
     public String getPdfHash() { return pdfHash; }
     public void setPdfHash(String pdfHash) { this.pdfHash = pdfHash; }

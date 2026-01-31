@@ -6,6 +6,7 @@ import com.agrimatch.chat.dto.ChatMessageResponse;
 import com.agrimatch.chat.event.ContractMessageEvent;
 import com.agrimatch.chat.event.MessageUpdateEvent;
 import com.agrimatch.chat.mapper.ChatMapper;
+import com.agrimatch.auth.service.SmsCodeService;
 import com.agrimatch.common.api.ResultCode;
 import com.agrimatch.common.exception.ApiException;
 import com.agrimatch.company.domain.BusCompany;
@@ -57,6 +58,7 @@ public class ContractServiceImpl implements ContractService {
     private final ChatMapper chatMapper;
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final SmsCodeService smsCodeService;
 
     public ContractServiceImpl(ContractMapper contractMapper,
                                ContractSignatureMapper signatureMapper,
@@ -66,7 +68,8 @@ public class ContractServiceImpl implements ContractService {
                                CompanyMapper companyMapper,
                                ChatMapper chatMapper,
                                ObjectMapper objectMapper,
-                               ApplicationEventPublisher eventPublisher) {
+                               ApplicationEventPublisher eventPublisher,
+                               SmsCodeService smsCodeService) {
         this.contractMapper = contractMapper;
         this.signatureMapper = signatureMapper;
         this.changeLogMapper = changeLogMapper;
@@ -76,6 +79,7 @@ public class ContractServiceImpl implements ContractService {
         this.chatMapper = chatMapper;
         this.objectMapper = objectMapper;
         this.eventPublisher = eventPublisher;
+        this.smsCodeService = smsCodeService;
     }
 
     @Override
@@ -559,7 +563,19 @@ public class ContractServiceImpl implements ContractService {
         if (existingSig != null) {
             throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "您已签署过此合同");
         }
-        
+
+        // 盖章类型需短信验证
+        String signType = req.getSignType();
+        if ("seal".equals(signType) || "seal_handwrite".equals(signType)) {
+            // 获取签署方手机号
+            BusCompany signCompany = companyMapper.selectById(companyId);
+            String phone = signCompany != null ? signCompany.getPhone() : null;
+            if (!StringUtils.hasText(phone)) {
+                throw new ApiException(400, "公司未绑定手机号，无法使用盖章签署");
+            }
+            smsCodeService.verifyOrThrow(phone, 4, req.getSmsCode());
+        }
+
         // 创建签署记录
         BusContractSignature sig = new BusContractSignature();
         sig.setContractId(contractId);
@@ -1005,7 +1021,9 @@ public class ContractServiceImpl implements ContractService {
         BusContractSignature sigSeller = signatureMapper.selectByContractAndParty(c.getId(), "seller");
         o.setBuyerSigned(sigBuyer != null);
         o.setSellerSigned(sigSeller != null);
-        
+        if (sigBuyer != null) o.setBuyerSealUrl(sigBuyer.getSealUrl());
+        if (sigSeller != null) o.setSellerSealUrl(sigSeller.getSealUrl());
+
         return o;
     }
 

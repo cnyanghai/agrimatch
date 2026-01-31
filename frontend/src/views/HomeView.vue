@@ -283,12 +283,11 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <!-- Platform Stats (4-Column Compact) -->
-    <section class="relative z-20 -mt-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Platform Stats -->
+    <section class="relative z-20 -mt-12 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <!-- 累计用户 -->
-        <div class="bg-white/95 backdrop-blur-sm p-5 rounded-xl shadow-lg border border-gray-100/80 flex items-center gap-4 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
-          <div class="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-slate-200 transition-colors">
+        <div class="bg-white/80 backdrop-blur-lg p-5 rounded-xl shadow-lg shadow-black/5 border border-white/60 flex items-center gap-4 group hover:bg-white hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+          <div class="w-11 h-11 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-slate-200 transition-colors">
             <Users :size="22" />
           </div>
           <div class="min-w-0">
@@ -296,8 +295,7 @@ onBeforeUnmount(() => {
             <div class="text-[10px] font-semibold text-gray-400 mt-0.5">平台用户</div>
           </div>
         </div>
-        <!-- 认证供应商 -->
-        <div class="bg-white/95 backdrop-blur-sm p-5 rounded-xl shadow-lg border border-gray-100/80 flex items-center gap-4 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+        <div class="bg-white/80 backdrop-blur-lg p-5 rounded-xl shadow-lg shadow-black/5 border border-white/60 flex items-center gap-4 group hover:bg-white hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
           <div class="w-11 h-11 rounded-xl bg-brand-50 flex items-center justify-center text-brand-600 group-hover:bg-brand-100 transition-colors">
             <Factory :size="22" />
           </div>
@@ -306,9 +304,8 @@ onBeforeUnmount(() => {
             <div class="text-[10px] font-semibold text-gray-400 mt-0.5">认证供应商</div>
           </div>
         </div>
-        <!-- 大宗采购商 -->
-        <div class="bg-white/95 backdrop-blur-sm p-5 rounded-xl shadow-lg border border-gray-100/80 flex items-center gap-4 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
-          <div class="w-11 h-11 rounded-xl bg-autumn-50 flex items-center justify-center text-autumn-600 group-hover:bg-autumn-100 transition-colors">
+        <div class="bg-white/80 backdrop-blur-lg p-5 rounded-xl shadow-lg shadow-black/5 border border-white/60 flex items-center gap-4 group hover:bg-white hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+          <div class="w-11 h-11 rounded-xl bg-autumn-50 flex items-center justify-center text-autumn-500 group-hover:bg-autumn-100 transition-colors">
             <Building2 :size="22" />
           </div>
           <div class="min-w-0">
@@ -316,9 +313,8 @@ onBeforeUnmount(() => {
             <div class="text-[10px] font-semibold text-gray-400 mt-0.5">大宗采购商</div>
           </div>
         </div>
-        <!-- 累计成交 -->
-        <div class="bg-white/95 backdrop-blur-sm p-5 rounded-xl shadow-lg border border-gray-100/80 flex items-center gap-4 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
-          <div class="w-11 h-11 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600 group-hover:bg-orange-100 transition-colors">
+        <div class="bg-white/80 backdrop-blur-lg p-5 rounded-xl shadow-lg shadow-black/5 border border-white/60 flex items-center gap-4 group hover:bg-white hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200">
+          <div class="w-11 h-11 rounded-xl bg-accent-50 flex items-center justify-center text-accent-400 group-hover:bg-accent-100 transition-colors">
             <TrendingUp :size="22" />
           </div>
           <div class="min-w-0">
@@ -330,7 +326,7 @@ onBeforeUnmount(() => {
     </section>
 
     <!-- 全产业链支柱板块 (Bento Grid) -->
-    <section class="pt-16 pb-12 bg-white">
+    <section class="pt-10 pb-12 bg-stone-50">
       <div class="max-w-7xl mx-auto px-4">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div class="max-w-2xl">

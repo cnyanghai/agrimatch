@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Pen, Stamp, Type, Check, FileSignature, Package } from 'lucide-vue-next'
-import { signContract, getContract, type ContractResponse } from '../../api/contract'
+import { Pen, Stamp, Type, Check, FileSignature, Package, ShieldCheck } from 'lucide-vue-next'
+import { signContract, getContract, type ContractResponse, type SealResponse } from '../../api/contract'
+import { sendSmsCode } from '../../api/sms'
 import { BaseModal, BaseButton } from '../ui'
 import SignaturePad from './SignaturePad.vue'
+import SealManager from './SealManager.vue'
 import { signData, generateKeyPair } from '../../utils/crypto'
 import { auditLogger } from '../../utils/audit-logger'
 import { ErrorHandler } from '../../utils/error-handler'
@@ -37,6 +39,26 @@ const signatureImage = ref('')
 const loading = ref(false)
 const contract = ref<ContractResponse | null>(null)
 
+// 盖章相关
+const selectedSeal = ref<SealResponse | null>(null)
+const smsCode = ref('')
+const smsSending = ref(false)
+const smsCountdown = ref(0)
+
+// 获取签署方手机号（部分脱敏显示）
+const signerPhone = computed(() => {
+  if (!contract.value || !auth.me?.companyId) return ''
+  const isBuyer = auth.me.companyId === contract.value.buyerCompanyId
+  const phone = isBuyer ? contract.value.buyerPhone : contract.value.sellerPhone
+  return phone || ''
+})
+
+const maskedPhone = computed(() => {
+  const p = signerPhone.value
+  if (!p || p.length < 7) return p
+  return p.slice(0, 3) + '****' + p.slice(-4)
+})
+
 // 质量指标解析
 const qualitySpecs = computed(() => {
   if (!contract.value) return []
@@ -48,11 +70,11 @@ const qualitySpecs = computed(() => {
       const data = JSON.parse(contract.value.paramsJson)
       const params = data?.params || data || {}
       const result: Array<{ name: string; value: string }> = []
-      
+
       const BLACKLIST = [
-        'snapshotTime', 'priceType', 'id', 'categoryName', 'title', 
+        'snapshotTime', 'priceType', 'id', 'categoryName', 'title',
         'productName', 'companyName', 'nickName', 'exFactoryPrice', 'expectedPrice',
-        'remainingQuantity', 'unit', 'basisQuotes', 'basisPrice', 
+        'remainingQuantity', 'unit', 'basisQuotes', 'basisPrice',
         'contractCode', 'futuresPrice', 'originPrice', 'shipAddress', 'purchaseAddress',
         'deliveryMode', 'storageMethod', 'packaging'
       ]
@@ -101,13 +123,49 @@ watch(() => props.modelValue, async (val) => {
     typedName.value = ''
     signatureImage.value = ''
     contract.value = null
+    selectedSeal.value = null
+    smsCode.value = ''
+    smsCountdown.value = 0
   }
 })
+
+// 发送短信验证码
+async function handleSendSms() {
+  if (smsSending.value || smsCountdown.value > 0) return
+  if (!signerPhone.value) {
+    ElMessage.warning('未找到签署方手机号，请先在公司资料中完善联系电话')
+    return
+  }
+
+  smsSending.value = true
+  try {
+    const res = await sendSmsCode(signerPhone.value, 4)
+    if (res.code === 0) {
+      ElMessage.success('验证码已发送')
+      smsCountdown.value = 60
+      const timer = setInterval(() => {
+        smsCountdown.value--
+        if (smsCountdown.value <= 0) clearInterval(timer)
+      }, 1000)
+    } else {
+      ElMessage.error(res.message || '发送失败')
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.message || e?.message || '发送失败')
+  } finally {
+    smsSending.value = false
+  }
+}
+
+// 选择印章
+function onSealSelect(seal: SealResponse) {
+  selectedSeal.value = seal
+}
 
 // 提交签署
 async function handleSign() {
   if (!props.contractId) return
-  
+
   // 验证
   if (signMethod.value === 'typed' && !typedName.value.trim()) {
     ElMessage.warning('请输入您的姓名')
@@ -117,13 +175,29 @@ async function handleSign() {
     ElMessage.warning('请在画布上签名')
     return
   }
-  
+  if (signMethod.value === 'seal') {
+    if (!selectedSeal.value) {
+      ElMessage.warning('请选择一枚公章')
+      return
+    }
+    if (!smsCode.value || smsCode.value.length !== 6) {
+      ElMessage.warning('请输入6位短信验证码')
+      return
+    }
+  }
+
   loading.value = true
   try {
-    const payload = {
+    const payload: any = {
       signType: signMethod.value,
       signerName: typedName.value.trim() || undefined,
       signatureData: signatureImage.value || undefined
+    }
+
+    // 盖章模式追加字段
+    if (signMethod.value === 'seal' && selectedSeal.value) {
+      payload.sealId = selectedSeal.value.id
+      payload.smsCode = smsCode.value
     }
 
     let encryptedSignatureData = payload.signatureData
@@ -244,17 +318,17 @@ function onSignatureChange(data: string) {
         </div>
       </div>
     </div>
-    
+
     <!-- 签署方式选择 -->
     <div class="space-y-4">
       <div class="text-xs font-bold text-gray-500 uppercase tracking-wider">选择签署方式</div>
-      
+
       <div class="grid grid-cols-3 gap-3">
         <button
           :class="[
             'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
-            signMethod === 'typed' 
-              ? 'border-brand-500 bg-brand-50' 
+            signMethod === 'typed'
+              ? 'border-brand-500 bg-brand-50'
               : 'border-gray-200 hover:border-gray-200 bg-white'
           ]"
           @click="signMethod = 'typed'"
@@ -264,12 +338,12 @@ function onSignatureChange(data: string) {
           </div>
           <span :class="['text-xs font-bold', signMethod === 'typed' ? 'text-brand-600' : 'text-gray-600']">打字签名</span>
         </button>
-        
+
         <button
           :class="[
             'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
-            signMethod === 'handwrite' 
-              ? 'border-brand-500 bg-brand-50' 
+            signMethod === 'handwrite'
+              ? 'border-brand-500 bg-brand-50'
               : 'border-gray-200 hover:border-gray-200 bg-white'
           ]"
           @click="signMethod = 'handwrite'"
@@ -279,12 +353,12 @@ function onSignatureChange(data: string) {
           </div>
           <span :class="['text-xs font-bold', signMethod === 'handwrite' ? 'text-brand-600' : 'text-gray-600']">手写签名</span>
         </button>
-        
+
         <button
           :class="[
             'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all',
-            signMethod === 'seal' 
-              ? 'border-brand-500 bg-brand-50' 
+            signMethod === 'seal'
+              ? 'border-brand-500 bg-brand-50'
               : 'border-gray-200 hover:border-gray-200 bg-white'
           ]"
           @click="signMethod = 'seal'"
@@ -295,7 +369,7 @@ function onSignatureChange(data: string) {
           <span :class="['text-xs font-bold', signMethod === 'seal' ? 'text-brand-600' : 'text-gray-600']">公司盖章</span>
         </button>
       </div>
-      
+
       <!-- 打字签名 -->
       <div v-if="signMethod === 'typed'" class="mt-4">
         <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">请输入您的真实姓名</label>
@@ -309,7 +383,7 @@ function onSignatureChange(data: string) {
           打字签名具有同等法律效力
         </p>
       </div>
-      
+
       <!-- 手写签名 -->
       <div v-if="signMethod === 'handwrite'" class="mt-4">
         <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">请在下方区域手写签名</label>
@@ -319,27 +393,59 @@ function onSignatureChange(data: string) {
           @update:model-value="onSignatureChange"
         />
       </div>
-      
+
       <!-- 公司盖章 -->
-      <div v-if="signMethod === 'seal'" class="mt-4">
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-          <p class="text-sm text-amber-700">
-            公司电子章功能开发中，请先使用打字签名或手写签名
+      <div v-if="signMethod === 'seal'" class="mt-4 space-y-4">
+        <!-- 选择印章 -->
+        <div>
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">选择印章</label>
+          <SealManager
+            selectable
+            :selected="selectedSeal?.id ?? null"
+            @select="onSealSelect"
+          />
+        </div>
+
+        <!-- 短信验证 -->
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <ShieldCheck class="w-4 h-4 text-brand-600" />
+            <span class="text-sm font-bold text-gray-700">短信验证</span>
+          </div>
+          <p class="text-xs text-gray-500 mb-3">
+            为确保签署安全，需向手机号 <span class="font-bold text-gray-700">{{ maskedPhone || '未绑定' }}</span> 发送验证码确认
           </p>
+          <div class="flex gap-3">
+            <input
+              v-model="smsCode"
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              placeholder="请输入6位验证码"
+              class="flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-brand-500 outline-none transition-all text-center text-lg font-bold tracking-widest"
+            />
+            <button
+              class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 text-sm"
+              :disabled="smsSending || smsCountdown > 0 || !signerPhone"
+              @click="handleSendSms"
+            >
+              {{ smsCountdown > 0 ? `${smsCountdown}s` : '获取验证码' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
-    
+
     <!-- 底部操作 -->
     <template #footer>
       <BaseButton type="secondary" block @click="visible = false">
         取消
       </BaseButton>
-      <BaseButton 
-        type="primary" 
+      <BaseButton
+        type="primary"
         block
-        :loading="loading" 
-        :disabled="signMethod === 'seal'"
+        :loading="loading"
+        :disabled="signMethod === 'seal' && (!selectedSeal || smsCode.length !== 6)"
         @click="handleSign"
       >
         <Check class="w-4 h-4" />

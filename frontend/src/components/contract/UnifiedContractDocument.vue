@@ -116,6 +116,10 @@ const props = withDefaults(defineProps<{
   buyerSignTime?: string
   /** 卖方签署时间 */
   sellerSignTime?: string
+  /** 买方印章图片URL */
+  buyerSealUrl?: string
+  /** 卖方印章图片URL */
+  sellerSealUrl?: string
   /** 当前用户是否为买方 */
   currentIsBuyer?: boolean
   /** 是否显示法律约束条款（正式合同） */
@@ -626,8 +630,15 @@ function formatDateTime(dateStr: string | undefined): string {
                 ]"
               >
                 <template v-if="buyerSigned">
-                  <!-- 电子签章效果 -->
-                  <div class="w-20 h-20 rounded-full border-2 border-red-600 flex items-center justify-center opacity-70 rotate-[-8deg]">
+                  <!-- 真实印章图片 -->
+                  <img
+                    v-if="buyerSealUrl"
+                    :src="buyerSealUrl"
+                    alt="买方签章"
+                    class="w-28 h-28 object-contain opacity-85 rotate-[-3deg]"
+                  />
+                  <!-- 文字印章兜底 -->
+                  <div v-else class="w-20 h-20 rounded-full border-2 border-red-600 flex items-center justify-center opacity-70 rotate-[-8deg]">
                     <span class="text-red-600 font-bold text-[8px] text-center leading-tight">
                       {{ data.buyer.companyName.slice(0, 4) }}<br/>合同章
                     </span>
@@ -654,8 +665,15 @@ function formatDateTime(dateStr: string | undefined): string {
                 ]"
               >
                 <template v-if="sellerSigned">
-                  <!-- 电子签章效果 -->
-                  <div class="w-20 h-20 rounded-full border-2 border-red-600 flex items-center justify-center opacity-70 rotate-[6deg]">
+                  <!-- 真实印章图片 -->
+                  <img
+                    v-if="sellerSealUrl"
+                    :src="sellerSealUrl"
+                    alt="卖方签章"
+                    class="w-28 h-28 object-contain opacity-85 rotate-[5deg]"
+                  />
+                  <!-- 文字印章兜底 -->
+                  <div v-else class="w-20 h-20 rounded-full border-2 border-red-600 flex items-center justify-center opacity-70 rotate-[6deg]">
                     <span class="text-red-600 font-bold text-[8px] text-center leading-tight">
                       {{ data.seller.companyName.slice(0, 4) }}<br/>合同章
                     </span>
