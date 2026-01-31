@@ -29,7 +29,7 @@ const pageMeta: Record<PageType, { title: string; icon: any; subtitle: string }>
 const currentMeta = computed(() => pageMeta[pageType.value] || pageMeta.terms)
 
 watch(pageType, () => {
-  nextTick(() => window.scrollTo({ top: 0, behavior: 'smooth' }))
+  nextTick(() => document.getElementById('main-scroll')?.scrollTo({ top: 0, behavior: 'smooth' }))
 })
 
 // 侧边导航快捷跳转

@@ -4,6 +4,9 @@ import { useUiStore } from '../store/ui'
 
 const router = createRouter({
   history: createWebHistory(),
+  scrollBehavior(_to, _from, savedPosition) {
+    return savedPosition || { top: 0 }
+  },
   routes: [
     { path: '/', name: 'landing', component: () => import('../views/HomeView.vue'), meta: { public: true, minimal: true, title: '沃谷 - 领先的农牧原料数字化交易平台' } },
     { path: '/hall/supply', name: 'hall-supply', component: () => import('../views/SupplyHallView.vue'), meta: { public: true, minimal: true, title: '供应大厅 - 实时现货货源直供 - 沃谷' } },
@@ -75,6 +78,8 @@ router.beforeEach(async (to) => {
 router.afterEach((to) => {
   const defaultTitle = '沃谷 - 农牧供需智能匹配平台'
   document.title = (to.meta.title as string) || defaultTitle
+  // 滚动内部容器到顶部（App.vue 用 overflow-hidden 包裹，window.scrollTo 无效）
+  document.getElementById('main-scroll')?.scrollTo({ top: 0 })
 })
 
 export default router

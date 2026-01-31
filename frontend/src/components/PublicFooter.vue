@@ -1,66 +1,81 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { Mail, Clock, MapPin } from 'lucide-vue-next'
 import logoWhite from '../assets/logo-white.svg'
 </script>
 
 <template>
-  <footer class="bg-slate-950 text-gray-500 py-20 border-t border-white/5 w-full">
-    <div class="max-w-7xl mx-auto px-4">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+  <footer class="bg-slate-950 text-gray-500 w-full">
+    <!-- 主体区域 -->
+    <div class="max-w-7xl mx-auto px-4 py-16">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8">
         <!-- 品牌 -->
-        <div class="col-span-1 md:col-span-2">
-          <div class="flex items-center gap-2.5 mb-6">
-            <img :src="logoWhite" alt="沃谷" class="h-9 w-auto opacity-90" />
-            <span class="text-2xl font-bold text-white tracking-wide">沃谷</span>
+        <div class="col-span-2 md:col-span-1">
+          <div class="flex items-center gap-2 mb-4">
+            <img :src="logoWhite" alt="沃谷" class="h-8 w-auto opacity-90" />
+            <span class="text-xl font-bold text-white tracking-wide">沃谷</span>
           </div>
-          <p class="text-sm leading-relaxed max-w-sm mb-8">
-            领先的农牧供需智能匹配平台。通过数字化手段连接产业上下游，让农牧人的每一笔交易都更安全、更透明、更简单。
+          <p class="text-xs leading-relaxed mb-5 max-w-[220px]">
+            农牧供需智能匹配平台<br />让每一笔交易更安全、更透明
           </p>
-          <div class="flex gap-4">
-            <div class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-brand-600 hover:text-white transition-all cursor-pointer">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.164 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
-            </div>
+          <div class="flex items-center gap-2 text-xs">
+            <Mail class="w-3.5 h-3.5 text-gray-600" />
+            <a href="mailto:cnyanghai@icloud.com" class="hover:text-brand-400 transition-colors">cnyanghai@icloud.com</a>
           </div>
+        </div>
+
+        <!-- 平台导航 -->
+        <div>
+          <h4 class="text-white font-bold mb-5 text-xs uppercase tracking-widest">平台</h4>
+          <ul class="space-y-3 text-xs">
+            <li><RouterLink to="/hall/supply" class="hover:text-brand-400 transition-colors">供应大厅</RouterLink></li>
+            <li><RouterLink to="/hall/need" class="hover:text-brand-400 transition-colors">采购大厅</RouterLink></li>
+            <li><RouterLink to="/talks" class="hover:text-brand-400 transition-colors">话题广场</RouterLink></li>
+            <li><RouterLink to="/companies/directory" class="hover:text-brand-400 transition-colors">企业名录</RouterLink></li>
+            <li><RouterLink to="/categories" class="hover:text-brand-400 transition-colors">品类目录</RouterLink></li>
+          </ul>
         </div>
 
         <!-- 法律合规 -->
         <div>
-          <h4 class="text-white font-bold mb-8 text-sm uppercase tracking-widest">法律与合规</h4>
-          <ul class="space-y-4 text-xs font-bold">
+          <h4 class="text-white font-bold mb-5 text-xs uppercase tracking-widest">法律合规</h4>
+          <ul class="space-y-3 text-xs">
             <li><RouterLink to="/legal/terms" class="hover:text-brand-400 transition-colors">用户协议</RouterLink></li>
             <li><RouterLink to="/legal/privacy" class="hover:text-brand-400 transition-colors">隐私政策</RouterLink></li>
-            <li><RouterLink to="/legal/e-signature" class="hover:text-brand-400 transition-colors">电子签约法律效力</RouterLink></li>
+            <li><RouterLink to="/legal/e-signature" class="hover:text-brand-400 transition-colors">电子签约效力</RouterLink></li>
             <li><RouterLink to="/legal/disclaimer" class="hover:text-brand-400 transition-colors">免责声明</RouterLink></li>
           </ul>
         </div>
 
         <!-- 联系我们 -->
         <div>
-          <h4 class="text-white font-bold mb-8 text-sm uppercase tracking-widest">联系我们</h4>
-          <ul class="space-y-4 text-xs font-bold">
+          <h4 class="text-white font-bold mb-5 text-xs uppercase tracking-widest">联系我们</h4>
+          <ul class="space-y-3 text-xs">
             <li><RouterLink to="/legal/cooperation" class="hover:text-brand-400 transition-colors">商务合作</RouterLink></li>
             <li><RouterLink to="/legal/feedback" class="hover:text-brand-400 transition-colors">意见反馈</RouterLink></li>
-            <li class="flex items-center gap-3">
-              <span class="w-2 h-2 bg-brand-500 rounded-full animate-pulse"></span>
-              <a href="mailto:cnyanghai@icloud.com" class="text-gray-300 hover:text-brand-400 transition-colors">cnyanghai@icloud.com</a>
+            <li class="flex items-start gap-2 !mt-5 pt-4 border-t border-white/5">
+              <Clock class="w-3.5 h-3.5 text-gray-600 mt-0.5 shrink-0" />
+              <span class="text-gray-400 leading-relaxed">周一至周五<br />9:00 - 18:00</span>
             </li>
-            <li class="text-[10px] text-gray-600 font-medium">天津市东丽区</li>
+            <li class="flex items-start gap-2">
+              <MapPin class="w-3.5 h-3.5 text-gray-600 mt-0.5 shrink-0" />
+              <span class="text-gray-400">天津市东丽区</span>
+            </li>
           </ul>
         </div>
       </div>
+    </div>
 
-      <!-- 底部版权 -->
-      <div class="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-[0.2em] font-black">
-        <div class="flex items-center gap-4">
-          <p>© 2026 天津市东丽区农汇通网络科技信息咨询厅</p>
-          <div class="hidden md:block w-1 h-1 bg-gray-800 rounded-full"></div>
-          <p>连接农牧产业上下游</p>
-        </div>
-        <div class="flex items-center gap-8">
-          <div class="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg border border-white/5 text-brand-500/80">
-            <span class="w-1 h-1 bg-brand-500 rounded-full"></span>
-            SYSTEM ONLINE
-          </div>
+    <!-- 底部版权 -->
+    <div class="border-t border-white/5">
+      <div class="max-w-7xl mx-auto px-4 py-5 flex flex-col md:flex-row justify-between items-center gap-3 text-[11px] text-gray-600">
+        <p>© 2026 天津市东丽区农汇通网络科技信息咨询厅</p>
+        <div class="flex items-center gap-1 text-gray-700">
+          <RouterLink to="/legal/terms" class="hover:text-gray-400 transition-colors">用户协议</RouterLink>
+          <span class="text-gray-800">·</span>
+          <RouterLink to="/legal/privacy" class="hover:text-gray-400 transition-colors">隐私政策</RouterLink>
+          <span class="text-gray-800">·</span>
+          <RouterLink to="/legal/disclaimer" class="hover:text-gray-400 transition-colors">免责声明</RouterLink>
         </div>
       </div>
     </div>

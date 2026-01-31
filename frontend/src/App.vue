@@ -98,7 +98,7 @@ onMounted(async () => {
     <PublicTopNav v-if="!hideNav" />
 
     <!-- Main Content Area -->
-    <div v-if="minimal" class="flex-1 overflow-auto">
+    <div v-if="minimal" id="main-scroll" class="flex-1 overflow-auto">
       <router-view />
     </div>
 
@@ -196,7 +196,7 @@ onMounted(async () => {
     </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 overflow-auto p-4 md:p-6 min-w-0">
+      <main id="main-scroll" class="flex-1 overflow-auto p-4 md:p-6 min-w-0">
         <router-view />
       </main>
     </div>
