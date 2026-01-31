@@ -10,6 +10,8 @@ public class MapCompanyMarkerResponse {
     private String address;
     private BigDecimal lat;
     private BigDecimal lng;
+    private Long ownerUserId;
+    private String companyType;
 
     private Integer supplyCount;
     private Integer requirementCount;
@@ -17,77 +19,38 @@ public class MapCompanyMarkerResponse {
     private List<String> supplyCategories = new ArrayList<>();
     private List<String> requirementCategories = new ArrayList<>();
 
-    public Long getCompanyId() {
-        return companyId;
-    }
+    public Long getCompanyId() { return companyId; }
+    public void setCompanyId(Long companyId) { this.companyId = companyId; }
 
-    public void setCompanyId(Long companyId) {
-        this.companyId = companyId;
-    }
+    public String getCompanyName() { return companyName; }
+    public void setCompanyName(String companyName) { this.companyName = companyName; }
 
-    public String getCompanyName() {
-        return companyName;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
+    public BigDecimal getLat() { return lat; }
+    public void setLat(BigDecimal lat) { this.lat = lat; }
 
-    public String getAddress() {
-        return address;
-    }
+    public BigDecimal getLng() { return lng; }
+    public void setLng(BigDecimal lng) { this.lng = lng; }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    public Long getOwnerUserId() { return ownerUserId; }
+    public void setOwnerUserId(Long ownerUserId) { this.ownerUserId = ownerUserId; }
 
-    public BigDecimal getLat() {
-        return lat;
-    }
+    public String getCompanyType() { return companyType; }
+    public void setCompanyType(String companyType) { this.companyType = companyType; }
 
-    public void setLat(BigDecimal lat) {
-        this.lat = lat;
-    }
+    public Integer getSupplyCount() { return supplyCount; }
+    public void setSupplyCount(Integer supplyCount) { this.supplyCount = supplyCount; }
 
-    public BigDecimal getLng() {
-        return lng;
-    }
+    public Integer getRequirementCount() { return requirementCount; }
+    public void setRequirementCount(Integer requirementCount) { this.requirementCount = requirementCount; }
 
-    public void setLng(BigDecimal lng) {
-        this.lng = lng;
-    }
+    public List<String> getSupplyCategories() { return supplyCategories; }
+    public void setSupplyCategories(List<String> supplyCategories) { this.supplyCategories = supplyCategories; }
 
-    public Integer getSupplyCount() {
-        return supplyCount;
-    }
-
-    public void setSupplyCount(Integer supplyCount) {
-        this.supplyCount = supplyCount;
-    }
-
-    public Integer getRequirementCount() {
-        return requirementCount;
-    }
-
-    public void setRequirementCount(Integer requirementCount) {
-        this.requirementCount = requirementCount;
-    }
-
-    public List<String> getSupplyCategories() {
-        return supplyCategories;
-    }
-
-    public void setSupplyCategories(List<String> supplyCategories) {
-        this.supplyCategories = supplyCategories;
-    }
-
-    public List<String> getRequirementCategories() {
-        return requirementCategories;
-    }
-
-    public void setRequirementCategories(List<String> requirementCategories) {
-        this.requirementCategories = requirementCategories;
-    }
+    public List<String> getRequirementCategories() { return requirementCategories; }
+    public void setRequirementCategories(List<String> requirementCategories) { this.requirementCategories = requirementCategories; }
 }
 
 

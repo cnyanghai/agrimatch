@@ -7,6 +7,7 @@ import java.time.LocalDate;
  */
 public class MilestoneCreateRequest {
     private String milestoneType;    // SHIP=发货, RECEIVE=收货, PAY=付款, INSPECT=质检, CUSTOM=自定义
+    private String responsibleParty; // buyer/seller（CUSTOM类型手动指定）
     private String milestoneName;    // 节点名称
     private String description;      // 节点描述
     private LocalDate expectedDate;  // 预期完成日期
@@ -15,6 +16,9 @@ public class MilestoneCreateRequest {
 
     public String getMilestoneType() { return milestoneType; }
     public void setMilestoneType(String milestoneType) { this.milestoneType = milestoneType; }
+
+    public String getResponsibleParty() { return responsibleParty; }
+    public void setResponsibleParty(String responsibleParty) { this.responsibleParty = responsibleParty; }
 
     public String getMilestoneName() { return milestoneName; }
     public void setMilestoneName(String milestoneName) { this.milestoneName = milestoneName; }

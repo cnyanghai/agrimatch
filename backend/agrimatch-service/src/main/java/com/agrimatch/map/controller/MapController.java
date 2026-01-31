@@ -24,10 +24,17 @@ public class MapController {
 
     @GetMapping("/companies")
     public Result<List<MapCompanyMarkerResponse>> companies(
-            @RequestParam(value = "keyword", required = false) String keyword
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "province", required = false) String province,
+            @RequestParam(value = "city", required = false) String city,
+            @RequestParam(value = "companyType", required = false) String companyType
     ) {
         String kw = StringUtils.hasText(keyword) ? keyword.trim() : null;
-        List<MapCompanyMapper.Row> rows = mapCompanyMapper.selectCompanyMarkers(kw);
+        String prov = StringUtils.hasText(province) ? province.trim() : null;
+        String ct = StringUtils.hasText(city) ? city.trim() : null;
+        String cType = StringUtils.hasText(companyType) ? companyType.trim() : null;
+
+        List<MapCompanyMapper.Row> rows = mapCompanyMapper.selectCompanyMarkers(kw, prov, ct, cType);
         List<MapCompanyMarkerResponse> out = new ArrayList<>();
         for (MapCompanyMapper.Row r : rows) {
             MapCompanyMarkerResponse o = new MapCompanyMarkerResponse();
@@ -36,6 +43,8 @@ public class MapController {
             o.setAddress(r.getAddress());
             o.setLat(r.getLat());
             o.setLng(r.getLng());
+            o.setOwnerUserId(r.getOwnerUserId());
+            o.setCompanyType(r.getCompanyType());
             o.setSupplyCount(r.getSupplyCount() == null ? 0 : r.getSupplyCount());
             o.setRequirementCount(r.getRequirementCount() == null ? 0 : r.getRequirementCount());
             o.setSupplyCategories(splitCats(r.getSupplyCats()));

@@ -10,6 +10,7 @@ public class BusContractMilestone {
     private Long id;
     private Long contractId;
     private String milestoneType;    // SHIP=发货, RECEIVE=收货, PAY=付款, INSPECT=质检, CUSTOM=自定义
+    private String responsibleParty; // buyer=买方负责, seller=卖方负责, null=不限制
     private String milestoneName;
     private String description;
     private LocalDate expectedDate;
@@ -18,6 +19,7 @@ public class BusContractMilestone {
     private String evidenceUrl;
     private String evidenceJson;
     private String remark;
+    private String rejectReason;
     private String status;           // pending=待完成, submitted=已提交, confirmed=已确认, rejected=已拒绝
     private Long confirmUserId;
     private LocalDateTime confirmTime;
@@ -36,6 +38,9 @@ public class BusContractMilestone {
 
     public String getMilestoneType() { return milestoneType; }
     public void setMilestoneType(String milestoneType) { this.milestoneType = milestoneType; }
+
+    public String getResponsibleParty() { return responsibleParty; }
+    public void setResponsibleParty(String responsibleParty) { this.responsibleParty = responsibleParty; }
 
     public String getMilestoneName() { return milestoneName; }
     public void setMilestoneName(String milestoneName) { this.milestoneName = milestoneName; }
@@ -60,6 +65,9 @@ public class BusContractMilestone {
 
     public String getRemark() { return remark; }
     public void setRemark(String remark) { this.remark = remark; }
+
+    public String getRejectReason() { return rejectReason; }
+    public void setRejectReason(String rejectReason) { this.rejectReason = rejectReason; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

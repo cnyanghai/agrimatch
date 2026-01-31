@@ -19,6 +19,7 @@ import com.agrimatch.contract.dto.*;
 import com.agrimatch.contract.mapper.CompanySealMapper;
 import com.agrimatch.contract.mapper.ContractChangeLogMapper;
 import com.agrimatch.contract.mapper.ContractMapper;
+import com.agrimatch.contract.mapper.ContractMilestoneMapper;
 import com.agrimatch.contract.mapper.ContractSignatureMapper;
 import com.agrimatch.contract.service.ContractService;
 import com.agrimatch.user.domain.SysUser;
@@ -52,6 +53,7 @@ public class ContractServiceImpl implements ContractService {
     private final ContractMapper contractMapper;
     private final ContractSignatureMapper signatureMapper;
     private final ContractChangeLogMapper changeLogMapper;
+    private final ContractMilestoneMapper milestoneMapper;
     private final CompanySealMapper sealMapper;
     private final UserMapper userMapper;
     private final CompanyMapper companyMapper;
@@ -63,6 +65,7 @@ public class ContractServiceImpl implements ContractService {
     public ContractServiceImpl(ContractMapper contractMapper,
                                ContractSignatureMapper signatureMapper,
                                ContractChangeLogMapper changeLogMapper,
+                               ContractMilestoneMapper milestoneMapper,
                                CompanySealMapper sealMapper,
                                UserMapper userMapper,
                                CompanyMapper companyMapper,
@@ -73,6 +76,7 @@ public class ContractServiceImpl implements ContractService {
         this.contractMapper = contractMapper;
         this.signatureMapper = signatureMapper;
         this.changeLogMapper = changeLogMapper;
+        this.milestoneMapper = milestoneMapper;
         this.sealMapper = sealMapper;
         this.userMapper = userMapper;
         this.companyMapper = companyMapper;
@@ -1155,6 +1159,13 @@ public class ContractServiceImpl implements ContractService {
         o.setSellerSigned(sigSeller != null);
         if (sigBuyer != null) o.setBuyerSealUrl(sigBuyer.getSealUrl());
         if (sigSeller != null) o.setSellerSealUrl(sigSeller.getSealUrl());
+
+        // 履约进度（已签署及之后的合同）
+        Integer status = c.getStatus();
+        if (status != null && status >= 2) {
+            o.setMilestoneTotal(milestoneMapper.countTotalByContractId(c.getId()));
+            o.setMilestoneCompleted(milestoneMapper.countConfirmedByContractId(c.getId()));
+        }
 
         return o;
     }

@@ -5,6 +5,7 @@ import { ElMessage } from 'element-plus'
 import {
   ArrowLeft, Download, Pen, RefreshCw, Scale
 } from 'lucide-vue-next'
+import { useAuthStore } from '../store/auth'
 import html2pdf from 'html2pdf.js'
 import {
   getContract, sendContractForSigning,
@@ -23,6 +24,7 @@ import UnifiedContractDocument, {
 
 const route = useRoute()
 const router = useRouter()
+const auth = useAuthStore()
 
 const loading = ref(false)
 const contract = ref<ContractResponse | null>(null)
@@ -307,6 +309,7 @@ onMounted(() => {
             :contract-status="contract.status"
             :buyer-company-id="contract.buyerCompanyId"
             :seller-company-id="contract.sellerCompanyId"
+            :current-user-company-id="auth.me?.companyId"
             @add="openCreateMilestone"
             @submit="openSubmitMilestone"
             @refresh="onMilestoneRefresh"

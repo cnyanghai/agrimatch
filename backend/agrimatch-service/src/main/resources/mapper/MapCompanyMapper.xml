@@ -11,6 +11,12 @@
             c.address AS address,
             c.lat AS lat,
             c.lng AS lng,
+            COALESCE(c.owner_user_id,
+                     (SELECT u.user_id FROM sys_user u
+                      WHERE u.company_id = c.id AND u.is_deleted = 0
+                      ORDER BY u.user_id ASC LIMIT 1)
+            ) AS ownerUserId,
+            c.company_type AS companyType,
             IFNULL(s.cnt, 0) AS supplyCount,
             IFNULL(r.cnt, 0) AS requirementCount,
             s.cats AS supplyCats,
@@ -20,7 +26,7 @@
         LEFT JOIN (
             SELECT company_id,
                    COUNT(1) AS cnt,
-                   GROUP_CONCAT(DISTINCT category_name ORDER BY category_name SEPARATOR ',') AS cats
+                   SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT category_name ORDER BY category_name SEPARATOR ','), ',', 10) AS cats
             FROM bus_supply
             WHERE is_deleted = 0
               AND status = 0
@@ -30,7 +36,7 @@
         LEFT JOIN (
             SELECT company_id,
                    COUNT(1) AS cnt,
-                   GROUP_CONCAT(DISTINCT category_name ORDER BY category_name SEPARATOR ',') AS cats
+                   SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT category_name ORDER BY category_name SEPARATOR ','), ',', 10) AS cats
             FROM bus_requirement
             WHERE is_deleted = 0
               AND (expire_time IS NULL OR expire_time &gt; NOW(3))
@@ -39,7 +45,20 @@
         WHERE c.is_deleted = 0
         <if test="keyword != null and keyword != ''">
             AND (c.company_name LIKE CONCAT('%', #{keyword}, '%')
-            OR c.address LIKE CONCAT('%', #{keyword}, '%'))
+            OR c.address LIKE CONCAT('%', #{keyword}, '%')
+            OR EXISTS (SELECT 1 FROM bus_supply bs WHERE bs.company_id = c.id AND bs.is_deleted = 0 AND bs.status = 0
+                       AND bs.category_name LIKE CONCAT('%', #{keyword}, '%') LIMIT 1)
+            OR EXISTS (SELECT 1 FROM bus_requirement br WHERE br.company_id = c.id AND br.is_deleted = 0
+                       AND br.category_name LIKE CONCAT('%', #{keyword}, '%') LIMIT 1))
+        </if>
+        <if test="province != null and province != ''">
+            AND c.province = #{province}
+        </if>
+        <if test="city != null and city != ''">
+            AND c.city = #{city}
+        </if>
+        <if test="companyType != null and companyType != ''">
+            AND c.company_type = #{companyType}
         </if>
         ORDER BY c.update_time DESC, c.id DESC
     </select>

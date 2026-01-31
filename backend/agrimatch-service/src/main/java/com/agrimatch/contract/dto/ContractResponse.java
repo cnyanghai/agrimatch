@@ -70,6 +70,10 @@ public class ContractResponse {
     private String pdfHash;
     private String pdfUrl;
 
+    // 履约进度
+    private Integer milestoneTotal;
+    private Integer milestoneCompleted;
+
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
@@ -204,6 +208,12 @@ public class ContractResponse {
 
     public String getPdfUrl() { return pdfUrl; }
     public void setPdfUrl(String pdfUrl) { this.pdfUrl = pdfUrl; }
+
+    public Integer getMilestoneTotal() { return milestoneTotal; }
+    public void setMilestoneTotal(Integer milestoneTotal) { this.milestoneTotal = milestoneTotal; }
+
+    public Integer getMilestoneCompleted() { return milestoneCompleted; }
+    public void setMilestoneCompleted(Integer milestoneCompleted) { this.milestoneCompleted = milestoneCompleted; }
 
     public LocalDateTime getCreateTime() { return createTime; }
     public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }

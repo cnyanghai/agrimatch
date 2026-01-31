@@ -25,13 +25,17 @@ const visible = computed({
 const loading = ref(false)
 
 // 表单数据
-const form = ref<MilestoneCreateRequest>({
+const form = ref<MilestoneCreateRequest & { responsibleParty?: string }>({
   milestoneType: 'CUSTOM',
+  responsibleParty: undefined,
   milestoneName: '',
   description: '',
   expectedDate: '',
   sortOrder: 0
 })
+
+// 是否显示负责方选择（仅 CUSTOM 类型）
+const showPartySelect = computed(() => form.value.milestoneType === 'CUSTOM')
 
 // 车辆信息（发货节点用）
 const vehicleInfo = ref<VehicleInfo>({
@@ -66,6 +70,7 @@ function selectType(type: string) {
 function resetForm() {
   form.value = {
     milestoneType: 'CUSTOM',
+    responsibleParty: undefined,
     milestoneName: '',
     description: '',
     expectedDate: '',
@@ -118,6 +123,7 @@ async function handleSubmit() {
 
     const res = await createMilestone(props.contractId, {
       milestoneType: form.value.milestoneType,
+      responsibleParty: form.value.milestoneType === 'CUSTOM' ? form.value.responsibleParty : undefined,
       milestoneName: form.value.milestoneName.trim(),
       description: form.value.description?.trim() || undefined,
       expectedDate: form.value.expectedDate || undefined,
@@ -229,8 +235,40 @@ watch(visible, (val) => {
         />
       </div>
 
+      <!-- 负责方选择（自定义类型） -->
+      <div v-if="showPartySelect">
+        <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
+          负责方
+        </label>
+        <div class="flex gap-2">
+          <button
+            :class="[
+              'flex-1 py-2.5 rounded-xl border-2 text-sm font-bold transition-all',
+              form.responsibleParty === 'buyer'
+                ? 'border-autumn-400 bg-autumn-50 text-autumn-600'
+                : 'border-neutral-200 text-neutral-500 hover:border-neutral-300 hover:bg-neutral-50'
+            ]"
+            @click="form.responsibleParty = 'buyer'"
+          >
+            买方负责
+          </button>
+          <button
+            :class="[
+              'flex-1 py-2.5 rounded-xl border-2 text-sm font-bold transition-all',
+              form.responsibleParty === 'seller'
+                ? 'border-brand-500 bg-brand-50 text-brand-600'
+                : 'border-neutral-200 text-neutral-500 hover:border-neutral-300 hover:bg-neutral-50'
+            ]"
+            @click="form.responsibleParty = 'seller'"
+          >
+            卖方负责
+          </button>
+        </div>
+        <p class="text-xs text-neutral-400 mt-1">选择后，只有负责方可以提交凭证，对方确认</p>
+      </div>
+
       <!-- 车辆信息（发货节点） -->
-      <VehiclePicker 
+      <VehiclePicker
         v-if="showVehicle"
         v-model="vehicleInfo"
       />

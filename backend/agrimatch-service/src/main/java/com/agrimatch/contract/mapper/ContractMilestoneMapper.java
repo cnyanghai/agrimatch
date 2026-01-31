@@ -11,6 +11,8 @@ import java.util.List;
 public interface ContractMilestoneMapper {
     int insert(BusContractMilestone milestone);
 
+    int batchInsert(@Param("list") List<BusContractMilestone> list);
+
     BusContractMilestone selectById(@Param("id") Long id);
 
     List<BusContractMilestone> selectByContractId(@Param("contractId") Long contractId);
@@ -24,10 +26,14 @@ public interface ContractMilestoneMapper {
 
     int confirm(@Param("id") Long id, @Param("confirmUserId") Long confirmUserId);
 
-    int reject(@Param("id") Long id, @Param("confirmUserId") Long confirmUserId, @Param("remark") String remark);
+    int reject(@Param("id") Long id, @Param("confirmUserId") Long confirmUserId, @Param("rejectReason") String rejectReason);
 
     int logicalDelete(@Param("id") Long id);
 
     int countPendingByContractId(@Param("contractId") Long contractId);
+
+    int countTotalByContractId(@Param("contractId") Long contractId);
+
+    int countConfirmedByContractId(@Param("contractId") Long contractId);
 }
 

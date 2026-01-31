@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   FileText, Search, Pen, RefreshCw,
@@ -11,6 +11,7 @@ import { listContracts, deleteContract, cancelContract, type ContractResponse, t
 import { Skeleton } from '../components/ui'
 import ContractSignModal from '../components/contract/ContractSignModal.vue'
 
+const route = useRoute()
 const router = useRouter()
 
 // 状态
@@ -27,6 +28,7 @@ const pageSize = ref(10)
 const tabs = [
   { key: 'all', label: '所有合同', statusFilter: null },
   { key: 'pending', label: '待我签署', statusFilter: 1 },
+  { key: 'milestones', label: '待确认节点', statusFilter: null },
   { key: 'executing', label: '履行中', statusFilter: 3 },
   { key: 'archived', label: '已归档', statusFilter: 4 }
 ]
@@ -73,7 +75,13 @@ function switchTab(key: string) {
 const filteredContracts = computed(() => {
   let result = contracts.value
 
-  if (filterStatus.value !== null) {
+  // "待确认节点" tab: 筛选有未完成里程碑的合同
+  if (activeTab.value === 'milestones') {
+    result = result.filter(c =>
+      c.milestoneTotal != null && c.milestoneTotal > 0 &&
+      (c.milestoneCompleted ?? 0) < c.milestoneTotal
+    )
+  } else if (filterStatus.value !== null) {
     result = result.filter(c => c.status === filterStatus.value)
   }
 
@@ -130,11 +138,20 @@ const stats = computed(() => {
   }
 })
 
+// 有待处理里程碑的合同数
+const milestonePendingCount = computed(() =>
+  contracts.value.filter(c =>
+    c.milestoneTotal != null && c.milestoneTotal > 0 &&
+    (c.milestoneCompleted ?? 0) < c.milestoneTotal
+  ).length
+)
+
 // Tab 显示数量
 function getTabCount(key: string): number {
   switch (key) {
     case 'all': return stats.value.total
     case 'pending': return stats.value.pending
+    case 'milestones': return milestonePendingCount.value
     case 'executing': return stats.value.executing
     case 'archived': return stats.value.completed
     default: return 0
@@ -335,6 +352,11 @@ watch([searchKeyword, filterStatus], () => {
 })
 
 onMounted(() => {
+  // 从 URL query 恢复 tab 状态（如从仪表盘跳转而来）
+  const tabQuery = route.query.tab as string
+  if (tabQuery && tabs.some(t => t.key === tabQuery)) {
+    switchTab(tabQuery)
+  }
   loadContracts()
 })
 </script>
@@ -450,6 +472,7 @@ onMounted(() => {
                   <th class="px-6 py-4">交易对手</th>
                   <th class="px-6 py-4">合同总额</th>
                   <th class="px-6 py-4">创建日期</th>
+                  <th class="px-6 py-4 text-center">履约进度</th>
                   <th class="px-6 py-4 text-center">状态</th>
                   <th class="px-6 py-4 text-right">操作</th>
                 </tr>
@@ -480,6 +503,24 @@ onMounted(() => {
                   </td>
                   <td class="px-6 py-4 text-sm text-neutral-500">
                     {{ formatDate(contract.createTime) }}
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <template v-if="contract.milestoneTotal != null && contract.milestoneTotal > 0">
+                      <div class="flex items-center justify-center gap-2">
+                        <div class="w-16 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                          <div
+                            class="h-full rounded-full transition-all"
+                            :class="(contract.milestoneCompleted ?? 0) >= contract.milestoneTotal ? 'bg-brand-500' : 'bg-autumn-400'"
+                            :style="{ width: `${Math.round(((contract.milestoneCompleted ?? 0) / contract.milestoneTotal) * 100)}%` }"
+                          />
+                        </div>
+                        <span class="text-xs text-neutral-500 whitespace-nowrap">
+                          {{ contract.milestoneCompleted ?? 0 }}/{{ contract.milestoneTotal }}
+                        </span>
+                      </div>
+                    </template>
+                    <span v-else-if="contract.status >= 2" class="text-xs text-neutral-400">-</span>
+                    <span v-else class="text-xs text-neutral-300">-</span>
                   </td>
                   <td class="px-6 py-4 text-center">
                     <span

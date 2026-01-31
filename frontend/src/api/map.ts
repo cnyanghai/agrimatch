@@ -6,20 +6,29 @@ export interface MapCompanyMarkerResponse {
   address?: string
   lat?: number
   lng?: number
+  ownerUserId?: number
+  companyType?: string
   supplyCount: number
   requirementCount: number
   supplyCategories: string[]
   requirementCategories: string[]
 }
 
-export async function listMapCompanies(keyword?: string) {
+export interface MapCompanyQuery {
+  keyword?: string
+  province?: string
+  city?: string
+  companyType?: string
+}
+
+export async function listMapCompanies(params?: MapCompanyQuery) {
   const { data } = await http.get<Result<MapCompanyMarkerResponse[]>>('/api/map/companies', {
-    params: { keyword: keyword || undefined }
+    params: {
+      keyword: params?.keyword || undefined,
+      province: params?.province || undefined,
+      city: params?.city || undefined,
+      companyType: params?.companyType || undefined,
+    }
   })
   return data
 }
-
-
-
-
-

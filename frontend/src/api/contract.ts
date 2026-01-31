@@ -70,6 +70,9 @@ export interface ContractResponse {
   sellerSealUrl?: string
   pdfHash?: string
   pdfUrl?: string
+  // 履约进度
+  milestoneTotal?: number
+  milestoneCompleted?: number
   createTime: string
   updateTime: string
 }
@@ -223,6 +226,7 @@ export interface MilestoneResponse {
   id: number
   contractId: number
   milestoneType: string
+  responsibleParty?: string  // buyer/seller
   milestoneName: string
   description?: string
   expectedDate?: string
@@ -232,6 +236,7 @@ export interface MilestoneResponse {
   evidenceUrl?: string
   evidenceJson?: string
   remark?: string
+  rejectReason?: string
   status: string
   confirmUserId?: number
   confirmUserName?: string
@@ -243,6 +248,7 @@ export interface MilestoneResponse {
 
 export interface MilestoneCreateRequest {
   milestoneType: string
+  responsibleParty?: string  // buyer/seller（CUSTOM类型手动指定）
   milestoneName: string
   description?: string
   expectedDate?: string
@@ -400,6 +406,11 @@ export async function rejectMilestone(contractId: number, milestoneId: number, r
 
 export async function deleteMilestone(contractId: number, milestoneId: number): Promise<Result<void>> {
   const res = await http.delete(`/api/contracts/${contractId}/milestones/${milestoneId}`)
+  return res.data
+}
+
+export async function generateStandardMilestones(contractId: number): Promise<Result<MilestoneResponse[]>> {
+  const res = await http.post(`/api/contracts/${contractId}/milestones/actions/generate-standard`)
   return res.data
 }
 

@@ -98,5 +98,16 @@ public class MilestoneController {
         milestoneService.delete(userId, milestoneId);
         return Result.success();
     }
+
+    /**
+     * 一键生成标准履约流程
+     * 使用独立路径避免与 /{milestoneId} 路径冲突
+     */
+    @PostMapping("/actions/generate-standard")
+    public Result<List<MilestoneResponse>> generateStandard(Authentication authentication,
+                                                             @PathVariable("contractId") @NotNull Long contractId) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        return Result.success(milestoneService.generateStandardMilestones(userId, contractId));
+    }
 }
 

@@ -8,6 +8,7 @@
         <id column="id" property="id"/>
         <result column="contract_id" property="contractId"/>
         <result column="milestone_type" property="milestoneType"/>
+        <result column="responsible_party" property="responsibleParty"/>
         <result column="milestone_name" property="milestoneName"/>
         <result column="description" property="description"/>
         <result column="expected_date" property="expectedDate"/>
@@ -16,6 +17,7 @@
         <result column="evidence_url" property="evidenceUrl"/>
         <result column="evidence_json" property="evidenceJson"/>
         <result column="remark" property="remark"/>
+        <result column="reject_reason" property="rejectReason"/>
         <result column="status" property="status"/>
         <result column="confirm_user_id" property="confirmUserId"/>
         <result column="confirm_time" property="confirmTime"/>
@@ -29,9 +31,18 @@
     <insert id="insert" parameterType="com.agrimatch.contract.domain.BusContractMilestone"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO bus_contract_milestone
-        (contract_id, milestone_type, milestone_name, description, expected_date, sort_order, vehicle_info_json, status, is_deleted, create_time, update_time)
+        (contract_id, milestone_type, responsible_party, milestone_name, description, expected_date, sort_order, vehicle_info_json, status, is_deleted, create_time, update_time)
         VALUES
-        (#{contractId}, #{milestoneType}, #{milestoneName}, #{description}, #{expectedDate}, #{sortOrder}, #{vehicleInfoJson}, 'pending', 0, NOW(3), NOW(3))
+        (#{contractId}, #{milestoneType}, #{responsibleParty}, #{milestoneName}, #{description}, #{expectedDate}, #{sortOrder}, #{vehicleInfoJson}, 'pending', 0, NOW(3), NOW(3))
+    </insert>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO bus_contract_milestone
+        (contract_id, milestone_type, responsible_party, milestone_name, description, sort_order, status, is_deleted, create_time, update_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.contractId}, #{item.milestoneType}, #{item.responsibleParty}, #{item.milestoneName}, #{item.description}, #{item.sortOrder}, 'pending', 0, NOW(3), NOW(3))
+        </foreach>
     </insert>
 
     <select id="selectById" resultMap="MilestoneMap">
@@ -72,7 +83,7 @@
         SET status = 'rejected',
             confirm_user_id = #{confirmUserId},
             confirm_time = NOW(3),
-            remark = #{remark},
+            reject_reason = #{rejectReason},
             update_time = NOW(3)
         WHERE id = #{id} AND is_deleted = 0
     </update>
@@ -85,7 +96,17 @@
 
     <select id="countPendingByContractId" resultType="int">
         SELECT COUNT(*) FROM bus_contract_milestone
-        WHERE contract_id = #{contractId} AND status IN ('pending', 'submitted') AND is_deleted = 0
+        WHERE contract_id = #{contractId} AND status IN ('pending', 'submitted', 'rejected') AND is_deleted = 0
+    </select>
+
+    <select id="countTotalByContractId" resultType="int">
+        SELECT COUNT(*) FROM bus_contract_milestone
+        WHERE contract_id = #{contractId} AND is_deleted = 0
+    </select>
+
+    <select id="countConfirmedByContractId" resultType="int">
+        SELECT COUNT(*) FROM bus_contract_milestone
+        WHERE contract_id = #{contractId} AND status = 'confirmed' AND is_deleted = 0
     </select>
 
 </mapper>

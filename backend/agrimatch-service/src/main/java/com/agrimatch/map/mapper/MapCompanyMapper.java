@@ -7,7 +7,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface MapCompanyMapper {
-    List<Row> selectCompanyMarkers(@Param("keyword") String keyword);
+    List<Row> selectCompanyMarkers(
+            @Param("keyword") String keyword,
+            @Param("province") String province,
+            @Param("city") String city,
+            @Param("companyType") String companyType
+    );
 
     class Row {
         private Long companyId;
@@ -15,91 +20,49 @@ public interface MapCompanyMapper {
         private String address;
         private BigDecimal lat;
         private BigDecimal lng;
+        private Long ownerUserId;
+        private String companyType;
         private Integer supplyCount;
         private Integer requirementCount;
         private String supplyCats;
         private String requirementCats;
         private LocalDateTime updateTime;
 
-        public Long getCompanyId() {
-            return companyId;
-        }
+        public Long getCompanyId() { return companyId; }
+        public void setCompanyId(Long companyId) { this.companyId = companyId; }
 
-        public void setCompanyId(Long companyId) {
-            this.companyId = companyId;
-        }
+        public String getCompanyName() { return companyName; }
+        public void setCompanyName(String companyName) { this.companyName = companyName; }
 
-        public String getCompanyName() {
-            return companyName;
-        }
+        public String getAddress() { return address; }
+        public void setAddress(String address) { this.address = address; }
 
-        public void setCompanyName(String companyName) {
-            this.companyName = companyName;
-        }
+        public BigDecimal getLat() { return lat; }
+        public void setLat(BigDecimal lat) { this.lat = lat; }
 
-        public String getAddress() {
-            return address;
-        }
+        public BigDecimal getLng() { return lng; }
+        public void setLng(BigDecimal lng) { this.lng = lng; }
 
-        public void setAddress(String address) {
-            this.address = address;
-        }
+        public Long getOwnerUserId() { return ownerUserId; }
+        public void setOwnerUserId(Long ownerUserId) { this.ownerUserId = ownerUserId; }
 
-        public BigDecimal getLat() {
-            return lat;
-        }
+        public String getCompanyType() { return companyType; }
+        public void setCompanyType(String companyType) { this.companyType = companyType; }
 
-        public void setLat(BigDecimal lat) {
-            this.lat = lat;
-        }
+        public Integer getSupplyCount() { return supplyCount; }
+        public void setSupplyCount(Integer supplyCount) { this.supplyCount = supplyCount; }
 
-        public BigDecimal getLng() {
-            return lng;
-        }
+        public Integer getRequirementCount() { return requirementCount; }
+        public void setRequirementCount(Integer requirementCount) { this.requirementCount = requirementCount; }
 
-        public void setLng(BigDecimal lng) {
-            this.lng = lng;
-        }
+        public String getSupplyCats() { return supplyCats; }
+        public void setSupplyCats(String supplyCats) { this.supplyCats = supplyCats; }
 
-        public Integer getSupplyCount() {
-            return supplyCount;
-        }
+        public String getRequirementCats() { return requirementCats; }
+        public void setRequirementCats(String requirementCats) { this.requirementCats = requirementCats; }
 
-        public void setSupplyCount(Integer supplyCount) {
-            this.supplyCount = supplyCount;
-        }
-
-        public Integer getRequirementCount() {
-            return requirementCount;
-        }
-
-        public void setRequirementCount(Integer requirementCount) {
-            this.requirementCount = requirementCount;
-        }
-
-        public String getSupplyCats() {
-            return supplyCats;
-        }
-
-        public void setSupplyCats(String supplyCats) {
-            this.supplyCats = supplyCats;
-        }
-
-        public String getRequirementCats() {
-            return requirementCats;
-        }
-
-        public void setRequirementCats(String requirementCats) {
-            this.requirementCats = requirementCats;
-        }
-
-        public LocalDateTime getUpdateTime() {
-            return updateTime;
-        }
-
-        public void setUpdateTime(LocalDateTime updateTime) {
-            this.updateTime = updateTime;
-        }
+        public LocalDateTime getUpdateTime() { return updateTime; }
+        public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
     }
 }
 

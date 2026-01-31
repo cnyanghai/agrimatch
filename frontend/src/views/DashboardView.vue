@@ -63,7 +63,7 @@ const pendingItems = computed(() => {
       label: '个待确认里程碑',
       count: dashboard.value.pendingMilestoneCount,
       color: 'purple',
-      path: '/contracts'
+      path: '/contracts?tab=milestones'
     })
   }
   

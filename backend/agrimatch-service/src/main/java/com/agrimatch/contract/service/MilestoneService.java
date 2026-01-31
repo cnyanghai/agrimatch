@@ -45,5 +45,10 @@ public interface MilestoneService {
      * 检查合同是否所有节点都已完成
      */
     boolean isAllCompleted(Long contractId);
+
+    /**
+     * 根据付款方式一键生成标准履约节点
+     */
+    List<MilestoneResponse> generateStandardMilestones(Long userId, Long contractId);
 }
 

@@ -10,6 +10,7 @@ public class MilestoneResponse {
     private Long id;
     private Long contractId;
     private String milestoneType;
+    private String responsibleParty;
     private String milestoneName;
     private String description;
     private LocalDate expectedDate;
@@ -19,6 +20,7 @@ public class MilestoneResponse {
     private String evidenceUrl;
     private String evidenceJson;
     private String remark;
+    private String rejectReason;
     private String status;
     private Long confirmUserId;
     private String confirmUserName;
@@ -35,6 +37,9 @@ public class MilestoneResponse {
 
     public String getMilestoneType() { return milestoneType; }
     public void setMilestoneType(String milestoneType) { this.milestoneType = milestoneType; }
+
+    public String getResponsibleParty() { return responsibleParty; }
+    public void setResponsibleParty(String responsibleParty) { this.responsibleParty = responsibleParty; }
 
     public String getMilestoneName() { return milestoneName; }
     public void setMilestoneName(String milestoneName) { this.milestoneName = milestoneName; }
@@ -62,6 +67,9 @@ public class MilestoneResponse {
 
     public String getRemark() { return remark; }
     public void setRemark(String remark) { this.remark = remark; }
+
+    public String getRejectReason() { return rejectReason; }
+    public void setRejectReason(String rejectReason) { this.rejectReason = rejectReason; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
