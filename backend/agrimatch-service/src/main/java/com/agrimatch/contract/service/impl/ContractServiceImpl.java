@@ -304,6 +304,13 @@ public class ContractServiceImpl implements ContractService {
         if (conversation == null)
             throw new ApiException(ResultCode.NOT_FOUND.getCode(), "会话不存在");
 
+        // 检查是否已从此会话创建过合同（防止双方重复创建）
+        BusContract existing = contractMapper.selectByConversationId(req.getConversationId());
+        if (existing != null) {
+            // 已存在合同，直接返回该合同ID（幂等处理）
+            return existing.getId();
+        }
+
         // 确认当前用户是会话参与方
         Long aUserId = conversation.getAUserId();
         Long bUserId = conversation.getBUserId();

@@ -143,6 +143,15 @@
         LIMIT 1
     </select>
 
+    <!-- 根据会话ID查询合同（防止同一会话重复创建） -->
+    <select id="selectByConversationId" resultMap="BusContractMap">
+        SELECT * FROM bus_contract
+        WHERE conversation_id = #{conversationId}
+          AND is_deleted = 0
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
     <update id="update" parameterType="com.agrimatch.contract.domain.BusContract">
         UPDATE bus_contract
         <set>

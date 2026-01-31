@@ -431,6 +431,20 @@ export function useNegotiationWorkspace() {
           // 忽略解析错误
         }
       }
+
+      // 收到 CONTRACT 消息时，更新状态为 SIGNING（对方已生成合同）
+      if (activeConversationId.value === msgConvId && message.msgType === 'CONTRACT' && message.payloadJson) {
+        try {
+          const payload = JSON.parse(message.payloadJson)
+          contractStatus.value = 'SIGNING'
+          if (payload.contractId) {
+            ElMessage.success('合同已生成，正在跳转到合同详情...')
+            router.push(`/contracts/${payload.contractId}`)
+          }
+        } catch {
+          // 忽略解析错误
+        }
+      }
     }
 
     if (type === 'SENT' && data.tempId && (data.id || data.messageId)) {

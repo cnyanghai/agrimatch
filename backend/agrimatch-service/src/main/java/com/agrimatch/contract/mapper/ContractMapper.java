@@ -20,6 +20,8 @@ public interface ContractMapper {
     
     BusContract selectByQuoteMessageId(@Param("quoteMessageId") Long quoteMessageId);
 
+    BusContract selectByConversationId(@Param("conversationId") Long conversationId);
+
     List<BusContract> selectList(@Param("q") ContractQuery q);
 
     int update(BusContract c);
