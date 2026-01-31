@@ -131,6 +131,7 @@ public class ChatServiceImpl implements ChatService {
         c.setSubjectType(st);
         c.setSubjectId(subjectId);
         c.setSubjectSnapshotJson(StringUtils.hasText(subjectSnapshotJson) ? subjectSnapshotJson : null);
+        c.setInitiatorUserId(userId);
         int rows = chatMapper.insertConversation(c);
         if (rows != 1 || c.getId() == null) throw new ApiException(ResultCode.SERVER_ERROR);
         return c.getId();
@@ -152,6 +153,7 @@ public class ChatServiceImpl implements ChatService {
             o.setSubjectType(r.getSubjectType());
             o.setSubjectId(r.getSubjectId());
             o.setSubjectSnapshotJson(r.getSubjectSnapshotJson());
+            o.setInitiatorUserId(r.getInitiatorUserId());
             o.setLastContent(r.getLastContent());
             o.setLastTime(r.getLastTime());
             o.setUnreadCount(r.getUnreadCount());

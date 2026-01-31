@@ -289,7 +289,132 @@ public class ContractServiceImpl implements ContractService {
 
         return contract.getId();
     }
-    
+
+    @Override
+    @Transactional
+    public Long createFromNegotiation(Long userId, ContractFromNegotiationRequest req) {
+        if (userId == null) throw new ApiException(401, "未登录");
+        SysUser currentUser = userMapper.selectById(userId);
+        if (currentUser == null) throw new ApiException(401, "未登录");
+        if (currentUser.getCompanyId() == null)
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "请先完善公司档案");
+
+        // 获取会话
+        BusChatConversation conversation = chatMapper.selectConversationById(req.getConversationId());
+        if (conversation == null)
+            throw new ApiException(ResultCode.NOT_FOUND.getCode(), "会话不存在");
+
+        // 确认当前用户是会话参与方
+        Long aUserId = conversation.getAUserId();
+        Long bUserId = conversation.getBUserId();
+        if (!userId.equals(aUserId) && !userId.equals(bUserId))
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "您不是该会话的参与方");
+
+        // 确定买卖双方：
+        // initiatorUserId 是发起会话的人
+        // SUPPLY 类型: 发起人是买方（买家联系卖家）
+        // NEED   类型: 发起人是卖方（卖家联系买家）
+        Long initiatorUserId = conversation.getInitiatorUserId();
+        String subjectType = conversation.getSubjectType();
+        Long buyerUserId;
+        Long sellerUserId;
+
+        if (initiatorUserId != null) {
+            Long otherUserId = initiatorUserId.equals(aUserId) ? bUserId : aUserId;
+            if ("SUPPLY".equalsIgnoreCase(subjectType)) {
+                buyerUserId = initiatorUserId;
+                sellerUserId = otherUserId;
+            } else {
+                buyerUserId = otherUserId;
+                sellerUserId = initiatorUserId;
+            }
+        } else {
+            // 兜底：当前用户为买方
+            buyerUserId = userId;
+            sellerUserId = userId.equals(aUserId) ? bUserId : aUserId;
+        }
+
+        SysUser buyerUser = userMapper.selectById(buyerUserId);
+        SysUser sellerUser = userMapper.selectById(sellerUserId);
+        if (buyerUser == null || sellerUser == null)
+            throw new ApiException(ResultCode.NOT_FOUND.getCode(), "用户信息不存在");
+
+        Long buyerCompanyId = buyerUser.getCompanyId();
+        Long sellerCompanyId = sellerUser.getCompanyId();
+
+        if (buyerCompanyId == null)
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "买方尚未完善公司信息，无法创建合同");
+        if (sellerCompanyId == null)
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "卖方尚未完善公司信息，无法创建合同");
+        if (buyerCompanyId.equals(sellerCompanyId))
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "买卖双方不能是同一家公司");
+
+        // 产品名称
+        String productName = req.getProductName();
+        String categoryName = req.getCategoryName();
+        String paramsJson = req.getParamsJson();
+
+        // 从会话快照补充缺失字段
+        if (conversation.getSubjectSnapshotJson() != null) {
+            try {
+                JsonNode snapshot = objectMapper.readTree(conversation.getSubjectSnapshotJson());
+                if ((productName == null || productName.isBlank()) && snapshot.has("productName"))
+                    productName = snapshot.get("productName").asText();
+                if ((productName == null || productName.isBlank()) && snapshot.has("categoryName"))
+                    productName = snapshot.get("categoryName").asText();
+                if ((productName == null || productName.isBlank()) && snapshot.has("title"))
+                    productName = snapshot.get("title").asText();
+                if ((categoryName == null || categoryName.isBlank()) && snapshot.has("categoryName"))
+                    categoryName = snapshot.get("categoryName").asText();
+                if ((paramsJson == null || paramsJson.isBlank()) && snapshot.has("paramsJson"))
+                    paramsJson = snapshot.get("paramsJson").asText();
+            } catch (Exception ignored) {}
+        }
+        if (productName == null || productName.isBlank()) productName = "商品";
+
+        // 校验数量和价格
+        boolean isBasis = "BASIS".equalsIgnoreCase(req.getPriceType())
+                || (req.getBasisPrice() != null && StringUtils.hasText(req.getContractCode()));
+        if (req.getQuantity() == null || req.getQuantity().compareTo(BigDecimal.ZERO) <= 0)
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "数量不能为空");
+        if (!isBasis && (req.getUnitPrice() == null || req.getUnitPrice().compareTo(BigDecimal.ZERO) <= 0))
+            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "价格不能为空");
+
+        // 构建合同
+        String contractNo = generateContractNo();
+        BusContract contract = new BusContract();
+        contract.setConversationId(req.getConversationId());
+        contract.setContractNo(contractNo);
+        contract.setBuyerCompanyId(buyerCompanyId);
+        contract.setSellerCompanyId(sellerCompanyId);
+        contract.setProductName(productName);
+        contract.setCategoryName(categoryName);
+        contract.setQuantity(req.getQuantity());
+        contract.setUnit(req.getUnit() != null ? req.getUnit() : "吨");
+        contract.setUnitPrice(req.getUnitPrice());
+        contract.setParamsJson(paramsJson);
+        contract.setBasisPrice(req.getBasisPrice());
+        contract.setContractCode(req.getContractCode());
+        contract.setTotalAmount(calcTotal(req.getQuantity(), req.getUnitPrice()));
+        contract.setDeliveryDate(req.parseDeliveryDate());
+        contract.setDeliveryAddress(req.getDeliveryAddress());
+        contract.setPaymentMethod(req.getPaymentMethod());
+        contract.setDeliveryMode(req.getDeliveryMode());
+        contract.setTermsJson(generateDefaultTermsJson(contract));
+        contract.setStatus(0); // 草稿
+
+        int rows = contractMapper.insert(contract);
+        if (rows != 1 || contract.getId() == null)
+            throw new ApiException(ResultCode.SERVER_ERROR);
+
+        logChange(contract.getId(), "CREATE", "从议价会话创建合同", null, null, userId);
+
+        // 发送 CONTRACT 消息到聊天
+        sendContractMessage(userId, contract, conversation);
+
+        return contract.getId();
+    }
+
     /**
      * 发送合同消息到聊天，并通过 WebSocket 广播给双方
      */

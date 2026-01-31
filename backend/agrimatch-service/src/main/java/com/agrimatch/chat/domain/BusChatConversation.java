@@ -12,6 +12,7 @@ public class BusChatConversation {
     private Long lastMsgId;
     private String lastContent;
     private LocalDateTime lastTime;
+    private Long initiatorUserId;
     private Integer isDeleted;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
@@ -86,6 +87,14 @@ public class BusChatConversation {
 
     public void setLastTime(LocalDateTime lastTime) {
         this.lastTime = lastTime;
+    }
+
+    public Long getInitiatorUserId() {
+        return initiatorUserId;
+    }
+
+    public void setInitiatorUserId(Long initiatorUserId) {
+        this.initiatorUserId = initiatorUserId;
     }
 
     public Integer getIsDeleted() {

@@ -151,6 +151,23 @@ export interface ContractFromQuoteRequest {
   terms?: string
 }
 
+export interface ContractFromNegotiationRequest {
+  conversationId: number
+  productName?: string
+  categoryName?: string
+  quantity?: number
+  unit?: string
+  unitPrice?: number
+  basisPrice?: number
+  contractCode?: string
+  priceType?: string
+  deliveryDate?: string
+  deliveryAddress?: string
+  deliveryMode?: string
+  paymentMethod?: string
+  paramsJson?: string
+}
+
 export interface ContractUpdateRequest {
   title?: string
   contractType?: string
@@ -263,6 +280,11 @@ export interface ContractCreateRequest {
 
 export async function createContractFromQuote(req: ContractFromQuoteRequest): Promise<Result<number>> {
   const res = await http.post('/api/contracts/from-quote', req)
+  return res.data
+}
+
+export async function createContractFromNegotiation(req: ContractFromNegotiationRequest): Promise<Result<number>> {
+  const res = await http.post('/api/contracts/from-negotiation', req)
   return res.data
 }
 

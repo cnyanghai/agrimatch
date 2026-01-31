@@ -15,6 +15,9 @@ public class ChatConversationResponse {
     private Long subjectId;
     private String subjectSnapshotJson;
 
+    /** 会话发起人userId（用于判断买方/卖方角色） */
+    private Long initiatorUserId;
+
     private String lastContent;
     private LocalDateTime lastTime;
     private Integer unreadCount;
@@ -89,6 +92,14 @@ public class ChatConversationResponse {
 
     public void setSubjectSnapshotJson(String subjectSnapshotJson) {
         this.subjectSnapshotJson = subjectSnapshotJson;
+    }
+
+    public Long getInitiatorUserId() {
+        return initiatorUserId;
+    }
+
+    public void setInitiatorUserId(Long initiatorUserId) {
+        this.initiatorUserId = initiatorUserId;
     }
 
     public String getLastContent() {

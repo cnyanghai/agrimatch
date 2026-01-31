@@ -50,6 +50,15 @@ public class ContractController {
         return Result.success(contractService.createFromQuote(userId, req));
     }
 
+    /**
+     * 从议价会话创建合同（双方确认条款后，无需报价单）
+     */
+    @PostMapping("/from-negotiation")
+    public Result<Long> createFromNegotiation(Authentication authentication, @Valid @RequestBody ContractFromNegotiationRequest req) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        return Result.success(contractService.createFromNegotiation(userId, req));
+    }
+
     @GetMapping("/{id}")
     public Result<ContractResponse> getById(Authentication authentication, @PathVariable("id") @NotNull Long id) {
         Long userId = SecurityUtil.requireUserId(authentication);

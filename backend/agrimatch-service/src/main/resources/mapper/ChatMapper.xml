@@ -147,9 +147,9 @@
     <insert id="insertConversation" parameterType="com.agrimatch.chat.domain.BusChatConversation"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO bus_chat_conversation
-        (a_user_id, b_user_id, subject_type, subject_id, subject_snapshot_json, last_msg_id, last_content, last_time, is_deleted, create_time, update_time)
+        (a_user_id, b_user_id, subject_type, subject_id, subject_snapshot_json, initiator_user_id, last_msg_id, last_content, last_time, is_deleted, create_time, update_time)
         VALUES
-        (#{aUserId}, #{bUserId}, #{subjectType}, #{subjectId}, #{subjectSnapshotJson}, NULL, NULL, NULL, 0, NOW(3), NOW(3))
+        (#{aUserId}, #{bUserId}, #{subjectType}, #{subjectId}, #{subjectSnapshotJson}, #{initiatorUserId}, NULL, NULL, NULL, 0, NOW(3), NOW(3))
     </insert>
     
     <select id="selectConversationById" resultType="com.agrimatch.chat.domain.BusChatConversation">
@@ -191,6 +191,14 @@
             t.subject_type AS subjectType,
             t.subject_id AS subjectId,
             t.subject_snapshot_json AS subjectSnapshotJson,
+            COALESCE(t.initiator_user_id,
+                CASE
+                    WHEN t.subject_type = 'SUPPLY' AND bs.user_id IS NOT NULL
+                        THEN CASE WHEN bs.user_id = t.a_user_id THEN t.b_user_id ELSE t.a_user_id END
+                    WHEN t.subject_type = 'NEED' AND br.user_id IS NOT NULL
+                        THEN CASE WHEN br.user_id = t.a_user_id THEN t.b_user_id ELSE t.a_user_id END
+                END
+            ) AS initiatorUserId,
             t.last_content AS lastContent,
             t.last_time AS lastTime,
             IFNULL(u.unread_count, 0) AS unreadCount
@@ -202,6 +210,8 @@
             WHERE c.is_deleted = 0
               AND (c.a_user_id = #{userId} OR c.b_user_id = #{userId})
         ) t
+        LEFT JOIN bus_supply bs ON t.subject_type = 'SUPPLY' AND bs.id = t.subject_id
+        LEFT JOIN bus_requirement br ON t.subject_type = 'NEED' AND br.id = t.subject_id
         LEFT JOIN sys_user pu ON pu.user_id = t.peer_user_id AND pu.del_flag = '0'
         LEFT JOIN bus_company pc ON pc.id = pu.company_id AND (pc.is_deleted IS NULL OR pc.is_deleted = 0)
         LEFT JOIN (

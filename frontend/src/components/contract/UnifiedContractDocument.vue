@@ -175,9 +175,9 @@ const bothConfirmed = computed(() => props.buyerConfirmed && props.sellerConfirm
 // 双方是否都已签署
 const bothSigned = computed(() => props.buyerSigned && props.sellerSigned)
 
-// 是否可以确认条款
+// 是否可以确认条款（DRAFT 或 PENDING_CONFIRM 状态均可）
 const canConfirm = computed(() => {
-  if (props.status !== 'PENDING_CONFIRM' && props.status !== 'DRAFT') return false
+  if (props.status !== 'DRAFT' && props.status !== 'PENDING_CONFIRM') return false
   if (props.currentIsBuyer) return !props.buyerConfirmed
   return !props.sellerConfirmed
 })
@@ -552,7 +552,9 @@ function formatDateTime(dateStr: string | undefined): string {
                 'relative p-6 rounded-lg min-h-[120px] flex flex-col items-center justify-center transition-all',
                 buyerConfirmed
                   ? 'border border-brand-200 bg-brand-50/50'
-                  : 'border-2 border-dashed border-gray-300 bg-gray-50 cursor-pointer hover:border-brand-500 hover:bg-brand-50/30 group'
+                  : canConfirm && currentIsBuyer
+                    ? 'border-2 border-dashed border-gray-300 bg-gray-50 cursor-pointer hover:border-brand-500 hover:bg-brand-50/30 group'
+                    : 'border-2 border-dashed border-gray-200 bg-gray-50/50 opacity-60'
               ]"
               @click="currentIsBuyer && canConfirm && emit('confirm')"
             >
@@ -574,7 +576,9 @@ function formatDateTime(dateStr: string | undefined): string {
                 'relative p-6 rounded-lg min-h-[120px] flex flex-col items-center justify-center transition-all',
                 sellerConfirmed
                   ? 'border border-brand-200 bg-brand-50/50'
-                  : 'border-2 border-dashed border-gray-300 bg-gray-50 cursor-pointer hover:border-brand-500 hover:bg-brand-50/30 group'
+                  : canConfirm && !currentIsBuyer
+                    ? 'border-2 border-dashed border-gray-300 bg-gray-50 cursor-pointer hover:border-brand-500 hover:bg-brand-50/30 group'
+                    : 'border-2 border-dashed border-gray-200 bg-gray-50/50 opacity-60'
               ]"
               @click="!currentIsBuyer && canConfirm && emit('confirm')"
             >

@@ -12,6 +12,11 @@ public interface ContractService {
      */
     Long createFromQuote(Long userId, ContractFromQuoteRequest req);
 
+    /**
+     * 从议价会话创建合同（无需报价单，直接使用会话数据）
+     */
+    Long createFromNegotiation(Long userId, ContractFromNegotiationRequest req);
+
     ContractResponse getById(Long viewerUserId, Long id);
 
     List<ContractResponse> list(Long viewerUserId, ContractQuery q);

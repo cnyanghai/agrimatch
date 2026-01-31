@@ -24,7 +24,7 @@ import type { RequirementData } from '../components/negotiation/ProductRequireme
 import type { ContractData, ContractStatus } from '../components/negotiation/ContractPreview.vue'
 import type { FileUploadResponse } from '../api/file'
 import { giftPoints as giftPointsApi } from '../api/points'
-import { createContractFromQuote, type ContractFromQuoteRequest } from '../api/contract'
+import { createContractFromNegotiation, type ContractFromNegotiationRequest } from '../api/contract'
 import { getMyCompany, getCompanyByUserId, type CompanyResponse } from '../api/company'
 import { getQualityStandards } from '../utils/qualityStandards'
 import { parseProductParams } from '../utils/chat/paramsParser'
@@ -368,7 +368,20 @@ export function useNegotiationWorkspace() {
 
   /** 当前用户是否为买方（基于激活的会话） */
   const currentIsBuyer = computed(() => {
-    return activeConversation.value?.subjectType === 'SUPPLY'
+    const conv = activeConversation.value
+    if (!conv) return true
+
+    const myUserId = auth.me?.userId
+    if (myUserId && conv.initiatorUserId) {
+      const isInitiator = myUserId === conv.initiatorUserId
+      // SUPPLY: 发起人是买方（买家联系卖家）
+      // NEED: 发起人是卖方（卖家联系买家）
+      if (conv.subjectType === 'SUPPLY') return isInitiator
+      if (conv.subjectType === 'NEED') return !isInitiator
+    }
+
+    // 旧会话无 initiatorUserId 时的兜底：subjectType === 'SUPPLY' 视为买方
+    return conv.subjectType === 'SUPPLY'
   })
 
   // ==================== WebSocket Handler ====================
@@ -1091,51 +1104,42 @@ export function useNegotiationWorkspace() {
       return
     }
 
-    // 获取已接受的报价消息
-    const acceptedQuote = chatMessages.latestAcceptedQuoteMessage.value
-    if (!acceptedQuote || typeof acceptedQuote.id !== 'number') {
-      ElMessage.error('未找到已接受的报价，无法生成合同')
+    const convId = activeConversationId.value
+    if (!convId) {
+      ElMessage.error('未选中会话，无法生成合同')
       return
     }
 
     sending.value = true
 
     try {
-      // 构建请求数据
-      const contract = contractData.value
-      const req: ContractFromQuoteRequest = {
-        quoteMessageId: acceptedQuote.id,
-        deliveryDate: contract.deliveryDate,
-        deliveryAddress: contract.deliveryPlace,
-        paymentMethod: contract.paymentMethod
+      // 从合同预览数据构建请求
+      const cd = contractData.value
+      const product = cd.products[0]
+      const req: ContractFromNegotiationRequest = {
+        conversationId: convId,
+        productName: product?.name,
+        categoryName: undefined,
+        quantity: product?.quantity,
+        unit: product?.unit,
+        unitPrice: product?.unitPrice,
+        basisPrice: cd.basisQuotes?.[0]?.basisPrice,
+        contractCode: cd.basisQuotes?.[0]?.contractCode,
+        priceType: cd.priceType,
+        deliveryDate: cd.deliveryDate,
+        deliveryAddress: cd.deliveryPlace,
+        deliveryMode: undefined,
+        paymentMethod: cd.paymentMethod
       }
 
-      // 调用后端API创建合同
-      const res = await createContractFromQuote(req)
+      // 调用后端API创建合同（后端会同时发送CONTRACT聊天消息）
+      const res = await createContractFromNegotiation(req)
 
       if (res.code === 0 && res.data) {
         const contractId = res.data
 
         // 更新状态为签署中
         contractStatus.value = 'SIGNING'
-
-        // 发送合同消息到聊天
-        const convId = activeConversationId.value
-        if (convId && webSocket.ensureConnected()) {
-          const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`
-          const contract = contractData.value
-          const contractPayload = JSON.stringify({
-            contractId: contractId,
-            contractNo: contract.contractNo,
-            productName: contract.products[0]?.name || '产品',
-            totalAmount: contract.totalAmount,
-            status: 1 // PENDING_CONFIRM
-          })
-
-          addPendingMessageToConv(convId, 'CONTRACT', '[合同]', tempId, contractPayload)
-          chatMessages.addPendingMessage(convId, 'CONTRACT', '[合同]', tempId, contractPayload)
-          webSocket.sendContract(convId, contractPayload, tempId)
-        }
 
         ElMessage.success('合同已生成，正在跳转到合同详情...')
 

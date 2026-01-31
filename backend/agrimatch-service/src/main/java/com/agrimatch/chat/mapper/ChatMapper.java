@@ -129,6 +129,7 @@ public interface ChatMapper {
         private String subjectType;
         private Long subjectId;
         private String subjectSnapshotJson;
+        private Long initiatorUserId;
         private String lastContent;
         private java.time.LocalDateTime lastTime;
         private Integer unreadCount;
@@ -203,6 +204,14 @@ public interface ChatMapper {
 
         public void setSubjectSnapshotJson(String subjectSnapshotJson) {
             this.subjectSnapshotJson = subjectSnapshotJson;
+        }
+
+        public Long getInitiatorUserId() {
+            return initiatorUserId;
+        }
+
+        public void setInitiatorUserId(Long initiatorUserId) {
+            this.initiatorUserId = initiatorUserId;
         }
 
         public String getLastContent() {

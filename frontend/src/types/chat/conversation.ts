@@ -84,6 +84,8 @@ export interface ChatConversationResponse {
   subjectType?: SubjectType | string
   subjectId?: number
   subjectSnapshotJson?: string
+  /** 会话发起人userId（用于判断买方/卖方角色） */
+  initiatorUserId?: number
   lastContent?: string
   lastTime?: string
   unreadCount?: number

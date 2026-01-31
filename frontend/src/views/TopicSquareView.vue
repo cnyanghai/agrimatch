@@ -372,7 +372,7 @@ onMounted(() => {
             
             <div v-if="isLoggedIn && followedUsers.length > 0" class="space-y-6">
               <div v-for="user in followedUsers" :key="user.userId" class="flex items-center gap-4 group/exp cursor-pointer" @click="go(`/users/${user.userId}/posts`)">
-                <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold shrink-0 overflow-hidden">
+                <div class="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center text-brand-600 font-bold shrink-0 overflow-hidden">
                   <img v-if="user.avatar" :src="user.avatar" alt="头像" class="w-full h-full object-cover" />
                   <span v-else>{{ (user.nickName || user.userName || '?')[0] }}</span>
                 </div>
