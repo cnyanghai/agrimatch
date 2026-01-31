@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUiStore } from '../store/ui'
 import { getProductTree, type ProductNode } from '../api/product'
 import { listPosts, type PostResponse } from '../api/post'
 import { getPlatformStats, type StatsResponse } from '../api/stats'
@@ -29,10 +30,12 @@ import {
   Users,
   Sprout,
   Factory,
-  Cog
+  Cog,
+  ShieldCheck
 } from 'lucide-vue-next'
 
 const router = useRouter()
+const ui = useUiStore()
 
 // 产业板块定义（key 与 schemaCode 统一）
 const domains = [
@@ -565,45 +568,76 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <!-- 底部流程引导 -->
-    <section class="bg-slate-900 py-16 relative overflow-hidden">
-      <div class="max-w-7xl mx-auto px-4 text-center">
-        <h2 class="text-2xl font-bold text-white mb-4">开启您的专业交易之旅</h2>
-        <p class="text-gray-400 text-sm mb-10 max-w-xl mx-auto">从发现商机到合约履行，沃谷为您提供全流程保障</p>
+    <!-- 平台核心能力 -->
+    <section class="bg-slate-900 py-14 relative overflow-hidden">
+      <!-- 背景光晕 -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-600/[.07] rounded-full blur-[120px] pointer-events-none"></div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div class="flex flex-col items-center">
-            <div class="w-16 h-16 bg-white/5 border border-white/10 text-brand-400 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xl">
-              <span class="text-2xl font-bold">01</span>
+      <div class="relative max-w-7xl mx-auto px-4">
+        <!-- 标题 -->
+        <div class="text-center mb-10">
+          <p class="text-xs font-bold text-brand-400 uppercase tracking-widest mb-3">Why WoGu</p>
+          <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">一站式农牧供应链服务平台</h2>
+          <p class="text-gray-400 text-sm max-w-lg mx-auto">从供需对接到合约履行，从行业交流到企业合作——沃谷为您构建完整的数字化交易生态</p>
+        </div>
+
+        <!-- 6 大能力网格 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- 智能匹配 -->
+          <div class="group bg-white/[.04] border border-white/[.08] rounded-2xl p-5 hover:bg-white/[.07] hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 rounded-xl bg-brand-500/15 flex items-center justify-center mb-4">
+              <Search :size="22" class="text-brand-400" />
             </div>
-            <h4 class="font-bold text-white mb-2">发布/发现</h4>
-            <p class="text-[10px] text-gray-500 px-4 leading-relaxed">精准匹配海量供需信息</p>
+            <h4 class="text-base font-bold text-white mb-2">智能匹配</h4>
+            <p class="text-sm text-gray-400 leading-relaxed">基于品类、规格、区域等多维度，精准连接供需双方，让商机主动找到您</p>
           </div>
 
-          <div class="flex flex-col items-center">
-            <div class="w-16 h-16 bg-white/5 border border-white/10 text-autumn-400 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xl">
-              <span class="text-2xl font-bold">02</span>
+          <!-- 在线议价 -->
+          <div class="group bg-white/[.04] border border-white/[.08] rounded-2xl p-5 hover:bg-white/[.07] hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 rounded-xl bg-autumn-400/15 flex items-center justify-center mb-4">
+              <MessageCircle :size="22" class="text-autumn-400" />
             </div>
-            <h4 class="font-bold text-white mb-2">洽谈议价</h4>
-            <p class="text-[10px] text-gray-500 px-4 leading-relaxed">在线直聊，快速达成意向</p>
+            <h4 class="text-base font-bold text-white mb-2">在线议价</h4>
+            <p class="text-sm text-gray-400 leading-relaxed">实时聊天直谈，结构化报价单，高效达成交易意向，告别低效电话沟通</p>
           </div>
 
-          <div class="flex flex-col items-center">
-            <div class="w-16 h-16 bg-white/5 border border-white/10 text-purple-400 rounded-xl flex items-center justify-center mb-4 backdrop-blur-xl">
-              <span class="text-2xl font-bold">03</span>
+          <!-- 电子签约 -->
+          <div class="group bg-white/[.04] border border-white/[.08] rounded-2xl p-5 hover:bg-white/[.07] hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 rounded-xl bg-purple-400/15 flex items-center justify-center mb-4">
+              <ShieldCheck :size="22" class="text-purple-400" />
             </div>
-            <h4 class="font-bold text-white mb-2">电子签约</h4>
-            <p class="text-[10px] text-gray-500 px-4 leading-relaxed">合法合规，保障双方权益</p>
+            <h4 class="text-base font-bold text-white mb-2">电子签约</h4>
+            <p class="text-sm text-gray-400 leading-relaxed">合法合规的电子合同与电子印章，在线签署即时生效，保障双方权益</p>
           </div>
 
-          <div class="flex flex-col items-center">
-            <div class="w-16 h-16 bg-brand-600 text-white rounded-xl flex items-center justify-center mb-4 shadow-md">
-              <Gift :size="28" />
+          <!-- 话题社区 -->
+          <div class="group bg-white/[.04] border border-white/[.08] rounded-2xl p-5 hover:bg-white/[.07] hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 rounded-xl bg-sky-400/15 flex items-center justify-center mb-4">
+              <Users :size="22" class="text-sky-400" />
             </div>
-            <h4 class="font-bold text-white mb-2">履约/奖励</h4>
-            <p class="text-[10px] text-gray-500 px-4 leading-relaxed">完成交易，赢取丰厚积分</p>
+            <h4 class="text-base font-bold text-white mb-2">话题社区</h4>
+            <p class="text-sm text-gray-400 leading-relaxed">行业资讯、经验分享、市场动态，与同行深度交流，构建专业人脉圈</p>
+          </div>
+
+          <!-- 企业名录 -->
+          <div class="group bg-white/[.04] border border-white/[.08] rounded-2xl p-5 hover:bg-white/[.07] hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 rounded-xl bg-emerald-400/15 flex items-center justify-center mb-4">
+              <Building2 :size="22" class="text-emerald-400" />
+            </div>
+            <h4 class="text-base font-bold text-white mb-2">企业名录</h4>
+            <p class="text-sm text-gray-400 leading-relaxed">发现优质供应商与采购商，查看企业主页与资质，让合作更有信心</p>
+          </div>
+
+          <!-- 积分奖励 -->
+          <div class="group bg-white/[.04] border border-white/[.08] rounded-2xl p-5 hover:bg-white/[.07] hover:-translate-y-1 transition-all duration-300">
+            <div class="w-12 h-12 rounded-xl bg-amber-400/15 flex items-center justify-center mb-4">
+              <Gift :size="22" class="text-amber-400" />
+            </div>
+            <h4 class="text-base font-bold text-white mb-2">积分奖励</h4>
+            <p class="text-sm text-gray-400 leading-relaxed">完成交易赚取积分，积分商城兑换好礼，交易越多回馈越丰厚</p>
           </div>
         </div>
+
       </div>
     </section>
 
