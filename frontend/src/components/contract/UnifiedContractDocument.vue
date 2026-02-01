@@ -84,6 +84,10 @@ export interface ContractDocumentData {
   deliveryMode?: string
   /** 合同总金额 */
   totalAmount: number
+  /** 发票类型 */
+  invoiceType?: string
+  /** 包装要求 */
+  packaging?: string
   /** 备注 */
   remark?: string
   /** 合同签订地（用于争议解决条款） */
@@ -485,6 +489,21 @@ function formatDateTime(dateStr: string | undefined): string {
             三、付款方式 (Payment Method)
           </h3>
           <p class="text-sm text-neutral-700 pl-3">{{ data.paymentMethod }}</p>
+        </div>
+
+        <!-- ========== 发票与包装 ========== -->
+        <div v-if="data.invoiceType || data.packaging" class="mb-8">
+          <h3 class="font-bold text-sm bg-brand-50 p-2 mb-3 px-3 border-l-4 border-brand-600">
+            发票与包装 (Invoice & Packaging)
+          </h3>
+          <div class="text-sm space-y-2 pl-3 text-neutral-700">
+            <p v-if="data.invoiceType">
+              <span class="font-medium">发票类型:</span> {{ data.invoiceType }}
+            </p>
+            <p v-if="data.packaging">
+              <span class="font-medium">包装要求:</span> {{ data.packaging }}
+            </p>
+          </div>
         </div>
 
         <!-- ========== 四、交货与验收 ========== -->

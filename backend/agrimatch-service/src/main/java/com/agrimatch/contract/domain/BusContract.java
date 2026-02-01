@@ -35,7 +35,10 @@ public class BusContract {
     private LocalDate deliveryDate;
     private String paymentMethod;
     private String deliveryMode;
-    
+    private String invoiceType;
+    private String packaging;
+    private String remark;
+
     // 条款和参数
     private String termsJson;          // JSON格式的条款
     private String paramsJson;         // 产品参数JSON
@@ -119,6 +122,15 @@ public class BusContract {
 
     public String getDeliveryMode() { return deliveryMode; }
     public void setDeliveryMode(String deliveryMode) { this.deliveryMode = deliveryMode; }
+
+    public String getInvoiceType() { return invoiceType; }
+    public void setInvoiceType(String invoiceType) { this.invoiceType = invoiceType; }
+
+    public String getPackaging() { return packaging; }
+    public void setPackaging(String packaging) { this.packaging = packaging; }
+
+    public String getRemark() { return remark; }
+    public void setRemark(String remark) { this.remark = remark; }
 
     public String getTermsJson() { return termsJson; }
     public void setTermsJson(String termsJson) { this.termsJson = termsJson; }

@@ -24,6 +24,9 @@
         <result column="delivery_date" property="deliveryDate"/>
         <result column="payment_method" property="paymentMethod"/>
         <result column="delivery_mode" property="deliveryMode"/>
+        <result column="invoice_type" property="invoiceType"/>
+        <result column="packaging" property="packaging"/>
+        <result column="remark" property="remark"/>
         <result column="terms_json" property="termsJson"/>
         <result column="params_json" property="paramsJson"/>
         <result column="basis_price" property="basisPrice"/>
@@ -48,12 +51,14 @@
          buyer_company_id, seller_company_id, product_name, category_name,
          quantity, unit, unit_price, total_amount,
          delivery_address, delivery_date, payment_method, delivery_mode,
+         invoice_type, packaging, remark,
          terms_json, params_json, basis_price, contract_code, status, is_deleted, create_time, update_time)
         VALUES
         (#{contractNo}, #{dealId}, #{negotiationId}, #{quoteId}, #{quoteMessageId}, #{conversationId},
          #{buyerCompanyId}, #{sellerCompanyId}, #{productName}, #{categoryName},
          #{quantity}, #{unit}, #{unitPrice}, #{totalAmount},
          #{deliveryAddress}, #{deliveryDate}, #{paymentMethod}, #{deliveryMode},
+         #{invoiceType}, #{packaging}, #{remark},
          #{termsJson}, #{paramsJson}, #{basisPrice}, #{contractCode}, #{status}, 0, NOW(3), NOW(3))
     </insert>
 

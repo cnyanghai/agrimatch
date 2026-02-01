@@ -276,7 +276,10 @@ public class ContractServiceImpl implements ContractService {
         contract.setDeliveryAddress(req.getDeliveryAddress() != null ? req.getDeliveryAddress() : quoteData.deliveryPlace);
         contract.setPaymentMethod(req.getPaymentMethod() != null ? req.getPaymentMethod() : quoteData.paymentMethod);
         contract.setDeliveryMode(quoteData.deliveryMode);
-        
+        contract.setInvoiceType(quoteData.invoiceType);
+        contract.setPackaging(quoteData.packaging);
+        contract.setRemark(quoteData.remark);
+
         // 生成默认条款 JSON
         contract.setTermsJson(generateDefaultTermsJson(contract));
 
@@ -1006,6 +1009,9 @@ public class ContractServiceImpl implements ContractService {
         String paramsJson;
         BigDecimal basisPrice;
         String contractCode;
+        String invoiceType;
+        String packaging;
+        String remark;
     }
 
     private QuoteData parseQuotePayload(String payloadJson) {
@@ -1049,6 +1055,15 @@ public class ContractServiceImpl implements ContractService {
             }
             if (fields.has("dynamicParams")) {
                 data.paramsJson = objectMapper.writeValueAsString(fields.get("dynamicParams"));
+            }
+            if (fields.has("invoiceType")) {
+                data.invoiceType = fields.get("invoiceType").asText();
+            }
+            if (fields.has("packaging")) {
+                data.packaging = fields.get("packaging").asText();
+            }
+            if (fields.has("remark")) {
+                data.remark = fields.get("remark").asText();
             }
         } catch (Exception e) {
             log.warn("parseQuotePayload failed: {}", e.getMessage());
@@ -1143,6 +1158,9 @@ public class ContractServiceImpl implements ContractService {
         o.setDeliveryAddress(c.getDeliveryAddress());
         o.setPaymentMethod(c.getPaymentMethod());
         o.setDeliveryMode(c.getDeliveryMode());
+        o.setInvoiceType(c.getInvoiceType());
+        o.setPackaging(c.getPackaging());
+        o.setRemark(c.getRemark());
         o.setTermsJson(c.getTermsJson());
         o.setStatus(c.getStatus());
         o.setBuyerSignTime(c.getBuyerSignTime());
@@ -1264,6 +1282,9 @@ public class ContractServiceImpl implements ContractService {
         o.setDeliveryAddress(getStringValue(detail, "delivery_address"));
         o.setPaymentMethod(getStringValue(detail, "payment_method"));
         o.setDeliveryMode(getStringValue(detail, "delivery_mode"));
+        o.setInvoiceType(getStringValue(detail, "invoice_type"));
+        o.setPackaging(getStringValue(detail, "packaging"));
+        o.setRemark(getStringValue(detail, "remark"));
         o.setTermsJson(getStringValue(detail, "terms_json"));
         
         // 生成格式化条款

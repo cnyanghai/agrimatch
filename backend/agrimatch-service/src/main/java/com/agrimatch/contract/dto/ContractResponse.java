@@ -51,6 +51,9 @@ public class ContractResponse {
     private String deliveryAddress;
     private String paymentMethod;
     private String deliveryMode;
+    private String invoiceType;
+    private String packaging;
+    private String remark;
     private String termsJson;
     
     // 格式化合同条款
@@ -172,6 +175,15 @@ public class ContractResponse {
 
     public String getDeliveryMode() { return deliveryMode; }
     public void setDeliveryMode(String deliveryMode) { this.deliveryMode = deliveryMode; }
+
+    public String getInvoiceType() { return invoiceType; }
+    public void setInvoiceType(String invoiceType) { this.invoiceType = invoiceType; }
+
+    public String getPackaging() { return packaging; }
+    public void setPackaging(String packaging) { this.packaging = packaging; }
+
+    public String getRemark() { return remark; }
+    public void setRemark(String remark) { this.remark = remark; }
 
     public String getTermsJson() { return termsJson; }
     public void setTermsJson(String termsJson) { this.termsJson = termsJson; }

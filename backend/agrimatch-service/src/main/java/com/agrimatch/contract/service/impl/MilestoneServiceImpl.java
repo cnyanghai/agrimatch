@@ -353,25 +353,31 @@ public class MilestoneServiceImpl implements MilestoneService {
      */
     private List<BusContractMilestone> buildStandardMilestones(Long contractId, String paymentMethod) {
         List<BusContractMilestone> list = new ArrayList<>();
+        String pm = paymentMethod != null ? paymentMethod : "";
 
-        if ("01".equals(paymentMethod) || "款到发货".equals(paymentMethod)) {
+        if ("01".equals(pm) || pm.contains("款到发货")) {
             // 款到发货: 付款(buyer) → 发货(seller) → 收货(buyer)
             list.add(newMilestone(contractId, "PAY", "buyer", "付款", "买方完成付款", 1));
             list.add(newMilestone(contractId, "SHIP", "seller", "发货", "卖方发货", 2));
             list.add(newMilestone(contractId, "RECEIVE", "buyer", "收货", "买方确认收货", 3));
-        } else if ("02".equals(paymentMethod) || "货到付款".equals(paymentMethod)) {
+        } else if ("02".equals(pm) || pm.contains("货到付款")) {
             // 货到付款: 发货(seller) → 收货(buyer) → 付款(buyer)
             list.add(newMilestone(contractId, "SHIP", "seller", "发货", "卖方发货", 1));
             list.add(newMilestone(contractId, "RECEIVE", "buyer", "收货", "买方确认收货", 2));
             list.add(newMilestone(contractId, "PAY", "buyer", "付款", "买方完成付款", 3));
-        } else if ("06".equals(paymentMethod) || "预付定金".equals(paymentMethod)) {
+        } else if ("06".equals(pm) || pm.contains("预付") || pm.contains("定金")) {
             // 预付定金: 定金(buyer) → 发货(seller) → 收货(buyer) → 尾款(buyer)
             list.add(newMilestone(contractId, "PAY", "buyer", "支付定金", "买方支付定金", 1));
             list.add(newMilestone(contractId, "SHIP", "seller", "发货", "卖方发货", 2));
             list.add(newMilestone(contractId, "RECEIVE", "buyer", "收货", "买方确认收货", 3));
             list.add(newMilestone(contractId, "PAY", "buyer", "支付尾款", "买方支付尾款", 4));
+        } else if ("03".equals(pm) || "04".equals(pm) || pm.contains("账期")) {
+            // 账期: 发货(seller) → 收货(buyer) → 付款(buyer)
+            list.add(newMilestone(contractId, "SHIP", "seller", "发货", "卖方发货", 1));
+            list.add(newMilestone(contractId, "RECEIVE", "buyer", "收货", "买方确认收货", 2));
+            list.add(newMilestone(contractId, "PAY", "buyer", "付款", "买方完成付款", 3));
         } else {
-            // 账期(03/04)、分期(05)、其他/默认: 发货(seller) → 收货(buyer) → 付款(buyer)
+            // 分期(05)、其他/默认: 发货(seller) → 收货(buyer) → 付款(buyer)
             list.add(newMilestone(contractId, "SHIP", "seller", "发货", "卖方发货", 1));
             list.add(newMilestone(contractId, "RECEIVE", "buyer", "收货", "买方确认收货", 2));
             list.add(newMilestone(contractId, "PAY", "buyer", "付款", "买方完成付款", 3));

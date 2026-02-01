@@ -121,6 +121,9 @@ const documentData = computed((): ContractDocumentData | null => {
     deliveryAddress: c.deliveryAddress,
     deliveryDate: c.deliveryDate,
     deliveryMode: getDeliveryModeText(c.deliveryMode),
+    invoiceType: c.invoiceType,
+    packaging: c.packaging,
+    remark: c.remark,
     totalAmount: c.totalAmount || 0,
     signingPlace: c.buyerAddress || c.sellerAddress
   }

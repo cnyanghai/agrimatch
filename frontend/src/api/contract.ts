@@ -55,6 +55,9 @@ export interface ContractResponse {
   deliveryAddress?: string
   paymentMethod?: string
   deliveryMode?: string
+  invoiceType?: string
+  packaging?: string
+  remark?: string
   termsJson?: string
   // 格式化合同条款
   formattedTerms?: string
