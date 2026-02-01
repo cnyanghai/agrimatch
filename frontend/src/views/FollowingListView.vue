@@ -112,7 +112,20 @@ async function contactForSupply(supply: any) {
       subjectSnapshotJson: JSON.stringify({
         categoryName: supply.categoryName,
         companyName: supply.companyName,
-        supplyNo: supply.supplyNo
+        supplyNo: supply.supplyNo,
+        exFactoryPrice: supply.exFactoryPrice,
+        quantity: supply.quantity,
+        remainingQuantity: supply.remainingQuantity ?? supply.quantity,
+        origin: supply.origin,
+        shipAddress: supply.shipAddress,
+        deliveryMode: supply.deliveryMode,
+        packaging: supply.packaging,
+        paymentMethod: supply.paymentMethod,
+        invoiceType: supply.invoiceType,
+        storageMethod: supply.storageMethod,
+        paramsJson: supply.paramsJson,
+        priceType: supply.priceType,
+        basisQuotes: supply.basisQuotes,
       })
     })
     if (res.code === 0 && res.data) {
@@ -142,7 +155,13 @@ async function contactForRequirement(req: any) {
       subjectId: req.id,
       subjectSnapshotJson: JSON.stringify({
         categoryName: req.categoryName,
-        companyName: req.companyName
+        companyName: req.companyName,
+        expectedPrice: req.budgetPrice ?? req.expectedPrice,
+        quantity: req.quantity,
+        purchaseAddress: req.purchaseAddress ?? req.address,
+        deliveryMode: req.deliveryMode,
+        paymentMethod: req.paymentMethod,
+        paramsJson: req.paramsJson,
       })
     })
     if (res.code === 0 && res.data) {

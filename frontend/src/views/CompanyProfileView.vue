@@ -306,15 +306,38 @@ async function contactMerchant() {
   
   // 如果有供应信息，使用第一个供应作为主题
   // 如果没有，使用公司ID作为subjectId，subjectType为SUPPLY（通用联系）
-  const subjectId = supplies.value.length > 0 ? supplies.value[0].id : company.value.id
+  const firstSupply = supplies.value.length > 0 ? supplies.value[0] : null
+  const subjectId = firstSupply ? firstSupply.id : company.value.id
   const subjectType = 'SUPPLY' as const
-  
+
+  // 构建完整快照，聊天侧栏依赖这些字段展示产品信息
+  const snapshot: Record<string, any> = { companyName: company.value.companyName }
+  if (firstSupply) {
+    Object.assign(snapshot, {
+      categoryName: firstSupply.categoryName,
+      supplyNo: firstSupply.supplyNo,
+      exFactoryPrice: firstSupply.exFactoryPrice,
+      quantity: firstSupply.quantity,
+      remainingQuantity: firstSupply.remainingQuantity ?? firstSupply.quantity,
+      origin: firstSupply.origin,
+      shipAddress: firstSupply.shipAddress,
+      deliveryMode: firstSupply.deliveryMode,
+      packaging: firstSupply.packaging,
+      paymentMethod: firstSupply.paymentMethod,
+      invoiceType: firstSupply.invoiceType,
+      storageMethod: firstSupply.storageMethod,
+      paramsJson: firstSupply.paramsJson,
+      priceType: firstSupply.priceType,
+      basisQuotes: firstSupply.basisQuotes,
+    })
+  }
+
   try {
     const res = await openChatConversation({
       peerUserId: company.value.ownerUserId,
       subjectType: subjectType,
       subjectId: subjectId,
-      subjectSnapshotJson: company.value.companyName ? JSON.stringify({ companyName: company.value.companyName }) : undefined
+      subjectSnapshotJson: JSON.stringify(snapshot)
     })
     
     if (res.code === 0 && res.data) {
@@ -349,7 +372,20 @@ async function sendInquiry(supply: any) {
       subjectSnapshotJson: JSON.stringify({
         companyName: company.value.companyName,
         categoryName: supply.categoryName,
-        supplyNo: supply.supplyNo
+        supplyNo: supply.supplyNo,
+        exFactoryPrice: supply.exFactoryPrice,
+        quantity: supply.quantity,
+        remainingQuantity: supply.remainingQuantity ?? supply.quantity,
+        origin: supply.origin,
+        shipAddress: supply.shipAddress,
+        deliveryMode: supply.deliveryMode,
+        packaging: supply.packaging,
+        paymentMethod: supply.paymentMethod,
+        invoiceType: supply.invoiceType,
+        storageMethod: supply.storageMethod,
+        paramsJson: supply.paramsJson,
+        priceType: supply.priceType,
+        basisQuotes: supply.basisQuotes,
       })
     })
     
