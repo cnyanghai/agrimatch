@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.agrimatch.admin.mapper.AdminMapper">
+
+    <!-- ==================== 仪表盘统计 ==================== -->
+
+    <select id="countTotalUsers" resultType="long">
+        SELECT COUNT(*) FROM sys_user WHERE del_flag = '0' AND (is_deleted IS NULL OR is_deleted = 0)
+    </select>
+
+    <select id="countTodayNewUsers" resultType="long">
+        SELECT COUNT(*) FROM sys_user
+        WHERE del_flag = '0' AND (is_deleted IS NULL OR is_deleted = 0)
+          AND DATE(create_time) = CURDATE()
+    </select>
+
+    <select id="countTotalCompanies" resultType="long">
+        SELECT COUNT(*) FROM bus_company WHERE (is_deleted IS NULL OR is_deleted = 0)
+    </select>
+
+    <select id="countActiveSupplies" resultType="long">
+        SELECT COUNT(*) FROM bus_supply WHERE status = 0 AND (is_deleted IS NULL OR is_deleted = 0)
+    </select>
+
+    <select id="countActiveRequirements" resultType="long">
+        SELECT COUNT(*) FROM bus_requirement WHERE status = 0 AND (is_deleted IS NULL OR is_deleted = 0)
+    </select>
+
+    <select id="countTotalContracts" resultType="long">
+        SELECT COUNT(*) FROM bus_contract WHERE (is_deleted IS NULL OR is_deleted = 0)
+    </select>
+
+    <select id="countTotalPosts" resultType="long">
+        SELECT COUNT(*) FROM bus_post WHERE (is_deleted IS NULL OR is_deleted = 0)
+    </select>
+
+    <select id="countTodayLogins" resultType="long">
+        SELECT COUNT(*) FROM sys_user
+        WHERE del_flag = '0' AND (is_deleted IS NULL OR is_deleted = 0)
+          AND DATE(login_date) = CURDATE()
+    </select>
+
+    <!-- ==================== 用户管理 ==================== -->
+
+    <select id="selectUsers" resultType="com.agrimatch.admin.dto.AdminUserResponse">
+        SELECT
+            u.user_id AS userId,
+            u.user_name AS userName,
+            u.nick_name AS nickName,
+            u.phonenumber,
+            u.company_id AS companyId,
+            c.company_name AS companyName,
+            u.is_buyer AS isBuyer,
+            u.is_seller AS isSeller,
+            u.user_type AS userType,
+            u.is_admin AS isAdmin,
+            u.is_deleted AS isDeleted,
+            u.create_time AS createTime
+        FROM sys_user u
+        LEFT JOIN bus_company c ON c.id = u.company_id AND (c.is_deleted IS NULL OR c.is_deleted = 0)
+        WHERE u.del_flag = '0'
+        <if test="keyword != null and keyword != ''">
+            AND (
+                u.user_name LIKE CONCAT('%', #{keyword}, '%')
+                OR u.nick_name LIKE CONCAT('%', #{keyword}, '%')
+                OR u.phonenumber LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        ORDER BY u.user_id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countUsers" resultType="long">
+        SELECT COUNT(*) FROM sys_user u
+        WHERE u.del_flag = '0'
+        <if test="keyword != null and keyword != ''">
+            AND (
+                u.user_name LIKE CONCAT('%', #{keyword}, '%')
+                OR u.nick_name LIKE CONCAT('%', #{keyword}, '%')
+                OR u.phonenumber LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+    </select>
+
+    <update id="updateAdminFlag">
+        UPDATE sys_user SET is_admin = #{isAdmin}, update_time = NOW()
+        WHERE user_id = #{userId} AND del_flag = '0'
+    </update>
+
+    <update id="updateUserDeleted">
+        UPDATE sys_user SET is_deleted = #{isDeleted}, update_time = NOW()
+        WHERE user_id = #{userId} AND del_flag = '0'
+    </update>
+
+    <!-- ==================== 企业管理 ==================== -->
+
+    <select id="selectCompanies" resultType="com.agrimatch.admin.dto.AdminCompanyResponse">
+        SELECT
+            c.id,
+            c.company_name AS companyName,
+            c.company_type AS companyType,
+            c.owner_user_id AS ownerUserId,
+            u.nick_name AS ownerName,
+            c.contacts,
+            c.phone,
+            c.province,
+            c.city,
+            c.district,
+            IFNULL(c.verified_status, 0) AS verifiedStatus,
+            c.create_time AS createTime
+        FROM bus_company c
+        LEFT JOIN sys_user u ON u.user_id = c.owner_user_id AND u.del_flag = '0'
+        WHERE (c.is_deleted IS NULL OR c.is_deleted = 0)
+        <if test="keyword != null and keyword != ''">
+            AND (
+                c.company_name LIKE CONCAT('%', #{keyword}, '%')
+                OR c.contacts LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        <if test="status != null">
+            AND IFNULL(c.verified_status, 0) = #{status}
+        </if>
+        ORDER BY c.id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countCompanies" resultType="long">
+        SELECT COUNT(*) FROM bus_company c
+        WHERE (c.is_deleted IS NULL OR c.is_deleted = 0)
+        <if test="keyword != null and keyword != ''">
+            AND (
+                c.company_name LIKE CONCAT('%', #{keyword}, '%')
+                OR c.contacts LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        <if test="status != null">
+            AND IFNULL(c.verified_status, 0) = #{status}
+        </if>
+    </select>
+
+    <update id="updateCompanyVerifiedStatus">
+        UPDATE bus_company SET verified_status = #{verifiedStatus}, update_time = NOW()
+        WHERE id = #{id} AND (is_deleted IS NULL OR is_deleted = 0)
+    </update>
+
+    <!-- ==================== 供应审核 ==================== -->
+
+    <select id="selectSupplies" resultType="java.util.HashMap">
+        SELECT
+            s.id,
+            s.category_name AS categoryName,
+            s.company_id AS companyId,
+            c.company_name AS companyName,
+            s.ex_factory_price AS price,
+            '元/吨' AS priceUnit,
+            s.quantity,
+            '吨' AS quantityUnit,
+            s.status,
+            s.create_time AS createTime
+        FROM bus_supply s
+        LEFT JOIN bus_company c ON c.id = s.company_id AND (c.is_deleted IS NULL OR c.is_deleted = 0)
+        WHERE (s.is_deleted IS NULL OR s.is_deleted = 0)
+        <if test="keyword != null and keyword != ''">
+            AND (
+                s.category_name LIKE CONCAT('%', #{keyword}, '%')
+                OR c.company_name LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        ORDER BY s.id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countSupplies" resultType="long">
+        SELECT COUNT(*) FROM bus_supply s
+        LEFT JOIN bus_company c ON c.id = s.company_id AND (c.is_deleted IS NULL OR c.is_deleted = 0)
+        WHERE (s.is_deleted IS NULL OR s.is_deleted = 0)
+        <if test="keyword != null and keyword != ''">
+            AND (
+                s.category_name LIKE CONCAT('%', #{keyword}, '%')
+                OR c.company_name LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+    </select>
+
+    <update id="updateSupplyStatus">
+        UPDATE bus_supply SET status = #{status}, update_time = NOW()
+        WHERE id = #{id} AND (is_deleted IS NULL OR is_deleted = 0)
+    </update>
+
+    <!-- ==================== 采购审核 ==================== -->
+
+    <select id="selectRequirements" resultType="java.util.HashMap">
+        SELECT
+            r.id,
+            r.category_name AS categoryName,
+            r.company_id AS companyId,
+            c.company_name AS companyName,
+            r.expected_price AS price,
+            '元/吨' AS priceUnit,
+            r.quantity,
+            '吨' AS quantityUnit,
+            r.status,
+            r.create_time AS createTime
+        FROM bus_requirement r
+        LEFT JOIN bus_company c ON c.id = r.company_id AND (c.is_deleted IS NULL OR c.is_deleted = 0)
+        WHERE (r.is_deleted IS NULL OR r.is_deleted = 0)
+        <if test="keyword != null and keyword != ''">
+            AND (
+                r.category_name LIKE CONCAT('%', #{keyword}, '%')
+                OR c.company_name LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        ORDER BY r.id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countRequirements" resultType="long">
+        SELECT COUNT(*) FROM bus_requirement r
+        LEFT JOIN bus_company c ON c.id = r.company_id AND (c.is_deleted IS NULL OR c.is_deleted = 0)
+        WHERE (r.is_deleted IS NULL OR r.is_deleted = 0)
+        <if test="keyword != null and keyword != ''">
+            AND (
+                r.category_name LIKE CONCAT('%', #{keyword}, '%')
+                OR c.company_name LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+    </select>
+
+    <update id="updateRequirementStatus">
+        UPDATE bus_requirement SET status = #{status}, update_time = NOW()
+        WHERE id = #{id} AND (is_deleted IS NULL OR is_deleted = 0)
+    </update>
+
+    <!-- ==================== 话题管理 ==================== -->
+
+    <select id="selectPosts" resultType="java.util.HashMap">
+        SELECT
+            p.id,
+            p.title,
+            p.user_id AS authorId,
+            u.nick_name AS authorName,
+            (SELECT COUNT(*) FROM bus_post_like l WHERE l.post_id = p.id) AS likeCount,
+            (SELECT COUNT(*) FROM bus_post_comment pc WHERE pc.post_id = p.id AND (pc.is_deleted IS NULL OR pc.is_deleted = 0)) AS commentCount,
+            p.is_deleted AS isDeleted,
+            p.create_time AS createTime
+        FROM bus_post p
+        LEFT JOIN sys_user u ON u.user_id = p.user_id AND u.del_flag = '0'
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND p.title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        ORDER BY p.id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countPosts" resultType="long">
+        SELECT COUNT(*) FROM bus_post p
+        WHERE 1=1
+        <if test="keyword != null and keyword != ''">
+            AND p.title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+    </select>
+
+    <update id="softDeletePost">
+        UPDATE bus_post SET is_deleted = 1, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+</mapper>

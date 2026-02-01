@@ -44,7 +44,20 @@ const router = createRouter({
     { path: '/notify', name: 'notify', component: () => import('../views/NotificationView.vue'), meta: { title: '消息通知 - 沃谷' } },
     { path: '/chat', name: 'chat', component: () => import('../views/NegotiationWorkspace.vue'), meta: { title: '聊天议价 - 沃谷' } },
     { path: '/vehicles', name: 'vehicles', component: () => import('../views/LogisticsVehicleView.vue'), meta: { title: '物流车辆管理 - 沃谷' } },
-    { path: '/admin/jd-redeems', name: 'admin-jd-redeems', component: () => import('../views/JdRedeemManageView.vue'), meta: { title: '京东卡发卡管理 - 沃谷' } },
+    // 管理后台（嵌套路由）
+    {
+      path: '/admin',
+      component: () => import('../views/admin/AdminLayout.vue'),
+      meta: { requiresAdmin: true },
+      children: [
+        { path: '', name: 'admin-dashboard', component: () => import('../views/admin/AdminDashboardView.vue'), meta: { title: '管理后台 - 沃谷' } },
+        { path: 'users', name: 'admin-users', component: () => import('../views/admin/AdminUsersView.vue'), meta: { title: '用户管理 - 沃谷' } },
+        { path: 'companies', name: 'admin-companies', component: () => import('../views/admin/AdminCompaniesView.vue'), meta: { title: '企业管理 - 沃谷' } },
+        { path: 'listings', name: 'admin-listings', component: () => import('../views/admin/AdminListingsView.vue'), meta: { title: '信息审核 - 沃谷' } },
+        { path: 'posts', name: 'admin-posts', component: () => import('../views/admin/AdminPostsView.vue'), meta: { title: '话题管理 - 沃谷' } },
+        { path: 'jd-redeems', name: 'admin-jd-redeems', component: () => import('../views/JdRedeemManageView.vue'), meta: { title: '京东卡发卡管理 - 沃谷' } }
+      ]
+    },
 
     // 名录与公司详情
     { path: '/companies/directory', name: 'company-directory', component: () => import('../views/CompanyDirectoryView.vue'), meta: { public: true, minimal: true, title: '企业名录 - 优质供应商与采购商黄页 - 沃谷' } },
@@ -72,6 +85,12 @@ router.beforeEach(async (to) => {
       return false
     }
   }
+
+  // 管理员路由守卫
+  if (to.matched.some(r => r.meta.requiresAdmin) && !auth.isAdmin) {
+    return { name: 'console' }
+  }
+
   return true
 })
 
