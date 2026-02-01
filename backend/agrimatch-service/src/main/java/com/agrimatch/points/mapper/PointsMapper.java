@@ -2,9 +2,11 @@ package com.agrimatch.points.mapper;
 
 import com.agrimatch.points.domain.BusJdRedeem;
 import com.agrimatch.points.domain.BusPointsAccount;
+import com.agrimatch.points.domain.BusPointsGift;
 import com.agrimatch.points.domain.BusPointsTx;
 import com.agrimatch.points.domain.BusRechargeOrder;
 import com.agrimatch.points.dto.AdminJdRedeemResponse;
+import com.agrimatch.points.dto.GiftResponse;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -57,6 +59,13 @@ public interface PointsMapper {
     int failJdRedeem(@Param("id") Long id,
                      @Param("adminUserId") Long adminUserId,
                      @Param("adminRemark") String adminRemark);
+
+    // ==================== 积分赠送 ====================
+    int insertGift(BusPointsGift gift);
+
+    Integer sumTodayGiftSendByUserId(@Param("userId") Long userId);
+
+    List<GiftResponse> selectGiftsByUserId(@Param("userId") Long userId);
 }
 
 

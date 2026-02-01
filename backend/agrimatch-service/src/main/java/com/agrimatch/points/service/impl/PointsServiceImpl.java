@@ -4,8 +4,11 @@ import com.agrimatch.common.api.ResultCode;
 import com.agrimatch.common.exception.ApiException;
 import com.agrimatch.points.domain.BusJdRedeem;
 import com.agrimatch.points.domain.BusPointsAccount;
+import com.agrimatch.points.domain.BusPointsGift;
 import com.agrimatch.points.domain.BusPointsTx;
 import com.agrimatch.points.domain.BusRechargeOrder;
+import com.agrimatch.user.mapper.UserMapper;
+import com.agrimatch.user.domain.SysUser;
 import com.agrimatch.points.dto.*;
 import com.agrimatch.points.mapper.PointsMapper;
 import com.agrimatch.points.service.PointsService;
@@ -32,12 +35,16 @@ public class PointsServiceImpl implements PointsService {
     private static final int RECHARGE_DAY_MAX = 50000;
     private static final int REDEEM_MAX = 5000;
     private static final int REDEEM_DAY_MAX = 10000;
+    private static final int GIFT_MAX = 5000;
+    private static final int GIFT_DAY_MAX = 10000;
     private static final Set<Integer> JD_FACE_VALUES = Set.of(500, 1000, 2000, 5000);
 
     private final PointsMapper pointsMapper;
+    private final UserMapper userMapper;
 
-    public PointsServiceImpl(PointsMapper pointsMapper) {
+    public PointsServiceImpl(PointsMapper pointsMapper, UserMapper userMapper) {
         this.pointsMapper = pointsMapper;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -397,6 +404,90 @@ public class PointsServiceImpl implements PointsService {
         add(redeem.getUserId(), (long) redeem.getPointsCost(), "京东卡兑换退款 ¥" + redeem.getFaceValue());
 
         log.info("管理员拒绝发卡并退积分: adminUserId={}, redeemId={}, points={}", adminUserId, id, redeem.getPointsCost());
+    }
+
+    // ================= 积分赠送 =================
+
+    @Override
+    @Transactional
+    public PointsMeResponse sendGift(Long senderId, GiftRequest req) {
+        Long receiverId = req.getReceiverUserId();
+        int pts = req.getPoints();
+
+        if (senderId.equals(receiverId)) {
+            throw new ApiException(400, "不能赠送给自己");
+        }
+
+        // 校验接收方存在
+        SysUser receiver = userMapper.selectById(receiverId);
+        if (receiver == null) {
+            throw new ApiException(404, "接收用户不存在");
+        }
+
+        // 校验日限额
+        Integer todayTotal = pointsMapper.sumTodayGiftSendByUserId(senderId);
+        if (todayTotal == null) todayTotal = 0;
+        if (todayTotal + pts > GIFT_DAY_MAX) {
+            throw new ApiException(400, "今日赠送已达上限 " + GIFT_DAY_MAX + " 积分");
+        }
+
+        // 确保双方账户存在
+        ensureAccount(senderId);
+        ensureAccount(receiverId);
+
+        // 锁定发送方账户并扣减
+        BusPointsAccount senderAcc = pointsMapper.selectAccountByUserIdForUpdate(senderId);
+        long senderBalance = senderAcc.getPointsBalance() == null ? 0 : senderAcc.getPointsBalance();
+        if (senderBalance < pts) {
+            throw new ApiException(400, "积分余额不足");
+        }
+        pointsMapper.updateAccountBalance(senderId, senderBalance - pts, senderAcc.getCnyBalance());
+
+        // 锁定接收方账户并增加
+        BusPointsAccount receiverAcc = pointsMapper.selectAccountByUserIdForUpdate(receiverId);
+        long receiverBalance = safeAdd(receiverAcc.getPointsBalance(), (long) pts);
+        pointsMapper.updateAccountBalance(receiverId, receiverBalance, receiverAcc.getCnyBalance());
+
+        String receiverNick = receiver.getNickName() != null ? receiver.getNickName() : String.valueOf(receiverId);
+
+        // 发送方流水
+        BusPointsTx sendTx = new BusPointsTx();
+        sendTx.setUserId(senderId);
+        sendTx.setTxType("GIFT_SEND");
+        sendTx.setPointsDelta((long) -pts);
+        sendTx.setCnyDelta(BigDecimal.ZERO);
+        sendTx.setRemark("赠送积分给 " + receiverNick);
+        pointsMapper.insertTx(sendTx);
+
+        // 接收方流水
+        SysUser sender = userMapper.selectById(senderId);
+        String senderNick = sender != null && sender.getNickName() != null ? sender.getNickName() : String.valueOf(senderId);
+
+        BusPointsTx recvTx = new BusPointsTx();
+        recvTx.setUserId(receiverId);
+        recvTx.setTxType("GIFT_RECEIVE");
+        recvTx.setPointsDelta((long) pts);
+        recvTx.setCnyDelta(BigDecimal.ZERO);
+        recvTx.setRemark("收到 " + senderNick + " 赠送积分");
+        pointsMapper.insertTx(recvTx);
+
+        // 赠送记录
+        BusPointsGift gift = new BusPointsGift();
+        gift.setSenderId(senderId);
+        gift.setReceiverId(receiverId);
+        gift.setPoints(pts);
+        gift.setMessage(req.getMessage());
+        pointsMapper.insertGift(gift);
+
+        log.info("积分赠送成功: sender={}, receiver={}, points={}", senderId, receiverId, pts);
+
+        BusPointsAccount out = pointsMapper.selectAccountByUserId(senderId);
+        return toMe(out);
+    }
+
+    @Override
+    public List<GiftResponse> myGifts(Long userId) {
+        return pointsMapper.selectGiftsByUserId(userId);
     }
 }
 

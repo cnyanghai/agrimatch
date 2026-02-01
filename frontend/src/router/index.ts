@@ -55,7 +55,8 @@ const router = createRouter({
         { path: 'companies', name: 'admin-companies', component: () => import('../views/admin/AdminCompaniesView.vue'), meta: { title: '企业管理 - 沃谷' } },
         { path: 'listings', name: 'admin-listings', component: () => import('../views/admin/AdminListingsView.vue'), meta: { title: '信息审核 - 沃谷' } },
         { path: 'posts', name: 'admin-posts', component: () => import('../views/admin/AdminPostsView.vue'), meta: { title: '话题管理 - 沃谷' } },
-        { path: 'jd-redeems', name: 'admin-jd-redeems', component: () => import('../views/JdRedeemManageView.vue'), meta: { title: '京东卡发卡管理 - 沃谷' } }
+        { path: 'jd-redeems', name: 'admin-jd-redeems', component: () => import('../views/JdRedeemManageView.vue'), meta: { title: '京东卡发卡管理 - 沃谷' } },
+        { path: 'points-manage', name: 'admin-points-manage', component: () => import('../views/admin/AdminPointsManageView.vue'), meta: { title: '积分管理 - 沃谷' } }
       ]
     },
 

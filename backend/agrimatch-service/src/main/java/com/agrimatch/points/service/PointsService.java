@@ -3,7 +3,6 @@ package com.agrimatch.points.service;
 import com.agrimatch.points.dto.*;
 
 import java.util.List;
-import java.util.Map;
 
 public interface PointsService {
     PointsMeResponse me(Long userId);
@@ -73,6 +72,16 @@ public interface PointsService {
      * 管理员拒绝 + 退积分
      */
     void failJdRedeem(Long adminUserId, Long id, String remark);
+
+    /**
+     * 赠送积分
+     */
+    PointsMeResponse sendGift(Long senderId, GiftRequest req);
+
+    /**
+     * 我的赠送/收到记录
+     */
+    List<GiftResponse> myGifts(Long userId);
 }
 
 

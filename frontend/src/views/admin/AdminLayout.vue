@@ -2,7 +2,7 @@
 import { useRoute, useRouter } from 'vue-router'
 import {
   LayoutDashboard, Users, Building2, ShieldAlert,
-  MessageSquareText, CreditCard, ArrowLeft
+  MessageSquareText, CreditCard, Coins, ArrowLeft
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -14,7 +14,8 @@ const navItems = [
   { title: '企业管理', icon: Building2, path: '/admin/companies' },
   { title: '信息审核', icon: ShieldAlert, path: '/admin/listings' },
   { title: '话题管理', icon: MessageSquareText, path: '/admin/posts' },
-  { title: '京东卡管理', icon: CreditCard, path: '/admin/jd-redeems' }
+  { title: '京东卡管理', icon: CreditCard, path: '/admin/jd-redeems' },
+  { title: '积分管理', icon: Coins, path: '/admin/points-manage' }
 ]
 
 function isActive(path: string): boolean {

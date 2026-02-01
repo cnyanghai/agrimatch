@@ -213,6 +213,35 @@
           AND is_deleted = 0
     </update>
 
+    <!-- 积分赠送 -->
+    <insert id="insertGift" parameterType="com.agrimatch.points.domain.BusPointsGift"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO bus_points_gift
+        (sender_id, receiver_id, points, message, is_deleted, create_time, update_time)
+        VALUES
+        (#{senderId}, #{receiverId}, #{points}, #{message}, 0, NOW(3), NOW(3))
+    </insert>
+
+    <select id="sumTodayGiftSendByUserId" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(points), 0)
+        FROM bus_points_gift
+        WHERE sender_id = #{userId}
+          AND DATE(create_time) = CURDATE()
+          AND is_deleted = 0
+    </select>
+
+    <select id="selectGiftsByUserId" resultType="com.agrimatch.points.dto.GiftResponse">
+        SELECT g.id, g.sender_id AS senderId, su.nick_name AS senderName,
+               g.receiver_id AS receiverId, ru.nick_name AS receiverName,
+               g.points, g.message, g.create_time AS createTime
+        FROM bus_points_gift g
+        LEFT JOIN sys_user su ON su.user_id = g.sender_id
+        LEFT JOIN sys_user ru ON ru.user_id = g.receiver_id
+        WHERE (g.sender_id = #{userId} OR g.receiver_id = #{userId})
+          AND g.is_deleted = 0
+        ORDER BY g.create_time DESC
+    </select>
+
 </mapper>
 
 

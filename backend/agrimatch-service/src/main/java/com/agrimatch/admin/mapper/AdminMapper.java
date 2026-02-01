@@ -2,8 +2,10 @@ package com.agrimatch.admin.mapper;
 
 import com.agrimatch.admin.dto.AdminCompanyResponse;
 import com.agrimatch.admin.dto.AdminUserResponse;
+import com.agrimatch.points.dto.GiftResponse;
 import org.apache.ibatis.annotations.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -56,4 +58,27 @@ public interface AdminMapper {
                                           @Param("size") int size);
     long countPosts(@Param("keyword") String keyword);
     int softDeletePost(@Param("id") Long id);
+
+    // ==================== 积分管理 ====================
+    BigDecimal sumTotalRechargeAmount();
+    BigDecimal sumTodayRechargeAmount();
+    BigDecimal sumTotalCardAmount();
+    BigDecimal sumTodayCardAmount();
+    Long sumTotalGiftPoints();
+    Long sumTotalCirculatingPoints();
+
+    List<Map<String, Object>> selectRechargeRecords(@Param("keyword") String keyword,
+                                                     @Param("offset") int offset,
+                                                     @Param("size") int size);
+    long countRechargeRecords(@Param("keyword") String keyword);
+
+    List<Map<String, Object>> selectRechargeUsers(@Param("keyword") String keyword,
+                                                   @Param("offset") int offset,
+                                                   @Param("size") int size);
+    long countRechargeUsers(@Param("keyword") String keyword);
+
+    List<GiftResponse> selectGiftRecords(@Param("keyword") String keyword,
+                                          @Param("offset") int offset,
+                                          @Param("size") int size);
+    long countGiftRecords(@Param("keyword") String keyword);
 }

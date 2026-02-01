@@ -268,4 +268,139 @@
         WHERE id = #{id}
     </update>
 
+    <!-- ==================== 积分管理 ==================== -->
+
+    <select id="sumTotalRechargeAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(points_delta), 0) FROM bus_points_tx
+        WHERE tx_type = 'RECHARGE' AND is_deleted = 0
+    </select>
+
+    <select id="sumTodayRechargeAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(points_delta), 0) FROM bus_points_tx
+        WHERE tx_type = 'RECHARGE' AND is_deleted = 0 AND DATE(create_time) = CURDATE()
+    </select>
+
+    <select id="sumTotalCardAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(face_value), 0) FROM bus_jd_redeem
+        WHERE status = 1 AND is_deleted = 0
+    </select>
+
+    <select id="sumTodayCardAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(face_value), 0) FROM bus_jd_redeem
+        WHERE status = 1 AND is_deleted = 0 AND DATE(fulfill_time) = CURDATE()
+    </select>
+
+    <select id="sumTotalGiftPoints" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(points), 0) FROM bus_points_gift WHERE is_deleted = 0
+    </select>
+
+    <select id="sumTotalCirculatingPoints" resultType="java.lang.Long">
+        SELECT COALESCE(SUM(points_balance), 0) FROM bus_points_account WHERE is_deleted = 0
+    </select>
+
+    <!-- 充值记录：从 bus_points_tx 读取所有 RECHARGE 流水，LEFT JOIN 订单表补充支付信息 -->
+    <select id="selectRechargeRecords" resultType="java.util.HashMap">
+        SELECT t.id, o.order_no AS orderNo, t.user_id AS userId,
+               u.nick_name AS nickName, u.phonenumber,
+               t.points_delta AS points,
+               COALESCE(o.pay_channel, '-') AS payChannel,
+               CASE WHEN o.id IS NOT NULL THEN o.status ELSE 1 END AS status,
+               t.create_time AS createTime,
+               o.pay_time AS payTime
+        FROM bus_points_tx t
+        LEFT JOIN sys_user u ON u.user_id = t.user_id AND u.del_flag = '0'
+        LEFT JOIN bus_recharge_order o ON o.user_id = t.user_id
+            AND o.status = 1 AND o.is_deleted = 0
+            AND ABS(TIMESTAMPDIFF(SECOND, o.create_time, t.create_time)) &lt; 5
+        WHERE t.tx_type = 'RECHARGE' AND t.is_deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (
+                u.nick_name LIKE CONCAT('%', #{keyword}, '%')
+                OR u.phonenumber LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        ORDER BY t.id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countRechargeRecords" resultType="long">
+        SELECT COUNT(*) FROM bus_points_tx t
+        LEFT JOIN sys_user u ON u.user_id = t.user_id AND u.del_flag = '0'
+        WHERE t.tx_type = 'RECHARGE' AND t.is_deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (
+                u.nick_name LIKE CONCAT('%', #{keyword}, '%')
+                OR u.phonenumber LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+    </select>
+
+    <!-- 充值名单（按用户聚合，从 bus_points_tx 统计） -->
+    <select id="selectRechargeUsers" resultType="java.util.HashMap">
+        SELECT t.user_id AS userId, u.nick_name AS nickName, u.phonenumber,
+               COUNT(*) AS rechargeCount,
+               SUM(t.points_delta) AS totalAmount,
+               MAX(t.create_time) AS lastRechargeTime
+        FROM bus_points_tx t
+        LEFT JOIN sys_user u ON u.user_id = t.user_id AND u.del_flag = '0'
+        WHERE t.tx_type = 'RECHARGE' AND t.is_deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (
+                u.nick_name LIKE CONCAT('%', #{keyword}, '%')
+                OR u.phonenumber LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        GROUP BY t.user_id, u.nick_name, u.phonenumber
+        ORDER BY totalAmount DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countRechargeUsers" resultType="long">
+        SELECT COUNT(DISTINCT t.user_id) FROM bus_points_tx t
+        LEFT JOIN sys_user u ON u.user_id = t.user_id AND u.del_flag = '0'
+        WHERE t.tx_type = 'RECHARGE' AND t.is_deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (
+                u.nick_name LIKE CONCAT('%', #{keyword}, '%')
+                OR u.phonenumber LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+    </select>
+
+    <!-- 赠送记录 -->
+    <select id="selectGiftRecords" resultType="com.agrimatch.points.dto.GiftResponse">
+        SELECT g.id, g.sender_id AS senderId, su.nick_name AS senderName,
+               g.receiver_id AS receiverId, ru.nick_name AS receiverName,
+               g.points, g.message, g.create_time AS createTime
+        FROM bus_points_gift g
+        LEFT JOIN sys_user su ON su.user_id = g.sender_id
+        LEFT JOIN sys_user ru ON ru.user_id = g.receiver_id
+        WHERE g.is_deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (
+                su.nick_name LIKE CONCAT('%', #{keyword}, '%')
+                OR ru.nick_name LIKE CONCAT('%', #{keyword}, '%')
+                OR su.phonenumber LIKE CONCAT('%', #{keyword}, '%')
+                OR ru.phonenumber LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+        ORDER BY g.id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countGiftRecords" resultType="long">
+        SELECT COUNT(*) FROM bus_points_gift g
+        LEFT JOIN sys_user su ON su.user_id = g.sender_id
+        LEFT JOIN sys_user ru ON ru.user_id = g.receiver_id
+        WHERE g.is_deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (
+                su.nick_name LIKE CONCAT('%', #{keyword}, '%')
+                OR ru.nick_name LIKE CONCAT('%', #{keyword}, '%')
+                OR su.phonenumber LIKE CONCAT('%', #{keyword}, '%')
+                OR ru.phonenumber LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+    </select>
+
 </mapper>

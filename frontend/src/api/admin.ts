@@ -160,3 +160,68 @@ export function deleteAdminPost(id: number) {
   return axios.delete<{ code: number; message: string }>(`/api/admin/posts/${id}`)
     .then(r => r.data)
 }
+
+// ==================== 积分管理 ====================
+
+export interface AdminPointsOverviewResponse {
+  totalRechargeAmount: number
+  todayRechargeAmount: number
+  totalCardAmount: number
+  todayCardAmount: number
+  totalGiftPoints: number
+  totalCirculatingPoints: number
+}
+
+export interface AdminRechargeRecord {
+  id: number
+  orderNo: string
+  userId: number
+  nickName: string
+  phonenumber: string
+  amount: number
+  points: number
+  payChannel: string
+  status: number
+  createTime: string
+  payTime: string | null
+}
+
+export interface AdminRechargeUser {
+  userId: number
+  nickName: string
+  phonenumber: string
+  rechargeCount: number
+  totalAmount: number
+  lastRechargeTime: string
+}
+
+export interface AdminGiftRecord {
+  id: number
+  senderId: number
+  senderName: string
+  receiverId: number
+  receiverName: string
+  points: number
+  message: string | null
+  createTime: string
+}
+
+export function getAdminPointsOverview() {
+  return axios.get<{ code: number; message: string; data: AdminPointsOverviewResponse }>('/api/admin/points-manage/overview')
+    .then(r => r.data)
+}
+
+export function listAdminRecharges(params: { keyword?: string; status?: number; page?: number; size?: number }) {
+  return axios.get<{ code: number; message: string; data: PageResult<AdminRechargeRecord> }>('/api/admin/points-manage/recharges', { params })
+    .then(r => r.data)
+}
+
+export function listAdminRechargeUsers(params: { keyword?: string; page?: number; size?: number }) {
+  return axios.get<{ code: number; message: string; data: PageResult<AdminRechargeUser> }>('/api/admin/points-manage/recharge-users', { params })
+    .then(r => r.data)
+}
+
+export function listAdminGifts(params: { keyword?: string; page?: number; size?: number }) {
+  return axios.get<{ code: number; message: string; data: PageResult<AdminGiftRecord> }>('/api/admin/points-manage/gifts', { params })
+    .then(r => r.data)
+}

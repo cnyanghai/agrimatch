@@ -110,6 +110,22 @@ public class PointsController {
         } catch (Exception ignored) {}
         return Result.success(pointsService.getLimits(userId));
     }
+
+    // ================= 积分赠送 =================
+
+    @PostMapping("/gift")
+    public Result<PointsMeResponse> sendGift(
+            Authentication authentication,
+            @Valid @RequestBody GiftRequest req) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        return Result.success(pointsService.sendGift(userId, req));
+    }
+
+    @GetMapping("/gifts/mine")
+    public Result<List<GiftResponse>> myGifts(Authentication authentication) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        return Result.success(pointsService.myGifts(userId));
+    }
 }
 
 
