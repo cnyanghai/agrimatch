@@ -6,6 +6,7 @@ import { Search, Heart, MessageCircle, FileText, ExternalLink } from 'lucide-vue
 import { getFollowedUsers, getFollowedSupplies, getFollowedRequirements, unfollowUser, type FollowedUser } from '../api/follow'
 import { openChatConversation } from '../api/chat'
 import { useAuthStore } from '../store/auth'
+import ProductInfoRow from '../components/ProductInfoRow.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -176,20 +177,6 @@ async function contactForRequirement(req: any) {
 }
 
 // 格式化价格
-function formatPrice(supply: any) {
-  if (supply.priceType === 1 && supply.basisQuotes?.length > 0) {
-    const quotes = supply.basisQuotes.slice(0, 2)
-    return quotes.map((q: any) => {
-      const price = q.referencePrice ? `¥${q.referencePrice.toFixed(0)}` : '待定'
-      return `${q.contractName || q.contractCode}: ${price}`
-    }).join(' / ')
-  }
-  if (supply.exFactoryPrice != null) {
-    return `¥${supply.exFactoryPrice}/吨`
-  }
-  return '面议'
-}
-
 // 加载所有数据
 async function loadData() {
   loading.value = true
@@ -407,44 +394,55 @@ onMounted(() => {
                 供应信息 ({{ selectedUserSupplies.length }})
               </h3>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                  <tr>
-                    <th class="px-4 py-2">品类/价格</th>
-                    <th class="px-4 py-2">库存/产地</th>
-                    <th class="px-4 py-2">交付方式</th>
-                    <th class="px-4 py-2">操作</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                  <tr
-                    v-for="supply in selectedUserSupplies"
-                    :key="supply.id"
-                    class="hover:bg-slate-50 transition"
-                  >
-                    <td class="px-4 py-3">
-                      <div class="text-sm font-semibold text-slate-800">{{ supply.categoryName }}</div>
-                      <div class="text-sm font-bold text-brand-600">{{ formatPrice(supply) }}</div>
-                    </td>
-                    <td class="px-4 py-3">
-                      <div class="text-sm text-slate-700">{{ supply.quantity || 0 }} 吨</div>
-                    </td>
-                    <td class="px-4 py-3">
-                      <div class="text-sm text-slate-700">{{ supply.deliveryMode || '自提' }}</div>
-                    </td>
-                    <td class="px-4 py-3">
-                      <button
-                        class="flex items-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium rounded-lg transition-all active:scale-95"
-                        @click="contactForSupply(supply)"
+            <div class="p-4 space-y-3">
+              <div
+                v-for="supply in selectedUserSupplies"
+                :key="supply.id"
+                class="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-brand-200 transition-all duration-200"
+              >
+                <ProductInfoRow
+                  :data="{
+                    categoryName: supply.categoryName || '未知品类',
+                    quantity: supply.quantity,
+                    quantityUnit: '吨',
+                    price: supply.priceType === 1 ? '基差报价' : supply.exFactoryPrice,
+                    priceUnit: '吨',
+                    address: supply.shipAddress,
+                    packaging: supply.packaging,
+                    paymentMethod: supply.paymentMethod,
+                    paramsJson: supply.paramsJson,
+                    expireTime: supply.expireTime
+                  }"
+                  type="supply"
+                >
+                  <!-- 基差报价详情 -->
+                  <template v-if="supply.priceType === 1 && supply.basisQuotes?.length" #extra>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                      <div
+                        v-for="bq in (supply.basisQuotes || []).slice(0, 3)"
+                        :key="bq.id"
+                        class="inline-flex items-center gap-1.5 px-2 py-1 bg-warning-50 border border-warning-200 rounded-lg text-xs"
                       >
-                        <MessageCircle class="w-3.5 h-3.5" />
-                        联系洽谈
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                        <span class="font-bold text-neutral-700">{{ bq.contractName || bq.contractCode }}</span>
+                        <span :class="bq.basisPrice >= 0 ? 'text-red-500' : 'text-green-500'" class="font-bold">
+                          {{ bq.basisPrice >= 0 ? '+' : '' }}{{ bq.basisPrice }}
+                        </span>
+                        <span class="text-neutral-400">·</span>
+                        <span class="font-medium text-neutral-600">{{ bq.remainingQty ?? bq.availableQty }}吨</span>
+                      </div>
+                    </div>
+                  </template>
+                  <template #actions>
+                    <button
+                      class="flex items-center gap-1.5 px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-medium rounded-lg transition-all active:scale-95"
+                      @click="contactForSupply(supply)"
+                    >
+                      <MessageCircle class="w-3.5 h-3.5" />
+                      联系洽谈
+                    </button>
+                  </template>
+                </ProductInfoRow>
+              </div>
             </div>
           </section>
 
@@ -456,45 +454,38 @@ onMounted(() => {
                 采购需求 ({{ selectedUserRequirements.length }})
               </h3>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                  <tr>
-                    <th class="px-4 py-2">品类</th>
-                    <th class="px-4 py-2">需求量</th>
-                    <th class="px-4 py-2">预算价格</th>
-                    <th class="px-4 py-2">操作</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                  <tr
-                    v-for="req in selectedUserRequirements"
-                    :key="req.id"
-                    class="hover:bg-slate-50 transition"
-                  >
-                    <td class="px-4 py-3">
-                      <div class="text-sm font-semibold text-slate-800">{{ req.categoryName }}</div>
-                    </td>
-                    <td class="px-4 py-3">
-                      <div class="text-sm text-slate-700">{{ req.quantity || 0 }} 吨</div>
-                    </td>
-                    <td class="px-4 py-3">
-                      <div class="text-sm font-bold text-autumn-600">
-                        {{ req.budgetPrice ? `¥${req.budgetPrice}/吨` : '面议' }}
-                      </div>
-                    </td>
-                    <td class="px-4 py-3">
-                      <button
-                        class="flex items-center gap-1.5 px-3 py-1.5 bg-autumn-600 hover:bg-autumn-700 text-white text-xs font-medium rounded-lg transition-all active:scale-95"
-                        @click="contactForRequirement(req)"
-                      >
-                        <MessageCircle class="w-3.5 h-3.5" />
-                        联系洽谈
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="p-4 space-y-3">
+              <div
+                v-for="req in selectedUserRequirements"
+                :key="req.id"
+                class="bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md hover:border-autumn-200 transition-all duration-200"
+              >
+                <ProductInfoRow
+                  :data="{
+                    categoryName: req.categoryName || '未知品类',
+                    quantity: req.quantity,
+                    quantityUnit: '吨',
+                    price: req.budgetPrice ?? req.expectedPrice,
+                    priceUnit: '吨',
+                    address: req.purchaseAddress ?? req.address,
+                    packaging: req.packaging,
+                    paymentMethod: req.paymentMethod,
+                    paramsJson: req.paramsJson,
+                    expireTime: req.expireTime
+                  }"
+                  type="purchase"
+                >
+                  <template #actions>
+                    <button
+                      class="flex items-center gap-1.5 px-3 py-1.5 bg-autumn-600 hover:bg-autumn-700 text-white text-xs font-medium rounded-lg transition-all active:scale-95"
+                      @click="contactForRequirement(req)"
+                    >
+                      <MessageCircle class="w-3.5 h-3.5" />
+                      联系洽谈
+                    </button>
+                  </template>
+                </ProductInfoRow>
+              </div>
             </div>
           </section>
 

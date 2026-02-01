@@ -128,6 +128,9 @@
         <result column="delivery_mode" property="deliveryMode"/>
         <result column="packaging" property="packaging"/>
         <result column="storage_method" property="storageMethod"/>
+        <result column="price_type" property="priceType"/>
+        <result column="payment_method" property="paymentMethod"/>
+        <result column="invoice_type" property="invoiceType"/>
         <result column="price_rules_json" property="priceRulesJson"/>
         <result column="params_json" property="paramsJson"/>
         <result column="status" property="status"/>
@@ -145,7 +148,8 @@
             u.user_name AS user_name,
             u.nick_name AS nick_name,
             s.category_name, s.supply_no, s.origin, s.quantity, s.quantity AS remaining_quantity,
-            s.ex_factory_price, s.ship_address, s.delivery_mode, s.packaging, s.storage_method,
+            s.price_type, s.ex_factory_price, s.ship_address, s.delivery_mode,
+            s.packaging, s.storage_method, s.payment_method, s.invoice_type,
             s.price_rules_json, s.params_json,
             s.status, s.expire_minutes, s.expire_time, s.remark,
             s.create_time, s.update_time
