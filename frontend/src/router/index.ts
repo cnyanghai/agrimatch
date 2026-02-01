@@ -33,7 +33,6 @@ const router = createRouter({
     { path: '/console/following', name: 'following-list', component: () => import('../views/FollowingListView.vue'), meta: { title: '关注列表 - 沃谷' } },
     { path: '/profile', name: 'profile', component: () => import('../views/AccountSettingsView.vue'), meta: { title: '用户资料 - 沃谷' } },
     { path: '/points', name: 'points', component: () => import('../views/UserPointsView.vue'), meta: { title: '会员积分 - 沃谷' } },
-    { path: '/points/mall', name: 'points-mall', component: () => import('../views/PointsMallView.vue'), meta: { title: '积分商城 - 沃谷' } },
     { path: '/requirements', name: 'requirements', component: () => import('../views/MyPurchaseManageView.vue'), meta: { title: '我的采购管理 - 沃谷' } },
     { path: '/requirements/published', redirect: { name: 'requirements', query: { tab: 'published' } } },
     { path: '/supply', name: 'supply', component: () => import('../views/MySupplyManageView.vue'), meta: { title: '我的供应管理 - 沃谷' } },
@@ -45,6 +44,7 @@ const router = createRouter({
     { path: '/notify', name: 'notify', component: () => import('../views/NotificationView.vue'), meta: { title: '消息通知 - 沃谷' } },
     { path: '/chat', name: 'chat', component: () => import('../views/NegotiationWorkspace.vue'), meta: { title: '聊天议价 - 沃谷' } },
     { path: '/vehicles', name: 'vehicles', component: () => import('../views/LogisticsVehicleView.vue'), meta: { title: '物流车辆管理 - 沃谷' } },
+    { path: '/admin/jd-redeems', name: 'admin-jd-redeems', component: () => import('../views/JdRedeemManageView.vue'), meta: { title: '京东卡发卡管理 - 沃谷' } },
 
     // 名录与公司详情
     { path: '/companies/directory', name: 'company-directory', component: () => import('../views/CompanyDirectoryView.vue'), meta: { public: true, minimal: true, title: '企业名录 - 优质供应商与采购商黄页 - 沃谷' } },

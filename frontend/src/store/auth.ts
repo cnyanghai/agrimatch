@@ -21,6 +21,7 @@ export interface MeResponse {
   isBuyer?: number
   isSeller?: number
   userType?: string
+  isAdmin?: boolean
   createTime?: string
   lastLoginTime?: string
 }
@@ -61,6 +62,8 @@ export const useAuthStore = defineStore('auth', {
       if (state.me?.isSeller === 1) return '供应商'
       return '未设置'
     },
+    // 是否为管理员
+    isAdmin: (state) => state.me?.isAdmin === true,
     // 是否已完善资料
     isProfileComplete: (state) => {
       if (!state.me) return false

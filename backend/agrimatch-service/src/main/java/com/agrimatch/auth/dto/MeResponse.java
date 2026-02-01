@@ -15,6 +15,7 @@ public class MeResponse {
     private Integer gender;
     private String bio;
     private String avatar;
+    private Boolean isAdmin;
 
     public Long getUserId() {
         return userId;
@@ -126,6 +127,14 @@ public class MeResponse {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public Boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(Boolean isAdmin) {
+        this.isAdmin = isAdmin;
     }
 }
 

@@ -194,6 +194,7 @@ public class AuthServiceImpl implements AuthService {
         r.setGender(u.getGender());
         r.setBio(u.getBio());
         r.setAvatar(u.getAvatar());
+        r.setIsAdmin(u.getIsAdmin() != null && u.getIsAdmin() == 1);
         return r;
     }
 }

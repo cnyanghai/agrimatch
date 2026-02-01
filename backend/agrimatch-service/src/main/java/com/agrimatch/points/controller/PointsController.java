@@ -91,6 +91,15 @@ public class PointsController {
     }
 
     /**
+     * 用户查自己的兑换记录
+     */
+    @GetMapping("/jd-redeems/mine")
+    public Result<List<JdRedeemDetailResponse>> myJdRedeems(Authentication authentication) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        return Result.success(pointsService.myJdRedeems(userId));
+    }
+
+    /**
      * 获取限额信息
      */
     @GetMapping("/limits")

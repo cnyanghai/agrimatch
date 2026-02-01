@@ -20,6 +20,7 @@ public class SysUser {
     private String bio;
     private String avatar;
     private String payInfoJson;
+    private Integer isAdmin;
     private Integer isDeleted;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
@@ -150,6 +151,14 @@ public class SysUser {
 
     public void setPayInfoJson(String payInfoJson) {
         this.payInfoJson = payInfoJson;
+    }
+
+    public Integer getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(Integer isAdmin) {
+        this.isAdmin = isAdmin;
     }
 
     public Integer getIsDeleted() {

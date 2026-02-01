@@ -32,7 +32,7 @@ public class PointsServiceImpl implements PointsService {
     private static final int RECHARGE_DAY_MAX = 50000;
     private static final int REDEEM_MAX = 5000;
     private static final int REDEEM_DAY_MAX = 10000;
-    private static final Set<Integer> JD_FACE_VALUES = Set.of(50, 100, 200, 500);
+    private static final Set<Integer> JD_FACE_VALUES = Set.of(500, 1000, 2000, 5000);
 
     private final PointsMapper pointsMapper;
 
@@ -278,9 +278,6 @@ public class PointsServiceImpl implements PointsService {
             throw new ApiException(400, "不支持的面额");
         }
 
-        // TODO: 验证短信验证码（当前模拟）
-        // smsCodeService.verifyOrThrow(phone, 3, req.getSmsCode());
-
         // 检查日限额
         Integer todayTotal = pointsMapper.sumTodayJdRedeemByUserId(userId);
         if (todayTotal == null) todayTotal = 0;
@@ -309,24 +306,20 @@ public class PointsServiceImpl implements PointsService {
         tx.setRemark("兑换京东卡 ¥" + req.getFaceValue());
         pointsMapper.insertTx(tx);
 
-        // TODO: 调用京东卡API获取真实卡密
-        // 这里返回模拟卡密
-        String cardCode = "JD" + System.currentTimeMillis() + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
-
-        // 记录兑换
+        // 创建待发卡订单（cardCode=null, status=0）
         BusJdRedeem redeem = new BusJdRedeem();
         redeem.setUserId(userId);
         redeem.setPointsCost(req.getFaceValue());
         redeem.setFaceValue(req.getFaceValue());
-        redeem.setCardCode(cardCode); // TODO: 生产环境需加密存储
-        redeem.setStatus(1); // 成功
+        redeem.setCardCode(null);
+        redeem.setStatus(0); // 待发卡
         pointsMapper.insertJdRedeem(redeem);
 
-        log.info("京东卡兑换成功: userId={}, faceValue={}, cardCode={}", userId, req.getFaceValue(), cardCode);
+        log.info("京东卡兑换订单已创建(待发卡): userId={}, faceValue={}, redeemId={}", userId, req.getFaceValue(), redeem.getId());
 
         JdRedeemResponse resp = new JdRedeemResponse();
         resp.setRedeemId(redeem.getId());
-        resp.setCardCode(cardCode);
+        resp.setCardCode(null);
         resp.setFaceValue(req.getFaceValue());
         resp.setPointsCost(req.getFaceValue());
         resp.setNewPointsBalance(newPoints);
@@ -349,6 +342,61 @@ public class PointsServiceImpl implements PointsService {
         }
 
         return resp;
+    }
+
+    // ================= 京东卡管理 =================
+
+    @Override
+    public List<JdRedeemDetailResponse> myJdRedeems(Long userId) {
+        List<BusJdRedeem> list = pointsMapper.selectJdRedeemListByUserId(userId);
+        List<JdRedeemDetailResponse> out = new ArrayList<>();
+        for (BusJdRedeem r : list) {
+            JdRedeemDetailResponse dto = new JdRedeemDetailResponse();
+            dto.setId(r.getId());
+            dto.setPointsCost(r.getPointsCost());
+            dto.setFaceValue(r.getFaceValue());
+            dto.setCardCode(r.getStatus() == 1 ? r.getCardCode() : null); // 仅发卡成功才返回卡密
+            dto.setStatus(r.getStatus());
+            dto.setAdminRemark(r.getAdminRemark());
+            dto.setCreateTime(r.getCreateTime());
+            dto.setFulfillTime(r.getFulfillTime());
+            out.add(dto);
+        }
+        return out;
+    }
+
+    @Override
+    public List<AdminJdRedeemResponse> listAllJdRedeems(Integer status) {
+        return pointsMapper.selectAllJdRedeems(status);
+    }
+
+    @Override
+    @Transactional
+    public void fulfillJdRedeem(Long adminUserId, Long id, String cardCode) {
+        BusJdRedeem redeem = pointsMapper.selectJdRedeemById(id);
+        if (redeem == null) throw new ApiException(404, "订单不存在");
+        if (redeem.getStatus() != 0) throw new ApiException(400, "该订单不是待发卡状态");
+
+        int rows = pointsMapper.fulfillJdRedeem(id, cardCode, adminUserId);
+        if (rows != 1) throw new ApiException(400, "发卡失败，请重试");
+
+        log.info("管理员发卡成功: adminUserId={}, redeemId={}", adminUserId, id);
+    }
+
+    @Override
+    @Transactional
+    public void failJdRedeem(Long adminUserId, Long id, String remark) {
+        BusJdRedeem redeem = pointsMapper.selectJdRedeemById(id);
+        if (redeem == null) throw new ApiException(404, "订单不存在");
+        if (redeem.getStatus() != 0) throw new ApiException(400, "该订单不是待发卡状态");
+
+        int rows = pointsMapper.failJdRedeem(id, adminUserId, remark);
+        if (rows != 1) throw new ApiException(400, "拒绝失败，请重试");
+
+        // 退还积分
+        add(redeem.getUserId(), (long) redeem.getPointsCost(), "京东卡兑换退款 ¥" + redeem.getFaceValue());
+
+        log.info("管理员拒绝发卡并退积分: adminUserId={}, redeemId={}, points={}", adminUserId, id, redeem.getPointsCost());
     }
 }
 

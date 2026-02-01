@@ -135,6 +135,9 @@
         <result column="face_value" property="faceValue"/>
         <result column="card_code" property="cardCode"/>
         <result column="status" property="status"/>
+        <result column="admin_user_id" property="adminUserId"/>
+        <result column="admin_remark" property="adminRemark"/>
+        <result column="fulfill_time" property="fulfillTime"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
@@ -158,12 +161,57 @@
     </select>
 
     <select id="selectJdRedeemListByUserId" resultMap="JdRedeemMap">
-        SELECT id, user_id, points_cost, face_value, card_code, status, is_deleted, create_time, update_time
+        SELECT id, user_id, points_cost, face_value, card_code, status, admin_remark, fulfill_time, is_deleted, create_time, update_time
         FROM bus_jd_redeem
         WHERE user_id = #{userId}
           AND is_deleted = 0
         ORDER BY create_time DESC
     </select>
+
+    <select id="selectJdRedeemById" resultMap="JdRedeemMap">
+        SELECT id, user_id, points_cost, face_value, card_code, status, admin_user_id, admin_remark, fulfill_time, is_deleted, create_time, update_time
+        FROM bus_jd_redeem
+        WHERE id = #{id}
+          AND is_deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectAllJdRedeems" resultType="com.agrimatch.points.dto.AdminJdRedeemResponse">
+        SELECT r.id, r.user_id AS userId, u.user_name AS userName, u.nick_name AS nickName,
+               r.points_cost AS pointsCost, r.face_value AS faceValue, r.card_code AS cardCode,
+               r.status, r.admin_user_id AS adminUserId, r.admin_remark AS adminRemark,
+               r.create_time AS createTime, r.fulfill_time AS fulfillTime
+        FROM bus_jd_redeem r
+        LEFT JOIN sys_user u ON u.user_id = r.user_id
+        WHERE r.is_deleted = 0
+          <if test="status != null">
+            AND r.status = #{status}
+          </if>
+        ORDER BY r.create_time DESC
+    </select>
+
+    <update id="fulfillJdRedeem">
+        UPDATE bus_jd_redeem
+        SET card_code = #{cardCode},
+            status = 1,
+            admin_user_id = #{adminUserId},
+            fulfill_time = NOW(3),
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND status = 0
+          AND is_deleted = 0
+    </update>
+
+    <update id="failJdRedeem">
+        UPDATE bus_jd_redeem
+        SET status = 2,
+            admin_user_id = #{adminUserId},
+            admin_remark = #{adminRemark},
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND status = 0
+          AND is_deleted = 0
+    </update>
 
 </mapper>
 

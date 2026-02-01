@@ -3,6 +3,7 @@ package com.agrimatch.points.service;
 import com.agrimatch.points.dto.*;
 
 import java.util.List;
+import java.util.Map;
 
 public interface PointsService {
     PointsMeResponse me(Long userId);
@@ -52,6 +53,26 @@ public interface PointsService {
      * 获取限额信息
      */
     PointsLimitsResponse getLimits(Long userId);
+
+    /**
+     * 用户查自己的兑换记录
+     */
+    List<JdRedeemDetailResponse> myJdRedeems(Long userId);
+
+    /**
+     * 管理员查全部订单
+     */
+    List<AdminJdRedeemResponse> listAllJdRedeems(Integer status);
+
+    /**
+     * 管理员发卡
+     */
+    void fulfillJdRedeem(Long adminUserId, Long id, String cardCode);
+
+    /**
+     * 管理员拒绝 + 退积分
+     */
+    void failJdRedeem(Long adminUserId, Long id, String remark);
 }
 
 

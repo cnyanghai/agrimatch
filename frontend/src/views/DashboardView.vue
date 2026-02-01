@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
 import { getDashboard, type DashboardResponse } from '../api/dashboard'
-import { FilePlus, Map, MessageSquare, FileCheck, User, Coins, Star, Bell, Clock, TrendingUp, ShoppingBag, Check, FileText, ChevronRight } from 'lucide-vue-next'
+import { FilePlus, Map, MessageSquare, FileCheck, User, Coins, Star, Bell, Clock, TrendingUp, Check, FileText, ChevronRight } from 'lucide-vue-next'
 import { Card, LoadingSpinner } from '../components/ui'
 
 const router = useRouter()
@@ -131,13 +131,6 @@ const consoleModules = computed(() => [
     badge: dashboard.value?.pointsBalance || null,
     badgeType: 'points'
   },
-  {
-    title: '兑换商城',
-    desc: '积分兑换京东好礼',
-    icon: ShoppingBag,
-    path: '/points/mall',
-    badge: null
-  }
 ])
 
 // 统计数据 - 纯展示信息，不可点击

@@ -21,6 +21,7 @@
         <result column="bio" property="bio"/>
         <result column="avatar" property="avatar"/>
         <result column="pay_info_json" property="payInfoJson"/>
+        <result column="is_admin" property="isAdmin"/>
         <result column="is_deleted" property="isDeleted"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
@@ -35,7 +36,7 @@
     </insert>
 
     <select id="selectById" resultMap="SysUserResultMap">
-        SELECT user_id, user_name, password, nick_name, phonenumber, wechat, company_id, is_buyer, is_seller, user_type, position, birth_date, gender, bio, avatar, pay_info_json, is_deleted, create_time, update_time
+        SELECT user_id, user_name, password, nick_name, phonenumber, wechat, company_id, is_buyer, is_seller, user_type, position, birth_date, gender, bio, avatar, pay_info_json, is_admin, is_deleted, create_time, update_time
         FROM sys_user
         WHERE user_id = #{userId}
           AND del_flag = '0'
@@ -44,7 +45,7 @@
     </select>
 
     <select id="selectByUserName" resultMap="SysUserResultMap">
-        SELECT user_id, user_name, password, nick_name, phonenumber, wechat, company_id, is_buyer, is_seller, user_type, position, birth_date, gender, bio, avatar, pay_info_json, is_deleted, create_time, update_time
+        SELECT user_id, user_name, password, nick_name, phonenumber, wechat, company_id, is_buyer, is_seller, user_type, position, birth_date, gender, bio, avatar, pay_info_json, is_admin, is_deleted, create_time, update_time
         FROM sys_user
         WHERE user_name = #{userName}
           AND del_flag = '0'

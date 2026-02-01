@@ -13,7 +13,7 @@ import NotificationToast from './components/notification/NotificationToast.vue'
 import {
   LayoutDashboard, FilePlus, Star, Map,
   MessageSquare, FileCheck, User, LogOut,
-  ChevronDown, Check, Plus, Coins
+  ChevronDown, Check, Plus, Coins, ShieldCheck
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -179,6 +179,15 @@ onMounted(async () => {
                   @click="go('/points')">
             <Coins class="h-5 w-5" stroke-width="2" />
             会员积分
+          </button>
+
+          <!-- 管理员：发卡管理 -->
+          <button v-if="auth.isAdmin"
+                  class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
+                  :class="route.path === '/admin/jd-redeems' ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
+                  @click="go('/admin/jd-redeems')">
+            <ShieldCheck class="h-5 w-5" stroke-width="2" />
+            发卡管理
           </button>
         </nav>
       </div>

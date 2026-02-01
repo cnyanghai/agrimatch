@@ -1,30 +1,22 @@
-package com.agrimatch.points.domain;
+package com.agrimatch.points.dto;
 
 import java.time.LocalDateTime;
 
 /**
- * 京东卡兑换记录实体
+ * 用户兑换记录详情
  */
-public class BusJdRedeem {
+public class JdRedeemDetailResponse {
     private Long id;
-    private Long userId;
     private Integer pointsCost;
     private Integer faceValue;
-    private String cardCode; // 加密存储
+    private String cardCode;
     private Integer status; // 0待发卡 1已发卡 2已失败
-    private Long adminUserId;
     private String adminRemark;
-    private LocalDateTime fulfillTime;
-    private Integer isDeleted;
     private LocalDateTime createTime;
-    private LocalDateTime updateTime;
+    private LocalDateTime fulfillTime;
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
 
     public Integer getPointsCost() { return pointsCost; }
     public void setPointsCost(Integer pointsCost) { this.pointsCost = pointsCost; }
@@ -38,22 +30,12 @@ public class BusJdRedeem {
     public Integer getStatus() { return status; }
     public void setStatus(Integer status) { this.status = status; }
 
-    public Long getAdminUserId() { return adminUserId; }
-    public void setAdminUserId(Long adminUserId) { this.adminUserId = adminUserId; }
-
     public String getAdminRemark() { return adminRemark; }
     public void setAdminRemark(String adminRemark) { this.adminRemark = adminRemark; }
-
-    public LocalDateTime getFulfillTime() { return fulfillTime; }
-    public void setFulfillTime(LocalDateTime fulfillTime) { this.fulfillTime = fulfillTime; }
-
-    public Integer getIsDeleted() { return isDeleted; }
-    public void setIsDeleted(Integer isDeleted) { this.isDeleted = isDeleted; }
 
     public LocalDateTime getCreateTime() { return createTime; }
     public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
 
-    public LocalDateTime getUpdateTime() { return updateTime; }
-    public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
+    public LocalDateTime getFulfillTime() { return fulfillTime; }
+    public void setFulfillTime(LocalDateTime fulfillTime) { this.fulfillTime = fulfillTime; }
 }
-
