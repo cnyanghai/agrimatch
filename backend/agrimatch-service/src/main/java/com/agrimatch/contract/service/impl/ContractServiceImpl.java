@@ -414,6 +414,9 @@ public class ContractServiceImpl implements ContractService {
         contract.setDeliveryAddress(req.getDeliveryAddress());
         contract.setPaymentMethod(req.getPaymentMethod());
         contract.setDeliveryMode(req.getDeliveryMode());
+        contract.setInvoiceType(req.getInvoiceType());
+        contract.setPackaging(req.getPackaging());
+        contract.setRemark(req.getRemark());
         contract.setTermsJson(generateDefaultTermsJson(contract));
         contract.setStatus(0); // 草稿
 

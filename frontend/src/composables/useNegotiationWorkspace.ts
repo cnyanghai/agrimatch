@@ -259,7 +259,6 @@ export function useNegotiationWorkspace() {
         contractCode,
         basisQuotes,
         packaging: snapshot.packaging || '',
-        origin: snapshot.origin || '',
         deliveryDate: snapshot.deliveryDate || snapshot.arrivalDate || '',
         deliveryPlace: snapshot.deliveryPlace || snapshot.shipAddress || snapshot.purchaseAddress || '',
         deliveryMethod: snapshot.deliveryMethod || snapshot.deliveryMode || '',
@@ -354,8 +353,11 @@ export function useNegotiationWorkspace() {
       paymentMethod: req.paymentMethod || '货到付款',
       deliveryPlace: req.deliveryPlace || formatCompanyAddress(isBuyer ? buyerCompany : sellerCompany),
       deliveryDate: req.deliveryDate || '',
+      deliveryMode: req.deliveryMethod || '',
       totalAmount: totalAmount,
-      remark: '',
+      invoiceType: req.invoiceType || '',
+      packaging: req.packaging || '',
+      remark: req.remark || '',
       priceType: req.priceType,
       basisQuotes: req.basisQuotes?.map(q => ({
         contractCode: q.contractCode,
@@ -1130,10 +1132,11 @@ export function useNegotiationWorkspace() {
       // 从合同预览数据构建请求
       const cd = contractData.value
       const product = cd.products[0]
+      const baseReq = requirementData.value
       const req: ContractFromNegotiationRequest = {
         conversationId: convId,
         productName: product?.name,
-        categoryName: undefined,
+        categoryName: baseReq.categoryName,
         quantity: product?.quantity,
         unit: product?.unit,
         unitPrice: product?.unitPrice,
@@ -1142,8 +1145,11 @@ export function useNegotiationWorkspace() {
         priceType: cd.priceType,
         deliveryDate: cd.deliveryDate,
         deliveryAddress: cd.deliveryPlace,
-        deliveryMode: undefined,
-        paymentMethod: cd.paymentMethod
+        deliveryMode: cd.deliveryMode || baseReq.deliveryMethod,
+        paymentMethod: cd.paymentMethod,
+        invoiceType: cd.invoiceType || baseReq.invoiceType,
+        packaging: cd.packaging || baseReq.packaging,
+        remark: cd.remark || baseReq.remark
       }
 
       // 调用后端API创建合同（后端会同时发送CONTRACT聊天消息）

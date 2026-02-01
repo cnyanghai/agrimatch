@@ -110,13 +110,13 @@ async function contactForSupply(supply: any) {
       subjectType: 'SUPPLY',
       subjectId: supply.id,
       subjectSnapshotJson: JSON.stringify({
+        productName: supply.categoryName,
         categoryName: supply.categoryName,
         companyName: supply.companyName,
         supplyNo: supply.supplyNo,
         exFactoryPrice: supply.exFactoryPrice,
         quantity: supply.quantity,
         remainingQuantity: supply.remainingQuantity ?? supply.quantity,
-        origin: supply.origin,
         shipAddress: supply.shipAddress,
         deliveryMode: supply.deliveryMode,
         packaging: supply.packaging,
@@ -154,6 +154,7 @@ async function contactForRequirement(req: any) {
       subjectType: 'REQUIREMENT',
       subjectId: req.id,
       subjectSnapshotJson: JSON.stringify({
+        productName: req.categoryName,
         categoryName: req.categoryName,
         companyName: req.companyName,
         expectedPrice: req.budgetPrice ?? req.expectedPrice,
@@ -428,7 +429,6 @@ onMounted(() => {
                     </td>
                     <td class="px-4 py-3">
                       <div class="text-sm text-slate-700">{{ supply.quantity || 0 }} 吨</div>
-                      <div class="text-xs text-slate-500">{{ supply.origin || '-' }}</div>
                     </td>
                     <td class="px-4 py-3">
                       <div class="text-sm text-slate-700">{{ supply.deliveryMode || '自提' }}</div>

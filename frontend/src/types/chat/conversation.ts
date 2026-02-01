@@ -160,7 +160,6 @@ export interface SubjectSnapshot {
   remainingQuantity?: number
 
   // 位置和物流
-  origin?: string
   shipAddress?: string
   purchaseAddress?: string
   deliveryMode?: string
@@ -206,7 +205,7 @@ export function getSubjectPrice(snapshot: SubjectSnapshot | null): number | null
 /** 获取标的地址 */
 export function getSubjectAddress(snapshot: SubjectSnapshot | null): string {
   if (!snapshot) return ''
-  return snapshot.shipAddress || snapshot.purchaseAddress || snapshot.origin || ''
+  return snapshot.shipAddress || snapshot.purchaseAddress || ''
 }
 
 /** 获取结算方式 */

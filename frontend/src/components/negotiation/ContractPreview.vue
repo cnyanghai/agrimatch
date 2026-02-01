@@ -56,7 +56,10 @@ export interface ContractData {
   paymentMethod: string
   deliveryPlace: string
   deliveryDate: string
+  deliveryMode?: string
   totalAmount: number
+  invoiceType?: string
+  packaging?: string
   remark?: string
   /** 定价方式 */
   priceType?: 'SPOT' | 'BASIS'
@@ -148,7 +151,10 @@ const documentData = computed((): ContractDocumentData => {
     paymentMethod: c.paymentMethod,
     deliveryAddress: c.deliveryPlace,
     deliveryDate: c.deliveryDate,
+    deliveryMode: c.deliveryMode,
     totalAmount: c.totalAmount,
+    invoiceType: c.invoiceType,
+    packaging: c.packaging,
     remark: c.remark,
     signingPlace: c.buyer.address || c.seller.address,
     priceType: c.priceType,

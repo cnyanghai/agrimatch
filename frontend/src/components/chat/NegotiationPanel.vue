@@ -39,7 +39,6 @@ type ProductInfo = {
   categoryName?: string
   companyName?: string
   nickName?: string
-  origin?: string
   storageMethod?: string
   remainingQuantity?: string
 }
@@ -82,7 +81,6 @@ function initFromSnapshot() {
       categoryName: s.categoryName || s.title,
       companyName: s.companyName,
       nickName: s.nickName,
-      origin: s.origin,
       storageMethod: s.storageMethod,
       remainingQuantity: s.remainingQuantity ? String(s.remainingQuantity) : undefined
     }
@@ -270,10 +268,6 @@ function send() {
         <div v-if="productInfo.companyName" class="flex items-center gap-1">
           <span class="text-neutral-400">公司:</span>
           <span class="font-bold text-neutral-700">{{ productInfo.companyName }}</span>
-        </div>
-        <div v-if="productInfo.origin" class="flex items-center gap-1">
-          <span class="text-neutral-400">产地:</span>
-          <span class="font-bold text-neutral-700">{{ productInfo.origin }}</span>
         </div>
         <div v-if="productInfo.storageMethod" class="flex items-center gap-1">
           <span class="text-neutral-400">储存:</span>

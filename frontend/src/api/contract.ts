@@ -171,6 +171,9 @@ export interface ContractFromNegotiationRequest {
   deliveryAddress?: string
   deliveryMode?: string
   paymentMethod?: string
+  invoiceType?: string
+  packaging?: string
+  remark?: string
   paramsJson?: string
 }
 

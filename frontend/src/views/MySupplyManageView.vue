@@ -170,7 +170,6 @@ const editOpen = ref(false)
 const saving = ref(false)
 const editing = ref<SupplyResponse | null>(null)
 const editForm = reactive<SupplyUpdateRequest>({
-  origin: undefined,
   quantity: undefined,
   exFactoryPrice: undefined,
   shipAddress: undefined,
@@ -187,7 +186,6 @@ const editForm = reactive<SupplyUpdateRequest>({
 
 function openEdit(s: SupplyResponse) {
   editing.value = s
-  editForm.origin = s.origin
   editForm.quantity = s.quantity
   editForm.exFactoryPrice = s.exFactoryPrice
   editForm.shipAddress = s.shipAddress
@@ -208,7 +206,6 @@ async function saveEdit() {
   saving.value = true
   try {
     const r = await updateSupply(editing.value.id, {
-      origin: editForm.origin,
       quantity: editForm.quantity,
       exFactoryPrice: editForm.exFactoryPrice,
       shipAddress: editForm.shipAddress,
@@ -1676,15 +1673,6 @@ async function applyTemplate(template: SupplyTemplateResponse) {
             <input
               v-model.number="editForm.exFactoryPrice"
               type="number"
-              class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
-            />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">产地</label>
-            <input
-              v-model="editForm.origin"
-              type="text"
-              placeholder="例如：山东济南..."
               class="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-lg focus:border-brand-500 outline-none transition-all"
             />
           </div>

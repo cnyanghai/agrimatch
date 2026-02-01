@@ -233,7 +233,6 @@ function buildSupplySnapshot(s: SupplyResponse) {
     basisQuotes: s.basisQuotes,
     quantity: s.quantity,
     remainingQuantity: s.remainingQuantity,
-    origin: s.origin,
     shipAddress: s.shipAddress,
     deliveryMode: s.deliveryMode,
     packaging: s.packaging,
@@ -316,11 +315,10 @@ async function loadSupplies() {
         if (s.companyName?.toLowerCase().includes(kw)) return true
         if (s.shipAddress?.toLowerCase().includes(kw)) return true
         if (s.nickName?.toLowerCase().includes(kw)) return true
-        // 扩展字段：包装、付款、备注、产地
+        // 扩展字段：包装、付款、备注
         if (s.packaging?.toLowerCase().includes(kw)) return true
         if (s.paymentMethod?.toLowerCase().includes(kw)) return true
         if (s.remark?.toLowerCase().includes(kw)) return true
-        if (s.origin?.toLowerCase().includes(kw)) return true
         // 质量参数 paramsJson（搜索参数名和参数值）
         if (s.paramsJson) {
           try {

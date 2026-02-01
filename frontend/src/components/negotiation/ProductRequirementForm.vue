@@ -32,7 +32,6 @@ export interface RequirementData {
   // 质量规格
   qualityGrade?: string
   packaging?: string  // 散装、袋装、箱装
-  origin?: string     // 产地
 
   // 交付条款
   deliveryDate: string
@@ -77,7 +76,6 @@ const form = ref<RequirementData>({
   unit: '吨',
   qualityGrade: '',
   packaging: '散装',
-  origin: '',
   deliveryDate: '',
   deliveryPlace: '',
   deliveryMethod: '物流配送',
@@ -341,34 +339,20 @@ function updateDynamicParam(key: string, value: string) {
         </div>
       </template>
 
-      <!-- 包装 + 产地 -->
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">
-            <Settings class="w-3 h-3 inline mr-0.5" />包装
-          </label>
-          <select
-            v-model="form.packaging"
-            :disabled="readonly"
-            class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
-                   focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                   disabled:bg-neutral-50 disabled:cursor-default"
-          >
-            <option v-for="opt in packagingOptions" :key="opt" :value="opt">{{ opt }}</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">产地</label>
-          <input
-            v-model="form.origin"
-            :readonly="readonly"
-            type="text"
-            class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
-                   focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
-                   read-only:bg-neutral-50 read-only:cursor-default"
-            placeholder="产地"
-          />
-        </div>
+      <!-- 包装 -->
+      <div>
+        <label class="block text-[10px] font-semibold text-neutral-500 uppercase mb-1">
+          <Settings class="w-3 h-3 inline mr-0.5" />包装
+        </label>
+        <select
+          v-model="form.packaging"
+          :disabled="readonly"
+          class="w-full h-8 px-2 text-sm rounded-lg border border-neutral-200 bg-white
+                 focus:ring-1 focus:ring-brand-500/20 focus:border-brand-500
+                 disabled:bg-neutral-50 disabled:cursor-default"
+        >
+          <option v-for="opt in packagingOptions" :key="opt" :value="opt">{{ opt }}</option>
+        </select>
       </div>
 
       <!-- 交货日期 + 交货地点 -->

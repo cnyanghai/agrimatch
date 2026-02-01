@@ -116,8 +116,7 @@ const filteredSupplies = computed(() => {
   if (!searchKeyword.value.trim()) return supplies.value
   const keyword = searchKeyword.value.trim().toLowerCase()
   return supplies.value.filter(s => 
-    s.categoryName?.toLowerCase().includes(keyword) ||
-    s.origin?.toLowerCase().includes(keyword)
+    s.categoryName?.toLowerCase().includes(keyword)
   )
 })
 
@@ -314,12 +313,12 @@ async function contactMerchant() {
   const snapshot: Record<string, any> = { companyName: company.value.companyName }
   if (firstSupply) {
     Object.assign(snapshot, {
+      productName: firstSupply.categoryName,
       categoryName: firstSupply.categoryName,
       supplyNo: firstSupply.supplyNo,
       exFactoryPrice: firstSupply.exFactoryPrice,
       quantity: firstSupply.quantity,
       remainingQuantity: firstSupply.remainingQuantity ?? firstSupply.quantity,
-      origin: firstSupply.origin,
       shipAddress: firstSupply.shipAddress,
       deliveryMode: firstSupply.deliveryMode,
       packaging: firstSupply.packaging,
@@ -371,12 +370,12 @@ async function sendInquiry(supply: any) {
       subjectId: supply.id,
       subjectSnapshotJson: JSON.stringify({
         companyName: company.value.companyName,
+        productName: supply.categoryName,
         categoryName: supply.categoryName,
         supplyNo: supply.supplyNo,
         exFactoryPrice: supply.exFactoryPrice,
         quantity: supply.quantity,
         remainingQuantity: supply.remainingQuantity ?? supply.quantity,
-        origin: supply.origin,
         shipAddress: supply.shipAddress,
         deliveryMode: supply.deliveryMode,
         packaging: supply.packaging,

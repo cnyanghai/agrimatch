@@ -32,6 +32,11 @@ public class ContractFromNegotiationRequest {
     private String deliveryMode;
     private String paymentMethod;
 
+    // 合同附加信息
+    private String invoiceType;
+    private String packaging;
+    private String remark;
+
     // 扩展字段
     private String paramsJson;
 
@@ -91,6 +96,15 @@ public class ContractFromNegotiationRequest {
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public String getInvoiceType() { return invoiceType; }
+    public void setInvoiceType(String invoiceType) { this.invoiceType = invoiceType; }
+
+    public String getPackaging() { return packaging; }
+    public void setPackaging(String packaging) { this.packaging = packaging; }
+
+    public String getRemark() { return remark; }
+    public void setRemark(String remark) { this.remark = remark; }
 
     public String getParamsJson() { return paramsJson; }
     public void setParamsJson(String paramsJson) { this.paramsJson = paramsJson; }
