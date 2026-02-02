@@ -31,6 +31,10 @@ export function recommendTags(categoryId: number | string): Promise<Result<Tag[]
   return http.get(`/api/tags/recommend/${categoryId}`)
 }
 
+export function getHotTags(): Promise<Result<Tag[]>> {
+  return http.get('/api/tags/list', { params: { isHot: 1 } })
+}
+
 export function createTag(tag: Partial<Tag>): Promise<Result<number>> {
   return http.post('/api/tags', tag)
 }

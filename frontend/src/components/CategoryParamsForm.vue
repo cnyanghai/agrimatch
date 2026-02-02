@@ -103,8 +103,7 @@ function updateCustomParam(idx: number, field: 'name' | 'value', val: string) {
       <!-- 分组标题 -->
       <div class="flex items-center gap-2">
         <div class="w-1 h-4 rounded-full" :class="{
-          'bg-action-500': group.key === 'breed',
-          'bg-action-500': group.key === 'biology',
+          'bg-action-500': group.key === 'breed' || group.key === 'biology',
           'bg-brand-500': group.key === 'quality',
           'bg-warning-500': group.key === 'logistics',
           'bg-accent-500': group.key === 'trade'
