@@ -31,15 +31,18 @@ public class AuthController {
     private final SmsCodeService smsCodeService;
     private final CaptchaService captchaService;
     private final long jwtExpireMs;
+    private final boolean cookieSecure;
 
     public AuthController(AuthService authService,
                           SmsCodeService smsCodeService,
                           CaptchaService captchaService,
-                          @Value("${security.jwt.expire-ms:604800000}") long jwtExpireMs) {
+                          @Value("${security.jwt.expire-ms:604800000}") long jwtExpireMs,
+                          @Value("${app.cookie-secure:false}") boolean cookieSecure) {
         this.authService = authService;
         this.smsCodeService = smsCodeService;
         this.captchaService = captchaService;
         this.jwtExpireMs = jwtExpireMs;
+        this.cookieSecure = cookieSecure;
     }
 
     /**
@@ -105,7 +108,7 @@ public class AuthController {
         long maxAgeSec = Math.max(0, jwtExpireMs / 1000);
         ResponseCookie cookie = ResponseCookie.from(TOKEN_COOKIE, token)
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookieSecure)
                 .path("/")
                 .sameSite("Lax")
                 .maxAge(maxAgeSec)
@@ -116,7 +119,7 @@ public class AuthController {
     private void clearTokenCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from(TOKEN_COOKIE, "")
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookieSecure)
                 .path("/")
                 .sameSite("Lax")
                 .maxAge(0)

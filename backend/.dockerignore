@@ -1,0 +1,10 @@
+target/
+*/target/
+uploads/
+*.jar
+.idea/
+.vscode/
+*.iml
+.git/
+.gitignore
+README.md
