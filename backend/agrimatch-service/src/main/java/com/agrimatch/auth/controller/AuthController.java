@@ -105,7 +105,7 @@ public class AuthController {
         long maxAgeSec = Math.max(0, jwtExpireMs / 1000);
         ResponseCookie cookie = ResponseCookie.from(TOKEN_COOKIE, token)
                 .httpOnly(true)
-                .secure(false) // 生产环境建议 true（https）
+                .secure(true)
                 .path("/")
                 .sameSite("Lax")
                 .maxAge(maxAgeSec)
@@ -116,7 +116,7 @@ public class AuthController {
     private void clearTokenCookie(HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from(TOKEN_COOKIE, "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .path("/")
                 .sameSite("Lax")
                 .maxAge(0)

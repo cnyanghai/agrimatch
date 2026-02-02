@@ -182,7 +182,13 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long userId, Long id) {
+        if (userId == null) throw new ApiException(401, "未登录");
+        BusPost existing = postMapper.selectById(id);
+        if (existing == null) throw new ApiException(ResultCode.NOT_FOUND);
+        if (!existing.getUserId().equals(userId)) {
+            throw new ApiException(403, "无权删除他人的帖子");
+        }
         int rows = postMapper.logicalDelete(id);
         if (rows != 1) throw new ApiException(ResultCode.NOT_FOUND);
     }

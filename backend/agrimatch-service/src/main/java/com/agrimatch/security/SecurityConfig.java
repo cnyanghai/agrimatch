@@ -21,7 +21,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtTokenUtil jwtTokenUtil(
-            @Value("${security.jwt.secret:agrimatch-demo-secret-please-change-32bytes}") String secret,
+            @Value("${security.jwt.secret}") String secret,
             @Value("${security.jwt.expire-ms:604800000}") long expireMs
     ) {
         return new JwtTokenUtil(secret, expireMs);

@@ -17,6 +17,7 @@ public class UnifiedSearchServiceImpl implements UnifiedSearchService {
 
     @Override
     public PageResult<UnifiedSearchResult> search(UnifiedSearchQuery query) {
+        query.setOffset((query.getPage() - 1) * query.getSize());
         List<UnifiedSearchResult> list = searchMapper.searchUnified(query);
         long total = searchMapper.countUnified(query);
         return new PageResult<>(list, total, query.getPage(), query.getSize());

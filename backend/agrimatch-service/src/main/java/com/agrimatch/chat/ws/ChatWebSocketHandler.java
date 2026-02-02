@@ -10,6 +10,8 @@ import com.agrimatch.security.JwtTokenUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.lang.NonNull;
@@ -29,6 +31,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class ChatWebSocketHandler extends TextWebSocketHandler {
+    private static final Logger log = LoggerFactory.getLogger(ChatWebSocketHandler.class);
+
     private final JwtTokenUtil jwtTokenUtil;
     private final ChatService chatService;
     private final ObjectMapper objectMapper;
@@ -53,7 +57,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         // 添加到用户的连接集合（支持多连接）
         sessions.computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet()).add(session);
         session.sendMessage(new TextMessage("{\"type\":\"CONNECTED\",\"serverTime\":\"" + LocalDateTime.now() + "\"}"));
-        System.out.println("[WS] User " + userId + " connected, total connections: " + sessions.get(userId).size());
+        log.debug("[WS] User {} connected, total connections: {}", userId, sessions.get(userId).size());
     }
 
     @Override
@@ -90,8 +94,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String contractCode = root.hasNonNull("contractCode") ? root.get("contractCode").asText(null) : null;
         String tempId = root.path("tempId").asText(null);
 
-        // DEBUG: 打印接收到的消息
-        System.out.println("[WS DEBUG] Received - msgType: " + msgType + ", payload field exists: " + root.hasNonNull("payload") + ", payloadJson: " + payloadJson);
+        log.debug("[WS] Received - msgType: {}, payload field exists: {}, payloadJson: {}", msgType, root.hasNonNull("payload"), payloadJson);
 
         if (conversationId == null) {
             session.sendMessage(new TextMessage("{\"type\":\"ERROR\",\"message\":\"missing conversationId\"}"));
@@ -129,8 +132,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                 if (userSessions.isEmpty()) {
                     sessions.remove(userId);
                 }
-                System.out.println("[WS] User " + userId + " disconnected, remaining connections: " +
-                    (sessions.containsKey(userId) ? sessions.get(userId).size() : 0));
+                log.debug("[WS] User {} disconnected, remaining connections: {}", userId,
+                    sessions.containsKey(userId) ? sessions.get(userId).size() : 0);
             }
         }
     }
@@ -230,7 +233,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private void sendToUser(Long userId, TextMessage message) {
         Set<WebSocketSession> userSessions = sessions.get(userId);
         if (userSessions == null || userSessions.isEmpty()) {
-            System.out.println("[WS] User " + userId + " is not online, active users: " + sessions.keySet());
+            log.debug("[WS] User {} is not online, active users: {}", userId, sessions.keySet());
             return;
         }
 
@@ -241,11 +244,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
                     session.sendMessage(message);
                     sent++;
                 } catch (Exception e) {
-                    System.out.println("[WS] Failed to send to one connection of user " + userId + ": " + e.getMessage());
+                    log.debug("[WS] Failed to send to one connection of user {}: {}", userId, e.getMessage());
                 }
             }
         }
-        System.out.println("[WS] Sent message to user " + userId + " via " + sent + "/" + userSessions.size() + " connections");
+        log.debug("[WS] Sent message to user {} via {}/{} connections", userId, sent, userSessions.size());
     }
 
     private Long authenticate(WebSocketSession session) {

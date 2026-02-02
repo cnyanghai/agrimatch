@@ -12,5 +12,6 @@ public class UnifiedSearchQuery {
     private Map<String, Object> tagFilters; // tagKey -> value (String or Number)
     private int page = 1;
     private int size = 10;
+    private int offset;
 }
 

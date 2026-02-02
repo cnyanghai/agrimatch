@@ -59,8 +59,9 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public Result<Void> delete(@PathVariable("id") @NotNull Long id) {
-        postService.delete(id);
+    public Result<Void> delete(Authentication authentication, @PathVariable("id") @NotNull Long id) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        postService.delete(userId, id);
         return Result.success();
     }
 }

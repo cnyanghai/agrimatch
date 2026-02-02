@@ -30,6 +30,7 @@ public class AdminCompanyController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
         AdminUtil.requireAdmin(authentication, userMapper);
+        if (size > 100) size = 100;
 
         int offset = (page - 1) * size;
         List<AdminCompanyResponse> list = adminMapper.selectCompanies(keyword, status, offset, size);

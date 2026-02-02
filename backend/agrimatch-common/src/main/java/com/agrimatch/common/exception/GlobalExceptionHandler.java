@@ -35,17 +35,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result<Void> handleException(Exception e) {
         log.error("Unhandled exception", e);
-        String msg = ResultCode.SERVER_ERROR.getMessage();
-        if (e != null) {
-            String detail = e.getMessage();
-            String type = e.getClass().getSimpleName();
-            if (detail != null && !detail.isBlank()) {
-                msg = msg + ": " + type + ": " + detail;
-            } else {
-                msg = msg + ": " + type;
-            }
-        }
-        return Result.fail(ResultCode.SERVER_ERROR.getCode(), msg);
+        return Result.fail(ResultCode.SERVER_ERROR.getCode(), ResultCode.SERVER_ERROR.getMessage());
     }
 }
 

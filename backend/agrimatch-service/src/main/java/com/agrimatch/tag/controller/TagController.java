@@ -3,6 +3,8 @@ package com.agrimatch.tag.controller;
 import com.agrimatch.common.api.Result;
 import com.agrimatch.tag.domain.NhtTag;
 import com.agrimatch.tag.service.TagService;
+import com.agrimatch.util.SecurityUtil;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -44,7 +46,8 @@ public class TagController {
     }
 
     @PostMapping("/custom")
-    public Result<NhtTag> createCustomTag(@RequestParam String tagName, @RequestParam(required = false, defaultValue = "general") String domain) {
+    public Result<NhtTag> createCustomTag(Authentication authentication, @RequestParam String tagName, @RequestParam(required = false, defaultValue = "general") String domain) {
+        SecurityUtil.requireUserId(authentication);
         return Result.success(tagService.createCustomTag(tagName, domain));
     }
 
@@ -54,7 +57,8 @@ public class TagController {
     }
 
     @DeleteMapping("/{id}")
-    public Result<Integer> remove(@PathVariable Integer id) {
+    public Result<Integer> remove(Authentication authentication, @PathVariable Integer id) {
+        SecurityUtil.requireUserId(authentication);
         return Result.success(tagService.deleteTag(id));
     }
 }

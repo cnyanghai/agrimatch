@@ -62,7 +62,7 @@
         SELECT t.*, u.nick_name as user_name, c.company_name
         <include refid="unifiedQueryBody" />
         ORDER BY t.create_time DESC
-        LIMIT ${(q.page - 1) * q.size}, #{q.size}
+        LIMIT #{q.offset}, #{q.size}
     </select>
 
     <select id="countUnified" resultType="long">

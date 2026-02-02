@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, reactive } from 'vue'
+import DOMPurify from 'dompurify'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { MessageSquare, ThumbsUp, Share2, Gift, ArrowLeft, Edit3, Trash2 } from 'lucide-vue-next'
@@ -50,6 +51,8 @@ const teaserContent = computed(() => {
 const showPaywall = computed(() => {
   return post.value?.isPaid && !hasPurchased.value && post.value.userId !== auth.me?.userId
 })
+
+const sanitizedContent = computed(() => DOMPurify.sanitize(post.value?.content || ''))
 
 // 打赏对话框
 const tipDialogOpen = ref(false)
@@ -409,7 +412,7 @@ onMounted(() => {
           </template>
           <template v-else>
             <!-- 富文本内容渲染 -->
-            <div class="post-content text-neutral-700 leading-relaxed text-lg" v-html="post.content"></div>
+            <div class="post-content text-neutral-700 leading-relaxed text-lg" v-html="sanitizedContent"></div>
           </template>
         </div>
 

@@ -44,6 +44,7 @@ public class AdminPointsManageController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
         AdminUtil.requireAdmin(authentication, userMapper);
+        if (size > 100) size = 100;
         int offset = (page - 1) * size;
         List<Map<String, Object>> list = adminMapper.selectRechargeRecords(keyword, offset, size);
         long total = adminMapper.countRechargeRecords(keyword);
@@ -57,6 +58,7 @@ public class AdminPointsManageController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
         AdminUtil.requireAdmin(authentication, userMapper);
+        if (size > 100) size = 100;
         int offset = (page - 1) * size;
         List<Map<String, Object>> list = adminMapper.selectRechargeUsers(keyword, offset, size);
         long total = adminMapper.countRechargeUsers(keyword);
@@ -70,6 +72,7 @@ public class AdminPointsManageController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
         AdminUtil.requireAdmin(authentication, userMapper);
+        if (size > 100) size = 100;
         int offset = (page - 1) * size;
         List<GiftResponse> list = adminMapper.selectGiftRecords(keyword, offset, size);
         long total = adminMapper.countGiftRecords(keyword);

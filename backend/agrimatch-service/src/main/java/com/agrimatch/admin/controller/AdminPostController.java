@@ -29,6 +29,7 @@ public class AdminPostController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
         AdminUtil.requireAdmin(authentication, userMapper);
+        if (size > 100) size = 100;
         int offset = (page - 1) * size;
         List<Map<String, Object>> list = adminMapper.selectPosts(keyword, offset, size);
         long total = adminMapper.countPosts(keyword);

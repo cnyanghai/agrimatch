@@ -1,8 +1,10 @@
 package com.agrimatch.points.controller;
 
+import com.agrimatch.admin.AdminUtil;
 import com.agrimatch.common.api.Result;
 import com.agrimatch.points.dto.*;
 import com.agrimatch.points.service.PointsService;
+import com.agrimatch.user.mapper.UserMapper;
 import com.agrimatch.util.SecurityUtil;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
@@ -16,9 +18,11 @@ import java.util.List;
 @Validated
 public class PointsController {
     private final PointsService pointsService;
+    private final UserMapper userMapper;
 
-    public PointsController(PointsService pointsService) {
+    public PointsController(PointsService pointsService, UserMapper userMapper) {
         this.pointsService = pointsService;
+        this.userMapper = userMapper;
     }
 
     @GetMapping("/me")
@@ -67,12 +71,14 @@ public class PointsController {
     }
 
     /**
-     * 模拟支付回调（开发测试用）
+     * 手动确认充值订单（仅管理员）
      */
     @PostMapping("/recharge/{orderNo}/confirm")
     public Result<Void> confirmRechargeOrder(
+            Authentication authentication,
             @PathVariable String orderNo,
             @RequestParam(required = false) String tradeNo) {
+        AdminUtil.requireAdmin(authentication, userMapper);
         pointsService.confirmRechargeOrder(orderNo, tradeNo);
         return Result.success();
     }

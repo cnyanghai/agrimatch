@@ -15,7 +15,7 @@ public interface PostService {
 
     List<PostResponse> list(PostQuery q);
 
-    void delete(Long id);
+    void delete(Long userId, Long id);
 }
 
 
