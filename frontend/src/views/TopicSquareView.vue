@@ -209,7 +209,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="flex items-center gap-4">
+          <div v-if="!auth.isFilingMode" class="flex items-center gap-4">
             <button
               class="bg-brand-600 hover:bg-brand-700 text-white px-5 py-2 rounded-lg text-sm font-black transition-all active:scale-95 shadow-lg shadow-brand-600/20"
               @click="onPublishTalk"
@@ -227,7 +227,7 @@ onMounted(() => {
         <div class="lg:col-span-8 space-y-4">
           
           <!-- 快速发布入口 (知乎风格集成卡片) -->
-          <Card padding="none" radius="2xl" class="overflow-hidden mb-6 border-none shadow-sm ring-1 ring-neutral-100">
+          <Card v-if="!auth.isFilingMode" padding="none" radius="2xl" class="overflow-hidden mb-6 border-none shadow-sm ring-1 ring-neutral-100">
             <div class="p-4 flex items-center gap-4">
               <div class="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-400 font-bold">
                 {{ displayName[0] }}

@@ -69,9 +69,20 @@ const router = createRouter({
   ]
 })
 
+// 备案模式下受限的路由路径
+const filingRestrictedPaths = ['/points', '/chat', '/contracts', '/console/publish', '/talks/publish', '/admin']
+
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
   const ui = useUiStore()
+
+  // 拉取站点配置（仅首次）
+  await auth.fetchConfig()
+
+  // 备案模式下拦截受限路由
+  if (auth.isFilingMode && filingRestrictedPaths.some(p => to.path.startsWith(p))) {
+    return { path: '/' }
+  }
 
   // 显式 public 直接放行
   if (to.meta.public) return true

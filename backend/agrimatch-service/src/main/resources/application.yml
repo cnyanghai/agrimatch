@@ -40,6 +40,7 @@ security:
 
 app:
   upload-dir: uploads
+  filing-mode: false    # 备案审核期间改为 true
 
 amap:
   # 高德地图：Web服务 Key（用于后端地理编码：地址->经纬度）

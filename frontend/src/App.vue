@@ -117,7 +117,8 @@ onMounted(async () => {
           </button>
 
           <!-- 2. 发布信息 -->
-          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
+          <button v-if="!auth.isFilingMode"
+                  class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
                   :class="route.path==='/console/publish' ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/console/publish')">
             <FilePlus class="h-5 w-5" stroke-width="2" />
@@ -141,7 +142,8 @@ onMounted(async () => {
           </button>
 
           <!-- 5. 聊天议价 -->
-          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3 relative"
+          <button v-if="!auth.isFilingMode"
+                  class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3 relative"
                   :class="route.path==='/chat' || route.path==='/notify' ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/chat')">
             <div class="relative">
@@ -158,7 +160,8 @@ onMounted(async () => {
           </button>
 
           <!-- 6. 合同管理 -->
-          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
+          <button v-if="!auth.isFilingMode"
+                  class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
                   :class="route.path.startsWith('/contracts') ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/contracts')">
             <FileCheck class="h-5 w-5" stroke-width="2" />
@@ -174,7 +177,8 @@ onMounted(async () => {
           </button>
 
           <!-- 8. 会员积分 -->
-          <button class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
+          <button v-if="!auth.isFilingMode"
+                  class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
                   :class="route.path.startsWith('/points') ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/points')">
             <Coins class="h-5 w-5" stroke-width="2" />
@@ -182,7 +186,7 @@ onMounted(async () => {
           </button>
 
           <!-- 管理员：管理后台 -->
-          <button v-if="auth.isAdmin"
+          <button v-if="auth.isAdmin && !auth.isFilingMode"
                   class="w-full text-left px-4 py-2.5 rounded-lg transition-all text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 flex items-center gap-3"
                   :class="route.path.startsWith('/admin') ? 'bg-brand-50 text-brand-700 font-medium border-l-2 border-brand-500' : ''"
                   @click="go('/admin')">

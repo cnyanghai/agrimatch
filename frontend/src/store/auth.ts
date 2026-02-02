@@ -47,11 +47,15 @@ export interface CaptchaResponse {
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: localStorage.getItem('agrimatch_token') || '',
-    me: null as MeResponse | null
+    me: null as MeResponse | null,
+    filingMode: false,
+    _configFetched: false
   }),
   getters: {
     // 是否已登录
     isLoggedIn: (state) => !!state.token,
+    // 是否备案模式
+    isFilingMode: (state) => state.filingMode,
     // 是否为采购商
     isBuyer: (state) => state.me?.isBuyer === 1,
     // 是否为供应商
@@ -127,6 +131,20 @@ export const useAuthStore = defineStore('auth', {
       })
       if (data.code !== 0 || !data.data?.token) throw new Error(data.message)
       this.setToken(data.data.token)
+    },
+
+    // 获取站点配置（备案模式等）
+    async fetchConfig() {
+      if (this._configFetched) return
+      try {
+        const { data } = await http.get<Result<{ filingMode: boolean }>>('/api/config')
+        if (data.code === 0 && data.data) {
+          this.filingMode = data.data.filingMode
+        }
+      } catch {
+        // 接口不可用时默认关闭备案模式
+      }
+      this._configFetched = true
     },
 
     // 获取当前用户信息

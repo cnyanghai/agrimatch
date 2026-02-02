@@ -34,7 +34,7 @@ public class SecurityConfig {
         http.httpBasic(Customizer.withDefaults());
 
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/error", "/api/health", "/api/auth/**",
+                .requestMatchers("/", "/error", "/api/health", "/api/config", "/api/auth/**",
                         "/api/products/tree", "/api/products/search", "/api/products/*/params",
                         "/api/product-schemas", "/api/product-schemas/**",
                         "/api/posts", "/api/posts/*/comments",
