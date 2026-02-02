@@ -13,7 +13,6 @@ import ExpertBadge from '../components/post/ExpertBadge.vue'
 import PaidBadge from '../components/post/PaidBadge.vue'
 import CollectButton from '../components/post/CollectButton.vue'
 import { Card, StatusBadge } from '../components/ui'
-import { getPostPlaceholderCover } from '../assets/placeholders'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -136,15 +135,15 @@ function formatTime(timeStr: string | undefined) {
   return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
 }
 
-// 获取帖子封面图，没有图片时返回本地占位图
-function getPostCover(post: PostResponse): string {
+// 获取帖子封面图，没有真实图片时返回 null（话题广场不使用占位图）
+function getPostCover(post: PostResponse): string | null {
   if (post.imagesJson) {
     try {
       const imgs = JSON.parse(post.imagesJson)
       if (Array.isArray(imgs) && imgs.length > 0) return imgs[0]
     } catch (e) { /* ignore */ }
   }
-  return getPostPlaceholderCover(post.id)
+  return null
 }
 
 // 去除 HTML 标签，用于列表预览
@@ -264,7 +263,7 @@ onMounted(() => {
             >
               <div class="p-4">
                 <!-- 作者行 -->
-                <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center justify-between mb-2">
                   <div class="flex items-center gap-2 cursor-pointer group/author" @click="onAuthorClick($event, post.userId)">
                     <div class="w-6 h-6 rounded-md bg-brand-600 text-white flex items-center justify-center text-[10px] font-black shadow-sm group-hover/author:scale-110 transition-transform overflow-hidden">
                       <img v-if="post.avatar" :src="post.avatar" alt="头像" class="w-full h-full object-cover" />
@@ -288,24 +287,24 @@ onMounted(() => {
                     <h3 class="text-lg font-black text-neutral-900 mb-2 group-hover:text-brand-600 transition-colors">
                       {{ post.title }}
                     </h3>
-                    <p class="text-sm text-neutral-500 leading-relaxed line-clamp-3 mb-3">
+                    <p class="text-sm text-neutral-500 leading-relaxed line-clamp-3">
                       {{ stripHtml(post.content) }}
                     </p>
                   </div>
-                  <div class="w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-neutral-100">
-                    <img :src="getPostCover(post)" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <div v-if="getPostCover(post)" class="w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-neutral-100">
+                    <img :src="getPostCover(post)!" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                 </div>
 
                 <!-- 交互行 -->
-                <div class="flex items-center justify-between mt-3 pt-3 border-t border-neutral-50">
+                <div class="flex items-center justify-between mt-2 pt-2 border-t border-neutral-50">
                   <div class="flex items-center gap-4">
                     <button class="flex items-center gap-1.5 text-xs font-bold transition-all" :class="post.likedByMe ? 'text-red-500' : 'text-neutral-400 hover:text-red-500'">
-                      <Heart :size="18" :fill="post.likedByMe ? 'currentColor' : 'none'" />
+                      <Heart :size="16" :fill="post.likedByMe ? 'currentColor' : 'none'" />
                       {{ post.likeCount ?? 0 }}
                     </button>
                     <button class="flex items-center gap-1.5 text-neutral-400 hover:text-brand-600 text-xs font-bold transition-all">
-                      <MessageSquare :size="18" />
+                      <MessageSquare :size="16" />
                       {{ post.commentCount ?? 0 }}
                     </button>
                     <CollectButton :post-id="post.id" :initial-status="collectedPostIds.includes(post.id)" />
