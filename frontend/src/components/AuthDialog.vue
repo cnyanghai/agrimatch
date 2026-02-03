@@ -41,6 +41,7 @@ const loginForm = reactive({
 const registerForm = reactive({
   phone: '',
   password: '',
+  confirmPassword: '',
   captchaCode: ''
 })
 
@@ -49,6 +50,27 @@ const agreed = ref(false)
 
 // 注册成功状态
 const registerSuccess = ref(false)
+
+const showResetPassword = ref(false)
+const resetForm = reactive({
+  phone: '',
+  smsCode: '',
+  newPassword: '',
+  confirmPassword: '',
+})
+const resetSending = ref(false)
+const resetCountdown = ref(0)
+
+const passwordStrength = computed(() => {
+  const p = registerForm.password
+  if (p.length < 6) return 0
+  let score = 0
+  if (p.length >= 8) score++
+  if (/[a-z]/.test(p) && /[A-Z]/.test(p)) score++
+  if (/\d/.test(p)) score++
+  if (/[^a-zA-Z0-9]/.test(p)) score++
+  return Math.min(score, 3)
+})
 
 // 获取验证码
 async function refreshCaptcha() {
@@ -74,6 +96,7 @@ watch(() => ui.authDialogVisible, (v) => {
     loginForm.captchaCode = ''
     registerForm.phone = ''
     registerForm.password = ''
+    registerForm.confirmPassword = ''
     registerForm.captchaCode = ''
   }
 })
@@ -139,6 +162,11 @@ async function onRegister() {
       loading.value = false
       return
     }
+    if (registerForm.password !== registerForm.confirmPassword) {
+      ElMessage.warning('两次输入的密码不一致')
+      loading.value = false
+      return
+    }
     if (!registerForm.captchaCode) {
       ElMessage.warning('请输入验证码')
       loading.value = false
@@ -156,10 +184,6 @@ async function onRegister() {
       password: registerForm.password,
       captchaKey: captcha.key,
       captchaCode: registerForm.captchaCode,
-      nickName: registerForm.phone,
-      userType: 'buyer',
-      companyName: '',
-      companyType: 'trader'
     })
     await auth.fetchMe()
     
@@ -186,6 +210,70 @@ async function onRegister() {
   } finally {
     loading.value = false
   }
+}
+
+async function sendResetCode() {
+  if (!resetForm.phone || resetForm.phone.length < 11) {
+    ElMessage.warning('请输入正确的手机号')
+    return
+  }
+  if (resetCountdown.value > 0) return
+  resetSending.value = true
+  try {
+    await auth.sendResetSmsCode(resetForm.phone)
+    ElMessage.success('验证码已发送')
+    resetCountdown.value = 60
+    const timer = setInterval(() => {
+      resetCountdown.value--
+      if (resetCountdown.value <= 0) clearInterval(timer)
+    }, 1000)
+  } catch (e: any) {
+    ElMessage.error(e?.message || '发送失败')
+  } finally {
+    resetSending.value = false
+  }
+}
+
+async function onResetPassword() {
+  if (!resetForm.phone || resetForm.phone.length < 11) {
+    ElMessage.warning('请输入正确的手机号')
+    return
+  }
+  if (!resetForm.smsCode) {
+    ElMessage.warning('请输入验证码')
+    return
+  }
+  if (!resetForm.newPassword || resetForm.newPassword.length < 6) {
+    ElMessage.warning('新密码至少6位')
+    return
+  }
+  if (resetForm.newPassword !== resetForm.confirmPassword) {
+    ElMessage.warning('两次输入的密码不一致')
+    return
+  }
+  loading.value = true
+  try {
+    await auth.resetPassword(resetForm.phone, resetForm.smsCode, resetForm.newPassword)
+    ElMessage.success('密码重置成功，请登录')
+    showResetPassword.value = false
+    activeTab.value = 'login'
+  } catch (e: any) {
+    ElMessage.error(e?.message || '重置失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+function goResetPassword() {
+  showResetPassword.value = true
+  resetForm.phone = loginForm.phoneOrUser || ''
+  resetForm.smsCode = ''
+  resetForm.newPassword = ''
+  resetForm.confirmPassword = ''
+}
+
+function backToLogin() {
+  showResetPassword.value = false
 }
 
 // 打开协议页面（新标签页）
@@ -216,7 +304,7 @@ function openAgreement(type: 'user' | 'privacy') {
     </template>
 
     <div class="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
-      <el-tabs v-model="activeTab" class="auth-tabs">
+      <el-tabs v-show="!showResetPassword" v-model="activeTab" class="auth-tabs">
         <!-- 登录 Tab -->
         <el-tab-pane name="login" label="登录">
           <div class="space-y-4">
@@ -258,10 +346,15 @@ function openAgreement(type: 'user' | 'privacy') {
               </div>
 
               <div class="flex justify-between items-center mt-6">
-                <button class="text-sm font-bold text-brand-600 hover:text-brand-700 transition-all " @click="activeTab = 'register'">
-                  没有账号？去注册
-                </button>
-                <BaseButton 
+                <div class="flex flex-col gap-1">
+                  <button class="text-sm font-bold text-brand-600 hover:text-brand-700 transition-all text-left" @click="activeTab = 'register'">
+                    没有账号？去注册
+                  </button>
+                  <button class="text-xs text-neutral-400 hover:text-neutral-600 transition-all text-left" @click="goResetPassword">
+                    忘记密码？
+                  </button>
+                </div>
+                <BaseButton
                   type="primary"
                   :loading="loading"
                   @click="onLogin"
@@ -303,26 +396,31 @@ function openAgreement(type: 'user' | 'privacy') {
                 <template #prefix><KeyRound class="text-neutral-400" :size="16" :stroke-width="2" /></template>
               </el-input>
 
+              <!-- 确认密码 -->
+              <el-input v-model="registerForm.confirmPassword" placeholder="确认密码" show-password class="mb-3">
+                <template #prefix><KeyRound class="text-neutral-400" :size="16" :stroke-width="2" /></template>
+              </el-input>
+
               <!-- 密码强度提示 -->
               <div v-if="registerForm.password" class="mb-3">
                 <div class="flex items-center gap-2">
                   <div class="flex-1 h-1 rounded-full bg-neutral-100 overflow-hidden">
-                    <div 
+                    <div
                       class="h-full transition-all duration-300"
                       :class="[
-                        registerForm.password.length < 6 ? 'w-1/4 bg-error-400' :
-                        registerForm.password.length < 8 ? 'w-2/4 bg-warning-400' :
-                        registerForm.password.length < 12 ? 'w-3/4 bg-brand-400' :
+                        passwordStrength === 0 ? 'w-1/4 bg-error-400' :
+                        passwordStrength === 1 ? 'w-2/4 bg-warning-400' :
+                        passwordStrength === 2 ? 'w-3/4 bg-brand-400' :
                         'w-full bg-brand-600'
                       ]"
                     />
                   </div>
                   <span class="text-xs font-medium" :class="[
-                    registerForm.password.length < 6 ? 'text-error-500' :
-                    registerForm.password.length < 8 ? 'text-warning-500' :
+                    passwordStrength === 0 ? 'text-error-500' :
+                    passwordStrength === 1 ? 'text-warning-500' :
                     'text-brand-600'
                   ]">
-                    {{ registerForm.password.length < 6 ? '弱' : registerForm.password.length < 8 ? '中' : '强' }}
+                    {{ ['弱', '中', '强', '很强'][passwordStrength] }}
                   </span>
                 </div>
               </div>
@@ -381,6 +479,52 @@ function openAgreement(type: 'user' | 'privacy') {
           </div>
         </el-tab-pane>
       </el-tabs>
+
+      <!-- 忘记密码面板 -->
+      <div v-if="showResetPassword" class="mt-4">
+        <div class="bg-white p-6 rounded-xl border border-neutral-200">
+          <div class="flex items-center gap-2 mb-4">
+            <button class="text-neutral-400 hover:text-neutral-600 transition-all" @click="backToLogin">
+              ← 返回登录
+            </button>
+            <span class="text-sm font-bold text-neutral-900">重置密码</span>
+          </div>
+
+          <el-input v-model="resetForm.phone" placeholder="手机号" class="mb-3" maxlength="11">
+            <template #prefix><Phone class="text-neutral-400" :size="16" :stroke-width="2" /></template>
+          </el-input>
+
+          <div class="flex gap-3 items-center mb-3">
+            <el-input v-model="resetForm.smsCode" placeholder="短信验证码" class="flex-1" maxlength="6">
+              <template #prefix><ShieldCheck class="text-neutral-400" :size="16" :stroke-width="2" /></template>
+            </el-input>
+            <BaseButton
+              :disabled="resetCountdown > 0 || resetSending"
+              size="sm"
+              @click="sendResetCode"
+            >
+              {{ resetSending ? '发送中...' : resetCountdown > 0 ? `${resetCountdown}s` : '发送验证码' }}
+            </BaseButton>
+          </div>
+
+          <el-input v-model="resetForm.newPassword" placeholder="新密码（至少6位）" show-password class="mb-3">
+            <template #prefix><KeyRound class="text-neutral-400" :size="16" :stroke-width="2" /></template>
+          </el-input>
+
+          <el-input v-model="resetForm.confirmPassword" placeholder="确认新密码" show-password class="mb-3">
+            <template #prefix><KeyRound class="text-neutral-400" :size="16" :stroke-width="2" /></template>
+          </el-input>
+
+          <BaseButton
+            type="primary"
+            :loading="loading"
+            class="w-full"
+            @click="onResetPassword"
+          >
+            重置密码
+          </BaseButton>
+        </div>
+      </div>
     </div>
   </BaseModal>
 </template>

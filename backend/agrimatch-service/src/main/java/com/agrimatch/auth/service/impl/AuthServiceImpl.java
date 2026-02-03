@@ -21,6 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Service
 public class AuthServiceImpl implements AuthService {
     private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
@@ -31,6 +34,21 @@ public class AuthServiceImpl implements AuthService {
     private final CompanyMapper companyMapper;
     private final SmsCodeService smsCodeService;
     private final SysLoginLogMapper loginLogMapper;
+
+    // 登录失败锁定：5次失败锁定15分钟
+    private static final int MAX_ATTEMPTS = 5;
+    private static final long LOCKOUT_MS = 15 * 60_000L;
+    private final Map<String, LoginAttempt> loginAttempts = new ConcurrentHashMap<>();
+
+    private static class LoginAttempt {
+        int failCount;
+        long lockUntil;
+
+        LoginAttempt() {
+            this.failCount = 0;
+            this.lockUntil = 0;
+        }
+    }
 
     public AuthServiceImpl(UserMapper userMapper,
                            PasswordEncoder passwordEncoder,
@@ -51,15 +69,22 @@ public class AuthServiceImpl implements AuthService {
         if (!StringUtils.hasText(userName) || !StringUtils.hasText(password)) {
             throw new ApiException(ResultCode.PARAM_ERROR);
         }
+        // 检查是否被锁定
+        checkLockout(userName);
+
         SysUser u = userMapper.selectByUserName(userName);
         if (u == null || !StringUtils.hasText(u.getPassword())) {
+            recordFailedAttempt(userName);
             recordLoginLog(userName, "1", "账号或密码错误");
             throw new ApiException(401, "账号或密码错误");
         }
         if (!passwordEncoder.matches(password, u.getPassword())) {
+            recordFailedAttempt(userName);
             recordLoginLog(userName, "1", "账号或密码错误");
             throw new ApiException(401, "账号或密码错误");
         }
+        // 登录成功，清除失败记录
+        clearAttempts(userName);
         String token = jwtTokenUtil.generateToken(u.getUserId(), u.getUserName());
         recordLoginLog(userName, "0", "登录成功");
         return new LoginResponse(token);
@@ -72,13 +97,65 @@ public class AuthServiceImpl implements AuthService {
         }
         String userName = phone.trim();
         SysUser u = userMapper.selectByUserName(userName);
+
         if (u == null) {
-            recordLoginLog(userName, "1", "账号不存在");
-            throw new ApiException(404, "账号不存在，请先注册");
+            // 自动注册：短信验证通过即创建账号
+            u = new SysUser();
+            u.setUserName(userName);
+            u.setNickName(userName); // 默认昵称为手机号，用户可后续修改
+            u.setPhonenumber(userName);
+            u.setUserType("SYS_USER");
+            u.setIsBuyer(0);
+            u.setIsSeller(0);
+            int rows = userMapper.insert(u);
+            if (rows != 1 || u.getUserId() == null) {
+                throw new ApiException(ResultCode.SERVER_ERROR);
+            }
+            log.info("Auto-registered new user via SMS login: phone={}, userId={}", userName, u.getUserId());
+            recordLoginLog(userName, "0", "短信登录（新用户自动注册）");
+        } else {
+            recordLoginLog(userName, "0", "短信登录成功");
         }
+
         String token = jwtTokenUtil.generateToken(u.getUserId(), u.getUserName());
-        recordLoginLog(userName, "0", "短信登录成功");
         return new LoginResponse(token);
+    }
+
+    private void checkLockout(String userName) {
+        LoginAttempt attempt = loginAttempts.get(userName);
+        if (attempt != null && attempt.lockUntil > System.currentTimeMillis()) {
+            long remainMin = (attempt.lockUntil - System.currentTimeMillis()) / 60_000 + 1;
+            throw new ApiException(429, "登录失败次数过多，请" + remainMin + "分钟后再试");
+        }
+    }
+
+    private void recordFailedAttempt(String userName) {
+        LoginAttempt attempt = loginAttempts.computeIfAbsent(userName, k -> new LoginAttempt());
+        attempt.failCount++;
+        if (attempt.failCount >= MAX_ATTEMPTS) {
+            attempt.lockUntil = System.currentTimeMillis() + LOCKOUT_MS;
+            attempt.failCount = 0;
+        }
+    }
+
+    private void clearAttempts(String userName) {
+        loginAttempts.remove(userName);
+    }
+
+    @Override
+    public void resetPassword(String phone, String newPassword) {
+        if (!StringUtils.hasText(phone) || !StringUtils.hasText(newPassword)) {
+            throw new ApiException(ResultCode.PARAM_ERROR);
+        }
+        SysUser u = userMapper.selectByUserName(phone.trim());
+        if (u == null) {
+            throw new ApiException(404, "账号不存在");
+        }
+        SysUser patch = new SysUser();
+        patch.setUserId(u.getUserId());
+        patch.setPassword(passwordEncoder.encode(newPassword));
+        userMapper.update(patch);
+        log.info("Password reset for user: {}", phone);
     }
 
     private void recordLoginLog(String userName, String status, String msg) {

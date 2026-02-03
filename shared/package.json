@@ -1,0 +1,19 @@
+{
+  "name": "@wogu/shared",
+  "version": "0.1.0",
+  "description": "Shared types, constants, and utilities for the WoGu platform",
+  "main": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./types": "./types/index.ts",
+    "./api": "./api/index.ts",
+    "./api/*": "./api/*.ts",
+    "./constants": "./constants/index.ts",
+    "./utils/format": "./utils/format.ts"
+  },
+  "files": [
+    "**/*.ts"
+  ],
+  "private": true
+}

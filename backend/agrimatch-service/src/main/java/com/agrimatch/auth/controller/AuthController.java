@@ -1,5 +1,6 @@
 package com.agrimatch.auth.controller;
 
+import com.agrimatch.auth.dto.ResetPasswordRequest;
 import com.agrimatch.auth.dto.LoginRequest;
 import com.agrimatch.auth.dto.LoginBySmsRequest;
 import com.agrimatch.auth.dto.LoginResponse;
@@ -86,6 +87,14 @@ public class AuthController {
         LoginResponse r = authService.register(req);
         setTokenCookie(response, r.getToken());
         return Result.success(r);
+    }
+
+    @PostMapping("/reset-password")
+    public Result<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest req) {
+        // type=3 找回密码
+        smsCodeService.verifyOrThrow(req.getPhone(), 3, req.getSmsCode());
+        authService.resetPassword(req.getPhone(), req.getNewPassword());
+        return Result.success();
     }
 
     @PostMapping("/logout")

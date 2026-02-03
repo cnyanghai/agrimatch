@@ -4,6 +4,7 @@ import com.agrimatch.common.exception.ApiException;
 import com.agrimatch.sms.SmsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -34,6 +35,9 @@ public class SmsCodeService {
     private static final long SEND_COOLDOWN_MS = 60_000L;
     // 过期：5 分钟
     private static final long EXPIRE_MS = 5 * 60_000L;
+
+    @Value("${agrimatch.sms.dev-bypass:false}")
+    private boolean devBypass;
 
     private final SmsProvider smsProvider;
 
@@ -67,8 +71,11 @@ public class SmsCodeService {
         if (!StringUtils.hasText(smsCode)) throw new ApiException(400, "请输入验证码");
 
         String code = smsCode.trim();
-        // 固定码（开发期联调）
-        if ("000000".equals(code)) return;
+        // 开发环境万能验证码（生产环境必须关闭）
+        if (devBypass && "000000".equals(code)) {
+            log.warn("⚠ SMS dev bypass used for phone={}, type={}", phone, type);
+            return;
+        }
 
         String key = key(phone, type);
         Entry e = store.get(key);

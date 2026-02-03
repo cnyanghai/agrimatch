@@ -7,9 +7,9 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,7 +32,7 @@ public class CaptchaService {
     private static final int HEIGHT = 40;
     private static final int CODE_LENGTH = 4;
     
-    private final Random random = new Random();
+    private final SecureRandom random = new SecureRandom();
     
     /**
      * 生成验证码

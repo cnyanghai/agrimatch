@@ -1,0 +1,194 @@
+{
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue",
+      "^Wg(.*)": "@/components/Wg$1.vue"
+    }
+  },
+  "pages": [
+    {
+      "path": "pages/home/index",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/supply/index",
+      "style": {
+        "navigationBarTitleText": "供应大厅",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/supply/detail",
+      "style": {
+        "navigationBarTitleText": "供应详情"
+      }
+    },
+    {
+      "path": "pages/supply/publish",
+      "style": {
+        "navigationBarTitleText": "发布供应"
+      }
+    },
+    {
+      "path": "pages/requirement/index",
+      "style": {
+        "navigationBarTitleText": "采购大厅",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/requirement/detail",
+      "style": {
+        "navigationBarTitleText": "采购详情"
+      }
+    },
+    {
+      "path": "pages/requirement/publish",
+      "style": {
+        "navigationBarTitleText": "发布采购"
+      }
+    },
+    {
+      "path": "pages/chat/index",
+      "style": {
+        "navigationBarTitleText": "消息",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/chat/conversation",
+      "style": {
+        "navigationBarTitleText": "聊天"
+      }
+    },
+    {
+      "path": "pages/profile/index",
+      "style": {
+        "navigationBarTitleText": "我的"
+      }
+    },
+    {
+      "path": "pages/auth/login",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    },
+    {
+      "path": "pages/search/index",
+      "style": {
+        "navigationBarTitleText": "搜索"
+      }
+    },
+    {
+      "path": "pages/topic/square",
+      "style": {
+        "navigationBarTitleText": "话题广场",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/topic/detail",
+      "style": {
+        "navigationBarTitleText": "话题详情"
+      }
+    },
+    {
+      "path": "pages/topic/publish",
+      "style": {
+        "navigationBarTitleText": "发布话题"
+      }
+    },
+    {
+      "path": "pages/user/profile",
+      "style": {
+        "navigationBarTitleText": "用户主页"
+      }
+    },
+    {
+      "path": "pages/company/detail",
+      "style": {
+        "navigationBarTitleText": "企业详情"
+      }
+    },
+    {
+      "path": "pages/contract/list",
+      "style": {
+        "navigationBarTitleText": "我的合同",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/contract/detail",
+      "style": {
+        "navigationBarTitleText": "合同详情"
+      }
+    },
+    {
+      "path": "pages/points/index",
+      "style": {
+        "navigationBarTitleText": "我的积分"
+      }
+    },
+    {
+      "path": "pages/settings/index",
+      "style": {
+        "navigationBarTitleText": "设置"
+      }
+    },
+    {
+      "path": "pages/settings/edit-profile",
+      "style": {
+        "navigationBarTitleText": "编辑资料"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "沃谷",
+    "navigationBarBackgroundColor": "#1a4532",
+    "backgroundColor": "#fafaf9",
+    "animationType": "slide-in-right",
+    "animationDuration": 250
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#2D6A4F",
+    "borderStyle": "white",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页",
+        "iconPath": "static/tab/home.png",
+        "selectedIconPath": "static/tab/home-active.png"
+      },
+      {
+        "pagePath": "pages/supply/index",
+        "text": "供应",
+        "iconPath": "static/tab/supply.png",
+        "selectedIconPath": "static/tab/supply-active.png"
+      },
+      {
+        "pagePath": "pages/requirement/index",
+        "text": "采购",
+        "iconPath": "static/tab/requirement.png",
+        "selectedIconPath": "static/tab/requirement-active.png"
+      },
+      {
+        "pagePath": "pages/chat/index",
+        "text": "消息",
+        "iconPath": "static/tab/chat.png",
+        "selectedIconPath": "static/tab/chat-active.png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "static/tab/profile.png",
+        "selectedIconPath": "static/tab/profile-active.png"
+      }
+    ]
+  }
+}

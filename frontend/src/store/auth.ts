@@ -29,14 +29,8 @@ export interface MeResponse {
 export interface RegisterRequest {
   phone: string
   password: string
-  // 图形验证码
   captchaKey: string
   captchaCode: string
-  // 系统不强制昵称：前端可用联系人姓名/手机号代替
-  nickName?: string
-  userType: 'buyer' | 'seller'
-  companyName?: string
-  companyType?: 'feed_factory' | 'trader' | 'grain_depot' | 'processor' | 'logistics' | 'other'
 }
 
 export interface CaptchaResponse {
@@ -121,16 +115,30 @@ export const useAuthStore = defineStore('auth', {
         userName: req.phone,
         phonenumber: req.phone,
         password: req.password,
-        nickName: req.nickName || req.phone,
-        companyName: req.companyName,
-        companyType: req.companyType,
         captchaKey: req.captchaKey,
         captchaCode: req.captchaCode,
-        isBuyer: req.userType === 'buyer' ? 1 : 0,
-        isSeller: req.userType === 'seller' ? 1 : 0
       })
       if (data.code !== 0 || !data.data?.token) throw new Error(data.message)
       this.setToken(data.data.token)
+    },
+
+    // 发送重置密码短信验证码
+    async sendResetSmsCode(phone: string) {
+      const { data } = await http.post<Result<void>>('/api/auth/sms/send', {
+        phone,
+        type: 3 // type=3 找回密码
+      })
+      if (data.code !== 0) throw new Error(data.message || '发送失败')
+    },
+
+    // 重置密码
+    async resetPassword(phone: string, smsCode: string, newPassword: string) {
+      const { data } = await http.post<Result<void>>('/api/auth/reset-password', {
+        phone,
+        smsCode,
+        newPassword
+      })
+      if (data.code !== 0) throw new Error(data.message || '重置失败')
     },
 
     // 获取站点配置（备案模式等）

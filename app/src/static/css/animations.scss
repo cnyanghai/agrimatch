@@ -1,0 +1,94 @@
+/* ===== 通用动画 ===== */
+
+/* 淡入 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 从下方滑入 */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 从右侧滑入 */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(60rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 缩放弹入 */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== 工具类 ===== */
+.anim-fade-in {
+  animation: fadeIn 300ms ease-out both;
+}
+
+.anim-slide-up {
+  animation: slideUp 300ms ease-out both;
+}
+
+.anim-slide-in-right {
+  animation: slideInRight 300ms ease-out both;
+}
+
+.anim-scale-in {
+  animation: scaleIn 250ms ease-out both;
+}
+
+/* 交错延迟（列表项）*/
+.anim-stagger-1 { animation-delay: 50ms; }
+.anim-stagger-2 { animation-delay: 100ms; }
+.anim-stagger-3 { animation-delay: 150ms; }
+.anim-stagger-4 { animation-delay: 200ms; }
+.anim-stagger-5 { animation-delay: 250ms; }
+
+/* 按钮按压反馈 */
+.tap-feedback {
+  transition: transform 150ms ease, opacity 150ms ease;
+
+  &:active {
+    transform: scale(0.96);
+    opacity: 0.85;
+  }
+}
+
+/* FAB 入场动画 */
+@keyframes fabEnter {
+  from {
+    opacity: 0;
+    transform: scale(0) rotate(-180deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+.anim-fab-enter {
+  animation: fabEnter 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: 300ms;
+}

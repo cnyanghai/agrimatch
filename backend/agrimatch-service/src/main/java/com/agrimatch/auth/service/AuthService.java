@@ -15,6 +15,8 @@ public interface AuthService {
     LoginResponse register(RegisterRequest req);
 
     MeResponse me(Long userId);
+
+    void resetPassword(String phone, String newPassword);
 }
 
 
