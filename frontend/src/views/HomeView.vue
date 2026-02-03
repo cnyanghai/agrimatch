@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUiStore } from '../store/ui'
 import { getProductTree, type ProductNode } from '../api/product'
 import { listPosts, type PostResponse } from '../api/post'
 import { getPlatformStats, type StatsResponse } from '../api/stats'
@@ -9,22 +8,11 @@ import { listTopCompanies, type CompanyCardResponse } from '../api/company'
 import PublicFooter from '../components/PublicFooter.vue'
 import { getPostPlaceholderCover } from '../assets/placeholders'
 import {
-  MapPin,
   Search,
   TrendingUp,
-  Package,
-  Truck,
-  ShoppingBag,
   Gift,
   MessageCircle,
   Wheat,
-  Leaf,
-  Droplets,
-  Microscope,
-  Beef,
-  Gem,
-  FlaskConical,
-  LayoutGrid,
   ChevronRight,
   Building2,
   Users,
@@ -35,47 +23,6 @@ import {
 } from 'lucide-vue-next'
 
 const router = useRouter()
-const ui = useUiStore()
-
-// 产业板块定义（key 与 schemaCode 统一）
-const domains = [
-  {
-    key: 'feed',  // 原料饲料
-    name: '原料饲料',
-    desc: '玉米、豆粕、油脂、添加剂...',
-    icon: Wheat,
-    color: 'text-brand-600',
-    bgColor: 'bg-brand-50',
-    tags: ['#水分', '#蛋白', '#产地']
-  },
-  {
-    key: 'breed',  // 生物种苗
-    name: '生物种苗',
-    desc: '种禽、种蛋、鱼苗、种猪...',
-    icon: Sprout,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    tags: ['#日龄', '#疫苗', '#亲本品种']
-  },
-  {
-    key: 'process',  // 农牧加工
-    name: '农牧加工',
-    desc: '肉禽分割、禽蛋、水产成品...',
-    icon: Factory,
-    color: 'text-accent-600',
-    bgColor: 'bg-accent-50',
-    tags: ['#分割部位', '#温控', '#保质期']
-  },
-  {
-    key: 'equipment',  // 装备物流
-    name: '装备物流',
-    desc: '料车、风机、农机、包装...',
-    icon: Cog,
-    color: 'text-action-600',
-    bgColor: 'bg-action-50',
-    tags: ['#载重', '#马力', '#保修']
-  }
-]
 
 // 平台统计
 const stats = ref<StatsResponse | null>(null)
@@ -94,12 +41,6 @@ const hotTopicsLoading = ref(false)
 const hotTopics = ref<PostResponse[]>([])
 
 const searchKeyword = ref('')
-
-const topCategories = computed(() => {
-  const list = categoryTree.value ?? []
-  const roots = list.filter((x) => (x.parentId ?? 0) === 0)
-  return roots.length ? roots : list
-})
 
 async function loadData() {
   dataLoading.value = true
@@ -198,17 +139,6 @@ async function loadCategories() {
   } finally {
     categoryLoading.value = false
   }
-}
-
-function goCategory(node: ProductNode) {
-  // 先跳供应大厅，并带上品类参数，后续大厅页可联动筛选
-  router.push({
-    path: '/hall/supply',
-    query: {
-      categoryId: String(node.id),
-      categoryName: node.name
-    }
-  })
 }
 
 onMounted(() => {

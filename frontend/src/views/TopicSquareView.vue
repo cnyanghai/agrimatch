@@ -6,9 +6,8 @@ import { requireAuth } from '../utils/requireAuth'
 import { listPosts, listCollectedPostIds, type PostResponse } from '../api/post'
 import { getFollowedPosts, getFollowedUsers, type FollowedUser } from '../api/follow'
 import { useAuthStore } from '../store/auth'
-import { useUiStore } from '../store/ui'
 import PublicFooter from '../components/PublicFooter.vue'
-import { MessageSquare, Heart, Search, ChevronDown, Plus, Star, Gift, Coins, CheckCircle, Flame, Users, Clock, ArrowRight, UserPlus } from 'lucide-vue-next'
+import { MessageSquare, Heart, Search, Plus, Star, Flame, Users, Clock, ArrowRight } from 'lucide-vue-next'
 import ExpertBadge from '../components/post/ExpertBadge.vue'
 import PaidBadge from '../components/post/PaidBadge.vue'
 import CollectButton from '../components/post/CollectButton.vue'
@@ -16,7 +15,6 @@ import { Card, StatusBadge } from '../components/ui'
 
 const router = useRouter()
 const auth = useAuthStore()
-const ui = useUiStore()
 
 // 用户信息
 const isLoggedIn = computed(() => !!auth.me)
@@ -40,11 +38,6 @@ function go(path: string) {
 function onPublishTalk() {
   if (!requireAuth('/talks/publish')) return
   go('/talks/publish')
-}
-
-function onEnterMy() {
-  if (!requireAuth('/console')) return
-  go('/console')
 }
 
 async function loadCollectedIds() {
@@ -113,10 +106,6 @@ function onSearch() {
 function onAuthorClick(e: Event, userId: number) {
   e.stopPropagation()
   go(`/users/${userId}/posts`)
-}
-
-function onOrderChange() {
-  loadPosts()
 }
 
 function formatTime(timeStr: string | undefined) {

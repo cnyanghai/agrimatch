@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
-import { Plus, X, Search, Tag as TagIcon, ChevronDown, Check, Sparkles } from 'lucide-vue-next'
-import { listTags, recommendTags, createTag, type Tag, type TagValue } from '../api/tag'
-import { ElMessage } from 'element-plus'
-
+import { ref, watch, onMounted } from 'vue'
+import { Plus, X, Search, Tag as TagIcon, Check, Sparkles } from 'lucide-vue-next'
+import { listTags, recommendTags, type Tag, type TagValue } from '../api/tag'
 const props = defineProps<{
   categoryId?: number
   domain?: string

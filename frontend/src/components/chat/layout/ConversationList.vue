@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { Search, FolderOpened, MoreFilled } from '@element-plus/icons-vue'
 import { MessageCircle, Clock, CheckCircle, Pause, XCircle } from 'lucide-vue-next'
 import type { PeerGroup, TimeGroup, ChatConversationResponse, ConversationBusinessStatus } from '../../../types/chat/conversation'
-import { getPeerDisplayName, getAvatarColor, BUSINESS_STATUS_MAP } from '../../../types/chat/conversation'
+import { getAvatarColor, BUSINESS_STATUS_MAP } from '../../../types/chat/conversation'
 import ConversationStatusFilter from './ConversationStatusFilter.vue'
 
 const props = defineProps<{

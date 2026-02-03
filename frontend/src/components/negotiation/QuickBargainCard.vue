@@ -102,15 +102,16 @@ const canSubmit = computed(() => {
 })
 
 // 状态配置
+const defaultStatus = { label: '待报价', color: 'text-neutral-500 bg-neutral-100', icon: Clock }
 const statusConfig = computed(() => {
   const configs: Record<string, { label: string; color: string; icon: any }> = {
-    IDLE: { label: '待报价', color: 'text-neutral-500 bg-neutral-100', icon: Clock },
+    IDLE: defaultStatus,
     MY_TURN: { label: '等待我方报价', color: 'text-warning-600 bg-warning-100', icon: Clock },
     PEER_TURN: { label: '等待对方回复', color: 'text-action-600 bg-action-100', icon: Clock },
     ACCEPTED: { label: '已成交', color: 'text-green-600 bg-green-100', icon: Check },
     REJECTED: { label: '已拒绝', color: 'text-error-600 bg-error-100', icon: X },
   }
-  return configs[props.state.status] || configs.IDLE
+  return configs[props.state.status] ?? defaultStatus
 })
 
 // 格式化金额

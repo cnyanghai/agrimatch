@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowLeft, Clock, MessageSquare, Heart, MessageCircle, Users } from 'lucide-vue-next'
+import { ArrowLeft, MessageSquare, Heart, MessageCircle } from 'lucide-vue-next'
 import { listPosts, type PostResponse } from '../api/post'
 import { getUser, type UserResponse } from '../api/user'
 import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'

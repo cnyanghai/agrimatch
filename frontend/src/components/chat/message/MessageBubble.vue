@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Document, Loading, Check, Close, Warning } from '@element-plus/icons-vue'
-import type { UiMessage, QuoteStatus } from '../../../types/chat/message'
-import { QUOTE_STATUS_BADGE } from '../../../types/chat/message'
-import { getQuoteDisplayFields, isBasisQuote, parseQuotePayload } from '../../../utils/chat/quoteParser'
+import { Document, Loading, Check, Warning } from '@element-plus/icons-vue'
+import type { UiMessage } from '../../../types/chat/message'
 import QuoteCard from './QuoteCard.vue'
 import { ContractFlowCard } from '../contract'
 import { formatFileSize } from '../../../api/file'
@@ -34,35 +32,6 @@ const isSent = computed(() => props.message.type === 'sent')
 const isSystem = computed(() => props.message.type === 'system')
 const msgType = computed(() => (props.message.msgType || 'TEXT').toUpperCase())
 
-const quoteStatus = computed(() => props.message.quoteStatus as QuoteStatus | undefined)
-const quoteStatusBadge = computed(() => {
-  if (!quoteStatus.value) return null
-  return QUOTE_STATUS_BADGE[quoteStatus.value]
-})
-
-const quoteDisplayFields = computed(() => {
-  if (msgType.value !== 'QUOTE') return []
-  return getQuoteDisplayFields(props.message.payloadJson)
-})
-
-const isQuoteBasis = computed(() => {
-  if (msgType.value !== 'QUOTE') return false
-  const payload = parseQuotePayload(props.message.payloadJson)
-  return isBasisQuote(payload)
-})
-
-// 可以确认的报价条件：收到的、待确认状态
-const canConfirmQuote = computed(() => {
-  return !isSent.value &&
-    msgType.value === 'QUOTE' &&
-    quoteStatus.value === 'OFFERED'
-})
-
-// 确认后可以起草合同
-const canDraftContract = computed(() => {
-  return msgType.value === 'QUOTE' &&
-    quoteStatus.value === 'ACCEPTED'
-})
 
 // 解析图片 payload
 function parseImagePayload(payloadJson?: string) {

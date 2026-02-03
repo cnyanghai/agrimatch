@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import ConversationList from './ConversationList.vue'
 import ChatMain from './ChatMain.vue'
 import type { PeerGroup, TimeGroup, ChatConversationResponse, ConversationBusinessStatus } from '../../../types/chat/conversation'

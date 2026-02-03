@@ -24,11 +24,6 @@ function go(path: string) {
   router.push(path)
 }
 
-function onPublishNeed() {
-  if (!requireAuth('/requirements')) return
-  go('/requirements')
-}
-
 const requirements = ref<RequirementResponse[]>([])
 const listLoading = ref(false)
 const focusedId = ref<number | null>(null)
@@ -397,41 +392,6 @@ function getRequirementUnitConfig(r: RequirementResponse) {
   return getSchemaUnitConfig(schemaCode)
 }
 
-// 解析品类参数 JSON，提取关键参数显示（极致精简版，支持标准化格式）
-function parseParams(paramsJson?: string): string {
-  if (!paramsJson) return '暂无参数'
-  try {
-    const data = JSON.parse(paramsJson)
-    // 兼容逻辑：标准格式是 {"参数名": "参数值"}
-    let flatParams: Record<string, any> = {}
-
-    if (data.params || data.custom) {
-      if (data.params) {
-        Object.entries(data.params).forEach(([k, v]) => {
-          const name = (typeof v === 'object' && v !== null && (v as any).name) ? (v as any).name : k
-          const val = (typeof v === 'object' && v !== null && 'value' in (v as any)) ? (v as any).value : v
-          flatParams[name] = val
-        })
-      }
-      if (data.custom) Object.assign(flatParams, data.custom)
-    } else if (typeof data === 'object' && data !== null) {
-      flatParams = data
-    }
-
-    const entries = Object.entries(flatParams)
-    if (entries.length === 0) return '暂无参数'
-    
-    return entries
-      .slice(0, 3)
-      .map(([k, v]) => {
-        if (/^\d+$/.test(k)) return String(v)
-        return `${k}:${v}`
-      })
-      .join(' / ')
-  } catch {
-    return '暂无参数'
-  }
-}
 </script>
 
 <template>

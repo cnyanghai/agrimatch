@@ -79,8 +79,6 @@ const remainingTime = computed(() => {
   }
 })
 
-// 是否有操作插槽
-const hasActions = computed(() => !!props.data)
 </script>
 
 <template>

@@ -189,7 +189,7 @@ async function loadData() {
     
     // 自动选中第一个用户
     if (followedUsers.value.length > 0 && !selectedUser.value) {
-      selectedUser.value = followedUsers.value[0]
+      selectedUser.value = followedUsers.value[0] ?? null
     }
   } finally {
     loading.value = false

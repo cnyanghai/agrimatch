@@ -10,10 +10,10 @@ import { useAuthStore } from '../store/auth'
 import { openChatConversation } from '../api/chat'
 import PublicFooter from '../components/PublicFooter.vue'
 import {
-  Info, MapPin, Search, TrendingUp, TrendingDown,
-  Minus, Circle, Heart, MessageCircle, Share2, Factory,
+  Info, MapPin, Search,
+  Heart, MessageCircle, Share2,
   Building2, User, FileText, Calendar, BarChart3,
-  Briefcase, Award, Package, Truck, Tag, Handshake, FileSignature
+  Briefcase, Award, Handshake, FileSignature
 } from 'lucide-vue-next'
 import CompanySkeleton from '../components/company/CompanySkeleton.vue'
 import ProductInfoRow from '../components/ProductInfoRow.vue'
@@ -23,7 +23,7 @@ const router = useRouter()
 const companyStore = useCompanyStore()
 const authStore = useAuthStore()
 
-const { loading, error, profile, company, supplies, requirements, loadProfile } = useCompany()
+const { loading, error, profile, company, supplies, loadProfile } = useCompany()
 const searchKeyword = ref('')
 const isFollowing = ref(false)
 const followLoading = ref(false)
@@ -159,54 +159,6 @@ function getOperationYears(establishDate?: string, createTime?: string) {
     return `${years}年`
   } else {
     return '不足1年'
-  }
-}
-
-// 获取企业规模
-function getCompanyScale() {
-  // 这里可以根据实际业务逻辑判断
-  return '100人以上'
-}
-
-// 格式化价格显示
-function formatPrice(supply: any) {
-  if (supply.priceType === 1) {
-    // 基差报价模式
-    if (supply.basisQuotes && supply.basisQuotes.length > 0) {
-      const quotes = supply.basisQuotes.slice(0, 2) // 最多显示2个合约
-      return quotes.map((q: any) => {
-        const price = q.referencePrice ? `¥${q.referencePrice.toFixed(0)}` : '待定'
-        return `${q.contractName || q.contractCode}: ${price}`
-      }).join(' / ')
-    }
-    return '基差报价'
-  } else {
-    // 现货一口价模式
-    if (supply.exFactoryPrice != null) {
-      return `¥${supply.exFactoryPrice.toFixed(2)}/吨`
-    }
-    return '面议'
-  }
-}
-
-// 解析规格参数
-function getParamsList(paramsJson?: string): Array<{ key: string; value: string }> {
-  if (!paramsJson) return []
-  try {
-    const parsed = JSON.parse(paramsJson)
-    if (typeof parsed !== 'object' || parsed === null) return []
-    
-    // 支持新格式：{"参数名": "值"}
-    const params: Array<{ key: string; value: string }> = []
-    Object.entries(parsed).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== '') {
-        params.push({ key, value: String(value) })
-      }
-    })
-    return params
-  } catch (e) {
-    console.error('Failed to parse paramsJson:', e)
-    return []
   }
 }
 

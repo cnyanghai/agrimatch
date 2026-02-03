@@ -14,7 +14,7 @@ import {
   getQuoteRemainingTime,
   calculateQuoteDiff
 } from '../../../utils/chat/quoteParser'
-import type { QuoteDisplayField, QuoteFieldDiff } from '../../../types/chat/quote'
+import type { QuoteFieldDiff } from '../../../types/chat/quote'
 import { getSchemaUnitConfig, getCategoryUnitConfig } from '../../../utils/schemaUnits'
 import QuoteDiffBadge from './QuoteDiffBadge.vue'
 import QuoteValidityTimer from '../quote/QuoteValidityTimer.vue'

@@ -8,7 +8,7 @@ import { ElMessage } from 'element-plus'
 import type { ContractPayload, ContractStatus } from '../../types/chat/message'
 import { CONTRACT_STATUS_MAP } from '../../types/chat/message'
 import type { QuoteFieldsV1, BasisQuoteFieldsV1 } from '../../types/chat/quote'
-import { parseQuotePayload, isBasisQuote } from '../../utils/chat/quoteParser'
+import { parseQuotePayload } from '../../utils/chat/quoteParser'
 import type { UseChatMessages } from './useChatMessages'
 
 /** 合同流程步骤 */
@@ -189,7 +189,7 @@ export function useContractFlow(options: UseContractFlowOptions) {
   /**
    * 合同创建成功回调
    */
-  function onContractCreated(contractId: number): void {
+  function onContractCreated(_contractId: number): void {
     closeDraftModal()
     ElMessage.success('合同已创建')
   }

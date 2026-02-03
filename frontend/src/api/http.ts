@@ -16,6 +16,13 @@ export interface Result<T> {
   data?: T
 }
 
+export interface PageResult<T> {
+  list: T[]
+  total: number
+  page: number
+  size: number
+}
+
 http.interceptors.request.use((config) => {
   try {
     const auth = useAuthStore()

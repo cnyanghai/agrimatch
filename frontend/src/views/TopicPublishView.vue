@@ -105,6 +105,7 @@ async function handleCoverUpload(e: Event) {
   if (!files || files.length === 0) return
 
   const file = files[0]
+  if (!file) return
   if (!file.type.startsWith('image/')) {
     ElMessage.warning('请选择图片文件')
     return

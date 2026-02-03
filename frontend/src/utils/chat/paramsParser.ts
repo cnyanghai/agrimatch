@@ -7,18 +7,6 @@
 export type ProductParams = Record<string, string>
 
 /**
- * 旧格式类型：{ params: { "1": { name: "xxx", value: "yyy" }, ... } }
- */
-interface LegacyParamsFormat {
-  params: Record<string, { name: string; value: string | number }>
-}
-
-/**
- * 新格式类型：{ "参数名": "参数值", ... }
- */
-type NewParamsFormat = Record<string, string | number>
-
-/**
  * 解析产品参数 JSON
  * 支持多种格式：
  * 1. 新格式：{ "蛋白质": "43%", "水分": "12%" }

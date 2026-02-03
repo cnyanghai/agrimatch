@@ -83,7 +83,7 @@ function handleKeydown(e: KeyboardEvent) {
     case 'Enter':
       e.preventDefault()
       if (filteredTemplates.value[selectedIndex.value]) {
-        selectTemplate(filteredTemplates.value[selectedIndex.value])
+        selectTemplate(filteredTemplates.value[selectedIndex.value]!)
       }
       break
     case 'Escape':

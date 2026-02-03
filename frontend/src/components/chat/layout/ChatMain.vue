@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, watch, onMounted } from 'vue'
+import { ref, nextTick, watch, onMounted } from 'vue'
 import { Picture, Document, Position, Star, StarFilled, Loading, ArrowLeft } from '@element-plus/icons-vue'
 import type { UiMessage } from '../../../types/chat/message'
 import type { ChatConversationResponse } from '../../../types/chat/conversation'

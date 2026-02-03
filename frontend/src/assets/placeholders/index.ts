@@ -29,5 +29,5 @@ export const postCoverPlaceholders = [
  * @returns 占位图URL
  */
 export function getPostPlaceholderCover(postId: number): string {
-  return postCoverPlaceholders[postId % postCoverPlaceholders.length]
+  return postCoverPlaceholders[postId % postCoverPlaceholders.length] ?? ''
 }

@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import { Star } from 'lucide-vue-next'
 import { togglePostCollect } from '../../api/post'
 import { ElMessage } from 'element-plus'
-import { useAuthStore } from '../../store/auth'
 import { requireAuth } from '../../utils/requireAuth'
 
 const props = defineProps<{
@@ -11,7 +10,6 @@ const props = defineProps<{
   initialStatus?: boolean
 }>()
 
-const auth = useAuthStore()
 const isCollected = ref(props.initialStatus ?? false)
 const loading = ref(false)
 

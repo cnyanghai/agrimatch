@@ -5,7 +5,7 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { useAuthStore } from '../store/auth'
 import { updateMe, type UserUpdateRequest, getLoginLogs, type LoginLogResponse } from '../api/user'
 import { getMyCompany, createCompany, updateCompany, type CompanyResponse, type CompanyCreateRequest } from '../api/company'
-import { User, Building2, Lock, Check, Upload, AlertTriangle, RefreshCw, Truck, ChevronRight, FileText, X, ZoomIn, Award, Calendar, Users, Plus, Trash2, Edit2, Star, ShieldCheck, History, Monitor, MapPin, Stamp } from 'lucide-vue-next'
+import { User, Building2, Lock, Check, Upload, AlertTriangle, RefreshCw, Truck, FileText, X, ZoomIn, Award, Calendar, Plus, Trash2, Edit2, Star, ShieldCheck, History, Monitor, MapPin, Stamp } from 'lucide-vue-next'
 import { BaseButton } from '../components/ui'
 import { regionData, codeToText } from 'element-china-area-data'
 import { uploadImage } from '../api/file'
@@ -505,11 +505,12 @@ function saveRecruitment() {
   }
   if (editingRecruitmentId.value) {
     const index = recruitments.value.findIndex(r => r.id === editingRecruitmentId.value)
-    if (index >= 0) {
-      recruitments.value[index] = { ...recruitments.value[index], ...recruitmentForm }
+    const existing = recruitments.value[index]
+    if (index >= 0 && existing) {
+      recruitments.value[index] = { ...existing, ...recruitmentForm, id: existing.id }
     }
   } else {
-    recruitments.value.push({ id: Date.now().toString(), ...recruitmentForm })
+    recruitments.value.push({ ...recruitmentForm, id: String(Date.now()) })
   }
   recruitmentDialogVisible.value = false
   ElMessage.success('保存成功')
@@ -558,8 +559,6 @@ function removeCertificate(index: number) {
 const genderOptions = [{ label: '男', value: 1 }, { label: '女', value: 2 }]
 
 const currentName = computed(() => auth.me?.nickName || auth.me?.userName || '用户')
-const currentPhone = computed(() => auth.me?.phonenumber || '未绑定手机号')
-const currentPosition = computed(() => auth.me?.position || '暂无职位')
 const avatarText = computed(() => {
   const n = currentName.value.trim()
   const ch = (n[0] ?? 'U').toUpperCase()

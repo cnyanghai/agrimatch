@@ -13,7 +13,6 @@ import { getSchemaTree, type ProductSchemaVO, type CategoryNode } from '../api/p
 import { getSchemaUnitConfig } from '../utils/schemaUnits'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../store/auth'
-import { Card, StatusBadge } from '../components/ui'
 import { Menu, MessageCircle } from 'lucide-vue-next'
 import ProductInfoRow from '../components/ProductInfoRow.vue'
 
@@ -23,11 +22,6 @@ const authStore = useAuthStore()
 
 function go(path: string) {
   router.push(path)
-}
-
-function onPublishSupply() {
-  if (!requireAuth('/supply')) return
-  go('/supply')
 }
 
 const supplies = ref<SupplyResponse[]>([])
@@ -473,44 +467,6 @@ function getSupplyUnitConfig(s: SupplyResponse) {
   return getSchemaUnitConfig(schemaCode)
 }
 
-// 解析品类参数 JSON，提取关键参数显示（极致精简版，支持标准化格式）
-function parseParams(paramsJson?: string): string {
-  if (!paramsJson) return '暂无参数'
-  try {
-    const data = JSON.parse(paramsJson)
-    // 兼容逻辑：
-    // 1. 标准格式: {"水分": "14%", "容重": "720"}
-    // 2. 旧格式: {"params": {"1": {"name": "水分", "value": "14%"}}, "custom": {}}
-    let flatParams: Record<string, any> = {}
-
-    if (data.params || data.custom) {
-      if (data.params) {
-        Object.entries(data.params).forEach(([k, v]) => {
-          const name = (typeof v === 'object' && v !== null && (v as any).name) ? (v as any).name : k
-          const val = (typeof v === 'object' && v !== null && 'value' in (v as any)) ? (v as any).value : v
-          flatParams[name] = val
-        })
-      }
-      if (data.custom) Object.assign(flatParams, data.custom)
-    } else if (typeof data === 'object' && data !== null) {
-      flatParams = data
-    }
-
-    const entries = Object.entries(flatParams)
-    if (entries.length === 0) return '暂无参数'
-    
-    return entries
-      .slice(0, 3)
-      .map(([k, v]) => {
-        // 如果键是纯数字（旧格式 ID），则只显示值
-        if (/^\d+$/.test(k)) return String(v)
-        return `${k}:${v}`
-      })
-      .join(' / ')
-  } catch {
-    return '暂无参数'
-  }
-}
 </script>
 
 <template>

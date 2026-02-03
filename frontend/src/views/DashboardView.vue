@@ -141,12 +141,6 @@ const statsData = computed(() => [
   { label: '累计成交', value: formatAmount(dashboard.value?.totalDealAmount), unit: '元', icon: Coins, iconBg: 'bg-warning-50', iconColor: 'text-warning-500' }
 ])
 
-// 获取图标容器的样式类（统一为 slate 风格，与首页对齐）
-function getIconClass() {
-  // 统一使用 slate 风格，与首页搜索模块保持一致
-  return 'bg-slate-50 text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600'
-}
-
 // 深色待办面板的背景色
 function getPendingBgClass(color?: string): string {
   const map: Record<string, string> = {
@@ -155,7 +149,7 @@ function getPendingBgClass(color?: string): string {
     blue: 'bg-action-500/20',
     purple: 'bg-action-500/20'
   }
-  return map[color || 'amber'] || map.amber
+  return map[color || 'amber'] ?? map.amber ?? ''
 }
 
 // 深色待办面板的图标色
@@ -166,7 +160,7 @@ function getPendingIconClass(color?: string): string {
     blue: 'text-action-400',
     purple: 'text-action-400'
   }
-  return map[color || 'amber'] || map.amber
+  return map[color || 'amber'] ?? map.amber ?? ''
 }
 
 async function loadDashboard() {

@@ -9,7 +9,6 @@ import type {
   QuotePayloadV2,
   BasisQuotePayloadV1,
   QuoteFieldsV1,
-  QuoteFieldsV2,
   BasisQuoteFieldsV1,
   LegacyQuotePayload,
   QuoteDisplayField,
@@ -485,7 +484,7 @@ export function getPriceChangeSummary(
 
   if (!currentFields.price || !previousFields.price) return null
 
-  const { diff, percentage, direction } = calculatePriceDiff(previousFields.price, currentFields.price)
+  const { diff, direction } = calculatePriceDiff(previousFields.price, currentFields.price)
   if (direction === 'unchanged') return null
 
   const prefix = diff > 0 ? '+' : ''

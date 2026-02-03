@@ -285,12 +285,12 @@ function renderMarkers() {
 
   // fitView — 用第一个点初始化 bounds，避免空 Bounds 从 (0,0) 开始导致缩放到全球
   if (withCoords.length > 0) {
-    const first = withCoords[0]
+    const first = withCoords[0]!
     const sw = new AMap.LngLat(first.lng, first.lat)
     const ne = new AMap.LngLat(first.lng, first.lat)
     const bounds = new AMap.Bounds(sw, ne)
     for (let i = 1; i < withCoords.length; i++) {
-      bounds.extend(new AMap.LngLat(withCoords[i].lng, withCoords[i].lat))
+      bounds.extend(new AMap.LngLat(withCoords[i]!.lng, withCoords[i]!.lat))
     }
     map.setBounds(bounds, false, [80, 80, 80, 80])
   }

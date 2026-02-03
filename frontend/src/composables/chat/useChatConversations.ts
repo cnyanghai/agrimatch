@@ -3,7 +3,7 @@
  * Manages conversation list, archiving, and peer grouping
  */
 
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { listChatConversations, markConversationRead } from '../../api/chat'
 import type { ChatConversationResponse, PeerGroup, TimeGroup } from '../../types/chat/conversation'
 import {

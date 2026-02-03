@@ -55,7 +55,6 @@ const canSign = computed(() => {
 })
 
 const isCancelled = computed(() => props.contract.status === 5)
-const isCompleted = computed(() => props.contract.status === 4)
 
 function formatAmount(val: number | string): string {
   const num = typeof val === 'string' ? parseFloat(val) : val

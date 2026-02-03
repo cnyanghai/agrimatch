@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Search, Tag as TagIcon, Building2, User, Clock, LayoutGrid, List, ChevronRight, X, Filter } from 'lucide-vue-next'
+import { Search, Tag as TagIcon, Building2, User, Clock, LayoutGrid, List, ChevronRight, Filter } from 'lucide-vue-next'
 import { searchUnified, type UnifiedSearchResult } from '../api/search'
 import { getHotTags, type Tag } from '../api/tag'
 import PublicFooter from '../components/PublicFooter.vue'
@@ -69,7 +69,7 @@ function updateUrl() {
   })
 }
 
-function toggleTag(tag: NhtTag) {
+function toggleTag(tag: Tag) {
   if (tagFilters.value[tag.tagKey]) {
     delete tagFilters.value[tag.tagKey]
   } else {

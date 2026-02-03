@@ -6,7 +6,7 @@
  */
 import { ref, computed, watch } from 'vue'
 import { X, Send, TrendingUp, TrendingDown, Percent } from 'lucide-vue-next'
-import type { QuotePayload, QuoteDisplayField } from '../../../types/chat/quote'
+import type { QuoteDisplayField } from '../../../types/chat/quote'
 
 const props = defineProps<{
   /** 原始报价的解析字段 */

@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowLeft, Users, UserMinus, MessageSquare, ArrowRight } from 'lucide-vue-next'
+import { ArrowLeft, Users, UserMinus, MessageSquare } from 'lucide-vue-next'
 import { getFollowedUsers, unfollowUser, type FollowedUser } from '../api/follow'
 import { Card } from '../components/ui'
 import PublicFooter from '../components/PublicFooter.vue'

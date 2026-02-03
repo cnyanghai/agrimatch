@@ -66,8 +66,6 @@ const emit = defineEmits<{
   (e: 'send-quote', data: RequirementData): void
 }>()
 
-const showAdvanced = ref(false)
-
 // 表单数据
 const form = ref<RequirementData>({
   productName: '',
@@ -135,21 +133,6 @@ watch(() => props.initialData, (newData) => {
 watch(form, (newForm) => {
   emit('update', { ...newForm })
 }, { deep: true })
-
-// 计算预计总金额
-const estimatedTotal = computed(() => {
-  if (!form.value.price || !form.value.quantity) return null
-  return form.value.price * form.value.quantity
-})
-
-// 格式化金额
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('zh-CN', {
-    style: 'currency',
-    currency: 'CNY',
-    minimumFractionDigits: 0
-  }).format(amount)
-}
 
 // 获取动态参数的键值对
 const dynamicParamsList = computed(() => {

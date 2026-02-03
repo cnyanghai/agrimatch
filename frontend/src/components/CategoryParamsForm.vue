@@ -29,7 +29,7 @@ const groupedParams = computed(() => {
     if (groups[group]) {
       groups[group].params.push(param)
     } else {
-      groups.quality.params.push(param)
+      groups.quality?.params.push(param)
     }
   })
 

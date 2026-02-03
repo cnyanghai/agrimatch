@@ -2,7 +2,6 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './store/auth'
-import { useUiStore } from './store/ui'
 import { useNotificationStore } from './stores/notification'
 import { useGlobalWebSocket } from './composables/useGlobalWebSocket'
 import { requestNotificationPermission } from './utils/browserNotification'
@@ -13,17 +12,16 @@ import NotificationToast from './components/notification/NotificationToast.vue'
 import {
   LayoutDashboard, FilePlus, Star, Map,
   MessageSquare, FileCheck, User, LogOut,
-  ChevronDown, Check, Plus, Coins, ShieldCheck
+  Coins, ShieldCheck
 } from 'lucide-vue-next'
 
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
-const ui = useUiStore()
 const notificationStore = useNotificationStore()
 
 // 初始化全局 WebSocket
-const { status: wsStatus } = useGlobalWebSocket()
+useGlobalWebSocket()
 
 // 未读消息数
 const unreadCount = computed(() => notificationStore.unreadTotal)
@@ -51,15 +49,6 @@ watch(() => auth.me, (me) => {
     }, 1000)
   }
 }, { immediate: true })
-
-function goToProfile() {
-  showProfileGuide.value = false
-  router.push('/profile')
-}
-
-function skipProfileGuide() {
-  showProfileGuide.value = false
-}
 
 function go(path: string) {
   router.push(path)

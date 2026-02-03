@@ -41,4 +41,7 @@ Thumbs.db
 stitch_/
 
 # Production secrets
-.env.production
+.env
+.env.*
+frontend/.env
+frontend/.env.*

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Trash2, FileText, Save, Send, List, Package, Truck, Clock, FileCheck, TrendingUp, Plus, X, ChevronDown, ChevronUp, Pencil, Ban, RotateCcw, RefreshCcw, MapPin, DollarSign, Search, MoreHorizontal, Calendar, CreditCard, BoxIcon } from 'lucide-vue-next'
+import { FileText, Save, Send, Package, Truck, Clock, FileCheck, TrendingUp, Plus, X, ChevronDown, RefreshCcw, Search } from 'lucide-vue-next'
 import { createSupply, getNextSupplyNo, createSupplyTemplate, getMySupplyTemplates, deleteSupplyTemplate, listSupplies, updateSupply, type SupplyCreateRequest, type BasisQuoteRequest, type SupplyTemplateResponse, type SupplyResponse, type SupplyUpdateRequest } from '../api/supply'
 import { listFuturesContracts, type FuturesContractResponse } from '../api/futures'
 import { getProductParams, type ProductParamResponse } from '../api/product'
@@ -18,7 +18,6 @@ import ProductInfoRow from '../components/ProductInfoRow.vue'
 import { useCompanyStore } from '../stores/company'
 import { useAuthStore } from '../store/auth'
 
-const router = useRouter()
 const route = useRoute()
 const companyStore = useCompanyStore()
 const authStore = useAuthStore()
@@ -103,45 +102,8 @@ function getStatusText(status?: number) {
   return statusOptions.find(o => o.value === status)?.label || '未知'
 }
 
-function getStatusColor(status?: number) {
-  return statusOptions.find(o => o.value === status)?.color || 'gray'
-}
-
 function getStatusIcon(status?: number) {
   return statusOptions.find(o => o.value === status)?.icon || '○'
-}
-
-// 格式化过期时间
-function formatExpireTime(expireTime?: string): string {
-  if (!expireTime) return ''
-  const expire = new Date(expireTime)
-  const now = new Date()
-  if (expire <= now) return '已过期'
-
-  const diff = expire.getTime() - now.getTime()
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-
-  if (days > 0) return `剩${days}天`
-  if (hours > 0) return `剩${hours}小时`
-  return '即将过期'
-}
-
-// 格式化发布时间
-function formatPublishTime(createTime?: string): string {
-  if (!createTime) return ''
-  const date = new Date(createTime)
-  const now = new Date()
-  const diff = now.getTime() - date.getTime()
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  const hours = Math.floor(diff / (1000 * 60 * 60))
-  const minutes = Math.floor(diff / (1000 * 60))
-
-  if (minutes < 1) return '刚刚'
-  if (minutes < 60) return `${minutes}分钟前`
-  if (hours < 24) return `${hours}小时前`
-  if (days < 7) return `${days}天前`
-  return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
 }
 
 // 计算成交进度百分比
@@ -150,19 +112,6 @@ function getDealProgress(s: SupplyResponse): number {
   const remaining = s.remainingQuantity ?? s.quantity
   const dealt = s.quantity - remaining
   return Math.round((dealt / s.quantity) * 100)
-}
-
-// 解析质量要求参数，返回标签数组
-function parseParamsTags(paramsJson?: string): { label: string; value: string }[] {
-  if (!paramsJson) return []
-  try {
-    const params = JSON.parse(paramsJson)
-    if (typeof params !== 'object' || params === null) return []
-    const entries = Object.entries(params).filter(([_, v]) => v !== undefined && v !== '')
-    return entries.slice(0, 5).map(([k, v]) => ({ label: String(k), value: String(v) }))
-  } catch {
-    return []
-  }
 }
 
 // 编辑已发布的供应
@@ -269,11 +218,6 @@ async function republishSupply(s: SupplyResponse) {
 // 模板下拉菜单
 const templateMenuOpen = ref(false)
 
-// 可选区域折叠
-const sectionsCollapsed = reactive({
-  publishInfo: false,
-  logistics: false
-})
 const supplyNo = ref<string>('')
 const templatePickerOpen = ref(false)
 
@@ -355,6 +299,7 @@ const saveTemplateDialogVisible = ref(false)
 const templateNameInput = ref('')
 
 type TemplateJsonData = {
+  schemaCode?: string
   templateName?: string
   companyName?: string
   publisherName?: string
@@ -395,20 +340,6 @@ const parsedTemplates = computed<TemplateItem[]>(() =>
     } as TemplateItem & { _raw: typeof t }
   })
 )
-
-function formatPrice(p?: number) {
-  const n = Number(p)
-  if (!p && p !== 0) return '面议'
-  if (Number.isNaN(n)) return '面议'
-  return `¥${n}`
-}
-
-function formatDate(dateStr?: string) {
-  if (!dateStr) return ''
-  const d = new Date(dateStr)
-  if (Number.isNaN(d.getTime())) return ''
-  return d.toLocaleDateString('zh-CN')
-}
 
 const previewData = computed(() => {
   const expireDays = publishForm.expireMinutes ? Math.floor(publishForm.expireMinutes / 1440) : 0

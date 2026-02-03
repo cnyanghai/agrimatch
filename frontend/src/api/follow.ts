@@ -14,6 +14,7 @@ export interface FollowedUser {
   avatar?: string
   companyId?: number
   companyName?: string
+  phone?: string
   isBuyer?: boolean
   isSeller?: boolean
   followTime?: string

@@ -25,6 +25,8 @@ export interface CompanyCreateRequest {
   lng?: number
   locationsJson?: string
   bankInfoJson?: string
+  contacts?: string
+  phone?: string
 }
 
 export interface CompanyUpdateRequest extends Partial<CompanyCreateRequest> {
@@ -59,6 +61,8 @@ export interface CompanyResponse {
   bankInfoJson?: string
   createTime?: string
   updateTime?: string
+  contacts?: string
+  phone?: string
 }
 
 export interface CompanyBriefResponse {

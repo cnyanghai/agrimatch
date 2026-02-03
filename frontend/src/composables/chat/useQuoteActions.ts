@@ -6,9 +6,9 @@
 import { ref, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { confirmChatOffer } from '../../api/chat'
-import type { QuotePayload, QuotePayloadV1, BasisQuotePayloadV1, QuoteFieldsV1, BasisQuoteFieldsV1 } from '../../types/chat/quote'
-import type { UiMessage, QuoteStatus } from '../../types/chat/message'
-import { parseQuotePayload, buildQuoteSummary, calculateQuoteDiff, isBasisQuote } from '../../utils/chat/quoteParser'
+import type { QuotePayloadV1, BasisQuotePayloadV1, QuoteFieldsV1, BasisQuoteFieldsV1 } from '../../types/chat/quote'
+import type { UiMessage } from '../../types/chat/message'
+import { parseQuotePayload, buildQuoteSummary } from '../../utils/chat/quoteParser'
 import type { UseChatWebSocket } from './useChatWebSocket'
 import type { UseChatMessages } from './useChatMessages'
 
@@ -118,11 +118,7 @@ export function useQuoteActions(options: UseQuoteActionsOptions) {
    * 发送报价
    */
   function sendQuote(
-    fields: QuoteFieldsV1,
-    options?: {
-      parentQuoteId?: number
-      expiresAt?: string
-    }
+    fields: QuoteFieldsV1
   ): boolean {
     const conversationId = getConversationId()
     if (!conversationId) {
@@ -206,20 +202,11 @@ export function useQuoteActions(options: UseQuoteActionsOptions) {
    * 发送还价（带关联）
    */
   function sendCounterQuote(
-    originalMessage: UiMessage,
+    _originalMessage: UiMessage,
     newFields: QuoteFieldsV1
   ): boolean {
-    // 计算差异
-    const originalPayload = parseQuotePayload(originalMessage.payloadJson)
-    const diffs = originalPayload ? calculateQuoteDiff(
-      { version: 1, kind: 'QUOTE_V1', createdAt: new Date().toISOString(), fields: newFields },
-      originalPayload
-    ) : []
-
     // 发送新报价
-    return sendQuote(newFields, {
-      parentQuoteId: typeof originalMessage.id === 'number' ? originalMessage.id : undefined
-    })
+    return sendQuote(newFields)
   }
 
   // ==================== Computed ====================

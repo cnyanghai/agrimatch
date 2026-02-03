@@ -8,6 +8,7 @@ export interface PostCreateRequest {
   isPaid?: boolean
   price?: number
   teaserLength?: number
+  domain?: string
 }
 
 export interface PostResponse {
@@ -33,6 +34,7 @@ export interface PostResponse {
   likedByMe?: boolean
   collectedByMe?: boolean
   hasPurchased?: boolean
+  domain?: string
 }
 
 export interface PostQuery {
@@ -46,6 +48,8 @@ export interface PostQuery {
   limit?: number
   followingUserId?: number
   onlyCollected?: boolean
+  domain?: string
+  viewerUserId?: number
 }
 
 export async function createPost(req: PostCreateRequest) {

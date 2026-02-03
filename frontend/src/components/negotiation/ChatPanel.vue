@@ -4,7 +4,7 @@
  * 支持文本消息、报价消息、图片消息、附件消息显示
  * 集成报价操作、附件上传、赠送积分功能
  */
-import { ref, nextTick, watch, onMounted, computed } from 'vue'
+import { ref, nextTick, watch, onMounted } from 'vue'
 import { Send, Paperclip, DollarSign, Gift, FileText, X, Download, Loader2, CheckCircle, Info, AlertCircle, FileSignature, ExternalLink } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'

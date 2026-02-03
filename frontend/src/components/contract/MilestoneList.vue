@@ -77,13 +77,6 @@ function canUserConfirm(milestone: MilestoneResponse): boolean {
   return true
 }
 
-// 获取负责方标签
-function getPartyLabel(party?: string): string {
-  if (party === 'buyer') return '买方'
-  if (party === 'seller') return '卖方'
-  return ''
-}
-
 // 加载节点列表
 async function loadMilestones() {
   if (!props.contractId) return

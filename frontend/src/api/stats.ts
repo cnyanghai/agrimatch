@@ -6,6 +6,7 @@ export interface StatsResponse {
   supplyCount: number
   supplierCount: number
   buyerCount: number
+  dealCount?: number
 }
 
 export async function getPlatformStats() {

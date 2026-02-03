@@ -47,6 +47,7 @@ export interface UserResponse {
   payInfoJson?: string
   createTime?: string
   updateTime?: string
+  companyName?: string
 }
 
 export interface UserBriefResponse {

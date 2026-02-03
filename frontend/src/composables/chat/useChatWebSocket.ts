@@ -3,7 +3,7 @@
  * Unified WebSocket connection management for chat
  */
 
-import { ref, computed, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
 import { buildChatWsUrl } from '../../utils/chatWs'
 
 /** WebSocket 消息类型 */

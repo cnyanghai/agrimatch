@@ -3,10 +3,10 @@
  * Manages message state, loading, and updates
  */
 
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { getConversationMessages, type ChatMessageResponse } from '../../api/chat'
 import type { UiMessage, QuoteStatus } from '../../types/chat/message'
-import { toUiMessage, formatMessageTime } from '../../types/chat/message'
+import { toUiMessage } from '../../types/chat/message'
 import { parseQuotePayload, getQuoteFields } from '../../utils/chat/quoteParser'
 import type { QuoteFieldsV1 } from '../../types/chat/quote'
 
