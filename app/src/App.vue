@@ -136,4 +136,34 @@ input, textarea {
 .page-padding {
   padding: $spacing-md;
 }
+
+/* TabBar 底部占位 */
+.tab-page-bottom {
+  padding-bottom: 130rpx;
+}
+
+/* 卡片基础样式 */
+.card {
+  background: $bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+}
+
+.card-md {
+  background: $bg-card;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-md;
+}
+
+/* 毛玻璃效果 */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(40rpx);
+  -webkit-backdrop-filter: blur(40rpx);
+}
+
+/* 品牌渐变背景 */
+.bg-brand-gradient {
+  background: linear-gradient(180deg, $brand-700 0%, $brand-600 100%);
+}
 </style>

@@ -49,3 +49,43 @@ export function getMyCompany() {
 export function getCompanyByUserId(userId: number) {
   return get<CompanyResponse | null>(`/api/companies/by-user/${userId}`)
 }
+
+/* ===== 企业名录 ===== */
+
+export interface CompanyCardResponse {
+  id: number
+  companyName: string
+  province?: string
+  city?: string
+  logo?: string
+  count?: number
+  categoryNamesStr?: string
+  categoryNames?: string[]
+}
+
+export interface PageResult<T> {
+  records: T[]
+  total: number
+  page: number
+  size: number
+}
+
+/** 企业名录分页 */
+export function getCompanyDirectory(type: string, letter?: string, page = 1, size = 20) {
+  return get<PageResult<CompanyCardResponse>>('/api/companies/directory', {
+    type,
+    letter: letter || undefined,
+    page,
+    size,
+  })
+}
+
+/** 获取头部企业 */
+export function getTopCompanies(type: string, limit?: number) {
+  return get<CompanyCardResponse[]>('/api/companies/top', { type, limit })
+}
+
+/** 搜索企业 */
+export function searchCompanies(keyword: string, limit?: number) {
+  return get<CompanyCardResponse[]>('/api/companies/search', { keyword, limit })
+}

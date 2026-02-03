@@ -2,17 +2,21 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import { listPosts, type PostResponse } from '../../api/post'
+import { getFollowedPosts } from '../../api/follow'
 import { useAuthStore } from '../../store/auth'
 import { formatRelativeTime } from '../../utils/format'
 
 const authStore = useAuthStore()
 const allPosts = ref<PostResponse[]>([])
+const followingPosts = ref<PostResponse[]>([])
+const followingLoading = ref(false)
 const loading = ref(false)
-const sortMode = ref<'latest' | 'hottest'>('latest')
+const sortMode = ref<'latest' | 'hottest' | 'following'>('latest')
 const displayCount = ref(15)
 const PAGE_SIZE = 15
 
 const filteredList = computed(() => {
+  if (sortMode.value === 'following') return followingPosts.value
   const list = [...allPosts.value]
   if (sortMode.value === 'hottest') {
     list.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0))
@@ -28,9 +32,23 @@ const loadStatus = computed<'loading' | 'more' | 'noMore'>(() => {
   return 'more'
 })
 
-watch(sortMode, () => {
+watch(sortMode, (mode) => {
   displayCount.value = PAGE_SIZE
+  if (mode === 'following' && authStore.isLoggedIn) {
+    loadFollowingPosts()
+  }
 })
+
+async function loadFollowingPosts() {
+  followingLoading.value = true
+  try {
+    followingPosts.value = await getFollowedPosts() || []
+  } catch {
+    // handled
+  } finally {
+    followingLoading.value = false
+  }
+}
 
 onMounted(() => {
   loadData()
@@ -65,6 +83,10 @@ function loadMore() {
 
 function goDetail(id: number) {
   uni.navigateTo({ url: `/pages/topic/detail?id=${id}` })
+}
+
+function goLogin() {
+  uni.navigateTo({ url: '/pages/auth/login' })
 }
 
 function goPublish() {
@@ -130,6 +152,24 @@ function getImages(item: PostResponse): string[] {
       >
         <text>最热</text>
       </view>
+      <view
+        class="sort-bar__tab"
+        :class="{ 'sort-bar__tab--active': sortMode === 'following' }"
+        @tap="sortMode = 'following'"
+      >
+        <text>关注</text>
+      </view>
+    </view>
+
+    <!-- 关注 tab 未登录提示 -->
+    <view v-if="sortMode === 'following' && !authStore.isLoggedIn" class="login-prompt">
+      <WgEmpty
+        text="登录后查看关注动态"
+        description="关注感兴趣的用户，获取他们的最新话题"
+        actionText="去登录"
+        icon="auth"
+        @action="goLogin"
+      />
     </view>
 
     <!-- 帖子列表 -->
@@ -209,9 +249,18 @@ function getImages(item: PostResponse): string[] {
       @action="goPublish"
     />
 
+    <!-- 关注 tab 加载中 -->
+    <WgSkeleton
+      v-if="followingLoading && sortMode === 'following'"
+      type="card"
+      :rows="3"
+      :avatar="true"
+      :title="true"
+    />
+
     <!-- 加载中骨架 -->
     <WgSkeleton
-      v-if="loading && allPosts.length === 0"
+      v-if="loading && allPosts.length === 0 && sortMode !== 'following'"
       type="card"
       :rows="3"
       :avatar="true"

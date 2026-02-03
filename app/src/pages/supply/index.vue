@@ -99,20 +99,20 @@ function goPublish() {
           confirm-type="search"
         />
       </view>
-      <view class="filter-bar__sort">
+      <view class="filter-bar__pills">
         <text
-          class="filter-bar__tab"
-          :class="{ 'filter-bar__tab--active': sortMode === 'newest' }"
+          class="filter-bar__pill"
+          :class="{ 'filter-bar__pill--active': sortMode === 'newest' }"
           @tap="sortMode = 'newest'"
         >最新</text>
         <text
-          class="filter-bar__tab"
-          :class="{ 'filter-bar__tab--active': sortMode === 'priceDesc' }"
+          class="filter-bar__pill"
+          :class="{ 'filter-bar__pill--active': sortMode === 'priceDesc' }"
           @tap="sortMode = 'priceDesc'"
         >价高</text>
         <text
-          class="filter-bar__tab"
-          :class="{ 'filter-bar__tab--active': sortMode === 'priceAsc' }"
+          class="filter-bar__pill"
+          :class="{ 'filter-bar__pill--active': sortMode === 'priceAsc' }"
           @tap="sortMode = 'priceAsc'"
         >价低</text>
       </view>
@@ -145,10 +145,15 @@ function goPublish() {
             <text v-if="item.paymentMethod" class="supply-card__tag">{{ item.paymentMethod }}</text>
           </view>
           <view class="supply-card__bottom">
-            <text class="supply-card__time">{{ formatRelativeTime(item.createTime) }}</text>
-            <view v-if="item.shipAddress" class="supply-card__location">
-              <uni-icons type="location" size="12" color="#9ca3af" />
-              <text class="supply-card__address">{{ item.shipAddress }}</text>
+            <view class="supply-card__meta">
+              <text class="supply-card__time">{{ formatRelativeTime(item.createTime) }}</text>
+              <view v-if="item.shipAddress" class="supply-card__location">
+                <uni-icons type="location" size="12" color="#9ca3af" />
+                <text class="supply-card__address">{{ item.shipAddress }}</text>
+              </view>
+            </view>
+            <view class="supply-card__action" @tap.stop="goDetail(item.id)">
+              <text class="supply-card__action-text">咨询</text>
             </view>
           </view>
         </view>
@@ -166,6 +171,8 @@ function goPublish() {
     <view class="fab anim-fab-enter" @tap="goPublish">
       <uni-icons type="plusempty" size="28" color="#fff" />
     </view>
+
+    <WgTabBar :current="1" />
   </view>
 </template>
 
@@ -173,6 +180,7 @@ function goPublish() {
 .supply-page {
   min-height: 100vh;
   background: $bg-page;
+  padding-bottom: 130rpx;
 }
 
 /* ===== Filter Bar ===== */
@@ -206,36 +214,24 @@ function goPublish() {
     font-size: $font-md;
   }
 
-  &__sort {
+  &__pills {
     display: flex;
-    gap: 0;
-    border-top: 1rpx solid $border-light;
+    gap: $spacing-xs;
+    padding: $spacing-xs 0 $spacing-sm;
   }
 
-  &__tab {
-    flex: 1;
-    text-align: center;
+  &__pill {
     font-size: $font-sm;
     color: $text-secondary;
-    padding: $spacing-sm 0;
-    position: relative;
-    transition: color 0.2s;
+    padding: $spacing-xs $spacing-md;
+    border-radius: 30rpx;
+    background: $bg-page;
+    transition: all 0.2s;
 
     &--active {
       color: $brand-600;
+      background: $brand-50;
       font-weight: 600;
-
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 48rpx;
-        height: 4rpx;
-        border-radius: 2rpx;
-        background: $brand-600;
-      }
     }
   }
 }
@@ -355,16 +351,23 @@ function goPublish() {
     border-top: 1rpx solid $border-light;
   }
 
+  &__meta {
+    flex: 1;
+    min-width: 0;
+  }
+
   &__time {
     font-size: $font-xs;
     color: $text-placeholder;
+    display: block;
   }
 
   &__location {
     display: flex;
     align-items: center;
     gap: 4rpx;
-    max-width: 350rpx;
+    max-width: 300rpx;
+    margin-top: 4rpx;
   }
 
   &__address {
@@ -373,6 +376,20 @@ function goPublish() {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  &__action {
+    flex-shrink: 0;
+    padding: $spacing-xs $spacing-md;
+    background: $brand-50;
+    border-radius: 30rpx;
+    margin-left: $spacing-sm;
+  }
+
+  &__action-text {
+    font-size: $font-xs;
+    color: $brand-600;
+    font-weight: 600;
   }
 }
 

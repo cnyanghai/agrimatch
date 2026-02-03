@@ -20,6 +20,17 @@ const form = ref<RequirementCreateRequest>({
 
 const submitting = ref(false)
 
+/** 有效期选项 */
+const expireOptions = [
+  { label: '1小时', value: 60 },
+  { label: '1天', value: 1440 },
+  { label: '3天', value: 4320 },
+  { label: '7天', value: 10080 },
+  { label: '30天', value: 43200 },
+]
+const expireIndex = ref(3) // 默认7天
+const expireMinutes = computed(() => expireOptions[expireIndex.value].value)
+
 /** 图片上传 */
 const images = ref<string[]>([])
 const uploading = ref(false)
@@ -62,6 +73,10 @@ function removeImage(idx: number) {
 /** 预览图片 */
 function previewImage(idx: number) {
   uni.previewImage({ urls: images.value, current: idx })
+}
+
+function handleExpirePick(e: any) {
+  expireIndex.value = Number(e.detail.value)
 }
 
 const paymentMethodOptions = ['款到发货', '货到付款', '月结30天', '月结60天', '协商']
@@ -146,14 +161,26 @@ async function handleSubmit() {
       purchaseAddress: form.value.purchaseAddress?.trim() || undefined,
       remark: form.value.remark?.trim() || undefined,
     }
+    req.expireMinutes = expireMinutes.value
     if (images.value.length > 0) {
       req.imagesJson = JSON.stringify(images.value)
     }
     await createRequirement(req)
-    uni.showToast({ title: '发布成功', icon: 'success' })
-    setTimeout(() => {
-      uni.navigateBack()
-    }, 1000)
+    uni.showModal({
+      title: '发布成功',
+      content: '采购需求已发布',
+      confirmText: '查看我的发布',
+      cancelText: '继续发布',
+      success(res) {
+        if (res.confirm) {
+          uni.navigateTo({ url: '/pages/requirement/my-list' })
+        } else {
+          form.value = { categoryName: '', quantity: undefined, expectedPrice: undefined, packaging: '', paymentMethod: '', deliveryMethod: '', purchaseAddress: '', remark: '' }
+          images.value = []
+          expireIndex.value = 3
+        }
+      },
+    })
   } catch {
     // handled by request.ts
   } finally {
@@ -252,6 +279,17 @@ async function handleSubmit() {
             >
               {{ form.deliveryMethod || '请选择交货方式' }}
             </text>
+            <text class="form-card__picker-arrow">&#x203A;</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 有效期 -->
+      <view class="form-card__field">
+        <text class="form-card__label">有效期</text>
+        <picker :range="expireOptions.map(o => o.label)" :value="expireIndex" @change="handleExpirePick">
+          <view class="form-card__picker">
+            <text class="form-card__picker-text">{{ expireOptions[expireIndex].label }}</text>
             <text class="form-card__picker-arrow">&#x203A;</text>
           </view>
         </picker>

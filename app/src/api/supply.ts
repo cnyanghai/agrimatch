@@ -1,4 +1,4 @@
-import { get, post } from '../utils/request'
+import { get, post, put, del } from '../utils/request'
 
 export interface SupplyResponse {
   id: number
@@ -58,4 +58,22 @@ export interface SupplyCreateRequest {
 
 export function createSupply(req: SupplyCreateRequest) {
   return post<number>('/api/supplies', req)
+}
+
+export interface SupplyUpdateRequest {
+  quantity?: number
+  exFactoryPrice?: number
+  shipAddress?: string
+  deliveryMode?: string
+  paymentMethod?: string
+  remark?: string
+  expireMinutes?: number
+}
+
+export function updateSupply(id: number, req: SupplyUpdateRequest) {
+  return put<void>(`/api/supplies/${id}`, req)
+}
+
+export function deleteSupply(id: number) {
+  return del<void>(`/api/supplies/${id}`)
 }

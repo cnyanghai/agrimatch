@@ -1,4 +1,4 @@
-import { get, post } from '../utils/request'
+import { get, post, put, del } from '../utils/request'
 
 export interface RequirementResponse {
   id: number
@@ -55,4 +55,23 @@ export interface RequirementCreateRequest {
 
 export function createRequirement(req: RequirementCreateRequest) {
   return post<number>('/api/requirements', req)
+}
+
+export interface RequirementUpdateRequest {
+  quantity?: number
+  expectedPrice?: number
+  packaging?: string
+  paymentMethod?: string
+  deliveryMethod?: string
+  purchaseAddress?: string
+  remark?: string
+  expireMinutes?: number
+}
+
+export function updateRequirement(id: number, req: RequirementUpdateRequest) {
+  return put<void>(`/api/requirements/${id}`, req)
+}
+
+export function deleteRequirement(id: number) {
+  return del<void>(`/api/requirements/${id}`)
 }

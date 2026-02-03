@@ -92,3 +92,36 @@
   animation: fabEnter 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
   animation-delay: 300ms;
 }
+
+/* 骨架屏闪烁 */
+@keyframes shimmer {
+  0% { background-position: -468rpx 0; }
+  100% { background-position: 468rpx 0; }
+}
+
+.anim-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 936rpx 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* 从下方淡入（更大幅度） */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(60rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.anim-fade-up {
+  animation: fadeUp 400ms ease-out both;
+}
+
+/* 交错延迟扩展 */
+.anim-stagger-6 { animation-delay: 300ms; }
+.anim-stagger-7 { animation-delay: 350ms; }
+.anim-stagger-8 { animation-delay: 400ms; }

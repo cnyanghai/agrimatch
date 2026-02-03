@@ -22,8 +22,14 @@ export interface ChatMessageResponse {
   toUserId: number
   content: string
   msgType?: string
+  payloadJson?: string
+  quoteStatus?: string  // 'OFFERED' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED'
   read: boolean
   createTime?: string
+  /** 前端本地状态，不来自后端 */
+  _status?: 'pending' | 'sent' | 'failed'
+  /** 前端临时 ID */
+  _tempId?: string
 }
 
 export function listConversations() {
@@ -54,4 +60,33 @@ export interface ChatConversationOpenRequest {
 
 export function openConversation(req: ChatConversationOpenRequest) {
   return post<number>('/api/chat/conversations/open', req)
+}
+
+export function sendQuoteMessage(conversationId: number, payloadJson: string, content: string) {
+  return post<ChatMessageResponse>(`/api/chat/conversations/${conversationId}/messages`, {
+    msgType: 'QUOTE',
+    content,
+    payloadJson,
+  })
+}
+
+export function confirmChatOffer(messageId: number) {
+  return post<void>(`/api/chat/messages/${messageId}/confirm`)
+}
+
+export function rejectChatOffer(messageId: number) {
+  return post<void>(`/api/chat/messages/${messageId}/reject`)
+}
+
+export interface CreateContractFromQuoteRequest {
+  quoteMessageId: number
+  title?: string
+  deliveryDate?: string
+  deliveryAddress?: string
+  paymentMethod?: string
+  terms?: string
+}
+
+export function createContractFromQuote(req: CreateContractFromQuoteRequest) {
+  return post<number>('/api/contracts/from-quote', req)
 }

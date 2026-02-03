@@ -118,8 +118,9 @@ function handleViewCompany() {
 .info-card {
   background: $bg-card;
   margin: $spacing-sm;
-  border-radius: $radius-lg;
+  border-radius: $radius-xl;
   padding: $spacing-lg;
+  box-shadow: $shadow-sm;
 
   &__name {
     font-size: $font-xl;
@@ -144,9 +145,10 @@ function handleViewCompany() {
 
 .detail-card {
   background: $bg-card;
-  margin: 0 $spacing-sm;
-  border-radius: $radius-lg;
+  margin: $spacing-sm $spacing-sm 0;
+  border-radius: $radius-xl;
   padding: $spacing-sm 0;
+  box-shadow: $shadow-sm;
 }
 
 .detail-row {
@@ -174,9 +176,11 @@ function handleViewCompany() {
   right: 0;
   display: flex;
   gap: $spacing-sm;
-  padding: $spacing-sm $spacing-md;
-  background: $bg-card;
-  border-top: 1rpx solid $border-light;
+  padding: $spacing-md $spacing-md;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(40rpx);
+  -webkit-backdrop-filter: blur(40rpx);
+  border-top: 1rpx solid rgba(0, 0, 0, 0.04);
 }
 
 .btn-primary {
@@ -186,19 +190,31 @@ function handleViewCompany() {
   background: $autumn-400;
   color: #fff;
   border: none;
-  border-radius: $radius-lg;
+  border-radius: $radius-xl;
   font-size: $font-md;
   font-weight: bold;
+  box-shadow: 0 4rpx 16rpx rgba(212, 163, 115, 0.25);
+  transition: transform $transition-fast;
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .btn-secondary {
   flex: 1;
   height: 88rpx;
   line-height: 88rpx;
-  background: $bg-page;
+  background: $autumn-50;
   color: $autumn-500;
-  border: 1rpx solid $autumn-200;
-  border-radius: $radius-lg;
+  border: none;
+  border-radius: $radius-xl;
   font-size: $font-md;
+  font-weight: 500;
+  transition: transform $transition-fast;
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 </style>

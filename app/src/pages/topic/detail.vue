@@ -8,12 +8,17 @@ import {
   togglePostCollect,
   listPostComments,
   createPostComment,
+  updatePost,
+  deletePost,
   type PostResponse,
   type PostCommentResponse,
 } from '../../api/post'
 import { useAuthStore } from '../../store/auth'
+import { useFollow } from '../../composables/useFollow'
 
 const authStore = useAuthStore()
+const { isFollowing, followLoading, loadFollowStatus, handleToggleFollow, canFollow }
+  = useFollow(() => detail.value?.userId)
 const detail = ref<PostResponse | null>(null)
 const comments = ref<PostCommentResponse[]>([])
 const loading = ref(true)
@@ -21,6 +26,11 @@ const commentText = ref('')
 const submitting = ref(false)
 const likeLoading = ref(false)
 const collectLoading = ref(false)
+
+/** 是否是自己的帖子 */
+const isMyPost = computed(() => {
+  return detail.value?.userId === authStore.user?.userId
+})
 
 /** 解析图片列表 */
 const imageList = computed<string[]>(() => {
@@ -44,11 +54,22 @@ async function loadDetail(id: number) {
   loading.value = true
   try {
     detail.value = await getPost(id)
+    await loadFollowStatus()
   } catch {
     // handled by request.ts
   } finally {
     loading.value = false
   }
+}
+
+function goAuthorProfile() {
+  if (detail.value?.userId) {
+    uni.navigateTo({ url: `/pages/user/profile?id=${detail.value.userId}` })
+  }
+}
+
+function handleShare() {
+  uni.showToast({ title: '分享功能开发中', icon: 'none' })
 }
 
 async function loadComments(postId: number) {
@@ -161,6 +182,43 @@ function getCommentInitial(c: PostCommentResponse): string {
   return name.charAt(0)
 }
 
+/** 作者更多菜单 */
+function handleAuthorMenu() {
+  uni.showActionSheet({
+    itemList: ['编辑', '删除'],
+    success: (res) => {
+      if (res.tapIndex === 0) {
+        // 编辑
+        if (detail.value) {
+          uni.navigateTo({ url: `/pages/topic/edit?id=${detail.value.id}` })
+        }
+      } else if (res.tapIndex === 1) {
+        // 删除
+        handleDeletePost()
+      }
+    },
+  })
+}
+
+/** 删除帖子 */
+function handleDeletePost() {
+  if (!detail.value) return
+  uni.showModal({
+    title: '删除话题',
+    content: '确认删除该话题？此操作不可撤销。',
+    success: async (res) => {
+      if (!res.confirm) return
+      try {
+        await deletePost(detail.value!.id)
+        uni.showToast({ title: '已删除', icon: 'success' })
+        setTimeout(() => uni.navigateBack(), 500)
+      } catch {
+        // handled
+      }
+    },
+  })
+}
+
 </script>
 
 <template>
@@ -175,7 +233,7 @@ function getCommentInitial(c: PostCommentResponse): string {
       <scroll-view scroll-y class="detail-page__scroll">
         <!-- 作者信息 -->
         <view class="author-section">
-          <view class="author-section__avatar">
+          <view class="author-section__avatar" @tap="goAuthorProfile">
             <image
               v-if="detail.avatar"
               class="author-section__avatar-img"
@@ -184,14 +242,29 @@ function getCommentInitial(c: PostCommentResponse): string {
             />
             <text v-else class="author-section__avatar-text">{{ getInitial(detail) }}</text>
           </view>
-          <view class="author-section__info">
+          <view class="author-section__info" @tap="goAuthorProfile">
             <text class="author-section__name">{{ getDisplayName(detail) }}</text>
             <view class="author-section__meta">
               <text v-if="detail.companyName" class="author-section__company">{{ detail.companyName }}</text>
               <text v-if="detail.position" class="author-section__position">{{ detail.position }}</text>
             </view>
           </view>
+          <view
+            v-if="canFollow()"
+            class="follow-btn"
+            :class="{ 'follow-btn--active': isFollowing }"
+            @tap="handleToggleFollow"
+          >
+            <text class="follow-btn__text">{{ followLoading ? '...' : (isFollowing ? '已关注' : '+ 关注') }}</text>
+          </view>
           <text class="author-section__time">{{ formatRelativeTime(detail.createTime) }}</text>
+          <view
+            v-if="isMyPost"
+            class="author-menu-btn"
+            @tap="handleAuthorMenu"
+          >
+            <text class="author-menu-btn__text">···</text>
+          </view>
         </view>
 
         <!-- 帖子内容 -->
@@ -237,6 +310,10 @@ function getCommentInitial(c: PostCommentResponse): string {
           >
             <uni-icons :type="detail.collectedByMe ? 'star-filled' : 'star'" size="22" :color="detail.collectedByMe ? '#D4A373' : '#999'" />
             <text class="action-bar__label">{{ detail.collectedByMe ? '已收藏' : '收藏' }}</text>
+          </view>
+          <view class="action-bar__item" @tap="handleShare">
+            <uni-icons type="redo" size="22" color="#999" />
+            <text class="action-bar__label">分享</text>
           </view>
         </view>
 
@@ -369,6 +446,58 @@ function getCommentInitial(c: PostCommentResponse): string {
     color: $text-placeholder;
     flex-shrink: 0;
     margin-left: $spacing-sm;
+  }
+}
+
+/* 作者菜单按钮 */
+.author-menu-btn {
+  flex-shrink: 0;
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: $spacing-xs;
+
+  &__text {
+    font-size: $font-xl;
+    color: $text-secondary;
+    font-weight: bold;
+    letter-spacing: 2rpx;
+  }
+}
+
+/* 关注按钮 */
+.follow-btn {
+  flex-shrink: 0;
+  height: 56rpx;
+  padding: 0 $spacing-md;
+  background: $brand-600;
+  border-radius: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-xs;
+  transition: all 0.2s;
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &--active {
+    background: $bg-page;
+    border: 1rpx solid $border-color;
+  }
+
+  &__text {
+    font-size: $font-sm;
+    color: #fff;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+
+  &--active &__text {
+    color: $text-secondary;
   }
 }
 

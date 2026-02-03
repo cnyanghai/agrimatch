@@ -3,18 +3,29 @@ import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { getUser, type UserResponse } from '../../api/user'
 import { listPosts, type PostResponse } from '../../api/post'
+import { getFollowStats, type FollowStats } from '../../api/follow'
+import { openConversation } from '../../api/chat'
+import { useAuthStore } from '../../store/auth'
+import { useFollow } from '../../composables/useFollow'
 import { formatDate, formatDateTime } from '../../utils/format'
 
+const authStore = useAuthStore()
 const user = ref<UserResponse | null>(null)
 const posts = ref<PostResponse[]>([])
+const followStats = ref<FollowStats | null>(null)
 const loading = ref(true)
 const postsLoading = ref(false)
+
+const { isFollowing, followLoading, loadFollowStatus, handleToggleFollow, canFollow }
+  = useFollow(() => user.value?.userId)
 
 onLoad(async (options) => {
   if (options?.id) {
     const id = Number(options.id)
     try {
       user.value = await getUser(id)
+      await loadFollowStatus()
+      loadFollowStatsData(id)
       await loadPosts(id)
     } catch {
       // handled by request.ts
@@ -23,6 +34,31 @@ onLoad(async (options) => {
     }
   }
 })
+
+async function loadFollowStatsData(userId: number) {
+  try {
+    followStats.value = await getFollowStats(userId)
+  } catch { /* silent */ }
+}
+
+async function handleSendMessage() {
+  if (!authStore.isLoggedIn) {
+    uni.navigateTo({ url: '/pages/auth/login' })
+    return
+  }
+  if (!user.value) return
+  try {
+    const convId = await openConversation({
+      peerUserId: user.value.userId,
+      subjectType: 'user',
+      subjectId: user.value.userId,
+    })
+    const name = user.value.nickName || user.value.userName || ''
+    uni.navigateTo({ url: `/pages/chat/conversation?id=${convId}&name=${encodeURIComponent(name)}` })
+  } catch {
+    // handled
+  }
+}
 
 /** Load user posts */
 async function loadPosts(userId: number) {
@@ -89,7 +125,17 @@ function handleViewCompany(companyId: number) {
         </view>
 
         <view class="user-header__info">
-          <text class="user-header__name">{{ user.nickName || user.userName }}</text>
+          <view class="user-header__name-row">
+            <text class="user-header__name">{{ user.nickName || user.userName }}</text>
+            <view
+              v-if="canFollow()"
+              class="follow-btn"
+              :class="{ 'follow-btn--active': isFollowing }"
+              @tap="handleToggleFollow"
+            >
+              <text class="follow-btn__text">{{ followLoading ? '...' : (isFollowing ? '已关注' : '+ 关注') }}</text>
+            </view>
+          </view>
 
           <view class="user-header__meta">
             <text v-if="user.position" class="user-header__position">
@@ -117,6 +163,24 @@ function handleViewCompany(companyId: number) {
               采购商
             </text>
           </view>
+        </view>
+      </view>
+
+      <!-- Stats bar -->
+      <view v-if="followStats" class="stats-bar">
+        <view class="stats-bar__item">
+          <text class="stats-bar__num">{{ followStats.following }}</text>
+          <text class="stats-bar__label">关注</text>
+        </view>
+        <view class="stats-bar__divider" />
+        <view class="stats-bar__item">
+          <text class="stats-bar__num">{{ followStats.followers }}</text>
+          <text class="stats-bar__label">粉丝</text>
+        </view>
+        <view class="stats-bar__divider" />
+        <view class="stats-bar__item">
+          <text class="stats-bar__num">{{ posts.length }}</text>
+          <text class="stats-bar__label">动态</text>
         </view>
       </view>
 
@@ -180,6 +244,14 @@ function handleViewCompany(companyId: number) {
           </view>
         </view>
       </view>
+
+      <!-- Bottom message bar -->
+      <view v-if="canFollow()" class="msg-bar safe-area-bottom">
+        <view class="msg-bar__btn" @tap="handleSendMessage">
+          <uni-icons type="chat" size="18" color="#fff" />
+          <text class="msg-bar__btn-text">发消息</text>
+        </view>
+      </view>
     </template>
   </view>
 </template>
@@ -188,7 +260,7 @@ function handleViewCompany(companyId: number) {
 .profile-page {
   min-height: 100vh;
   background: $bg-page;
-
+  padding-bottom: 140rpx;
 }
 
 /* ===== User header ===== */
@@ -230,11 +302,18 @@ function handleViewCompany(companyId: number) {
     min-width: 0;
   }
 
+  &__name-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
   &__name {
     font-size: $font-xl;
     font-weight: bold;
     color: $text-primary;
-    display: block;
+    flex: 1;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -283,6 +362,97 @@ function handleViewCompany(companyId: number) {
       color: $autumn-500;
       background: rgba($autumn-400, 0.12);
     }
+  }
+}
+
+/* ===== Follow button ===== */
+.follow-btn {
+  padding: 8rpx 24rpx;
+  border-radius: 100rpx;
+  background: $brand-600;
+  flex-shrink: 0;
+
+  &--active {
+    background: $bg-page;
+    border: 1rpx solid $border-color;
+  }
+
+  &__text {
+    font-size: $font-xs;
+    color: #ffffff;
+    white-space: nowrap;
+  }
+
+  &--active &__text {
+    color: $text-secondary;
+  }
+}
+
+/* ===== Stats bar ===== */
+.stats-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg-card;
+  margin: 0 $spacing-sm;
+  margin-top: $spacing-sm;
+  border-radius: $radius-lg;
+  padding: $spacing-md 0;
+
+  &__item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__num {
+    font-size: $font-2xl;
+    font-weight: bold;
+    color: $brand-600;
+  }
+
+  &__label {
+    font-size: $font-sm;
+    color: $text-secondary;
+    margin-top: 4rpx;
+  }
+
+  &__divider {
+    width: 1rpx;
+    height: 60rpx;
+    background: $border-light;
+  }
+}
+
+/* ===== Bottom message bar ===== */
+.msg-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-sm $spacing-md;
+  background: $bg-card;
+  border-top: 1rpx solid $border-light;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-xs;
+    height: 88rpx;
+    background: $brand-600;
+    border-radius: $radius-lg;
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  &__btn-text {
+    font-size: $font-md;
+    font-weight: bold;
+    color: #ffffff;
   }
 }
 

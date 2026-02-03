@@ -6,11 +6,15 @@ import {
   companyTypeMap,
   type CompanyResponse,
 } from '../../api/company'
+import { useFollow } from '../../composables/useFollow'
 
 const company = ref<CompanyResponse | null>(null)
 const supplies = ref<any[]>([])
 const requirements = ref<any[]>([])
 const loading = ref(true)
+
+const { isFollowing, followLoading, loadFollowStatus, handleToggleFollow, canFollow }
+  = useFollow(() => company.value?.ownerUserId)
 
 onLoad(async (options) => {
   if (options?.id) {
@@ -19,6 +23,7 @@ onLoad(async (options) => {
       company.value = res.company
       supplies.value = res.supplies ?? []
       requirements.value = res.requirements ?? []
+      await loadFollowStatus()
     } catch {
       // handled by request.ts
     } finally {
@@ -182,8 +187,16 @@ function handleViewRequirement(id: number) {
         </view>
       </view>
 
-      <!-- Bottom contact bar -->
+      <!-- Bottom bar -->
       <view class="bottom-bar safe-area-bottom">
+        <view
+          v-if="canFollow()"
+          class="bottom-bar__btn bottom-bar__btn--follow"
+          :class="{ 'bottom-bar__btn--followed': isFollowing }"
+          @tap="handleToggleFollow"
+        >
+          <text>{{ followLoading ? '...' : (isFollowing ? '已关注' : '+ 关注') }}</text>
+        </view>
         <button class="bottom-bar__btn bottom-bar__btn--primary" @tap="handleCall">
           <uni-icons type="phone" size="18" color="#fff" />
           <text>{{ company.phone ? '电话联系' : '暂无电话' }}</text>
@@ -392,6 +405,24 @@ function handleViewRequirement(id: number) {
     font-weight: bold;
     text-align: center;
     border: none;
+
+    &--follow {
+      background: $brand-600;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+
+    &--followed {
+      background: $bg-page;
+      border: 1rpx solid $border-color;
+      color: $text-secondary;
+    }
 
     &--primary {
       background: $brand-600;

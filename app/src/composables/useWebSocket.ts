@@ -13,6 +13,8 @@ export interface WsMessage {
   toUserId?: number
   content?: string
   msgType?: string
+  payloadJson?: string
+  quoteStatus?: string
   timestamp?: string
 }
 
@@ -137,6 +139,17 @@ export function useWebSocket() {
     })
   }
 
+  function sendQuoteMessage(conversationId: number, toUserId: number, payloadJson: string, content: string): boolean {
+    return send({
+      type: 'chat',
+      conversationId,
+      toUserId,
+      content,
+      msgType: 'QUOTE',
+      payloadJson,
+    })
+  }
+
   // --- heartbeat ---
   function startHeartbeat() {
     stopHeartbeat()
@@ -182,6 +195,7 @@ export function useWebSocket() {
     disconnect,
     send,
     sendChatMessage,
+    sendQuoteMessage,
     onMessage,
     offMessage,
   }

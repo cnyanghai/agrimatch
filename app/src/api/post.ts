@@ -1,4 +1,4 @@
-import { get, post } from '../utils/request'
+import { get, post, put, del } from '../utils/request'
 
 export interface PostResponse {
   id: number
@@ -32,6 +32,7 @@ export interface PostQuery {
   domain?: string
   userId?: number
   companyId?: number
+  onlyCollected?: boolean
 }
 
 export interface PostCommentResponse {
@@ -78,4 +79,12 @@ export function createPostComment(postId: number, content: string) {
 
 export function togglePostCollect(postId: number) {
   return post<boolean>(`/api/posts/${postId}/collect`)
+}
+
+export function updatePost(postId: number, req: Partial<PostCreateRequest>) {
+  return put<void>(`/api/posts/${postId}`, req)
+}
+
+export function deletePost(postId: number) {
+  return del<void>(`/api/posts/${postId}`)
 }

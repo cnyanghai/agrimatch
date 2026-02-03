@@ -16,6 +16,7 @@ const activeTab = ref<number>(-1) // -1 = all
 
 const statusTabs = [
   { value: -1, label: '全部' },
+  { value: 0, label: '草稿' },
   { value: 1, label: '待签署' },
   { value: 2, label: '已签署' },
   { value: 3, label: '履约中' },
@@ -91,6 +92,11 @@ function getStatusColor(status: number): string {
       </view>
     </scroll-view>
 
+    <!-- 提示 -->
+    <view v-if="activeTab === 0 && filteredContracts.length === 0 && !loading" class="hint-card">
+      <text class="hint-card__text">在聊天中发送报价来创建合同</text>
+    </view>
+
     <!-- 合同列表 -->
     <view v-if="filteredContracts.length > 0" class="contract-list">
       <view
@@ -159,6 +165,19 @@ function getStatusColor(status: number): string {
       color: $brand-600;
       font-weight: bold;
     }
+  }
+}
+
+.hint-card {
+  margin: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  background: $brand-50;
+  border-radius: $radius-lg;
+  text-align: center;
+
+  &__text {
+    font-size: $font-sm;
+    color: $brand-600;
   }
 }
 

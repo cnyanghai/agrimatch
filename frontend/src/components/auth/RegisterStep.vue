@@ -16,6 +16,7 @@ const emit = defineEmits<{
 
 const auth = useAuthStore()
 const localLoading = ref(false)
+const agreed = ref(false)
 
 const form = reactive({
   password: '',
@@ -74,6 +75,10 @@ async function refreshCaptcha() {
 onMounted(refreshCaptcha)
 
 async function handleRegister() {
+  if (!agreed.value) {
+    ElMessage.warning('请先同意用户协议和隐私政策')
+    return
+  }
   if (!form.password || form.password.length < 6) {
     ElMessage.warning('密码至少6位')
     return
@@ -182,9 +187,24 @@ async function handleRegister() {
       </div>
     </div>
 
+    <!-- Agreement -->
+    <label class="flex items-start gap-2.5 cursor-pointer select-none">
+      <input
+        v-model="agreed"
+        type="checkbox"
+        class="mt-0.5 w-4 h-4 rounded border-neutral-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
+      />
+      <span class="text-xs text-neutral-500 leading-relaxed">
+        我已阅读并同意
+        <a href="/legal/terms" target="_blank" class="text-brand-600 font-semibold hover:underline" @click.stop>《用户协议》</a>
+        和
+        <a href="/legal/privacy" target="_blank" class="text-brand-600 font-semibold hover:underline" @click.stop>《隐私政策》</a>
+      </span>
+    </label>
+
     <!-- Register Button -->
     <button
-      :disabled="localLoading"
+      :disabled="localLoading || !agreed"
       class="w-full h-12 bg-brand-600 hover:bg-brand-700 disabled:bg-neutral-200 disabled:text-neutral-400 text-white font-bold rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"
       @click="handleRegister"
     >

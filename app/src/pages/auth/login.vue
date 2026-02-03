@@ -23,6 +23,13 @@ const showPassword = ref(false)
 
 const isPhoneValid = computed(() => /^1\d{10}$/.test(phone.value))
 
+// 状态栏高度（用于返回按钮安全区）
+const statusBarHeight = ref(44)
+try {
+  const sysInfo = uni.getSystemInfoSync()
+  statusBarHeight.value = sysInfo.statusBarHeight || 44
+} catch {}
+
 // 是否有上一页可返回（首次启动时没有）
 const canGoBack = computed(() => {
   const pages = getCurrentPages()
@@ -171,43 +178,56 @@ function handleBack() {
   }
 }
 
+// Web 端法律页面基础地址（根据实际部署地址调整）
+const LEGAL_BASE_URL = 'https://www.wogucloud.com'
+
 function handleViewAgreement() {
-  uni.showModal({ title: '用户协议', content: '沃谷用户协议详细内容（待完善）', showCancel: false })
+  const url = encodeURIComponent(`${LEGAL_BASE_URL}/legal/terms`)
+  uni.navigateTo({ url: `/pages/common/webview?url=${url}` })
 }
 
 function handleViewPrivacy() {
-  uni.showModal({ title: '隐私政策', content: '沃谷隐私政策详细内容（待完善）', showCancel: false })
+  const url = encodeURIComponent(`${LEGAL_BASE_URL}/legal/privacy`)
+  uni.navigateTo({ url: `/pages/common/webview?url=${url}` })
 }
 </script>
 
 <template>
   <view class="login-page">
-    <!-- Brand gradient header -->
-    <view class="brand-header">
-      <!-- Decorative circles -->
-      <view class="brand-header__circle brand-header__circle--1" />
-      <view class="brand-header__circle brand-header__circle--2" />
+    <!-- ====== Header scene ====== -->
+    <view class="scene">
+      <!-- Deep gradient background -->
+      <view class="scene__bg" />
 
-      <!-- Back button (only if there's a page to go back to) -->
-      <view class="brand-header__nav">
-        <view v-if="canGoBack" class="brand-header__back" @tap="handleBack">
+      <!-- Subtle decorative circles -->
+      <view class="scene__circle scene__circle--1" />
+      <view class="scene__circle scene__circle--2" />
+      <view class="scene__circle scene__circle--3" />
+
+      <!-- Abstract mountain silhouettes -->
+      <view class="scene__ridge scene__ridge--far" />
+      <view class="scene__ridge scene__ridge--near" />
+
+      <!-- Brand -->
+      <view class="scene__brand">
+        <view class="scene__brand-row">
+          <view class="scene__logo">
+            <image class="scene__logo-img" src="/static/logo-white.svg" mode="aspectFit" />
+          </view>
+          <text class="scene__title">沃谷</text>
+        </view>
+        <text class="scene__subtitle">农牧供需智能匹配平台</text>
+      </view>
+
+      <!-- Back button -->
+      <view class="scene__nav" :style="{ paddingTop: statusBarHeight + 'px' }">
+        <view v-if="canGoBack" class="scene__back" @tap="handleBack">
           <uni-icons type="left" size="18" color="#fff" />
         </view>
       </view>
-
-      <!-- Brand content -->
-      <view class="brand-header__content">
-        <view class="brand-header__brand">
-          <view class="brand-header__logo">
-            <text class="brand-header__logo-text">沃</text>
-          </view>
-          <text class="brand-header__title">沃谷</text>
-        </view>
-        <text class="brand-header__subtitle">农牧供需智能匹配平台</text>
-      </view>
     </view>
 
-    <!-- White card -->
+    <!-- ====== Form card (full-width tray) ====== -->
     <view class="form-card">
       <!-- Step indicator -->
       <view class="step-indicator">
@@ -247,16 +267,16 @@ function handleViewPrivacy() {
         </view>
 
         <!-- Agreement -->
-        <view class="agreement" @tap="agreed = !agreed">
-          <view class="agreement__check" :class="{ 'agreement__check--active': agreed }">
+        <view class="agreement">
+          <view class="agreement__check" :class="{ 'agreement__check--active': agreed }" @tap="agreed = !agreed">
             <uni-icons v-if="agreed" type="checkmarkempty" size="11" color="#fff" />
           </view>
-          <text class="agreement__text">
-            我已阅读并同意
-            <text class="agreement__link" @tap.stop="handleViewAgreement">《用户协议》</text>
-            和
-            <text class="agreement__link" @tap.stop="handleViewPrivacy">《隐私政策》</text>
-          </text>
+          <view class="agreement__body">
+            <text class="agreement__text" @tap="agreed = !agreed">我已阅读并同意</text>
+            <text class="agreement__link" @tap="handleViewAgreement">《用户协议》</text>
+            <text class="agreement__text" @tap="agreed = !agreed">和</text>
+            <text class="agreement__link" @tap="handleViewPrivacy">《隐私政策》</text>
+          </view>
         </view>
 
         <button class="btn-primary" :disabled="!isPhoneValid || !agreed || checking" @tap="submitPhone">
@@ -366,11 +386,11 @@ function handleViewPrivacy() {
           <text class="success-panel__subtitle">正在为您跳转...</text>
         </view>
       </view>
-    </view>
 
-    <!-- Bottom decoration -->
-    <view class="bottom-text">
-      <text class="bottom-text__content">让农牧交易更简单</text>
+      <!-- Bottom tagline -->
+      <view class="bottom-text">
+        <text class="bottom-text__content">让农牧交易更简单</text>
+      </view>
     </view>
   </view>
 </template>
@@ -380,119 +400,174 @@ function handleViewPrivacy() {
   min-height: 100vh;
   background: #fafaf9;
   position: relative;
+  overflow-x: hidden;
 }
 
 // ==============================
-// Brand gradient header
+// Header scene (professional)
 // ==============================
-.brand-header {
+.scene {
   position: relative;
   height: 480rpx;
-  background: linear-gradient(160deg, #163b28 0%, #1a4532 30%, #2D6A4F 70%, #347a5c 100%);
-  clip-path: ellipse(140% 100% at 50% 0%);
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
 
+  // Deep gradient background
+  &__bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, #0f2e1f 0%, #163b28 25%, #1a4532 50%, #2D6A4F 80%, #347a5c 100%);
+    z-index: 0;
+  }
+
+  // Subtle decorative circles
   &__circle {
     position: absolute;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.04);
+    z-index: 1;
 
     &--1 {
-      width: 300rpx;
-      height: 300rpx;
-      top: -60rpx;
-      right: -80rpx;
+      width: 360rpx;
+      height: 360rpx;
+      top: -100rpx;
+      right: -100rpx;
+      background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 70%);
     }
 
     &--2 {
-      width: 200rpx;
-      height: 200rpx;
-      bottom: 40rpx;
-      left: -40rpx;
+      width: 240rpx;
+      height: 240rpx;
+      bottom: 20rpx;
+      left: -60rpx;
+      background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 70%);
+    }
+
+    &--3 {
+      width: 160rpx;
+      height: 160rpx;
+      top: 60rpx;
+      left: 200rpx;
+      background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 70%);
     }
   }
 
-  &__nav {
-    position: relative;
-    z-index: 2;
-    padding-top: 88rpx;
-    padding-left: 32rpx;
-    padding-right: 32rpx;
+  // Abstract mountain ridges
+  &__ridge {
+    position: absolute;
+    left: -10%;
+    width: 120%;
+    border-radius: 50% 50% 0 0;
+
+    &--far {
+      height: 120rpx;
+      bottom: -10rpx;
+      background: rgba(0, 0, 0, 0.15);
+      z-index: 2;
+      animation: ridge-fade 0.8s ease-out 0.1s both;
+    }
+
+    &--near {
+      height: 80rpx;
+      bottom: -16rpx;
+      background: rgba(0, 0, 0, 0.1);
+      z-index: 3;
+      animation: ridge-fade 0.8s ease-out 0.25s both;
+    }
   }
 
-  &__back {
-    width: 60rpx;
-    height: 60rpx;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.12);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  &__content {
-    position: relative;
-    z-index: 2;
-    flex: 1;
+  // Brand
+  &__brand {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding-bottom: 80rpx;
+    padding-bottom: 40rpx;
+    z-index: 5;
+    animation: brand-fade 0.6s ease-out 0.15s both;
   }
 
-  &__brand {
+  &__brand-row {
     display: flex;
     align-items: center;
     gap: 16rpx;
-    margin-bottom: 12rpx;
+    margin-bottom: 16rpx;
   }
 
   &__logo {
-    width: 72rpx;
-    height: 72rpx;
-    border-radius: 18rpx;
-    background: rgba(255, 255, 255, 0.15);
+    width: 76rpx;
+    height: 76rpx;
+    border-radius: 20rpx;
+    background: rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  &__logo-text {
-    font-size: 36rpx;
-    font-weight: 900;
-    color: #fff;
+  &__logo-img {
+    width: 52rpx;
+    height: 52rpx;
   }
 
   &__title {
-    font-size: 48rpx;
+    font-size: 52rpx;
     font-weight: 900;
     color: #fff;
-    letter-spacing: 4rpx;
+    letter-spacing: 6rpx;
   }
 
   &__subtitle {
     font-size: 22rpx;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.45);
     letter-spacing: 6rpx;
+  }
+
+  // Back button
+  &__nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 7;
+    padding-left: 32rpx;
+    padding-right: 32rpx;
+  }
+
+  &__back {
+    margin-top: 16rpx;
+    width: 64rpx;
+    height: 64rpx;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+
+    &:active {
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.2);
+    }
   }
 }
 
 // ==============================
-// Form card
+// Form card (full-width tray)
 // ==============================
 .form-card {
   position: relative;
-  margin: -60rpx 32rpx 0;
+  margin-top: -60rpx;
   background: #fff;
-  border-radius: 28rpx;
-  padding: 48rpx 40rpx 56rpx;
-  box-shadow:
-    0 4rpx 16rpx rgba(0, 0, 0, 0.04),
-    0 16rpx 48rpx rgba(0, 0, 0, 0.06);
+  border-radius: 40rpx 40rpx 0 0;
+  padding: 52rpx 48rpx 60rpx;
+  box-shadow: 0 -4rpx 24rpx rgba(0,0,0,0.06);
+  min-height: 55vh;
+  z-index: 10;
 }
 
 // ==============================
@@ -687,6 +762,12 @@ function handleViewPrivacy() {
     }
   }
 
+  &__body {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
   &__text {
     font-size: 23rpx;
     color: #9ca3af;
@@ -694,8 +775,10 @@ function handleViewPrivacy() {
   }
 
   &__link {
+    font-size: 23rpx;
     color: $brand-600;
     font-weight: 600;
+    line-height: 1.6;
   }
 }
 
@@ -787,13 +870,13 @@ function handleViewPrivacy() {
 }
 
 // ==============================
-// Bottom text
+// Bottom text (inside form card)
 // ==============================
 .bottom-text {
   display: flex;
   justify-content: center;
-  margin-top: 80rpx;
-  padding-bottom: 60rpx;
+  margin-top: 60rpx;
+  padding-bottom: 40rpx;
 
   &__content {
     font-size: 22rpx;
@@ -803,8 +886,34 @@ function handleViewPrivacy() {
 }
 
 // ==============================
-// Animations
+// Animations (restrained)
 // ==============================
+
+// Ridge silhouette fade-in
+@keyframes ridge-fade {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Brand fade-in
+@keyframes brand-fade {
+  from {
+    opacity: 0;
+    transform: translateY(-16rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Success bounce (preserved)
 @keyframes success-bounce {
   0% { transform: scale(0); opacity: 0; }
   50% { transform: scale(1.15); opacity: 1; }
@@ -812,6 +921,7 @@ function handleViewPrivacy() {
   100% { transform: scale(1); }
 }
 
+// Step slide animations (preserved)
 @keyframes step-slide-left-in {
   from { transform: translateX(60rpx); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }

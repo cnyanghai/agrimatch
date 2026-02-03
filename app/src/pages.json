@@ -10,7 +10,8 @@
     {
       "path": "pages/home/index",
       "style": {
-        "navigationStyle": "custom"
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": true
       }
     },
     {
@@ -102,6 +103,13 @@
       }
     },
     {
+      "path": "pages/topic/collections",
+      "style": {
+        "navigationBarTitleText": "我的收藏",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
       "path": "pages/user/profile",
       "style": {
         "navigationBarTitleText": "用户主页"
@@ -133,6 +141,32 @@
       }
     },
     {
+      "path": "pages/supply/my-list",
+      "style": {
+        "navigationBarTitleText": "我的供应",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/supply/edit",
+      "style": {
+        "navigationBarTitleText": "编辑供应"
+      }
+    },
+    {
+      "path": "pages/requirement/my-list",
+      "style": {
+        "navigationBarTitleText": "我的采购",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/requirement/edit",
+      "style": {
+        "navigationBarTitleText": "编辑采购"
+      }
+    },
+    {
       "path": "pages/settings/index",
       "style": {
         "navigationBarTitleText": "设置"
@@ -142,6 +176,70 @@
       "path": "pages/settings/edit-profile",
       "style": {
         "navigationBarTitleText": "编辑资料"
+      }
+    },
+    {
+      "path": "pages/common/webview",
+      "style": {
+        "navigationBarTitleText": ""
+      }
+    },
+    {
+      "path": "pages/publish/index",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/notify/index",
+      "style": {
+        "navigationBarTitleText": "通知中心",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/market/index",
+      "style": {
+        "navigationBarTitleText": "行情中心",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/company/directory",
+      "style": {
+        "navigationBarTitleText": "企业名录",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/follow/list",
+      "style": {
+        "navigationBarTitleText": "我的关注",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/chat/quote-form",
+      "style": {
+        "navigationBarTitleText": "发送报价"
+      }
+    },
+    {
+      "path": "pages/contract/draft",
+      "style": {
+        "navigationBarTitleText": "起草合同"
+      }
+    },
+    {
+      "path": "pages/contract/milestones",
+      "style": {
+        "navigationBarTitleText": "履约节点"
+      }
+    },
+    {
+      "path": "pages/topic/edit",
+      "style": {
+        "navigationBarTitleText": "编辑话题"
       }
     }
   ],
@@ -154,6 +252,7 @@
     "animationDuration": 250
   },
   "tabBar": {
+    "custom": true,
     "color": "#999999",
     "selectedColor": "#2D6A4F",
     "borderStyle": "white",
@@ -172,10 +271,10 @@
         "selectedIconPath": "static/tab/supply-active.png"
       },
       {
-        "pagePath": "pages/requirement/index",
-        "text": "采购",
-        "iconPath": "static/tab/requirement.png",
-        "selectedIconPath": "static/tab/requirement-active.png"
+        "pagePath": "pages/publish/index",
+        "text": "发布",
+        "iconPath": "static/tab/supply.png",
+        "selectedIconPath": "static/tab/supply-active.png"
       },
       {
         "pagePath": "pages/chat/index",

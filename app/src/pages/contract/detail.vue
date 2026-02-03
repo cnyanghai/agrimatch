@@ -7,15 +7,31 @@ import {
   paymentMethodMap,
   type ContractResponse,
 } from '../../api/contract'
+import { listMilestones, type MilestoneResponse } from '../../api/milestone'
+import { useContractActions } from '../../composables/useContractActions'
 import { formatAmount, formatPrice, formatDate, formatDateTime } from '../../utils/format'
 
 const detail = ref<ContractResponse | null>(null)
 const loading = ref(true)
+const milestones = ref<MilestoneResponse[]>([])
+
+const {
+  canEdit,
+  canSend,
+  canSign,
+  canCancel,
+  canAddMilestone,
+  handleSend,
+  handleSign,
+  handleCancel,
+  handleDelete,
+} = useContractActions(detail)
 
 onLoad(async (options) => {
   if (options?.id) {
     try {
       detail.value = await getContract(Number(options.id))
+      loadMilestones()
     } catch {
       // handled by request.ts
     } finally {
@@ -23,6 +39,16 @@ onLoad(async (options) => {
     }
   }
 })
+
+async function loadMilestones() {
+  if (!detail.value) return
+  try {
+    const res = await listMilestones(detail.value.id)
+    milestones.value = res || []
+  } catch {
+    // silent
+  }
+}
 
 function getStatusLabel(status: number): string {
   return contractStatusMap[status]?.label || '未知'
@@ -44,6 +70,68 @@ function milestonePercent(): number {
     ((detail.value.milestoneCompleted || 0) / detail.value.milestoneTotal) * 100,
   )
 }
+
+function getMilestoneStatusIcon(status: string): string {
+  const map: Record<string, string> = {
+    CONFIRMED: '✅',
+    SUBMITTED: '📤',
+    PENDING: '⏳',
+    REJECTED: '❌',
+  }
+  return map[status] || '⏳'
+}
+
+function getMilestoneStatusLabel(status: string): string {
+  const map: Record<string, string> = {
+    CONFIRMED: '已确认',
+    SUBMITTED: '已提交',
+    PENDING: '待执行',
+    REJECTED: '已驳回',
+  }
+  return map[status] || status
+}
+
+const previewMilestones = ref<MilestoneResponse[]>([])
+function updatePreview() {
+  previewMilestones.value = milestones.value.slice(0, 4)
+}
+// Watch milestones change
+import { watch } from 'vue'
+watch(milestones, updatePreview, { immediate: true })
+
+function goMilestones() {
+  if (!detail.value) return
+  uni.navigateTo({ url: `/pages/contract/milestones?contractId=${detail.value.id}` })
+}
+
+function goEdit() {
+  // For now, navigate to detail with edit mode in the future
+  uni.showToast({ title: '编辑功能开发中', icon: 'none' })
+}
+
+// Action handlers with reload
+async function onSend() {
+  const ok = await handleSend()
+  if (ok && detail.value) {
+    detail.value = await getContract(detail.value.id)
+  }
+}
+
+async function onSign() {
+  const ok = await handleSign()
+  if (ok && detail.value) {
+    detail.value = await getContract(detail.value.id)
+  }
+}
+
+async function onCancel() {
+  const ok = await handleCancel()
+  if (ok && detail.value) {
+    detail.value = await getContract(detail.value.id)
+  }
+}
+
+const hasActions = ref(true)
 </script>
 
 <template>
@@ -176,6 +264,35 @@ function milestonePercent(): number {
         </view>
       </view>
 
+      <!-- 履约节点预览 -->
+      <view class="info-section" v-if="milestones.length > 0">
+        <text class="info-section__title">履约节点</text>
+        <view
+          v-for="ms in previewMilestones"
+          :key="ms.id"
+          class="milestone-item"
+        >
+          <view
+            class="milestone-item__dot"
+            :class="{
+              'milestone-item__dot--confirmed': ms.status === 'CONFIRMED',
+              'milestone-item__dot--submitted': ms.status === 'SUBMITTED',
+              'milestone-item__dot--rejected': ms.status === 'REJECTED',
+            }"
+          />
+          <text class="milestone-item__name">{{ ms.milestoneName }}</text>
+          <text class="milestone-item__date">
+            {{ ms.actualDate || ms.expectedDate || '' }}
+          </text>
+          <text class="milestone-item__status">
+            {{ getMilestoneStatusIcon(ms.status) }} {{ getMilestoneStatusLabel(ms.status) }}
+          </text>
+        </view>
+        <view class="milestone-more" @tap="goMilestones">
+          <text class="milestone-more__text">查看全部节点 →</text>
+        </view>
+      </view>
+
       <!-- 备注 -->
       <view class="info-section" v-if="detail.remark">
         <text class="info-section__title">备注</text>
@@ -185,7 +302,7 @@ function milestonePercent(): number {
       </view>
 
       <!-- 时间信息 -->
-      <view class="info-section info-section--last">
+      <view class="info-section">
         <text class="info-section__title">时间记录</text>
         <view class="info-row">
           <text class="info-row__label">创建时间</text>
@@ -194,6 +311,31 @@ function milestonePercent(): number {
         <view class="info-row">
           <text class="info-row__label">更新时间</text>
           <text class="info-row__value">{{ formatDateTime(detail.updateTime) }}</text>
+        </view>
+      </view>
+
+      <!-- 底部占位 -->
+      <view class="bottom-placeholder" />
+
+      <!-- 操作栏 -->
+      <view
+        v-if="canEdit || canSend || canSign || canCancel"
+        class="action-bar safe-area-bottom"
+      >
+        <view v-if="canEdit" class="action-bar__btn action-bar__btn--secondary" @tap="goEdit">
+          <text class="action-bar__btn-text action-bar__btn-text--secondary">编辑</text>
+        </view>
+        <view v-if="canEdit" class="action-bar__btn action-bar__btn--danger" @tap="handleDelete">
+          <text class="action-bar__btn-text action-bar__btn-text--danger">删除</text>
+        </view>
+        <view v-if="canSend" class="action-bar__btn action-bar__btn--primary" @tap="onSend">
+          <text class="action-bar__btn-text action-bar__btn-text--primary">发送签署</text>
+        </view>
+        <view v-if="canSign" class="action-bar__btn action-bar__btn--primary" @tap="onSign">
+          <text class="action-bar__btn-text action-bar__btn-text--primary">签署</text>
+        </view>
+        <view v-if="canCancel && !canEdit" class="action-bar__btn action-bar__btn--danger" @tap="onCancel">
+          <text class="action-bar__btn-text action-bar__btn-text--danger">取消合同</text>
         </view>
       </view>
     </template>
@@ -267,10 +409,6 @@ function milestonePercent(): number {
   margin: 0 $spacing-sm $spacing-sm;
   border-radius: $radius-lg;
   padding: $spacing-md $spacing-lg $spacing-sm;
-
-  &--last {
-    margin-bottom: $spacing-xl;
-  }
 
   &__title {
     font-size: $font-md;
@@ -414,6 +552,63 @@ function milestonePercent(): number {
   }
 }
 
+/* ===== 履约节点预览 ===== */
+.milestone-item {
+  display: flex;
+  align-items: center;
+  padding: $spacing-xs 0;
+  gap: $spacing-sm;
+
+  &__dot {
+    width: 16rpx;
+    height: 16rpx;
+    border-radius: 50%;
+    background: $border-color;
+    flex-shrink: 0;
+
+    &--confirmed {
+      background: $brand-600;
+    }
+    &--submitted {
+      background: $action-600;
+    }
+    &--rejected {
+      background: $color-error;
+    }
+  }
+
+  &__name {
+    flex: 1;
+    font-size: $font-md;
+    color: $text-primary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__date {
+    font-size: $font-xs;
+    color: $text-placeholder;
+    flex-shrink: 0;
+  }
+
+  &__status {
+    font-size: $font-xs;
+    color: $text-secondary;
+    flex-shrink: 0;
+  }
+}
+
+.milestone-more {
+  padding: $spacing-sm 0;
+  text-align: center;
+
+  &__text {
+    font-size: $font-sm;
+    color: $brand-600;
+  }
+}
+
 /* ===== 备注 ===== */
 .remark-block {
   background: $bg-page;
@@ -425,6 +620,71 @@ function milestonePercent(): number {
     font-size: $font-md;
     color: $text-primary;
     line-height: 1.6;
+  }
+}
+
+/* ===== 底部占位 ===== */
+.bottom-placeholder {
+  height: 140rpx;
+}
+
+/* ===== 操作栏 ===== */
+.action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: $bg-card;
+  border-top: 1rpx solid $border-light;
+  z-index: 10;
+
+  &__btn {
+    flex: 1;
+    height: 80rpx;
+    border-radius: $radius-lg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform $transition-fast;
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &--primary {
+      background: $brand-600;
+    }
+
+    &--secondary {
+      background: $bg-page;
+      border: 1rpx solid $border-color;
+    }
+
+    &--danger {
+      background: $bg-page;
+      border: 1rpx solid $color-error;
+    }
+  }
+
+  &__btn-text {
+    font-size: $font-md;
+    font-weight: 600;
+
+    &--primary {
+      color: #fff;
+    }
+
+    &--secondary {
+      color: $text-primary;
+    }
+
+    &--danger {
+      color: $color-error;
+    }
   }
 }
 </style>
