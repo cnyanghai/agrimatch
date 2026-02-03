@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../store/auth'
-import { useUiStore } from '../store/ui'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -9,6 +8,7 @@ const router = createRouter({
   },
   routes: [
     { path: '/', name: 'landing', component: () => import('../views/HomeView.vue'), meta: { public: true, minimal: true, title: '沃谷 - 领先的农牧原料数字化交易平台' } },
+    { path: '/login', name: 'login', component: () => import('../views/LoginView.vue'), meta: { public: true, minimal: true, hideNav: true, title: '登录 - 沃谷' } },
     { path: '/hall/supply', name: 'hall-supply', component: () => import('../views/SupplyHallView.vue'), meta: { public: true, minimal: true, title: '供应大厅 - 实时现货货源直供 - 沃谷' } },
     { path: '/hall/need', name: 'hall-need', component: () => import('../views/PurchaseHallView.vue'), meta: { public: true, minimal: true, title: '采购大厅 - 精准匹配采购需求 - 沃谷' } },
     { path: '/search', name: 'search', component: () => import('../views/UnifiedSearchView.vue'), meta: { public: true, minimal: true, title: '全站搜索 - 沃谷' } },
@@ -74,10 +74,25 @@ const filingRestrictedPaths = ['/points', '/chat', '/contracts', '/console/publi
 
 router.beforeEach(async (to) => {
   const auth = useAuthStore()
-  const ui = useUiStore()
 
   // 拉取站点配置（仅首次）
   await auth.fetchConfig()
+
+  // Already logged in user visiting /login → redirect away
+  if (to.path === '/login') {
+    if (auth.me) {
+      return (to.query.redirect as string) || '/console'
+    }
+    if (auth.token) {
+      try {
+        await auth.fetchMe()
+        return (to.query.redirect as string) || '/console'
+      } catch {
+        auth.clear()
+      }
+    }
+    return true
+  }
 
   // 备案模式下拦截受限路由
   if (auth.isFilingMode && filingRestrictedPaths.some(p => to.path.startsWith(p))) {
@@ -93,8 +108,7 @@ router.beforeEach(async (to) => {
       await auth.fetchMe()
     } catch {
       auth.clear()
-      ui.openAuthDialog('login', { path: to.path, query: to.query as any })
-      return false
+      return { path: '/login', query: { redirect: to.fullPath } }
     }
   }
 

@@ -274,6 +274,12 @@ public class AuthServiceImpl implements AuthService {
         r.setIsAdmin(u.getIsAdmin() != null && u.getIsAdmin() == 1);
         return r;
     }
+
+    @Override
+    public boolean checkPhone(String phone) {
+        if (phone == null || phone.isBlank()) return false;
+        return userMapper.selectByUserName(phone.trim()) != null;
+    }
 }
 
 

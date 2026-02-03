@@ -73,6 +73,64 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  /** 检查手机号是否已注册 */
+  async function checkPhone(phone: string): Promise<boolean> {
+    try {
+      const res = await uni.request({
+        url: `${getBaseUrl()}/api/auth/check-phone`,
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { phone },
+      })
+      const data = res.data as any
+      if (data?.code === 0 && data?.data) {
+        return data.data.registered === true
+      }
+      return false
+    } catch {
+      return false
+    }
+  }
+
+  /** 获取图形验证码 */
+  async function getCaptcha(): Promise<{ captchaKey: string; captchaImage: string } | null> {
+    try {
+      const res = await uni.request({
+        url: `${getBaseUrl()}/api/auth/captcha`,
+        method: 'GET',
+      })
+      const data = res.data as any
+      if (data?.code === 0 && data?.data) {
+        return data.data
+      }
+      return null
+    } catch {
+      return null
+    }
+  }
+
+  /** 密码登录 */
+  async function loginByPassword(userName: string, password: string, captchaKey: string, captchaCode: string): Promise<{ ok: boolean; msg?: string }> {
+    try {
+      const res = await uni.request({
+        url: `${getBaseUrl()}/api/auth/login`,
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { userName, password, captchaKey, captchaCode },
+      })
+      const data = res.data as any
+      if (data?.code === 0 && data?.data?.token) {
+        token.value = data.data.token
+        uni.setStorageSync(TOKEN_KEY, token.value)
+        await checkSession()
+        return { ok: true }
+      }
+      return { ok: false, msg: data?.message || '登录失败' }
+    } catch {
+      return { ok: false, msg: '网络错误' }
+    }
+  }
+
   /** 发送短信验证码 */
   async function sendSmsCode(phone: string): Promise<boolean> {
     try {
@@ -147,6 +205,9 @@ export const useAuthStore = defineStore('auth', () => {
     isLoggedIn,
     restoreSession,
     checkSession,
+    checkPhone,
+    getCaptcha,
+    loginByPassword,
     sendSmsCode,
     loginBySms,
     saveUser,

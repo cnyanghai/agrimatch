@@ -1,17 +1,18 @@
 import { useAuthStore } from '../store/auth'
-import { useUiStore } from '../store/ui'
+import { useRouter } from 'vue-router'
 
 /**
- * 用于“前台页面/按钮点击”场景：
- * - 已登录：直接返回 true
- * - 未登录：弹出登录注册对话框，并记录跳转目标；返回 false
+ * For "public page / button click" scenarios:
+ * - Logged in: returns true
+ * - Not logged in: redirects to /login with optional redirect target; returns false
  */
 export function requireAuth(targetPath?: string, query?: Record<string, any>) {
   const auth = useAuthStore()
-  const ui = useUiStore()
   if (auth.me) return true
-  ui.openAuthDialog('login', targetPath ? { path: targetPath, query } : undefined)
+  const router = useRouter()
+  const redirect = targetPath
+    ? targetPath + (query ? '?' + new URLSearchParams(query as any).toString() : '')
+    : undefined
+  router.push({ path: '/login', query: redirect ? { redirect } : undefined })
   return false
 }
-
-

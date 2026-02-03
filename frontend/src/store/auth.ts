@@ -171,6 +171,26 @@ export const useAuthStore = defineStore('auth', {
       if (data.code !== 0) throw new Error(data.message)
       // 刷新用户信息
       await this.fetchMe()
+    },
+
+    // 检查手机号是否已注册
+    async checkPhone(phone: string): Promise<boolean> {
+      const { data } = await http.post<Result<{ registered: boolean }>>('/api/auth/check-phone', { phone })
+      if (data.code !== 0 || !data.data) throw new Error(data.message || '检查失败')
+      return data.data.registered
+    },
+
+    // 短信验证码登录
+    async loginBySms(phone: string, smsCode: string) {
+      const { data } = await http.post<Result<LoginResponse>>('/api/auth/login/sms', { phone, smsCode })
+      if (data.code !== 0 || !data.data?.token) throw new Error(data.message || '登录失败')
+      this.setToken(data.data.token)
+    },
+
+    // 发送登录短信验证码
+    async sendLoginSmsCode(phone: string) {
+      const { data } = await http.post<Result<void>>('/api/auth/sms/send', { phone, type: 2 })
+      if (data.code !== 0) throw new Error(data.message || '发送失败')
     }
   }
 })

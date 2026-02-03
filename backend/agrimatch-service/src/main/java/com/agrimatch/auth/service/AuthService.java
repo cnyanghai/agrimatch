@@ -17,6 +17,8 @@ public interface AuthService {
     MeResponse me(Long userId);
 
     void resetPassword(String phone, String newPassword);
+
+    boolean checkPhone(String phone);
 }
 
 

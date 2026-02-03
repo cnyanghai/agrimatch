@@ -3,9 +3,13 @@ import { onLaunch, onShow, onHide } from '@dcloudio/uni-app'
 import { useAuthStore } from './store/auth'
 
 onLaunch(() => {
-  // 启动时尝试恢复登录状态
   const authStore = useAuthStore()
   authStore.restoreSession()
+
+  // 未登录时强制跳转登录页
+  if (!authStore.isLoggedIn) {
+    uni.reLaunch({ url: '/pages/auth/login' })
+  }
 })
 
 onShow(() => {

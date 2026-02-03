@@ -6,6 +6,8 @@ import com.agrimatch.auth.dto.LoginBySmsRequest;
 import com.agrimatch.auth.dto.LoginResponse;
 import com.agrimatch.auth.dto.MeResponse;
 import com.agrimatch.auth.dto.RegisterRequest;
+import com.agrimatch.auth.dto.CheckPhoneRequest;
+import com.agrimatch.auth.dto.CheckPhoneResponse;
 import com.agrimatch.auth.dto.SmsSendRequest;
 import com.agrimatch.auth.service.AuthService;
 import com.agrimatch.auth.service.CaptchaService;
@@ -110,6 +112,12 @@ public class AuthController {
         }
         LoginUser p = (LoginUser) authentication.getPrincipal();
         return Result.success(authService.me(p.getUserId()));
+    }
+
+    @PostMapping("/check-phone")
+    public Result<CheckPhoneResponse> checkPhone(@Valid @RequestBody CheckPhoneRequest req) {
+        boolean registered = authService.checkPhone(req.getPhone());
+        return Result.success(new CheckPhoneResponse(registered));
     }
 
     private void setTokenCookie(HttpServletResponse response, String token) {
