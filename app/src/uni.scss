@@ -1,6 +1,6 @@
 /**
  * 沃谷 App 全局样式变量
- * 与 Web 端 Tailwind 品牌色保持一致
+ * Airbnb 风格暖色系 — Premium = 克制 + 留白 + 温暖
  */
 
 /* ===== 品牌色 - 沃野绿 ===== */
@@ -35,34 +35,43 @@ $autumn-300: #e4bd91;
 $autumn-400: #D4A373;
 $autumn-500: #c28a55;
 
+/* ===== 暖中性色阶 (Warm Neutrals) ===== */
+$warm-50: #FAF8F4;
+$warm-100: #F5F0E8;
+$warm-200: #E8E0D4;
+$warm-300: #D6CCC0;
+$warm-400: #A8A29E;
+$warm-500: #78716C;
+
 /* ===== 功能色 ===== */
 $color-success: #22c55e;
 $color-warning: #f59e0b;
 $color-error: #ef4444;
 $color-info: #3b82f6;
 
-/* ===== 文字颜色 ===== */
-$text-primary: #111318;
-$text-secondary: #6b7280;
-$text-placeholder: #9ca3af;
-$text-disabled: #d1d5db;
+/* ===== 文字颜色 (暖石色) ===== */
+$text-primary: #1C1917;
+$text-secondary: #78716C;
+$text-placeholder: #A8A29E;
+$text-disabled: #D6CCC0;
 $text-inverse: #ffffff;
 
-/* ===== 背景颜色 ===== */
-$bg-page: #fafaf9;
+/* ===== 背景颜色 (暖色调) ===== */
+$bg-page: #FAF8F4;
 $bg-card: #ffffff;
-$bg-hover: #f5f5f4;
+$bg-hover: #F5F0E8;
 $bg-mask: rgba(0, 0, 0, 0.4);
 
 /* ===== 边框 ===== */
-$border-color: #e5e7eb;
-$border-light: #f3f4f6;
+$border-color: #E8E0D4;
+$border-light: #F5F0E8;
 
 /* ===== 圆角 ===== */
 $radius-sm: 8rpx;
 $radius-md: 16rpx;
 $radius-lg: 24rpx;
 $radius-xl: 32rpx;
+$radius-pill: 999rpx;
 
 /* ===== 间距 ===== */
 $spacing-xs: 8rpx;
@@ -70,6 +79,8 @@ $spacing-sm: 16rpx;
 $spacing-md: 24rpx;
 $spacing-lg: 32rpx;
 $spacing-xl: 48rpx;
+$spacing-2xl: 64rpx;
+$spacing-3xl: 96rpx;
 
 /* ===== 字号 ===== */
 $font-xs: 20rpx;
@@ -79,12 +90,19 @@ $font-base: 28rpx;
 $font-lg: 32rpx;
 $font-xl: 36rpx;
 $font-2xl: 44rpx;
+$font-3xl: 52rpx;
+$font-4xl: 64rpx;
 
-/* ===== 阴影 ===== */
-$shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-$shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
-$shadow-lg: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+/* ===== 阴影 (暖色调) ===== */
+$shadow-sm: 0 2rpx 8rpx rgba(120, 90, 50, 0.04);
+$shadow-md: 0 4rpx 16rpx rgba(120, 90, 50, 0.06);
+$shadow-lg: 0 8rpx 32rpx rgba(120, 90, 50, 0.08);
 $shadow-brand: 0 4rpx 16rpx rgba(45, 106, 79, 0.15);
+
+/* 暖色专属阴影 */
+$shadow-warm-card: 0 2rpx 12rpx rgba(120, 90, 50, 0.05);
+$shadow-warm-elevated: 0 8rpx 30rpx rgba(120, 90, 50, 0.10);
+$shadow-warm-search: 0 4rpx 20rpx rgba(120, 90, 50, 0.08);
 
 /* ===== 过渡 ===== */
 $transition-fast: 150ms;

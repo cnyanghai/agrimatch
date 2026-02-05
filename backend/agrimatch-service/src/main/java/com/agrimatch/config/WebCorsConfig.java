@@ -17,7 +17,8 @@ public class WebCorsConfig implements WebMvcConfigurer {
         registry.addMapping("/api/**")
                 .allowedOriginPatterns(
                         "http://localhost:*",
-                        "http://127.0.0.1:*"
+                        "http://127.0.0.1:*",
+                        "http://172.28.0.135:*"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")

@@ -244,10 +244,10 @@
     }
   ],
   "globalStyle": {
-    "navigationBarTextStyle": "white",
+    "navigationBarTextStyle": "black",
     "navigationBarTitleText": "沃谷",
-    "navigationBarBackgroundColor": "#1a4532",
-    "backgroundColor": "#fafaf9",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#FAF8F4",
     "animationType": "slide-in-right",
     "animationDuration": 250
   },
@@ -271,10 +271,10 @@
         "selectedIconPath": "static/tab/supply-active.png"
       },
       {
-        "pagePath": "pages/publish/index",
-        "text": "发布",
-        "iconPath": "static/tab/supply.png",
-        "selectedIconPath": "static/tab/supply-active.png"
+        "pagePath": "pages/requirement/index",
+        "text": "采购",
+        "iconPath": "static/tab/requirement.png",
+        "selectedIconPath": "static/tab/requirement-active.png"
       },
       {
         "pagePath": "pages/chat/index",

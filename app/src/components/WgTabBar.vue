@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useAuthStore } from '../store/auth'
 
 const props = defineProps<{
@@ -14,7 +13,6 @@ interface TabItem {
   label: string
   icon: string
   iconActive: string
-  isCenter?: boolean
 }
 
 const tabs: TabItem[] = [
@@ -31,11 +29,10 @@ const tabs: TabItem[] = [
     iconActive: '/static/tab/supply-active.png'
   },
   {
-    path: '/pages/publish/index',
-    label: '发布',
-    icon: '',
-    iconActive: '',
-    isCenter: true
+    path: '/pages/requirement/index',
+    label: '采购',
+    icon: '/static/tab/requirement.png',
+    iconActive: '/static/tab/requirement-active.png'
   },
   {
     path: '/pages/chat/index',
@@ -54,12 +51,6 @@ const tabs: TabItem[] = [
 function handleTab(index: number, tab: TabItem) {
   if (index === props.current) return
 
-  // 中间发布按钮 → 弹出选择
-  if (tab.isCenter) {
-    showPublishSheet()
-    return
-  }
-
   // 消息和我的需要登录
   if ((index === 3 || index === 4) && !authStore.isLoggedIn) {
     uni.navigateTo({ url: '/pages/auth/login' })
@@ -67,23 +58,6 @@ function handleTab(index: number, tab: TabItem) {
   }
 
   uni.switchTab({ url: tab.path })
-}
-
-function showPublishSheet() {
-  if (!authStore.isLoggedIn) {
-    uni.navigateTo({ url: '/pages/auth/login' })
-    return
-  }
-  uni.showActionSheet({
-    itemList: ['发布供应', '发布采购'],
-    success: (res) => {
-      if (res.tapIndex === 0) {
-        uni.navigateTo({ url: '/pages/supply/publish' })
-      } else if (res.tapIndex === 1) {
-        uni.navigateTo({ url: '/pages/requirement/publish' })
-      }
-    }
-  })
 }
 </script>
 
@@ -96,16 +70,7 @@ function showPublishSheet() {
       :class="{ 'tab-bar__item--active': index === current }"
       @tap="handleTab(index, tab)"
     >
-      <!-- 中间发布按钮 -->
-      <view v-if="tab.isCenter" class="tab-bar__center">
-        <view class="tab-bar__center-btn">
-          <text class="tab-bar__center-icon">+</text>
-        </view>
-        <text class="tab-bar__label tab-bar__label--center">{{ tab.label }}</text>
-      </view>
-
-      <!-- 普通 tab -->
-      <view v-else class="tab-bar__normal">
+      <view class="tab-bar__normal">
         <image
           class="tab-bar__icon"
           :src="index === current ? tab.iconActive : tab.icon"
@@ -134,10 +99,8 @@ function showPublishSheet() {
   align-items: flex-end;
   justify-content: space-around;
   height: 110rpx;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(40rpx);
-  -webkit-backdrop-filter: blur(40rpx);
-  border-top: 1rpx solid rgba(0, 0, 0, 0.04);
+  background: #ffffff;
+  border-top: 1rpx solid $warm-200;
   padding-bottom: constant(safe-area-inset-bottom);
   padding-bottom: env(safe-area-inset-bottom);
 
@@ -147,10 +110,6 @@ function showPublishSheet() {
     align-items: center;
     justify-content: center;
     height: 110rpx;
-
-    &--active {
-      // active state handled by child classes
-    }
   }
 
   &__normal {
@@ -191,51 +150,13 @@ function showPublishSheet() {
 
   &__label {
     font-size: 20rpx;
-    color: #999;
+    color: $warm-400;
     line-height: 1.2;
 
     &--active {
       color: $brand-600;
       font-weight: 600;
     }
-
-    &--center {
-      font-size: 20rpx;
-      color: $brand-600;
-      font-weight: 600;
-      margin-top: 4rpx;
-    }
-  }
-
-  &__center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: -40rpx;
-  }
-
-  &__center-btn {
-    width: 96rpx;
-    height: 96rpx;
-    border-radius: 50%;
-    background: linear-gradient(135deg, $brand-500, $brand-600);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8rpx 24rpx rgba(45, 106, 79, 0.3);
-    transition: transform $transition-fast ease;
-
-    &:active {
-      transform: scale(0.92);
-    }
-  }
-
-  &__center-icon {
-    font-size: 48rpx;
-    color: #fff;
-    font-weight: 300;
-    line-height: 1;
-    margin-top: -4rpx;
   }
 }
 </style>

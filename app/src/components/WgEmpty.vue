@@ -14,18 +14,22 @@ defineEmits<{
   action: []
 }>()
 
-const iconMap: Record<string, string> = {
-  empty: '📭',
-  search: '🔍',
-  network: '📡',
-  auth: '🔐',
+const iconMap: Record<string, { name: string; color: string }> = {
+  empty: { name: 'email', color: '#A8A29E' },
+  search: { name: 'search', color: '#A8A29E' },
+  network: { name: 'wifi', color: '#A8A29E' },
+  auth: { name: 'locked', color: '#A8A29E' },
 }
 </script>
 
 <template>
   <view class="wg-empty">
     <view class="wg-empty__icon-wrapper">
-      <text class="wg-empty__icon">{{ iconMap[icon || 'empty'] }}</text>
+      <uni-icons
+        :type="iconMap[icon || 'empty'].name"
+        size="40"
+        :color="iconMap[icon || 'empty'].color"
+      />
     </view>
     <text class="wg-empty__text">{{ text || '暂无数据' }}</text>
     <text v-if="description" class="wg-empty__desc">{{ description }}</text>
@@ -46,15 +50,11 @@ const iconMap: Record<string, string> = {
     width: 160rpx;
     height: 160rpx;
     border-radius: 50%;
-    background: $border-light;
+    background: $warm-100;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: $spacing-lg;
-  }
-
-  &__icon {
-    font-size: 72rpx;
   }
 
   &__text {

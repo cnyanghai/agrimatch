@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import { listSupplies, type SupplyResponse } from '../../api/supply'
+import { getSchemaTree, type ProductSchemaVO, type CategoryNode } from '../../api/productSchema'
 import { formatPrice, formatRelativeTime } from '../../utils/format'
 
 const PAGE_SIZE = 20
@@ -11,6 +12,32 @@ const displayCount = ref(PAGE_SIZE)
 const loading = ref(false)
 const keyword = ref('')
 const sortMode = ref<'newest' | 'priceDesc' | 'priceAsc'>('newest')
+
+// Schema + Category 筛选
+const schemaList = ref<ProductSchemaVO[]>([])
+const activeSchemaIndex = ref(-1) // -1 = 全部
+const activeCategoryName = ref('') // 空 = 该 schema 下全部
+
+const activeSchema = computed(() => {
+  if (activeSchemaIndex.value < 0) return null
+  return schemaList.value[activeSchemaIndex.value] || null
+})
+
+/** 当前 schema 下的一级分类（展平二级） */
+const categoryPills = computed<string[]>(() => {
+  const schema = activeSchema.value
+  if (!schema) return []
+  const names: string[] = []
+  for (const cat of schema.categories) {
+    names.push(cat.name)
+    if (cat.children?.length) {
+      for (const child of cat.children) {
+        names.push(child.name)
+      }
+    }
+  }
+  return names
+})
 
 const filteredList = computed(() => {
   let list = [...allData.value]
@@ -27,7 +54,6 @@ const filteredList = computed(() => {
   } else if (sortMode.value === 'priceAsc') {
     list.sort((a, b) => (a.exFactoryPrice || 0) - (b.exFactoryPrice || 0))
   }
-  // default 'newest': API returns in create_time desc order
   return list
 })
 
@@ -44,6 +70,7 @@ watch([keyword, sortMode], () => {
 })
 
 onMounted(() => {
+  loadSchemas()
   loadData()
 })
 
@@ -57,10 +84,45 @@ onReachBottom(() => {
   loadMore()
 })
 
+async function loadSchemas() {
+  try {
+    const res = await getSchemaTree()
+    schemaList.value = res || []
+  } catch {
+    // schema 加载失败不影响列表
+  }
+}
+
+function selectSchema(index: number) {
+  if (activeSchemaIndex.value === index) return
+  activeSchemaIndex.value = index
+  activeCategoryName.value = ''
+  displayCount.value = PAGE_SIZE
+  loadData()
+}
+
+function selectCategory(name: string) {
+  if (activeCategoryName.value === name) {
+    activeCategoryName.value = ''
+  } else {
+    activeCategoryName.value = name
+  }
+  displayCount.value = PAGE_SIZE
+  loadData()
+}
+
 async function loadData() {
   loading.value = true
   try {
-    const res = await listSupplies({ activeOnly: true, orderBy: 'create_time', order: 'desc' })
+    const params: any = { activeOnly: true, orderBy: 'create_time', order: 'desc' }
+    const schema = activeSchema.value
+    if (schema) {
+      params.schemaCode = schema.schemaCode
+    }
+    if (activeCategoryName.value) {
+      params.categoryName = activeCategoryName.value
+    }
+    const res = await listSupplies(params)
     allData.value = res || []
     displayCount.value = PAGE_SIZE
   } catch {
@@ -90,7 +152,7 @@ function goPublish() {
     <!-- Sticky filter bar -->
     <view class="filter-bar">
       <view class="filter-bar__search">
-        <uni-icons type="search" size="16" color="#9ca3af" />
+        <uni-icons type="search" size="16" color="#A8A29E" />
         <input
           v-model="keyword"
           class="filter-bar__input"
@@ -99,6 +161,44 @@ function goPublish() {
           confirm-type="search"
         />
       </view>
+
+      <!-- Schema 标签 -->
+      <scroll-view scroll-x class="filter-bar__schema-scroll" :show-scrollbar="false">
+        <view class="filter-bar__schemas">
+          <text
+            class="filter-bar__schema"
+            :class="{ 'filter-bar__schema--active': activeSchemaIndex === -1 }"
+            @tap="selectSchema(-1)"
+          >全部</text>
+          <text
+            v-for="(schema, idx) in schemaList"
+            :key="schema.schemaCode"
+            class="filter-bar__schema"
+            :class="{ 'filter-bar__schema--active': activeSchemaIndex === idx }"
+            @tap="selectSchema(idx)"
+          >{{ schema.schemaName }}</text>
+        </view>
+      </scroll-view>
+
+      <!-- 二级分类胶囊 -->
+      <scroll-view v-if="categoryPills.length > 0" scroll-x class="filter-bar__cat-scroll" :show-scrollbar="false">
+        <view class="filter-bar__cats">
+          <text
+            class="filter-bar__cat"
+            :class="{ 'filter-bar__cat--active': activeCategoryName === '' }"
+            @tap="activeCategoryName = ''; displayCount = PAGE_SIZE; loadData()"
+          >全部</text>
+          <text
+            v-for="name in categoryPills"
+            :key="name"
+            class="filter-bar__cat"
+            :class="{ 'filter-bar__cat--active': activeCategoryName === name }"
+            @tap="selectCategory(name)"
+          >{{ name }}</text>
+        </view>
+      </scroll-view>
+
+      <!-- 排序 -->
       <view class="filter-bar__pills">
         <text
           class="filter-bar__pill"
@@ -126,17 +226,16 @@ function goPublish() {
         class="supply-card tap-feedback"
         @tap="goDetail(item.id)"
       >
-        <view class="supply-card__accent" />
         <view class="supply-card__content">
           <view class="supply-card__top">
             <view class="supply-card__title-row">
               <text class="supply-card__name">{{ item.categoryName }}</text>
-              <text v-if="item.origin" class="supply-card__badge supply-card__badge--brand">{{ item.origin }}</text>
+              <text v-if="item.origin" class="supply-card__badge">{{ item.origin }}</text>
             </view>
             <text class="supply-card__price">{{ formatPrice(item.exFactoryPrice) }}</text>
           </view>
           <view class="supply-card__company-row">
-            <uni-icons type="shop" size="14" color="#9ca3af" />
+            <uni-icons type="shop" size="14" color="#A8A29E" />
             <text class="supply-card__company">{{ item.companyName || item.nickName || item.userName }}</text>
           </view>
           <view class="supply-card__tags">
@@ -148,7 +247,7 @@ function goPublish() {
             <view class="supply-card__meta">
               <text class="supply-card__time">{{ formatRelativeTime(item.createTime) }}</text>
               <view v-if="item.shipAddress" class="supply-card__location">
-                <uni-icons type="location" size="12" color="#9ca3af" />
+                <uni-icons type="location" size="12" color="#A8A29E" />
                 <text class="supply-card__address">{{ item.shipAddress }}</text>
               </view>
             </view>
@@ -188,17 +287,17 @@ function goPublish() {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: $bg-card;
-  padding: $spacing-sm $spacing-sm 0;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  padding: $spacing-sm $spacing-md 0;
+  box-shadow: $shadow-warm-card;
 
   &__search {
     display: flex;
     align-items: center;
     gap: $spacing-xs;
-    background: $bg-page;
-    border-radius: $radius-sm;
-    padding: $spacing-xs $spacing-sm;
+    background: $warm-100;
+    border-radius: $radius-pill;
+    padding: $spacing-sm $spacing-lg;
     margin-bottom: $spacing-sm;
   }
 
@@ -214,6 +313,66 @@ function goPublish() {
     font-size: $font-md;
   }
 
+  /* Schema 标签行 */
+  &__schema-scroll {
+    white-space: nowrap;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__schemas {
+    display: inline-flex;
+    gap: $spacing-sm;
+    padding: 0 $spacing-xs $spacing-xs;
+  }
+
+  &__schema {
+    display: inline-block;
+    font-size: $font-md;
+    color: $text-secondary;
+    padding: $spacing-xs $spacing-lg;
+    border-radius: $radius-pill;
+    background: $warm-100;
+    white-space: nowrap;
+    transition: all 0.2s;
+    font-weight: 500;
+
+    &--active {
+      color: #ffffff;
+      background: $brand-600;
+      font-weight: 600;
+    }
+  }
+
+  /* 二级分类胶囊行 */
+  &__cat-scroll {
+    white-space: nowrap;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__cats {
+    display: inline-flex;
+    gap: $spacing-xs;
+    padding: 0 $spacing-xs $spacing-xs;
+  }
+
+  &__cat {
+    display: inline-block;
+    font-size: $font-sm;
+    color: $text-secondary;
+    padding: 6rpx $spacing-md;
+    border-radius: $radius-pill;
+    background: $warm-100;
+    white-space: nowrap;
+    transition: all 0.2s;
+
+    &--active {
+      color: $brand-600;
+      background: $brand-50;
+      font-weight: 600;
+    }
+  }
+
+  /* 排序行 */
   &__pills {
     display: flex;
     gap: $spacing-xs;
@@ -224,8 +383,8 @@ function goPublish() {
     font-size: $font-sm;
     color: $text-secondary;
     padding: $spacing-xs $spacing-md;
-    border-radius: 30rpx;
-    background: $bg-page;
+    border-radius: $radius-pill;
+    background: $warm-100;
     transition: all 0.2s;
 
     &--active {
@@ -238,41 +397,31 @@ function goPublish() {
 
 /* ===== List ===== */
 .list {
-  padding: $spacing-sm;
+  padding: $spacing-md;
 }
 
 /* ===== Supply Card ===== */
 .supply-card {
-  display: flex;
-  background: $bg-card;
-  border-radius: $radius-lg;
-  margin-bottom: $spacing-sm;
+  background: #ffffff;
+  border-radius: $radius-xl;
+  margin-bottom: $spacing-md;
   overflow: hidden;
-  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+  box-shadow: $shadow-warm-card;
   transition: transform 0.15s;
 
   &:active {
     transform: scale(0.98);
   }
 
-  &__accent {
-    width: 6rpx;
-    flex-shrink: 0;
-    background: $brand-600;
-    border-radius: $radius-lg 0 0 $radius-lg;
-  }
-
   &__content {
-    flex: 1;
-    padding: $spacing-md;
-    min-width: 0;
+    padding: $spacing-lg;
   }
 
   &__top {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: $spacing-xs;
+    margin-bottom: $spacing-sm;
   }
 
   &__title-row {
@@ -294,15 +443,12 @@ function goPublish() {
 
   &__badge {
     font-size: $font-xs;
-    padding: 2rpx 12rpx;
-    border-radius: $radius-sm;
+    padding: 4rpx 14rpx;
+    border-radius: $radius-pill;
     flex-shrink: 0;
     white-space: nowrap;
-
-    &--brand {
-      color: $brand-600;
-      background: $brand-50;
-    }
+    color: $warm-500;
+    background: $warm-100;
   }
 
   &__price {
@@ -317,7 +463,7 @@ function goPublish() {
     display: flex;
     align-items: center;
     gap: 6rpx;
-    margin-bottom: $spacing-xs;
+    margin-bottom: $spacing-sm;
   }
 
   &__company {
@@ -332,23 +478,23 @@ function goPublish() {
     display: flex;
     flex-wrap: wrap;
     gap: $spacing-xs;
-    margin-bottom: $spacing-xs;
+    margin-bottom: $spacing-sm;
   }
 
   &__tag {
     font-size: $font-xs;
-    color: $brand-600;
-    background: $brand-50;
+    color: $warm-500;
+    background: $warm-100;
     padding: 4rpx 14rpx;
-    border-radius: $radius-sm;
+    border-radius: $radius-pill;
   }
 
   &__bottom {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: $spacing-xs;
-    border-top: 1rpx solid $border-light;
+    padding-top: $spacing-sm;
+    border-top: 1rpx solid $warm-100;
   }
 
   &__meta {
@@ -380,15 +526,19 @@ function goPublish() {
 
   &__action {
     flex-shrink: 0;
-    padding: $spacing-xs $spacing-md;
-    background: $brand-50;
-    border-radius: 30rpx;
+    padding: $spacing-xs $spacing-lg;
+    background: $brand-600;
+    border-radius: $radius-pill;
     margin-left: $spacing-sm;
+
+    &:active {
+      opacity: 0.85;
+    }
   }
 
   &__action-text {
-    font-size: $font-xs;
-    color: $brand-600;
+    font-size: $font-sm;
+    color: #ffffff;
     font-weight: 600;
   }
 }
@@ -405,7 +555,7 @@ function goPublish() {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 24rpx rgba(45, 106, 79, 0.3);
+  box-shadow: 0 6rpx 20rpx rgba(45, 106, 79, 0.2);
   transition: transform 0.15s;
   z-index: 20;
 

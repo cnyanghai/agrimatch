@@ -32,23 +32,9 @@ const loadStatus = computed<'loading' | 'more' | 'noMore'>(() => {
   return 'more'
 })
 
-watch(sortMode, (mode) => {
+watch(sortMode, () => {
   displayCount.value = PAGE_SIZE
-  if (mode === 'following' && authStore.isLoggedIn) {
-    loadFollowingPosts()
-  }
 })
-
-async function loadFollowingPosts() {
-  followingLoading.value = true
-  try {
-    followingPosts.value = await getFollowedPosts() || []
-  } catch {
-    // handled
-  } finally {
-    followingLoading.value = false
-  }
-}
 
 onMounted(() => {
   loadData()
@@ -85,10 +71,6 @@ function goDetail(id: number) {
   uni.navigateTo({ url: `/pages/topic/detail?id=${id}` })
 }
 
-function goLogin() {
-  uni.navigateTo({ url: '/pages/auth/login' })
-}
-
 function goPublish() {
   if (!authStore.isLoggedIn) {
     uni.navigateTo({ url: '/pages/auth/login' })
@@ -116,15 +98,10 @@ function getSubInfo(item: PostResponse): string {
   return parts.join(' · ') || ''
 }
 
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim()
-}
-
 /** 截取预览文本 */
 function getPreview(content?: string): string {
   if (!content) return ''
-  const text = stripHtml(content)
-  return text.length > 80 ? text.slice(0, 80) + '...' : text
+  return content.length > 80 ? content.slice(0, 80) + '...' : content
 }
 
 /** 解析图片列表 */
@@ -157,24 +134,6 @@ function getImages(item: PostResponse): string[] {
       >
         <text>最热</text>
       </view>
-      <view
-        class="sort-bar__tab"
-        :class="{ 'sort-bar__tab--active': sortMode === 'following' }"
-        @tap="sortMode = 'following'"
-      >
-        <text>关注</text>
-      </view>
-    </view>
-
-    <!-- 关注 tab 未登录提示 -->
-    <view v-if="sortMode === 'following' && !authStore.isLoggedIn" class="login-prompt">
-      <WgEmpty
-        text="登录后查看关注动态"
-        description="关注感兴趣的用户，获取他们的最新话题"
-        actionText="去登录"
-        icon="auth"
-        @action="goLogin"
-      />
     </view>
 
     <!-- 帖子列表 -->
@@ -254,18 +213,9 @@ function getImages(item: PostResponse): string[] {
       @action="goPublish"
     />
 
-    <!-- 关注 tab 加载中 -->
-    <WgSkeleton
-      v-if="followingLoading && sortMode === 'following'"
-      type="card"
-      :rows="3"
-      :avatar="true"
-      :title="true"
-    />
-
     <!-- 加载中骨架 -->
     <WgSkeleton
-      v-if="loading && allPosts.length === 0 && sortMode !== 'following'"
+      v-if="loading && allPosts.length === 0"
       type="card"
       :rows="3"
       :avatar="true"

@@ -92,15 +92,11 @@ function handleLogout() {
 
 <template>
   <view class="profile-page">
-    <!-- 头部区域 -->
+    <!-- 白色头部 (水平布局) -->
     <view class="header">
-      <!-- 装饰圆 -->
-      <view class="header__deco header__deco--1" />
-      <view class="header__deco header__deco--2" />
-
       <!-- 已登录 -->
-      <view v-if="isLoggedIn" class="header__user">
-        <view class="header__avatar-wrap" @tap="goEditProfile">
+      <view v-if="isLoggedIn" class="header__user" @tap="goEditProfile">
+        <view class="header__avatar-wrap">
           <image
             v-if="user?.avatar"
             class="header__avatar"
@@ -111,39 +107,43 @@ function handleLogout() {
             <text class="header__avatar-char">{{ avatarChar }}</text>
           </view>
         </view>
-        <text class="header__name">{{ user?.nickName || user?.userName || '用户' }}</text>
-        <text v-if="user?.companyName" class="header__company">{{ user.companyName }}</text>
-        <view class="header__roles">
-          <text v-if="user?.isSeller" class="header__role">供应商</text>
-          <text v-if="user?.isBuyer" class="header__role header__role--autumn">采购商</text>
+        <view class="header__info">
+          <text class="header__name">{{ user?.nickName || user?.userName || '用户' }}</text>
+          <text v-if="user?.companyName" class="header__company">{{ user.companyName }}</text>
+          <view class="header__roles">
+            <text v-if="user?.isSeller" class="header__role">供应商</text>
+            <text v-if="user?.isBuyer" class="header__role header__role--autumn">采购商</text>
+          </view>
         </view>
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
 
       <!-- 未登录 -->
       <view v-else class="header__guest" @tap="goLogin">
         <view class="header__avatar header__avatar--placeholder">
-          <uni-icons type="person" size="40" color="rgba(255,255,255,0.6)" />
+          <uni-icons type="person" size="32" color="#A8A29E" />
         </view>
-        <text class="header__name">点击登录</text>
-        <text class="header__company">登录后享受完整功能</text>
+        <view class="header__info">
+          <text class="header__name">点击登录</text>
+          <text class="header__company">登录后享受完整功能</text>
+        </view>
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
+    </view>
 
-      <!-- 统计行 -->
-      <view v-if="isLoggedIn" class="header__stats">
-        <view class="header__stat" @tap="goMySupplies">
-          <text class="header__stat-value">-</text>
-          <text class="header__stat-label">供应</text>
-        </view>
-        <view class="header__stat-divider" />
-        <view class="header__stat" @tap="goMyRequirements">
-          <text class="header__stat-value">-</text>
-          <text class="header__stat-label">采购</text>
-        </view>
-        <view class="header__stat-divider" />
-        <view class="header__stat" @tap="goContracts">
-          <text class="header__stat-value">-</text>
-          <text class="header__stat-label">合同</text>
-        </view>
+    <!-- 统计卡片 (独立暖色卡片) -->
+    <view v-if="isLoggedIn" class="stats-row">
+      <view class="stat-card" @tap="goMySupplies">
+        <text class="stat-card__value">-</text>
+        <text class="stat-card__label">供应</text>
+      </view>
+      <view class="stat-card" @tap="goMyRequirements">
+        <text class="stat-card__value">-</text>
+        <text class="stat-card__label">采购</text>
+      </view>
+      <view class="stat-card" @tap="goContracts">
+        <text class="stat-card__value">-</text>
+        <text class="stat-card__label">合同</text>
       </view>
     </view>
 
@@ -151,45 +151,45 @@ function handleLogout() {
     <view class="menu-card">
       <view class="menu-item" @tap="goMySupplies">
         <view class="menu-item__icon menu-item__icon--brand">
-          <uni-icons type="shop" size="20" color="#fff" />
+          <uni-icons type="shop" size="20" color="#2D6A4F" />
         </view>
         <text class="menu-item__label">我的供应</text>
-        <uni-icons type="right" size="16" color="#d1d5db" />
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
       <view class="menu-item" @tap="goMyRequirements">
         <view class="menu-item__icon menu-item__icon--autumn">
-          <uni-icons type="cart" size="20" color="#fff" />
+          <uni-icons type="cart" size="20" color="#c28a55" />
         </view>
         <text class="menu-item__label">我的采购</text>
-        <uni-icons type="right" size="16" color="#d1d5db" />
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
       <view class="menu-item" @tap="goContracts">
         <view class="menu-item__icon menu-item__icon--action">
-          <uni-icons type="list" size="20" color="#fff" />
+          <uni-icons type="list" size="20" color="#2563eb" />
         </view>
         <text class="menu-item__label">我的合同</text>
-        <uni-icons type="right" size="16" color="#d1d5db" />
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
       <view v-if="user?.companyId" class="menu-item" @tap="goCompany">
         <view class="menu-item__icon menu-item__icon--brand">
-          <uni-icons type="flag" size="20" color="#fff" />
+          <uni-icons type="flag" size="20" color="#2D6A4F" />
         </view>
         <text class="menu-item__label">企业信息</text>
-        <uni-icons type="right" size="16" color="#d1d5db" />
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
       <view class="menu-item" @tap="goMarket">
         <view class="menu-item__icon menu-item__icon--accent">
-          <uni-icons type="bars" size="20" color="#fff" />
+          <uni-icons type="bars" size="20" color="#E76F51" />
         </view>
         <text class="menu-item__label">行情中心</text>
-        <uni-icons type="right" size="16" color="#d1d5db" />
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
       <view class="menu-item" @tap="goDirectory">
         <view class="menu-item__icon menu-item__icon--action">
-          <uni-icons type="contact" size="20" color="#fff" />
+          <uni-icons type="contact" size="20" color="#2563eb" />
         </view>
         <text class="menu-item__label">企业名录</text>
-        <uni-icons type="right" size="16" color="#d1d5db" />
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
     </view>
 
@@ -197,49 +197,49 @@ function handleLogout() {
     <view class="menu-card">
       <view class="menu-item" @tap="goCollections">
         <view class="menu-item__icon menu-item__icon--accent">
-          <uni-icons type="star-filled" size="20" color="#fff" />
+          <uni-icons type="star-filled" size="20" color="#E76F51" />
         </view>
         <text class="menu-item__label">我的收藏</text>
-        <uni-icons type="right" size="16" color="#d1d5db" />
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
       <view class="menu-item" @tap="goTopicSquare">
         <view class="menu-item__icon menu-item__icon--action">
-          <uni-icons type="chatboxes" size="20" color="#fff" />
+          <uni-icons type="chatboxes" size="20" color="#2563eb" />
         </view>
         <text class="menu-item__label">话题广场</text>
-        <uni-icons type="right" size="16" color="#d1d5db" />
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
       <view class="menu-item" @tap="goFollowing">
         <view class="menu-item__icon menu-item__icon--brand">
-          <uni-icons type="personadd" size="20" color="#fff" />
+          <uni-icons type="personadd" size="20" color="#2D6A4F" />
         </view>
         <text class="menu-item__label">我的关注</text>
-        <uni-icons type="right" size="16" color="#d1d5db" />
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
       <view class="menu-item" @tap="goNotify">
         <view class="menu-item__icon menu-item__icon--accent">
-          <uni-icons type="bell" size="20" color="#fff" />
+          <uni-icons type="bell" size="20" color="#E76F51" />
         </view>
         <text class="menu-item__label">通知中心</text>
-        <uni-icons type="right" size="16" color="#d1d5db" />
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
     </view>
 
     <!-- 系统功能组 -->
     <view class="menu-card">
       <view class="menu-item" @tap="goPoints">
-        <view class="menu-item__icon menu-item__icon--accent">
-          <uni-icons type="gift" size="20" color="#fff" />
+        <view class="menu-item__icon menu-item__icon--autumn">
+          <uni-icons type="gift" size="20" color="#c28a55" />
         </view>
         <text class="menu-item__label">我的积分</text>
-        <uni-icons type="right" size="16" color="#d1d5db" />
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
       <view class="menu-item" @tap="goSettings">
         <view class="menu-item__icon menu-item__icon--gray">
-          <uni-icons type="gear" size="20" color="#fff" />
+          <uni-icons type="gear" size="20" color="#78716C" />
         </view>
         <text class="menu-item__label">设置</text>
-        <uni-icons type="right" size="16" color="#d1d5db" />
+        <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
     </view>
 
@@ -259,85 +259,65 @@ function handleLogout() {
   padding-bottom: 130rpx;
 }
 
-/* ===== Header ===== */
+/* ===== Header (White, Horizontal) ===== */
 .header {
-  background: linear-gradient(180deg, $brand-700 0%, $brand-600 100%);
+  background: #ffffff;
   padding: $spacing-xl $spacing-lg $spacing-lg;
   padding-top: calc(var(--status-bar-height, 25px) + 40rpx);
-  position: relative;
-  overflow: hidden;
-
-  &__deco {
-    position: absolute;
-    border-radius: 50%;
-    opacity: 0.06;
-    background: #fff;
-
-    &--1 {
-      width: 300rpx;
-      height: 300rpx;
-      top: -80rpx;
-      right: -60rpx;
-    }
-
-    &--2 {
-      width: 200rpx;
-      height: 200rpx;
-      bottom: -40rpx;
-      left: -40rpx;
-    }
-  }
 
   &__user,
   &__guest {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    position: relative;
-    z-index: 1;
+    gap: $spacing-md;
   }
 
   &__avatar-wrap {
-    margin-bottom: $spacing-sm;
+    flex-shrink: 0;
   }
 
   &__avatar {
-    width: 128rpx;
-    height: 128rpx;
+    width: 112rpx;
+    height: 112rpx;
     border-radius: 50%;
-    border: 4rpx solid rgba(255, 255, 255, 0.3);
 
     &--text {
-      background: rgba(255, 255, 255, 0.15);
+      background: $warm-100;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     &--placeholder {
-      background: rgba(255, 255, 255, 0.12);
+      background: $warm-100;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: $spacing-sm;
     }
   }
 
   &__avatar-char {
     font-size: $font-2xl;
     font-weight: 800;
-    color: #fff;
+    color: $brand-600;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
   }
 
   &__name {
-    color: #fff;
+    display: block;
+    color: $text-primary;
     font-size: $font-xl;
     font-weight: 700;
     margin-bottom: 4rpx;
   }
 
   &__company {
-    color: rgba(255, 255, 255, 0.6);
+    display: block;
+    color: $text-secondary;
     font-size: $font-sm;
     margin-bottom: $spacing-xs;
   }
@@ -350,87 +330,81 @@ function handleLogout() {
   &__role {
     font-size: $font-xs;
     padding: 4rpx 16rpx;
-    border-radius: 20rpx;
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
+    border-radius: $radius-pill;
+    background: $brand-50;
+    color: $brand-600;
     font-weight: 600;
 
     &--autumn {
-      background: rgba(212, 163, 115, 0.3);
+      background: $autumn-50;
+      color: $autumn-500;
     }
   }
+}
 
-  &__stats {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: $spacing-lg;
-    padding: $spacing-md 0;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: $radius-lg;
-    position: relative;
-    z-index: 1;
-  }
+/* ===== Stats Row (Independent warm cards) ===== */
+.stats-row {
+  display: flex;
+  gap: $spacing-sm;
+  padding: $spacing-md $spacing-md 0;
+}
 
-  &__stat {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+.stat-card {
+  flex: 1;
+  background: #ffffff;
+  border-radius: $radius-xl;
+  padding: $spacing-lg $spacing-sm;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: $shadow-warm-card;
 
-  &__stat-value {
+  &__value {
     font-size: $font-xl;
     font-weight: 800;
-    color: #fff;
+    color: $text-primary;
+    margin-bottom: 4rpx;
   }
 
-  &__stat-label {
+  &__label {
     font-size: $font-xs;
-    color: rgba(255, 255, 255, 0.6);
-    margin-top: 2rpx;
-  }
-
-  &__stat-divider {
-    width: 1rpx;
-    height: 48rpx;
-    background: rgba(255, 255, 255, 0.15);
+    color: $text-secondary;
   }
 }
 
 /* ===== Menu Card ===== */
 .menu-card {
   background: $bg-card;
-  margin: $spacing-sm $spacing-md;
+  margin: $spacing-md;
   border-radius: $radius-xl;
   overflow: hidden;
-  box-shadow: $shadow-sm;
+  box-shadow: $shadow-warm-card;
 }
 
 .menu-item {
   display: flex;
   align-items: center;
-  padding: $spacing-lg $spacing-md;
-  border-bottom: 1rpx solid $border-light;
-  gap: $spacing-sm;
+  padding: $spacing-lg $spacing-lg;
+  border-bottom: 1rpx solid $warm-100;
+  gap: $spacing-md;
 
   &:last-child {
     border-bottom: none;
   }
 
   &__icon {
-    width: 64rpx;
-    height: 64rpx;
-    border-radius: $radius-md;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: $radius-lg;
     display: flex;
     align-items: center;
     justify-content: center;
 
-    &--brand { background: $brand-600; }
-    &--autumn { background: $autumn-400; }
-    &--action { background: $action-600; }
-    &--accent { background: $accent-400; }
-    &--gray { background: #9ca3af; }
+    &--brand { background: $brand-50; }
+    &--autumn { background: $autumn-50; }
+    &--action { background: rgba(37, 99, 235, 0.08); }
+    &--accent { background: $accent-50; }
+    &--gray { background: $warm-100; }
   }
 
   &__label {
@@ -449,7 +423,7 @@ function handleLogout() {
 .btn-logout {
   background: $bg-card;
   color: $color-error;
-  border: 1rpx solid $border-color;
+  border: 1rpx solid $warm-200;
   border-radius: $radius-xl;
   font-size: $font-md;
   height: 88rpx;

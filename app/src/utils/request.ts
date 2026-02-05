@@ -12,7 +12,7 @@ function getBaseUrl(): string {
   return ''
   // #endif
   // #ifdef APP-PLUS
-  return 'http://localhost:8080' // TODO: 配置生产环境地址
+  return 'http://172.28.0.135:8080'
   // #endif
 }
 

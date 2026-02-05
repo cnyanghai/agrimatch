@@ -28,6 +28,7 @@ export interface RequirementListParams {
   companyId?: number
   userId?: number
   categoryName?: string
+  schemaCode?: string
   status?: number
   includeExpired?: boolean
   orderBy?: string

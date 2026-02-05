@@ -276,7 +276,7 @@ function handleDeletePost() {
             <text class="content-section__domain-tag">{{ detail.domain }}</text>
           </view>
 
-          <text v-if="detail.content" class="content-section__body">{{ detail.content }}</text>
+          <view v-if="detail.content" class="content-section__body rich-content" v-html="detail.content" />
 
           <!-- 图片列表 -->
           <view v-if="imageList.length > 0" class="content-section__images">
@@ -532,10 +532,73 @@ function handleDeletePost() {
     font-size: $font-md;
     color: $text-primary;
     line-height: 1.8;
-    display: block;
     word-break: break-all;
   }
+}
 
+/* v-html 内部 HTML 元素样式（需要 :deep 穿透 scoped） */
+.rich-content {
+  :deep(p) {
+    margin: 0 0 $spacing-sm;
+    line-height: 1.8;
+  }
+
+  :deep(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: $radius-md;
+    margin: $spacing-xs 0;
+    display: block;
+  }
+
+  :deep(a) {
+    color: $brand-600;
+    text-decoration: underline;
+  }
+
+  :deep(strong),
+  :deep(b) {
+    font-weight: bold;
+  }
+
+  :deep(em),
+  :deep(i) {
+    font-style: italic;
+  }
+
+  :deep(ul),
+  :deep(ol) {
+    padding-left: $spacing-lg;
+    margin: $spacing-xs 0;
+  }
+
+  :deep(li) {
+    margin-bottom: $spacing-xs;
+  }
+
+  :deep(blockquote) {
+    border-left: 6rpx solid $brand-200;
+    padding-left: $spacing-md;
+    color: $text-secondary;
+    margin: $spacing-sm 0;
+  }
+
+  :deep(h1),
+  :deep(h2),
+  :deep(h3) {
+    font-weight: bold;
+    margin: $spacing-md 0 $spacing-sm;
+  }
+
+  :deep(br) {
+    content: '';
+    display: block;
+    margin-top: $spacing-xs;
+  }
+}
+
+/* 内容区域续 - 图片 */
+.content-section {
   &__images {
     display: flex;
     flex-direction: column;

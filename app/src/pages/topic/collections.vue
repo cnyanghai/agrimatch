@@ -73,9 +73,14 @@ function getSubInfo(item: PostResponse): string {
   return parts.join(' · ') || ''
 }
 
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim()
+}
+
 function getPreview(content?: string): string {
   if (!content) return ''
-  return content.length > 80 ? content.slice(0, 80) + '...' : content
+  const text = stripHtml(content)
+  return text.length > 80 ? text.slice(0, 80) + '...' : text
 }
 
 function getImages(item: PostResponse): string[] {

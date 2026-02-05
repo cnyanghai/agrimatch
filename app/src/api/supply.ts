@@ -30,6 +30,7 @@ export interface SupplyListParams {
   companyId?: number
   userId?: number
   categoryName?: string
+  schemaCode?: string
   status?: number
   activeOnly?: boolean
   includeExpired?: boolean

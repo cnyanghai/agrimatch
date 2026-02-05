@@ -89,6 +89,10 @@ public class CaptchaService {
      * 验证验证码，失败抛异常
      */
     public void validateOrThrow(String key, String code) {
+        // 当 key 和 code 都为空时跳过验证码校验（APP 端不使用验证码）
+        if ((key == null || key.isBlank()) && (code == null || code.isBlank())) {
+            return;
+        }
         if (!validate(key, code)) {
             throw new ApiException(400, "验证码错误或已过期");
         }

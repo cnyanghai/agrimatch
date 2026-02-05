@@ -3,27 +3,28 @@ import { ref, computed, onMounted } from 'vue'
 import { onShow, onPullDownRefresh } from '@dcloudio/uni-app'
 import { useAuthStore } from '../../store/auth'
 import { listConversations, type ChatConversationResponse } from '../../api/chat'
+import { listMyNotifications, type NotifyResponse } from '../../api/notify'
 import { formatRelativeTime } from '../../utils/format'
 
 const authStore = useAuthStore()
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 const conversations = ref<ChatConversationResponse[]>([])
+const notifications = ref<NotifyResponse[]>([])
 const loading = ref(false)
-const filterMode = ref<'all' | 'unread' | 'read'>('all')
 
-const filteredConversations = computed(() => {
-  if (filterMode.value === 'unread') {
-    return conversations.value.filter(c => (c.unreadCount || 0) > 0)
-  }
-  if (filterMode.value === 'read') {
-    return conversations.value.filter(c => !c.unreadCount)
-  }
-  return conversations.value
+// 按通知类型统计未读数
+const notifyCategories = computed(() => {
+  const unread = notifications.value.filter(n => !n.read)
+  const countByType = (types: string[]) =>
+    unread.filter(n => types.includes(n.type)).length
+
+  return [
+    { key: 'like', label: '赞和收藏', icon: 'heart', count: countByType(['LIKE', 'COLLECT', 'like', 'collect']) },
+    { key: 'comment', label: '评论回复', icon: 'chat', count: countByType(['COMMENT', 'REPLY', 'comment', 'reply']) },
+    { key: 'contract', label: '合同动态', icon: 'list', count: countByType(['CONTRACT', 'MILESTONE', 'contract', 'milestone']) },
+    { key: 'system', label: '系统通知', icon: 'notification', count: countByType(['SYSTEM', 'system', 'POINTS', 'points']) },
+  ]
 })
-
-const totalUnread = computed(() =>
-  conversations.value.reduce((sum, c) => sum + (c.unreadCount || 0), 0)
-)
 
 onMounted(() => {
   if (isLoggedIn.value) loadData()
@@ -44,9 +45,14 @@ onPullDownRefresh(() => {
 async function loadData() {
   loading.value = true
   try {
-    conversations.value = await listConversations() || []
+    const [convRes, notifyRes] = await Promise.allSettled([
+      listConversations(),
+      listMyNotifications(),
+    ])
+    if (convRes.status === 'fulfilled') conversations.value = convRes.value || []
+    if (notifyRes.status === 'fulfilled') notifications.value = notifyRes.value || []
   } catch {
-    // not logged in or error
+    // handled
   } finally {
     loading.value = false
   }
@@ -54,6 +60,10 @@ async function loadData() {
 
 function goConversation(conv: ChatConversationResponse) {
   uni.navigateTo({ url: `/pages/chat/conversation?id=${conv.id}&name=${encodeURIComponent(conv.peerNickName || conv.peerUserName || '')}` })
+}
+
+function goNotify(type: string) {
+  uni.navigateTo({ url: `/pages/notify/index?type=${type}` })
 }
 
 function goLogin() {
@@ -65,7 +75,7 @@ function goSupply() {
 }
 
 function goRequirement() {
-  uni.navigateTo({ url: '/pages/requirement/index' })
+  uni.switchTab({ url: '/pages/requirement/index' })
 }
 </script>
 
@@ -75,34 +85,33 @@ function goRequirement() {
     <WgEmpty v-if="!isLoggedIn" text="登录后查看消息" icon="auth" actionText="去登录" @action="goLogin" />
 
     <template v-else>
-      <!-- 筛选 tabs -->
-      <view class="filter-bar">
-        <view class="filter-bar__pills">
-          <text
-            class="filter-bar__pill"
-            :class="{ 'filter-bar__pill--active': filterMode === 'all' }"
-            @tap="filterMode = 'all'"
-          >全部</text>
-          <text
-            class="filter-bar__pill"
-            :class="{ 'filter-bar__pill--active': filterMode === 'unread' }"
-            @tap="filterMode = 'unread'"
-          >
-            未读
-            <text v-if="totalUnread > 0" class="filter-bar__count">{{ totalUnread > 99 ? '99+' : totalUnread }}</text>
-          </text>
-          <text
-            class="filter-bar__pill"
-            :class="{ 'filter-bar__pill--active': filterMode === 'read' }"
-            @tap="filterMode = 'read'"
-          >已读</text>
+      <!-- 通知分类入口 -->
+      <view class="notify-bar">
+        <view
+          v-for="cat in notifyCategories"
+          :key="cat.key"
+          class="notify-bar__item"
+          @tap="goNotify(cat.key)"
+        >
+          <view class="notify-bar__icon-wrap">
+            <uni-icons :type="cat.icon" size="24" color="#57534E" />
+            <view v-if="cat.count > 0" class="notify-bar__badge">
+              <text class="notify-bar__badge-text">{{ cat.count > 99 ? '99+' : cat.count }}</text>
+            </view>
+          </view>
+          <text class="notify-bar__label">{{ cat.label }}</text>
         </view>
       </view>
 
+      <!-- 会话列表标题 -->
+      <view class="section-header">
+        <text class="section-header__title">会话</text>
+      </view>
+
       <!-- 会话列表 -->
-      <view v-if="filteredConversations.length > 0" class="conv-list">
+      <view v-if="conversations.length > 0" class="conv-list">
         <view
-          v-for="conv in filteredConversations"
+          v-for="conv in conversations"
           :key="conv.id"
           class="conv-item"
           @tap="goConversation(conv)"
@@ -118,8 +127,8 @@ function goRequirement() {
             </view>
             <view class="conv-item__bottom">
               <text class="conv-item__msg">{{ conv.lastContent || '暂无消息' }}</text>
-              <view v-if="conv.unreadCount" class="conv-item__badge">
-                <text class="conv-item__badge-text">{{ conv.unreadCount > 99 ? '99+' : conv.unreadCount }}</text>
+              <view v-if="conv.unreadCount" class="conv-item__unread">
+                <text class="conv-item__unread-text">{{ conv.unreadCount > 99 ? '99+' : conv.unreadCount }}</text>
               </view>
             </view>
             <text v-if="conv.peerCompanyName" class="conv-item__company">{{ conv.peerCompanyName }}</text>
@@ -132,11 +141,9 @@ function goRequirement() {
         <view class="empty-state__icon">
           <uni-icons type="chat" size="48" color="#d1d5db" />
         </view>
-        <text class="empty-state__text">
-          {{ filterMode === 'unread' ? '没有未读消息' : filterMode === 'read' ? '没有已读消息' : '还没有对话' }}
-        </text>
-        <text v-if="filterMode === 'all'" class="empty-state__desc">去供应大厅或采购大厅找合作伙伴吧</text>
-        <view v-if="filterMode === 'all'" class="empty-state__actions">
+        <text class="empty-state__text">还没有对话</text>
+        <text class="empty-state__desc">去供应大厅或采购大厅找合作伙伴吧</text>
+        <view class="empty-state__actions">
           <view class="empty-state__btn empty-state__btn--brand" @tap="goSupply">
             <text class="empty-state__btn-text">去供应</text>
           </view>
@@ -160,54 +167,79 @@ function goRequirement() {
   padding-bottom: 130rpx;
 }
 
-/* ===== Filter Bar ===== */
-.filter-bar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: $bg-card;
-  padding: $spacing-sm $spacing-md;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+/* ===== Notification Bar ===== */
+.notify-bar {
+  display: flex;
+  justify-content: space-around;
+  background: #ffffff;
+  padding: $spacing-lg $spacing-md;
+  margin-bottom: $spacing-sm;
 
-  &__pills {
+  &__item {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     gap: $spacing-xs;
   }
 
-  &__pill {
-    font-size: $font-sm;
-    color: $text-secondary;
-    padding: $spacing-xs $spacing-md;
-    border-radius: 30rpx;
-    background: $bg-page;
-    transition: all 0.2s;
+  &__icon-wrap {
+    position: relative;
+    width: 96rpx;
+    height: 96rpx;
+    border-radius: 50%;
+    background: $warm-100;
     display: flex;
     align-items: center;
-    gap: 6rpx;
+    justify-content: center;
+    transition: transform 0.15s;
 
-    &--active {
-      color: $brand-600;
-      background: $brand-50;
-      font-weight: 600;
+    &:active {
+      transform: scale(0.92);
     }
   }
 
-  &__count {
-    font-size: 20rpx;
-    color: #fff;
+  &__badge {
+    position: absolute;
+    top: -4rpx;
+    right: -4rpx;
+    min-width: 32rpx;
+    height: 32rpx;
     background: $color-error;
     border-radius: 16rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0 8rpx;
-    min-width: 28rpx;
-    height: 28rpx;
-    line-height: 28rpx;
-    text-align: center;
+    border: 2rpx solid #fff;
+  }
+
+  &__badge-text {
+    color: #fff;
+    font-size: 18rpx;
+    font-weight: bold;
+    line-height: 32rpx;
+  }
+
+  &__label {
+    font-size: $font-xs;
+    color: $text-secondary;
+  }
+}
+
+/* ===== Section Header ===== */
+.section-header {
+  padding: $spacing-sm $spacing-md;
+
+  &__title {
+    font-size: $font-lg;
+    font-weight: 700;
+    color: $text-primary;
   }
 }
 
 /* ===== Conversation List ===== */
 .conv-list {
-  background: $bg-card;
+  background: #ffffff;
 }
 
 .conv-item {
@@ -278,7 +310,7 @@ function goRequirement() {
     flex: 1;
   }
 
-  &__badge {
+  &__unread {
     background: $color-error;
     border-radius: 20rpx;
     padding: 0 12rpx;
@@ -290,7 +322,7 @@ function goRequirement() {
     margin-left: $spacing-xs;
   }
 
-  &__badge-text {
+  &__unread-text {
     color: #fff;
     font-size: $font-xs;
     font-weight: bold;
@@ -314,7 +346,7 @@ function goRequirement() {
     width: 120rpx;
     height: 120rpx;
     border-radius: 50%;
-    background: $bg-card;
+    background: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;

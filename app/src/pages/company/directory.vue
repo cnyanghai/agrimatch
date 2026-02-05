@@ -26,6 +26,9 @@ const loadStatus = computed<'loading' | 'more' | 'noMore'>(() => {
   return 'noMore'
 })
 
+/** 当前选中的企业类型标签 */
+const activeTypeLabel = computed(() => companyTypeMap[activeType.value] || '')
+
 onLoad(() => {
   loadData(true)
 })
@@ -84,20 +87,17 @@ function goCompanyDetail(id: number) {
   uni.navigateTo({ url: `/pages/company/detail?id=${id}` })
 }
 
-/** 获取企业名首字 */
 function getInitial(c: CompanyCardResponse): string {
   return c.companyName?.charAt(0) || '企'
 }
 
-/** 获取位置 */
 function formatLocation(c: CompanyCardResponse): string {
-  return [c.city, c.province].filter(Boolean).join(' · ')
+  return [c.province, c.city].filter(Boolean).join(' ')
 }
 
-/** 获取品类标签 */
 function getCategoryTags(c: CompanyCardResponse): string[] {
-  if (c.categoryNames && c.categoryNames.length > 0) return c.categoryNames.slice(0, 3)
-  if (c.categoryNamesStr) return c.categoryNamesStr.split(',').slice(0, 3)
+  if (c.categoryNames && c.categoryNames.length > 0) return c.categoryNames.slice(0, 4)
+  if (c.categoryNamesStr) return c.categoryNamesStr.split(',').slice(0, 4)
   return []
 }
 </script>
@@ -153,24 +153,51 @@ function getCategoryTags(c: CompanyCardResponse): string[] {
         class="company-card tap-feedback"
         @tap="goCompanyDetail(c.id)"
       >
-        <view class="company-card__initial">
-          <text class="company-card__initial-text">{{ getInitial(c) }}</text>
-        </view>
-        <view class="company-card__info">
-          <text class="company-card__name">{{ c.companyName }}</text>
-          <text v-if="formatLocation(c)" class="company-card__location">{{ formatLocation(c) }}</text>
-          <view class="company-card__bottom">
-            <view v-if="getCategoryTags(c).length > 0" class="company-card__tags">
-              <text
-                v-for="tag in getCategoryTags(c)"
-                :key="tag"
-                class="company-card__tag"
-              >{{ tag }}</text>
+        <!-- 顶部：头像 + 名称 + 类型标签 -->
+        <view class="company-card__header">
+          <view class="company-card__avatar">
+            <image
+              v-if="c.logo"
+              class="company-card__avatar-img"
+              :src="c.logo"
+              mode="aspectFill"
+            />
+            <text v-else class="company-card__avatar-text">{{ getInitial(c) }}</text>
+          </view>
+          <view class="company-card__header-info">
+            <text class="company-card__name">{{ c.companyName }}</text>
+            <view class="company-card__type-badge">
+              <text class="company-card__type-text">{{ activeTypeLabel }}</text>
             </view>
-            <text v-if="c.count" class="company-card__count">供应: {{ c.count }}</text>
           </view>
         </view>
-        <uni-icons type="right" size="14" color="#d1d5db" />
+
+        <!-- 位置信息 -->
+        <view v-if="formatLocation(c)" class="company-card__location">
+          <uni-icons type="location" size="14" color="#A8A29E" />
+          <text class="company-card__location-text">{{ formatLocation(c) }}</text>
+        </view>
+
+        <!-- 品类标签 -->
+        <view v-if="getCategoryTags(c).length > 0" class="company-card__tags">
+          <text
+            v-for="tag in getCategoryTags(c)"
+            :key="tag"
+            class="company-card__tag"
+          >{{ tag }}</text>
+        </view>
+
+        <!-- 底部统计 -->
+        <view class="company-card__footer">
+          <view v-if="c.count" class="company-card__stat">
+            <uni-icons type="list" size="14" color="#2D6A4F" />
+            <text class="company-card__stat-text">已发布 {{ c.count }} 条供应</text>
+          </view>
+          <view v-else class="company-card__stat">
+            <text class="company-card__stat-text company-card__stat-text--muted">暂无供应</text>
+          </view>
+          <uni-icons type="right" size="14" color="#d1d5db" />
+        </view>
       </view>
 
       <WgLoadMore :status="loadStatus" @loadMore="loadNextPage" />
@@ -180,7 +207,7 @@ function getCategoryTags(c: CompanyCardResponse): string[] {
     <WgEmpty v-else-if="!loading" text="暂无企业" description="换个条件试试" />
 
     <!-- 骨架屏 -->
-    <WgSkeleton v-if="loading && companies.length === 0" type="list" :rows="5" />
+    <WgSkeleton v-if="loading && companies.length === 0" type="card" :rows="4" />
   </view>
 </template>
 
@@ -192,7 +219,7 @@ function getCategoryTags(c: CompanyCardResponse): string[] {
 
 /* ===== Type tabs ===== */
 .type-tabs {
-  background: $bg-card;
+  background: #ffffff;
   border-bottom: 1rpx solid $border-light;
 
   &__scroll {
@@ -226,7 +253,7 @@ function getCategoryTags(c: CompanyCardResponse): string[] {
 
 /* ===== Letter bar ===== */
 .letter-bar {
-  background: $bg-card;
+  background: #ffffff;
   border-bottom: 1rpx solid $border-light;
 
   &__scroll {
@@ -264,78 +291,131 @@ function getCategoryTags(c: CompanyCardResponse): string[] {
 }
 
 .company-card {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  background: $bg-card;
-  border-radius: $radius-lg;
-  padding: $spacing-md;
-  margin-bottom: $spacing-sm;
+  background: #ffffff;
+  border-radius: $radius-xl;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s;
 
-  &__initial {
-    width: 80rpx;
-    height: 80rpx;
-    border-radius: $radius-md;
-    background: $brand-100;
+  &:active {
+    transform: scale(0.98);
+  }
+
+  /* Header: avatar + name + type */
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    margin-bottom: $spacing-md;
+  }
+
+  &__avatar {
+    width: 100rpx;
+    height: 100rpx;
+    border-radius: $radius-lg;
+    background: $brand-50;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    overflow: hidden;
   }
 
-  &__initial-text {
-    font-size: $font-xl;
+  &__avatar-img {
+    width: 100rpx;
+    height: 100rpx;
+  }
+
+  &__avatar-text {
+    font-size: 40rpx;
     font-weight: 800;
     color: $brand-600;
   }
 
-  &__info {
+  &__header-info {
     flex: 1;
     min-width: 0;
   }
 
   &__name {
-    font-size: $font-md;
+    font-size: $font-lg;
     font-weight: bold;
     color: $text-primary;
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    margin-bottom: $spacing-xs;
   }
 
-  &__location {
-    font-size: $font-xs;
-    color: $text-secondary;
-    display: block;
-    margin-top: 4rpx;
-  }
-
-  &__bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: $spacing-xs;
-  }
-
-  &__tags {
-    display: flex;
-    gap: $spacing-xs;
-    flex-wrap: wrap;
-  }
-
-  &__tag {
-    font-size: 18rpx;
-    color: $brand-600;
+  &__type-badge {
+    display: inline-flex;
+    padding: 4rpx 16rpx;
     background: $brand-50;
-    padding: 2rpx 12rpx;
     border-radius: $radius-sm;
   }
 
-  &__count {
+  &__type-text {
     font-size: $font-xs;
-    color: $text-placeholder;
-    flex-shrink: 0;
+    color: $brand-600;
+    font-weight: 600;
+  }
+
+  /* Location */
+  &__location {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__location-text {
+    font-size: $font-sm;
+    color: $text-secondary;
+  }
+
+  /* Category tags */
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-md;
+  }
+
+  &__tag {
+    font-size: $font-xs;
+    color: $autumn-500;
+    background: $autumn-50;
+    padding: 6rpx 18rpx;
+    border-radius: $radius-pill;
+    font-weight: 500;
+  }
+
+  /* Footer */
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: $spacing-sm;
+    border-top: 1rpx solid $border-light;
+  }
+
+  &__stat {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+  }
+
+  &__stat-text {
+    font-size: $font-sm;
+    color: $brand-600;
+    font-weight: 600;
+
+    &--muted {
+      color: $text-placeholder;
+      font-weight: 400;
+    }
   }
 }
 </style>

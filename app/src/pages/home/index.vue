@@ -1,97 +1,62 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { onPullDownRefresh } from '@dcloudio/uni-app'
-import { getPlatformStats, type StatsResponse } from '../../api/stats'
-import { listSupplies, type SupplyResponse } from '../../api/supply'
-import { listRequirements, type RequirementResponse } from '../../api/requirement'
+import { ref, computed, watch, onMounted } from 'vue'
+import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import { listPosts, type PostResponse } from '../../api/post'
-import { getPendingCount } from '../../api/dashboard'
-import { listFuturesContracts, type FuturesContractResponse } from '../../api/futures'
-import { formatPrice, formatRelativeTime } from '../../utils/format'
+import { getFollowedPosts } from '../../api/follow'
 import { useAuthStore } from '../../store/auth'
+import { formatRelativeTime } from '../../utils/format'
 
 const authStore = useAuthStore()
-const stats = ref<StatsResponse | null>(null)
-const supplies = ref<SupplyResponse[]>([])
-const requirements = ref<RequirementResponse[]>([])
-const hotPosts = ref<PostResponse[]>([])
-const pendingCount = ref(0)
-const marketPrices = ref<FuturesContractResponse[]>([])
+const allPosts = ref<PostResponse[]>([])
+const followingPosts = ref<PostResponse[]>([])
+const followingLoading = ref(false)
 const loading = ref(true)
+const sortMode = ref<'latest' | 'hottest' | 'following'>('latest')
+const displayCount = ref(15)
+const PAGE_SIZE = 15
 
-// 时段问候语
-const greeting = computed(() => {
-  const h = new Date().getHours()
-  if (h < 6) return '夜深了'
-  if (h < 11) return '早上好'
-  if (h < 14) return '中午好'
-  if (h < 18) return '下午好'
-  return '晚上好'
+const filteredList = computed(() => {
+  if (sortMode.value === 'following') return followingPosts.value
+  const list = [...allPosts.value]
+  if (sortMode.value === 'hottest') {
+    list.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0))
+  }
+  return list
 })
 
-// 品类快捷入口
-const categories = [
-  { name: '玉米', icon: '🌽' },
-  { name: '水稻', icon: '🌾' },
-  { name: '大豆', icon: '🫘' },
-  { name: '小麦', icon: '🌿' },
-  { name: '棉花', icon: '☁️' },
-  { name: '花生', icon: '🥜' },
-  { name: '饲料', icon: '🌱' },
-  { name: '更多', icon: '📋' },
-]
+const displayList = computed(() => filteredList.value.slice(0, displayCount.value))
 
-// 混合信息流
-interface FeedItem {
-  id: number
-  type: 'supply' | 'requirement'
-  categoryName: string
-  price: number
-  companyName: string
-  origin?: string
-  quantity?: number
-  address?: string
-  createTime?: string
+const loadStatus = computed<'loading' | 'more' | 'noMore'>(() => {
+  if (loading.value) return 'loading'
+  if (displayCount.value >= filteredList.value.length) return 'noMore'
+  return 'more'
+})
+
+watch(sortMode, (mode) => {
+  displayCount.value = PAGE_SIZE
+  if (mode === 'following' && authStore.isLoggedIn) {
+    loadFollowingPosts()
+  }
+})
+
+async function loadFollowingPosts() {
+  followingLoading.value = true
+  try {
+    followingPosts.value = await getFollowedPosts() || []
+  } catch {
+    // handled
+  } finally {
+    followingLoading.value = false
+  }
 }
 
-const feedList = computed<FeedItem[]>(() => {
-  const supplyItems: FeedItem[] = supplies.value.map(s => ({
-    id: s.id,
-    type: 'supply',
-    categoryName: s.categoryName,
-    price: s.exFactoryPrice,
-    companyName: s.companyName || s.nickName || s.userName || '',
-    origin: s.origin,
-    quantity: s.quantity,
-    address: s.shipAddress,
-    createTime: s.createTime
-  }))
-  const reqItems: FeedItem[] = requirements.value.map(r => ({
-    id: r.id,
-    type: 'requirement',
-    categoryName: r.categoryName,
-    price: r.expectedPrice || 0,
-    companyName: r.companyName || r.nickName || r.userName || '',
-    quantity: r.quantity,
-    address: r.purchaseAddress,
-    createTime: r.createTime
-  }))
-
-  // 按时间排序混合
-  return [...supplyItems, ...reqItems]
-    .sort((a, b) => {
-      const ta = a.createTime ? new Date(a.createTime).getTime() : 0
-      const tb = b.createTime ? new Date(b.createTime).getTime() : 0
-      return tb - ta
-    })
-    .slice(0, 20)
-})
-
-// 双列分配
-const leftColumn = computed(() => feedList.value.filter((_, i) => i % 2 === 0))
-const rightColumn = computed(() => feedList.value.filter((_, i) => i % 2 === 1))
-
 onMounted(() => loadData())
+
+onReachBottom(() => {
+  if (loadStatus.value === 'more') {
+    displayCount.value += PAGE_SIZE
+  }
+})
 
 onPullDownRefresh(() => {
   loadData().finally(() => uni.stopPullDownRefresh())
@@ -100,237 +65,213 @@ onPullDownRefresh(() => {
 async function loadData() {
   loading.value = true
   try {
-    const pendingPromise = authStore.isLoggedIn ? getPendingCount().catch(() => 0) : Promise.resolve(0)
-    const [statsRes, suppliesRes, requirementsRes, postsRes, pendingRes, marketRes] = await Promise.allSettled([
-      getPlatformStats(),
-      listSupplies({ activeOnly: true, orderBy: 'create_time', order: 'desc' }),
-      listRequirements({ includeExpired: false, orderBy: 'create_time', order: 'desc' }),
-      listPosts({ orderBy: 'like_count', limit: 5 }),
-      pendingPromise,
-      listFuturesContracts(),
-    ])
-    if (statsRes.status === 'fulfilled') stats.value = statsRes.value
-    if (suppliesRes.status === 'fulfilled') supplies.value = suppliesRes.value?.slice(0, 12) || []
-    if (requirementsRes.status === 'fulfilled') requirements.value = requirementsRes.value?.slice(0, 12) || []
-    if (postsRes.status === 'fulfilled') hotPosts.value = postsRes.value?.slice(0, 5) || []
-    if (pendingRes.status === 'fulfilled') pendingCount.value = (pendingRes.value as number) || 0
-    if (marketRes.status === 'fulfilled') marketPrices.value = ((marketRes.value as FuturesContractResponse[]) || []).slice(0, 8)
+    const res = await listPosts({ orderBy: 'create_time', limit: 100 })
+    allPosts.value = res || []
+    displayCount.value = PAGE_SIZE
   } finally {
     loading.value = false
   }
 }
 
-function navigateTo(url: string) {
-  uni.navigateTo({ url })
+function loadMore() {
+  displayCount.value += PAGE_SIZE
 }
 
-function goCategory(name: string) {
-  if (name === '更多') {
-    navigateTo('/pages/search/index')
-  } else {
-    navigateTo(`/pages/search/index?keyword=${encodeURIComponent(name)}`)
+function goDetail(id: number) {
+  uni.navigateTo({ url: `/pages/topic/detail?id=${id}` })
+}
+
+function goLogin() {
+  uni.navigateTo({ url: '/pages/auth/login' })
+}
+
+function goPublish() {
+  if (!authStore.isLoggedIn) {
+    uni.navigateTo({ url: '/pages/auth/login' })
+    return
   }
+  uni.navigateTo({ url: '/pages/topic/publish' })
 }
 
-function goFeedDetail(item: FeedItem) {
-  if (item.type === 'supply') {
-    navigateTo(`/pages/supply/detail?id=${item.id}`)
-  } else {
-    navigateTo(`/pages/requirement/detail?id=${item.id}`)
+function goSearch() {
+  uni.navigateTo({ url: '/pages/search/index' })
+}
+
+function getInitial(item: PostResponse): string {
+  const name = item.nickName || item.userName || item.companyName || '?'
+  return name.charAt(0)
+}
+
+function getDisplayName(item: PostResponse): string {
+  return item.nickName || item.userName || '匿名用户'
+}
+
+/** 作者信息合并成一段文字：名字 · 公司 · 职位 */
+function getAuthorLine(item: PostResponse): string {
+  const parts: string[] = [getDisplayName(item)]
+  if (item.companyName) parts.push(item.companyName)
+  if (item.position) parts.push(item.position)
+  return parts.join(' · ')
+}
+
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim()
+}
+
+function getPreview(content?: string): string {
+  if (!content) return ''
+  const text = stripHtml(content)
+  return text.length > 100 ? text.slice(0, 100) + '...' : text
+}
+
+function getImages(item: PostResponse): string[] {
+  if (!item.imagesJson) return []
+  try {
+    const imgs = JSON.parse(item.imagesJson)
+    return Array.isArray(imgs) ? imgs.slice(0, 3) : []
+  } catch {
+    return []
   }
 }
 </script>
 
 <template>
   <view class="home">
-    <!-- Hero 渐变头部 -->
-    <view class="hero">
-      <view class="hero__nav safe-area-top">
-        <image class="hero__logo" src="/static/logo-white.svg" mode="aspectFit" />
-        <text class="hero__brand">沃谷</text>
-        <view class="hero__spacer" />
-        <view class="hero__bell" @tap="navigateTo('/pages/notify/index')">
-          <uni-icons type="bell" size="20" color="rgba(255,255,255,0.9)" />
-          <view v-if="pendingCount > 0" class="hero__bell-badge">
-            <text class="hero__bell-badge-text">{{ pendingCount > 99 ? '99+' : pendingCount }}</text>
-          </view>
-        </view>
-        <view class="hero__search" @tap="navigateTo('/pages/search/index')">
-          <uni-icons type="search" size="16" color="rgba(255,255,255,0.7)" />
-          <text class="hero__search-text">搜索</text>
-        </view>
-      </view>
-
-      <view class="hero__greeting">
-        <text class="hero__greeting-text">{{ greeting }}，欢迎来到沃谷</text>
-        <text class="hero__subtitle">农牧供需智能匹配平台</text>
-      </view>
-
-      <!-- 统计数据 -->
-      <view v-if="stats" class="hero__stats">
-        <view class="hero__stat">
-          <text class="hero__stat-value">{{ stats.supplyCount || 0 }}</text>
-          <text class="hero__stat-label">供应</text>
-        </view>
-        <view class="hero__stat-divider" />
-        <view class="hero__stat">
-          <text class="hero__stat-value">{{ stats.requirementCount || 0 }}</text>
-          <text class="hero__stat-label">采购</text>
-        </view>
-        <view class="hero__stat-divider" />
-        <view class="hero__stat">
-          <text class="hero__stat-value">{{ stats.supplierCount || 0 }}</text>
-          <text class="hero__stat-label">企业</text>
-        </view>
+    <!-- 头部：全宽搜索栏 -->
+    <view class="header safe-area-top">
+      <view class="search-bar" @tap="goSearch">
+        <uni-icons type="search" size="16" color="#A8A29E" />
+        <text class="search-bar__text">搜索话题、用户、企业...</text>
       </view>
     </view>
 
-    <!-- 品类快捷入口 -->
-    <view class="categories">
-      <scroll-view scroll-x class="categories__scroll" :show-scrollbar="false">
-        <view class="categories__list">
-          <view
-            v-for="cat in categories"
-            :key="cat.name"
-            class="categories__item tap-feedback"
-            @tap="goCategory(cat.name)"
-          >
-            <view class="categories__icon">
-              <text class="categories__emoji">{{ cat.icon }}</text>
-            </view>
-            <text class="categories__name">{{ cat.name }}</text>
-          </view>
-        </view>
-      </scroll-view>
+    <!-- 排序标签 -->
+    <view class="sort-bar">
+      <view
+        class="sort-bar__tab"
+        :class="{ 'sort-bar__tab--active': sortMode === 'latest' }"
+        @tap="sortMode = 'latest'"
+      >
+        <text>最新</text>
+      </view>
+      <view
+        class="sort-bar__tab"
+        :class="{ 'sort-bar__tab--active': sortMode === 'hottest' }"
+        @tap="sortMode = 'hottest'"
+      >
+        <text>最热</text>
+      </view>
+      <view
+        class="sort-bar__tab"
+        :class="{ 'sort-bar__tab--active': sortMode === 'following' }"
+        @tap="sortMode = 'following'"
+      >
+        <text>关注</text>
+      </view>
     </view>
 
-    <!-- 行情速览 -->
-    <view v-if="marketPrices.length > 0" class="market-ticker">
-      <view class="market-ticker__header">
-        <text class="market-ticker__title">行情速览</text>
-        <text class="market-ticker__more" @tap="navigateTo('/pages/market/index')">更多 ></text>
-      </view>
-      <scroll-view scroll-x class="market-ticker__scroll" :show-scrollbar="false">
-        <view class="market-ticker__list">
-          <view
-            v-for="item in marketPrices"
-            :key="item.contractCode"
-            class="ticker-card tap-feedback"
-            @tap="navigateTo('/pages/market/index')"
-          >
-            <text class="ticker-card__name">{{ item.productName }}</text>
-            <text class="ticker-card__code">{{ item.contractCode }}</text>
-            <text class="ticker-card__price">{{ item.lastPrice ? '¥' + item.lastPrice : '-' }}</text>
-            <text
-              class="ticker-card__change"
-              :class="{
-                'ticker-card__change--up': (item.changePrice || 0) > 0,
-                'ticker-card__change--down': (item.changePrice || 0) < 0,
-              }"
-            >
-              {{ (item.changePrice || 0) > 0 ? '+' : '' }}{{ item.changePercent?.toFixed(2) || '0.00' }}%
-            </text>
-          </view>
-        </view>
-      </scroll-view>
+    <!-- 关注 tab 未登录提示 -->
+    <view v-if="sortMode === 'following' && !authStore.isLoggedIn" class="login-prompt">
+      <WgEmpty
+        text="登录后查看关注动态"
+        description="关注感兴趣的用户，获取他们的最新话题"
+        actionText="去登录"
+        icon="auth"
+        @action="goLogin"
+      />
     </view>
 
-    <!-- 热门话题 -->
-    <view v-if="hotPosts.length > 0" class="hot-topics">
-      <view class="hot-topics__header">
-        <text class="hot-topics__title">热门话题</text>
-        <text class="hot-topics__more" @tap="navigateTo('/pages/topic/square')">查看更多 ></text>
-      </view>
-      <scroll-view scroll-x class="hot-topics__scroll" :show-scrollbar="false">
-        <view class="hot-topics__list">
+    <!-- 帖子列表 -->
+    <view v-if="displayList.length > 0" class="post-list">
+      <view
+        v-for="item in displayList"
+        :key="item.id"
+        class="post-card tap-feedback"
+        @tap="goDetail(item.id)"
+      >
+        <!-- 第1层：标题 -->
+        <text class="post-card__title">{{ item.title }}</text>
+
+        <!-- 第2层：作者信息（紧凑一行） -->
+        <view class="post-card__author">
+          <view class="post-card__avatar">
+            <image
+              v-if="item.avatar"
+              class="post-card__avatar-img"
+              :src="item.avatar"
+              mode="aspectFill"
+            />
+            <text v-else class="post-card__avatar-text">{{ getInitial(item) }}</text>
+          </view>
+          <text class="post-card__author-line">{{ getAuthorLine(item) }}</text>
+          <text class="post-card__time">{{ formatRelativeTime(item.createTime) }}</text>
+        </view>
+
+        <!-- 第3层：内容摘要 -->
+        <text v-if="item.content" class="post-card__content">{{ getPreview(item.content) }}</text>
+
+        <!-- 第4层：图片网格 -->
+        <view v-if="getImages(item).length > 0" class="post-card__images">
           <view
-            v-for="post in hotPosts"
-            :key="post.id"
-            class="hot-topic-card tap-feedback"
-            @tap="navigateTo(`/pages/topic/detail?id=${post.id}`)"
+            v-for="(img, idx) in getImages(item)"
+            :key="idx"
+            class="post-card__image"
           >
-            <text class="hot-topic-card__title">{{ post.title }}</text>
-            <text v-if="post.content" class="hot-topic-card__desc">
-              {{ post.content.length > 40 ? post.content.slice(0, 40) + '...' : post.content }}
-            </text>
-            <view class="hot-topic-card__footer">
-              <uni-icons type="heart-filled" size="12" color="#999" />
-              <text class="hot-topic-card__stat">{{ post.likeCount || 0 }}</text>
-              <uni-icons type="chat" size="12" color="#999" />
-              <text class="hot-topic-card__stat">{{ post.commentCount || 0 }}</text>
-            </view>
+            <image :src="img" mode="aspectFill" style="width: 100%; height: 100%" />
           </view>
         </view>
-      </scroll-view>
+
+        <!-- 第5层：互动数据 -->
+        <view class="post-card__footer">
+          <view class="post-card__stat">
+            <uni-icons type="heart-filled" size="14" color="#A8A29E" />
+            <text class="post-card__stat-num">{{ item.likeCount || 0 }}</text>
+          </view>
+          <view class="post-card__stat">
+            <uni-icons type="chat" size="14" color="#A8A29E" />
+            <text class="post-card__stat-num">{{ item.commentCount || 0 }}</text>
+          </view>
+          <view v-if="item.domain" class="post-card__domain">
+            <text class="post-card__domain-text">{{ item.domain }}</text>
+          </view>
+        </view>
+      </view>
+
+      <WgLoadMore :status="loadStatus" @loadMore="loadMore" />
     </view>
 
-    <!-- 最新动态 -->
-    <view class="feed">
-      <view class="feed__header">
-        <text class="feed__title">最新动态</text>
-        <view class="feed__tabs">
-          <text class="feed__tab feed__tab--supply" @tap="navigateTo('/pages/supply/index')">供应</text>
-          <text class="feed__tab feed__tab--req" @tap="navigateTo('/pages/requirement/index')">采购</text>
-        </view>
-      </view>
+    <!-- 空状态 -->
+    <WgEmpty
+      v-else-if="!loading"
+      text="暂无话题"
+      description="快来发布第一个话题吧"
+      actionText="发布话题"
+      @action="goPublish"
+    />
 
-      <!-- 骨架屏 -->
-      <WgSkeleton v-if="loading" type="card" :rows="4" />
+    <!-- 关注 tab 加载中 -->
+    <WgSkeleton
+      v-if="followingLoading && sortMode === 'following'"
+      type="card"
+      :rows="3"
+    />
 
-      <!-- 双列卡片 -->
-      <view v-else-if="feedList.length > 0" class="feed__grid">
-        <view class="feed__col">
-          <view
-            v-for="item in leftColumn"
-            :key="`${item.type}-${item.id}`"
-            class="feed-card tap-feedback anim-fade-up"
-            :class="{ 'feed-card--supply': item.type === 'supply', 'feed-card--req': item.type === 'requirement' }"
-            @tap="goFeedDetail(item)"
-          >
-            <view class="feed-card__badge">
-              <text class="feed-card__badge-text">{{ item.type === 'supply' ? '供' : '采' }}</text>
-            </view>
-            <text class="feed-card__category">{{ item.categoryName }}</text>
-            <text class="feed-card__price">{{ formatPrice(item.price) }}</text>
-            <text class="feed-card__company ellipsis">{{ item.companyName }}</text>
-            <view class="feed-card__footer">
-              <text v-if="item.quantity" class="feed-card__tag">{{ item.quantity }}吨</text>
-              <text v-if="item.origin" class="feed-card__tag">{{ item.origin }}</text>
-            </view>
-            <text class="feed-card__time">{{ formatRelativeTime(item.createTime) }}</text>
-          </view>
-        </view>
-        <view class="feed__col">
-          <view
-            v-for="item in rightColumn"
-            :key="`${item.type}-${item.id}`"
-            class="feed-card tap-feedback anim-fade-up"
-            :class="{ 'feed-card--supply': item.type === 'supply', 'feed-card--req': item.type === 'requirement' }"
-            @tap="goFeedDetail(item)"
-          >
-            <view class="feed-card__badge">
-              <text class="feed-card__badge-text">{{ item.type === 'supply' ? '供' : '采' }}</text>
-            </view>
-            <text class="feed-card__category">{{ item.categoryName }}</text>
-            <text class="feed-card__price">{{ formatPrice(item.price) }}</text>
-            <text class="feed-card__company ellipsis">{{ item.companyName }}</text>
-            <view class="feed-card__footer">
-              <text v-if="item.quantity" class="feed-card__tag">{{ item.quantity }}吨</text>
-              <text v-if="item.origin" class="feed-card__tag">{{ item.origin }}</text>
-            </view>
-            <text class="feed-card__time">{{ formatRelativeTime(item.createTime) }}</text>
-          </view>
-        </view>
-      </view>
+    <!-- 加载中骨架 -->
+    <WgSkeleton
+      v-if="loading && allPosts.length === 0 && sortMode !== 'following'"
+      type="card"
+      :rows="3"
+    />
 
-      <!-- 空状态 -->
-      <WgEmpty v-else text="暂无动态" description="信息流为空，下拉刷新试试" />
+    <!-- FAB 发帖按钮 -->
+    <view class="fab anim-fab-enter" @tap="goPublish">
+      <uni-icons type="compose" size="28" color="#fff" />
     </view>
 
     <!-- 底部间距 -->
-    <view style="height: 140rpx;" />
+    <view style="height: 130rpx;" />
 
-    <WgTabBar :current="0" :badges="pendingCount > 0 ? { 3: pendingCount } : undefined" />
+    <WgTabBar :current="0" />
   </view>
 </template>
 
@@ -340,476 +281,210 @@ function goFeedDetail(item: FeedItem) {
   background: $bg-page;
 }
 
-/* ===== Hero ===== */
-.hero {
-  background: linear-gradient(180deg, $brand-700 0%, $brand-600 60%, $brand-500 100%);
-  padding-bottom: $spacing-lg;
-
-  &__nav {
-    display: flex;
-    align-items: center;
-    padding: $spacing-sm $spacing-md;
-    gap: $spacing-xs;
-  }
-
-  &__logo {
-    width: 48rpx;
-    height: 48rpx;
-  }
-
-  &__brand {
-    font-size: $font-xl;
-    font-weight: 800;
-    color: #fff;
-  }
-
-  &__spacer {
-    flex: 1;
-  }
-
-  &__search {
-    display: flex;
-    align-items: center;
-    gap: 8rpx;
-    height: 60rpx;
-    padding: 0 24rpx;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 30rpx;
-  }
-
-  &__search-text {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: $font-sm;
-  }
-
-  &__greeting {
-    padding: $spacing-md $spacing-md 0;
-  }
-
-  &__greeting-text {
-    display: block;
-    font-size: $font-xl;
-    font-weight: 700;
-    color: #fff;
-  }
-
-  &__subtitle {
-    display: block;
-    font-size: $font-sm;
-    color: rgba(255, 255, 255, 0.6);
-    margin-top: 4rpx;
-  }
-
-  &__bell {
-    position: relative;
-    width: 60rpx;
-    height: 60rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: $spacing-xs;
-  }
-
-  &__bell-badge {
-    position: absolute;
-    top: 4rpx;
-    right: 0;
-    min-width: 28rpx;
-    height: 28rpx;
-    background: $color-error;
-    border-radius: 14rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 6rpx;
-  }
-
-  &__bell-badge-text {
-    color: #fff;
-    font-size: 18rpx;
-    font-weight: bold;
-    line-height: 28rpx;
-  }
-
-  &__stats {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: $spacing-lg $spacing-md 0;
-    padding: $spacing-md 0;
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: $radius-lg;
-  }
-
-  &__stat {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  &__stat-value {
-    font-size: $font-xl;
-    font-weight: 800;
-    color: #fff;
-  }
-
-  &__stat-label {
-    font-size: $font-xs;
-    color: rgba(255, 255, 255, 0.6);
-    margin-top: 2rpx;
-  }
-
-  &__stat-divider {
-    width: 1rpx;
-    height: 48rpx;
-    background: rgba(255, 255, 255, 0.2);
-  }
+/* ===== Header ===== */
+.header {
+  background: #ffffff;
+  padding: $spacing-sm $spacing-md;
 }
 
-/* ===== Categories ===== */
-.categories {
-  margin: -20rpx $spacing-sm 0;
-  position: relative;
-  z-index: 2;
+/* ===== 全宽搜索栏 ===== */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  height: 72rpx;
+  padding: 0 $spacing-lg;
+  background: $warm-100;
+  border-radius: $radius-pill;
 
-  &__scroll {
-    white-space: nowrap;
-  }
-
-  &__list {
-    display: inline-flex;
-    gap: 0;
-    background: $bg-card;
-    border-radius: $radius-xl;
-    padding: $spacing-md $spacing-sm;
-    box-shadow: $shadow-md;
-  }
-
-  &__item {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    width: 120rpx;
-    gap: $spacing-xs;
-  }
-
-  &__icon {
-    width: 80rpx;
-    height: 80rpx;
-    border-radius: 50%;
-    background: $brand-50;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  &__emoji {
-    font-size: 40rpx;
-  }
-
-  &__name {
-    font-size: $font-xs;
-    color: $text-secondary;
-    white-space: nowrap;
-  }
-}
-
-/* ===== Market Ticker ===== */
-.market-ticker {
-  padding: $spacing-md $spacing-sm 0;
-
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: $spacing-sm;
-    padding: 0 $spacing-xs;
-  }
-
-  &__title {
-    font-size: $font-lg;
-    font-weight: 700;
-    color: $text-primary;
-  }
-
-  &__more {
-    font-size: $font-sm;
-    color: $text-secondary;
-  }
-
-  &__scroll {
-    white-space: nowrap;
-  }
-
-  &__list {
-    display: inline-flex;
-    gap: $spacing-sm;
-    padding: 0 $spacing-xs $spacing-xs;
-  }
-}
-
-.ticker-card {
-  width: 200rpx;
-  background: $bg-card;
-  border-radius: $radius-lg;
-  padding: $spacing-md;
-  box-shadow: $shadow-sm;
-  display: inline-flex;
-  flex-direction: column;
-  white-space: normal;
-
-  &__name {
-    font-size: $font-sm;
-    color: $text-secondary;
-    margin-bottom: 2rpx;
-  }
-
-  &__code {
-    font-size: $font-xs;
+  &__text {
     color: $text-placeholder;
-    margin-bottom: $spacing-xs;
-  }
-
-  &__price {
-    font-size: $font-lg;
-    font-weight: 800;
-    color: $text-primary;
-    margin-bottom: 2rpx;
-  }
-
-  &__change {
-    font-size: $font-sm;
-    font-weight: 600;
-    color: $text-secondary;
-
-    &--up {
-      color: $color-error;
-    }
-
-    &--down {
-      color: $color-success;
-    }
-  }
-}
-
-/* ===== Hot Topics ===== */
-.hot-topics {
-  padding: $spacing-md $spacing-sm 0;
-
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: $spacing-sm;
-    padding: 0 $spacing-xs;
-  }
-
-  &__title {
-    font-size: $font-lg;
-    font-weight: 700;
-    color: $text-primary;
-  }
-
-  &__more {
-    font-size: $font-sm;
-    color: $text-secondary;
-  }
-
-  &__scroll {
-    white-space: nowrap;
-  }
-
-  &__list {
-    display: inline-flex;
-    gap: $spacing-sm;
-    padding: 0 $spacing-xs $spacing-xs;
-  }
-}
-
-.hot-topic-card {
-  width: 280rpx;
-  background: $bg-card;
-  border-radius: $radius-lg;
-  padding: $spacing-md;
-  box-shadow: $shadow-sm;
-  display: inline-flex;
-  flex-direction: column;
-  white-space: normal;
-
-  &__title {
     font-size: $font-md;
-    font-weight: 700;
-    color: $text-primary;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    margin-bottom: $spacing-xs;
-  }
-
-  &__desc {
-    font-size: $font-xs;
-    color: $text-secondary;
-    line-height: 1.5;
-    flex: 1;
-    margin-bottom: $spacing-sm;
-  }
-
-  &__footer {
-    display: flex;
-    align-items: center;
-    gap: 6rpx;
-  }
-
-  &__stat {
-    font-size: $font-xs;
-    color: $text-placeholder;
-    margin-right: $spacing-xs;
   }
 }
 
-/* ===== Feed ===== */
-.feed {
-  padding: $spacing-md $spacing-sm 0;
-
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: $spacing-md;
-    padding: 0 $spacing-xs;
-  }
-
-  &__title {
-    font-size: $font-lg;
-    font-weight: 700;
-    color: $text-primary;
-  }
-
-  &__tabs {
-    display: flex;
-    gap: $spacing-sm;
-  }
+/* ===== Sort Bar ===== */
+.sort-bar {
+  display: flex;
+  background: #ffffff;
+  padding: $spacing-sm $spacing-md;
+  gap: $spacing-lg;
+  border-bottom: 1rpx solid $border-light;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 
   &__tab {
-    font-size: $font-sm;
-    padding: 4rpx 20rpx;
-    border-radius: 20rpx;
+    font-size: $font-md;
+    color: $text-secondary;
+    padding-bottom: $spacing-xs;
+    position: relative;
 
-    &--supply {
+    &--active {
       color: $brand-600;
-      background: $brand-50;
+      font-weight: bold;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40rpx;
+        height: 4rpx;
+        background: $brand-600;
+        border-radius: 2rpx;
+      }
     }
-
-    &--req {
-      color: $autumn-500;
-      background: $autumn-50;
-    }
-  }
-
-  &__grid {
-    display: flex;
-    gap: $spacing-sm;
-  }
-
-  &__col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-sm;
   }
 }
 
-/* ===== Feed Card ===== */
-.feed-card {
-  background: $bg-card;
-  border-radius: $radius-xl;
-  padding: $spacing-md;
-  box-shadow: $shadow-sm;
-  position: relative;
-  overflow: hidden;
+/* ===== Post List ===== */
+.post-list {
+  padding: 0;
+}
 
-  &--supply {
-    border-left: 6rpx solid $brand-500;
+.post-card {
+  background: #ffffff;
+  padding: $spacing-md $spacing-md;
+  border-bottom: 1rpx solid $border-light;
+
+  /* 第1层：标题 */
+  &__title {
+    font-size: $font-lg;
+    font-weight: bold;
+    color: $text-primary;
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.4;
+    margin-bottom: $spacing-xs;
   }
 
-  &--req {
-    border-left: 6rpx solid $autumn-400;
+  /* 第2层：作者信息（紧凑一行） */
+  &__author {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-sm;
   }
 
-  &__badge {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 4rpx 16rpx;
-    border-radius: 0 $radius-xl 0 $radius-lg;
+  &__avatar {
+    width: 40rpx;
+    height: 40rpx;
+    border-radius: 50%;
+    background: $brand-100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    margin-right: $spacing-xs;
   }
 
-  .feed-card--supply &__badge {
-    background: $brand-50;
+  &__avatar-img {
+    width: 40rpx;
+    height: 40rpx;
   }
 
-  .feed-card--req &__badge {
-    background: $autumn-50;
-  }
-
-  &__badge-text {
-    font-size: $font-xs;
-    font-weight: 700;
-  }
-
-  .feed-card--supply &__badge-text {
+  &__avatar-text {
+    font-size: 20rpx;
+    font-weight: bold;
     color: $brand-600;
   }
 
-  .feed-card--req &__badge-text {
-    color: $autumn-500;
-  }
-
-  &__category {
-    display: block;
-    font-size: $font-md;
-    font-weight: 700;
-    color: $text-primary;
-    margin-bottom: 4rpx;
-    padding-right: 60rpx;
-  }
-
-  &__price {
-    display: block;
-    font-size: $font-lg;
-    font-weight: 800;
-    color: $accent-400;
-    margin-bottom: $spacing-xs;
-  }
-
-  &__company {
-    display: block;
+  &__author-line {
+    flex: 1;
     font-size: $font-xs;
     color: $text-secondary;
-    margin-bottom: $spacing-xs;
-  }
-
-  &__footer {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6rpx;
-    margin-bottom: $spacing-xs;
-  }
-
-  &__tag {
-    font-size: 18rpx;
-    color: $text-secondary;
-    background: $bg-page;
-    padding: 2rpx 10rpx;
-    border-radius: $radius-sm;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__time {
-    display: block;
-    font-size: 18rpx;
+    font-size: $font-xs;
     color: $text-placeholder;
+    flex-shrink: 0;
+    margin-left: $spacing-sm;
+  }
+
+  /* 第3层：内容摘要 */
+  &__content {
+    font-size: $font-md;
+    color: $text-secondary;
+    line-height: 1.6;
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    margin-bottom: $spacing-sm;
+  }
+
+  /* 第4层：图片 */
+  &__images {
+    display: flex;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__image {
+    flex: 1;
+    height: 200rpx;
+    border-radius: $radius-sm;
+    overflow: hidden;
+  }
+
+  /* 第5层：互动 */
+  &__footer {
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+  }
+
+  &__stat {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+  }
+
+  &__stat-num {
+    font-size: $font-xs;
+    color: $text-placeholder;
+  }
+
+  &__domain {
+    margin-left: auto;
+  }
+
+  &__domain-text {
+    font-size: $font-xs;
+    color: $brand-600;
+    background: $brand-50;
+    padding: 2rpx 14rpx;
+    border-radius: $radius-sm;
+  }
+}
+
+/* ===== FAB ===== */
+.fab {
+  position: fixed;
+  right: 32rpx;
+  bottom: 180rpx;
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: $brand-600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(45, 106, 79, 0.3);
+  z-index: 20;
+
+  &:active {
+    transform: scale(0.92);
   }
 }
 </style>

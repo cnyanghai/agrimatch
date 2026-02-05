@@ -68,7 +68,7 @@ defineProps<{
 }
 
 .shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 37%, #f0f0f0 63%);
+  background: linear-gradient(90deg, #F5F0E8 25%, #E8E0D4 37%, #F5F0E8 63%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite ease-in-out;
   border-radius: $radius-sm;

@@ -52,7 +52,7 @@ export function useWebSocket() {
     baseUrl = `${wsProtocol}//${loc.host}`
     // #endif
     // #ifdef APP-PLUS
-    baseUrl = 'ws://localhost:8080' // TODO: configure for production
+    baseUrl = 'ws://172.28.0.135:8080'
     // #endif
     return `${baseUrl}/ws/chat?token=${authStore.token}`
   }

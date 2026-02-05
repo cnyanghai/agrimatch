@@ -31,7 +31,7 @@ page {
     'Microsoft YaHei', sans-serif;
   font-size: $font-base;
   color: $text-primary;
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -73,6 +73,7 @@ input, textarea {
 .bg-brand { background-color: $brand-600; }
 .bg-page { background-color: $bg-page; }
 .bg-card { background-color: $bg-card; }
+.bg-warm { background-color: $warm-50; }
 
 .price {
   color: $accent-400;
@@ -128,7 +129,7 @@ input, textarea {
 /* 分割线 */
 .divider {
   height: 1rpx;
-  background: $border-light;
+  background: $warm-200;
   margin: $spacing-md 0;
 }
 
@@ -142,11 +143,11 @@ input, textarea {
   padding-bottom: 130rpx;
 }
 
-/* 卡片基础样式 */
+/* 卡片基础样式 (暖阴影) */
 .card {
   background: $bg-card;
   border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
+  box-shadow: $shadow-warm-card;
 }
 
 .card-md {
@@ -155,9 +156,26 @@ input, textarea {
   box-shadow: $shadow-md;
 }
 
-/* 毛玻璃效果 */
+/* 暖色卡片 */
+.card-warm {
+  background: $bg-card;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-warm-card;
+  border: 1rpx solid $warm-200;
+}
+
+/* 区块标题 */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+  padding: 0 $spacing-xs;
+}
+
+/* 毛玻璃效果 (暖色调) */
 .glass {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 253, 248, 0.88);
   backdrop-filter: blur(40rpx);
   -webkit-backdrop-filter: blur(40rpx);
 }

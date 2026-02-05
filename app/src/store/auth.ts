@@ -28,7 +28,7 @@ function getBaseUrl(): string {
   return '' // H5 模式使用相对路径（由 proxy 代理）
   // #endif
   // #ifdef APP-PLUS
-  return 'http://localhost:8080' // TODO: 配置生产环境地址
+  return 'http://172.28.0.135:8080'
   // #endif
 }
 
@@ -94,23 +94,30 @@ export const useAuthStore = defineStore('auth', () => {
 
   /** 获取图形验证码 */
   async function getCaptcha(): Promise<{ captchaKey: string; captchaImage: string } | null> {
-    try {
-      const res = await uni.request({
+    return new Promise((resolve) => {
+      uni.request({
         url: `${getBaseUrl()}/api/auth/captcha`,
         method: 'GET',
+        success(res) {
+          const data = res.data as any
+          console.log('[Captcha] response status:', res.statusCode, 'code:', data?.code)
+          if (data?.code === 0 && data?.data?.captchaImage) {
+            resolve(data.data)
+          } else {
+            console.warn('[Captcha] unexpected response:', JSON.stringify(data).substring(0, 200))
+            resolve(null)
+          }
+        },
+        fail(err) {
+          console.error('[Captcha] request failed:', err)
+          resolve(null)
+        },
       })
-      const data = res.data as any
-      if (data?.code === 0 && data?.data) {
-        return data.data
-      }
-      return null
-    } catch {
-      return null
-    }
+    })
   }
 
   /** 密码登录 */
-  async function loginByPassword(userName: string, password: string, captchaKey: string, captchaCode: string): Promise<{ ok: boolean; msg?: string }> {
+  async function loginByPassword(userName: string, password: string, captchaKey = '', captchaCode = ''): Promise<{ ok: boolean; msg?: string }> {
     try {
       const res = await uni.request({
         url: `${getBaseUrl()}/api/auth/login`,
@@ -131,19 +138,60 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  /** 发送短信验证码 */
-  async function sendSmsCode(phone: string): Promise<boolean> {
+  /** 发送短信验证码 (type: 1=注册, 2=登录, 3=重置密码) */
+  async function sendSmsCode(phone: string, type = 2): Promise<boolean> {
     try {
       const res = await uni.request({
         url: `${getBaseUrl()}/api/auth/sms/send`,
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
-        data: { phone, type: 2 },
+        data: { phone, type },
       })
       const data = res.data as any
       return data?.code === 0
     } catch {
       return false
+    }
+  }
+
+  /** 注册（手机号+密码，App端跳过图形验证码） */
+  async function register(phone: string, password: string): Promise<{ ok: boolean; msg?: string }> {
+    try {
+      const res = await uni.request({
+        url: `${getBaseUrl()}/api/auth/register`,
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { userName: phone, phonenumber: phone, password, captchaKey: '', captchaCode: '' },
+      })
+      const data = res.data as any
+      if (data?.code === 0 && data?.data?.token) {
+        token.value = data.data.token
+        uni.setStorageSync(TOKEN_KEY, token.value)
+        await checkSession()
+        return { ok: true }
+      }
+      return { ok: false, msg: data?.message || '注册失败' }
+    } catch {
+      return { ok: false, msg: '网络错误' }
+    }
+  }
+
+  /** 重置密码 */
+  async function resetPassword(phone: string, smsCode: string, newPassword: string): Promise<{ ok: boolean; msg?: string }> {
+    try {
+      const res = await uni.request({
+        url: `${getBaseUrl()}/api/auth/reset-password`,
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        data: { phone, smsCode, newPassword },
+      })
+      const data = res.data as any
+      if (data?.code === 0) {
+        return { ok: true }
+      }
+      return { ok: false, msg: data?.message || '重置失败' }
+    } catch {
+      return { ok: false, msg: '网络错误' }
     }
   }
 
@@ -210,6 +258,8 @@ export const useAuthStore = defineStore('auth', () => {
     loginByPassword,
     sendSmsCode,
     loginBySms,
+    register,
+    resetPassword,
     saveUser,
     clearAuth,
     logout,
