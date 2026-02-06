@@ -1,14 +1,75 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { getRequirement, type RequirementResponse } from '../../api/requirement'
 import { openConversation } from '../../api/chat'
 import { formatPrice, formatDateTime } from '../../utils/format'
+import { parseParams, type ParsedParam } from '../../utils/parseParams'
+import { getUnitLabel } from '../../utils/unitConfig'
 import { useAuthStore } from '../../store/auth'
 
 const authStore = useAuthStore()
 const detail = ref<RequirementResponse | null>(null)
 const loading = ref(true)
+
+/** Parse dynamic params from paramsJson (unified parser) */
+const dynamicParams = computed<ParsedParam[]>(() => {
+  return parseParams(detail.value?.paramsJson)
+})
+
+/** Dynamic unit labels */
+const quantityUnit = computed(() =>
+  getUnitLabel(detail.value?.schemaCode, 'quantity', detail.value?.categoryName)
+)
+const priceUnit = computed(() =>
+  getUnitLabel(detail.value?.schemaCode, 'price', detail.value?.categoryName)
+)
+
+/** Status label */
+const statusInfo = computed(() => {
+  if (!detail.value) return null
+  const status = detail.value.status
+  const expireTime = detail.value.expireTime
+  const now = Date.now()
+
+  if (status === 0 || (expireTime && new Date(expireTime).getTime() < now)) {
+    return { label: '已过期', color: 'status--expired' }
+  }
+  if (status === 1) {
+    return { label: '有效', color: 'status--active' }
+  }
+  return null
+})
+
+/** Parse images */
+const imageList = computed<string[]>(() => {
+  if (!detail.value?.imagesJson) return []
+  try {
+    const arr = JSON.parse(detail.value.imagesJson)
+    return Array.isArray(arr) ? arr : []
+  } catch {
+    return []
+  }
+})
+
+/** Preview image */
+function handlePreviewImage(index: number) {
+  uni.previewImage({
+    current: index,
+    urls: imageList.value,
+  })
+}
+
+/** Remaining quantity */
+const remainingQtyText = computed(() => {
+  if (!detail.value) return ''
+  const { quantity, remainingQuantity } = detail.value
+  if (remainingQuantity !== null && remainingQuantity !== undefined && quantity) {
+    if (remainingQuantity <= 0) return '已满足'
+    return `${remainingQuantity} / ${quantity} ${quantityUnit.value}`
+  }
+  return ''
+})
 
 onLoad(async (options) => {
   if (options?.id) {
@@ -49,12 +110,49 @@ async function handleContact() {
   }
 }
 
-function handleViewCompany() {
+function handleCall() {
+  if (detail.value?.companyId) {
+    uni.navigateTo({ url: `/pages/company/detail?id=${detail.value.companyId}` })
+  } else {
+    uni.showToast({ title: '暂无联系电话', icon: 'none' })
+  }
+}
+
+function goCompany() {
   if (detail.value?.companyId) {
     uni.navigateTo({ url: `/pages/company/detail?id=${detail.value.companyId}` })
   }
 }
 
+function handleShare() {
+  // #ifdef APP-PLUS
+  uni.share({
+    provider: 'weixin',
+    type: 0,
+    title: `采购: ${detail.value?.categoryName || ''}`,
+    summary: `${formatPrice(detail.value?.expectedPrice)} ${priceUnit.value} - ${detail.value?.companyName || ''}`,
+    success() {
+      uni.showToast({ title: '分享成功', icon: 'success' })
+    },
+    fail() {
+      uni.setClipboardData({
+        data: `采购: ${detail.value?.categoryName} - ${formatPrice(detail.value?.expectedPrice)} ${priceUnit.value}`,
+        success() {
+          uni.showToast({ title: '已复制到剪贴板', icon: 'success' })
+        },
+      })
+    },
+  })
+  // #endif
+  // #ifdef H5
+  uni.setClipboardData({
+    data: `采购: ${detail.value?.categoryName} - ${formatPrice(detail.value?.expectedPrice)} ${priceUnit.value}`,
+    success() {
+      uni.showToast({ title: '已复制到剪贴板', icon: 'success' })
+    },
+  })
+  // #endif
+}
 </script>
 
 <template>
@@ -63,20 +161,45 @@ function handleViewCompany() {
     <WgEmpty v-else-if="!detail" text="采购信息不存在" icon="empty" />
 
     <template v-else>
-      <view class="info-card">
-        <text class="info-card__name">{{ detail.categoryName }}</text>
-        <text class="info-card__price">{{ formatPrice(detail.expectedPrice) }}</text>
-        <text class="info-card__unit">元/吨 · 期望价格</text>
+      <!-- 商品图片 -->
+      <view v-if="imageList.length > 0" class="image-section">
+        <scroll-view scroll-x class="image-section__scroll">
+          <view class="image-section__list">
+            <image
+              v-for="(img, idx) in imageList"
+              :key="idx"
+              class="image-section__item"
+              :src="img"
+              mode="aspectFill"
+              @tap="handlePreviewImage(idx)"
+            />
+          </view>
+        </scroll-view>
       </view>
 
+      <!-- 基础信息 -->
+      <view class="info-card">
+        <view class="info-card__header">
+          <text class="info-card__name">{{ detail.categoryName }}</text>
+          <text v-if="statusInfo" class="info-card__status" :class="statusInfo.color">{{ statusInfo.label }}</text>
+        </view>
+        <text class="info-card__price">{{ formatPrice(detail.expectedPrice) }}</text>
+        <text class="info-card__unit">{{ priceUnit }} · 期望价格</text>
+      </view>
+
+      <!-- 详情信息 -->
       <view class="detail-card">
         <view class="detail-row" v-if="detail.companyName">
           <text class="detail-row__label">企业</text>
           <text class="detail-row__value">{{ detail.companyName }}</text>
         </view>
         <view class="detail-row" v-if="detail.quantity">
-          <text class="detail-row__label">数量</text>
-          <text class="detail-row__value">{{ detail.quantity }} 吨</text>
+          <text class="detail-row__label">需求数量</text>
+          <text class="detail-row__value">{{ detail.quantity }} {{ quantityUnit }}</text>
+        </view>
+        <view class="detail-row" v-if="remainingQtyText">
+          <text class="detail-row__label">剩余数量</text>
+          <text class="detail-row__value" :class="{ 'detail-row__value--accent': remainingQtyText === '已满足' }">{{ remainingQtyText }}</text>
         </view>
         <view class="detail-row" v-if="detail.purchaseAddress">
           <text class="detail-row__label">收货地</text>
@@ -94,14 +217,54 @@ function handleViewCompany() {
           <text class="detail-row__label">备注</text>
           <text class="detail-row__value">{{ detail.remark }}</text>
         </view>
+        <view class="detail-row" v-if="detail.expireTime">
+          <text class="detail-row__label">有效期</text>
+          <text class="detail-row__value">{{ formatDateTime(detail.expireTime) }}</text>
+        </view>
         <view class="detail-row">
           <text class="detail-row__label">发布时间</text>
           <text class="detail-row__value">{{ formatDateTime(detail.createTime) }}</text>
         </view>
       </view>
 
+      <!-- 动态参数 -->
+      <view v-if="dynamicParams.length > 0" class="detail-card">
+        <view class="detail-card__title">
+          <text class="detail-card__title-text">质量要求</text>
+        </view>
+        <view
+          v-for="(p, idx) in dynamicParams"
+          :key="idx"
+          class="detail-row"
+        >
+          <text class="detail-row__label">{{ p.key }}</text>
+          <text class="detail-row__value">{{ p.value }}{{ p.unit ? ` ${p.unit}` : '' }}</text>
+        </view>
+      </view>
+
+      <!-- 企业信息卡片 -->
+      <view v-if="detail.companyName" class="company-card" @tap="goCompany">
+        <view class="company-card__avatar">
+          <text class="company-card__initial">{{ (detail.companyName || '?')[0] }}</text>
+        </view>
+        <view class="company-card__info">
+          <text class="company-card__name">{{ detail.companyName }}</text>
+          <text class="company-card__hint">点击查看企业详情</text>
+        </view>
+        <uni-icons type="right" size="16" color="#D6CCC0" />
+      </view>
+
+      <!-- 分享按钮 -->
+      <view class="share-bar">
+        <view class="share-btn" @tap="handleShare">
+          <uni-icons type="redo" size="16" color="#78716C" />
+          <text class="share-btn__text">分享</text>
+        </view>
+      </view>
+
+      <!-- 底部操作 -->
       <view class="bottom-bar safe-area-bottom">
-        <button class="btn-secondary" @tap="handleViewCompany"><uni-icons type="shop" size="18" color="#D4A373" /> 企业信息</button>
+        <button class="btn-secondary" @tap="handleCall"><uni-icons type="phone" size="18" color="#D4A373" /> 电话咨询</button>
         <button class="btn-primary" @tap="handleContact"><uni-icons type="chat" size="18" color="#fff" /> 联系采购方</button>
       </view>
     </template>
@@ -115,6 +278,31 @@ function handleViewCompany() {
   padding-bottom: 140rpx;
 }
 
+/* Image gallery */
+.image-section {
+  background: $bg-card;
+  margin: $spacing-sm $spacing-sm 0;
+  border-radius: $radius-xl;
+  overflow: hidden;
+
+  &__scroll {
+    white-space: nowrap;
+  }
+
+  &__list {
+    display: flex;
+    gap: $spacing-xs;
+    padding: $spacing-sm;
+  }
+
+  &__item {
+    width: 400rpx;
+    height: 300rpx;
+    border-radius: $radius-md;
+    flex-shrink: 0;
+  }
+}
+
 .info-card {
   background: $bg-card;
   margin: $spacing-sm;
@@ -122,12 +310,24 @@ function handleViewCompany() {
   padding: $spacing-lg;
   box-shadow: $shadow-sm;
 
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-sm;
+  }
+
   &__name {
     font-size: $font-xl;
     font-weight: bold;
     color: $text-primary;
-    display: block;
-    margin-bottom: $spacing-sm;
+  }
+
+  &__status {
+    font-size: $font-xs;
+    padding: 4rpx 16rpx;
+    border-radius: $radius-sm;
+    font-weight: 600;
   }
 
   &__price {
@@ -143,12 +343,34 @@ function handleViewCompany() {
   }
 }
 
+.status--active {
+  color: $brand-600;
+  background: $brand-50;
+}
+
+.status--expired {
+  color: $text-placeholder;
+  background: $warm-100;
+}
+
 .detail-card {
   background: $bg-card;
   margin: $spacing-sm $spacing-sm 0;
   border-radius: $radius-xl;
   padding: $spacing-sm 0;
   box-shadow: $shadow-sm;
+
+  &__title {
+    padding: $spacing-sm $spacing-lg;
+    border-bottom: 1rpx solid $border-light;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__title-text {
+    font-size: $font-md;
+    font-weight: bold;
+    color: $text-primary;
+  }
 }
 
 .detail-row {
@@ -166,6 +388,84 @@ function handleViewCompany() {
     flex: 1;
     font-size: $font-md;
     color: $text-primary;
+
+    &--accent {
+      color: $brand-600;
+      font-weight: 600;
+    }
+  }
+}
+
+/* Company card */
+.company-card {
+  background: $bg-card;
+  margin: $spacing-sm;
+  border-radius: $radius-xl;
+  padding: $spacing-lg;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  box-shadow: $shadow-sm;
+
+  &:active {
+    opacity: 0.85;
+  }
+
+  &__avatar {
+    width: 80rpx;
+    height: 80rpx;
+    border-radius: 50%;
+    background: $autumn-50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__initial {
+    font-size: $font-xl;
+    font-weight: bold;
+    color: $autumn-500;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $font-md;
+    font-weight: 600;
+    color: $text-primary;
+    display: block;
+  }
+
+  &__hint {
+    font-size: $font-xs;
+    color: $text-placeholder;
+  }
+}
+
+/* Share bar */
+.share-bar {
+  padding: $spacing-sm $spacing-md;
+  display: flex;
+  justify-content: center;
+}
+
+.share-btn {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-lg;
+  background: $warm-100;
+  border-radius: $radius-pill;
+
+  &:active { opacity: 0.7; }
+
+  &__text {
+    font-size: $font-sm;
+    color: $text-secondary;
   }
 }
 

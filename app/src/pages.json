@@ -237,9 +237,41 @@
       }
     },
     {
+      "path": "pages/contract/sign",
+      "style": {
+        "navigationBarTitleText": "签署合同"
+      }
+    },
+    {
       "path": "pages/topic/edit",
       "style": {
         "navigationBarTitleText": "编辑话题"
+      }
+    },
+    {
+      "path": "pages/category/directory",
+      "style": {
+        "navigationBarTitleText": "品类目录"
+      }
+    },
+    {
+      "path": "pages/legal/index",
+      "style": {
+        "navigationBarTitleText": "法律文档"
+      }
+    },
+    {
+      "path": "pages/vehicle/list",
+      "style": {
+        "navigationBarTitleText": "车辆管理",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/map/index",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": true
       }
     }
   ],

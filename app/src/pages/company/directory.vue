@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { onLoad, onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import {
   getCompanyDirectory,
+  searchCompanies,
   companyTypeMap,
   type CompanyCardResponse,
 } from '../../api/company'
@@ -16,7 +17,17 @@ const total = ref(0)
 const loading = ref(false)
 const PAGE_SIZE = 20
 
-const alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+// ==================== 搜索相关 ====================
+const searchKeyword = ref('')
+const searchResults = ref<CompanyCardResponse[]>([])
+const isSearching = ref(false)
+const searchLoading = ref(false)
+let searchTimer: ReturnType<typeof setTimeout> | null = null
+
+/** 搜索状态下是否为空结果 */
+const searchEmpty = computed(() => isSearching.value && !searchLoading.value && searchResults.value.length === 0)
+
+const alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0-9']
 
 const hasMore = computed(() => companies.value.length < total.value)
 
@@ -100,10 +111,125 @@ function getCategoryTags(c: CompanyCardResponse): string[] {
   if (c.categoryNamesStr) return c.categoryNamesStr.split(',').slice(0, 4)
   return []
 }
+
+// ==================== 搜索逻辑 ====================
+
+/** 防抖搜索：输入变化后延迟300ms执行 */
+function onSearchInput() {
+  if (searchTimer) clearTimeout(searchTimer)
+  const keyword = searchKeyword.value.trim()
+
+  if (!keyword) {
+    // 清空搜索，恢复列表
+    isSearching.value = false
+    searchResults.value = []
+    return
+  }
+
+  isSearching.value = true
+  searchLoading.value = true
+
+  searchTimer = setTimeout(async () => {
+    await doSearch(keyword)
+  }, 300)
+}
+
+async function doSearch(keyword: string) {
+  searchLoading.value = true
+  try {
+    const res = await searchCompanies(keyword, 50)
+    searchResults.value = res ?? []
+  } catch {
+    searchResults.value = []
+  } finally {
+    searchLoading.value = false
+  }
+}
+
+/** 清空搜索框 */
+function clearSearch() {
+  searchKeyword.value = ''
+  isSearching.value = false
+  searchResults.value = []
+}
 </script>
 
 <template>
   <view class="directory-page">
+    <!-- 搜索栏 -->
+    <view class="search-bar">
+      <view class="search-bar__inner">
+        <uni-icons type="search" size="16" color="#A8A29E" />
+        <input
+          v-model="searchKeyword"
+          class="search-bar__input"
+          placeholder="搜索企业名称"
+          confirm-type="search"
+          @input="onSearchInput"
+        />
+        <view v-if="searchKeyword" class="search-bar__clear" @tap="clearSearch">
+          <uni-icons type="clear" size="16" color="#A8A29E" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 搜索结果 -->
+    <template v-if="isSearching">
+      <!-- 搜索加载中 -->
+      <WgSkeleton v-if="searchLoading" type="card" :rows="3" />
+
+      <!-- 搜索结果列表 -->
+      <view v-else-if="searchResults.length > 0" class="company-list">
+        <view
+          v-for="c in searchResults"
+          :key="c.id"
+          class="company-card tap-feedback"
+          @tap="goCompanyDetail(c.id)"
+        >
+          <view class="company-card__header">
+            <view class="company-card__avatar">
+              <image
+                v-if="c.logo"
+                class="company-card__avatar-img"
+                :src="c.logo"
+                mode="aspectFill"
+              />
+              <text v-else class="company-card__avatar-text">{{ getInitial(c) }}</text>
+            </view>
+            <view class="company-card__header-info">
+              <text class="company-card__name">{{ c.companyName }}</text>
+            </view>
+          </view>
+          <view v-if="formatLocation(c)" class="company-card__location">
+            <uni-icons type="location" size="14" color="#A8A29E" />
+            <text class="company-card__location-text">{{ formatLocation(c) }}</text>
+          </view>
+          <view v-if="getCategoryTags(c).length > 0" class="company-card__tags">
+            <text
+              v-for="tag in getCategoryTags(c)"
+              :key="tag"
+              class="company-card__tag"
+            >{{ tag }}</text>
+          </view>
+          <view class="company-card__footer">
+            <view v-if="c.count" class="company-card__stat">
+              <uni-icons type="list" size="14" color="#2D6A4F" />
+              <text class="company-card__stat-text">已发布 {{ c.count }} 条供应</text>
+            </view>
+            <view v-else class="company-card__stat">
+              <text class="company-card__stat-text company-card__stat-text--muted">暂无供应</text>
+            </view>
+            <uni-icons type="right" size="14" color="#d1d5db" />
+          </view>
+        </view>
+      </view>
+
+      <!-- 搜索无结果 -->
+      <WgEmpty v-else text="未找到相关企业" description="换个关键词试试" />
+    </template>
+
+    <!-- 正常列表模式（非搜索状态） -->
+    <template v-else>
     <!-- 类型 tabs -->
     <view class="type-tabs">
       <scroll-view scroll-x :show-scrollbar="false" class="type-tabs__scroll">
@@ -208,6 +334,7 @@ function getCategoryTags(c: CompanyCardResponse): string[] {
 
     <!-- 骨架屏 -->
     <WgSkeleton v-if="loading && companies.length === 0" type="card" :rows="4" />
+    </template>
   </view>
 </template>
 
@@ -215,6 +342,35 @@ function getCategoryTags(c: CompanyCardResponse): string[] {
 .directory-page {
   min-height: 100vh;
   background: $bg-page;
+}
+
+/* ===== Search bar ===== */
+.search-bar {
+  background: #ffffff;
+  padding: $spacing-sm $spacing-md;
+  border-bottom: 1rpx solid $border-light;
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    background: $bg-page;
+    border-radius: $radius-pill;
+    padding: $spacing-xs $spacing-md;
+    height: 72rpx;
+  }
+
+  &__input {
+    flex: 1;
+    font-size: $font-md;
+    color: $text-primary;
+    height: 72rpx;
+  }
+
+  &__clear {
+    padding: 4rpx;
+    flex-shrink: 0;
+  }
 }
 
 /* ===== Type tabs ===== */
@@ -270,12 +426,14 @@ function getCategoryTags(c: CompanyCardResponse): string[] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 56rpx;
+    min-width: 56rpx;
     height: 56rpx;
+    padding: 0 10rpx;
     border-radius: $radius-sm;
     font-size: $font-sm;
     color: $text-secondary;
     background: $bg-page;
+    white-space: nowrap;
 
     &--active {
       background: $brand-600;

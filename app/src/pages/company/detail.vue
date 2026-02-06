@@ -1,20 +1,105 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import {
   getCompanyProfile,
   companyTypeMap,
   type CompanyResponse,
 } from '../../api/company'
+import { openConversation } from '../../api/chat'
 import { useFollow } from '../../composables/useFollow'
+import { useAuthStore } from '../../store/auth'
+
+const authStore = useAuthStore()
 
 const company = ref<CompanyResponse | null>(null)
 const supplies = ref<any[]>([])
 const requirements = ref<any[]>([])
 const loading = ref(true)
+const chatLoading = ref(false)
 
 const { isFollowing, followLoading, loadFollowStatus, handleToggleFollow, canFollow }
   = useFollow(() => company.value?.ownerUserId)
+
+/** 是否可以发起聊天（非本企业、已登录、企业有ownerUserId） */
+const canChat = computed(() => {
+  if (!company.value?.ownerUserId) return false
+  if (!authStore.isLoggedIn) return true // 点击后再引导登录
+  // 不能跟自己的企业聊天
+  return company.value.id !== authStore.user?.companyId
+})
+
+/** 是否有经纬度 */
+const hasCoords = computed(() => {
+  return company.value?.lat != null && company.value?.lng != null
+    && company.value.lat !== 0 && company.value.lng !== 0
+})
+
+/** 完整地址文字 */
+const fullAddress = computed(() => {
+  if (!company.value) return ''
+  return [company.value.province, company.value.city, company.value.district, company.value.address]
+    .filter(Boolean)
+    .join('')
+})
+
+/** 是否显示地图区域：有经纬度或有地址文字 */
+const showMapSection = computed(() => hasCoords.value || !!fullAddress.value)
+
+/** 地图标记点 */
+const mapMarkers = computed(() => {
+  if (!hasCoords.value) return []
+  return [{
+    id: 1,
+    latitude: company.value!.lat!,
+    longitude: company.value!.lng!,
+    title: company.value!.companyName || '企业位置',
+    width: 30,
+    height: 30,
+  }]
+})
+
+/** 打开导航（调用系统地图） */
+function handleOpenNavigation() {
+  if (hasCoords.value) {
+    uni.openLocation({
+      latitude: Number(company.value!.lat),
+      longitude: Number(company.value!.lng),
+      name: company.value!.companyName || '企业位置',
+      address: fullAddress.value || '',
+      fail: () => {
+        uni.showToast({ title: '无法打开导航', icon: 'none' })
+      },
+    })
+  } else if (fullAddress.value) {
+    // 无经纬度时复制地址
+    uni.setClipboardData({
+      data: fullAddress.value,
+      success: () => {
+        uni.showToast({ title: '地址已复制', icon: 'none' })
+      },
+    })
+  }
+}
+
+/** 解析资质证书JSON */
+const certificates = computed<string[]>(() => {
+  if (!company.value?.certificatesJson) return []
+  try {
+    const parsed = JSON.parse(company.value.certificatesJson)
+    return Array.isArray(parsed) ? parsed.filter((url: any) => typeof url === 'string' && url.length > 0) : []
+  } catch {
+    return []
+  }
+})
+
+/** 预览证书图片 */
+function handlePreviewCertificate(index: number) {
+  uni.previewImage({
+    urls: certificates.value,
+    current: certificates.value[index] || certificates.value[0],
+  })
+}
 
 onLoad(async (options) => {
   if (options?.id) {
@@ -55,6 +140,55 @@ function handleCall() {
       // user cancelled or not supported
     },
   })
+}
+
+/** 在线聊天 */
+async function handleChat() {
+  if (!authStore.isLoggedIn) {
+    uni.navigateTo({ url: '/pages/auth/login' })
+    return
+  }
+  if (!company.value?.ownerUserId) {
+    uni.showToast({ title: '该企业未关联用户', icon: 'none' })
+    return
+  }
+  if (company.value.id === authStore.user?.companyId) {
+    uni.showToast({ title: '不能和自己的企业聊天', icon: 'none' })
+    return
+  }
+  if (chatLoading.value) return
+
+  chatLoading.value = true
+  try {
+    // 优先使用供应信息作为标的，否则使用采购信息，都没有则用企业本身
+    let subjectType = 'SUPPLY'
+    let subjectId = 0
+    if (supplies.value.length > 0) {
+      subjectId = supplies.value[0].id
+    } else if (requirements.value.length > 0) {
+      subjectType = 'NEED'
+      subjectId = requirements.value[0].id
+    }
+
+    // 如果没有供应/采购标的，用企业ID作为兜底（subjectId=companyId, type=SUPPLY）
+    if (!subjectId) {
+      subjectId = company.value.id
+    }
+
+    const conversationId = await openConversation({
+      peerUserId: company.value.ownerUserId,
+      subjectType,
+      subjectId,
+    })
+    const peerName = company.value.companyName || ''
+    uni.navigateTo({
+      url: `/pages/chat/conversation?id=${conversationId}&peerId=${company.value.ownerUserId}&name=${encodeURIComponent(peerName)}`,
+    })
+  } catch {
+    uni.showToast({ title: '打开会话失败', icon: 'none' })
+  } finally {
+    chatLoading.value = false
+  }
 }
 
 /** Navigate to the full address on the map (future) */
@@ -159,6 +293,56 @@ function handleViewRequirement(id: number) {
         <text class="detail-card__intro">{{ company.companyIntro }}</text>
       </view>
 
+      <!-- Certificates (Task 7) -->
+      <view v-if="certificates.length > 0" class="detail-card">
+        <text class="detail-card__title">资质证书</text>
+        <scroll-view scroll-x :show-scrollbar="false" class="cert-scroll">
+          <view class="cert-list">
+            <view
+              v-for="(cert, index) in certificates"
+              :key="index"
+              class="cert-item"
+              @tap="handlePreviewCertificate(index)"
+            >
+              <image
+                class="cert-img"
+                :src="cert"
+                mode="aspectFill"
+              />
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <!-- Map location (Task 6) -->
+      <view v-if="showMapSection" class="detail-card">
+        <text class="detail-card__title">厂区位置</text>
+
+        <!-- 有经纬度：显示地图 -->
+        <view v-if="hasCoords" class="map-container">
+          <map
+            class="map-view"
+            :latitude="company.lat"
+            :longitude="company.lng"
+            :markers="mapMarkers"
+            :scale="12"
+            :show-location="false"
+          />
+        </view>
+
+        <!-- 地址文字 -->
+        <view v-if="fullAddress" class="map-address">
+          <uni-icons type="location" size="16" color="#A8A29E" />
+          <text class="map-address__text">{{ fullAddress }}</text>
+        </view>
+
+        <!-- 导航按钮 -->
+        <view class="map-nav-btn" @tap="handleOpenNavigation">
+          <uni-icons type="navigate" size="16" color="#2D6A4F" />
+          <text class="map-nav-btn__text">{{ hasCoords ? '导航前往' : '复制地址' }}</text>
+        </view>
+      </view>
+
       <!-- Supply list -->
       <view v-if="supplies.length" class="detail-card">
         <text class="detail-card__title">供应信息 ({{ supplies.length }})</text>
@@ -196,6 +380,14 @@ function handleViewRequirement(id: number) {
           @tap="handleToggleFollow"
         >
           <text>{{ followLoading ? '...' : (isFollowing ? '已关注' : '+ 关注') }}</text>
+        </view>
+        <view
+          v-if="canChat"
+          class="bottom-bar__btn bottom-bar__btn--chat"
+          @tap="handleChat"
+        >
+          <uni-icons type="chat" size="18" color="#2D6A4F" />
+          <text>{{ chatLoading ? '连接中...' : '在线聊天' }}</text>
         </view>
         <button class="bottom-bar__btn bottom-bar__btn--primary" @tap="handleCall">
           <uni-icons type="phone" size="18" color="#fff" />
@@ -361,6 +553,81 @@ function handleViewRequirement(id: number) {
   }
 }
 
+/* ===== Certificates (Task 7) ===== */
+.cert-scroll {
+  white-space: nowrap;
+}
+
+.cert-list {
+  display: inline-flex;
+  gap: $spacing-sm;
+  padding: 4rpx 0;
+}
+
+.cert-item {
+  width: 200rpx;
+  height: 150rpx;
+  border-radius: $radius-md;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1rpx solid $border-light;
+}
+
+.cert-img {
+  width: 200rpx;
+  height: 150rpx;
+}
+
+/* ===== Map (Task 6) ===== */
+.map-container {
+  width: 100%;
+  height: 400rpx;
+  border-radius: $radius-md;
+  overflow: hidden;
+  margin-bottom: $spacing-sm;
+}
+
+.map-view {
+  width: 100%;
+  height: 400rpx;
+}
+
+.map-address {
+  display: flex;
+  align-items: flex-start;
+  gap: 8rpx;
+  margin-bottom: $spacing-sm;
+
+  &__text {
+    flex: 1;
+    font-size: $font-sm;
+    color: $text-secondary;
+    line-height: 1.5;
+    word-break: break-all;
+  }
+}
+
+.map-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  height: 72rpx;
+  border-radius: $radius-md;
+  background: $brand-50;
+  border: 1rpx solid $brand-600;
+
+  &__text {
+    font-size: $font-md;
+    color: $brand-600;
+    font-weight: 600;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
 /* ===== List item (supply/requirement) ===== */
 .list-item {
   display: flex;
@@ -422,6 +689,20 @@ function handleViewRequirement(id: number) {
       background: $bg-page;
       border: 1rpx solid $border-color;
       color: $text-secondary;
+    }
+
+    &--chat {
+      background: $brand-50;
+      border: 1rpx solid $brand-600;
+      color: $brand-600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $spacing-xs;
+
+      &:active {
+        transform: scale(0.95);
+      }
     }
 
     &--primary {

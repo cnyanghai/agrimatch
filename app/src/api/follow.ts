@@ -46,3 +46,27 @@ export function getFollowedPosts() {
 export function getFollowStats(userId: number) {
   return get<FollowStats>(`/api/follows/stats/${userId}`)
 }
+
+/**
+ * 批量检查关注状态（并行请求，后端暂无批量接口）
+ * 返回 Map<userId, isFollowing>
+ */
+export async function batchCheckFollowStatus(userIds: number[]): Promise<Map<number, boolean>> {
+  const map = new Map<number, boolean>()
+  if (!userIds.length) return map
+
+  const results = await Promise.allSettled(
+    userIds.map(async (uid) => {
+      const following = await checkFollowStatus(uid)
+      return { uid, following }
+    })
+  )
+
+  for (const result of results) {
+    if (result.status === 'fulfilled') {
+      map.set(result.value.uid, result.value.following)
+    }
+  }
+
+  return map
+}

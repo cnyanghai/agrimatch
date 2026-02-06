@@ -69,7 +69,40 @@ function goAuthorProfile() {
 }
 
 function handleShare() {
-  uni.showToast({ title: '分享功能开发中', icon: 'none' })
+  if (!detail.value) return
+  const title = detail.value.title || '话题分享'
+  const summary = getDisplayName(detail.value) + ': ' + (detail.value.content ? stripHtml(detail.value.content).slice(0, 60) : title)
+  // #ifdef APP-PLUS
+  uni.share({
+    provider: 'weixin',
+    type: 0,
+    title,
+    summary,
+    success() {
+      uni.showToast({ title: '分享成功', icon: 'success' })
+    },
+    fail() {
+      uni.setClipboardData({
+        data: `${title} - ${summary}`,
+        success() {
+          uni.showToast({ title: '已复制到剪贴板', icon: 'success' })
+        },
+      })
+    },
+  })
+  // #endif
+  // #ifdef H5
+  uni.setClipboardData({
+    data: `${title} - ${summary}`,
+    success() {
+      uni.showToast({ title: '已复制到剪贴板', icon: 'success' })
+    },
+  })
+  // #endif
+}
+
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').trim()
 }
 
 async function loadComments(postId: number) {

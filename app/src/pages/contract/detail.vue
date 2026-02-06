@@ -1,19 +1,28 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import {
   getContract,
   contractStatusMap,
   paymentMethodMap,
+  getContractPdfDownloadPath,
   type ContractResponse,
 } from '../../api/contract'
 import { listMilestones, type MilestoneResponse } from '../../api/milestone'
 import { useContractActions } from '../../composables/useContractActions'
+import { useAuthStore } from '../../store/auth'
+import { getBaseUrl } from '../../utils/request'
 import { formatAmount, formatPrice, formatDate, formatDateTime } from '../../utils/format'
+import ContractDocument from './components/contract-document.vue'
 
+const authStore = useAuthStore()
 const detail = ref<ContractResponse | null>(null)
 const loading = ref(true)
 const milestones = ref<MilestoneResponse[]>([])
+const pdfDownloading = ref(false)
+
+/** 是否展开合同文档视图 */
+const showDocument = ref(false)
 
 const {
   canEdit,
@@ -22,10 +31,21 @@ const {
   canCancel,
   canAddMilestone,
   handleSend,
-  handleSign,
   handleCancel,
   handleDelete,
 } = useContractActions(detail)
+
+/** 是否可以下载PDF（非草稿状态都可以下载） */
+const canDownloadPdf = computed(() => {
+  if (!detail.value) return false
+  return detail.value.status >= 1
+})
+
+/** 是否显示法律条款（待签署及之后的状态） */
+const showLegalTerms = computed(() => {
+  if (!detail.value) return false
+  return detail.value.status >= 1
+})
 
 onLoad(async (options) => {
   if (options?.id) {
@@ -73,12 +93,12 @@ function milestonePercent(): number {
 
 function getMilestoneStatusIcon(status: string): string {
   const map: Record<string, string> = {
-    CONFIRMED: '✅',
-    SUBMITTED: '📤',
-    PENDING: '⏳',
-    REJECTED: '❌',
+    CONFIRMED: '|',
+    SUBMITTED: '>',
+    PENDING: '...',
+    REJECTED: 'x',
   }
-  return map[status] || '⏳'
+  return map[status] || '...'
 }
 
 function getMilestoneStatusLabel(status: string): string {
@@ -105,20 +125,18 @@ function goMilestones() {
 }
 
 function goEdit() {
-  // For now, navigate to detail with edit mode in the future
   uni.showToast({ title: '编辑功能开发中', icon: 'none' })
+}
+
+/** 跳转到签署页面（支持多种签署方式） */
+function goSign() {
+  if (!detail.value) return
+  uni.navigateTo({ url: `/pages/contract/sign?id=${detail.value.id}` })
 }
 
 // Action handlers with reload
 async function onSend() {
   const ok = await handleSend()
-  if (ok && detail.value) {
-    detail.value = await getContract(detail.value.id)
-  }
-}
-
-async function onSign() {
-  const ok = await handleSign()
   if (ok && detail.value) {
     detail.value = await getContract(detail.value.id)
   }
@@ -131,7 +149,101 @@ async function onCancel() {
   }
 }
 
-const hasActions = ref(true)
+/** 刷新合同详情（从签署页返回时） */
+async function refreshDetail() {
+  if (!detail.value) return
+  try {
+    detail.value = await getContract(detail.value.id)
+    loadMilestones()
+  } catch {
+    // silent
+  }
+}
+
+/** 下载合同PDF */
+async function downloadPdf() {
+  if (!detail.value || pdfDownloading.value) return
+
+  pdfDownloading.value = true
+  const pdfPath = getContractPdfDownloadPath(detail.value.id)
+  const fullUrl = `${getBaseUrl()}${pdfPath}`
+  const contractNo = detail.value.contractNo || `contract-${detail.value.id}`
+
+  try {
+    // #ifdef H5
+    // H5环境：使用fetch + blob方式下载（带Authorization头）
+    const link = document.createElement('a')
+    link.download = `合同-${contractNo}.pdf`
+    if (authStore.token) {
+      const response = await fetch(fullUrl, {
+        headers: { Authorization: `Bearer ${authStore.token}` }
+      })
+      if (!response.ok) throw new Error(`下载失败 (${response.status})`)
+      const blob = await response.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      link.href = blobUrl
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(blobUrl)
+    } else {
+      link.href = fullUrl
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+    uni.showToast({ title: 'PDF下载成功', icon: 'success' })
+    // #endif
+
+    // #ifdef APP-PLUS
+    // APP-PLUS环境：使用uni.downloadFile下载到本地
+    const downloadResult = await new Promise<UniApp.DownloadSuccessData>((resolve, reject) => {
+      uni.downloadFile({
+        url: fullUrl,
+        header: authStore.token ? { Authorization: `Bearer ${authStore.token}` } : {},
+        success: (res) => {
+          if (res.statusCode === 200) {
+            resolve(res)
+          } else {
+            reject(new Error(`下载失败 (${res.statusCode})`))
+          }
+        },
+        fail: (err) => reject(err),
+      })
+    })
+
+    // 打开文件预览（允许用户从菜单保存/分享）
+    const tempPath = downloadResult.tempFilePath
+
+    // 使用系统文档预览打开PDF
+    uni.openDocument({
+      filePath: tempPath,
+      fileType: 'pdf',
+      showMenu: true,  // 允许用户从菜单保存/分享
+      success: () => {
+        uni.showToast({ title: 'PDF已打开', icon: 'success' })
+      },
+      fail: () => {
+        // 如果无法预览，提示已下载
+        uni.showToast({ title: 'PDF已下载到临时目录', icon: 'success' })
+      },
+    })
+    // #endif
+  } catch (e: any) {
+    console.error('PDF下载失败:', e)
+    uni.showToast({ title: e?.message || 'PDF下载失败，请重试', icon: 'none' })
+  } finally {
+    pdfDownloading.value = false
+  }
+}
+
+// 页面显示时刷新（从签署页返回）
+import { onShow } from '@dcloudio/uni-app'
+onShow(() => {
+  if (detail.value) {
+    refreshDetail()
+  }
+})
 </script>
 
 <template>
@@ -147,6 +259,31 @@ const hasActions = ref(true)
       <view class="status-header" :style="{ backgroundColor: getStatusColor(detail.status) }">
         <text class="status-header__label">{{ getStatusLabel(detail.status) }}</text>
         <text class="status-header__no">合同编号：{{ detail.contractNo }}</text>
+      </view>
+
+      <!-- 查看合同文档 & 下载PDF -->
+      <view class="doc-actions">
+        <view class="doc-toggle" @tap="showDocument = !showDocument">
+          <text class="doc-toggle__text">{{ showDocument ? '收起合同文档' : '查看合同文档' }}</text>
+          <text class="doc-toggle__arrow">{{ showDocument ? '&#9650;' : '&#9660;' }}</text>
+        </view>
+        <view
+          v-if="canDownloadPdf"
+          class="pdf-download-btn"
+          :class="{ 'pdf-download-btn--loading': pdfDownloading }"
+          @tap="downloadPdf"
+        >
+          <text class="pdf-download-btn__icon">&#128196;</text>
+          <text class="pdf-download-btn__text">{{ pdfDownloading ? '下载中...' : '导出PDF' }}</text>
+        </view>
+      </view>
+
+      <!-- 合同文档组件 -->
+      <view v-if="showDocument" class="doc-wrapper">
+        <ContractDocument
+          :contract="detail"
+          :show-legal-terms="showLegalTerms"
+        />
       </view>
 
       <!-- 金额卡片 -->
@@ -180,6 +317,14 @@ const hasActions = ref(true)
         <view class="info-row">
           <text class="info-row__label">单价</text>
           <text class="info-row__value">{{ formatPrice(detail.unitPrice) }}</text>
+        </view>
+        <view class="info-row" v-if="detail.invoiceType">
+          <text class="info-row__label">发票类型</text>
+          <text class="info-row__value">{{ detail.invoiceType }}</text>
+        </view>
+        <view class="info-row" v-if="detail.packaging">
+          <text class="info-row__label">包装方式</text>
+          <text class="info-row__value">{{ detail.packaging }}</text>
         </view>
       </view>
 
@@ -285,11 +430,11 @@ const hasActions = ref(true)
             {{ ms.actualDate || ms.expectedDate || '' }}
           </text>
           <text class="milestone-item__status">
-            {{ getMilestoneStatusIcon(ms.status) }} {{ getMilestoneStatusLabel(ms.status) }}
+            {{ getMilestoneStatusLabel(ms.status) }}
           </text>
         </view>
         <view class="milestone-more" @tap="goMilestones">
-          <text class="milestone-more__text">查看全部节点 →</text>
+          <text class="milestone-more__text">查看全部节点 ></text>
         </view>
       </view>
 
@@ -331,11 +476,22 @@ const hasActions = ref(true)
         <view v-if="canSend" class="action-bar__btn action-bar__btn--primary" @tap="onSend">
           <text class="action-bar__btn-text action-bar__btn-text--primary">发送签署</text>
         </view>
-        <view v-if="canSign" class="action-bar__btn action-bar__btn--primary" @tap="onSign">
-          <text class="action-bar__btn-text action-bar__btn-text--primary">签署</text>
+        <view v-if="canSign" class="action-bar__btn action-bar__btn--primary" @tap="goSign">
+          <text class="action-bar__btn-text action-bar__btn-text--primary">签署合同</text>
         </view>
         <view v-if="canCancel && !canEdit" class="action-bar__btn action-bar__btn--danger" @tap="onCancel">
           <text class="action-bar__btn-text action-bar__btn-text--danger">取消合同</text>
+        </view>
+      </view>
+      <!-- 仅有PDF下载（无其他操作）时的单独底部栏 -->
+      <view
+        v-else-if="canDownloadPdf"
+        class="action-bar safe-area-bottom"
+      >
+        <view class="action-bar__btn action-bar__btn--secondary" @tap="downloadPdf">
+          <text class="action-bar__btn-text action-bar__btn-text--secondary">
+            {{ pdfDownloading ? '下载中...' : '下载PDF' }}
+          </text>
         </view>
       </view>
     </template>
@@ -347,6 +503,66 @@ const hasActions = ref(true)
   min-height: 100vh;
   background: $bg-page;
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ===== 合同文档操作区 ===== */
+.doc-actions {
+  display: flex;
+  gap: $spacing-sm;
+  margin: $spacing-sm $spacing-sm 0;
+}
+
+.doc-toggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  padding: $spacing-sm;
+  background: $bg-card;
+  border-radius: $radius-lg;
+
+  &__text {
+    font-size: $font-md;
+    font-weight: 600;
+    color: $brand-600;
+  }
+
+  &__arrow {
+    font-size: $font-sm;
+    color: $brand-600;
+  }
+}
+
+.pdf-download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-md;
+  background: $bg-card;
+  border-radius: $radius-lg;
+  flex-shrink: 0;
+
+  &--loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  &__icon {
+    font-size: $font-md;
+  }
+
+  &__text {
+    font-size: $font-sm;
+    font-weight: 600;
+    color: $brand-600;
+    white-space: nowrap;
+  }
+}
+
+.doc-wrapper {
+  margin-top: $spacing-sm;
 }
 
 /* ===== 状态头部 ===== */

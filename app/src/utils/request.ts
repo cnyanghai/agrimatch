@@ -7,7 +7,7 @@
 import { useAuthStore } from '../store/auth'
 
 /** API 基础地址 */
-function getBaseUrl(): string {
+export function getBaseUrl(): string {
   // #ifdef H5
   return ''
   // #endif

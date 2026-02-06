@@ -5,11 +5,7 @@ import { useAuthStore } from './store/auth'
 onLaunch(() => {
   const authStore = useAuthStore()
   authStore.restoreSession()
-
-  // 未登录时强制跳转登录页
-  if (!authStore.isLoggedIn) {
-    uni.reLaunch({ url: '/pages/auth/login' })
-  }
+  // Allow browsing without login - login is prompted when needed
 })
 
 onShow(() => {
@@ -183,5 +179,18 @@ input, textarea {
 /* 品牌渐变背景 */
 .bg-brand-gradient {
   background: linear-gradient(180deg, $brand-700 0%, $brand-600 100%);
+}
+
+/* 骨架屏占位高度 */
+.skeleton-block {
+  background: linear-gradient(90deg, #F5F0E8 25%, #E8E0D4 37%, #F5F0E8 63%);
+  background-size: 200% 100%;
+  animation: shimmer-block 1.5s infinite ease-in-out;
+  border-radius: $radius-sm;
+}
+
+@keyframes shimmer-block {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 </style>

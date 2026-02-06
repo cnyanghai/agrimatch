@@ -15,7 +15,11 @@ function goChangePassword() {
 }
 
 function goAbout() {
-  uni.showToast({ title: '沃谷 - 农牧供需智能匹配平台', icon: 'none' })
+  uni.showToast({ title: '沃谷 - 农牧供需智能匹配平台 v1.0.0', icon: 'none' })
+}
+
+function goLegal(type: string) {
+  uni.navigateTo({ url: `/pages/legal/index?type=${type}` })
 }
 
 function clearCache() {
@@ -90,6 +94,39 @@ function handleLogout() {
           <text class="menu-item__value">v1.0.0</text>
           <uni-icons type="right" size="16" color="#999" />
         </view>
+      </view>
+    </view>
+
+    <!-- 法律文档 -->
+    <view class="menu-group">
+      <view class="menu-group__title">法律与合规</view>
+      <view class="menu-item" @tap="goLegal('terms')">
+        <view class="menu-item__left">
+          <view class="menu-item__icon"><uni-icons type="list" size="20" color="#2D6A4F" /></view>
+          <text class="menu-item__label">用户协议</text>
+        </view>
+        <uni-icons type="right" size="16" color="#999" />
+      </view>
+      <view class="menu-item" @tap="goLegal('privacy')">
+        <view class="menu-item__left">
+          <view class="menu-item__icon"><uni-icons type="locked" size="20" color="#2D6A4F" /></view>
+          <text class="menu-item__label">隐私政策</text>
+        </view>
+        <uni-icons type="right" size="16" color="#999" />
+      </view>
+      <view class="menu-item" @tap="goLegal('disclaimer')">
+        <view class="menu-item__left">
+          <view class="menu-item__icon"><uni-icons type="info" size="20" color="#E76F51" /></view>
+          <text class="menu-item__label">免责声明</text>
+        </view>
+        <uni-icons type="right" size="16" color="#999" />
+      </view>
+      <view class="menu-item" @tap="goLegal('feedback')">
+        <view class="menu-item__left">
+          <view class="menu-item__icon"><uni-icons type="chatboxes" size="20" color="#2563eb" /></view>
+          <text class="menu-item__label">意见反馈</text>
+        </view>
+        <uni-icons type="right" size="16" color="#999" />
       </view>
     </view>
 

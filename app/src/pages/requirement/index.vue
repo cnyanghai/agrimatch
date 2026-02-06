@@ -3,7 +3,19 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import { listRequirements, type RequirementResponse } from '../../api/requirement'
 import { getSchemaTree, type ProductSchemaVO } from '../../api/productSchema'
-import { formatPrice, formatRelativeTime } from '../../utils/format'
+import { followUser, unfollowUser, batchCheckFollowStatus } from '../../api/follow'
+import { openConversation } from '../../api/chat'
+import { useAuthStore } from '../../store/auth'
+import { formatPrice, formatRelativeTime, formatRemainingTime } from '../../utils/format'
+import { parseParamTags } from '../../utils/parseParams'
+import { getUnitLabel } from '../../utils/unitConfig'
+
+const authStore = useAuthStore()
+
+/** 获取卡片的质量参数标签（最多5个） */
+function getParamTags(item: RequirementResponse): string[] {
+  return parseParamTags(item.paramsJson, 5)
+}
 
 const PAGE_SIZE = 20
 
@@ -42,11 +54,25 @@ const filteredList = computed(() => {
   let list = [...allData.value]
   if (keyword.value.trim()) {
     const kw = keyword.value.trim().toLowerCase()
-    list = list.filter(item =>
-      item.categoryName.toLowerCase().includes(kw) ||
-      (item.companyName || '').toLowerCase().includes(kw) ||
-      (item.purchaseAddress || '').toLowerCase().includes(kw)
-    )
+    list = list.filter(item => {
+      // 基础字段
+      if (item.categoryName.toLowerCase().includes(kw)) return true
+      if ((item.companyName || '').toLowerCase().includes(kw)) return true
+      if ((item.purchaseAddress || '').toLowerCase().includes(kw)) return true
+      // 扩展字段：昵称、用户名、包装、付款、交货方式、备注
+      if ((item.nickName || '').toLowerCase().includes(kw)) return true
+      if ((item.userName || '').toLowerCase().includes(kw)) return true
+      if ((item.packaging || '').toLowerCase().includes(kw)) return true
+      if ((item.paymentMethod || '').toLowerCase().includes(kw)) return true
+      if ((item.deliveryMethod || '').toLowerCase().includes(kw)) return true
+      if ((item.remark || '').toLowerCase().includes(kw)) return true
+      // paramsJson 参数键值匹配
+      if (item.paramsJson) {
+        const tags = parseParamTags(item.paramsJson, 999)
+        if (tags.some(tag => tag.toLowerCase().includes(kw))) return true
+      }
+      return false
+    })
   }
   if (sortMode.value === 'priceDesc') {
     list.sort((a, b) => (b.expectedPrice || 0) - (a.expectedPrice || 0))
@@ -124,6 +150,8 @@ async function loadData() {
     const res = await listRequirements(params)
     allData.value = res || []
     displayCount.value = PAGE_SIZE
+    // Task 6: 批量加载关注状态
+    loadFollowStatus(allData.value)
   } catch {
     // handled by request.ts
   } finally {
@@ -143,6 +171,125 @@ function goDetail(id: number) {
 
 function goPublish() {
   uni.navigateTo({ url: '/pages/requirement/publish' })
+}
+
+// ===== Task 6: Follow functionality =====
+const followingMap = ref<Map<number, boolean>>(new Map())
+
+/** 批量加载关注状态（列表加载后调用，不逐卡片请求） */
+async function loadFollowStatus(items: RequirementResponse[]) {
+  if (!authStore.isLoggedIn) return
+  const myUserId = authStore.user?.userId
+  const userIds = [...new Set(
+    items
+      .map(item => item.userId)
+      .filter((uid): uid is number => !!uid && uid !== myUserId)
+  )]
+  // 过滤已缓存的
+  const unchecked = userIds.filter(uid => !followingMap.value.has(uid))
+  if (unchecked.length === 0) return
+
+  try {
+    const result = await batchCheckFollowStatus(unchecked)
+    for (const [uid, following] of result) {
+      followingMap.value.set(uid, following)
+    }
+  } catch {
+    // 静默失败，不影响列表展示
+  }
+}
+
+function isFollowingUser(userId?: number): boolean {
+  if (!userId) return false
+  return followingMap.value.get(userId) || false
+}
+
+function isSelfUser(userId?: number): boolean {
+  if (!userId || !authStore.user?.userId) return true
+  return userId === authStore.user.userId
+}
+
+async function toggleFollow(item: RequirementResponse) {
+  if (!authStore.isLoggedIn) {
+    uni.navigateTo({ url: '/pages/auth/login' })
+    return
+  }
+  if (!item.userId) {
+    uni.showToast({ title: '无法关注该用户', icon: 'none' })
+    return
+  }
+  if (isSelfUser(item.userId)) {
+    uni.showToast({ title: '不能关注自己', icon: 'none' })
+    return
+  }
+
+  const isFollowing = followingMap.value.get(item.userId) || false
+  try {
+    if (isFollowing) {
+      await unfollowUser(item.userId)
+      followingMap.value.set(item.userId, false)
+      uni.showToast({ title: '已取消关注', icon: 'success' })
+    } else {
+      await followUser(item.userId)
+      followingMap.value.set(item.userId, true)
+      uni.showToast({ title: '已关注', icon: 'success' })
+    }
+  } catch {
+    uni.showToast({ title: '操作失败', icon: 'none' })
+  }
+}
+
+// ===== Task 7: Direct chat from list =====
+function buildNeedSnapshot(item: RequirementResponse): string {
+  return JSON.stringify({
+    snapshotTime: new Date().toLocaleString('zh-CN'),
+    title: item.categoryName,
+    categoryName: item.categoryName,
+    companyName: item.companyName,
+    nickName: item.nickName,
+    expectedPrice: item.expectedPrice,
+    quantity: item.quantity,
+    remainingQuantity: item.remainingQuantity,
+    purchaseAddress: item.purchaseAddress,
+    paymentMethod: item.paymentMethod,
+    deliveryMethod: item.deliveryMethod,
+    packaging: item.packaging,
+    paramsJson: item.paramsJson,
+    remark: item.remark,
+  })
+}
+
+async function handleQuote(item: RequirementResponse) {
+  if (!authStore.isLoggedIn) {
+    uni.navigateTo({ url: '/pages/auth/login' })
+    return
+  }
+  if (!item.userId || !item.id) {
+    uni.showToast({ title: '该条需求暂不支持报价', icon: 'none' })
+    return
+  }
+  if (isSelfUser(item.userId)) {
+    uni.showToast({ title: '不能和自己聊天', icon: 'none' })
+    return
+  }
+
+  try {
+    uni.showLoading({ title: '正在打开会话...' })
+    const conversationId = await openConversation({
+      peerUserId: item.userId,
+      subjectType: 'NEED',
+      subjectId: item.id,
+      subjectSnapshotJson: buildNeedSnapshot(item),
+    })
+    uni.hideLoading()
+    const peerName = item.companyName || item.nickName || item.userName || ''
+    uni.navigateTo({
+      url: `/pages/chat/conversation?id=${conversationId}&peerId=${item.userId}&name=${encodeURIComponent(peerName)}`,
+    })
+  } catch {
+    uni.hideLoading()
+    uni.showToast({ title: '发起报价失败', icon: 'none' })
+  }
 }
 </script>
 
@@ -237,22 +384,54 @@ function goPublish() {
           <view class="req-card__company-row">
             <uni-icons type="shop" size="14" color="#A8A29E" />
             <text class="req-card__company">{{ item.companyName || item.nickName || item.userName }}</text>
+            <!-- Task 6: Follow button -->
+            <view
+              v-if="authStore.isLoggedIn && item.userId && !isSelfUser(item.userId)"
+              class="req-card__follow-btn"
+              :class="{ 'req-card__follow-btn--active': isFollowingUser(item.userId) }"
+              @tap.stop="toggleFollow(item)"
+            >
+              <text
+                class="req-card__follow-text"
+                :class="{ 'req-card__follow-text--active': isFollowingUser(item.userId) }"
+              >{{ isFollowingUser(item.userId) ? '已关注' : '+ 关注' }}</text>
+            </view>
           </view>
           <view class="req-card__tags">
-            <text v-if="item.quantity" class="req-card__tag">{{ item.quantity }}吨</text>
+            <text v-if="item.quantity" class="req-card__tag">{{ item.quantity }}{{ getUnitLabel(item.schemaCode, 'quantity', item.categoryName) }}</text>
             <text v-if="item.paymentMethod" class="req-card__tag">{{ item.paymentMethod }}</text>
             <text v-if="item.deliveryMethod" class="req-card__tag">{{ item.deliveryMethod }}</text>
           </view>
+          <!-- 质量指标标签 (Task 1) -->
+          <scroll-view v-if="getParamTags(item).length > 0" scroll-x class="req-card__params-scroll" :show-scrollbar="false">
+            <view class="req-card__params">
+              <text
+                v-for="(tag, idx) in getParamTags(item)"
+                :key="idx"
+                class="req-card__param-tag"
+              >{{ tag }}</text>
+            </view>
+          </scroll-view>
           <view class="req-card__bottom">
             <view class="req-card__meta">
-              <text class="req-card__time">{{ formatRelativeTime(item.createTime) }}</text>
+              <view class="req-card__time-row">
+                <text class="req-card__time">{{ formatRelativeTime(item.createTime) }}</text>
+                <text
+                  v-if="formatRemainingTime(item.expireTime)"
+                  class="req-card__expire"
+                  :class="{
+                    'req-card__expire--warning': formatRemainingTime(item.expireTime)?.level === 'warning',
+                    'req-card__expire--expired': formatRemainingTime(item.expireTime)?.level === 'expired',
+                  }"
+                >{{ formatRemainingTime(item.expireTime)?.text }}</text>
+              </view>
               <view v-if="item.purchaseAddress" class="req-card__location">
                 <uni-icons type="location" size="12" color="#A8A29E" />
                 <text class="req-card__address">{{ item.purchaseAddress }}</text>
               </view>
             </view>
-            <view class="req-card__action" @tap.stop="goDetail(item.id)">
-              <text class="req-card__action-text">咨询</text>
+            <view class="req-card__action" @tap.stop="handleQuote(item)">
+              <text class="req-card__action-text">报价</text>
             </view>
           </view>
         </view>
@@ -480,11 +659,41 @@ function goPublish() {
   }
 
   &__company {
+    flex: 1;
     font-size: $font-sm;
     color: $text-secondary;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  /* Task 6: Follow button */
+  &__follow-btn {
+    flex-shrink: 0;
+    padding: 4rpx 16rpx;
+    border-radius: $radius-pill;
+    border: 1rpx solid $warm-300;
+    background: #ffffff;
+    margin-left: $spacing-xs;
+
+    &--active {
+      border-color: $autumn-200;
+      background: $autumn-50;
+    }
+
+    &:active {
+      opacity: 0.7;
+    }
+  }
+
+  &__follow-text {
+    font-size: 20rpx;
+    font-weight: 600;
+    color: $text-secondary;
+
+    &--active {
+      color: $autumn-500;
+    }
   }
 
   &__tags {
@@ -502,6 +711,29 @@ function goPublish() {
     border-radius: $radius-pill;
   }
 
+  /* 质量指标标签 (Task 1) */
+  &__params-scroll {
+    white-space: nowrap;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__params {
+    display: inline-flex;
+    gap: $spacing-xs;
+    padding: 0 2rpx;
+  }
+
+  &__param-tag {
+    display: inline-block;
+    font-size: 20rpx;
+    color: #57534E;
+    background: #F5F5F4;
+    border: 1rpx solid #E7E5E4;
+    padding: 4rpx 12rpx;
+    border-radius: $radius-sm;
+    white-space: nowrap;
+  }
+
   &__bottom {
     display: flex;
     justify-content: space-between;
@@ -515,10 +747,30 @@ function goPublish() {
     min-width: 0;
   }
 
+  &__time-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
   &__time {
     font-size: $font-xs;
     color: $text-placeholder;
-    display: block;
+  }
+
+  &__expire {
+    font-size: $font-xs;
+    color: $text-secondary;
+    font-weight: 500;
+
+    &--warning {
+      color: #DC2626;
+      font-weight: 600;
+    }
+
+    &--expired {
+      color: $text-placeholder;
+    }
   }
 
   &__location {

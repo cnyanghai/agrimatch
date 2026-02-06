@@ -56,6 +56,7 @@ export interface ChatConversationOpenRequest {
   peerUserId: number
   subjectType: string
   subjectId: number
+  subjectSnapshotJson?: string
 }
 
 export function openConversation(req: ChatConversationOpenRequest) {

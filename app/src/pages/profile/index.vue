@@ -77,6 +77,22 @@ function goEditProfile() {
   uni.navigateTo({ url: '/pages/settings/edit-profile' })
 }
 
+function goVehicles() {
+  uni.navigateTo({ url: '/pages/vehicle/list' })
+}
+
+function goMap() {
+  uni.navigateTo({ url: '/pages/map/index' })
+}
+
+function goCategoryDirectory() {
+  uni.navigateTo({ url: '/pages/category/directory' })
+}
+
+function goLegal(type = 'terms') {
+  uni.navigateTo({ url: `/pages/legal/index?type=${type}` })
+}
+
 function handleLogout() {
   uni.showModal({
     title: '确认退出',
@@ -189,6 +205,27 @@ function handleLogout() {
           <uni-icons type="contact" size="20" color="#2563eb" />
         </view>
         <text class="menu-item__label">企业名录</text>
+        <uni-icons type="right" size="16" color="#D6CCC0" />
+      </view>
+      <view class="menu-item" @tap="goCategoryDirectory">
+        <view class="menu-item__icon menu-item__icon--brand">
+          <uni-icons type="list" size="20" color="#2D6A4F" />
+        </view>
+        <text class="menu-item__label">品类目录</text>
+        <uni-icons type="right" size="16" color="#D6CCC0" />
+      </view>
+      <view class="menu-item" @tap="goMap">
+        <view class="menu-item__icon menu-item__icon--action">
+          <uni-icons type="location" size="20" color="#2563eb" />
+        </view>
+        <text class="menu-item__label">地图找商</text>
+        <uni-icons type="right" size="16" color="#D6CCC0" />
+      </view>
+      <view v-if="user?.companyId" class="menu-item" @tap="goVehicles">
+        <view class="menu-item__icon menu-item__icon--autumn">
+          <uni-icons type="car" size="20" color="#c28a55" />
+        </view>
+        <text class="menu-item__label">车辆管理</text>
         <uni-icons type="right" size="16" color="#D6CCC0" />
       </view>
     </view>

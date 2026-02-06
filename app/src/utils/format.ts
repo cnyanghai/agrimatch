@@ -68,3 +68,38 @@ export function formatQuantity(qty?: number | null, unit?: string): string {
     : qty.toLocaleString('zh-CN')
   return unit ? `${str}${unit}` : str
 }
+
+/**
+ * 格式化剩余时长
+ * - 剩余>1天：返回 { text: "剩余X天", level: "normal" }
+ * - 剩余<1天且>1小时：返回 { text: "剩余X小时", level: "normal" }
+ * - 剩余<1小时且>0：返回 { text: "即将到期", level: "warning" }
+ * - 已过期：返回 { text: "已过期", level: "expired" }
+ * - 为空：返回 null（不显示）
+ */
+export function formatRemainingTime(
+  expireTime?: string | null,
+): { text: string; level: 'normal' | 'warning' | 'expired' } | null {
+  if (!expireTime) return null
+
+  const now = Date.now()
+  const expire = new Date(expireTime).getTime()
+  if (isNaN(expire)) return null
+
+  const diff = expire - now
+
+  if (diff <= 0) {
+    return { text: '已过期', level: 'expired' }
+  }
+
+  const hours = diff / (1000 * 60 * 60)
+  const days = Math.floor(hours / 24)
+
+  if (days >= 1) {
+    return { text: `剩余${days}天`, level: 'normal' }
+  }
+  if (hours >= 1) {
+    return { text: `剩余${Math.floor(hours)}小时`, level: 'normal' }
+  }
+  return { text: '即将到期', level: 'warning' }
+}

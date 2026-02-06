@@ -18,8 +18,12 @@ export interface CompanyResponse {
   city?: string
   district?: string
   address?: string
+  lat?: number
+  lng?: number
   contacts?: string
   phone?: string
+  /** JSON array of certificate image URLs */
+  certificatesJson?: string
   createTime?: string
 }
 

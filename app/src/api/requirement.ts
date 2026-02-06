@@ -9,6 +9,7 @@ export interface RequirementResponse {
   nickName?: string
   position?: string
   categoryName: string
+  schemaCode?: string
   contractNo?: string
   quantity?: number
   remainingQuantity?: number
@@ -18,6 +19,8 @@ export interface RequirementResponse {
   deliveryMethod?: string
   purchaseAddress?: string
   remark?: string
+  paramsJson?: string
+  imagesJson?: string
   status?: number
   expireTime?: string
   distanceKm?: number

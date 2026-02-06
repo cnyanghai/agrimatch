@@ -1,5 +1,19 @@
 import { get, post, put, del } from '../utils/request'
 
+/** 基差报价响应（单条） */
+export interface BasisQuoteResponse {
+  id: number
+  contractCode: string
+  contractName: string
+  basisPrice: number
+  availableQty: number
+  soldQty: number
+  remainingQty: number
+  lastPrice: number | null
+  referencePrice: number | null
+  remark?: string
+}
+
 export interface SupplyResponse {
   id: number
   companyId: number
@@ -14,16 +28,27 @@ export interface SupplyResponse {
   origin?: string
   quantity?: number
   remainingQuantity?: number
+  /** 报价类型：0=现货一口价，1=基差报价 */
   priceType: number
   exFactoryPrice: number
+  /** 基差报价明细（priceType=1 时有值） */
+  basisQuotes?: BasisQuoteResponse[]
   shipAddress?: string
   deliveryMode?: string
   paymentMethod?: string
+  invoiceType?: string
+  packaging?: string
+  storageMethod?: string
   remark?: string
+  paramsJson?: string
+  priceRulesJson?: string
+  imagesJson?: string
   status?: number
   expireTime?: string
   distanceKm?: number
+  deliveredPrice?: number
   createTime?: string
+  updateTime?: string
 }
 
 export interface SupplyListParams {
