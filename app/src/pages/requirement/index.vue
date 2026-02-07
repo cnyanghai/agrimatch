@@ -298,7 +298,7 @@ async function handleQuote(item: RequirementResponse) {
     <!-- Sticky filter bar -->
     <view class="filter-bar">
       <view class="filter-bar__search">
-        <uni-icons type="search" size="16" color="#A8A29E" />
+        <WgIcon name="search" :size="16" color="#A8A29E" />
         <input
           v-model="keyword"
           class="filter-bar__input"
@@ -382,7 +382,7 @@ async function handleQuote(item: RequirementResponse) {
             <text class="req-card__price">{{ formatPrice(item.expectedPrice) }}</text>
           </view>
           <view class="req-card__company-row">
-            <uni-icons type="shop" size="14" color="#A8A29E" />
+            <WgIcon name="store" :size="14" color="#A8A29E" />
             <text class="req-card__company">{{ item.companyName || item.nickName || item.userName }}</text>
             <!-- Task 6: Follow button -->
             <view
@@ -426,7 +426,7 @@ async function handleQuote(item: RequirementResponse) {
                 >{{ formatRemainingTime(item.expireTime)?.text }}</text>
               </view>
               <view v-if="item.purchaseAddress" class="req-card__location">
-                <uni-icons type="location" size="12" color="#A8A29E" />
+                <WgIcon name="map-pin" :size="12" color="#A8A29E" />
                 <text class="req-card__address">{{ item.purchaseAddress }}</text>
               </view>
             </view>
@@ -447,7 +447,7 @@ async function handleQuote(item: RequirementResponse) {
 
     <!-- FAB -->
     <view class="fab anim-fab-enter" @tap="goPublish">
-      <uni-icons type="plusempty" size="28" color="#fff" />
+      <WgIcon name="plus" :size="24" color="#fff" />
     </view>
 
     <WgTabBar :current="2" />

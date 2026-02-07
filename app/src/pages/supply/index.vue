@@ -318,7 +318,7 @@ async function handleConsult(item: SupplyResponse) {
     <!-- Sticky filter bar -->
     <view class="filter-bar">
       <view class="filter-bar__search">
-        <uni-icons type="search" size="16" color="#A8A29E" />
+        <WgIcon name="search" :size="16" color="#A8A29E" />
         <input
           v-model="keyword"
           class="filter-bar__input"
@@ -404,7 +404,7 @@ async function handleConsult(item: SupplyResponse) {
             <text v-if="item.priceType !== 1" class="supply-card__price">{{ formatPrice(item.exFactoryPrice) }}</text>
           </view>
           <view class="supply-card__company-row">
-            <uni-icons type="shop" size="14" color="#A8A29E" />
+            <WgIcon name="store" :size="14" color="#A8A29E" />
             <text class="supply-card__company">{{ item.companyName || item.nickName || item.userName }}</text>
             <!-- Task 6: Follow button -->
             <view
@@ -440,7 +440,7 @@ async function handleConsult(item: SupplyResponse) {
               <text class="supply-card__basis-toggle-text">
                 {{ expandedBasisIds.has(item.id) ? '收起报价' : `查看基差报价 (${item.basisQuotes.length})` }}
               </text>
-              <uni-icons :type="expandedBasisIds.has(item.id) ? 'up' : 'down'" size="12" color="#B45309" />
+              <WgIcon :name="expandedBasisIds.has(item.id) ? 'chevron-up' : 'chevron-down'" :size="12" color="#B45309" />
             </view>
             <view v-if="expandedBasisIds.has(item.id)" class="supply-card__basis-list">
               <view
@@ -472,7 +472,7 @@ async function handleConsult(item: SupplyResponse) {
                 >{{ formatRemainingTime(item.expireTime)?.text }}</text>
               </view>
               <view v-if="item.shipAddress" class="supply-card__location">
-                <uni-icons type="location" size="12" color="#A8A29E" />
+                <WgIcon name="map-pin" :size="12" color="#A8A29E" />
                 <text class="supply-card__address">{{ item.shipAddress }}</text>
               </view>
             </view>
@@ -493,7 +493,7 @@ async function handleConsult(item: SupplyResponse) {
 
     <!-- FAB -->
     <view class="fab anim-fab-enter" @tap="goPublish">
-      <uni-icons type="plusempty" size="28" color="#fff" />
+      <WgIcon name="plus" :size="24" color="#fff" />
     </view>
 
     <WgTabBar :current="1" />

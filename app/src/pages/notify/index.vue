@@ -63,9 +63,9 @@ async function handleReadAll() {
 /** 通知类型图标配置 */
 function getNotifyStyle(type: string): { icon: string; bgClass: string } {
   switch (type) {
-    case 'LIKE': return { icon: 'heart-filled', bgClass: 'notify-icon--like' }
-    case 'COMMENT': return { icon: 'chat', bgClass: 'notify-icon--comment' }
-    case 'MESSAGE': return { icon: 'email', bgClass: 'notify-icon--message' }
+    case 'LIKE': return { icon: 'heart', bgClass: 'notify-icon--like' }
+    case 'COMMENT': return { icon: 'message-circle', bgClass: 'notify-icon--comment' }
+    case 'MESSAGE': return { icon: 'mail', bgClass: 'notify-icon--message' }
     default: return { icon: 'info', bgClass: 'notify-icon--system' }
   }
 }
@@ -113,7 +113,7 @@ function getNotifyStyle(type: string): { icon: string; bgClass: string } {
         @tap="handleTap(item)"
       >
         <view class="notify-icon" :class="getNotifyStyle(item.type).bgClass">
-          <uni-icons :type="getNotifyStyle(item.type).icon" size="18" color="#fff" />
+          <WgIcon :name="getNotifyStyle(item.type).icon" :size="18" color="#fff" />
         </view>
         <view class="notify-card__body">
           <text class="notify-card__title">{{ item.title }}</text>

@@ -1,11 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useAuthStore } from '../../store/auth'
+import { listSupplies } from '../../api/supply'
+import { listRequirements } from '../../api/requirement'
+import { listContracts } from '../../api/contract'
 
 const authStore = useAuthStore()
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 const user = computed(() => authStore.user)
+
+/** 统计数据 */
+const supplyCount = ref<number | null>(null)
+const requirementCount = ref<number | null>(null)
+const contractCount = ref<number | null>(null)
 
 // 用户名首字
 const avatarChar = computed(() => {
@@ -16,8 +24,26 @@ const avatarChar = computed(() => {
 onShow(() => {
   if (isLoggedIn.value) {
     authStore.checkSession()
+    loadStats()
   }
 })
+
+async function loadStats() {
+  const userId = user.value?.userId
+  if (!userId) return
+  try {
+    const [supplies, requirements, contracts] = await Promise.all([
+      listSupplies({ userId }).catch(() => []),
+      listRequirements({ userId }).catch(() => []),
+      listContracts().catch(() => []),
+    ])
+    supplyCount.value = supplies?.length ?? 0
+    requirementCount.value = requirements?.length ?? 0
+    contractCount.value = contracts?.length ?? 0
+  } catch {
+    // silently fail
+  }
+}
 
 function goLogin() {
   uni.navigateTo({ url: '/pages/auth/login' })
@@ -131,152 +157,114 @@ function handleLogout() {
             <text v-if="user?.isBuyer" class="header__role header__role--autumn">采购商</text>
           </view>
         </view>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
+        <WgIcon name="right" :size="16" color="#D6CCC0" />
       </view>
 
       <!-- 未登录 -->
       <view v-else class="header__guest" @tap="goLogin">
         <view class="header__avatar header__avatar--placeholder">
-          <uni-icons type="person" size="32" color="#A8A29E" />
+          <WgIcon name="user" :size="32" color="#A8A29E" />
         </view>
         <view class="header__info">
           <text class="header__name">点击登录</text>
           <text class="header__company">登录后享受完整功能</text>
         </view>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
+        <WgIcon name="right" :size="16" color="#D6CCC0" />
       </view>
     </view>
 
     <!-- 统计卡片 (独立暖色卡片) -->
-    <view v-if="isLoggedIn" class="stats-row">
+    <view v-if="isLoggedIn" class="stats-row anim-fade-in">
       <view class="stat-card" @tap="goMySupplies">
-        <text class="stat-card__value">-</text>
+        <text class="stat-card__value font-mono">{{ supplyCount ?? '-' }}</text>
         <text class="stat-card__label">供应</text>
       </view>
       <view class="stat-card" @tap="goMyRequirements">
-        <text class="stat-card__value">-</text>
+        <text class="stat-card__value font-mono">{{ requirementCount ?? '-' }}</text>
         <text class="stat-card__label">采购</text>
       </view>
       <view class="stat-card" @tap="goContracts">
-        <text class="stat-card__value">-</text>
+        <text class="stat-card__value font-mono">{{ contractCount ?? '-' }}</text>
         <text class="stat-card__label">合同</text>
       </view>
     </view>
 
-    <!-- 业务功能组 -->
+    <!-- 功能网格（紧凑4列） -->
+    <view class="func-grid anim-slide-up">
+      <view class="func-grid__item" @tap="goMySupplies">
+        <view class="func-grid__icon func-grid__icon--brand"><WgIcon name="store" :size="22" color="#2D6A4F" /></view>
+        <text class="func-grid__label">我的供应</text>
+      </view>
+      <view class="func-grid__item" @tap="goMyRequirements">
+        <view class="func-grid__icon func-grid__icon--autumn"><WgIcon name="shopping-bag" :size="22" color="#c28a55" /></view>
+        <text class="func-grid__label">我的采购</text>
+      </view>
+      <view class="func-grid__item" @tap="goContracts">
+        <view class="func-grid__icon func-grid__icon--action"><WgIcon name="file-text" :size="22" color="#2563eb" /></view>
+        <text class="func-grid__label">我的合同</text>
+      </view>
+      <view class="func-grid__item" @tap="goCollections">
+        <view class="func-grid__icon func-grid__icon--accent"><WgIcon name="bookmark" :size="22" color="#E76F51" /></view>
+        <text class="func-grid__label">我的收藏</text>
+      </view>
+      <view class="func-grid__item" @tap="goFollowing">
+        <view class="func-grid__icon func-grid__icon--brand"><WgIcon name="user-plus" :size="22" color="#2D6A4F" /></view>
+        <text class="func-grid__label">我的关注</text>
+      </view>
+      <view class="func-grid__item" @tap="goNotify">
+        <view class="func-grid__icon func-grid__icon--accent"><WgIcon name="bell" :size="22" color="#E76F51" /></view>
+        <text class="func-grid__label">通知中心</text>
+      </view>
+      <view class="func-grid__item" @tap="goPoints">
+        <view class="func-grid__icon func-grid__icon--autumn"><WgIcon name="award" :size="22" color="#c28a55" /></view>
+        <text class="func-grid__label">我的积分</text>
+      </view>
+      <view class="func-grid__item" @tap="goTopicSquare">
+        <view class="func-grid__icon func-grid__icon--action"><WgIcon name="message-square" :size="22" color="#2563eb" /></view>
+        <text class="func-grid__label">话题广场</text>
+      </view>
+    </view>
+
+    <!-- 发现与工具 -->
     <view class="menu-card">
-      <view class="menu-item" @tap="goMySupplies">
-        <view class="menu-item__icon menu-item__icon--brand">
-          <uni-icons type="shop" size="20" color="#2D6A4F" />
-        </view>
-        <text class="menu-item__label">我的供应</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
-      </view>
-      <view class="menu-item" @tap="goMyRequirements">
-        <view class="menu-item__icon menu-item__icon--autumn">
-          <uni-icons type="cart" size="20" color="#c28a55" />
-        </view>
-        <text class="menu-item__label">我的采购</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
-      </view>
-      <view class="menu-item" @tap="goContracts">
-        <view class="menu-item__icon menu-item__icon--action">
-          <uni-icons type="list" size="20" color="#2563eb" />
-        </view>
-        <text class="menu-item__label">我的合同</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
-      </view>
       <view v-if="user?.companyId" class="menu-item" @tap="goCompany">
-        <view class="menu-item__icon menu-item__icon--brand">
-          <uni-icons type="flag" size="20" color="#2D6A4F" />
-        </view>
+        <view class="menu-item__icon menu-item__icon--brand"><WgIcon name="building" :size="20" color="#2D6A4F" /></view>
         <text class="menu-item__label">企业信息</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
+        <WgIcon name="right" :size="16" color="#D6CCC0" />
       </view>
       <view class="menu-item" @tap="goMarket">
-        <view class="menu-item__icon menu-item__icon--accent">
-          <uni-icons type="bars" size="20" color="#E76F51" />
-        </view>
+        <view class="menu-item__icon menu-item__icon--accent"><WgIcon name="trending-up" :size="20" color="#E76F51" /></view>
         <text class="menu-item__label">行情中心</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
+        <WgIcon name="right" :size="16" color="#D6CCC0" />
       </view>
       <view class="menu-item" @tap="goDirectory">
-        <view class="menu-item__icon menu-item__icon--action">
-          <uni-icons type="contact" size="20" color="#2563eb" />
-        </view>
+        <view class="menu-item__icon menu-item__icon--action"><WgIcon name="building2" :size="20" color="#2563eb" /></view>
         <text class="menu-item__label">企业名录</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
+        <WgIcon name="right" :size="16" color="#D6CCC0" />
       </view>
       <view class="menu-item" @tap="goCategoryDirectory">
-        <view class="menu-item__icon menu-item__icon--brand">
-          <uni-icons type="list" size="20" color="#2D6A4F" />
-        </view>
+        <view class="menu-item__icon menu-item__icon--brand"><WgIcon name="layout-grid" :size="20" color="#2D6A4F" /></view>
         <text class="menu-item__label">品类目录</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
+        <WgIcon name="right" :size="16" color="#D6CCC0" />
       </view>
       <view class="menu-item" @tap="goMap">
-        <view class="menu-item__icon menu-item__icon--action">
-          <uni-icons type="location" size="20" color="#2563eb" />
-        </view>
+        <view class="menu-item__icon menu-item__icon--action"><WgIcon name="map-pin" :size="20" color="#2563eb" /></view>
         <text class="menu-item__label">地图找商</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
+        <WgIcon name="right" :size="16" color="#D6CCC0" />
       </view>
       <view v-if="user?.companyId" class="menu-item" @tap="goVehicles">
-        <view class="menu-item__icon menu-item__icon--autumn">
-          <uni-icons type="car" size="20" color="#c28a55" />
-        </view>
+        <view class="menu-item__icon menu-item__icon--autumn"><WgIcon name="truck" :size="20" color="#c28a55" /></view>
         <text class="menu-item__label">车辆管理</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
+        <WgIcon name="right" :size="16" color="#D6CCC0" />
       </view>
     </view>
 
-    <!-- 社交功能组 -->
+    <!-- 系统 -->
     <view class="menu-card">
-      <view class="menu-item" @tap="goCollections">
-        <view class="menu-item__icon menu-item__icon--accent">
-          <uni-icons type="star-filled" size="20" color="#E76F51" />
-        </view>
-        <text class="menu-item__label">我的收藏</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
-      </view>
-      <view class="menu-item" @tap="goTopicSquare">
-        <view class="menu-item__icon menu-item__icon--action">
-          <uni-icons type="chatboxes" size="20" color="#2563eb" />
-        </view>
-        <text class="menu-item__label">话题广场</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
-      </view>
-      <view class="menu-item" @tap="goFollowing">
-        <view class="menu-item__icon menu-item__icon--brand">
-          <uni-icons type="personadd" size="20" color="#2D6A4F" />
-        </view>
-        <text class="menu-item__label">我的关注</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
-      </view>
-      <view class="menu-item" @tap="goNotify">
-        <view class="menu-item__icon menu-item__icon--accent">
-          <uni-icons type="bell" size="20" color="#E76F51" />
-        </view>
-        <text class="menu-item__label">通知中心</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
-      </view>
-    </view>
-
-    <!-- 系统功能组 -->
-    <view class="menu-card">
-      <view class="menu-item" @tap="goPoints">
-        <view class="menu-item__icon menu-item__icon--autumn">
-          <uni-icons type="gift" size="20" color="#c28a55" />
-        </view>
-        <text class="menu-item__label">我的积分</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
-      </view>
       <view class="menu-item" @tap="goSettings">
-        <view class="menu-item__icon menu-item__icon--gray">
-          <uni-icons type="gear" size="20" color="#78716C" />
-        </view>
+        <view class="menu-item__icon menu-item__icon--gray"><WgIcon name="settings" :size="20" color="#78716C" /></view>
         <text class="menu-item__label">设置</text>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
+        <WgIcon name="right" :size="16" color="#D6CCC0" />
       </view>
     </view>
 
@@ -406,6 +394,51 @@ function handleLogout() {
   &__label {
     font-size: $font-xs;
     color: $text-secondary;
+  }
+}
+
+/* ===== 功能网格 ===== */
+.func-grid {
+  display: flex;
+  flex-wrap: wrap;
+  background: $bg-card;
+  margin: $spacing-md;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-warm-card;
+  padding: $spacing-sm 0;
+
+  &__item {
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $spacing-md 0;
+
+    &:active {
+      opacity: 0.7;
+      transform: scale(0.95);
+    }
+  }
+
+  &__icon {
+    width: 80rpx;
+    height: 80rpx;
+    border-radius: $radius-lg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $spacing-xs;
+
+    &--brand { background: $brand-50; }
+    &--autumn { background: $autumn-50; }
+    &--action { background: rgba(37, 99, 235, 0.08); }
+    &--accent { background: $accent-50; }
+  }
+
+  &__label {
+    font-size: 22rpx;
+    color: $text-secondary;
+    font-weight: 500;
   }
 }
 

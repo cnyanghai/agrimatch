@@ -174,12 +174,12 @@ function switchType(type: PageType) {
         </view>
         <view class="contact-card">
           <view class="contact-item">
-            <uni-icons type="email" size="18" color="#2D6A4F" />
+            <WgIcon name="mail" :size="18" color="#2D6A4F" />
             <text class="contact-item__label">商务邮箱</text>
             <text class="contact-item__value" selectable>{{ SERVICE_EMAIL }}</text>
           </view>
           <view class="contact-item">
-            <uni-icons type="flag" size="18" color="#2D6A4F" />
+            <WgIcon name="building" :size="18" color="#2D6A4F" />
             <text class="contact-item__label">运营主体</text>
             <text class="contact-item__value">{{ COMPANY_NAME }}</text>
           </view>
@@ -196,7 +196,7 @@ function switchType(type: PageType) {
         </view>
         <view class="contact-card">
           <view class="contact-item">
-            <uni-icons type="email" size="18" color="#2D6A4F" />
+            <WgIcon name="mail" :size="18" color="#2D6A4F" />
             <text class="contact-item__label">反馈邮箱</text>
             <text class="contact-item__value" selectable>{{ SERVICE_EMAIL }}</text>
           </view>

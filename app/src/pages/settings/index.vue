@@ -58,20 +58,20 @@ function handleLogout() {
       <view class="menu-group__title">账号设置</view>
       <view class="menu-item" @tap="goEditProfile">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><uni-icons type="person" size="20" color="#2D6A4F" /></view>
+          <view class="menu-item__icon"><WgIcon name="user" :size="20" color="#2D6A4F" /></view>
           <text class="menu-item__label">编辑资料</text>
         </view>
         <view class="menu-item__right">
           <text class="menu-item__value">{{ user?.nickName || user?.userName || '' }}</text>
-          <uni-icons type="right" size="16" color="#999" />
+          <WgIcon name="right" :size="16" color="#999" />
         </view>
       </view>
       <view class="menu-item" @tap="goChangePassword">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><uni-icons type="locked" size="20" color="#666" /></view>
+          <view class="menu-item__icon"><WgIcon name="lock" :size="20" color="#666" /></view>
           <text class="menu-item__label">修改密码</text>
         </view>
-        <uni-icons type="right" size="16" color="#999" />
+        <WgIcon name="right" :size="16" color="#999" />
       </view>
     </view>
 
@@ -80,19 +80,19 @@ function handleLogout() {
       <view class="menu-group__title">通用</view>
       <view class="menu-item" @tap="clearCache">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><uni-icons type="trash" size="20" color="#999" /></view>
+          <view class="menu-item__icon"><WgIcon name="trash" :size="20" color="#999" /></view>
           <text class="menu-item__label">清除缓存</text>
         </view>
-        <uni-icons type="right" size="16" color="#999" />
+        <WgIcon name="right" :size="16" color="#999" />
       </view>
       <view class="menu-item" @tap="goAbout">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><uni-icons type="info" size="20" color="#2563eb" /></view>
+          <view class="menu-item__icon"><WgIcon name="info" :size="20" color="#2563eb" /></view>
           <text class="menu-item__label">关于沃谷</text>
         </view>
         <view class="menu-item__right">
           <text class="menu-item__value">v1.0.0</text>
-          <uni-icons type="right" size="16" color="#999" />
+          <WgIcon name="right" :size="16" color="#999" />
         </view>
       </view>
     </view>
@@ -102,31 +102,31 @@ function handleLogout() {
       <view class="menu-group__title">法律与合规</view>
       <view class="menu-item" @tap="goLegal('terms')">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><uni-icons type="list" size="20" color="#2D6A4F" /></view>
+          <view class="menu-item__icon"><WgIcon name="file-text" :size="20" color="#2D6A4F" /></view>
           <text class="menu-item__label">用户协议</text>
         </view>
-        <uni-icons type="right" size="16" color="#999" />
+        <WgIcon name="right" :size="16" color="#999" />
       </view>
       <view class="menu-item" @tap="goLegal('privacy')">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><uni-icons type="locked" size="20" color="#2D6A4F" /></view>
+          <view class="menu-item__icon"><WgIcon name="lock" :size="20" color="#2D6A4F" /></view>
           <text class="menu-item__label">隐私政策</text>
         </view>
-        <uni-icons type="right" size="16" color="#999" />
+        <WgIcon name="right" :size="16" color="#999" />
       </view>
       <view class="menu-item" @tap="goLegal('disclaimer')">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><uni-icons type="info" size="20" color="#E76F51" /></view>
+          <view class="menu-item__icon"><WgIcon name="info" :size="20" color="#E76F51" /></view>
           <text class="menu-item__label">免责声明</text>
         </view>
-        <uni-icons type="right" size="16" color="#999" />
+        <WgIcon name="right" :size="16" color="#999" />
       </view>
       <view class="menu-item" @tap="goLegal('feedback')">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><uni-icons type="chatboxes" size="20" color="#2563eb" /></view>
+          <view class="menu-item__icon"><WgIcon name="message-square" :size="20" color="#2563eb" /></view>
           <text class="menu-item__label">意见反馈</text>
         </view>
-        <uni-icons type="right" size="16" color="#999" />
+        <WgIcon name="right" :size="16" color="#999" />
       </view>
     </view>
 

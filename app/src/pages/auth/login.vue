@@ -291,7 +291,7 @@ function handleViewPrivacy() {
     <!-- Navigation -->
     <view class="nav" :style="{ paddingTop: statusBarHeight + 'px' }">
       <view v-if="canGoBack" class="nav__back" @tap="handleBack">
-        <uni-icons type="left" size="18" color="#1C1917" />
+        <WgIcon name="left" :size="18" color="#1C1917" />
       </view>
     </view>
 
@@ -316,7 +316,7 @@ function handleViewPrivacy() {
               'step-indicator__dot--done': stepIndex > i - 1
             }"
           >
-            <uni-icons v-if="stepIndex > i - 1" type="checkmarkempty" size="10" color="#fff" />
+            <WgIcon v-if="stepIndex > i - 1" name="check" :size="10" color="#fff" />
             <text v-else-if="stepIndex === i - 1" class="step-indicator__num">{{ i }}</text>
           </view>
           <view v-if="i < 3" class="step-indicator__line" :class="{ 'step-indicator__line--done': stepIndex >= i }" />
@@ -330,7 +330,7 @@ function handleViewPrivacy() {
 
         <view class="form-group">
           <view class="form-input-wrap" :class="{ 'form-input-wrap--error': phone.length > 0 && !isPhoneValid }">
-            <uni-icons type="phone" size="18" color="#A8A29E" />
+            <WgIcon name="phone" :size="18" color="#A8A29E" />
             <input
               v-model="phone"
               type="number"
@@ -346,7 +346,7 @@ function handleViewPrivacy() {
         <!-- Agreement -->
         <view class="agreement">
           <view class="agreement__check" :class="{ 'agreement__check--active': agreed }" @tap="agreed = !agreed">
-            <uni-icons v-if="agreed" type="checkmarkempty" size="11" color="#fff" />
+            <WgIcon v-if="agreed" name="check" :size="11" color="#fff" />
           </view>
           <view class="agreement__body">
             <text class="agreement__text" @tap="agreed = !agreed">我已阅读并同意</text>
@@ -368,7 +368,7 @@ function handleViewPrivacy() {
 
         <view class="form-group">
           <view class="form-input-wrap">
-            <uni-icons type="locked" size="18" color="#A8A29E" />
+            <WgIcon name="lock" :size="18" color="#A8A29E" />
             <input
               v-model="password"
               :type="showPassword ? 'text' : 'password'"
@@ -377,7 +377,7 @@ function handleViewPrivacy() {
               placeholder-class="form-placeholder"
             />
             <view class="input-eye" @tap="showPassword = !showPassword">
-              <uni-icons :type="showPassword ? 'eye' : 'eye-slash'" size="18" color="#A8A29E" />
+              <WgIcon :name="showPassword ? 'eye' : 'eye-off'" :size="18" color="#A8A29E" />
             </view>
           </view>
         </view>
@@ -402,7 +402,7 @@ function handleViewPrivacy() {
 
         <view class="form-group form-group--code">
           <view class="form-input-wrap">
-            <uni-icons type="locked" size="18" color="#A8A29E" />
+            <WgIcon name="lock" :size="18" color="#A8A29E" />
             <input
               v-model="code"
               type="number"
@@ -439,7 +439,7 @@ function handleViewPrivacy() {
 
         <view class="form-group form-group--code">
           <view class="form-input-wrap">
-            <uni-icons type="email" size="18" color="#A8A29E" />
+            <WgIcon name="mail" :size="18" color="#A8A29E" />
             <input
               v-model="code"
               type="number"
@@ -460,7 +460,7 @@ function handleViewPrivacy() {
 
         <view class="form-group">
           <view class="form-input-wrap">
-            <uni-icons type="locked" size="18" color="#A8A29E" />
+            <WgIcon name="lock" :size="18" color="#A8A29E" />
             <input
               v-model="newPassword"
               :type="showNewPassword ? 'text' : 'password'"
@@ -469,14 +469,14 @@ function handleViewPrivacy() {
               placeholder-class="form-placeholder"
             />
             <view class="input-eye" @tap="showNewPassword = !showNewPassword">
-              <uni-icons :type="showNewPassword ? 'eye' : 'eye-slash'" size="18" color="#A8A29E" />
+              <WgIcon :name="showNewPassword ? 'eye' : 'eye-off'" :size="18" color="#A8A29E" />
             </view>
           </view>
         </view>
 
         <view class="form-group">
           <view class="form-input-wrap" :class="{ 'form-input-wrap--error': confirmPassword && newPassword !== confirmPassword }">
-            <uni-icons type="locked" size="18" color="#A8A29E" />
+            <WgIcon name="lock" :size="18" color="#A8A29E" />
             <input
               v-model="confirmPassword"
               type="password"
@@ -508,7 +508,7 @@ function handleViewPrivacy() {
 
         <view class="form-group form-group--code">
           <view class="form-input-wrap">
-            <uni-icons type="email" size="18" color="#A8A29E" />
+            <WgIcon name="mail" :size="18" color="#A8A29E" />
             <input
               v-model="resetCode"
               type="number"
@@ -529,7 +529,7 @@ function handleViewPrivacy() {
 
         <view class="form-group">
           <view class="form-input-wrap">
-            <uni-icons type="locked" size="18" color="#A8A29E" />
+            <WgIcon name="lock" :size="18" color="#A8A29E" />
             <input
               v-model="resetNewPassword"
               :type="showResetPassword ? 'text' : 'password'"
@@ -538,14 +538,14 @@ function handleViewPrivacy() {
               placeholder-class="form-placeholder"
             />
             <view class="input-eye" @tap="showResetPassword = !showResetPassword">
-              <uni-icons :type="showResetPassword ? 'eye' : 'eye-slash'" size="18" color="#A8A29E" />
+              <WgIcon :name="showResetPassword ? 'eye' : 'eye-off'" :size="18" color="#A8A29E" />
             </view>
           </view>
         </view>
 
         <view class="form-group">
           <view class="form-input-wrap" :class="{ 'form-input-wrap--error': resetConfirmPassword && resetNewPassword !== resetConfirmPassword }">
-            <uni-icons type="locked" size="18" color="#A8A29E" />
+            <WgIcon name="lock" :size="18" color="#A8A29E" />
             <input
               v-model="resetConfirmPassword"
               type="password"
@@ -574,7 +574,7 @@ function handleViewPrivacy() {
       <view v-else-if="currentStep === 'SUCCESS'" class="step-content step-slide-left">
         <view class="success-panel">
           <view class="success-panel__icon">
-            <uni-icons type="checkmarkempty" size="44" color="#2D6A4F" />
+            <WgIcon name="check" :size="44" color="#2D6A4F" />
           </view>
           <text class="success-panel__title">登录成功</text>
           <text class="success-panel__subtitle">正在为您跳转...</text>

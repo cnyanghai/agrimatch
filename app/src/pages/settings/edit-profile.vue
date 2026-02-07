@@ -111,10 +111,10 @@ async function handleSave() {
           mode="aspectFill"
         />
         <view v-else class="avatar-section__placeholder">
-          <uni-icons type="person" size="48" color="#ccc" />
+          <WgIcon name="user" :size="48" color="#ccc" />
         </view>
         <view class="avatar-section__overlay">
-          <uni-icons type="camera" size="20" color="#fff" />
+          <WgIcon name="camera" :size="20" color="#fff" />
         </view>
       </view>
       <text class="avatar-section__hint">{{ uploadingAvatar ? '上传中...' : '点击更换头像' }}</text>
@@ -147,7 +147,7 @@ async function handleSave() {
         <picker :range="genderOptions" :value="form.gender - 1" @change="handleGenderPick">
           <view class="form-card__picker">
             <text class="form-card__picker-text">{{ form.gender === 1 ? '男' : '女' }}</text>
-            <uni-icons type="right" size="16" color="#999" />
+            <WgIcon name="right" :size="16" color="#999" />
           </view>
         </picker>
       </view>

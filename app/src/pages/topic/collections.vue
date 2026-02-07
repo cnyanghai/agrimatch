@@ -151,11 +151,11 @@ function getImages(item: PostResponse): string[] {
         <!-- Stats -->
         <view class="post-card__footer">
           <view class="post-card__stat">
-            <uni-icons type="heart-filled" size="14" color="#999" />
+            <WgIcon name="heart" :size="14" color="#999" />
             <text class="post-card__stat-num">{{ item.likeCount || 0 }}</text>
           </view>
           <view class="post-card__stat">
-            <uni-icons type="chat" size="14" color="#999" />
+            <WgIcon name="message-circle" :size="14" color="#999" />
             <text class="post-card__stat-num">{{ item.commentCount || 0 }}</text>
           </view>
         </view>

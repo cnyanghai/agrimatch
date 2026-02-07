@@ -57,10 +57,10 @@ function goRequirementHall(name: string) {
 
 /** Category icon mapping */
 function getCategoryIcon(name: string): string {
-  if (name.includes('谷物') || name.includes('玉米') || name.includes('小麦')) return 'calendar'
-  if (name.includes('油') || name.includes('豆')) return 'flask'
-  if (name.includes('动物') || name.includes('鱼粉')) return 'heart'
-  if (name.includes('矿物') || name.includes('钙')) return 'medal'
+  if (name.includes('谷物') || name.includes('玉米') || name.includes('小麦')) return 'package'
+  if (name.includes('油') || name.includes('豆')) return 'package'
+  if (name.includes('动物') || name.includes('鱼粉')) return 'package'
+  if (name.includes('矿物') || name.includes('钙')) return 'package'
   if (name.includes('添加') || name.includes('维生素')) return 'star'
   if (name.includes('微生物') || name.includes('酶')) return 'eye'
   return 'folder'
@@ -86,7 +86,7 @@ onMounted(async () => {
     <!-- Search bar -->
     <view class="search-section">
       <view class="search-bar">
-        <uni-icons type="search" size="16" color="#A8A29E" />
+        <WgIcon name="search" :size="16" color="#A8A29E" />
         <input
           v-model="searchKeyword"
           class="search-bar__input"
@@ -94,7 +94,7 @@ onMounted(async () => {
           placeholder-class="search-bar__placeholder"
         />
         <view v-if="searchKeyword" class="search-bar__clear" @tap="searchKeyword = ''">
-          <uni-icons type="clear" size="16" color="#A8A29E" />
+          <WgIcon name="clear" :size="16" color="#A8A29E" />
         </view>
       </view>
     </view>
@@ -120,16 +120,16 @@ onMounted(async () => {
         <view class="tree-header" @tap="toggleExpand(topNode.id)">
           <view class="tree-header__left">
             <view class="tree-header__icon">
-              <uni-icons :type="getCategoryIcon(topNode.name)" size="20" color="#2D6A4F" />
+              <WgIcon :name="getCategoryIcon(topNode.name)" :size="20" color="#2D6A4F" />
             </view>
             <text class="tree-header__name">{{ topNode.name }}</text>
             <text v-if="topNode.children?.length" class="tree-header__count">
               {{ topNode.children.length }}
             </text>
           </view>
-          <uni-icons
-            :type="isExpanded(topNode.id) ? 'top' : 'bottom'"
-            size="14"
+          <WgIcon
+            :name="isExpanded(topNode.id) ? 'chevron-up' : 'chevron-down'"
+            :size="14"
             color="#A8A29E"
           />
         </view>

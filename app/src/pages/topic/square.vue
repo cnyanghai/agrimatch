@@ -15,7 +15,25 @@ const sortMode = ref<'latest' | 'hottest' | 'following'>('latest')
 const displayCount = ref(15)
 const PAGE_SIZE = 15
 
+/** Phase C: 话题搜索 */
+const searchKeyword = ref('')
+const showSearch = ref(false)
+
+const searchedList = computed(() => {
+  const kw = searchKeyword.value.trim().toLowerCase()
+  if (!kw) return []
+  return allPosts.value.filter(p =>
+    (p.title || '').toLowerCase().includes(kw) ||
+    stripHtml(p.content || '').toLowerCase().includes(kw) ||
+    (p.nickName || '').toLowerCase().includes(kw) ||
+    (p.companyName || '').toLowerCase().includes(kw) ||
+    (p.domain || '').toLowerCase().includes(kw)
+  )
+})
+
 const filteredList = computed(() => {
+  // 如果搜索模式激活且有关键词，显示搜索结果
+  if (showSearch.value && searchKeyword.value.trim()) return searchedList.value
   if (sortMode.value === 'following') return followingPosts.value
   const list = [...allPosts.value]
   if (sortMode.value === 'hottest') {
@@ -23,6 +41,17 @@ const filteredList = computed(() => {
   }
   return list
 })
+
+function toggleSearch() {
+  showSearch.value = !showSearch.value
+  if (!showSearch.value) {
+    searchKeyword.value = ''
+  }
+}
+
+function clearSearch() {
+  searchKeyword.value = ''
+}
 
 const displayList = computed(() => filteredList.value.slice(0, displayCount.value))
 
@@ -141,28 +170,51 @@ function getImages(item: PostResponse): string[] {
 
 <template>
   <view class="square-page">
+    <!-- 搜索栏 -->
+    <view v-if="showSearch" class="search-bar">
+      <view class="search-bar__inner">
+        <WgIcon name="search" :size="16" color="#999" />
+        <input
+          class="search-bar__input"
+          v-model="searchKeyword"
+          placeholder="搜索话题、作者、领域..."
+          :focus="showSearch"
+          :maxlength="50"
+        />
+        <view v-if="searchKeyword" class="search-bar__clear" @tap="clearSearch">
+          <WgIcon name="clear" :size="16" color="#999" />
+        </view>
+      </view>
+      <text class="search-bar__cancel" @tap="toggleSearch">取消</text>
+    </view>
+
     <!-- 排序标签 -->
     <view class="sort-bar">
-      <view
-        class="sort-bar__tab"
-        :class="{ 'sort-bar__tab--active': sortMode === 'latest' }"
-        @tap="sortMode = 'latest'"
-      >
-        <text>最新</text>
+      <view class="sort-bar__tabs">
+        <view
+          class="sort-bar__tab"
+          :class="{ 'sort-bar__tab--active': sortMode === 'latest' && !showSearch }"
+          @tap="sortMode = 'latest'; showSearch = false; searchKeyword = ''"
+        >
+          <text>最新</text>
+        </view>
+        <view
+          class="sort-bar__tab"
+          :class="{ 'sort-bar__tab--active': sortMode === 'hottest' && !showSearch }"
+          @tap="sortMode = 'hottest'; showSearch = false; searchKeyword = ''"
+        >
+          <text>最热</text>
+        </view>
+        <view
+          class="sort-bar__tab"
+          :class="{ 'sort-bar__tab--active': sortMode === 'following' && !showSearch }"
+          @tap="sortMode = 'following'; showSearch = false; searchKeyword = ''"
+        >
+          <text>关注</text>
+        </view>
       </view>
-      <view
-        class="sort-bar__tab"
-        :class="{ 'sort-bar__tab--active': sortMode === 'hottest' }"
-        @tap="sortMode = 'hottest'"
-      >
-        <text>最热</text>
-      </view>
-      <view
-        class="sort-bar__tab"
-        :class="{ 'sort-bar__tab--active': sortMode === 'following' }"
-        @tap="sortMode = 'following'"
-      >
-        <text>关注</text>
+      <view class="sort-bar__search-icon" @tap="toggleSearch">
+        <WgIcon name="search" :size="20" :color="showSearch ? '#2D6A4F' : '#999'" />
       </view>
     </view>
 
@@ -232,11 +284,11 @@ function getImages(item: PostResponse): string[] {
         <!-- 互动数据 -->
         <view class="post-card__footer">
           <view class="post-card__stat">
-            <uni-icons type="heart-filled" size="14" color="#999" />
+            <WgIcon name="heart" :size="14" color="#999" />
             <text class="post-card__stat-num">{{ item.likeCount || 0 }}</text>
           </view>
           <view class="post-card__stat">
-            <uni-icons type="chat" size="14" color="#999" />
+            <WgIcon name="message-circle" :size="14" color="#999" />
             <text class="post-card__stat-num">{{ item.commentCount || 0 }}</text>
           </view>
         </view>
@@ -274,7 +326,7 @@ function getImages(item: PostResponse): string[] {
 
     <!-- 发布按钮 -->
     <view class="fab anim-fab-enter" @tap="goPublish">
-      <uni-icons type="compose" size="28" color="#fff" />
+      <WgIcon name="square-pen" :size="24" color="#fff" />
     </view>
   </view>
 </template>
@@ -285,12 +337,56 @@ function getImages(item: PostResponse): string[] {
   background: $bg-page;
 }
 
-.sort-bar {
+/* ===== 搜索栏 ===== */
+.search-bar {
   display: flex;
+  align-items: center;
+  gap: $spacing-sm;
   background: $bg-card;
   padding: $spacing-sm $spacing-md;
-  gap: $spacing-lg;
   border-bottom: 1rpx solid $border-light;
+
+  &__inner {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    background: $bg-page;
+    border-radius: 30rpx;
+    padding: 0 $spacing-md;
+    height: 64rpx;
+  }
+
+  &__input {
+    flex: 1;
+    font-size: $font-sm;
+    height: 64rpx;
+  }
+
+  &__clear {
+    padding: $spacing-xs;
+  }
+
+  &__cancel {
+    font-size: $font-sm;
+    color: $brand-600;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+}
+
+.sort-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: $bg-card;
+  padding: $spacing-sm $spacing-md;
+  border-bottom: 1rpx solid $border-light;
+
+  &__tabs {
+    display: flex;
+    gap: $spacing-lg;
+  }
 
   &__tab {
     font-size: $font-md;
@@ -314,6 +410,10 @@ function getImages(item: PostResponse): string[] {
         border-radius: 2rpx;
       }
     }
+  }
+
+  &__search-icon {
+    padding: $spacing-xs;
   }
 }
 

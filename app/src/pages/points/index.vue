@@ -168,7 +168,7 @@ function handleRedeem() {
     <!-- Not logged in state -->
     <view v-if="!isLoggedIn" class="points-page__login-prompt">
       <view class="login-prompt__card">
-        <view class="login-prompt__icon"><uni-icons type="locked" size="48" color="#2D6A4F" /></view>
+        <view class="login-prompt__icon"><WgIcon name="lock" :size="48" color="#2D6A4F" /></view>
         <text class="login-prompt__title">请先登录</text>
         <text class="login-prompt__desc">登录后查看积分信息</text>
         <view class="login-prompt__btn" @tap="goLogin">
@@ -203,11 +203,11 @@ function handleRedeem() {
       <!-- Action buttons -->
       <view class="action-bar">
         <view class="action-bar__btn action-bar__btn--recharge" @tap="handleRecharge">
-          <uni-icons type="plus" size="20" color="#2D6A4F" />
+          <WgIcon name="plus" :size="20" color="#2D6A4F" />
           <text class="action-bar__btn-text">充值</text>
         </view>
         <view class="action-bar__btn action-bar__btn--redeem" @tap="handleRedeem">
-          <uni-icons type="refreshempty" size="20" color="#D4A373" />
+          <WgIcon name="refresh-cw" :size="20" color="#D4A373" />
           <text class="action-bar__btn-text">兑换</text>
         </view>
       </view>
@@ -234,8 +234,8 @@ function handleRedeem() {
           >
             <view class="tx-item__left">
               <view class="tx-item__type-badge" :class="tx.pointsDelta >= 0 ? 'tx-item__type-badge--in' : 'tx-item__type-badge--out'">
-                <uni-icons v-if="tx.pointsDelta >= 0" type="top" size="16" color="#16a34a" />
-                <uni-icons v-else type="bottom" size="16" color="#E76F51" />
+                <WgIcon v-if="tx.pointsDelta >= 0" name="chevron-up" :size="16" color="#16a34a" />
+                <WgIcon v-else name="chevron-down" :size="16" color="#E76F51" />
               </view>
               <view class="tx-item__info">
                 <text class="tx-item__type">{{ getTxTypeLabel(tx.txType) }}</text>

@@ -182,7 +182,7 @@ async function handleSubmit() {
             >
               {{ form.deliveryMode || '选择交货方式（可选）' }}
             </text>
-            <uni-icons type="right" size="16" color="#999" />
+            <WgIcon name="right" :size="16" color="#999" />
           </view>
         </picker>
       </view>
@@ -208,7 +208,7 @@ async function handleSubmit() {
             >
               {{ form.deliveryDate || '选择到货日期（可选）' }}
             </text>
-            <uni-icons type="right" size="16" color="#999" />
+            <WgIcon name="right" :size="16" color="#999" />
           </view>
         </picker>
       </view>
@@ -224,7 +224,7 @@ async function handleSubmit() {
             >
               {{ paymentLabel || '选择付款方式（可选）' }}
             </text>
-            <uni-icons type="right" size="16" color="#999" />
+            <WgIcon name="right" :size="16" color="#999" />
           </view>
         </picker>
       </view>

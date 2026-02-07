@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { onShow, onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
-import { listSupplies, deleteSupply, type SupplyResponse } from '../../api/supply'
+import { listSupplies, updateSupply, deleteSupply, type SupplyResponse } from '../../api/supply'
 import { useAuthStore } from '../../store/auth'
 import { formatPrice, formatRelativeTime } from '../../utils/format'
 
@@ -11,7 +11,7 @@ const PAGE_SIZE = 20
 const allData = ref<SupplyResponse[]>([])
 const displayCount = ref(PAGE_SIZE)
 const loading = ref(false)
-const statusFilter = ref<number | null>(null) // null=全部, 0=发布中, 2=已下架
+const statusFilter = ref<number | null>(null) // null=全部, 0=发布中, 1=部分成交, 2=已下架, 3=已成交
 
 const filteredList = computed(() => {
   if (statusFilter.value === null) return allData.value
@@ -92,6 +92,92 @@ function goPublish() {
   uni.navigateTo({ url: '/pages/supply/publish' })
 }
 
+/** 下架供应 */
+function handleRevoke(item: SupplyResponse) {
+  uni.showModal({
+    title: '确认下架',
+    content: `下架后「${item.categoryName}」将从大厅隐藏，可随时再次发布。`,
+    confirmColor: '#E76F51',
+    success: async (res) => {
+      if (!res.confirm) return
+      try {
+        await updateSupply(item.id, { status: 2 })
+        uni.showToast({ title: '已下架', icon: 'success' })
+        loadData()
+      } catch {
+        // handled
+      }
+    },
+  })
+}
+
+/** 重新上架供应 */
+function handleRepublish(item: SupplyResponse) {
+  uni.showModal({
+    title: '再次发布',
+    content: `将「${item.categoryName}」重新发布到大厅，并按有效期重新计时。`,
+    success: async (res) => {
+      if (!res.confirm) return
+      try {
+        await updateSupply(item.id, { status: 0, expireMinutes: 4320 })
+        uni.showToast({ title: '已重新发布', icon: 'success' })
+        loadData()
+      } catch {
+        // handled
+      }
+    },
+  })
+}
+
+/** 记录部分成交 */
+function handleRecordDeal(item: SupplyResponse) {
+  const remaining = item.remainingQuantity ?? item.quantity ?? 0
+  if (remaining <= 0) {
+    uni.showToast({ title: '无剩余可成交数量', icon: 'none' })
+    return
+  }
+
+  // 弹出输入对话框（uni-app用prompt模拟）
+  uni.showModal({
+    title: '记录成交',
+    content: `当前剩余 ${remaining} 吨，请输入本次成交量`,
+    editable: true,
+    placeholderText: '成交数量（吨）',
+    success: async (res) => {
+      if (!res.confirm || !res.content) return
+      const qty = parseFloat(res.content)
+      if (isNaN(qty) || qty <= 0) {
+        uni.showToast({ title: '请输入有效数量', icon: 'none' })
+        return
+      }
+      if (qty > remaining) {
+        uni.showToast({ title: '超过剩余数量', icon: 'none' })
+        return
+      }
+      try {
+        const newRemaining = remaining - qty
+        const newStatus = newRemaining <= 0 ? 3 : 1 // 3=已成交, 1=部分成交
+        await updateSupply(item.id, {
+          remainingQuantity: newRemaining,
+          status: newStatus,
+        })
+        uni.showToast({ title: `成交 ${qty} 吨`, icon: 'success' })
+        loadData()
+      } catch {
+        // handled
+      }
+    },
+  })
+}
+
+/** 计算成交进度百分比 */
+function getDealProgress(item: SupplyResponse): number {
+  if (!item.quantity || item.quantity <= 0) return 0
+  const remaining = item.remainingQuantity ?? item.quantity
+  const dealt = item.quantity - remaining
+  return Math.round((dealt / item.quantity) * 100)
+}
+
 function handleDelete(item: SupplyResponse) {
   uni.showModal({
     title: '确认删除',
@@ -128,9 +214,19 @@ function handleDelete(item: SupplyResponse) {
         >发布中</text>
         <text
           class="filter-bar__pill"
+          :class="{ 'filter-bar__pill--active': statusFilter === 1 }"
+          @tap="setFilter(1)"
+        >部分成交</text>
+        <text
+          class="filter-bar__pill"
           :class="{ 'filter-bar__pill--active': statusFilter === 2 }"
           @tap="setFilter(2)"
         >已下架</text>
+        <text
+          class="filter-bar__pill"
+          :class="{ 'filter-bar__pill--active': statusFilter === 3 }"
+          @tap="setFilter(3)"
+        >已成交</text>
       </view>
     </view>
 
@@ -157,12 +253,34 @@ function handleDelete(item: SupplyResponse) {
             <text v-if="item.deliveryMode" class="my-card__tag">{{ item.deliveryMode }}</text>
           </view>
 
+          <!-- 成交进度（部分成交时显示） -->
+          <view v-if="item.status === 1 && item.remainingQuantity != null" class="my-card__progress">
+            <view class="my-card__progress-bar">
+              <view class="my-card__progress-fill" :style="{ width: getDealProgress(item) + '%' }" />
+            </view>
+            <text class="my-card__progress-text">成交 {{ getDealProgress(item) }}%</text>
+          </view>
+
           <view class="my-card__bottom">
             <text class="my-card__time">{{ formatRelativeTime(item.createTime) }}</text>
             <view class="my-card__actions">
-              <view class="my-card__btn my-card__btn--edit" @tap="goEdit(item.id)">
+              <!-- 编辑（非全部成交状态可编辑） -->
+              <view v-if="item.status !== 3" class="my-card__btn my-card__btn--edit" @tap="goEdit(item.id)">
                 <text class="my-card__btn-text">编辑</text>
               </view>
+              <!-- 记录成交（发布中/部分成交可操作） -->
+              <view v-if="(item.status === 0 || item.status === 1) && item.quantity" class="my-card__btn my-card__btn--deal" @tap.stop="handleRecordDeal(item)">
+                <text class="my-card__btn-text my-card__btn-text--deal">成交</text>
+              </view>
+              <!-- 下架（发布中/部分成交可下架） -->
+              <view v-if="item.status === 0 || item.status === 1" class="my-card__btn my-card__btn--revoke" @tap.stop="handleRevoke(item)">
+                <text class="my-card__btn-text my-card__btn-text--revoke">下架</text>
+              </view>
+              <!-- 重新上架（已下架可重新发布） -->
+              <view v-else-if="item.status === 2" class="my-card__btn my-card__btn--republish" @tap.stop="handleRepublish(item)">
+                <text class="my-card__btn-text my-card__btn-text--republish">再发布</text>
+              </view>
+              <!-- 删除 -->
               <view class="my-card__btn my-card__btn--delete" @tap="handleDelete(item)">
                 <text class="my-card__btn-text my-card__btn-text--delete">删除</text>
               </view>
@@ -176,7 +294,7 @@ function handleDelete(item: SupplyResponse) {
     <!-- 空状态 -->
     <view v-else-if="!loading" class="empty">
       <view class="empty__icon">
-        <uni-icons type="shop" size="48" color="#d1d5db" />
+        <WgIcon name="store" :size="48" color="#d1d5db" />
       </view>
       <text class="empty__text">还没有发布供应</text>
       <view class="empty__btn" @tap="goPublish">
@@ -189,7 +307,7 @@ function handleDelete(item: SupplyResponse) {
 
     <!-- FAB -->
     <view class="fab" @tap="goPublish">
-      <uni-icons type="plusempty" size="28" color="#fff" />
+      <WgIcon name="plus" :size="24" color="#fff" />
     </view>
   </view>
 </template>
@@ -344,8 +462,20 @@ function handleDelete(item: SupplyResponse) {
       background: $brand-50;
     }
 
+    &--deal {
+      background: $autumn-50;
+    }
+
     &--delete {
       background: rgba(231, 111, 81, 0.08);
+    }
+
+    &--revoke {
+      background: rgba(231, 111, 81, 0.08);
+    }
+
+    &--republish {
+      background: $brand-50;
     }
   }
 
@@ -354,9 +484,52 @@ function handleDelete(item: SupplyResponse) {
     color: $brand-600;
     font-weight: 600;
 
+    &--deal {
+      color: $autumn-500;
+      font-weight: 700;
+    }
+
     &--delete {
       color: $accent-400;
     }
+
+    &--revoke {
+      color: $accent-400;
+    }
+
+    &--republish {
+      color: $brand-600;
+    }
+  }
+
+  /* 成交进度条 */
+  &__progress {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__progress-bar {
+    flex: 1;
+    height: 8rpx;
+    background: $warm-100;
+    border-radius: 4rpx;
+    overflow: hidden;
+  }
+
+  &__progress-fill {
+    height: 100%;
+    background: $brand-600;
+    border-radius: 4rpx;
+    transition: width 0.3s;
+  }
+
+  &__progress-text {
+    font-size: $font-xs;
+    color: $brand-600;
+    font-weight: 600;
+    flex-shrink: 0;
   }
 }
 

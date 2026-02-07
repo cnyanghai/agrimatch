@@ -327,21 +327,21 @@ function handleShare() {
           <text class="company-card__name">{{ detail.companyName }}</text>
           <text class="company-card__hint">点击查看企业详情</text>
         </view>
-        <uni-icons type="right" size="16" color="#D6CCC0" />
+        <WgIcon name="right" :size="16" color="#D6CCC0" />
       </view>
 
       <!-- 分享按钮 -->
       <view class="share-bar">
         <view class="share-btn" @tap="handleShare">
-          <uni-icons type="redo" size="16" color="#78716C" />
+          <WgIcon name="share" :size="16" color="#78716C" />
           <text class="share-btn__text">分享</text>
         </view>
       </view>
 
       <!-- 底部操作 -->
       <view class="bottom-bar safe-area-bottom">
-        <button class="btn-secondary" @tap="handleCall"><uni-icons type="phone" size="18" color="#2D6A4F" /> 电话咨询</button>
-        <button class="btn-primary" @tap="handleContact"><uni-icons type="chat" size="18" color="#fff" /> 在线聊天</button>
+        <button class="btn-secondary" @tap="handleCall"><WgIcon name="phone" :size="18" color="#2D6A4F" /> 电话咨询</button>
+        <button class="btn-primary" @tap="handleContact"><WgIcon name="message-circle" :size="18" color="#fff" /> 在线聊天</button>
       </view>
     </template>
   </view>

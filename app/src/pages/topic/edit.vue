@@ -223,14 +223,14 @@ async function handleSubmit() {
             <view v-for="(img, idx) in imageList" :key="idx" class="image-grid__item">
               <image :src="img.url" mode="aspectFill" class="image-grid__img" @tap="previewImage(idx)" />
               <view class="image-grid__delete" @tap.stop="removeImage(idx)">
-                <uni-icons type="clear" size="20" color="#fff" />
+                <WgIcon name="clear" :size="20" color="#fff" />
               </view>
               <view v-if="img.uploading" class="image-grid__loading">
                 <view class="image-grid__spinner" />
               </view>
             </view>
             <view v-if="imageList.length < 9" class="image-grid__add" @tap="chooseImage">
-              <uni-icons type="plusempty" size="40" color="#ccc" />
+              <WgIcon name="plus" :size="40" color="#ccc" />
             </view>
           </view>
         </view>
@@ -247,7 +247,7 @@ async function handleSubmit() {
                 >
                   {{ form.domain || '选择领域（可选）' }}
                 </text>
-                <uni-icons type="right" size="16" color="#999" />
+                <WgIcon name="right" :size="16" color="#999" />
               </view>
             </picker>
             <view

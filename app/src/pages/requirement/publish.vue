@@ -1,21 +1,127 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { createRequirement } from '../../api/requirement'
-import type { RequirementCreateRequest } from '../../api/requirement'
+import { onShow } from '@dcloudio/uni-app'
+import { createRequirement, listMyRequirementTemplates, createRequirementTemplate, deleteRequirementTemplate } from '../../api/requirement'
+import type { RequirementCreateRequest, RequirementTemplateResponse } from '../../api/requirement'
+import type { PickedCategory } from '../../components/WgCategoryPicker.vue'
+import type { TemplateItem } from '../../components/WgTemplatePicker.vue'
 import { uploadFile } from '../../utils/request'
 import { useAuthStore } from '../../store/auth'
 
 const authStore = useAuthStore()
+
+/** 品类选择器选中项 */
+const pickedCategory = ref<PickedCategory | null>(null)
+
+/** 动态质量参数表单数据 */
+const dynamicParamsData = ref<Record<string, any>>({})
 
 const form = ref<RequirementCreateRequest>({
   categoryName: '',
   quantity: undefined,
   expectedPrice: undefined,
   packaging: '',
+  invoiceType: '',
   paymentMethod: '',
   deliveryMethod: '',
   purchaseAddress: '',
   remark: '',
+})
+
+// ========== 模板功能 ==========
+const templatePickerOpen = ref(false)
+const templates = ref<TemplateItem[]>([])
+const loadedRawTemplates = ref<RequirementTemplateResponse[]>([])
+
+async function loadRawTemplates() {
+  try {
+    const list = await listMyRequirementTemplates()
+    loadedRawTemplates.value = list || []
+    templates.value = (list || []).map((t: RequirementTemplateResponse) => {
+      const data = JSON.parse(t.templateJson || '{}')
+      return {
+        id: t.id,
+        name: t.templateName,
+        category: data.categoryName || '',
+        quantity: data.quantity,
+        price: data.expectedPrice,
+        tags: data.tags,
+      }
+    })
+  } catch {
+    // ignore
+  }
+}
+
+function handleTemplateSelect(tpl: TemplateItem) {
+  const rawTpl = loadedRawTemplates.value.find(t => t.id === tpl.id)
+  if (rawTpl) {
+    const data = JSON.parse(rawTpl.templateJson || '{}')
+    form.value.categoryName = data.categoryName || ''
+    form.value.quantity = data.quantity
+    form.value.expectedPrice = data.expectedPrice
+    form.value.packaging = data.packaging || ''
+    form.value.invoiceType = data.invoiceType || ''
+    form.value.paymentMethod = data.paymentMethod || ''
+    form.value.deliveryMethod = data.deliveryMethod || ''
+    form.value.purchaseAddress = data.purchaseAddress || ''
+    form.value.remark = data.remark || ''
+    if (data.categoryName) {
+      pickedCategory.value = { id: data.productId, name: data.categoryName, schemaCode: data.schemaCode || '' }
+    }
+    uni.showToast({ title: '模板已填入', icon: 'success' })
+  }
+}
+
+async function handleDeleteTemplate(id: number) {
+  try {
+    await deleteRequirementTemplate(id)
+    templates.value = templates.value.filter(t => t.id !== id)
+    loadedRawTemplates.value = loadedRawTemplates.value.filter(t => t.id !== id)
+    uni.showToast({ title: '已删除', icon: 'success' })
+  } catch {
+    // handled
+  }
+}
+
+async function saveAsTemplate() {
+  if (!form.value.categoryName.trim()) {
+    uni.showToast({ title: '请先填写品类', icon: 'none' })
+    return
+  }
+  uni.showModal({
+    title: '保存为模板',
+    content: '将当前表单保存为采购模板',
+    editable: true,
+    placeholderText: '模板名称',
+    success: async (res) => {
+      if (!res.confirm || !res.content?.trim()) return
+      try {
+        const templateJson = JSON.stringify({
+          categoryName: form.value.categoryName,
+          productId: pickedCategory.value?.id,
+          schemaCode: pickedCategory.value?.schemaCode || '',
+          quantity: form.value.quantity,
+          expectedPrice: form.value.expectedPrice,
+          packaging: form.value.packaging,
+          invoiceType: form.value.invoiceType,
+          paymentMethod: form.value.paymentMethod,
+          deliveryMethod: form.value.deliveryMethod,
+          purchaseAddress: form.value.purchaseAddress,
+          remark: form.value.remark,
+        })
+        await createRequirementTemplate({ templateName: res.content.trim(), templateJson })
+        uni.showToast({ title: '模板已保存', icon: 'success' })
+        loadRawTemplates()
+      } catch {
+        // handled
+      }
+    },
+  })
+}
+
+onShow(() => {
+  loadRawTemplates()
 })
 
 const submitting = ref(false)
@@ -81,6 +187,13 @@ function handleExpirePick(e: any) {
 
 const paymentMethodOptions = ['款到发货', '货到付款', '月结30天', '月结60天', '协商']
 const deliveryMethodOptions = ['送货上门', '自提', '物流运输', '协商']
+const invoiceTypeOptions = ['增值税专用发票', '增值税普通发票', '不开票', '协商']
+
+/** 选择发票类型 */
+function handleInvoiceTypePick(e: any) {
+  const idx = e.detail.value
+  form.value.invoiceType = invoiceTypeOptions[idx]
+}
 
 /** 错误状态 */
 const errors = ref<Record<string, string>>({})
@@ -95,7 +208,7 @@ function validate(): boolean {
 
   // Required: categoryName
   if (!form.value.categoryName.trim()) {
-    newErrors.categoryName = '请输入商品名称'
+    newErrors.categoryName = '请选择商品品类'
   }
 
   // Number validations
@@ -156,10 +269,15 @@ async function handleSubmit() {
       quantity: form.value.quantity || undefined,
       expectedPrice: form.value.expectedPrice || undefined,
       packaging: form.value.packaging?.trim() || undefined,
+      invoiceType: form.value.invoiceType || undefined,
       paymentMethod: form.value.paymentMethod || undefined,
       deliveryMethod: form.value.deliveryMethod || undefined,
       purchaseAddress: form.value.purchaseAddress?.trim() || undefined,
       remark: form.value.remark?.trim() || undefined,
+    }
+    // 动态质量参数
+    if (Object.keys(dynamicParamsData.value).length > 0) {
+      req.paramsJson = JSON.stringify(dynamicParamsData.value)
     }
     req.expireMinutes = expireMinutes.value
     if (images.value.length > 0) {
@@ -175,7 +293,7 @@ async function handleSubmit() {
         if (res.confirm) {
           uni.navigateTo({ url: '/pages/requirement/my-list' })
         } else {
-          form.value = { categoryName: '', quantity: undefined, expectedPrice: undefined, packaging: '', paymentMethod: '', deliveryMethod: '', purchaseAddress: '', remark: '' }
+          form.value = { categoryName: '', quantity: undefined, expectedPrice: undefined, packaging: '', invoiceType: '', paymentMethod: '', deliveryMethod: '', purchaseAddress: '', remark: '' }
           images.value = []
           expireIndex.value = 3
         }
@@ -191,19 +309,43 @@ async function handleSubmit() {
 
 <template>
   <view class="publish-page">
+    <!-- 模板操作栏 -->
+    <view class="template-bar">
+      <view class="template-bar__btn" @tap="templatePickerOpen = true">
+        <WgIcon name="file-text" :size="16" color="#2D6A4F" />
+        <text class="template-bar__text">使用模板</text>
+      </view>
+      <view class="template-bar__btn" @tap="saveAsTemplate">
+        <WgIcon name="bookmark" :size="16" color="#c28a55" />
+        <text class="template-bar__text template-bar__text--save">保存模板</text>
+      </view>
+    </view>
+
+    <!-- 模板选择器 -->
+    <WgTemplatePicker
+      v-model="templatePickerOpen"
+      :templates="templates"
+      title="采购模板"
+      empty-text="暂无模板，可点击「保存模板」创建"
+      @select="handleTemplateSelect"
+      @delete="handleDeleteTemplate"
+    />
+
     <view class="form-card">
-      <!-- 商品名称 -->
+      <!-- 商品品类选择 -->
       <view class="form-card__field" :class="{ 'form-card__field--error': errors.categoryName }">
-        <text class="form-card__label">商品名称 <text class="form-card__required">*</text></text>
-        <input
-          class="form-card__input"
-          :class="{ 'form-card__input--error': errors.categoryName }"
-          v-model="form.categoryName"
-          placeholder="请输入商品名称"
-          :maxlength="50"
-          @input="clearError('categoryName')"
+        <text class="form-card__label">商品品类 <text class="form-card__required">*</text></text>
+        <WgCategoryPicker
+          v-model="pickedCategory"
+          @update:modelValue="(v: PickedCategory | null) => { form.categoryName = v?.name || ''; form.productId = v?.id; clearError('categoryName'); }"
         />
         <text v-if="errors.categoryName" class="form-card__error">{{ errors.categoryName }}</text>
+      </view>
+
+      <!-- 动态质量参数 -->
+      <view v-if="pickedCategory?.id" class="form-card__field">
+        <text class="form-card__label">质量参数</text>
+        <WgParamsForm :product-id="pickedCategory.id" v-model="dynamicParamsData" />
       </view>
 
       <!-- 数量 -->
@@ -250,6 +392,22 @@ async function handleSubmit() {
           placeholder="请输入包装要求"
           :maxlength="100"
         />
+      </view>
+
+      <!-- 发票类型 -->
+      <view class="form-card__field">
+        <text class="form-card__label">发票类型</text>
+        <picker :range="invoiceTypeOptions" @change="handleInvoiceTypePick">
+          <view class="form-card__picker">
+            <text
+              class="form-card__picker-text"
+              :class="{ 'form-card__picker-text--placeholder': !form.invoiceType }"
+            >
+              {{ form.invoiceType || '请选择发票类型' }}
+            </text>
+            <text class="form-card__picker-arrow">&#x203A;</text>
+          </view>
+        </picker>
       </view>
 
       <!-- 付款方式 -->
@@ -325,11 +483,11 @@ async function handleSubmit() {
           <view v-for="(img, idx) in images" :key="idx" class="image-grid__item">
             <image :src="img" mode="aspectFill" class="image-grid__img" @tap="previewImage(idx)" />
             <view class="image-grid__delete" @tap.stop="removeImage(idx)">
-              <uni-icons type="clear" size="20" color="#fff" />
+              <WgIcon name="clear" :size="20" color="#fff" />
             </view>
           </view>
           <view v-if="images.length < 6 && !uploading" class="image-grid__add" @tap="chooseImage">
-            <uni-icons type="plusempty" size="40" color="#ccc" />
+            <WgIcon name="plus" :size="40" color="#ccc" />
             <text class="image-grid__add-text">{{ images.length }}/6</text>
           </view>
           <view v-if="uploading" class="image-grid__add">
@@ -353,6 +511,38 @@ async function handleSubmit() {
 </template>
 
 <style lang="scss" scoped>
+/* ===== 模板操作栏 ===== */
+.template-bar {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    padding: $spacing-xs $spacing-md;
+    border-radius: 30rpx;
+    background: $bg-card;
+    border: 1rpx solid $warm-200;
+    transition: transform 0.15s;
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  &__text {
+    font-size: $font-xs;
+    color: $brand-600;
+    font-weight: 600;
+
+    &--save {
+      color: $autumn-500;
+    }
+  }
+}
+
 .publish-page {
   min-height: 100vh;
   background: $bg-page;

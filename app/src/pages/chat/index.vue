@@ -20,9 +20,9 @@ const notifyCategories = computed(() => {
 
   return [
     { key: 'like', label: '赞和收藏', icon: 'heart', count: countByType(['LIKE', 'COLLECT', 'like', 'collect']) },
-    { key: 'comment', label: '评论回复', icon: 'chat', count: countByType(['COMMENT', 'REPLY', 'comment', 'reply']) },
-    { key: 'contract', label: '合同动态', icon: 'list', count: countByType(['CONTRACT', 'MILESTONE', 'contract', 'milestone']) },
-    { key: 'system', label: '系统通知', icon: 'notification', count: countByType(['SYSTEM', 'system', 'POINTS', 'points']) },
+    { key: 'comment', label: '评论回复', icon: 'message-circle', count: countByType(['COMMENT', 'REPLY', 'comment', 'reply']) },
+    { key: 'contract', label: '合同动态', icon: 'file-text', count: countByType(['CONTRACT', 'MILESTONE', 'contract', 'milestone']) },
+    { key: 'system', label: '系统通知', icon: 'bell', count: countByType(['SYSTEM', 'system', 'POINTS', 'points']) },
   ]
 })
 
@@ -94,7 +94,7 @@ function goRequirement() {
           @tap="goNotify(cat.key)"
         >
           <view class="notify-bar__icon-wrap">
-            <uni-icons :type="cat.icon" size="24" color="#57534E" />
+            <WgIcon :name="cat.icon" :size="24" color="#57534E" />
             <view v-if="cat.count > 0" class="notify-bar__badge">
               <text class="notify-bar__badge-text">{{ cat.count > 99 ? '99+' : cat.count }}</text>
             </view>
@@ -139,7 +139,7 @@ function goRequirement() {
       <!-- 空状态 -->
       <view v-else-if="!loading" class="empty-state">
         <view class="empty-state__icon">
-          <uni-icons type="chat" size="48" color="#d1d5db" />
+          <WgIcon name="message-circle" :size="48" color="#d1d5db" />
         </view>
         <text class="empty-state__text">还没有对话</text>
         <text class="empty-state__desc">去供应大厅或采购大厅找合作伙伴吧</text>

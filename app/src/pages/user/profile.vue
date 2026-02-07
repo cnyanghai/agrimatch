@@ -248,7 +248,7 @@ function handleViewCompany(companyId: number) {
       <!-- Bottom message bar -->
       <view v-if="canFollow()" class="msg-bar safe-area-bottom">
         <view class="msg-bar__btn" @tap="handleSendMessage">
-          <uni-icons type="chat" size="18" color="#fff" />
+          <WgIcon name="message-circle" :size="18" color="#fff" />
           <text class="msg-bar__btn-text">发消息</text>
         </view>
       </view>

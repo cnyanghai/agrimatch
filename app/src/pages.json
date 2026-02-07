@@ -281,7 +281,7 @@
     "navigationBarBackgroundColor": "#FFFFFF",
     "backgroundColor": "#FAF8F4",
     "animationType": "slide-in-right",
-    "animationDuration": 250
+    "animationDuration": 280
   },
   "tabBar": {
     "custom": true,

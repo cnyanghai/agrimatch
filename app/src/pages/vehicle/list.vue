@@ -147,7 +147,7 @@ function maskIdCard(val: string): string {
       >
         <view class="vehicle-card__header">
           <view class="vehicle-card__plate-wrap">
-            <uni-icons type="car" size="18" color="#2D6A4F" />
+            <WgIcon name="truck" :size="18" color="#2D6A4F" />
             <text class="vehicle-card__plate">{{ v.plateNumber }}</text>
           </view>
           <view v-if="v.isDefault" class="vehicle-card__badge">
@@ -178,15 +178,15 @@ function maskIdCard(val: string): string {
         </view>
         <view class="vehicle-card__actions">
           <view v-if="!v.isDefault" class="vehicle-card__action" @tap="handleSetDefault(v)">
-            <uni-icons type="star" size="16" color="#D4A373" />
+            <WgIcon name="star" :size="16" color="#D4A373" />
             <text class="vehicle-card__action-text">设为默认</text>
           </view>
           <view class="vehicle-card__action" @tap="openEdit(v)">
-            <uni-icons type="compose" size="16" color="#2563eb" />
+            <WgIcon name="square-pen" :size="16" color="#2563eb" />
             <text class="vehicle-card__action-text vehicle-card__action-text--blue">编辑</text>
           </view>
           <view class="vehicle-card__action" @tap="handleDelete(v)">
-            <uni-icons type="trash" size="16" color="#ef4444" />
+            <WgIcon name="trash" :size="16" color="#ef4444" />
             <text class="vehicle-card__action-text vehicle-card__action-text--red">删除</text>
           </view>
         </view>
@@ -207,7 +207,7 @@ function maskIdCard(val: string): string {
 
     <!-- FAB add -->
     <view v-if="vehicles.length > 0" class="fab" @tap="openCreate">
-      <uni-icons type="plusempty" size="28" color="#fff" />
+      <WgIcon name="plus" :size="24" color="#fff" />
     </view>
 
     <!-- Form popup -->
@@ -216,7 +216,7 @@ function maskIdCard(val: string): string {
         <view class="popup-sheet__header">
           <text class="popup-sheet__title">{{ formMode === 'create' ? '添加车辆' : '编辑车辆' }}</text>
           <view @tap="showForm = false">
-            <uni-icons type="closeempty" size="22" color="#78716C" />
+            <WgIcon name="clear" :size="22" color="#78716C" />
           </view>
         </view>
         <scroll-view scroll-y class="popup-sheet__body">

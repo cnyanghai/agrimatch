@@ -303,13 +303,13 @@ function handleDraftContract(msg: ChatMessageResponse) {
     <!-- Subject context card -->
     <view v-if="subjectInfo" class="context-card" @tap="goSubjectDetail">
       <view class="context-card__icon" :class="subjectInfo.type === 'supply' ? 'context-card__icon--brand' : 'context-card__icon--autumn'">
-        <uni-icons :type="subjectInfo.type === 'supply' ? 'shop' : 'cart'" size="16" color="#fff" />
+        <WgIcon :name="subjectInfo.type === 'supply' ? 'store' : 'shopping-bag'" :size="16" color="#fff" />
       </view>
       <view class="context-card__info">
         <text class="context-card__name">{{ subjectInfo.name }}</text>
         <text class="context-card__price">{{ subjectInfo.price }}</text>
       </view>
-      <uni-icons type="right" size="14" color="#d1d5db" />
+      <WgIcon name="right" :size="14" color="#d1d5db" />
     </view>
 
     <scroll-view

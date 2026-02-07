@@ -15,19 +15,19 @@ defineEmits<{
 }>()
 
 const iconMap: Record<string, { name: string; color: string }> = {
-  empty: { name: 'email', color: '#A8A29E' },
+  empty: { name: 'mail', color: '#A8A29E' },
   search: { name: 'search', color: '#A8A29E' },
-  network: { name: 'wifi', color: '#A8A29E' },
-  auth: { name: 'locked', color: '#A8A29E' },
+  network: { name: 'info', color: '#A8A29E' },
+  auth: { name: 'lock', color: '#A8A29E' },
 }
 </script>
 
 <template>
   <view class="wg-empty">
     <view class="wg-empty__icon-wrapper">
-      <uni-icons
-        :type="iconMap[icon || 'empty'].name"
-        size="40"
+      <WgIcon
+        :name="iconMap[icon || 'empty'].name"
+        :size="40"
         :color="iconMap[icon || 'empty'].color"
       />
     </view>

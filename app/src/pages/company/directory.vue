@@ -4,12 +4,15 @@ import { onLoad, onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import {
   getCompanyDirectory,
   searchCompanies,
-  companyTypeMap,
   type CompanyCardResponse,
 } from '../../api/company'
 
-const companyTypes = Object.entries(companyTypeMap)
-const activeType = ref('feed_factory')
+/** 与后端一致的两大分类：supplier / buyer */
+const directoryTypes: [string, string][] = [
+  ['supplier', '供应商'],
+  ['buyer', '采购商'],
+]
+const activeType = ref('supplier')
 const activeLetter = ref('')
 const companies = ref<CompanyCardResponse[]>([])
 const currentPage = ref(1)
@@ -38,7 +41,10 @@ const loadStatus = computed<'loading' | 'more' | 'noMore'>(() => {
 })
 
 /** 当前选中的企业类型标签 */
-const activeTypeLabel = computed(() => companyTypeMap[activeType.value] || '')
+const activeTypeLabel = computed(() => {
+  const found = directoryTypes.find(([k]) => k === activeType.value)
+  return found ? found[1] : ''
+})
 
 onLoad(() => {
   loadData(true)
@@ -79,7 +85,8 @@ async function loadData(reset = false) {
       PAGE_SIZE,
     )
     if (res) {
-      companies.value = reset ? res.records : [...companies.value, ...res.records]
+      const list = res.list || []
+      companies.value = reset ? list : [...companies.value, ...list]
       total.value = res.total
     }
   } catch {
@@ -159,7 +166,7 @@ function clearSearch() {
     <!-- 搜索栏 -->
     <view class="search-bar">
       <view class="search-bar__inner">
-        <uni-icons type="search" size="16" color="#A8A29E" />
+        <WgIcon name="search" :size="16" color="#A8A29E" />
         <input
           v-model="searchKeyword"
           class="search-bar__input"
@@ -168,7 +175,7 @@ function clearSearch() {
           @input="onSearchInput"
         />
         <view v-if="searchKeyword" class="search-bar__clear" @tap="clearSearch">
-          <uni-icons type="clear" size="16" color="#A8A29E" />
+          <WgIcon name="clear" :size="16" color="#A8A29E" />
         </view>
       </view>
     </view>
@@ -201,7 +208,7 @@ function clearSearch() {
             </view>
           </view>
           <view v-if="formatLocation(c)" class="company-card__location">
-            <uni-icons type="location" size="14" color="#A8A29E" />
+            <WgIcon name="map-pin" :size="14" color="#A8A29E" />
             <text class="company-card__location-text">{{ formatLocation(c) }}</text>
           </view>
           <view v-if="getCategoryTags(c).length > 0" class="company-card__tags">
@@ -213,13 +220,13 @@ function clearSearch() {
           </view>
           <view class="company-card__footer">
             <view v-if="c.count" class="company-card__stat">
-              <uni-icons type="list" size="14" color="#2D6A4F" />
+              <WgIcon name="layout-grid" :size="14" color="#2D6A4F" />
               <text class="company-card__stat-text">已发布 {{ c.count }} 条供应</text>
             </view>
             <view v-else class="company-card__stat">
               <text class="company-card__stat-text company-card__stat-text--muted">暂无供应</text>
             </view>
-            <uni-icons type="right" size="14" color="#d1d5db" />
+            <WgIcon name="right" :size="14" color="#d1d5db" />
           </view>
         </view>
       </view>
@@ -235,7 +242,7 @@ function clearSearch() {
       <scroll-view scroll-x :show-scrollbar="false" class="type-tabs__scroll">
         <view class="type-tabs__list">
           <view
-            v-for="[key, label] in companyTypes"
+            v-for="[key, label] in directoryTypes"
             :key="key"
             class="type-tabs__item"
             :class="{ 'type-tabs__item--active': activeType === key }"
@@ -300,7 +307,7 @@ function clearSearch() {
 
         <!-- 位置信息 -->
         <view v-if="formatLocation(c)" class="company-card__location">
-          <uni-icons type="location" size="14" color="#A8A29E" />
+          <WgIcon name="map-pin" :size="14" color="#A8A29E" />
           <text class="company-card__location-text">{{ formatLocation(c) }}</text>
         </view>
 
@@ -316,13 +323,13 @@ function clearSearch() {
         <!-- 底部统计 -->
         <view class="company-card__footer">
           <view v-if="c.count" class="company-card__stat">
-            <uni-icons type="list" size="14" color="#2D6A4F" />
+            <WgIcon name="layout-grid" :size="14" color="#2D6A4F" />
             <text class="company-card__stat-text">已发布 {{ c.count }} 条供应</text>
           </view>
           <view v-else class="company-card__stat">
             <text class="company-card__stat-text company-card__stat-text--muted">暂无供应</text>
           </view>
-          <uni-icons type="right" size="14" color="#d1d5db" />
+          <WgIcon name="right" :size="14" color="#d1d5db" />
         </view>
       </view>
 

@@ -330,22 +330,22 @@ function handleDeletePost() {
             class="action-bar__item"
             @tap="handleToggleLike"
           >
-            <uni-icons :type="detail.likedByMe ? 'heart-filled' : 'heart'" size="22" :color="detail.likedByMe ? '#E76F51' : '#999'" />
+            <WgIcon :name="detail.likedByMe ? 'heart' : 'heart'" :size="22" :color="detail.likedByMe ? '#E76F51' : '#999'" />
             <text class="action-bar__label">{{ detail.likeCount || 0 }}</text>
           </view>
           <view class="action-bar__item">
-            <uni-icons type="chat" size="22" color="#999" />
+            <WgIcon name="message-circle" :size="22" color="#999" />
             <text class="action-bar__label">{{ detail.commentCount || 0 }}</text>
           </view>
           <view
             class="action-bar__item"
             @tap="handleToggleCollect"
           >
-            <uni-icons :type="detail.collectedByMe ? 'star-filled' : 'star'" size="22" :color="detail.collectedByMe ? '#D4A373' : '#999'" />
+            <WgIcon :name="detail.collectedByMe ? 'bookmark' : 'star'" :size="22" :color="detail.collectedByMe ? '#D4A373' : '#999'" />
             <text class="action-bar__label">{{ detail.collectedByMe ? '已收藏' : '收藏' }}</text>
           </view>
           <view class="action-bar__item" @tap="handleShare">
-            <uni-icons type="redo" size="22" color="#999" />
+            <WgIcon name="share" :size="22" color="#999" />
             <text class="action-bar__label">分享</text>
           </view>
         </view>

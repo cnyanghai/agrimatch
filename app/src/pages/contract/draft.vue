@@ -355,7 +355,7 @@ async function handleSubmit() {
               >
                 {{ form.deliveryDate || '选择交付日期' }}
               </text>
-              <uni-icons type="right" size="16" color="#999" />
+              <WgIcon name="right" :size="16" color="#999" />
             </view>
           </picker>
         </view>
@@ -379,7 +379,7 @@ async function handleSubmit() {
               >
                 {{ paymentLabel || '选择付款方式' }}
               </text>
-              <uni-icons type="right" size="16" color="#999" />
+              <WgIcon name="right" :size="16" color="#999" />
             </view>
           </picker>
         </view>
@@ -394,7 +394,7 @@ async function handleSubmit() {
               >
                 {{ deliveryModeLabel || '选择交货方式' }}
               </text>
-              <uni-icons type="right" size="16" color="#999" />
+              <WgIcon name="right" :size="16" color="#999" />
             </view>
           </picker>
         </view>
@@ -411,7 +411,7 @@ async function handleSubmit() {
               <text class="form-card__picker-text">
                 {{ form.unit || '吨' }}
               </text>
-              <uni-icons type="right" size="16" color="#999" />
+              <WgIcon name="right" :size="16" color="#999" />
             </view>
           </picker>
         </view>
@@ -426,7 +426,7 @@ async function handleSubmit() {
               >
                 {{ invoiceTypeLabel || '选择发票类型' }}
               </text>
-              <uni-icons type="right" size="16" color="#999" />
+              <WgIcon name="right" :size="16" color="#999" />
             </view>
           </picker>
         </view>

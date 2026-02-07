@@ -201,7 +201,7 @@ function getContentPreview(content?: string): string {
     <!-- 搜索栏 -->
     <view class="search-bar">
       <view class="search-bar__input-wrap">
-        <uni-icons type="search" size="16" color="#999" />
+        <WgIcon name="search" :size="16" color="#999" />
         <input
           v-model="keyword"
           class="search-bar__input"
@@ -215,7 +215,7 @@ function getContentPreview(content?: string): string {
           class="search-bar__clear"
           @tap="keyword = ''"
         >
-          <uni-icons type="clear" size="16" color="#ccc" />
+          <WgIcon name="clear" :size="16" color="#ccc" />
         </view>
       </view>
       <text class="search-bar__cancel" @tap="handleCancel">取消</text>
@@ -239,7 +239,7 @@ function getContentPreview(content?: string): string {
       <view class="history-section__header">
         <text class="history-section__title">搜索历史</text>
         <view class="history-section__clear" @tap="handleClearHistory">
-          <uni-icons type="trash" size="16" color="#999" />
+          <WgIcon name="trash" :size="16" color="#999" />
           <text>清除</text>
         </view>
       </view>
@@ -308,7 +308,7 @@ function getContentPreview(content?: string): string {
             <text v-if="item.companyName && item.userName" class="result-card__dot"> · </text>
             <text v-if="item.userName" class="result-card__user">{{ item.userName }}</text>
           </view>
-          <uni-icons type="right" size="12" color="#ccc" />
+          <WgIcon name="right" :size="12" color="#ccc" />
         </view>
       </view>
 

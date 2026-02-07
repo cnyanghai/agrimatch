@@ -97,6 +97,30 @@ function goSearch() {
   uni.navigateTo({ url: '/pages/search/index' })
 }
 
+function goSupplyHall() {
+  uni.switchTab({ url: '/pages/supply/index' })
+}
+
+function goRequirementHall() {
+  uni.switchTab({ url: '/pages/requirement/index' })
+}
+
+function goContracts() {
+  uni.navigateTo({ url: '/pages/contract/list' })
+}
+
+function goDirectory() {
+  uni.navigateTo({ url: '/pages/company/directory' })
+}
+
+function goMarket() {
+  uni.navigateTo({ url: '/pages/market/index' })
+}
+
+function goCategoryDirectory() {
+  uni.navigateTo({ url: '/pages/category/directory' })
+}
+
 function getInitial(item: PostResponse): string {
   const name = item.nickName || item.userName || item.companyName || '?'
   return name.charAt(0)
@@ -139,9 +163,49 @@ function getImages(item: PostResponse): string[] {
   <view class="home">
     <!-- 头部：全宽搜索栏 -->
     <view class="header safe-area-top">
-      <view class="search-bar" @tap="goSearch">
-        <uni-icons type="search" size="16" color="#A8A29E" />
+      <view class="search-bar anim-header-in" @tap="goSearch">
+        <WgIcon name="search" :size="16" color="#A8A29E" />
         <text class="search-bar__text">搜索话题、用户、企业...</text>
+      </view>
+    </view>
+
+    <!-- 业务快捷入口 -->
+    <view class="quick-entry anim-slide-up">
+      <view class="quick-entry__item" @tap="goSupplyHall">
+        <view class="quick-entry__icon quick-entry__icon--brand">
+          <WgIcon name="store" :size="22" color="#2D6A4F" />
+        </view>
+        <text class="quick-entry__label">供应大厅</text>
+      </view>
+      <view class="quick-entry__item" @tap="goRequirementHall">
+        <view class="quick-entry__icon quick-entry__icon--autumn">
+          <WgIcon name="shopping-bag" :size="22" color="#c28a55" />
+        </view>
+        <text class="quick-entry__label">采购大厅</text>
+      </view>
+      <view class="quick-entry__item" @tap="goContracts">
+        <view class="quick-entry__icon quick-entry__icon--action">
+          <WgIcon name="file-text" :size="22" color="#2563eb" />
+        </view>
+        <text class="quick-entry__label">合同管理</text>
+      </view>
+      <view class="quick-entry__item" @tap="goDirectory">
+        <view class="quick-entry__icon quick-entry__icon--accent">
+          <WgIcon name="building2" :size="22" color="#E76F51" />
+        </view>
+        <text class="quick-entry__label">企业名录</text>
+      </view>
+      <view class="quick-entry__item" @tap="goMarket">
+        <view class="quick-entry__icon quick-entry__icon--warm">
+          <WgIcon name="trending-up" :size="22" color="#78716C" />
+        </view>
+        <text class="quick-entry__label">行情中心</text>
+      </view>
+      <view class="quick-entry__item" @tap="goCategoryDirectory">
+        <view class="quick-entry__icon quick-entry__icon--brand-light">
+          <WgIcon name="layout-grid" :size="22" color="#389867" />
+        </view>
+        <text class="quick-entry__label">品类目录</text>
       </view>
     </view>
 
@@ -224,11 +288,11 @@ function getImages(item: PostResponse): string[] {
         <!-- 第5层：互动数据 -->
         <view class="post-card__footer">
           <view class="post-card__stat">
-            <uni-icons type="heart-filled" size="14" color="#A8A29E" />
+            <WgIcon name="heart" :size="14" color="#A8A29E" />
             <text class="post-card__stat-num">{{ item.likeCount || 0 }}</text>
           </view>
           <view class="post-card__stat">
-            <uni-icons type="chat" size="14" color="#A8A29E" />
+            <WgIcon name="message-circle" :size="14" color="#A8A29E" />
             <text class="post-card__stat-num">{{ item.commentCount || 0 }}</text>
           </view>
           <view v-if="item.domain" class="post-card__domain">
@@ -265,7 +329,7 @@ function getImages(item: PostResponse): string[] {
 
     <!-- FAB 发帖按钮 -->
     <view class="fab anim-fab-enter" @tap="goPublish">
-      <uni-icons type="compose" size="28" color="#fff" />
+      <WgIcon name="square-pen" :size="24" color="#fff" />
     </view>
 
     <!-- 底部间距 -->
@@ -300,6 +364,50 @@ function getImages(item: PostResponse): string[] {
   &__text {
     color: $text-placeholder;
     font-size: $font-md;
+  }
+}
+
+/* ===== Quick Entry ===== */
+.quick-entry {
+  display: flex;
+  flex-wrap: wrap;
+  background: #ffffff;
+  padding: $spacing-md $spacing-sm $spacing-xs;
+
+  &__item {
+    width: 33.333%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $spacing-sm 0;
+
+    &:active {
+      opacity: 0.7;
+      transform: scale(0.95);
+    }
+  }
+
+  &__icon {
+    width: 88rpx;
+    height: 88rpx;
+    border-radius: $radius-xl;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $spacing-xs;
+
+    &--brand { background: $brand-50; }
+    &--brand-light { background: rgba(56, 152, 103, 0.08); }
+    &--autumn { background: $autumn-50; }
+    &--action { background: rgba(37, 99, 235, 0.08); }
+    &--accent { background: $accent-50; }
+    &--warm { background: $warm-100; }
+  }
+
+  &__label {
+    font-size: $font-sm;
+    color: $text-primary;
+    font-weight: 500;
   }
 }
 
@@ -341,13 +449,15 @@ function getImages(item: PostResponse): string[] {
 
 /* ===== Post List ===== */
 .post-list {
-  padding: 0;
+  padding: $spacing-xs $spacing-md;
 }
 
 .post-card {
   background: #ffffff;
   padding: $spacing-md $spacing-md;
-  border-bottom: 1rpx solid $border-light;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-sm;
+  box-shadow: $shadow-warm-card;
 
   /* 第1层：标题 */
   &__title {

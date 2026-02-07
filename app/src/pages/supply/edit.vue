@@ -9,16 +9,36 @@ const submitting = ref(false)
 const loading = ref(true)
 
 const form = ref<SupplyUpdateRequest>({
+  origin: '',
   quantity: undefined,
   exFactoryPrice: undefined,
   shipAddress: '',
   deliveryMode: '',
   paymentMethod: '',
+  invoiceType: '',
+  packaging: '',
+  storageMethod: '',
   remark: '',
 })
 
 const deliveryModeOptions = ['送货上门', '自提', '物流运输', '协商']
 const paymentMethodOptions = ['款到发货', '货到付款', '月结30天', '月结60天', '协商']
+const invoiceTypeOptions = ['增值税专用发票', '增值税普通发票', '不开票', '协商']
+const packagingOptions = ['编织袋', '纸箱', '吨袋', '散装', '桶装', '协商']
+const storageOptions = ['常温仓储', '冷链仓储', '恒温恒湿', '露天堆放', '协商']
+
+/** 有效期选项 */
+const expireOptions = [
+  { label: '1天', value: 1440 },
+  { label: '3天', value: 4320 },
+  { label: '7天', value: 10080 },
+  { label: '30天', value: 43200 },
+]
+const expireIndex = ref(2)
+
+function handleExpirePick(e: any) {
+  expireIndex.value = Number(e.detail.value)
+}
 
 onLoad((query) => {
   if (query?.id) {
@@ -34,11 +54,15 @@ async function loadDetail() {
     if (res) {
       original.value = res
       form.value = {
+        origin: res.origin || '',
         quantity: res.quantity,
         exFactoryPrice: res.exFactoryPrice,
         shipAddress: res.shipAddress || '',
         deliveryMode: res.deliveryMode || '',
         paymentMethod: res.paymentMethod || '',
+        invoiceType: res.invoiceType || '',
+        packaging: res.packaging || '',
+        storageMethod: res.storageMethod || '',
         remark: res.remark || '',
       }
     }
@@ -79,6 +103,18 @@ function handlePaymentMethodPick(e: any) {
   form.value.paymentMethod = paymentMethodOptions[e.detail.value]
 }
 
+function handleInvoiceTypePick(e: any) {
+  form.value.invoiceType = invoiceTypeOptions[e.detail.value]
+}
+
+function handlePackagingPick(e: any) {
+  form.value.packaging = packagingOptions[e.detail.value]
+}
+
+function handleStoragePick(e: any) {
+  form.value.storageMethod = storageOptions[e.detail.value]
+}
+
 async function handleSubmit() {
   if (!validate()) {
     uni.showToast({ title: '请检查填写内容', icon: 'none' })
@@ -88,12 +124,17 @@ async function handleSubmit() {
   submitting.value = true
   try {
     await updateSupply(supplyId.value, {
+      origin: form.value.origin?.trim() || undefined,
       quantity: form.value.quantity || undefined,
       exFactoryPrice: form.value.exFactoryPrice || undefined,
       shipAddress: form.value.shipAddress?.trim() || undefined,
       deliveryMode: form.value.deliveryMode || undefined,
       paymentMethod: form.value.paymentMethod || undefined,
+      invoiceType: form.value.invoiceType || undefined,
+      packaging: form.value.packaging || undefined,
+      storageMethod: form.value.storageMethod || undefined,
       remark: form.value.remark?.trim() || undefined,
+      expireMinutes: expireOptions[expireIndex.value].value,
     })
     uni.showToast({ title: '保存成功', icon: 'success' })
     setTimeout(() => uni.navigateBack(), 1000)
@@ -120,6 +161,17 @@ async function handleSubmit() {
           <view class="form-card__readonly">
             <text class="form-card__readonly-text">{{ original.categoryName }}</text>
           </view>
+        </view>
+
+        <!-- 产地 -->
+        <view class="form-card__field">
+          <text class="form-card__label">产地</text>
+          <input
+            class="form-card__input"
+            v-model="form.origin"
+            placeholder="请输入产地"
+            :maxlength="100"
+          />
         </view>
 
         <!-- 数量 -->
@@ -191,6 +243,59 @@ async function handleSubmit() {
                 class="form-card__picker-text"
                 :class="{ 'form-card__picker-text--placeholder': !form.paymentMethod }"
               >{{ form.paymentMethod || '请选择付款方式' }}</text>
+              <text class="form-card__picker-arrow">&#x203A;</text>
+            </view>
+          </picker>
+        </view>
+
+        <!-- 发票类型 -->
+        <view class="form-card__field">
+          <text class="form-card__label">发票类型</text>
+          <picker :range="invoiceTypeOptions" @change="handleInvoiceTypePick">
+            <view class="form-card__picker">
+              <text
+                class="form-card__picker-text"
+                :class="{ 'form-card__picker-text--placeholder': !form.invoiceType }"
+              >{{ form.invoiceType || '请选择发票类型' }}</text>
+              <text class="form-card__picker-arrow">&#x203A;</text>
+            </view>
+          </picker>
+        </view>
+
+        <!-- 包装方式 -->
+        <view class="form-card__field">
+          <text class="form-card__label">包装方式</text>
+          <picker :range="packagingOptions" @change="handlePackagingPick">
+            <view class="form-card__picker">
+              <text
+                class="form-card__picker-text"
+                :class="{ 'form-card__picker-text--placeholder': !form.packaging }"
+              >{{ form.packaging || '请选择包装方式' }}</text>
+              <text class="form-card__picker-arrow">&#x203A;</text>
+            </view>
+          </picker>
+        </view>
+
+        <!-- 仓储条件 -->
+        <view class="form-card__field">
+          <text class="form-card__label">仓储条件</text>
+          <picker :range="storageOptions" @change="handleStoragePick">
+            <view class="form-card__picker">
+              <text
+                class="form-card__picker-text"
+                :class="{ 'form-card__picker-text--placeholder': !form.storageMethod }"
+              >{{ form.storageMethod || '请选择仓储条件' }}</text>
+              <text class="form-card__picker-arrow">&#x203A;</text>
+            </view>
+          </picker>
+        </view>
+
+        <!-- 有效期 -->
+        <view class="form-card__field">
+          <text class="form-card__label">续期时间</text>
+          <picker :range="expireOptions.map(o => o.label)" :value="expireIndex" @change="handleExpirePick">
+            <view class="form-card__picker">
+              <text class="form-card__picker-text">{{ expireOptions[expireIndex].label }}</text>
               <text class="form-card__picker-arrow">&#x203A;</text>
             </view>
           </picker>

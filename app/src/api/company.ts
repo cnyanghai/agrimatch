@@ -67,16 +67,14 @@ export interface CompanyCardResponse {
   categoryNames?: string[]
 }
 
-export interface PageResult<T> {
-  records: T[]
+export interface DirectoryResult {
+  list: CompanyCardResponse[]
   total: number
-  page: number
-  size: number
 }
 
-/** 企业名录分页 */
+/** 企业名录分页（type: 'supplier' | 'buyer'） */
 export function getCompanyDirectory(type: string, letter?: string, page = 1, size = 20) {
-  return get<PageResult<CompanyCardResponse>>('/api/companies/directory', {
+  return get<DirectoryResult>('/api/companies/directory', {
     type,
     letter: letter || undefined,
     page,

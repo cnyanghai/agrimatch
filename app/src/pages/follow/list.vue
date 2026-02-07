@@ -214,11 +214,11 @@ function getPostInitial(item: PostResponse): string {
           <text v-if="item.content" class="post-item__preview">{{ getPostPreview(item.content) }}</text>
           <view class="post-item__footer">
             <view class="post-item__stat">
-              <uni-icons type="heart-filled" size="14" color="#A8A29E" />
+              <WgIcon name="heart" :size="14" color="#A8A29E" />
               <text class="post-item__stat-num">{{ item.likeCount || 0 }}</text>
             </view>
             <view class="post-item__stat">
-              <uni-icons type="chat" size="14" color="#A8A29E" />
+              <WgIcon name="message-circle" :size="14" color="#A8A29E" />
               <text class="post-item__stat-num">{{ item.commentCount || 0 }}</text>
             </view>
           </view>

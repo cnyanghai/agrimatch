@@ -24,11 +24,13 @@ onHide(() => {
 page {
   background-color: $bg-page;
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC',
-    'Microsoft YaHei', sans-serif;
+    'Noto Sans SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
   font-size: $font-base;
   color: $text-primary;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 view, text, scroll-view, swiper, swiper-item, image, navigator {
@@ -74,6 +76,30 @@ input, textarea {
 .price {
   color: $accent-400;
   font-weight: bold;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 金额等宽字体（数字对齐） */
+.font-mono {
+  font-family: 'DIN Alternate', 'Roboto Mono', 'SF Mono', 'Menlo', 'Consolas', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 金额大号显示 */
+.price-lg {
+  color: $accent-400;
+  font-weight: 800;
+  font-size: $font-xl;
+  font-variant-numeric: tabular-nums;
+  font-family: 'DIN Alternate', 'Roboto Mono', -apple-system, sans-serif;
+}
+
+/* 金额小号显示 */
+.price-sm {
+  color: $accent-400;
+  font-weight: 600;
+  font-size: $font-sm;
+  font-variant-numeric: tabular-nums;
 }
 
 /* 单行文本省略 */
