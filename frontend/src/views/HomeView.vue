@@ -19,8 +19,14 @@ import {
   Sprout,
   Factory,
   Cog,
-  ShieldCheck
+  ShieldCheck,
+  ArrowRight
 } from 'lucide-vue-next'
+import { useAuthStore } from '../store/auth'
+import { useUiStore } from '../store/ui'
+
+const auth = useAuthStore()
+const ui = useUiStore()
 
 const router = useRouter()
 
@@ -153,7 +159,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="bg-neutral-50 text-neutral-900 min-h-screen">
     <!-- Hero -->
-    <section class="relative min-h-[600px] flex items-center justify-center overflow-hidden">
+    <section class="relative min-h-[480px] md:min-h-[600px] flex items-center justify-center overflow-hidden">
       <!-- Background Image with Parallax-like effect -->
       <div class="absolute inset-0 z-0">
         <img 
@@ -165,7 +171,7 @@ onBeforeUnmount(() => {
       </div>
 
       <!-- Content -->
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-24 flex flex-col items-center text-center animate-fade-in">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 py-16 md:py-24 flex flex-col items-center text-center animate-fade-in">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/20 border border-brand-500/30 backdrop-blur-md mb-8 animate-slide-up">
           <span class="relative flex h-2 w-2">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
@@ -174,44 +180,67 @@ onBeforeUnmount(() => {
           <span class="text-[10px] font-bold text-brand-200 uppercase tracking-widest">2026 智慧畜牧新标准</span>
         </div>
 
-        <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight tracking-tight animate-slide-up" style="animation-delay: 100ms">
+        <h1 class="text-3xl md:text-6xl font-extrabold text-white mb-4 md:mb-6 leading-tight tracking-tight animate-slide-up" style="animation-delay: 100ms">
           连接全球资源<br/>
           <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-300 to-brand-500">重塑农牧供应链</span>
         </h1>
         
-        <p class="text-lg md:text-xl text-neutral-300 mb-12 max-w-2xl leading-relaxed animate-slide-up" style="animation-delay: 200ms">
+        <p class="text-base md:text-xl text-neutral-300 mb-8 md:mb-12 max-w-2xl leading-relaxed animate-slide-up px-2" style="animation-delay: 200ms">
           链接全国优质饲料、兽药、养殖设备供应商，提供在线合同签约及交流服务
         </p>
 
         <!-- Glassmorphism Search Box -->
         <div class="w-full max-w-3xl animate-slide-up" style="animation-delay: 300ms">
-          <div class="group flex p-2 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-2xl focus-within:bg-white/15 focus-within:border-brand-500/50 transition-all duration-300">
-            <div class="flex-1 flex items-center px-4">
-              <Search :size="22" class="text-brand-300 group-focus-within:text-brand-400 transition-colors" />
+          <div class="group flex p-1.5 md:p-2 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-xl md:rounded-2xl shadow-2xl focus-within:bg-white/15 focus-within:border-brand-500/50 transition-all duration-300">
+            <div class="flex-1 flex items-center px-3 md:px-4">
+              <Search :size="20" class="text-brand-300 group-focus-within:text-brand-400 transition-colors shrink-0" />
               <input
                 v-model="searchKeyword"
                 type="text"
-                placeholder="搜索玉米、豆粕、疫苗、自动喂料机、型号..."
-                class="w-full bg-transparent border-none outline-none text-white placeholder:text-neutral-400/80 py-4 px-3 text-lg"
+                placeholder="搜索玉米、豆粕、疫苗..."
+                class="w-full bg-transparent border-none outline-none text-white placeholder:text-neutral-400/80 py-3 md:py-4 px-2 md:px-3 text-base md:text-lg"
                 @keyup.enter="onSearch"
               />
             </div>
             <button 
-              class="bg-brand-600 hover:bg-brand-500 text-white px-10 py-4 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-brand-900/20 flex items-center gap-2"
+              class="bg-brand-600 hover:bg-brand-500 text-white px-5 md:px-10 py-3 md:py-4 rounded-lg md:rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-brand-900/20 flex items-center gap-2 shrink-0"
               @click="onSearch"
             >
               <span>搜索</span>
-              <ArrowRight :size="18" />
+              <ArrowRight :size="18" class="hidden md:block" />
             </button>
           </div>
           
           <!-- Hot Search Tags -->
-          <div class="flex flex-wrap justify-center gap-4 mt-6 text-xs font-medium text-neutral-400">
+          <div class="hidden md:flex flex-wrap justify-center gap-4 mt-6 text-xs font-medium text-neutral-400">
             <span class="text-neutral-500">热门搜索:</span>
             <button class="hover:text-brand-400 transition-colors">优质豆粕</button>
             <button class="hover:text-brand-400 transition-colors">智能喂料系统</button>
             <button class="hover:text-brand-400 transition-colors">疫苗直供</button>
           </div>
+        </div>
+
+        <!-- Quick CTA (below search) -->
+        <div class="flex flex-wrap justify-center gap-3 mt-6 animate-slide-up" style="animation-delay: 400ms">
+          <button
+            class="px-5 py-2.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold hover:bg-white/20 transition-all active:scale-95"
+            @click="go('/hall/supply')"
+          >
+            进入供应大厅
+          </button>
+          <button
+            class="px-5 py-2.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold hover:bg-white/20 transition-all active:scale-95"
+            @click="go('/hall/need')"
+          >
+            进入采购大厅
+          </button>
+          <button
+            v-if="!auth.me"
+            class="px-5 py-2.5 rounded-xl bg-brand-500 text-white text-sm font-bold hover:bg-brand-400 transition-all active:scale-95 shadow-lg shadow-brand-900/30"
+            @click="ui.openAuthDialog('register')"
+          >
+            免费注册
+          </button>
         </div>
       </div>
     </section>
@@ -278,39 +307,39 @@ onBeforeUnmount(() => {
           </button>
         </div>
 
-        <div class="grid grid-cols-4 grid-rows-2 gap-6 h-[500px]">
+        <div class="grid grid-cols-2 md:grid-cols-4 md:grid-rows-2 gap-4 md:gap-6 md:h-[500px]">
           <!-- Big Bento Card (原料饲料) -->
           <div
-            class="col-span-2 row-span-2 group relative overflow-hidden rounded-3xl bg-brand-600 cursor-pointer p-10 flex flex-col justify-end"
+            class="col-span-2 md:row-span-2 group relative overflow-hidden rounded-2xl md:rounded-3xl bg-brand-600 cursor-pointer p-6 md:p-10 flex flex-col justify-end min-h-[200px] md:min-h-0"
             @click="go(`/hall/supply?schemaCode=feed`)"
           >
-            <div class="absolute top-10 right-10 opacity-20 group-hover:scale-110 transition-transform duration-500">
-              <Wheat :size="180" class="text-white" />
+            <div class="absolute top-6 right-6 md:top-10 md:right-10 opacity-20 group-hover:scale-110 transition-transform duration-500">
+              <Wheat :size="120" class="text-white md:!w-[180px] md:!h-[180px]" />
             </div>
             <div class="relative z-10">
-              <div class="flex flex-wrap gap-2 mb-6">
+              <div class="flex flex-wrap gap-2 mb-4 md:mb-6">
                 <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold text-white uppercase"># 玉米豆粕</span>
-                <span class="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold text-white uppercase"># 进口添加剂</span>
+                <span class="hidden sm:inline-flex px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold text-white uppercase"># 进口添加剂</span>
               </div>
-              <h3 class="text-4xl font-black text-white mb-4">原料饲料</h3>
-              <p class="text-brand-50 max-w-sm text-sm leading-relaxed">提供全球大宗原料及核心添加剂的集采、比价与实时行情分析。</p>
+              <h3 class="text-2xl md:text-4xl font-black text-white mb-2 md:mb-4">原料饲料</h3>
+              <p class="text-brand-50 max-w-sm text-xs md:text-sm leading-relaxed">提供全球大宗原料及核心添加剂的集采、比价与实时行情分析。</p>
             </div>
           </div>
 
           <!-- Medium Bento Card (生物种苗) -->
           <div
-            class="col-span-2 group relative overflow-hidden rounded-3xl bg-slate-900 cursor-pointer p-8 flex flex-col justify-between"
+            class="col-span-2 group relative overflow-hidden rounded-2xl md:rounded-3xl bg-slate-900 cursor-pointer p-6 md:p-8 flex flex-col justify-between min-h-[160px] md:min-h-0"
             @click="go(`/hall/supply?schemaCode=breed`)"
           >
             <div class="absolute top-0 right-0 w-48 h-full bg-gradient-to-l from-brand-500/20 to-transparent"></div>
             <div class="flex justify-between items-start relative z-10">
-              <h3 class="text-2xl font-black text-white">生物种苗</h3>
-              <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-brand-400 backdrop-blur-md">
-                <Sprout :size="24" />
+              <h3 class="text-xl md:text-2xl font-black text-white">生物种苗</h3>
+              <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/10 flex items-center justify-center text-brand-400 backdrop-blur-md">
+                <Sprout :size="20" class="md:!w-6 md:!h-6" />
               </div>
             </div>
             <div class="flex items-end justify-between relative z-10">
-              <p class="text-neutral-400 text-sm max-w-[200px]">优质种禽、种蛋、鱼苗及畜种资源调度。</p>
+              <p class="text-neutral-400 text-xs md:text-sm max-w-[200px]">优质种禽、种蛋、鱼苗及畜种资源调度。</p>
               <div class="flex gap-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
                 <span class="w-1.5 h-1.5 rounded-full bg-brand-500/30"></span>
@@ -320,11 +349,11 @@ onBeforeUnmount(() => {
 
           <!-- Small Bento Card (农牧加工) -->
           <div
-            class="group relative overflow-hidden rounded-3xl bg-accent-50 border border-accent-100 cursor-pointer p-6 flex flex-col justify-between hover:border-accent-200 transition-all"
+            class="group relative overflow-hidden rounded-2xl md:rounded-3xl bg-accent-50 border border-accent-100 cursor-pointer p-5 md:p-6 flex flex-col justify-between hover:border-accent-200 transition-all min-h-[140px] md:min-h-0"
             @click="go(`/hall/supply?schemaCode=process`)"
           >
-            <div class="w-12 h-12 rounded-2xl bg-accent-100 flex items-center justify-center text-accent-600">
-              <Factory :size="24" />
+            <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-accent-100 flex items-center justify-center text-accent-600">
+              <Factory :size="20" class="md:!w-6 md:!h-6" />
             </div>
             <div>
               <h4 class="font-black text-neutral-900 mb-1">农牧加工</h4>
@@ -334,11 +363,11 @@ onBeforeUnmount(() => {
 
           <!-- Small Bento Card (装备物流) -->
           <div
-            class="group relative overflow-hidden rounded-3xl bg-action-50 border border-action-100 cursor-pointer p-6 flex flex-col justify-between hover:border-action-200 transition-all"
+            class="group relative overflow-hidden rounded-2xl md:rounded-3xl bg-action-50 border border-action-100 cursor-pointer p-5 md:p-6 flex flex-col justify-between hover:border-action-200 transition-all min-h-[140px] md:min-h-0"
             @click="go(`/hall/supply?schemaCode=equipment`)"
           >
-            <div class="w-12 h-12 rounded-2xl bg-action-100 flex items-center justify-center text-action-600">
-              <Cog :size="24" />
+            <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-action-100 flex items-center justify-center text-action-600">
+              <Cog :size="20" class="md:!w-6 md:!h-6" />
             </div>
             <div>
               <h4 class="font-black text-neutral-900 mb-1">装备物流</h4>

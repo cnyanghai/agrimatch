@@ -196,7 +196,7 @@ function formatStatAmount(val: number): string {
     <!-- ===== 搜索栏 ===== -->
     <view class="search-bar">
       <view class="search-bar__input-wrap">
-        <text class="search-bar__icon">&#128269;</text>
+        <WgIcon name="search" :size="16" color="#A8A29E" />
         <input
           class="search-bar__input"
           type="text"
@@ -206,11 +206,9 @@ function formatStatAmount(val: number): string {
           confirm-type="search"
           @input="onSearchInput(($event as any).detail.value)"
         />
-        <text
-          v-if="searchInput"
-          class="search-bar__clear"
-          @tap="clearSearch"
-        >&#10005;</text>
+        <view v-if="searchInput" class="search-bar__clear" @tap="clearSearch">
+          <WgIcon name="x" :size="14" color="#A8A29E" />
+        </view>
       </view>
     </view>
 
@@ -236,13 +234,13 @@ function formatStatAmount(val: number): string {
     <view v-if="hasTodo" class="todo-section">
       <view class="todo-section__header" @tap="todoExpanded = !todoExpanded">
         <view class="todo-section__title-wrap">
-          <text class="todo-section__icon">&#9888;</text>
+          <WgIcon name="alert-circle" :size="16" color="#f59e0b" />
           <text class="todo-section__title">待办提醒</text>
           <view class="todo-section__badge">
             <text class="todo-section__badge-text">{{ pendingSignCount + pendingMilestoneCount }}</text>
           </view>
         </view>
-        <text class="todo-section__arrow">{{ todoExpanded ? '&#9650;' : '&#9660;' }}</text>
+        <WgIcon :name="todoExpanded ? 'chevron-up' : 'chevron-down'" :size="14" color="#A8A29E" />
       </view>
       <view v-if="todoExpanded" class="todo-section__body">
         <view
@@ -253,7 +251,7 @@ function formatStatAmount(val: number): string {
           <view class="todo-item__dot todo-item__dot--sign" />
           <text class="todo-item__text">待我签署</text>
           <text class="todo-item__count">({{ pendingSignCount }})</text>
-          <text class="todo-item__arrow">></text>
+          <WgIcon name="chevron-right" :size="14" color="#A8A29E" />
         </view>
         <view
           v-if="pendingMilestoneCount > 0"
@@ -263,7 +261,7 @@ function formatStatAmount(val: number): string {
           <view class="todo-item__dot todo-item__dot--milestone" />
           <text class="todo-item__text">待确认节点</text>
           <text class="todo-item__count">({{ pendingMilestoneCount }})</text>
-          <text class="todo-item__arrow">></text>
+          <WgIcon name="chevron-right" :size="14" color="#A8A29E" />
         </view>
       </view>
     </view>
@@ -354,17 +352,10 @@ function formatStatAmount(val: number): string {
   &__input-wrap {
     display: flex;
     align-items: center;
-    background: $bg-page;
-    border-radius: $radius-lg;
-    padding: 0 $spacing-md;
+    background: $warm-100;
+    border-radius: $radius-pill;
+    padding: 0 $spacing-lg;
     height: 72rpx;
-  }
-
-  &__icon {
-    font-size: $font-md;
-    color: $text-placeholder;
-    flex-shrink: 0;
-    margin-right: $spacing-xs;
   }
 
   &__input {
@@ -372,6 +363,7 @@ function formatStatAmount(val: number): string {
     font-size: $font-md;
     color: $text-primary;
     height: 72rpx;
+    margin-left: $spacing-xs;
   }
 
   &__placeholder {
@@ -380,8 +372,6 @@ function formatStatAmount(val: number): string {
   }
 
   &__clear {
-    font-size: $font-sm;
-    color: $text-placeholder;
     padding: $spacing-xs;
     flex-shrink: 0;
   }
@@ -392,9 +382,10 @@ function formatStatAmount(val: number): string {
   display: flex;
   align-items: center;
   background: $bg-card;
-  margin: $spacing-xs $spacing-sm 0;
-  border-radius: $radius-lg;
-  padding: $spacing-sm $spacing-md;
+  margin: $spacing-md $spacing-md 0;
+  border-radius: $radius-xl;
+  padding: $spacing-md $spacing-md;
+  box-shadow: $shadow-warm-card;
 
   &__item {
     flex: 1;
@@ -430,9 +421,10 @@ function formatStatAmount(val: number): string {
 /* ===== 待办提醒 ===== */
 .todo-section {
   background: $bg-card;
-  margin: $spacing-xs $spacing-sm 0;
-  border-radius: $radius-lg;
+  margin: $spacing-sm $spacing-md 0;
+  border-radius: $radius-xl;
   overflow: hidden;
+  box-shadow: $shadow-warm-card;
 
   &__header {
     display: flex;
@@ -445,11 +437,6 @@ function formatStatAmount(val: number): string {
     display: flex;
     align-items: center;
     gap: $spacing-xs;
-  }
-
-  &__icon {
-    font-size: $font-md;
-    color: $color-warning;
   }
 
   &__title {
@@ -473,11 +460,6 @@ function formatStatAmount(val: number): string {
     font-size: 20rpx;
     color: #fff;
     font-weight: bold;
-  }
-
-  &__arrow {
-    font-size: $font-xs;
-    color: $text-placeholder;
   }
 
   &__body {
@@ -518,11 +500,7 @@ function formatStatAmount(val: number): string {
     margin-left: 4rpx;
   }
 
-  &__arrow {
-    font-size: $font-sm;
-    color: $text-placeholder;
-    margin-left: auto;
-  }
+  /* arrow icon handled by WgIcon */
 }
 
 /* ===== 状态Tab ===== */
@@ -584,9 +562,15 @@ function formatStatAmount(val: number): string {
 
 .contract-card {
   background: $bg-card;
-  border-radius: $radius-lg;
-  padding: $spacing-md;
-  margin-bottom: $spacing-sm;
+  border-radius: $radius-xl;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-warm-card;
+  transition: transform $transition-fast;
+
+  &:active {
+    transform: scale(0.98);
+  }
 
   &__header {
     display: flex;

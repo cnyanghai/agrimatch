@@ -45,13 +45,13 @@ function isExpanded(id: number): boolean {
 
 function goSupplyHall(name: string) {
   uni.navigateTo({
-    url: `/pages/supply/index?categoryName=${encodeURIComponent(name)}`
+    url: `/pages/search/index?tab=supply&keyword=${encodeURIComponent(name)}`
   })
 }
 
 function goRequirementHall(name: string) {
   uni.navigateTo({
-    url: `/pages/requirement/index?categoryName=${encodeURIComponent(name)}`
+    url: `/pages/search/index?tab=requirement&keyword=${encodeURIComponent(name)}`
   })
 }
 

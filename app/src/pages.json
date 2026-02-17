@@ -198,13 +198,6 @@
       }
     },
     {
-      "path": "pages/market/index",
-      "style": {
-        "navigationBarTitleText": "行情中心",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
       "path": "pages/company/directory",
       "style": {
         "navigationBarTitleText": "企业名录",
@@ -272,6 +265,12 @@
       "style": {
         "navigationStyle": "custom",
         "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/seal/manage",
+      "style": {
+        "navigationBarTitleText": "印章管理"
       }
     }
   ],

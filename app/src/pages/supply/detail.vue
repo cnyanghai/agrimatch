@@ -114,6 +114,13 @@ async function handleContact() {
       peerUserId: detail.value.userId,
       subjectType: 'SUPPLY',
       subjectId: detail.value.id,
+      subjectSnapshotJson: JSON.stringify({
+        categoryName: detail.value.categoryName,
+        exFactoryPrice: detail.value.exFactoryPrice,
+        quantity: detail.value.quantity,
+        unit: priceUnit.value,
+        companyName: detail.value.companyName,
+      }),
     })
     const peerName = detail.value.companyName || detail.value.nickName || detail.value.userName || ''
     uni.navigateTo({

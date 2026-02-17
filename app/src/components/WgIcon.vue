@@ -13,6 +13,8 @@ import {
   UserPlus, MapPin, Bell, Phone, Mail, Trash2, Star, Lock, User,
   Camera, Info, RefreshCw, Eye, EyeOff, Share2, Package,
   MessageSquare, Navigation, Coins, ArrowLeft,
+  ImagePlus, Sparkles, AlertCircle, RotateCcw, PlusCircle, ArrowRight,
+  Home, Palette, Shield, Zap, Clock, CalendarDays, Filter, SlidersHorizontal,
 } from 'lucide-vue-next'
 
 const props = withDefaults(defineProps<{
@@ -111,6 +113,23 @@ const iconMap: Record<string, Component> = {
   package: Package,
   eye: Eye,
   'eye-off': EyeOff,
+
+  // 新增图标
+  'image-plus': ImagePlus,
+  sparkles: Sparkles,
+  'alert-circle': AlertCircle,
+  'rotate-ccw': RotateCcw,
+  'plus-circle': PlusCircle,
+  'arrow-right': ArrowRight,
+  home: Home,
+  palette: Palette,
+  shield: Shield,
+  zap: Zap,
+  clock: Clock,
+  'calendar-days': CalendarDays,
+  filter: Filter,
+  'sliders-horizontal': SlidersHorizontal,
+  x: X,
 }
 
 const iconComponent = computed(() => iconMap[props.name] || null)

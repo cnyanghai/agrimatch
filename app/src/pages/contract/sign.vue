@@ -24,6 +24,7 @@ import {
 } from '../../api/contract'
 import { useAuthStore } from '../../store/auth'
 import { getMyCompany, type CompanyResponse } from '../../api/company'
+import WgSealUploader from '../../components/WgSealUploader.vue'
 
 const authStore = useAuthStore()
 
@@ -190,6 +191,42 @@ async function handleCreateSeal() {
   }
 }
 
+/** 印章上传器回调 */
+async function handleSealCreated(result: string) {
+  showCreateSeal.value = false
+  if (!result) return // 用户取消
+
+  if (result.startsWith('__GENERATE__:')) {
+    // 系统生成模式
+    const sealNameStr = result.replace('__GENERATE__:', '')
+    try {
+      await createSeal({
+        sealName: sealNameStr,
+        sealType: 'company',
+        generate: true,
+      })
+      uni.showToast({ title: '印章生成成功', icon: 'success' })
+      await loadSeals()
+    } catch {
+      // handled
+    }
+  } else {
+    // 上传提取模式 - result 是上传后的 URL
+    try {
+      await createSeal({
+        sealName: newSealName.value.trim() || '上传印章',
+        sealType: 'company',
+        sealUrl: result,
+        generate: false,
+      })
+      uni.showToast({ title: '印章创建成功', icon: 'success' })
+      await loadSeals()
+    } catch {
+      // handled
+    }
+  }
+}
+
 // ==================== 手写签名 Canvas ====================
 function initCanvas() {
   nextTick(() => {
@@ -251,18 +288,27 @@ function getCanvasDataUrl(): Promise<string> {
       fileType: 'png',
       quality: 0.9,
       success(res) {
-        // 读取文件转 base64
         // #ifdef APP-PLUS
-        const reader = new plus.io.FileReader()
-        reader.onload = function(e: any) {
-          resolve(e.target.result)
-        }
-        reader.onerror = function() {
-          reject(new Error('读取签名文件失败'))
-        }
-        reader.readAsDataURL(res.tempFilePath)
+        // APP-PLUS 模式：通过 plus.io 读取临时文件为 base64
+        plus.io.resolveLocalFileSystemURL(
+          res.tempFilePath,
+          (entry: any) => {
+            entry.file((file: any) => {
+              const reader = new plus.io.FileReader()
+              reader.onloadend = function(e: any) {
+                resolve(e.target.result as string)
+              }
+              reader.onerror = function() {
+                reject(new Error('读取签名文件失败'))
+              }
+              reader.readAsDataURL(file)
+            }, () => reject(new Error('获取文件对象失败')))
+          },
+          () => reject(new Error('文件路径解析失败'))
+        )
         // #endif
         // #ifdef H5
+        // H5 模式：canvasToTempFilePath 直接返回 base64 data URL
         resolve(res.tempFilePath)
         // #endif
       },
@@ -422,43 +468,22 @@ function onMethodChange(method: SignMethod) {
             <text class="seal-item__name">{{ seal.sealName }}</text>
             <text v-if="seal.isDefault" class="seal-item__default">默认</text>
             <view v-if="selectedSealId === seal.id" class="seal-item__check">
-              <text class="seal-item__check-icon">&#10003;</text>
+              <WgIcon name="check" :size="14" color="#fff" :stroke-width="3" />
             </view>
           </view>
         </view>
 
         <!-- 创建新印章 -->
         <view class="create-seal-btn" @tap="showCreateSeal = true">
-          <text class="create-seal-btn__text">+ 创建新印章</text>
+          <WgIcon name="plus-circle" :size="16" color="#2D6A4F" />
+          <text class="create-seal-btn__text">添加印章（拍照提取 / 系统生成）</text>
         </view>
 
-        <!-- 创建印章弹窗 -->
-        <view v-if="showCreateSeal" class="modal-mask" @tap.self="showCreateSeal = false">
-          <view class="modal-content">
-            <text class="modal-content__title">创建电子印章</text>
-            <text class="modal-content__desc">系统将根据公司名称自动生成电子印章</text>
-            <input
-              v-model="newSealName"
-              class="modal-content__input"
-              placeholder="请输入印章名称（如：公司合同章）"
-              :maxlength="20"
-            />
-            <view class="modal-content__actions">
-              <view class="modal-content__btn modal-content__btn--cancel" @tap="showCreateSeal = false">
-                <text class="modal-content__btn-text">取消</text>
-              </view>
-              <view
-                class="modal-content__btn modal-content__btn--confirm"
-                :class="{ 'modal-content__btn--disabled': creatingSeal }"
-                @tap="handleCreateSeal"
-              >
-                <text class="modal-content__btn-text modal-content__btn-text--white">
-                  {{ creatingSeal ? '创建中...' : '确认创建' }}
-                </text>
-              </view>
-            </view>
-          </view>
-        </view>
+        <!-- 印章上传器（底部面板） -->
+        <WgSealUploader
+          :model-value="showCreateSeal"
+          @created="handleSealCreated"
+        />
       </view>
 
       <!-- ========== SMS 验证码（盖章类签署必填） ========== -->
@@ -793,19 +818,24 @@ function onMethodChange(method: SignMethod) {
     justify-content: center;
   }
 
-  &__check-icon {
-    font-size: 20rpx;
-    color: #fff;
-    font-weight: bold;
-  }
+  /* check icon handled by WgIcon */
 }
 
 .create-seal-btn {
   margin-top: $spacing-md;
-  padding: $spacing-sm;
-  text-align: center;
-  border: 2rpx dashed $border-color;
+  padding: $spacing-sm $spacing-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  border: 2rpx dashed $brand-300;
   border-radius: $radius-md;
+  background: $brand-50;
+  transition: all $transition-fast;
+
+  &:active {
+    background: $brand-100;
+  }
 
   &__text {
     font-size: $font-sm;
@@ -814,91 +844,7 @@ function onMethodChange(method: SignMethod) {
   }
 }
 
-/* ===== 创建印章弹窗 ===== */
-.modal-mask {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: $bg-mask;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-content {
-  width: 85%;
-  background: $bg-card;
-  border-radius: $radius-xl;
-  padding: $spacing-lg;
-
-  &__title {
-    font-size: $font-lg;
-    font-weight: bold;
-    color: $text-primary;
-    display: block;
-    text-align: center;
-    margin-bottom: $spacing-xs;
-  }
-
-  &__desc {
-    font-size: $font-sm;
-    color: $text-secondary;
-    display: block;
-    text-align: center;
-    margin-bottom: $spacing-md;
-  }
-
-  &__input {
-    width: 100%;
-    height: 88rpx;
-    border: 2rpx solid $border-color;
-    border-radius: $radius-md;
-    padding: 0 $spacing-md;
-    font-size: $font-md;
-    color: $text-primary;
-    margin-bottom: $spacing-md;
-  }
-
-  &__actions {
-    display: flex;
-    gap: $spacing-sm;
-  }
-
-  &__btn {
-    flex: 1;
-    height: 80rpx;
-    border-radius: $radius-lg;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    &--cancel {
-      background: $bg-page;
-      border: 1rpx solid $border-color;
-    }
-
-    &--confirm {
-      background: $brand-600;
-    }
-
-    &--disabled {
-      opacity: 0.5;
-    }
-  }
-
-  &__btn-text {
-    font-size: $font-md;
-    font-weight: 600;
-    color: $text-primary;
-
-    &--white {
-      color: #fff;
-    }
-  }
-}
+/* 印章上传弹窗样式由 WgSealUploader 组件自带 */
 
 /* ===== SMS 验证码区域 ===== */
 .sms-area {

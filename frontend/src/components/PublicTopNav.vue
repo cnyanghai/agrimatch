@@ -3,10 +3,13 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../store/auth'
 import { useUiStore } from '../store/ui'
-import { LogOut, Settings, ChevronDown, ShoppingBag, Truck } from 'lucide-vue-next'
+import { LogOut, Settings, ChevronDown, ShoppingBag, Truck, Menu } from 'lucide-vue-next'
 import { getSchemaTree, type ProductSchemaVO } from '../api/productSchema'
 import { listTopCompanies, type CompanyCardResponse } from '../api/company'
+import MobileDrawer from './MobileDrawer.vue'
 import logoWhite from '../assets/logo-white.svg'
+
+const mobileDrawerVisible = ref(false)
 
 const router = useRouter()
 const route = useRoute()
@@ -94,12 +97,21 @@ onMounted(async () => {
   <nav class="bg-brand-700/90 backdrop-blur-md border-b border-brand-800/30 sticky top-0 z-50 shadow-lg shadow-brand-900/20">
     <div class="w-full px-4 md:px-10">
       <div class="min-h-11 py-1 flex items-center justify-between gap-6">
-        <!-- Left: Logo & Dropdowns (Stacked) -->
+        <!-- Left: Hamburger (mobile) + Logo & Dropdowns -->
         <div class="flex flex-col items-start gap-3">
-          <div class="flex items-center gap-1.5 cursor-pointer hover:bg-white/10 px-2 py-1.5 rounded-xl transition-all active:scale-95" @click="go('/')">
-            <!-- Logo: 沃谷黄金谷粒（白色版本，透明背景） -->
-            <img :src="logoWhite" alt="沃谷" class="h-7 w-auto" />
-            <span class="hidden sm:block text-lg font-black text-white tracking-tight">沃谷</span>
+          <div class="flex items-center gap-1">
+            <!-- Hamburger menu (mobile only) -->
+            <button
+              class="md:hidden p-2 -ml-1 rounded-lg hover:bg-white/10 text-white transition-all active:scale-95"
+              @click="mobileDrawerVisible = true"
+            >
+              <Menu class="w-5 h-5" :stroke-width="2" />
+            </button>
+            <div class="flex items-center gap-1.5 cursor-pointer hover:bg-white/10 px-2 py-1.5 rounded-xl transition-all active:scale-95" @click="go('/')">
+              <!-- Logo: 沃谷黄金谷粒（白色版本，透明背景） -->
+              <img :src="logoWhite" alt="沃谷" class="h-7 w-auto" />
+              <span class="hidden sm:block text-lg font-black text-white tracking-tight">沃谷</span>
+            </div>
           </div>
 
           <!-- Dropdowns Row -->
@@ -286,6 +298,9 @@ onMounted(async () => {
       </div>
     </div>
   </nav>
+
+  <!-- Mobile Drawer -->
+  <MobileDrawer :visible="mobileDrawerVisible" @close="mobileDrawerVisible = false" />
 </template>
 
 

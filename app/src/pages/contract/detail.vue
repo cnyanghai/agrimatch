@@ -264,8 +264,9 @@ onShow(() => {
       <!-- 查看合同文档 & 下载PDF -->
       <view class="doc-actions">
         <view class="doc-toggle" @tap="showDocument = !showDocument">
+          <WgIcon name="file-text" :size="16" color="#2D6A4F" />
           <text class="doc-toggle__text">{{ showDocument ? '收起合同文档' : '查看合同文档' }}</text>
-          <text class="doc-toggle__arrow">{{ showDocument ? '&#9650;' : '&#9660;' }}</text>
+          <WgIcon :name="showDocument ? 'chevron-up' : 'chevron-down'" :size="14" color="#2D6A4F" />
         </view>
         <view
           v-if="canDownloadPdf"
@@ -273,7 +274,7 @@ onShow(() => {
           :class="{ 'pdf-download-btn--loading': pdfDownloading }"
           @tap="downloadPdf"
         >
-          <text class="pdf-download-btn__icon">&#128196;</text>
+          <WgIcon name="file-text" :size="16" color="#c28a55" />
           <text class="pdf-download-btn__text">{{ pdfDownloading ? '下载中...' : '导出PDF' }}</text>
         </view>
       </view>
@@ -434,7 +435,8 @@ onShow(() => {
           </text>
         </view>
         <view class="milestone-more" @tap="goMilestones">
-          <text class="milestone-more__text">查看全部节点 ></text>
+          <text class="milestone-more__text">查看全部节点</text>
+          <WgIcon name="chevron-right" :size="14" color="#2D6A4F" />
         </view>
       </view>
 
@@ -527,11 +529,6 @@ onShow(() => {
     font-weight: 600;
     color: $brand-600;
   }
-
-  &__arrow {
-    font-size: $font-sm;
-    color: $brand-600;
-  }
 }
 
 .pdf-download-btn {
@@ -549,14 +546,10 @@ onShow(() => {
     pointer-events: none;
   }
 
-  &__icon {
-    font-size: $font-md;
-  }
-
   &__text {
     font-size: $font-sm;
     font-weight: 600;
-    color: $brand-600;
+    color: $autumn-500;
     white-space: nowrap;
   }
 }
@@ -586,11 +579,12 @@ onShow(() => {
 /* ===== 金额卡片 ===== */
 .amount-card {
   background: $bg-card;
-  margin: -#{$spacing-md} $spacing-sm $spacing-sm;
-  border-radius: $radius-lg;
+  margin: -#{$spacing-md} $spacing-md $spacing-md;
+  border-radius: $radius-xl;
   padding: $spacing-lg;
   position: relative;
   z-index: 1;
+  box-shadow: $shadow-warm-elevated;
 
   &__row {
     display: flex;
@@ -622,9 +616,10 @@ onShow(() => {
 /* ===== 信息分区 ===== */
 .info-section {
   background: $bg-card;
-  margin: 0 $spacing-sm $spacing-sm;
-  border-radius: $radius-lg;
+  margin: 0 $spacing-md $spacing-md;
+  border-radius: $radius-xl;
   padding: $spacing-md $spacing-lg $spacing-sm;
+  box-shadow: $shadow-warm-card;
 
   &__title {
     font-size: $font-md;

@@ -100,6 +100,13 @@ async function handleContact() {
       peerUserId: detail.value.userId,
       subjectType: 'NEED',
       subjectId: detail.value.id,
+      subjectSnapshotJson: JSON.stringify({
+        categoryName: detail.value.categoryName,
+        expectedPrice: detail.value.expectedPrice,
+        quantity: detail.value.quantity,
+        unit: priceUnit.value,
+        companyName: detail.value.companyName,
+      }),
     })
     const peerName = detail.value.companyName || detail.value.nickName || detail.value.userName || ''
     uni.navigateTo({

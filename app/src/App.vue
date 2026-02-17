@@ -207,6 +207,16 @@ input, textarea {
   background: linear-gradient(180deg, $brand-700 0%, $brand-600 100%);
 }
 
+/* 统一点击反馈效果 */
+.tap-feedback {
+  transition: transform 150ms ease, opacity 150ms ease;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.85;
+  }
+}
+
 /* 骨架屏占位高度 */
 .skeleton-block {
   background: linear-gradient(90deg, #F5F0E8 25%, #E8E0D4 37%, #F5F0E8 63%);

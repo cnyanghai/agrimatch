@@ -33,6 +33,28 @@ const showActions = ref(false)
 const conversation = ref<ChatConversationResponse | null>(null)
 const subjectInfo = ref<{ type: string; name: string; price: string; id: number } | null>(null)
 
+function normalizeSubjectType(type?: string): '' | 'supply' | 'requirement' {
+  if (!type) return ''
+  const t = String(type).toLowerCase()
+  if (t === 'supply') return 'supply'
+  if (t === 'requirement' || t === 'need') return 'requirement'
+  if (t === 'sup' || t === 'supplier') return 'supply'
+  if (t === 'req' || t === 'buyer') return 'requirement'
+  return ''
+}
+
+const latestQuote = computed(() => {
+  for (let i = messages.value.length - 1; i >= 0; i--) {
+    const m = messages.value[i]
+    if (m.msgType === 'QUOTE') return m
+  }
+  return null
+})
+const canQuickCounter = computed(() => {
+  if (!latestQuote.value) return false
+  return !isMyMsg(latestQuote.value)
+})
+
 // WebSocket
 const { connected, connecting, connect, sendChatMessage, onMessage, disconnect } = useWebSocket()
 
@@ -94,9 +116,10 @@ async function loadSubjectContext() {
   try {
     const conv = await getConversation(conversationId.value)
     conversation.value = conv
-    if (!conv?.subjectType || !conv?.subjectId) return
+    const subjectType = normalizeSubjectType(conv?.subjectType)
+    if (!subjectType || !conv?.subjectId) return
 
-    if (conv.subjectType === 'supply') {
+    if (subjectType === 'supply') {
       const supply = await getSupply(conv.subjectId)
       if (supply) {
         subjectInfo.value = {
@@ -106,7 +129,7 @@ async function loadSubjectContext() {
           id: supply.id,
         }
       }
-    } else if (conv.subjectType === 'requirement') {
+    } else if (subjectType === 'requirement') {
       const req = await getRequirement(conv.subjectId)
       if (req) {
         subjectInfo.value = {
@@ -165,6 +188,22 @@ function formatTimeSeparator(time?: string): string {
     return `${weekdays[d.getDay()]} ${hm}`
   }
   return `${d.getMonth() + 1}月${d.getDate()}日 ${hm}`
+}
+
+function getPrevQuote(index: number): ChatMessageResponse | null {
+  for (let i = index - 1; i >= 0; i--) {
+    const m = messages.value[i]
+    if (m.msgType === 'QUOTE') return m
+  }
+  return null
+}
+
+function getQuoteRound(index: number): number {
+  let count = 0
+  for (let i = 0; i <= index; i++) {
+    if (messages.value[i]?.msgType === 'QUOTE') count++
+  }
+  return count
 }
 
 let tempIdCounter = 0
@@ -228,23 +267,33 @@ function isMyMsg(msg: ChatMessageResponse): boolean {
 // --- Action sheet ("+") ---
 function handleShowActions() {
   showActions.value = false
+  const items = ['发送报价']
+  if (subjectInfo.value) {
+    items.push('查看商品详情')
+  }
   uni.showActionSheet({
-    itemList: ['发送报价'],
+    itemList: items,
     success: (res) => {
       if (res.tapIndex === 0) {
         goQuoteForm()
+      } else if (res.tapIndex === 1 && subjectInfo.value) {
+        goSubjectDetail()
       }
     },
   })
 }
 
-function goQuoteForm() {
+function goQuoteForm(mode?: 'counter') {
   const params = [`conversationId=${conversationId.value}`]
-  if (conversation.value?.subjectType) {
-    params.push(`subjectType=${conversation.value.subjectType}`)
+  const normalizedType = normalizeSubjectType(conversation.value?.subjectType)
+  if (normalizedType) {
+    params.push(`subjectType=${normalizedType}`)
   }
   if (conversation.value?.subjectId) {
     params.push(`subjectId=${conversation.value.subjectId}`)
+  }
+  if (mode) {
+    params.push(`mode=${mode}`)
   }
   uni.navigateTo({ url: `/pages/chat/quote-form?${params.join('&')}` })
 }
@@ -284,8 +333,27 @@ async function handleRejectQuote(msg: ChatMessageResponse) {
   })
 }
 
-function handleCounterQuote() {
-  goQuoteForm()
+const QUOTE_DRAFT_KEY = 'quoteDraft'
+
+function handleCounterQuote(msg: ChatMessageResponse) {
+  let payload: Record<string, any> | null = null
+  if (msg.payloadJson) {
+    try {
+      payload = JSON.parse(msg.payloadJson)
+    } catch {
+      payload = null
+    }
+  }
+  if (payload) {
+    uni.setStorageSync(QUOTE_DRAFT_KEY, {
+      ...payload,
+      _fromMessageId: msg.id,
+      _mode: 'counter',
+      subjectType: normalizeSubjectType(conversation.value?.subjectType) || normalizeSubjectType(payload.subjectType),
+      subjectId: conversation.value?.subjectId || payload.subjectId,
+    })
+  }
+  goQuoteForm('counter')
 }
 
 function handleDraftContract(msg: ChatMessageResponse) {
@@ -300,16 +368,21 @@ function handleDraftContract(msg: ChatMessageResponse) {
       <text class="status-bar__text">{{ connecting ? '连接中...' : '未连接' }}</text>
     </view>
 
-    <!-- Subject context card -->
-    <view v-if="subjectInfo" class="context-card" @tap="goSubjectDetail">
-      <view class="context-card__icon" :class="subjectInfo.type === 'supply' ? 'context-card__icon--brand' : 'context-card__icon--autumn'">
-        <WgIcon :name="subjectInfo.type === 'supply' ? 'store' : 'shopping-bag'" :size="16" color="#fff" />
+    <!-- Subject context card + 报价入口 -->
+    <view v-if="subjectInfo" class="context-card">
+      <view class="context-card__main" @tap="goSubjectDetail">
+        <view class="context-card__icon" :class="subjectInfo.type === 'supply' ? 'context-card__icon--brand' : 'context-card__icon--autumn'">
+          <WgIcon :name="subjectInfo.type === 'supply' ? 'store' : 'shopping-bag'" :size="16" color="#fff" />
+        </view>
+        <view class="context-card__info">
+          <text class="context-card__name">{{ subjectInfo.name }}</text>
+          <text class="context-card__price">{{ subjectInfo.price }}</text>
+        </view>
       </view>
-      <view class="context-card__info">
-        <text class="context-card__name">{{ subjectInfo.name }}</text>
-        <text class="context-card__price">{{ subjectInfo.price }}</text>
+      <view class="context-card__quote-btn" @tap="goQuoteForm">
+        <WgIcon name="coins" :size="14" color="#fff" />
+        <text class="context-card__quote-text">发报价</text>
       </view>
-      <WgIcon name="right" :size="14" color="#d1d5db" />
     </view>
 
     <scroll-view
@@ -340,9 +413,11 @@ function handleDraftContract(msg: ChatMessageResponse) {
           <WgQuoteCard
             :message="msg"
             :is-mine="isMyMsg(msg)"
+            :prev-message="getPrevQuote(index)"
+            :round="getQuoteRound(index)"
             @accept="handleAcceptQuote(msg)"
             @reject="handleRejectQuote(msg)"
-            @counter="handleCounterQuote"
+            @counter="handleCounterQuote(msg)"
             @draft-contract="handleDraftContract(msg)"
           />
           <view class="message__meta">
@@ -380,7 +455,15 @@ function handleDraftContract(msg: ChatMessageResponse) {
     <!-- Input area -->
     <view class="input-bar safe-area-bottom">
       <view class="input-bar__plus" @tap="handleShowActions">
-        <text class="input-bar__plus-icon">+</text>
+        <WgIcon name="plus" :size="20" color="#78716C" />
+      </view>
+      <view
+        v-if="canQuickCounter && latestQuote"
+        class="input-bar__quick"
+        @tap="handleCounterQuote(latestQuote)"
+      >
+        <WgIcon name="arrow-right" :size="14" color="#2D6A4F" />
+        <text class="input-bar__quick-text">快速还价</text>
       </view>
       <input
         v-model="inputText"
@@ -424,6 +507,14 @@ function handleDraftContract(msg: ChatMessageResponse) {
   border-bottom: 1rpx solid $border-light;
   gap: $spacing-sm;
 
+  &__main {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    flex: 1;
+    min-width: 0;
+  }
+
   &__icon {
     width: 56rpx;
     height: 56rpx;
@@ -455,6 +546,24 @@ function handleDraftContract(msg: ChatMessageResponse) {
   &__price {
     font-size: $font-xs;
     color: $accent-400;
+    font-weight: 600;
+  }
+
+  &__quote-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    padding: $spacing-xs $spacing-md;
+    background: $brand-600;
+    border-radius: $radius-pill;
+
+    &:active { opacity: 0.8; transform: scale(0.95); }
+  }
+
+  &__quote-text {
+    font-size: $font-xs;
+    color: #fff;
     font-weight: 600;
   }
 }
@@ -603,13 +712,6 @@ function handleDraftContract(msg: ChatMessageResponse) {
     }
   }
 
-  &__plus-icon {
-    font-size: 44rpx;
-    color: $text-secondary;
-    font-weight: 300;
-    line-height: 1;
-  }
-
   &__input {
     flex: 1;
     height: 72rpx;
@@ -617,6 +719,29 @@ function handleDraftContract(msg: ChatMessageResponse) {
     border-radius: $radius-lg;
     padding: 0 $spacing-md;
     font-size: $font-md;
+  }
+
+  &__quick {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    height: 72rpx;
+    padding: 0 $spacing-sm;
+    background: $brand-50;
+    border-radius: $radius-pill;
+    border: 1rpx solid $brand-100;
+    flex-shrink: 0;
+
+    &:active {
+      transform: scale(0.96);
+      opacity: 0.85;
+    }
+  }
+
+  &__quick-text {
+    font-size: $font-xs;
+    color: $brand-600;
+    font-weight: 600;
   }
 
   &__send {

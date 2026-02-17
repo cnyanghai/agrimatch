@@ -83,8 +83,8 @@ function goTopicSquare() {
   uni.navigateTo({ url: '/pages/topic/square' })
 }
 
-function goMarket() {
-  uni.navigateTo({ url: '/pages/market/index' })
+function goSealManage() {
+  uni.navigateTo({ url: '/pages/seal/manage' })
 }
 
 function goDirectory() {
@@ -232,9 +232,9 @@ function handleLogout() {
         <text class="menu-item__label">企业信息</text>
         <WgIcon name="right" :size="16" color="#D6CCC0" />
       </view>
-      <view class="menu-item" @tap="goMarket">
-        <view class="menu-item__icon menu-item__icon--accent"><WgIcon name="trending-up" :size="20" color="#E76F51" /></view>
-        <text class="menu-item__label">行情中心</text>
+      <view class="menu-item" @tap="goSealManage">
+        <view class="menu-item__icon menu-item__icon--accent"><WgIcon name="shield" :size="20" color="#E76F51" /></view>
+        <text class="menu-item__label">印章管理</text>
         <WgIcon name="right" :size="16" color="#D6CCC0" />
       </view>
       <view class="menu-item" @tap="goDirectory">

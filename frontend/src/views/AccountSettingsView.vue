@@ -590,10 +590,30 @@ const navItems = [
     </div>
 
     <!-- 主布局：左侧导航 + 右侧内容 -->
-    <div class="flex gap-6">
-      <!-- 左侧垂直导航 -->
-      <aside class="w-64 shrink-0">
-        <nav class="bg-white rounded-xl border border-neutral-200 p-2 space-y-1">
+    <div class="flex flex-col md:flex-row gap-4 md:gap-6">
+      <!-- 导航：移动端水平滚动 / 桌面端垂直列表 -->
+      <aside class="md:w-64 shrink-0">
+        <!-- 移动端: 水平标签 -->
+        <div class="md:hidden overflow-x-auto -mx-4 px-4 pb-2">
+          <div class="flex gap-2 min-w-max">
+            <button
+              v-for="item in navItems"
+              :key="item.key"
+              :class="[
+                'flex items-center gap-2 px-4 py-2 rounded-full text-sm whitespace-nowrap transition-all',
+                activeTab === item.key
+                  ? 'bg-brand-600 text-white font-bold shadow-brand'
+                  : 'bg-white border border-neutral-200 text-neutral-600'
+              ]"
+              @click="activeTab = item.key"
+            >
+              <component :is="item.icon" class="w-4 h-4" />
+              <span>{{ item.label }}</span>
+            </button>
+          </div>
+        </div>
+        <!-- 桌面端: 垂直导航 -->
+        <nav class="hidden md:block bg-white rounded-xl border border-neutral-200 p-2 space-y-1">
           <button
             v-for="item in navItems"
             :key="item.key"

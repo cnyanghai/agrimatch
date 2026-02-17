@@ -8,6 +8,7 @@ import { requestNotificationPermission } from './utils/browserNotification'
 import { initAudioContext } from './utils/notificationSound'
 import AuthDialog from './components/AuthDialog.vue'
 import PublicTopNav from './components/PublicTopNav.vue'
+import MobileBottomNav from './components/MobileBottomNav.vue'
 import NotificationToast from './components/notification/NotificationToast.vue'
 import {
   LayoutDashboard, FilePlus, Star, Map,
@@ -86,7 +87,7 @@ onMounted(async () => {
     <!-- Global Navigation -->
     <PublicTopNav v-if="!hideNav" />
 
-    <!-- Main Content Area -->
+    <!-- Main Content Area (public/minimal pages) -->
     <div v-if="minimal" id="main-scroll" class="flex-1 overflow-auto">
       <router-view />
     </div>
@@ -198,10 +199,13 @@ onMounted(async () => {
     </aside>
 
       <!-- Main Content -->
-      <main id="main-scroll" class="flex-1 overflow-auto p-4 md:p-6 min-w-0">
+      <main id="main-scroll" class="flex-1 overflow-auto p-4 md:p-6 min-w-0 pb-20 md:pb-6">
         <router-view />
       </main>
     </div>
+
+    <!-- Mobile Bottom Nav (logged-in console pages only) -->
+    <MobileBottomNav v-if="!minimal && isLoggedIn" />
 
     <AuthDialog />
 

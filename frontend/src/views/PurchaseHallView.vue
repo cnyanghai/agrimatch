@@ -1,22 +1,18 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { requireAuth } from '../utils/requireAuth'
 import PublicFooter from '../components/PublicFooter.vue'
 import ChatDrawer from '../components/chat/ChatDrawer.vue'
 import CategorySidebar from '../components/CategorySidebar.vue'
 import { listRequirements, type RequirementResponse } from '../api/requirement'
-import { openChatConversation } from '../api/chat'
-import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
-import { getSchemaTree, type ProductSchemaVO, type CategoryNode } from '../api/productSchema'
 import { getSchemaUnitConfig } from '../utils/schemaUnits'
-import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../store/auth'
 import { Menu, MessageCircle } from 'lucide-vue-next'
 import ProductInfoRow from '../components/ProductInfoRow.vue'
+import { useHallFilters } from '../composables/useHallFilters'
+import { useHallInteractions } from '../composables/useHallInteractions'
 
 const authStore = useAuthStore()
-
 const router = useRouter()
 const route = useRoute()
 
@@ -24,72 +20,26 @@ function go(path: string) {
   router.push(path)
 }
 
+// -- Shared composables --
+const {
+  searchKeyword, selectedCategory, currentPage, pageSize, total,
+  schemaTree, selectedSchemaCode, mobileSidebarOpen,
+  companyIdFilter, schemaCodeFromRoute,
+  loadSchemaTree, findSchemaCodeByCategory, handlePageChange, initFromRoute,
+} = useHallFilters()
+
+const {
+  focusedId, focusIdFromRoute,
+  loadFollowStatus, toggleFollow, isFollowingUser,
+  setCardEl, applyFocusIfNeeded,
+  drawerOpen, drawerConversationId, drawerPeerName,
+  drawerSubjectSnapshotJson, drawerSubjectId,
+  openConsultDrawer, onDrawerClosed,
+} = useHallInteractions('/hall/need')
+
+// -- Local state --
 const requirements = ref<RequirementResponse[]>([])
 const listLoading = ref(false)
-const focusedId = ref<number | null>(null)
-const cardEls = new Map<number, HTMLElement>()
-let focusTimer: number | null = null
-
-// 筛选条件
-const searchKeyword = ref('')
-const selectedCategory = ref<string | null>(null)
-
-// 从 URL 读取公司筛选参数
-const companyIdFilter = computed(() => {
-  const raw = route.query.companyId
-  const s = Array.isArray(raw) ? raw[0] : raw
-  const n = s ? Number(s) : NaN
-  return Number.isFinite(n) ? n : null
-})
-
-// 从 URL 读取业态筛选参数
-const schemaCodeFromRoute = computed((): string | null => {
-  const raw = route.query.schemaCode
-  if (Array.isArray(raw)) {
-    return raw[0] ?? null
-  }
-  return raw ?? null
-})
-
-// 分页
-const currentPage = ref(1)
-const pageSize = ref(10)
-const total = ref(0)
-
-// 业态与品类数据（从API加载）
-const schemaTree = ref<ProductSchemaVO[]>([])
-const selectedSchemaCode = ref<string | null>(null)
-
-// 移动端侧边栏状态
-const mobileSidebarOpen = ref(false)
-
-// 扁平化分类树
-function flattenCategories(nodes: CategoryNode[]): string[] {
-  const result: string[] = []
-  function traverse(list: CategoryNode[]) {
-    for (const node of list) {
-      if (node.children && node.children.length > 0) {
-        traverse(node.children)
-      } else {
-        result.push(node.name)
-      }
-    }
-  }
-  traverse(nodes)
-  return result
-}
-
-// 加载业态树
-async function loadSchemaTree() {
-  try {
-    const r = await getSchemaTree()
-    if (r.code === 0 && r.data) {
-      schemaTree.value = r.data
-    }
-  } catch {
-    // 静默失败
-  }
-}
 
 // 处理业态变化（来自侧边栏）
 function onSchemaChange(schemaCode: string | null) {
@@ -103,102 +53,14 @@ function onCategoryChange(categoryName: string | null) {
   selectedCategory.value = categoryName
   currentPage.value = 1
   loadRequirements()
-  // 移动端选择后自动关闭侧边栏
   mobileSidebarOpen.value = false
 }
 
-// 关注状态 Map: userId -> isFollowing
-const followingMap = ref<Map<number, boolean>>(new Map())
-
-// 检查并加载关注状态
-async function loadFollowStatus(userIds: number[]) {
-  if (!authStore.token) return
-  for (const userId of userIds) {
-    if (!followingMap.value.has(userId)) {
-      try {
-        const r = await checkFollowStatus(userId)
-        if (r.code === 0) {
-          followingMap.value.set(userId, r.data || false)
-        }
-      } catch {
-        // ignore
-      }
-    }
-  }
-}
-
-// 关注/取消关注
-async function toggleFollow(r: RequirementResponse) {
-  if (!requireAuth('/hall/need')) return
-  if (!r.userId) {
-    ElMessage.warning('无法关注该用户')
-    return
-  }
-
-  const isFollowing = followingMap.value.get(r.userId) || false
-  try {
-    if (isFollowing) {
-      await unfollowUser(r.userId)
-      followingMap.value.set(r.userId, false)
-      ElMessage.success(`已取消关注 ${r.nickName || r.companyName || '该用户'}`)
-    } else {
-      await followUser(r.userId)
-      followingMap.value.set(r.userId, true)
-      ElMessage.success(`已关注 ${r.nickName || r.companyName || '该用户'}`)
-    }
-  } catch (e: any) {
-    ElMessage.error(e?.message || '操作失败')
-  }
-}
-
-function isFollowingUser(userId?: number): boolean {
-  if (!userId) return false
-  return followingMap.value.get(userId) || false
-}
-
-const focusIdFromRoute = computed(() => {
-  const raw = route.query.focusId
-  const s = Array.isArray(raw) ? raw[0] : raw
-  const n = s ? Number(s) : NaN
-  return Number.isFinite(n) ? n : null
-})
-
 const displayRequirements = computed(() => {
   if (focusIdFromRoute.value) return requirements.value
-  // 前端分页
   const start = (currentPage.value - 1) * pageSize.value
   return requirements.value.slice(start, start + pageSize.value)
 })
-
-function setCardEl(id: number, el: Element | null) {
-  if (!id) return
-  if (el) cardEls.set(id, el as HTMLElement)
-  else cardEls.delete(id)
-}
-
-async function applyFocusIfNeeded() {
-  const id = focusIdFromRoute.value
-  if (!id) return
-  await nextTick()
-  const el = cardEls.get(id)
-  if (!el) return
-
-  focusedId.value = id
-  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  router.replace({ path: route.path, query: { ...route.query, focusId: undefined } })
-
-  if (focusTimer) window.clearTimeout(focusTimer)
-  focusTimer = window.setTimeout(() => {
-    focusedId.value = null
-    focusTimer = null
-  }, 2500)
-}
-
-const drawerOpen = ref(false)
-const drawerConversationId = ref<number | null>(null)
-const drawerPeerName = ref('')
-const drawerSubjectSnapshotJson = ref<string | null>(null)
-const drawerSubjectId = ref<number | null>(null)
 
 function buildNeedSnapshot(r: RequirementResponse) {
   return JSON.stringify({
@@ -221,35 +83,7 @@ function buildNeedSnapshot(r: RequirementResponse) {
 }
 
 async function onQuote(r: RequirementResponse) {
-  if (!requireAuth('/hall/need')) return
-  if (!r.userId || !r.id) {
-    ElMessage.warning('该条需求暂不支持报价')
-    return
-  }
-  try {
-    const res = await openChatConversation({
-      peerUserId: r.userId,
-      subjectType: 'NEED',
-      subjectId: r.id,
-      subjectSnapshotJson: buildNeedSnapshot(r)
-    })
-    if (res.code !== 0 || !res.data) throw new Error(res.message)
-
-    drawerConversationId.value = res.data
-    drawerPeerName.value = r.nickName || r.userName || r.companyName || '对方'
-    drawerSubjectId.value = r.id
-    drawerSubjectSnapshotJson.value = buildNeedSnapshot(r)
-    drawerOpen.value = true
-  } catch (e: any) {
-    ElMessage.error(e?.message || '发起报价失败')
-  }
-}
-
-function onDrawerClosed() {
-  drawerConversationId.value = null
-  drawerSubjectSnapshotJson.value = null
-  drawerSubjectId.value = null
-  drawerPeerName.value = ''
+  await openConsultDrawer(r, 'REQUIREMENT', buildNeedSnapshot(r))
 }
 
 async function loadRequirements() {
@@ -327,21 +161,12 @@ async function loadRequirements() {
 
 // 搜索
 function onSearch() {
-  currentPage.value = 1 // 重置分页
+  currentPage.value = 1
   loadRequirements()
 }
 
-// 分页变更
-function handlePageChange(page: number) {
-  currentPage.value = page
-  window.scrollTo({ top: 400, behavior: 'smooth' })
-}
-
 onMounted(() => {
-  // 从URL初始化业态筛选
-  if (schemaCodeFromRoute.value) {
-    selectedSchemaCode.value = schemaCodeFromRoute.value
-  }
+  initFromRoute()
   loadSchemaTree()
   loadRequirements()
 })
@@ -374,17 +199,6 @@ watch(searchKeyword, (newVal, oldVal) => {
     loadRequirements()
   }
 })
-
-// 根据品类名称查找业态代码
-function findSchemaCodeByCategory(categoryName: string): string {
-  for (const schema of schemaTree.value) {
-    const categories = flattenCategories(schema.categories)
-    if (categories.includes(categoryName)) {
-      return schema.schemaCode
-    }
-  }
-  return 'feed' // 默认饲料原料
-}
 
 // 获取需求的单位配置
 function getRequirementUnitConfig(r: RequirementResponse) {

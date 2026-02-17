@@ -5,6 +5,8 @@ import type { ChatMessageResponse } from '../api/chat'
 const props = defineProps<{
   message: ChatMessageResponse
   isMine: boolean
+  prevMessage?: ChatMessageResponse | null
+  round?: number
 }>()
 
 const emit = defineEmits<{
@@ -26,12 +28,23 @@ interface QuotePayload {
   remark?: string
   productName?: string
   categoryName?: string
+  subjectType?: string
+  subjectId?: number
 }
 
 const payload = computed<QuotePayload>(() => {
   if (!props.message.payloadJson) return {}
   try {
     return JSON.parse(props.message.payloadJson)
+  } catch {
+    return {}
+  }
+})
+
+const prevPayload = computed<QuotePayload>(() => {
+  if (!props.prevMessage?.payloadJson) return {}
+  try {
+    return JSON.parse(props.prevMessage.payloadJson)
   } catch {
     return {}
   }
@@ -78,6 +91,39 @@ const paymentLabel = computed(() => {
   return map[payload.value.paymentMethod || ''] || payload.value.paymentMethod || ''
 })
 
+const productLabel = computed(() => {
+  return payload.value.productName || payload.value.categoryName || ''
+})
+
+const priceDelta = computed(() => {
+  const cur = payload.value.price
+  const prev = prevPayload.value.price
+  if (cur == null || prev == null) return null
+  const diff = cur - prev
+  if (!Number.isFinite(diff) || diff === 0) return null
+  return diff
+})
+
+const qtyDelta = computed(() => {
+  const cur = payload.value.quantity
+  const prev = prevPayload.value.quantity
+  if (cur == null || prev == null) return null
+  const diff = cur - prev
+  if (!Number.isFinite(diff) || diff === 0) return null
+  return diff
+})
+
+function formatDelta(value: number, unit?: string): string {
+  const sign = value > 0 ? '+' : ''
+  return `${sign}${value}${unit || ''}`
+}
+
+function getDeltaClass(value: number): string {
+  if (value > 0) return 'quote-card__delta-item--up'
+  if (value < 0) return 'quote-card__delta-item--down'
+  return ''
+}
+
 const showActions = computed(() => !props.isMine && status.value === 'OFFERED')
 const showDraftContract = computed(() => status.value === 'ACCEPTED')
 </script>
@@ -87,7 +133,13 @@ const showDraftContract = computed(() => status.value === 'ACCEPTED')
     <!-- Header -->
     <view class="quote-card__header">
       <text class="quote-card__title">报价</text>
+      <text v-if="round" class="quote-card__round">第{{ round }}轮</text>
       <text class="quote-card__badge" :class="statusClass">{{ statusLabel }}</text>
+    </view>
+
+    <view v-if="productLabel" class="quote-card__product">
+      <WgIcon name="package" :size="12" color="#78716C" />
+      <text class="quote-card__product-text">{{ productLabel }}</text>
     </view>
 
     <!-- Price info -->
@@ -96,6 +148,15 @@ const showDraftContract = computed(() => status.value === 'ACCEPTED')
         ¥{{ payload.price || '-' }}/{{ payload.unit || '吨' }}
       </text>
       <text class="quote-card__qty">× {{ payload.quantity || '-' }}{{ payload.unit || '吨' }}</text>
+    </view>
+    <view v-if="priceDelta || qtyDelta" class="quote-card__delta">
+      <text class="quote-card__delta-label">较上次</text>
+      <text v-if="priceDelta" class="quote-card__delta-item" :class="getDeltaClass(priceDelta)">
+        单价 {{ formatDelta(priceDelta, '') }}
+      </text>
+      <text v-if="qtyDelta" class="quote-card__delta-item" :class="getDeltaClass(qtyDelta)">
+        数量 {{ formatDelta(qtyDelta, payload.unit || '吨') }}
+      </text>
     </view>
     <text v-if="totalAmount" class="quote-card__total">合计 ¥{{ totalAmount }}</text>
 
@@ -155,6 +216,14 @@ const showDraftContract = computed(() => status.value === 'ACCEPTED')
     margin-bottom: $spacing-sm;
   }
 
+  &__round {
+    font-size: $font-xs;
+    color: $text-secondary;
+    background: $bg-page;
+    padding: 2rpx 10rpx;
+    border-radius: $radius-pill;
+  }
+
   &__title {
     font-size: $font-sm;
     color: $text-secondary;
@@ -188,6 +257,49 @@ const showDraftContract = computed(() => status.value === 'ACCEPTED')
     display: flex;
     align-items: baseline;
     gap: $spacing-sm;
+  }
+
+  &__delta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6rpx;
+    margin-top: 4rpx;
+  }
+
+  &__delta-label {
+    font-size: $font-xs;
+    color: $text-placeholder;
+  }
+
+  &__delta-item {
+    font-size: $font-xs;
+    color: $brand-600;
+    background: $brand-50;
+    padding: 2rpx 10rpx;
+    border-radius: $radius-pill;
+  }
+
+  &__delta-item--up {
+    color: $color-error;
+    background: rgba($color-error, 0.08);
+  }
+
+  &__delta-item--down {
+    color: $brand-600;
+    background: $brand-50;
+  }
+
+  &__product {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__product-text {
+    font-size: $font-xs;
+    color: $text-secondary;
   }
 
   &__price {

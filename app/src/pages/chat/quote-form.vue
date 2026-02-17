@@ -11,6 +11,18 @@ const subjectType = ref('')
 const subjectId = ref(0)
 const subjectName = ref('')
 
+const QUOTE_DRAFT_KEY = 'quoteDraft'
+
+function normalizeSubjectType(type?: string): '' | 'supply' | 'requirement' {
+  if (!type) return ''
+  const t = String(type).toLowerCase()
+  if (t === 'supply') return 'supply'
+  if (t === 'requirement' || t === 'need') return 'requirement'
+  if (t === 'sup' || t === 'supplier') return 'supply'
+  if (t === 'req' || t === 'buyer') return 'requirement'
+  return ''
+}
+
 const form = ref({
   price: '',
   quantity: '',
@@ -43,14 +55,35 @@ onLoad(async (options) => {
     conversationId.value = Number(options.conversationId)
   }
   if (options?.subjectType) {
-    subjectType.value = options.subjectType
+    subjectType.value = normalizeSubjectType(options.subjectType)
   }
   if (options?.subjectId) {
     subjectId.value = Number(options.subjectId)
   }
 
+  // Counter-quote draft prefill (from chat)
+  if (options?.mode === 'counter') {
+    const draft = uni.getStorageSync(QUOTE_DRAFT_KEY)
+    if (draft && typeof draft === 'object') {
+      if (draft.subjectType && !subjectType.value) subjectType.value = normalizeSubjectType(draft.subjectType)
+      if (draft.subjectId && !subjectId.value) subjectId.value = Number(draft.subjectId)
+      if (draft.productName || draft.categoryName) {
+        subjectName.value = draft.productName || draft.categoryName
+      }
+      if (draft.unit) form.value.unit = String(draft.unit)
+      if (draft.price != null) form.value.price = String(draft.price)
+      if (draft.quantity != null) form.value.quantity = String(draft.quantity)
+      if (draft.deliveryPlace) form.value.deliveryPlace = String(draft.deliveryPlace)
+      if (draft.deliveryDate) form.value.deliveryDate = String(draft.deliveryDate)
+      if (draft.deliveryMode) form.value.deliveryMode = String(draft.deliveryMode)
+      if (draft.paymentMethod) form.value.paymentMethod = String(draft.paymentMethod)
+      if (draft.remark) form.value.remark = String(draft.remark)
+    }
+    uni.removeStorageSync(QUOTE_DRAFT_KEY)
+  }
+
   // Pre-fill from subject context
-  if (subjectType.value && subjectId.value) {
+  if (subjectType.value && subjectId.value && !subjectName.value) {
     try {
       if (subjectType.value === 'supply') {
         const supply = await getSupply(subjectId.value)
@@ -116,6 +149,9 @@ async function handleSubmit() {
       paymentMethod: form.value.paymentMethod || undefined,
       remark: form.value.remark || undefined,
       productName: subjectName.value || undefined,
+      categoryName: subjectName.value || undefined,
+      subjectType: normalizeSubjectType(subjectType.value) || undefined,
+      subjectId: subjectId.value || undefined,
     })
 
     const content = `报价: ¥${price}/${form.value.unit} × ${quantity}${form.value.unit}`

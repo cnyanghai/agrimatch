@@ -113,8 +113,8 @@ function goDirectory() {
   uni.navigateTo({ url: '/pages/company/directory' })
 }
 
-function goMarket() {
-  uni.navigateTo({ url: '/pages/market/index' })
+function goMap() {
+  uni.navigateTo({ url: '/pages/map/index' })
 }
 
 function goCategoryDirectory() {
@@ -195,11 +195,11 @@ function getImages(item: PostResponse): string[] {
         </view>
         <text class="quick-entry__label">企业名录</text>
       </view>
-      <view class="quick-entry__item" @tap="goMarket">
+      <view class="quick-entry__item" @tap="goMap">
         <view class="quick-entry__icon quick-entry__icon--warm">
-          <WgIcon name="trending-up" :size="22" color="#78716C" />
+          <WgIcon name="map-pin" :size="22" color="#78716C" />
         </view>
-        <text class="quick-entry__label">行情中心</text>
+        <text class="quick-entry__label">地图找商</text>
       </view>
       <view class="quick-entry__item" @tap="goCategoryDirectory">
         <view class="quick-entry__icon quick-entry__icon--brand-light">
@@ -326,11 +326,6 @@ function getImages(item: PostResponse): string[] {
       type="card"
       :rows="3"
     />
-
-    <!-- FAB 发帖按钮 -->
-    <view class="fab anim-fab-enter" @tap="goPublish">
-      <WgIcon name="square-pen" :size="24" color="#fff" />
-    </view>
 
     <!-- 底部间距 -->
     <view style="height: 130rpx;" />
@@ -578,23 +573,5 @@ function getImages(item: PostResponse): string[] {
   }
 }
 
-/* ===== FAB ===== */
-.fab {
-  position: fixed;
-  right: 32rpx;
-  bottom: 180rpx;
-  width: 100rpx;
-  height: 100rpx;
-  border-radius: 50%;
-  background: $brand-600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8rpx 24rpx rgba(45, 106, 79, 0.3);
-  z-index: 20;
-
-  &:active {
-    transform: scale(0.92);
-  }
-}
+/* FAB removed per user request */
 </style>

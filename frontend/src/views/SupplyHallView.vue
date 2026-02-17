@@ -1,20 +1,17 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { requireAuth } from '../utils/requireAuth'
 import PublicFooter from '../components/PublicFooter.vue'
 import ChatDrawer from '../components/chat/ChatDrawer.vue'
 import CategorySidebar from '../components/CategorySidebar.vue'
 import { listSupplies, type SupplyResponse } from '../api/supply'
-import { openChatConversation } from '../api/chat'
-import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
 import { batchGetFuturesPrices, type FuturesContractResponse } from '../api/futures'
-import { getSchemaTree, type ProductSchemaVO, type CategoryNode } from '../api/productSchema'
 import { getSchemaUnitConfig } from '../utils/schemaUnits'
-import { ElMessage } from 'element-plus'
 import { useAuthStore } from '../store/auth'
 import { Menu, MessageCircle } from 'lucide-vue-next'
 import ProductInfoRow from '../components/ProductInfoRow.vue'
+import { useHallFilters } from '../composables/useHallFilters'
+import { useHallInteractions } from '../composables/useHallInteractions'
 
 const router = useRouter()
 const route = useRoute()
@@ -24,81 +21,26 @@ function go(path: string) {
   router.push(path)
 }
 
+// -- Shared composables --
+const {
+  searchKeyword, selectedCategory, currentPage, pageSize, total,
+  schemaTree, selectedSchemaCode, mobileSidebarOpen,
+  companyIdFilter, schemaCodeFromRoute, categoryNameFromRoute,
+  loadSchemaTree, findSchemaCodeByCategory, handlePageChange, initFromRoute,
+} = useHallFilters()
+
+const {
+  focusedId, focusIdFromRoute,
+  loadFollowStatus, toggleFollow, isFollowingUser,
+  setCardEl, applyFocusIfNeeded,
+  drawerOpen, drawerConversationId, drawerPeerName,
+  drawerSubjectSnapshotJson, drawerSubjectId,
+  openConsultDrawer, onDrawerClosed,
+} = useHallInteractions('/hall/supply')
+
+// -- Local state --
 const supplies = ref<SupplyResponse[]>([])
 const listLoading = ref(false)
-const focusedId = ref<number | null>(null)
-const cardEls = new Map<number, HTMLElement>()
-let focusTimer: number | null = null
-
-// 筛选条件
-const searchKeyword = ref('')
-const selectedCategory = ref<string | null>(null)
-
-// 从 URL 读取公司筛选参数
-const companyIdFilter = computed(() => {
-  const raw = route.query.companyId
-  const s = Array.isArray(raw) ? raw[0] : raw
-  const n = s ? Number(s) : NaN
-  return Number.isFinite(n) ? n : null
-})
-
-// 从 URL 读取业态筛选参数
-const schemaCodeFromRoute = computed((): string | null => {
-  const raw = route.query.schemaCode
-  if (Array.isArray(raw)) {
-    return raw[0] ?? null
-  }
-  return raw ?? null
-})
-
-// 从 URL 读取分类名称参数
-const categoryNameFromRoute = computed((): string | null => {
-  const raw = route.query.categoryName
-  if (Array.isArray(raw)) {
-    return raw[0] ?? null
-  }
-  return raw ?? null
-})
-
-// 分页
-const currentPage = ref(1)
-const pageSize = ref(10)
-const total = ref(0)
-
-// 业态与品类数据（从API加载）
-const schemaTree = ref<ProductSchemaVO[]>([])
-const selectedSchemaCode = ref<string | null>(null)
-
-// 移动端侧边栏状态
-const mobileSidebarOpen = ref(false)
-
-// 扁平化分类树
-function flattenCategories(nodes: CategoryNode[]): string[] {
-  const result: string[] = []
-  function traverse(list: CategoryNode[]) {
-    for (const node of list) {
-      if (node.children && node.children.length > 0) {
-        traverse(node.children)
-      } else {
-        result.push(node.name)
-      }
-    }
-  }
-  traverse(nodes)
-  return result
-}
-
-// 加载业态树
-async function loadSchemaTree() {
-  try {
-    const r = await getSchemaTree()
-    if (r.code === 0 && r.data) {
-      schemaTree.value = r.data
-    }
-  } catch {
-    // 静默失败
-  }
-}
 
 // 处理业态变化（来自侧边栏）
 function onSchemaChange(schemaCode: string | null) {
@@ -112,108 +54,14 @@ function onCategoryChange(categoryName: string | null) {
   selectedCategory.value = categoryName
   currentPage.value = 1
   loadSupplies()
-  // 移动端选择后自动关闭侧边栏
   mobileSidebarOpen.value = false
 }
 
-
-// 关注状态 Map: userId -> isFollowing
-const followingMap = ref<Map<number, boolean>>(new Map())
-
-// 检查并加载关注状态
-async function loadFollowStatus(userIds: number[]) {
-  if (!authStore.token) return
-  for (const userId of userIds) {
-    if (followingMap.value.has(userId)) continue
-    try {
-      const r = await checkFollowStatus(userId)
-      if (r.code === 0) {
-        followingMap.value.set(userId, r.data || false)
-      }
-    } catch {
-      // 忽略单个检查失败
-    }
-  }
-}
-
-// 关注/取消关注
-async function toggleFollow(s: SupplyResponse) {
-  if (!requireAuth('/hall/supply')) return
-  if (!s.userId) {
-    ElMessage.warning('无法关注该用户')
-    return
-  }
-
-  const isFollowing = followingMap.value.get(s.userId) || false
-  try {
-    if (isFollowing) {
-      await unfollowUser(s.userId)
-      followingMap.value.set(s.userId, false)
-      ElMessage.success(`已取消关注 ${s.nickName || s.companyName || '该用户'}`)
-    } else {
-      await followUser(s.userId)
-      followingMap.value.set(s.userId, true)
-      ElMessage.success(`已关注 ${s.nickName || s.companyName || '该用户'}`)
-    }
-  } catch (e: any) {
-    ElMessage.error(e?.message || '操作失败')
-  }
-}
-
-// 获取用户关注状态
-function isFollowingUser(userId?: number): boolean {
-  if (!userId) return false
-  return followingMap.value.get(userId) || false
-}
-
-const focusIdFromRoute = computed(() => {
-  const raw = route.query.focusId
-  const s = Array.isArray(raw) ? raw[0] : raw
-  const n = s ? Number(s) : NaN
-  return Number.isFinite(n) ? n : null
-})
-
 const displaySupplies = computed(() => {
-  // 若存在 focusId，则展示完整列表以保证可定位
   if (focusIdFromRoute.value) return supplies.value
-  // 前端分页
   const start = (currentPage.value - 1) * pageSize.value
   return supplies.value.slice(start, start + pageSize.value)
 })
-
-function setCardEl(id: number, el: Element | null) {
-  if (!id) return
-  if (el) cardEls.set(id, el as HTMLElement)
-  else cardEls.delete(id)
-}
-
-async function applyFocusIfNeeded() {
-  const id = focusIdFromRoute.value
-  if (!id) return
-
-  // 等待 DOM 渲染
-  await nextTick()
-  const el = cardEls.get(id)
-  if (!el) return
-
-  focusedId.value = id
-  el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-
-  // 清掉 query，避免刷新/切换重复触发
-  router.replace({ path: route.path, query: { ...route.query, focusId: undefined } })
-
-  if (focusTimer) window.clearTimeout(focusTimer)
-  focusTimer = window.setTimeout(() => {
-    focusedId.value = null
-    focusTimer = null
-  }, 2500)
-}
-
-const drawerOpen = ref(false)
-const drawerConversationId = ref<number | null>(null)
-const drawerPeerName = ref('')
-const drawerSubjectSnapshotJson = ref<string | null>(null)
-const drawerSubjectId = ref<number | null>(null)
 
 function buildSupplySnapshot(s: SupplyResponse) {
   return JSON.stringify({
@@ -237,35 +85,7 @@ function buildSupplySnapshot(s: SupplyResponse) {
 }
 
 async function onConsult(s: SupplyResponse) {
-  if (!requireAuth('/hall/supply')) return
-  if (!s.userId || !s.id) {
-    ElMessage.warning('该条信息暂不支持咨询')
-    return
-  }
-  try {
-    const res = await openChatConversation({
-      peerUserId: s.userId,
-      subjectType: 'SUPPLY',
-      subjectId: s.id,
-      subjectSnapshotJson: buildSupplySnapshot(s)
-    })
-    if (res.code !== 0 || !res.data) throw new Error(res.message)
-
-    drawerConversationId.value = res.data
-    drawerPeerName.value = s.nickName || s.userName || s.companyName || '对方'
-    drawerSubjectId.value = s.id
-    drawerSubjectSnapshotJson.value = buildSupplySnapshot(s)
-    drawerOpen.value = true
-  } catch (e: any) {
-    ElMessage.error(e?.message || '发起咨询失败')
-  }
-}
-
-function onDrawerClosed() {
-  drawerConversationId.value = null
-  drawerSubjectSnapshotJson.value = null
-  drawerSubjectId.value = null
-  drawerPeerName.value = ''
+  await openConsultDrawer(s, 'SUPPLY', buildSupplySnapshot(s))
 }
 
 // 期货价格缓存
@@ -385,26 +205,12 @@ function calcReferencePrice(contractCode: string, basisPrice: number): number | 
 
 // 搜索
 function onSearch() {
-  currentPage.value = 1 // 重置分页
+  currentPage.value = 1
   loadSupplies()
 }
 
-// 分页变更
-function handlePageChange(page: number) {
-  currentPage.value = page
-  // 滚动到列表顶部
-  window.scrollTo({ top: 400, behavior: 'smooth' })
-}
-
 onMounted(() => {
-  // 从 URL 初始化业态筛选
-  if (schemaCodeFromRoute.value) {
-    selectedSchemaCode.value = schemaCodeFromRoute.value
-  }
-  // 从 URL 初始化分类筛选
-  if (categoryNameFromRoute.value) {
-    selectedCategory.value = categoryNameFromRoute.value
-  }
+  initFromRoute()
   loadSchemaTree()
   loadSupplies()
 })
@@ -449,17 +255,6 @@ watch(searchKeyword, (newVal, oldVal) => {
     loadSupplies()
   }
 })
-
-// 根据品类名称查找业态代码
-function findSchemaCodeByCategory(categoryName: string): string {
-  for (const schema of schemaTree.value) {
-    const categories = flattenCategories(schema.categories)
-    if (categories.includes(categoryName)) {
-      return schema.schemaCode
-    }
-  }
-  return 'feed' // 默认饲料原料
-}
 
 // 获取供应的单位配置
 function getSupplyUnitConfig(s: SupplyResponse) {

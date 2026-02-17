@@ -49,6 +49,10 @@ const showSkeleton = computed(() => loading.value && results.value.length === 0)
 /* ===== 生命周期 ===== */
 onLoad((query) => {
   loadHistory()
+  // 支持预填 tab（supply / requirement / post）
+  if (query?.tab && tabs.some(t => t.value === query.tab)) {
+    activeTab.value = query.tab
+  }
   if (query?.keyword) {
     keyword.value = query.keyword
     nextTick(() => handleSearch())
