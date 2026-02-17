@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { BRAND_600, WARM_300, WARM_500, WHITE } from '../../constants/colors'
 import { onLoad } from '@dcloudio/uni-app'
 import { getSupply, type SupplyResponse, type BasisQuoteResponse } from '../../api/supply'
 import { openConversation } from '../../api/chat'
@@ -61,17 +62,24 @@ function formatBasisPrice(price: number): string {
   return price >= 0 ? `+${price}` : `${price}`
 }
 
-/** Status info */
+/** Status info: 0=发布中, 1=部分成交, 2=已下架, 3=已成交 */
 const statusInfo = computed(() => {
   if (!detail.value) return null
   const status = detail.value.status
   const expireTime = detail.value.expireTime
   const now = Date.now()
+  const isExpired = expireTime && new Date(expireTime).getTime() < now
 
-  if (status === 0 || (expireTime && new Date(expireTime).getTime() < now)) {
+  if (status === 2 || isExpired) {
     return { label: '已过期', color: 'status--expired' }
   }
+  if (status === 3) {
+    return { label: '已成交', color: 'status--expired' }
+  }
   if (status === 1) {
+    return { label: '部分成交', color: 'status--active' }
+  }
+  if (status === 0) {
     return { label: '有效', color: 'status--active' }
   }
   return null
@@ -334,21 +342,21 @@ function handleShare() {
           <text class="company-card__name">{{ detail.companyName }}</text>
           <text class="company-card__hint">点击查看企业详情</text>
         </view>
-        <WgIcon name="right" :size="16" color="#D6CCC0" />
+        <WgIcon name="right" :size="16" :color="WARM_300" />
       </view>
 
       <!-- 分享按钮 -->
       <view class="share-bar">
         <view class="share-btn" @tap="handleShare">
-          <WgIcon name="share" :size="16" color="#78716C" />
+          <WgIcon name="share" :size="16" :color="WARM_500" />
           <text class="share-btn__text">分享</text>
         </view>
       </view>
 
       <!-- 底部操作 -->
       <view class="bottom-bar safe-area-bottom">
-        <button class="btn-secondary" @tap="handleCall"><WgIcon name="phone" :size="18" color="#2D6A4F" /> 电话咨询</button>
-        <button class="btn-primary" @tap="handleContact"><WgIcon name="message-circle" :size="18" color="#fff" /> 在线聊天</button>
+        <button class="btn-secondary" @tap="handleCall"><WgIcon name="phone" :size="18" :color="BRAND_600" /> 电话咨询</button>
+        <button class="btn-primary" @tap="handleContact"><WgIcon name="message-circle" :size="18" :color="WHITE" /> 在线聊天</button>
       </view>
     </template>
   </view>
@@ -651,7 +659,7 @@ function handleShare() {
   height: 88rpx;
   line-height: 88rpx;
   background: $brand-600;
-  color: #fff;
+  color: $text-inverse;
   border: none;
   border-radius: $radius-xl;
   font-size: $font-md;

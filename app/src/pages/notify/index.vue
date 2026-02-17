@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { WHITE } from '../../constants/colors'
 import { onShow, onPullDownRefresh } from '@dcloudio/uni-app'
 import {
   listMyNotifications,
@@ -113,7 +114,7 @@ function getNotifyStyle(type: string): { icon: string; bgClass: string } {
         @tap="handleTap(item)"
       >
         <view class="notify-icon" :class="getNotifyStyle(item.type).bgClass">
-          <WgIcon :name="getNotifyStyle(item.type).icon" :size="18" color="#fff" />
+          <WgIcon :name="getNotifyStyle(item.type).icon" :size="18" :color="WHITE" />
         </view>
         <view class="notify-card__body">
           <text class="notify-card__title">{{ item.title }}</text>

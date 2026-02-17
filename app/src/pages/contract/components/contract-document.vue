@@ -472,7 +472,7 @@ function formatDateTime(dateStr?: string | null): string {
 
 <style lang="scss" scoped>
 .contract-doc {
-  background: #ffffff;
+  background: $bg-card;
   border-radius: $radius-lg;
   margin: 0 $spacing-sm;
   padding: $spacing-lg $spacing-md;
@@ -865,7 +865,7 @@ function formatDateTime(dateStr?: string | null): string {
     height: 40rpx;
     border-radius: 50%;
     background: $color-warning;
-    color: #fff;
+    color: $text-inverse;
     font-size: $font-md;
     font-weight: bold;
     text-align: center;

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { WARM_300, WHITE } from '../../constants/colors'
 import { onShow, onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import { listSupplies, updateSupply, deleteSupply, type SupplyResponse } from '../../api/supply'
 import { useAuthStore } from '../../store/auth'
@@ -294,7 +295,7 @@ function handleDelete(item: SupplyResponse) {
     <!-- 空状态 -->
     <view v-else-if="!loading" class="empty">
       <view class="empty__icon">
-        <WgIcon name="store" :size="48" color="#d1d5db" />
+        <WgIcon name="store" :size="48" :color="WARM_300" />
       </view>
       <text class="empty__text">还没有发布供应</text>
       <view class="empty__btn" @tap="goPublish">
@@ -307,7 +308,7 @@ function handleDelete(item: SupplyResponse) {
 
     <!-- FAB -->
     <view class="fab" @tap="goPublish">
-      <WgIcon name="plus" :size="24" color="#fff" />
+      <WgIcon name="plus" :size="24" :color="WHITE" />
     </view>
   </view>
 </template>
@@ -593,7 +594,7 @@ function handleDelete(item: SupplyResponse) {
 
   &__btn-text {
     font-size: $font-md;
-    color: #fff;
+    color: $text-inverse;
     font-weight: 600;
   }
 }

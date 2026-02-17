@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { WARM_300, WHITE } from '../../constants/colors'
 import { onShow, onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import { listRequirements, updateRequirement, deleteRequirement, type RequirementResponse } from '../../api/requirement'
 import { useAuthStore } from '../../store/auth'
@@ -292,7 +293,7 @@ function handleDelete(item: RequirementResponse) {
     <!-- 空状态 -->
     <view v-else-if="!loading" class="empty">
       <view class="empty__icon">
-        <WgIcon name="shopping-bag" :size="48" color="#d1d5db" />
+        <WgIcon name="shopping-bag" :size="48" :color="WARM_300" />
       </view>
       <text class="empty__text">还没有发布采购</text>
       <view class="empty__btn" @tap="goPublish">
@@ -305,7 +306,7 @@ function handleDelete(item: RequirementResponse) {
 
     <!-- FAB -->
     <view class="fab" @tap="goPublish">
-      <WgIcon name="plus" :size="24" color="#fff" />
+      <WgIcon name="plus" :size="24" :color="WHITE" />
     </view>
   </view>
 </template>
@@ -587,7 +588,7 @@ function handleDelete(item: RequirementResponse) {
 
   &__btn-text {
     font-size: $font-md;
-    color: #fff;
+    color: $text-inverse;
     font-weight: 600;
   }
 }

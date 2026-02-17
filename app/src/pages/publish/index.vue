@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { BRAND_600, WARM_300, WARM_500, AUTUMN_500, ACTION_600 } from '../../constants/colors'
 import { onShow } from '@dcloudio/uni-app'
 import { useAuthStore } from '../../store/auth'
 
@@ -43,7 +44,7 @@ function handleClose() {
         <view class="panel__header">
           <text class="panel__title">发布</text>
           <view class="panel__close" @tap="handleClose">
-            <WgIcon name="clear" :size="20" color="#78716C" />
+            <WgIcon name="clear" :size="20" :color="WARM_500" />
           </view>
         </view>
 
@@ -51,37 +52,37 @@ function handleClose() {
           <!-- 发布供应 -->
           <view class="publish-card publish-card--brand" @tap="goSupplyPublish">
             <view class="publish-card__icon">
-              <WgIcon name="store" :size="28" color="#2D6A4F" />
+              <WgIcon name="store" :size="28" :color="BRAND_600" />
             </view>
             <view class="publish-card__body">
               <text class="publish-card__title">发布供应</text>
               <text class="publish-card__desc">发布您的商品供应信息</text>
             </view>
-            <WgIcon name="right" :size="18" color="#D6CCC0" />
+            <WgIcon name="right" :size="18" :color="WARM_300" />
           </view>
 
           <!-- 发布采购 -->
           <view class="publish-card publish-card--autumn" @tap="goRequirementPublish">
             <view class="publish-card__icon">
-              <WgIcon name="shopping-bag" :size="28" color="#c28a55" />
+              <WgIcon name="shopping-bag" :size="28" :color="AUTUMN_500" />
             </view>
             <view class="publish-card__body">
               <text class="publish-card__title">发布采购</text>
               <text class="publish-card__desc">发布您的采购需求信息</text>
             </view>
-            <WgIcon name="right" :size="18" color="#D6CCC0" />
+            <WgIcon name="right" :size="18" :color="WARM_300" />
           </view>
 
           <!-- 发布话题 -->
           <view class="publish-card publish-card--action" @tap="goTopicPublish">
             <view class="publish-card__icon">
-              <WgIcon name="square-pen" :size="28" color="#2563eb" />
+              <WgIcon name="square-pen" :size="28" :color="ACTION_600" />
             </view>
             <view class="publish-card__body">
               <text class="publish-card__title">发布话题</text>
               <text class="publish-card__desc">分享行业见解和动态</text>
             </view>
-            <WgIcon name="right" :size="18" color="#D6CCC0" />
+            <WgIcon name="right" :size="18" :color="WARM_300" />
           </view>
         </view>
       </view>
@@ -110,7 +111,7 @@ function handleClose() {
 
 .panel {
   width: 100%;
-  background: #ffffff;
+  background: $bg-card;
   border-radius: 32rpx 32rpx 0 0;
   padding: $spacing-lg $spacing-lg;
   padding-bottom: calc(#{$spacing-xl} + constant(safe-area-inset-bottom));

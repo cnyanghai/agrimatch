@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { BRAND_600, AUTUMN_500 } from '../../constants/colors'
 import { onLoad } from '@dcloudio/uni-app'
 import {
   getContract,
@@ -264,9 +265,9 @@ onShow(() => {
       <!-- 查看合同文档 & 下载PDF -->
       <view class="doc-actions">
         <view class="doc-toggle" @tap="showDocument = !showDocument">
-          <WgIcon name="file-text" :size="16" color="#2D6A4F" />
+          <WgIcon name="file-text" :size="16" :color="BRAND_600" />
           <text class="doc-toggle__text">{{ showDocument ? '收起合同文档' : '查看合同文档' }}</text>
-          <WgIcon :name="showDocument ? 'chevron-up' : 'chevron-down'" :size="14" color="#2D6A4F" />
+          <WgIcon :name="showDocument ? 'chevron-up' : 'chevron-down'" :size="14" :color="BRAND_600" />
         </view>
         <view
           v-if="canDownloadPdf"
@@ -274,7 +275,7 @@ onShow(() => {
           :class="{ 'pdf-download-btn--loading': pdfDownloading }"
           @tap="downloadPdf"
         >
-          <WgIcon name="file-text" :size="16" color="#c28a55" />
+          <WgIcon name="file-text" :size="16" :color="AUTUMN_500" />
           <text class="pdf-download-btn__text">{{ pdfDownloading ? '下载中...' : '导出PDF' }}</text>
         </view>
       </view>
@@ -436,7 +437,7 @@ onShow(() => {
         </view>
         <view class="milestone-more" @tap="goMilestones">
           <text class="milestone-more__text">查看全部节点</text>
-          <WgIcon name="chevron-right" :size="14" color="#2D6A4F" />
+          <WgIcon name="chevron-right" :size="14" :color="BRAND_600" />
         </view>
       </view>
 
@@ -561,7 +562,7 @@ onShow(() => {
 /* ===== 状态头部 ===== */
 .status-header {
   padding: $spacing-xl $spacing-lg $spacing-lg;
-  color: #fff;
+  color: $text-inverse;
 
   &__label {
     font-size: $font-2xl;
@@ -886,7 +887,7 @@ onShow(() => {
     font-weight: 600;
 
     &--primary {
-      color: #fff;
+      color: $text-inverse;
     }
 
     &--secondary {

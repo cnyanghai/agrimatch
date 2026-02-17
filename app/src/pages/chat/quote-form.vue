@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
+import { WARM_400 } from '../../constants/colors'
 import { sendQuoteMessage } from '../../api/chat'
 import { getSupply } from '../../api/supply'
 import { getRequirement } from '../../api/requirement'
@@ -218,7 +219,7 @@ async function handleSubmit() {
             >
               {{ form.deliveryMode || '选择交货方式（可选）' }}
             </text>
-            <WgIcon name="right" :size="16" color="#999" />
+            <WgIcon name="right" :size="16" :color="WARM_400" />
           </view>
         </picker>
       </view>
@@ -244,7 +245,7 @@ async function handleSubmit() {
             >
               {{ form.deliveryDate || '选择到货日期（可选）' }}
             </text>
-            <WgIcon name="right" :size="16" color="#999" />
+            <WgIcon name="right" :size="16" :color="WARM_400" />
           </view>
         </picker>
       </view>
@@ -260,7 +261,7 @@ async function handleSubmit() {
             >
               {{ paymentLabel || '选择付款方式（可选）' }}
             </text>
-            <WgIcon name="right" :size="16" color="#999" />
+            <WgIcon name="right" :size="16" :color="WARM_400" />
           </view>
         </picker>
       </view>
@@ -403,7 +404,7 @@ async function handleSubmit() {
   &__text {
     font-size: $font-lg;
     font-weight: bold;
-    color: #fff;
+    color: $text-inverse;
   }
 }
 </style>

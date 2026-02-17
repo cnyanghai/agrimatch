@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { BRAND_600 } from '../../constants/colors'
 import { onLoad } from '@dcloudio/uni-app'
 
 type PageType = 'terms' | 'privacy' | 'e-signature' | 'disclaimer' | 'cooperation' | 'feedback'
@@ -174,12 +175,12 @@ function switchType(type: PageType) {
         </view>
         <view class="contact-card">
           <view class="contact-item">
-            <WgIcon name="mail" :size="18" color="#2D6A4F" />
+            <WgIcon name="mail" :size="18" :color="BRAND_600" />
             <text class="contact-item__label">商务邮箱</text>
             <text class="contact-item__value" selectable>{{ SERVICE_EMAIL }}</text>
           </view>
           <view class="contact-item">
-            <WgIcon name="building" :size="18" color="#2D6A4F" />
+            <WgIcon name="building" :size="18" :color="BRAND_600" />
             <text class="contact-item__label">运营主体</text>
             <text class="contact-item__value">{{ COMPANY_NAME }}</text>
           </view>
@@ -196,7 +197,7 @@ function switchType(type: PageType) {
         </view>
         <view class="contact-card">
           <view class="contact-item">
-            <WgIcon name="mail" :size="18" color="#2D6A4F" />
+            <WgIcon name="mail" :size="18" :color="BRAND_600" />
             <text class="contact-item__label">反馈邮箱</text>
             <text class="contact-item__value" selectable>{{ SERVICE_EMAIL }}</text>
           </view>
@@ -221,7 +222,7 @@ function switchType(type: PageType) {
 
 /* Tab navigation */
 .type-tabs {
-  background: #ffffff;
+  background: $bg-card;
   white-space: nowrap;
   border-bottom: 1rpx solid $border-light;
 
@@ -242,7 +243,7 @@ function switchType(type: PageType) {
     transition: all 0.2s;
 
     &--active {
-      color: #ffffff;
+      color: $text-inverse;
       background: $brand-600;
       font-weight: 600;
     }
@@ -259,7 +260,7 @@ function switchType(type: PageType) {
   padding: $spacing-md;
 
   &__header {
-    background: #ffffff;
+    background: $bg-card;
     border-radius: $radius-xl;
     padding: $spacing-lg;
     margin-bottom: $spacing-md;
@@ -282,7 +283,7 @@ function switchType(type: PageType) {
 }
 
 .legal-section {
-  background: #ffffff;
+  background: $bg-card;
   border-radius: $radius-xl;
   padding: $spacing-lg;
   margin-bottom: $spacing-sm;
@@ -307,7 +308,7 @@ function switchType(type: PageType) {
 
 /* Contact card */
 .contact-card {
-  background: #ffffff;
+  background: $bg-card;
   border-radius: $radius-xl;
   overflow: hidden;
   margin-bottom: $spacing-sm;

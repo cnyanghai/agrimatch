@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, nextTick } from 'vue'
 import { onLoad, onReachBottom } from '@dcloudio/uni-app'
+import { WARM_400 } from '../../constants/colors'
 import { searchUnified, type UnifiedSearchResult, type SearchPageResult } from '../../api/search'
 import { formatRelativeTime } from '../../utils/format'
 
@@ -205,7 +206,7 @@ function getContentPreview(content?: string): string {
     <!-- 搜索栏 -->
     <view class="search-bar">
       <view class="search-bar__input-wrap">
-        <WgIcon name="search" :size="16" color="#999" />
+        <WgIcon name="search" :size="16" :color="WARM_400" />
         <input
           v-model="keyword"
           class="search-bar__input"
@@ -243,7 +244,7 @@ function getContentPreview(content?: string): string {
       <view class="history-section__header">
         <text class="history-section__title">搜索历史</text>
         <view class="history-section__clear" @tap="handleClearHistory">
-          <WgIcon name="trash" :size="16" color="#999" />
+          <WgIcon name="trash" :size="16" :color="WARM_400" />
           <text>清除</text>
         </view>
       </view>

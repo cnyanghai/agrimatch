@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
+import { WARM_400 } from '../../constants/colors'
 import { onShow } from '@dcloudio/uni-app'
 import { listPosts, type PostResponse } from '../../api/post'
 import { formatRelativeTime } from '../../utils/format'
@@ -151,11 +152,11 @@ function getImages(item: PostResponse): string[] {
         <!-- Stats -->
         <view class="post-card__footer">
           <view class="post-card__stat">
-            <WgIcon name="heart" :size="14" color="#999" />
+            <WgIcon name="heart" :size="14" :color="WARM_400" />
             <text class="post-card__stat-num">{{ item.likeCount || 0 }}</text>
           </view>
           <view class="post-card__stat">
-            <WgIcon name="message-circle" :size="14" color="#999" />
+            <WgIcon name="message-circle" :size="14" :color="WARM_400" />
             <text class="post-card__stat-num">{{ item.commentCount || 0 }}</text>
           </view>
         </view>

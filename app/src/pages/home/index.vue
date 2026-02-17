@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import { BRAND_600, WARM_400, WARM_500, ACCENT_400, AUTUMN_500, ACTION_600, WHITE } from '../../constants/colors'
 import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import { listPosts, type PostResponse } from '../../api/post'
 import { getFollowedPosts } from '../../api/follow'
@@ -14,6 +15,20 @@ const loading = ref(true)
 const sortMode = ref<'latest' | 'hottest' | 'following'>('latest')
 const displayCount = ref(15)
 const PAGE_SIZE = 15
+
+const greeting = computed(() => {
+  const h = new Date().getHours()
+  if (h < 6) return '夜深了'
+  if (h < 12) return '早上好'
+  if (h < 14) return '中午好'
+  if (h < 18) return '下午好'
+  return '晚上好'
+})
+
+const userName = computed(() => {
+  if (!authStore.isLoggedIn) return ''
+  return authStore.user?.nickName || authStore.user?.userName || ''
+})
 
 const filteredList = computed(() => {
   if (sortMode.value === 'following') return followingPosts.value
@@ -130,7 +145,6 @@ function getDisplayName(item: PostResponse): string {
   return item.nickName || item.userName || '匿名用户'
 }
 
-/** 作者信息合并成一段文字：名字 · 公司 · 职位 */
 function getAuthorLine(item: PostResponse): string {
   const parts: string[] = [getDisplayName(item)]
   if (item.companyName) parts.push(item.companyName)
@@ -161,175 +175,176 @@ function getImages(item: PostResponse): string[] {
 
 <template>
   <view class="home">
-    <!-- 头部：全宽搜索栏 -->
-    <view class="header safe-area-top">
-      <view class="search-bar anim-header-in" @tap="goSearch">
-        <WgIcon name="search" :size="16" color="#A8A29E" />
-        <text class="search-bar__text">搜索话题、用户、企业...</text>
+    <!-- ===== Hero Header (品牌色渐变) ===== -->
+    <view class="hero stitch-hero">
+      <view class="hero__safe safe-area-top" />
+      <view class="hero__content">
+        <view class="hero__greeting">
+          <text class="hero__greeting-text stitch-page-title">{{ greeting }}</text>
+          <text v-if="userName" class="hero__greeting-name stitch-page-subtitle">{{ userName }}，探索今日农贸动态</text>
+          <text v-else class="hero__greeting-name stitch-page-subtitle">探索今日农贸动态</text>
+        </view>
+        <view class="hero__search stitch-search" @tap="goSearch">
+          <WgIcon name="search" :size="18" :color="WHITE" />
+          <text class="stitch-search__text">搜索话题、用户、企业...</text>
+        </view>
       </view>
     </view>
 
-    <!-- 业务快捷入口 -->
-    <view class="quick-entry anim-slide-up">
-      <view class="quick-entry__item" @tap="goSupplyHall">
-        <view class="quick-entry__icon quick-entry__icon--brand">
-          <WgIcon name="store" :size="22" color="#2D6A4F" />
+    <!-- ===== 快捷入口 (2行3列 → 大图标) ===== -->
+    <view class="quick-section">
+      <view class="quick-grid">
+        <view class="quick-item" @tap="goSupplyHall">
+          <view class="stitch-icon-box stitch-icon-box--md stitch-icon-box--brand">
+            <WgIcon name="store" :size="26" :color="BRAND_600" />
+          </view>
+          <text class="quick-item__label">供应大厅</text>
         </view>
-        <text class="quick-entry__label">供应大厅</text>
-      </view>
-      <view class="quick-entry__item" @tap="goRequirementHall">
-        <view class="quick-entry__icon quick-entry__icon--autumn">
-          <WgIcon name="shopping-bag" :size="22" color="#c28a55" />
+        <view class="quick-item" @tap="goRequirementHall">
+          <view class="stitch-icon-box stitch-icon-box--md stitch-icon-box--autumn">
+            <WgIcon name="shopping-bag" :size="26" :color="AUTUMN_500" />
+          </view>
+          <text class="quick-item__label">采购大厅</text>
         </view>
-        <text class="quick-entry__label">采购大厅</text>
-      </view>
-      <view class="quick-entry__item" @tap="goContracts">
-        <view class="quick-entry__icon quick-entry__icon--action">
-          <WgIcon name="file-text" :size="22" color="#2563eb" />
+        <view class="quick-item" @tap="goContracts">
+          <view class="stitch-icon-box stitch-icon-box--md stitch-icon-box--action">
+            <WgIcon name="file-text" :size="26" :color="ACTION_600" />
+          </view>
+          <text class="quick-item__label">合同管理</text>
         </view>
-        <text class="quick-entry__label">合同管理</text>
-      </view>
-      <view class="quick-entry__item" @tap="goDirectory">
-        <view class="quick-entry__icon quick-entry__icon--accent">
-          <WgIcon name="building2" :size="22" color="#E76F51" />
+        <view class="quick-item" @tap="goDirectory">
+          <view class="stitch-icon-box stitch-icon-box--md stitch-icon-box--accent">
+            <WgIcon name="building2" :size="26" :color="ACCENT_400" />
+          </view>
+          <text class="quick-item__label">企业名录</text>
         </view>
-        <text class="quick-entry__label">企业名录</text>
-      </view>
-      <view class="quick-entry__item" @tap="goMap">
-        <view class="quick-entry__icon quick-entry__icon--warm">
-          <WgIcon name="map-pin" :size="22" color="#78716C" />
+        <view class="quick-item" @tap="goMap">
+          <view class="stitch-icon-box stitch-icon-box--md stitch-icon-box--warm">
+            <WgIcon name="map-pin" :size="26" :color="WARM_500" />
+          </view>
+          <text class="quick-item__label">地图找商</text>
         </view>
-        <text class="quick-entry__label">地图找商</text>
-      </view>
-      <view class="quick-entry__item" @tap="goCategoryDirectory">
-        <view class="quick-entry__icon quick-entry__icon--brand-light">
-          <WgIcon name="layout-grid" :size="22" color="#389867" />
+        <view class="quick-item" @tap="goCategoryDirectory">
+          <view class="stitch-icon-box stitch-icon-box--md stitch-icon-box--brand-bold">
+            <WgIcon name="layout-grid" :size="26" :color="BRAND_600" />
+          </view>
+          <text class="quick-item__label">品类目录</text>
         </view>
-        <text class="quick-entry__label">品类目录</text>
       </view>
     </view>
 
-    <!-- 排序标签 -->
-    <view class="sort-bar">
-      <view
-        class="sort-bar__tab"
-        :class="{ 'sort-bar__tab--active': sortMode === 'latest' }"
-        @tap="sortMode = 'latest'"
-      >
-        <text>最新</text>
+    <!-- ===== 话题区域 ===== -->
+    <view class="topic-section">
+      <!-- 排序标签 (Stitch Pill 风格) -->
+      <view class="sort-bar">
+        <text class="stitch-section-title">话题动态</text>
+        <view class="sort-bar__tabs">
+          <text
+            class="sort-tab"
+            :class="{ 'sort-tab--active': sortMode === 'latest' }"
+            @tap="sortMode = 'latest'"
+          >最新</text>
+          <text
+            class="sort-tab"
+            :class="{ 'sort-tab--active': sortMode === 'hottest' }"
+            @tap="sortMode = 'hottest'"
+          >最热</text>
+          <text
+            class="sort-tab"
+            :class="{ 'sort-tab--active': sortMode === 'following' }"
+            @tap="sortMode = 'following'"
+          >关注</text>
+        </view>
       </view>
-      <view
-        class="sort-bar__tab"
-        :class="{ 'sort-bar__tab--active': sortMode === 'hottest' }"
-        @tap="sortMode = 'hottest'"
-      >
-        <text>最热</text>
-      </view>
-      <view
-        class="sort-bar__tab"
-        :class="{ 'sort-bar__tab--active': sortMode === 'following' }"
-        @tap="sortMode = 'following'"
-      >
-        <text>关注</text>
-      </view>
-    </view>
 
-    <!-- 关注 tab 未登录提示 -->
-    <view v-if="sortMode === 'following' && !authStore.isLoggedIn" class="login-prompt">
+      <!-- 关注 tab 未登录提示 -->
+      <view v-if="sortMode === 'following' && !authStore.isLoggedIn" class="login-prompt">
+        <WgEmpty
+          text="登录后查看关注动态"
+          description="关注感兴趣的用户，获取他们的最新话题"
+          actionText="去登录"
+          icon="auth"
+          @action="goLogin"
+        />
+      </view>
+
+      <!-- 帖子列表 -->
+      <view v-if="displayList.length > 0" class="post-list">
+        <view
+          v-for="item in displayList"
+          :key="item.id"
+          class="post-card stitch-card"
+          @tap="goDetail(item.id)"
+        >
+          <text class="post-card__title">{{ item.title }}</text>
+
+          <view class="post-card__author">
+            <view class="post-card__avatar">
+              <image
+                v-if="item.avatar"
+                class="post-card__avatar-img"
+                :src="item.avatar"
+                mode="aspectFill"
+              />
+              <text v-else class="post-card__avatar-text">{{ getInitial(item) }}</text>
+            </view>
+            <text class="post-card__author-line">{{ getAuthorLine(item) }}</text>
+            <text class="post-card__time">{{ formatRelativeTime(item.createTime) }}</text>
+          </view>
+
+          <text v-if="item.content" class="post-card__content">{{ getPreview(item.content) }}</text>
+
+          <view v-if="getImages(item).length > 0" class="post-card__images">
+            <view
+              v-for="(img, idx) in getImages(item)"
+              :key="idx"
+              class="post-card__image"
+            >
+              <image :src="img" mode="aspectFill" style="width: 100%; height: 100%" />
+            </view>
+          </view>
+
+          <view class="post-card__footer">
+            <view class="post-card__stat">
+              <WgIcon name="heart" :size="14" :color="WARM_400" />
+              <text class="post-card__stat-num">{{ item.likeCount || 0 }}</text>
+            </view>
+            <view class="post-card__stat">
+              <WgIcon name="message-circle" :size="14" :color="WARM_400" />
+              <text class="post-card__stat-num">{{ item.commentCount || 0 }}</text>
+            </view>
+            <view v-if="item.domain" class="post-card__domain">
+              <text class="stitch-tag stitch-tag--brand">{{ item.domain }}</text>
+            </view>
+          </view>
+        </view>
+
+        <WgLoadMore :status="loadStatus" @loadMore="loadMore" />
+      </view>
+
+      <!-- 空状态 -->
       <WgEmpty
-        text="登录后查看关注动态"
-        description="关注感兴趣的用户，获取他们的最新话题"
-        actionText="去登录"
-        icon="auth"
-        @action="goLogin"
+        v-else-if="!loading"
+        text="暂无话题"
+        description="快来发布第一个话题吧"
+        actionText="发布话题"
+        @action="goPublish"
+      />
+
+      <!-- 加载态 -->
+      <WgSkeleton
+        v-if="followingLoading && sortMode === 'following'"
+        type="card"
+        :rows="3"
+      />
+      <WgSkeleton
+        v-if="loading && allPosts.length === 0 && sortMode !== 'following'"
+        type="card"
+        :rows="3"
       />
     </view>
 
-    <!-- 帖子列表 -->
-    <view v-if="displayList.length > 0" class="post-list">
-      <view
-        v-for="item in displayList"
-        :key="item.id"
-        class="post-card tap-feedback"
-        @tap="goDetail(item.id)"
-      >
-        <!-- 第1层：标题 -->
-        <text class="post-card__title">{{ item.title }}</text>
-
-        <!-- 第2层：作者信息（紧凑一行） -->
-        <view class="post-card__author">
-          <view class="post-card__avatar">
-            <image
-              v-if="item.avatar"
-              class="post-card__avatar-img"
-              :src="item.avatar"
-              mode="aspectFill"
-            />
-            <text v-else class="post-card__avatar-text">{{ getInitial(item) }}</text>
-          </view>
-          <text class="post-card__author-line">{{ getAuthorLine(item) }}</text>
-          <text class="post-card__time">{{ formatRelativeTime(item.createTime) }}</text>
-        </view>
-
-        <!-- 第3层：内容摘要 -->
-        <text v-if="item.content" class="post-card__content">{{ getPreview(item.content) }}</text>
-
-        <!-- 第4层：图片网格 -->
-        <view v-if="getImages(item).length > 0" class="post-card__images">
-          <view
-            v-for="(img, idx) in getImages(item)"
-            :key="idx"
-            class="post-card__image"
-          >
-            <image :src="img" mode="aspectFill" style="width: 100%; height: 100%" />
-          </view>
-        </view>
-
-        <!-- 第5层：互动数据 -->
-        <view class="post-card__footer">
-          <view class="post-card__stat">
-            <WgIcon name="heart" :size="14" color="#A8A29E" />
-            <text class="post-card__stat-num">{{ item.likeCount || 0 }}</text>
-          </view>
-          <view class="post-card__stat">
-            <WgIcon name="message-circle" :size="14" color="#A8A29E" />
-            <text class="post-card__stat-num">{{ item.commentCount || 0 }}</text>
-          </view>
-          <view v-if="item.domain" class="post-card__domain">
-            <text class="post-card__domain-text">{{ item.domain }}</text>
-          </view>
-        </view>
-      </view>
-
-      <WgLoadMore :status="loadStatus" @loadMore="loadMore" />
-    </view>
-
-    <!-- 空状态 -->
-    <WgEmpty
-      v-else-if="!loading"
-      text="暂无话题"
-      description="快来发布第一个话题吧"
-      actionText="发布话题"
-      @action="goPublish"
-    />
-
-    <!-- 关注 tab 加载中 -->
-    <WgSkeleton
-      v-if="followingLoading && sortMode === 'following'"
-      type="card"
-      :rows="3"
-    />
-
-    <!-- 加载中骨架 -->
-    <WgSkeleton
-      v-if="loading && allPosts.length === 0 && sortMode !== 'following'"
-      type="card"
-      :rows="3"
-    />
-
-    <!-- 底部间距 -->
-    <view style="height: 130rpx;" />
-
+    <view style="height: 160rpx;" />
     <WgTabBar :current="0" />
   </view>
 </template>
@@ -340,124 +355,117 @@ function getImages(item: PostResponse): string[] {
   background: $bg-page;
 }
 
-/* ===== Header ===== */
-.header {
-  background: #ffffff;
-  padding: $spacing-sm $spacing-md;
-}
+/* ===== Hero Header ===== */
+.hero {
+  padding-bottom: $spacing-xl;
 
-/* ===== 全宽搜索栏 ===== */
-.search-bar {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  height: 72rpx;
-  padding: 0 $spacing-lg;
-  background: $warm-100;
-  border-radius: $radius-pill;
+  &__safe {
+    height: 0;
+  }
 
-  &__text {
-    color: $text-placeholder;
-    font-size: $font-md;
+  &__content {
+    padding: $spacing-xl $spacing-xl 0;
+  }
+
+  &__greeting {
+    margin-bottom: $spacing-xl;
+  }
+
+  &__greeting-text {
+    display: block;
+    color: $text-inverse;
+  }
+
+  &__greeting-name {
+    display: block;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  &__search {
+    margin-bottom: $spacing-sm;
   }
 }
 
-/* ===== Quick Entry ===== */
-.quick-entry {
+/* ===== Quick Section ===== */
+.quick-section {
+  margin: -#{$spacing-lg} $spacing-lg 0;
+  position: relative;
+  z-index: 2;
+}
+
+.quick-grid {
   display: flex;
   flex-wrap: wrap;
-  background: #ffffff;
-  padding: $spacing-md $spacing-sm $spacing-xs;
+  background: $bg-card;
+  border-radius: $radius-2xl;
+  padding: $spacing-lg $spacing-sm;
+  box-shadow: 0 4rpx 20rpx rgba(120, 90, 50, 0.06), 0 0 1rpx rgba(0, 0, 0, 0.04);
+}
 
-  &__item {
-    width: 33.333%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: $spacing-sm 0;
+.quick-item {
+  width: 33.333%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-md 0;
+  transition: transform $transition-fast ease;
 
-    &:active {
-      opacity: 0.7;
-      transform: scale(0.95);
-    }
-  }
-
-  &__icon {
-    width: 88rpx;
-    height: 88rpx;
-    border-radius: $radius-xl;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: $spacing-xs;
-
-    &--brand { background: $brand-50; }
-    &--brand-light { background: rgba(56, 152, 103, 0.08); }
-    &--autumn { background: $autumn-50; }
-    &--action { background: rgba(37, 99, 235, 0.08); }
-    &--accent { background: $accent-50; }
-    &--warm { background: $warm-100; }
+  &:active {
+    transform: scale(0.92);
   }
 
   &__label {
     font-size: $font-sm;
     color: $text-primary;
-    font-weight: 500;
+    font-weight: 600;
+    margin-top: $spacing-sm;
   }
+}
+
+/* ===== Topic Section ===== */
+.topic-section {
+  padding: $spacing-xl $spacing-lg 0;
 }
 
 /* ===== Sort Bar ===== */
 .sort-bar {
   display: flex;
-  background: #ffffff;
-  padding: $spacing-sm $spacing-md;
-  gap: $spacing-lg;
-  border-bottom: 1rpx solid $border-light;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-lg;
 
-  &__tab {
-    font-size: $font-md;
-    color: $text-secondary;
-    padding-bottom: $spacing-xs;
-    position: relative;
-
-    &--active {
-      color: $brand-600;
-      font-weight: bold;
-
-      &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 40rpx;
-        height: 4rpx;
-        background: $brand-600;
-        border-radius: 2rpx;
-      }
-    }
+  &__tabs {
+    display: flex;
+    gap: $spacing-xs;
+    background: $warm-100;
+    border-radius: $radius-full;
+    padding: 4rpx;
   }
 }
 
-/* ===== Post List ===== */
-.post-list {
-  padding: $spacing-xs $spacing-md;
+.sort-tab {
+  font-size: $font-sm;
+  color: $text-secondary;
+  padding: $spacing-xs $spacing-lg;
+  border-radius: $radius-full;
+  font-weight: 500;
+  transition: all $transition-fast ease;
+
+  &--active {
+    color: $brand-600;
+    background: $bg-card;
+    font-weight: 700;
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  }
 }
 
+/* ===== Post Card (inherits stitch-card) ===== */
 .post-card {
-  background: #ffffff;
-  padding: $spacing-md $spacing-md;
-  border-radius: $radius-lg;
-  margin-bottom: $spacing-sm;
-  box-shadow: $shadow-warm-card;
+  margin-bottom: $spacing-md;
 
-  /* 第1层：标题 */
   &__title {
     font-size: $font-lg;
-    font-weight: bold;
+    font-weight: 800;
     color: $text-primary;
     display: -webkit-box;
     overflow: hidden;
@@ -465,36 +473,35 @@ function getImages(item: PostResponse): string[] {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     line-height: 1.4;
-    margin-bottom: $spacing-xs;
-  }
-
-  /* 第2层：作者信息（紧凑一行） */
-  &__author {
-    display: flex;
-    align-items: center;
     margin-bottom: $spacing-sm;
   }
 
+  &__author {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-md;
+  }
+
   &__avatar {
-    width: 40rpx;
-    height: 40rpx;
+    width: 48rpx;
+    height: 48rpx;
     border-radius: 50%;
-    background: $brand-100;
+    background: $brand-50;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     overflow: hidden;
-    margin-right: $spacing-xs;
+    margin-right: $spacing-sm;
   }
 
   &__avatar-img {
-    width: 40rpx;
-    height: 40rpx;
+    width: 48rpx;
+    height: 48rpx;
   }
 
   &__avatar-text {
-    font-size: 20rpx;
+    font-size: 22rpx;
     font-weight: bold;
     color: $brand-600;
   }
@@ -515,44 +522,43 @@ function getImages(item: PostResponse): string[] {
     margin-left: $spacing-sm;
   }
 
-  /* 第3层：内容摘要 */
   &__content {
     font-size: $font-md;
     color: $text-secondary;
-    line-height: 1.6;
+    line-height: 1.7;
     display: -webkit-box;
     overflow: hidden;
     text-overflow: ellipsis;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
-    margin-bottom: $spacing-sm;
+    margin-bottom: $spacing-md;
   }
 
-  /* 第4层：图片 */
   &__images {
     display: flex;
-    gap: $spacing-xs;
-    margin-bottom: $spacing-sm;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
   }
 
   &__image {
     flex: 1;
-    height: 200rpx;
-    border-radius: $radius-sm;
+    height: 220rpx;
+    border-radius: $radius-lg;
     overflow: hidden;
   }
 
-  /* 第5层：互动 */
   &__footer {
     display: flex;
     align-items: center;
-    gap: $spacing-lg;
+    gap: $spacing-xl;
+    padding-top: $spacing-md;
+    border-top: 1rpx solid $warm-100;
   }
 
   &__stat {
     display: flex;
     align-items: center;
-    gap: 6rpx;
+    gap: 8rpx;
   }
 
   &__stat-num {
@@ -563,15 +569,5 @@ function getImages(item: PostResponse): string[] {
   &__domain {
     margin-left: auto;
   }
-
-  &__domain-text {
-    font-size: $font-xs;
-    color: $brand-600;
-    background: $brand-50;
-    padding: 2rpx 14rpx;
-    border-radius: $radius-sm;
-  }
 }
-
-/* FAB removed per user request */
 </style>

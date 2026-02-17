@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { BRAND_600, WARM_400, ACCENT_400, ACTION_600 } from '../../constants/colors'
 import { useAuthStore } from '../../store/auth'
 
 const authStore = useAuthStore()
@@ -58,12 +59,12 @@ function handleLogout() {
       <view class="menu-group__title">账号设置</view>
       <view class="menu-item" @tap="goEditProfile">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><WgIcon name="user" :size="20" color="#2D6A4F" /></view>
+          <view class="menu-item__icon"><WgIcon name="user" :size="20" :color="BRAND_600" /></view>
           <text class="menu-item__label">编辑资料</text>
         </view>
         <view class="menu-item__right">
           <text class="menu-item__value">{{ user?.nickName || user?.userName || '' }}</text>
-          <WgIcon name="right" :size="16" color="#999" />
+          <WgIcon name="right" :size="16" :color="WARM_400" />
         </view>
       </view>
       <view class="menu-item" @tap="goChangePassword">
@@ -71,7 +72,7 @@ function handleLogout() {
           <view class="menu-item__icon"><WgIcon name="lock" :size="20" color="#666" /></view>
           <text class="menu-item__label">修改密码</text>
         </view>
-        <WgIcon name="right" :size="16" color="#999" />
+        <WgIcon name="right" :size="16" :color="WARM_400" />
       </view>
     </view>
 
@@ -80,19 +81,19 @@ function handleLogout() {
       <view class="menu-group__title">通用</view>
       <view class="menu-item" @tap="clearCache">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><WgIcon name="trash" :size="20" color="#999" /></view>
+          <view class="menu-item__icon"><WgIcon name="trash" :size="20" :color="WARM_400" /></view>
           <text class="menu-item__label">清除缓存</text>
         </view>
-        <WgIcon name="right" :size="16" color="#999" />
+        <WgIcon name="right" :size="16" :color="WARM_400" />
       </view>
       <view class="menu-item" @tap="goAbout">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><WgIcon name="info" :size="20" color="#2563eb" /></view>
+          <view class="menu-item__icon"><WgIcon name="info" :size="20" :color="ACTION_600" /></view>
           <text class="menu-item__label">关于沃谷</text>
         </view>
         <view class="menu-item__right">
           <text class="menu-item__value">v1.0.0</text>
-          <WgIcon name="right" :size="16" color="#999" />
+          <WgIcon name="right" :size="16" :color="WARM_400" />
         </view>
       </view>
     </view>
@@ -102,31 +103,31 @@ function handleLogout() {
       <view class="menu-group__title">法律与合规</view>
       <view class="menu-item" @tap="goLegal('terms')">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><WgIcon name="file-text" :size="20" color="#2D6A4F" /></view>
+          <view class="menu-item__icon"><WgIcon name="file-text" :size="20" :color="BRAND_600" /></view>
           <text class="menu-item__label">用户协议</text>
         </view>
-        <WgIcon name="right" :size="16" color="#999" />
+        <WgIcon name="right" :size="16" :color="WARM_400" />
       </view>
       <view class="menu-item" @tap="goLegal('privacy')">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><WgIcon name="lock" :size="20" color="#2D6A4F" /></view>
+          <view class="menu-item__icon"><WgIcon name="lock" :size="20" :color="BRAND_600" /></view>
           <text class="menu-item__label">隐私政策</text>
         </view>
-        <WgIcon name="right" :size="16" color="#999" />
+        <WgIcon name="right" :size="16" :color="WARM_400" />
       </view>
       <view class="menu-item" @tap="goLegal('disclaimer')">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><WgIcon name="info" :size="20" color="#E76F51" /></view>
+          <view class="menu-item__icon"><WgIcon name="info" :size="20" :color="ACCENT_400" /></view>
           <text class="menu-item__label">免责声明</text>
         </view>
-        <WgIcon name="right" :size="16" color="#999" />
+        <WgIcon name="right" :size="16" :color="WARM_400" />
       </view>
       <view class="menu-item" @tap="goLegal('feedback')">
         <view class="menu-item__left">
-          <view class="menu-item__icon"><WgIcon name="message-square" :size="20" color="#2563eb" /></view>
+          <view class="menu-item__icon"><WgIcon name="message-square" :size="20" :color="ACTION_600" /></view>
           <text class="menu-item__label">意见反馈</text>
         </view>
-        <WgIcon name="right" :size="16" color="#999" />
+        <WgIcon name="right" :size="16" :color="WARM_400" />
       </view>
     </view>
 

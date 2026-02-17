@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { WARM_400 } from '../../constants/colors'
 import { onShow, onPullDownRefresh } from '@dcloudio/uni-app'
 import { getFollowedUsers, getFollowedPosts, unfollowUser, type FollowedUser } from '../../api/follow'
 import type { PostResponse } from '../../api/post'
@@ -214,11 +215,11 @@ function getPostInitial(item: PostResponse): string {
           <text v-if="item.content" class="post-item__preview">{{ getPostPreview(item.content) }}</text>
           <view class="post-item__footer">
             <view class="post-item__stat">
-              <WgIcon name="heart" :size="14" color="#A8A29E" />
+              <WgIcon name="heart" :size="14" :color="WARM_400" />
               <text class="post-item__stat-num">{{ item.likeCount || 0 }}</text>
             </view>
             <view class="post-item__stat">
-              <WgIcon name="message-circle" :size="14" color="#A8A29E" />
+              <WgIcon name="message-circle" :size="14" :color="WARM_400" />
               <text class="post-item__stat-num">{{ item.commentCount || 0 }}</text>
             </view>
           </view>

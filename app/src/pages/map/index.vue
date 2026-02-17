@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { BRAND_600, WARM_300, WARM_400, ACCENT_400, AUTUMN_500 } from '../../constants/colors'
 import { onPullDownRefresh } from '@dcloudio/uni-app'
 import { listMapCompanies, type MapCompanyMarkerResponse } from '../../api/map'
 
@@ -196,7 +197,7 @@ function renderMarkers() {
           border:3px solid rgba(255,255,255,0.9);
           border-radius:50%;
           display:flex;align-items:center;justify-content:center;
-          color:#fff;font-weight:800;font-size:${Math.max(11, sz * 0.3)}px;
+          color:$text-inverse;font-weight:800;font-size:${Math.max(11, sz * 0.3)}px;
           box-shadow:0 4px 16px rgba(45,106,79,0.35);
           cursor:pointer;
         ">${count}</div>
@@ -307,7 +308,7 @@ onUnmounted(() => {
     <!-- 顶部搜索 & 筛选 -->
     <view class="top-bar safe-area-top">
       <view class="search-bar">
-        <WgIcon name="search" :size="16" color="#A8A29E" />
+        <WgIcon name="search" :size="16" :color="WARM_400" />
         <input
           v-model="keyword"
           class="search-bar__input"
@@ -317,7 +318,7 @@ onUnmounted(() => {
           @confirm="handleSearch"
         />
         <view v-if="keyword" class="search-bar__clear" @tap="keyword = ''; handleSearch()">
-          <WgIcon name="clear" :size="16" color="#A8A29E" />
+          <WgIcon name="clear" :size="16" :color="WARM_400" />
         </view>
       </view>
 
@@ -328,7 +329,7 @@ onUnmounted(() => {
           <text class="filter-pill" :class="{ 'filter-pill--active': filterType === 'requirement' }" @tap="filterType = 'requirement'">有采购</text>
         </view>
         <view class="view-toggle" @tap="viewMode = viewMode === 'list' ? 'map' : 'list'">
-          <WgIcon :name="viewMode === 'list' ? 'map-pin' : 'layout-grid'" :size="16" color="#2D6A4F" />
+          <WgIcon :name="viewMode === 'list' ? 'map-pin' : 'layout-grid'" :size="16" :color="BRAND_600" />
           <text class="view-toggle__text">{{ viewMode === 'list' ? '地图' : '列表' }}</text>
         </view>
       </view>
@@ -358,12 +359,12 @@ onUnmounted(() => {
             <view class="company-card__info">
               <text class="company-card__name">{{ c.companyName }}</text>
               <view v-if="c.address" class="company-card__address-row">
-                <WgIcon name="map-pin" :size="12" color="#A8A29E" />
+                <WgIcon name="map-pin" :size="12" :color="WARM_400" />
                 <text class="company-card__address">{{ c.address }}</text>
               </view>
             </view>
             <view v-if="c.lat && c.lng" class="company-card__locate" @tap.stop="focusCompany(c)">
-              <WgIcon name="navigation" :size="16" color="#2D6A4F" />
+              <WgIcon name="navigation" :size="16" :color="BRAND_600" />
             </view>
           </view>
 
@@ -373,17 +374,17 @@ onUnmounted(() => {
 
           <view class="company-card__footer">
             <view v-if="c.supplyCount > 0" class="company-card__stat">
-              <WgIcon name="store" :size="14" color="#2D6A4F" />
+              <WgIcon name="store" :size="14" :color="BRAND_600" />
               <text class="company-card__stat-text company-card__stat-text--brand">供应 {{ c.supplyCount }}</text>
             </view>
             <view v-if="c.requirementCount > 0" class="company-card__stat">
-              <WgIcon name="shopping-bag" :size="14" color="#c28a55" />
+              <WgIcon name="shopping-bag" :size="14" :color="AUTUMN_500" />
               <text class="company-card__stat-text company-card__stat-text--autumn">需求 {{ c.requirementCount }}</text>
             </view>
             <view v-if="!c.supplyCount && !c.requirementCount" class="company-card__stat">
               <text class="company-card__stat-text company-card__stat-text--muted">暂无供需</text>
             </view>
-            <WgIcon name="right" :size="14" color="#d1d5db" />
+            <WgIcon name="right" :size="14" :color="WARM_300" />
           </view>
         </view>
       </view>
@@ -398,7 +399,7 @@ onUnmounted(() => {
         <!-- #ifdef H5 -->
         <view ref="mapContainerRef" class="amap-container" />
         <view v-if="mapError" class="map-error">
-          <WgIcon name="info" :size="32" color="#E76F51" />
+          <WgIcon name="info" :size="32" :color="ACCENT_400" />
           <text class="map-error__text">{{ mapError }}</text>
           <view class="map-error__btn" @tap="viewMode = 'list'">
             <text class="map-error__btn-text">切换到列表</text>
@@ -423,7 +424,7 @@ onUnmounted(() => {
         <view class="map-overlay">
           <text class="map-overlay__text">{{ withCoords.length }} 家企业</text>
           <view class="map-overlay__btn" @tap="viewMode = 'list'">
-            <WgIcon name="layout-grid" :size="14" color="#2D6A4F" />
+            <WgIcon name="layout-grid" :size="14" :color="BRAND_600" />
             <text class="map-overlay__btn-text">列表</text>
           </view>
         </view>
@@ -441,7 +442,7 @@ onUnmounted(() => {
 }
 
 .top-bar {
-  background: #ffffff;
+  background: $bg-card;
   padding: $spacing-sm $spacing-md;
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
   z-index: 20;
@@ -510,7 +511,7 @@ onUnmounted(() => {
 
 .stats-bar {
   padding: $spacing-xs $spacing-md;
-  background: #ffffff;
+  background: $bg-card;
   border-bottom: 1rpx solid $border-light;
   display: flex;
   align-items: center;
@@ -524,7 +525,7 @@ onUnmounted(() => {
 .company-list { padding: $spacing-sm; }
 
 .company-card {
-  background: #ffffff;
+  background: $bg-card;
   border-radius: $radius-xl;
   padding: $spacing-lg;
   margin-bottom: $spacing-sm;

@@ -14,11 +14,13 @@ defineEmits<{
   action: []
 }>()
 
+import { WARM_400 } from '../constants/colors'
+
 const iconMap: Record<string, { name: string; color: string }> = {
-  empty: { name: 'mail', color: '#A8A29E' },
-  search: { name: 'search', color: '#A8A29E' },
-  network: { name: 'info', color: '#A8A29E' },
-  auth: { name: 'lock', color: '#A8A29E' },
+  empty: { name: 'mail', color: WARM_400 },
+  search: { name: 'search', color: WARM_400 },
+  network: { name: 'info', color: WARM_400 },
+  auth: { name: 'lock', color: WARM_400 },
 }
 </script>
 
@@ -90,7 +92,7 @@ const iconMap: Record<string, { name: string; color: string }> = {
   }
 
   &__action-text {
-    color: #fff;
+    color: $text-inverse;
     font-size: $font-md;
     font-weight: bold;
   }

@@ -100,7 +100,7 @@
 }
 
 .anim-shimmer {
-  background: linear-gradient(90deg, #F5F0E8 25%, #E8E0D4 50%, #F5F0E8 75%);
+  background: linear-gradient(90deg, $warm-100 25%, $warm-200 50%, $warm-100 75%);
   background-size: 936rpx 100%;
   animation: shimmer 1.5s infinite linear;
 }

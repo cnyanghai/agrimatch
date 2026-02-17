@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { BRAND_600, ACCENT_400 } from '../../constants/colors'
 import { onShow } from '@dcloudio/uni-app'
 import { useAuthStore } from '../../store/auth'
 import {
@@ -168,7 +169,7 @@ function handleRedeem() {
     <!-- Not logged in state -->
     <view v-if="!isLoggedIn" class="points-page__login-prompt">
       <view class="login-prompt__card">
-        <view class="login-prompt__icon"><WgIcon name="lock" :size="48" color="#2D6A4F" /></view>
+        <view class="login-prompt__icon"><WgIcon name="lock" :size="48" :color="BRAND_600" /></view>
         <text class="login-prompt__title">请先登录</text>
         <text class="login-prompt__desc">登录后查看积分信息</text>
         <view class="login-prompt__btn" @tap="goLogin">
@@ -203,7 +204,7 @@ function handleRedeem() {
       <!-- Action buttons -->
       <view class="action-bar">
         <view class="action-bar__btn action-bar__btn--recharge" @tap="handleRecharge">
-          <WgIcon name="plus" :size="20" color="#2D6A4F" />
+          <WgIcon name="plus" :size="20" :color="BRAND_600" />
           <text class="action-bar__btn-text">充值</text>
         </view>
         <view class="action-bar__btn action-bar__btn--redeem" @tap="handleRedeem">
@@ -235,7 +236,7 @@ function handleRedeem() {
             <view class="tx-item__left">
               <view class="tx-item__type-badge" :class="tx.pointsDelta >= 0 ? 'tx-item__type-badge--in' : 'tx-item__type-badge--out'">
                 <WgIcon v-if="tx.pointsDelta >= 0" name="chevron-up" :size="16" color="#16a34a" />
-                <WgIcon v-else name="chevron-down" :size="16" color="#E76F51" />
+                <WgIcon v-else name="chevron-down" :size="16" :color="ACCENT_400" />
               </view>
               <view class="tx-item__info">
                 <text class="tx-item__type">{{ getTxTypeLabel(tx.txType) }}</text>
@@ -318,7 +319,7 @@ function handleRedeem() {
 }
 
 .login-prompt__btn-text {
-  color: #ffffff;
+  color: $text-inverse;
   font-size: $font-md;
   font-weight: bold;
 }
@@ -352,7 +353,7 @@ function handleRedeem() {
   }
 
   &__points {
-    color: #ffffff;
+    color: $text-inverse;
     font-size: 64rpx;
     font-weight: bold;
     line-height: 1.2;
@@ -379,7 +380,7 @@ function handleRedeem() {
   }
 
   &__cny {
-    color: #ffffff;
+    color: $text-inverse;
     font-size: $font-2xl;
     font-weight: bold;
     line-height: 1.2;

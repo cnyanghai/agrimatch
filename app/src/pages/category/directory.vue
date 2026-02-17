@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { BRAND_600, WARM_400 } from '../../constants/colors'
 import { getProductTree, type ProductNode } from '../../api/product'
 
 const categoryTree = ref<ProductNode[]>([])
@@ -86,7 +87,7 @@ onMounted(async () => {
     <!-- Search bar -->
     <view class="search-section">
       <view class="search-bar">
-        <WgIcon name="search" :size="16" color="#A8A29E" />
+        <WgIcon name="search" :size="16" :color="WARM_400" />
         <input
           v-model="searchKeyword"
           class="search-bar__input"
@@ -94,7 +95,7 @@ onMounted(async () => {
           placeholder-class="search-bar__placeholder"
         />
         <view v-if="searchKeyword" class="search-bar__clear" @tap="searchKeyword = ''">
-          <WgIcon name="clear" :size="16" color="#A8A29E" />
+          <WgIcon name="clear" :size="16" :color="WARM_400" />
         </view>
       </view>
     </view>
@@ -120,7 +121,7 @@ onMounted(async () => {
         <view class="tree-header" @tap="toggleExpand(topNode.id)">
           <view class="tree-header__left">
             <view class="tree-header__icon">
-              <WgIcon :name="getCategoryIcon(topNode.name)" :size="20" color="#2D6A4F" />
+              <WgIcon :name="getCategoryIcon(topNode.name)" :size="20" :color="BRAND_600" />
             </view>
             <text class="tree-header__name">{{ topNode.name }}</text>
             <text v-if="topNode.children?.length" class="tree-header__count">
@@ -130,7 +131,7 @@ onMounted(async () => {
           <WgIcon
             :name="isExpanded(topNode.id) ? 'chevron-up' : 'chevron-down'"
             :size="14"
-            color="#A8A29E"
+            :color="WARM_400"
           />
         </view>
 
@@ -200,7 +201,7 @@ onMounted(async () => {
 
 /* Search */
 .search-section {
-  background: #ffffff;
+  background: $bg-card;
   padding: $spacing-sm $spacing-md;
 }
 
@@ -246,7 +247,7 @@ onMounted(async () => {
 }
 
 .tree-section {
-  background: #ffffff;
+  background: $bg-card;
   border-radius: $radius-xl;
   margin-bottom: $spacing-sm;
   overflow: hidden;

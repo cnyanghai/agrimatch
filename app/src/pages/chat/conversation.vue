@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, onUnmounted } from 'vue'
+import { BRAND_600, WARM_500, WHITE } from '../../constants/colors'
 import { onLoad } from '@dcloudio/uni-app'
 import { useAuthStore } from '../../store/auth'
 import {
@@ -372,7 +373,7 @@ function handleDraftContract(msg: ChatMessageResponse) {
     <view v-if="subjectInfo" class="context-card">
       <view class="context-card__main" @tap="goSubjectDetail">
         <view class="context-card__icon" :class="subjectInfo.type === 'supply' ? 'context-card__icon--brand' : 'context-card__icon--autumn'">
-          <WgIcon :name="subjectInfo.type === 'supply' ? 'store' : 'shopping-bag'" :size="16" color="#fff" />
+          <WgIcon :name="subjectInfo.type === 'supply' ? 'store' : 'shopping-bag'" :size="16" :color="WHITE" />
         </view>
         <view class="context-card__info">
           <text class="context-card__name">{{ subjectInfo.name }}</text>
@@ -380,7 +381,7 @@ function handleDraftContract(msg: ChatMessageResponse) {
         </view>
       </view>
       <view class="context-card__quote-btn" @tap="goQuoteForm">
-        <WgIcon name="coins" :size="14" color="#fff" />
+        <WgIcon name="coins" :size="14" :color="WHITE" />
         <text class="context-card__quote-text">发报价</text>
       </view>
     </view>
@@ -455,14 +456,14 @@ function handleDraftContract(msg: ChatMessageResponse) {
     <!-- Input area -->
     <view class="input-bar safe-area-bottom">
       <view class="input-bar__plus" @tap="handleShowActions">
-        <WgIcon name="plus" :size="20" color="#78716C" />
+        <WgIcon name="plus" :size="20" :color="WARM_500" />
       </view>
       <view
         v-if="canQuickCounter && latestQuote"
         class="input-bar__quick"
         @tap="handleCounterQuote(latestQuote)"
       >
-        <WgIcon name="arrow-right" :size="14" color="#2D6A4F" />
+        <WgIcon name="arrow-right" :size="14" :color="BRAND_600" />
         <text class="input-bar__quick-text">快速还价</text>
       </view>
       <input
@@ -563,7 +564,7 @@ function handleDraftContract(msg: ChatMessageResponse) {
 
   &__quote-text {
     font-size: $font-xs;
-    color: #fff;
+    color: $text-inverse;
     font-weight: 600;
   }
 }
@@ -760,7 +761,7 @@ function handleDraftContract(msg: ChatMessageResponse) {
   }
 
   &__send-text {
-    color: #fff;
+    color: $text-inverse;
     font-size: $font-md;
     font-weight: bold;
   }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { WARM_400, WARM_500, WARM_300, BRAND_600, ACCENT_400 } from '../constants/colors'
 
 export interface TemplateItem {
   id: number
@@ -59,7 +60,7 @@ function confirmDelete(tpl: TemplateItem) {
   uni.showModal({
     title: '删除模板',
     content: `确定删除「${tpl.name}」吗？`,
-    confirmColor: '#E76F51',
+    confirmColor: ACCENT_400,
     success: (res) => {
       if (res.confirm) {
         emit('delete', tpl.id)
@@ -83,13 +84,13 @@ function formatPrice(price?: number | string, unit?: string): string {
       <view class="tpl-panel__header">
         <text class="tpl-panel__title">{{ title }}</text>
         <view class="tpl-panel__close" @tap="close">
-          <WgIcon name="clear" :size="18" color="#78716C" />
+          <WgIcon name="clear" :size="18" :color="WARM_500" />
         </view>
       </view>
 
       <!-- 搜索 -->
       <view class="tpl-search">
-        <WgIcon name="search" :size="16" color="#A8A29E" />
+        <WgIcon name="search" :size="16" :color="WARM_400" />
         <input
           class="tpl-search__input"
           v-model="searchQuery"
@@ -102,7 +103,7 @@ function formatPrice(price?: number | string, unit?: string): string {
       <scroll-view class="tpl-list" scroll-y>
         <!-- 空状态 -->
         <view v-if="filteredTemplates.length === 0" class="tpl-empty">
-          <WgIcon name="file-text" :size="40" color="#d1d5db" />
+          <WgIcon name="file-text" :size="40" :color="WARM_300" />
           <text class="tpl-empty__text">{{ searchQuery ? '未找到匹配模板' : emptyText }}</text>
         </view>
 
@@ -114,7 +115,7 @@ function formatPrice(price?: number | string, unit?: string): string {
           @tap="selectTemplate(tpl)"
         >
           <view class="tpl-card__icon">
-            <WgIcon name="package" :size="20" color="#2D6A4F" />
+            <WgIcon name="package" :size="20" :color="BRAND_600" />
           </view>
           <view class="tpl-card__body">
             <text class="tpl-card__name">{{ tpl.name }}</text>
@@ -125,7 +126,7 @@ function formatPrice(price?: number | string, unit?: string): string {
             </view>
           </view>
           <view class="tpl-card__del" @tap.stop="confirmDelete(tpl)">
-            <WgIcon name="trash" :size="16" color="#A8A29E" />
+            <WgIcon name="trash" :size="16" :color="WARM_400" />
           </view>
         </view>
       </scroll-view>
@@ -153,7 +154,7 @@ function formatPrice(price?: number | string, unit?: string): string {
 
 .tpl-panel {
   width: 100%;
-  background: #ffffff;
+  background: $bg-card;
   border-radius: 32rpx 32rpx 0 0;
   max-height: 75vh;
   display: flex;
@@ -235,7 +236,7 @@ function formatPrice(price?: number | string, unit?: string): string {
   margin-bottom: $spacing-xs;
   border-radius: $radius-lg;
   border: 2rpx solid $warm-100;
-  background: #ffffff;
+  background: $bg-card;
   transition: transform 0.15s;
 
   &:active {

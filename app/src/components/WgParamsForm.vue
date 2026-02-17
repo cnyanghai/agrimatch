@@ -10,6 +10,7 @@
  */
 import { ref, computed, watch, onMounted } from 'vue'
 import { getProductParams, type ProductParam } from '../api/product'
+import { WARM_400, WARM_500, BRAND_600, COLOR_ERROR } from '../constants/colors'
 
 const props = defineProps<{
   productId?: number
@@ -137,7 +138,7 @@ function handlePickerConfirm(idx: number) {
           <text :class="localValues[param.id] ? 'param-row__value' : 'param-row__placeholder'">
             {{ localValues[param.id] || '请选择' }}
           </text>
-          <WgIcon name="chevron-down" :size="14" color="#A8A29E" />
+          <WgIcon name="chevron-down" :size="14" :color="WARM_400" />
         </view>
 
         <!-- 数值输入 -->
@@ -180,11 +181,11 @@ function handlePickerConfirm(idx: number) {
             @blur="emitAll"
           />
           <view class="custom-row__remove" @tap="removeCustomParam(idx)">
-            <WgIcon name="clear" :size="16" color="#ef4444" />
+            <WgIcon name="clear" :size="16" :color="COLOR_ERROR" />
           </view>
         </view>
         <view class="custom-add" @tap="addCustomParam">
-          <WgIcon name="plus" :size="14" color="#2D6A4F" />
+          <WgIcon name="plus" :size="14" :color="BRAND_600" />
           <text class="custom-add__text">添加自定义参数</text>
         </view>
       </view>
@@ -195,7 +196,7 @@ function handlePickerConfirm(idx: number) {
       <view class="picker-popup" @tap.stop>
         <view class="picker-popup__header">
           <text class="picker-popup__title">选择{{ pickerParam.paramName }}</text>
-          <view @tap="pickerParam = null"><WgIcon name="clear" :size="18" color="#78716C" /></view>
+          <view @tap="pickerParam = null"><WgIcon name="clear" :size="18" :color="WARM_500" /></view>
         </view>
         <scroll-view scroll-y class="picker-popup__body">
           <view
@@ -206,7 +207,7 @@ function handlePickerConfirm(idx: number) {
             @tap="handlePickerConfirm(idx)"
           >
             <text>{{ opt }}</text>
-            <WgIcon v-if="localValues[pickerParam.id] === opt" name="check" :size="16" color="#2D6A4F" />
+            <WgIcon v-if="localValues[pickerParam.id] === opt" name="check" :size="16" :color="BRAND_600" />
           </view>
         </scroll-view>
       </view>
@@ -357,7 +358,7 @@ function handlePickerConfirm(idx: number) {
 .picker-popup {
   width: 100%;
   max-height: 60vh;
-  background: #ffffff;
+  background: $bg-card;
   border-radius: 24rpx 24rpx 0 0;
   overflow: hidden;
 

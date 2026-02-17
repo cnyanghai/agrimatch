@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { BRAND_600, WARM_400, WHITE } from '../../constants/colors'
 import { onLoad } from '@dcloudio/uni-app'
 import {
   getCompanyProfile,
@@ -332,13 +333,13 @@ function handleViewRequirement(id: number) {
 
         <!-- 地址文字 -->
         <view v-if="fullAddress" class="map-address">
-          <WgIcon name="map-pin" :size="16" color="#A8A29E" />
+          <WgIcon name="map-pin" :size="16" :color="WARM_400" />
           <text class="map-address__text">{{ fullAddress }}</text>
         </view>
 
         <!-- 导航按钮 -->
         <view class="map-nav-btn" @tap="handleOpenNavigation">
-          <WgIcon name="navigation" :size="16" color="#2D6A4F" />
+          <WgIcon name="navigation" :size="16" :color="BRAND_600" />
           <text class="map-nav-btn__text">{{ hasCoords ? '导航前往' : '复制地址' }}</text>
         </view>
       </view>
@@ -353,7 +354,7 @@ function handleViewRequirement(id: number) {
           @tap="handleViewSupply(item.id)"
         >
           <text class="list-item__name">{{ item.categoryName || item.productName || '供应' }}</text>
-          <WgIcon name="right" :size="14" color="#999" />
+          <WgIcon name="right" :size="14" :color="WARM_400" />
         </view>
       </view>
 
@@ -367,7 +368,7 @@ function handleViewRequirement(id: number) {
           @tap="handleViewRequirement(item.id)"
         >
           <text class="list-item__name">{{ item.categoryName || item.productName || '采购' }}</text>
-          <WgIcon name="right" :size="14" color="#999" />
+          <WgIcon name="right" :size="14" :color="WARM_400" />
         </view>
       </view>
 
@@ -386,11 +387,11 @@ function handleViewRequirement(id: number) {
           class="bottom-bar__btn bottom-bar__btn--chat"
           @tap="handleChat"
         >
-          <WgIcon name="message-circle" :size="18" color="#2D6A4F" />
+          <WgIcon name="message-circle" :size="18" :color="BRAND_600" />
           <text>{{ chatLoading ? '连接中...' : '在线聊天' }}</text>
         </view>
         <button class="bottom-bar__btn bottom-bar__btn--primary" @tap="handleCall">
-          <WgIcon name="phone" :size="18" color="#fff" />
+          <WgIcon name="phone" :size="18" :color="WHITE" />
           <text>{{ company.phone ? '电话联系' : '暂无电话' }}</text>
         </button>
       </view>
@@ -675,7 +676,7 @@ function handleViewRequirement(id: number) {
 
     &--follow {
       background: $brand-600;
-      color: #ffffff;
+      color: $text-inverse;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -707,7 +708,7 @@ function handleViewRequirement(id: number) {
 
     &--primary {
       background: $brand-600;
-      color: #ffffff;
+      color: $text-inverse;
       display: flex;
       align-items: center;
       justify-content: center;

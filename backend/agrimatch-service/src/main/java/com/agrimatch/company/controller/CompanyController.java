@@ -79,7 +79,7 @@ public class CompanyController {
     }
 
     @GetMapping("/top")
-    public Result<List<com.agrimatch.company.dto.CompanyCardResponse>> top(@RequestParam("type") String type,
+    public Result<List<com.agrimatch.company.dto.CompanyCardResponse>> top(@RequestParam(value = "type", required = false) String type,
                                                                          @RequestParam(value = "limit", required = false) Integer limit) {
         return Result.success(companyService.getTopCompanies(type, limit));
     }

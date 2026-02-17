@@ -12,6 +12,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { getSchemaTree, type ProductSchemaVO, type CategoryNode } from '../api/productSchema'
 import { createCustomProduct } from '../api/product'
+import { WARM_400, BRAND_600 } from '../constants/colors'
 
 export interface PickedCategory {
   id: number
@@ -183,7 +184,7 @@ onMounted(loadSchemas)
       <text v-if="displayText" class="category-picker__value">{{ displayText }}</text>
       <text v-else class="category-picker__placeholder">请选择品类</text>
       <view v-if="displayText" class="category-picker__clear" @tap.stop="clearSelection">
-        <WgIcon name="clear" :size="16" color="#999" />
+        <WgIcon name="clear" :size="16" :color="WARM_400" />
       </view>
       <text v-else class="category-picker__arrow">&#x203A;</text>
     </view>
@@ -242,7 +243,7 @@ onMounted(loadSchemas)
                 @tap="selectChild(child)"
               >
                 <text class="picker-popup__child-text">{{ child.name }}</text>
-                <WgIcon v-if="modelValue?.id === child.id" name="check" :size="14" color="#2D6A4F" />
+                <WgIcon v-if="modelValue?.id === child.id" name="check" :size="14" :color="BRAND_600" />
               </view>
             </view>
             <view v-else class="picker-popup__empty">
@@ -251,7 +252,7 @@ onMounted(loadSchemas)
 
             <!-- 自定义创建入口 -->
             <view class="picker-popup__custom-btn" @tap="openCustomDialog">
-              <WgIcon name="plus" :size="14" color="#2D6A4F" />
+              <WgIcon name="plus" :size="14" :color="BRAND_600" />
               <text class="picker-popup__custom-text">找不到？手动创建</text>
             </view>
           </scroll-view>
@@ -376,7 +377,7 @@ onMounted(loadSchemas)
     font-weight: 600;
 
     .picker-popup__schema-item--active & {
-      color: #fff;
+      color: $text-inverse;
     }
   }
 
@@ -574,7 +575,7 @@ onMounted(loadSchemas)
     color: $text-secondary;
 
     &--white {
-      color: #fff;
+      color: $text-inverse;
     }
   }
 }

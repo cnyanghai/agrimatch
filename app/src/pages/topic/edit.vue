@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { WARM_400, WHITE } from '../../constants/colors'
 import { onLoad } from '@dcloudio/uni-app'
 import { getPost, updatePost } from '../../api/post'
 import { uploadFile } from '../../utils/request'
@@ -223,7 +224,7 @@ async function handleSubmit() {
             <view v-for="(img, idx) in imageList" :key="idx" class="image-grid__item">
               <image :src="img.url" mode="aspectFill" class="image-grid__img" @tap="previewImage(idx)" />
               <view class="image-grid__delete" @tap.stop="removeImage(idx)">
-                <WgIcon name="clear" :size="20" color="#fff" />
+                <WgIcon name="clear" :size="20" :color="WHITE" />
               </view>
               <view v-if="img.uploading" class="image-grid__loading">
                 <view class="image-grid__spinner" />
@@ -247,7 +248,7 @@ async function handleSubmit() {
                 >
                   {{ form.domain || '选择领域（可选）' }}
                 </text>
-                <WgIcon name="right" :size="16" color="#999" />
+                <WgIcon name="right" :size="16" :color="WARM_400" />
               </view>
             </picker>
             <view
@@ -476,7 +477,7 @@ async function handleSubmit() {
   &__text {
     font-size: $font-lg;
     font-weight: bold;
-    color: #fff;
+    color: $text-inverse;
   }
 }
 </style>

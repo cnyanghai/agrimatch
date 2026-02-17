@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { WHITE } from '../../constants/colors'
 import { onLoad } from '@dcloudio/uni-app'
 import { getUser, type UserResponse } from '../../api/user'
 import { listPosts, type PostResponse } from '../../api/post'
@@ -248,7 +249,7 @@ function handleViewCompany(companyId: number) {
       <!-- Bottom message bar -->
       <view v-if="canFollow()" class="msg-bar safe-area-bottom">
         <view class="msg-bar__btn" @tap="handleSendMessage">
-          <WgIcon name="message-circle" :size="18" color="#fff" />
+          <WgIcon name="message-circle" :size="18" :color="WHITE" />
           <text class="msg-bar__btn-text">发消息</text>
         </view>
       </view>
@@ -379,7 +380,7 @@ function handleViewCompany(companyId: number) {
 
   &__text {
     font-size: $font-xs;
-    color: #ffffff;
+    color: $text-inverse;
     white-space: nowrap;
   }
 
@@ -452,7 +453,7 @@ function handleViewCompany(companyId: number) {
   &__btn-text {
     font-size: $font-md;
     font-weight: bold;
-    color: #ffffff;
+    color: $text-inverse;
   }
 }
 

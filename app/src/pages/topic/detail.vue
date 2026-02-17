@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
+import { WARM_400 } from '../../constants/colors'
 import { formatRelativeTime } from '../../utils/format'
 import {
   getPost,
@@ -334,7 +335,7 @@ function handleDeletePost() {
             <text class="action-bar__label">{{ detail.likeCount || 0 }}</text>
           </view>
           <view class="action-bar__item">
-            <WgIcon name="message-circle" :size="22" color="#999" />
+            <WgIcon name="message-circle" :size="22" :color="WARM_400" />
             <text class="action-bar__label">{{ detail.commentCount || 0 }}</text>
           </view>
           <view
@@ -345,7 +346,7 @@ function handleDeletePost() {
             <text class="action-bar__label">{{ detail.collectedByMe ? '已收藏' : '收藏' }}</text>
           </view>
           <view class="action-bar__item" @tap="handleShare">
-            <WgIcon name="share" :size="22" color="#999" />
+            <WgIcon name="share" :size="22" :color="WARM_400" />
             <text class="action-bar__label">分享</text>
           </view>
         </view>
@@ -524,7 +525,7 @@ function handleDeletePost() {
 
   &__text {
     font-size: $font-sm;
-    color: #fff;
+    color: $text-inverse;
     font-weight: bold;
     white-space: nowrap;
   }
@@ -789,7 +790,7 @@ function handleDeletePost() {
 
   &__btn-text {
     font-size: $font-md;
-    color: #fff;
+    color: $text-inverse;
     font-weight: bold;
   }
 }

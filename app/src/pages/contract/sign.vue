@@ -9,6 +9,7 @@
  * 4. seal_handwrite - 印章+手写组合
  */
 import { ref, computed, nextTick } from 'vue'
+import { BRAND_600, WHITE } from '../../constants/colors'
 import { onLoad } from '@dcloudio/uni-app'
 import {
   getContract,
@@ -468,14 +469,14 @@ function onMethodChange(method: SignMethod) {
             <text class="seal-item__name">{{ seal.sealName }}</text>
             <text v-if="seal.isDefault" class="seal-item__default">默认</text>
             <view v-if="selectedSealId === seal.id" class="seal-item__check">
-              <WgIcon name="check" :size="14" color="#fff" :stroke-width="3" />
+              <WgIcon name="check" :size="14" :color="WHITE" :stroke-width="3" />
             </view>
           </view>
         </view>
 
         <!-- 创建新印章 -->
         <view class="create-seal-btn" @tap="showCreateSeal = true">
-          <WgIcon name="plus-circle" :size="16" color="#2D6A4F" />
+          <WgIcon name="plus-circle" :size="16" :color="BRAND_600" />
           <text class="create-seal-btn__text">添加印章（拍照提取 / 系统生成）</text>
         </view>
 
@@ -623,7 +624,7 @@ function onMethodChange(method: SignMethod) {
 .sign-summary {
   background: $brand-700;
   padding: $spacing-lg $spacing-md;
-  color: #fff;
+  color: $text-inverse;
 
   &__no {
     font-size: $font-sm;
@@ -717,7 +718,7 @@ function onMethodChange(method: SignMethod) {
     height: 40rpx;
     border-radius: 50%;
     background: $brand-600;
-    color: #fff;
+    color: $text-inverse;
     font-size: $font-sm;
     font-weight: bold;
     text-align: center;
@@ -909,7 +910,7 @@ function onMethodChange(method: SignMethod) {
   &__send-text {
     font-size: $font-sm;
     font-weight: 600;
-    color: #fff;
+    color: $text-inverse;
   }
 
   &__tip {
@@ -928,7 +929,7 @@ function onMethodChange(method: SignMethod) {
   border: 2rpx solid $border-color;
   border-radius: $radius-md;
   overflow: hidden;
-  background: #ffffff;
+  background: $bg-card;
 }
 
 .sign-canvas {
@@ -1086,7 +1087,7 @@ function onMethodChange(method: SignMethod) {
   &__text {
     font-size: $font-lg;
     font-weight: bold;
-    color: #fff;
+    color: $text-inverse;
   }
 }
 </style>

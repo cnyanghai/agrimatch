@@ -241,7 +241,7 @@ function getLatestUpdateTime(): string {
 
     &--active {
       background: $brand-600;
-      color: #ffffff;
+      color: $text-inverse;
       font-weight: bold;
     }
   }

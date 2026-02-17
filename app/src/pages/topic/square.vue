@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import { WARM_400, WHITE } from '../../constants/colors'
 import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import { listPosts, type PostResponse } from '../../api/post'
 import { getFollowedPosts } from '../../api/follow'
@@ -173,7 +174,7 @@ function getImages(item: PostResponse): string[] {
     <!-- 搜索栏 -->
     <view v-if="showSearch" class="search-bar">
       <view class="search-bar__inner">
-        <WgIcon name="search" :size="16" color="#999" />
+        <WgIcon name="search" :size="16" :color="WARM_400" />
         <input
           class="search-bar__input"
           v-model="searchKeyword"
@@ -182,7 +183,7 @@ function getImages(item: PostResponse): string[] {
           :maxlength="50"
         />
         <view v-if="searchKeyword" class="search-bar__clear" @tap="clearSearch">
-          <WgIcon name="clear" :size="16" color="#999" />
+          <WgIcon name="clear" :size="16" :color="WARM_400" />
         </view>
       </view>
       <text class="search-bar__cancel" @tap="toggleSearch">取消</text>
@@ -284,11 +285,11 @@ function getImages(item: PostResponse): string[] {
         <!-- 互动数据 -->
         <view class="post-card__footer">
           <view class="post-card__stat">
-            <WgIcon name="heart" :size="14" color="#999" />
+            <WgIcon name="heart" :size="14" :color="WARM_400" />
             <text class="post-card__stat-num">{{ item.likeCount || 0 }}</text>
           </view>
           <view class="post-card__stat">
-            <WgIcon name="message-circle" :size="14" color="#999" />
+            <WgIcon name="message-circle" :size="14" :color="WARM_400" />
             <text class="post-card__stat-num">{{ item.commentCount || 0 }}</text>
           </view>
         </view>
@@ -326,7 +327,7 @@ function getImages(item: PostResponse): string[] {
 
     <!-- 发布按钮 -->
     <view class="fab anim-fab-enter" @tap="goPublish">
-      <WgIcon name="square-pen" :size="24" color="#fff" />
+      <WgIcon name="square-pen" :size="24" :color="WHITE" />
     </view>
   </view>
 </template>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { WARM_400, WHITE } from '../../constants/colors'
 import { useAuthStore } from '../../store/auth'
 import { updateMe } from '../../api/user'
 import { uploadFile } from '../../utils/request'
@@ -114,7 +115,7 @@ async function handleSave() {
           <WgIcon name="user" :size="48" color="#ccc" />
         </view>
         <view class="avatar-section__overlay">
-          <WgIcon name="camera" :size="20" color="#fff" />
+          <WgIcon name="camera" :size="20" :color="WHITE" />
         </view>
       </view>
       <text class="avatar-section__hint">{{ uploadingAvatar ? '上传中...' : '点击更换头像' }}</text>
@@ -147,7 +148,7 @@ async function handleSave() {
         <picker :range="genderOptions" :value="form.gender - 1" @change="handleGenderPick">
           <view class="form-card__picker">
             <text class="form-card__picker-text">{{ form.gender === 1 ? '男' : '女' }}</text>
-            <WgIcon name="right" :size="16" color="#999" />
+            <WgIcon name="right" :size="16" :color="WARM_400" />
           </view>
         </picker>
       </view>
@@ -314,7 +315,7 @@ async function handleSave() {
   &__text {
     font-size: $font-lg;
     font-weight: bold;
-    color: #fff;
+    color: $text-inverse;
   }
 }
 </style>

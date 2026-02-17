@@ -326,7 +326,7 @@ async function handleAddCustom() {
   &__text {
     font-size: $font-md;
     font-weight: 600;
-    color: #fff;
+    color: $text-inverse;
   }
 }
 
@@ -475,7 +475,7 @@ async function handleAddCustom() {
     font-weight: 600;
 
     &--primary {
-      color: #fff;
+      color: $text-inverse;
     }
 
     &--danger {

@@ -400,7 +400,7 @@ async function handleSubmit() {
   &__text {
     font-size: $font-lg;
     font-weight: bold;
-    color: #fff;
+    color: $text-inverse;
   }
 }
 </style>

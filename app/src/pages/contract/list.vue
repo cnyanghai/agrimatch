@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { WARM_400 } from '../../constants/colors'
 import { onLoad, onPullDownRefresh } from '@dcloudio/uni-app'
 import { useAuthStore } from '../../store/auth'
 import {
@@ -196,7 +197,7 @@ function formatStatAmount(val: number): string {
     <!-- ===== 搜索栏 ===== -->
     <view class="search-bar">
       <view class="search-bar__input-wrap">
-        <WgIcon name="search" :size="16" color="#A8A29E" />
+        <WgIcon name="search" :size="16" :color="WARM_400" />
         <input
           class="search-bar__input"
           type="text"
@@ -207,7 +208,7 @@ function formatStatAmount(val: number): string {
           @input="onSearchInput(($event as any).detail.value)"
         />
         <view v-if="searchInput" class="search-bar__clear" @tap="clearSearch">
-          <WgIcon name="x" :size="14" color="#A8A29E" />
+          <WgIcon name="x" :size="14" :color="WARM_400" />
         </view>
       </view>
     </view>
@@ -240,7 +241,7 @@ function formatStatAmount(val: number): string {
             <text class="todo-section__badge-text">{{ pendingSignCount + pendingMilestoneCount }}</text>
           </view>
         </view>
-        <WgIcon :name="todoExpanded ? 'chevron-up' : 'chevron-down'" :size="14" color="#A8A29E" />
+        <WgIcon :name="todoExpanded ? 'chevron-up' : 'chevron-down'" :size="14" :color="WARM_400" />
       </view>
       <view v-if="todoExpanded" class="todo-section__body">
         <view
@@ -251,7 +252,7 @@ function formatStatAmount(val: number): string {
           <view class="todo-item__dot todo-item__dot--sign" />
           <text class="todo-item__text">待我签署</text>
           <text class="todo-item__count">({{ pendingSignCount }})</text>
-          <WgIcon name="chevron-right" :size="14" color="#A8A29E" />
+          <WgIcon name="chevron-right" :size="14" :color="WARM_400" />
         </view>
         <view
           v-if="pendingMilestoneCount > 0"
@@ -261,7 +262,7 @@ function formatStatAmount(val: number): string {
           <view class="todo-item__dot todo-item__dot--milestone" />
           <text class="todo-item__text">待确认节点</text>
           <text class="todo-item__count">({{ pendingMilestoneCount }})</text>
-          <WgIcon name="chevron-right" :size="14" color="#A8A29E" />
+          <WgIcon name="chevron-right" :size="14" :color="WARM_400" />
         </view>
       </view>
     </view>
@@ -458,7 +459,7 @@ function formatStatAmount(val: number): string {
 
   &__badge-text {
     font-size: 20rpx;
-    color: #fff;
+    color: $text-inverse;
     font-weight: bold;
   }
 

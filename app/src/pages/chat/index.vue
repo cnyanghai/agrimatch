@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { WARM_300, WARM_600 } from '../../constants/colors'
 import { onShow, onPullDownRefresh } from '@dcloudio/uni-app'
 import { useAuthStore } from '../../store/auth'
 import { listConversations, type ChatConversationResponse } from '../../api/chat'
@@ -94,7 +95,7 @@ function goRequirement() {
           @tap="goNotify(cat.key)"
         >
           <view class="notify-bar__icon-wrap">
-            <WgIcon :name="cat.icon" :size="24" color="#57534E" />
+            <WgIcon :name="cat.icon" :size="24" :color="WARM_600" />
             <view v-if="cat.count > 0" class="notify-bar__badge">
               <text class="notify-bar__badge-text">{{ cat.count > 99 ? '99+' : cat.count }}</text>
             </view>
@@ -139,7 +140,7 @@ function goRequirement() {
       <!-- 空状态 -->
       <view v-else-if="!loading" class="empty-state">
         <view class="empty-state__icon">
-          <WgIcon name="message-circle" :size="48" color="#d1d5db" />
+          <WgIcon name="message-circle" :size="48" :color="WARM_300" />
         </view>
         <text class="empty-state__text">还没有对话</text>
         <text class="empty-state__desc">去供应大厅或采购大厅找合作伙伴吧</text>
@@ -171,7 +172,7 @@ function goRequirement() {
 .notify-bar {
   display: flex;
   justify-content: space-around;
-  background: #ffffff;
+  background: $bg-card;
   padding: $spacing-lg $spacing-md;
   margin-bottom: $spacing-sm;
 
@@ -214,7 +215,7 @@ function goRequirement() {
   }
 
   &__badge-text {
-    color: #fff;
+    color: $text-inverse;
     font-size: 18rpx;
     font-weight: bold;
     line-height: 32rpx;
@@ -239,7 +240,7 @@ function goRequirement() {
 
 /* ===== Conversation List ===== */
 .conv-list {
-  background: #ffffff;
+  background: $bg-card;
 }
 
 .conv-item {
@@ -323,7 +324,7 @@ function goRequirement() {
   }
 
   &__unread-text {
-    color: #fff;
+    color: $text-inverse;
     font-size: $font-xs;
     font-weight: bold;
   }
@@ -346,7 +347,7 @@ function goRequirement() {
     width: 120rpx;
     height: 120rpx;
     border-radius: 50%;
-    background: #ffffff;
+    background: $bg-card;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -392,7 +393,7 @@ function goRequirement() {
 
   &__btn-text {
     font-size: $font-md;
-    color: #fff;
+    color: $text-inverse;
     font-weight: 600;
   }
 }

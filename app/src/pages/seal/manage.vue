@@ -4,6 +4,7 @@
  * 查看、创建、删除印章，设置默认印章
  */
 import { ref } from 'vue'
+import { COLOR_ERROR, WHITE } from '../../constants/colors'
 import { onShow } from '@dcloudio/uni-app'
 import {
   listSeals,
@@ -133,7 +134,7 @@ async function handleSealCreated(result: string) {
               <text class="seal-card__btn-text">设为默认</text>
             </view>
             <view class="seal-card__btn seal-card__btn--delete" @tap="handleDelete(seal)">
-              <WgIcon name="trash" :size="14" color="#ef4444" />
+              <WgIcon name="trash" :size="14" :color="COLOR_ERROR" />
             </view>
           </view>
         </view>
@@ -143,7 +144,7 @@ async function handleSealCreated(result: string) {
     <!-- 创建按钮 -->
     <view class="create-bar safe-area-bottom">
       <view class="create-btn" @tap="showUploader = true">
-        <WgIcon name="plus-circle" :size="18" color="#fff" />
+        <WgIcon name="plus-circle" :size="18" :color="WHITE" />
         <text class="create-btn__text">添加印章</text>
       </view>
     </view>
@@ -311,7 +312,7 @@ async function handleSealCreated(result: string) {
   &__text {
     font-size: $font-lg;
     font-weight: 700;
-    color: #fff;
+    color: $text-inverse;
   }
 }
 </style>

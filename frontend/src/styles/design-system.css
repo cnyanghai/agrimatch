@@ -1,5 +1,13 @@
-/* AgriMatch Design System - CSS Variables */
-/* 融合原项目 emerald 色彩与 Stitch 现代化设计 */
+/**
+ * 沃谷设计系统 (WoGu Design System)
+ *
+ * 色彩令牌从 brain/design/tokens.json 自动生成 → design-tokens.css
+ * 本文件仅包含：暗色模式覆盖、基础样式、工具类、动画
+ * 禁止在此文件中硬编码色值！
+ */
+
+/* ===== 自动生成的令牌（唯一真理来源）===== */
+@import './design-tokens.css';
 
 /* 字体使用规范：
  * 1. 字体大小统一使用工具类或 CSS 变量：
@@ -12,7 +20,6 @@
  *    - text-3xl (30px) - 页面主标题
  *    - text-4xl (36px) - 首页主标题
  *    - text-5xl (48px) - 营销标题
- *    - text-6xl (60px) - 超大标题
  *
  * 2. 字体粗细统一使用工具类：
  *    - font-normal (400) - 正文、描述
@@ -22,174 +29,40 @@
  *    - font-extrabold (800) - 营销标题（限制使用）
  *    - 禁止使用 font-black (900)
  *
- * 3. 行高使用规范：
- *    - leading-none (1.0) - 图标文字
- *    - leading-tight (1.25) - 标题
- *    - leading-normal (1.5) - 正文（默认）
- *    - leading-relaxed (1.625) - 长篇文章
- *    - leading-loose (2.0) - 特殊排版
- *
- * 4. 禁止事项：
+ * 3. 禁止事项：
  *    - 禁止使用 px 单位指定字体大小
- *    - 禁止使用数值直接指定字体粗细（如 font-weight: 800）
- *    - 禁止使用 @apply 指令（与自定义 CSS 变量不兼容）
- *    - 禁止混用不同字体家族
- *
- * 5. 示例用法：
- *    <div class="text-2xl font-bold leading-tight">页面标题</div>
- *    <p class="text-base font-normal leading-normal">正文内容</p>
- *    <span class="text-sm font-medium">标签文字</span>
+ *    - 禁止使用数值直接指定字体粗细
+ *    - 禁止硬编码色值（必须使用 Tailwind 类名或 CSS 变量）
  */
 
-:root {
-  /* 主色系统 - 沃野绿（品牌色 #2D6A4F） */
-  --brand-50: #f0f7f4;
-  --brand-100: #daeee3;
-  --brand-200: #b5ddc6;
-  --brand-300: #82c49e;
-  --brand-400: #57b17f;
-  --brand-500: #389867;
-  --brand-600: #2D6A4F;
-  --brand-700: #1a4532;
-  --brand-800: #113322;
-  --brand-900: #092015;
-
-  /* 行动色 - 蓝色（基于 stitch #1152d4） */
-  --action-50: #eff6ff;
-  --action-100: #dbeafe;
-  --action-200: #bfdbfe;
-  --action-300: #93c5fd;
-  --action-400: #60a5fa;
-  --action-500: #3b82f6;
-  --action-600: #2563eb;
-  --action-700: #1d4ed8;
-  --action-800: #1e40af;
-  --action-900: #1e3a8a;
-
-  /* 背景色系统 - 基于 stitch #f6f6f8 */
-  --bg-light: #fafaf9;
-  --bg-light-hover: #f5f5f4;
-  --bg-dark: #18181b;
-  --bg-dark-hover: #27272a;
-  --bg-white: #ffffff;
-  --bg-gray: #f4f4f5;
-
-  /* 中性色系统 - 基于 stitch 文字色 #111318 */
-  --neutral-50: #fafafa;
-  --neutral-100: #f4f4f5;
-  --neutral-200: #e4e4e7;
-  --neutral-300: #d4d4d8;
-  --neutral-400: #a1a1aa;
-  --neutral-500: #71717a;
-  --neutral-600: #52525b;
-  --neutral-700: #3f3f46;
-  --neutral-800: #27272a;
-  --neutral-900: #18181b;
-
-  /* 语义色 */
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
-
-  /* 透明度 */
-  --opacity-subtle: rgba(0, 0, 0, 0.03);
-  --opacity-light: rgba(0, 0, 0, 0.06);
-  --opacity-medium: rgba(0, 0, 0, 0.1);
-  --opacity-heavy: rgba(0, 0, 0, 0.15);
-
-  /* 字体家族 */
-  --font-family-sans: 'Inter', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', sans-serif;
-  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-
-  /* 字体大小系统 */
-  --font-xs: 0.75rem;
-  --font-sm: 0.875rem;
-  --font-base: 1rem;
-  --font-lg: 1.125rem;
-  --font-xl: 1.25rem;
-  --font-2xl: 1.5rem;
-  --font-3xl: 1.875rem;
-  --font-4xl: 2.25rem;
-  --font-5xl: 3rem;
-  --font-6xl: 3.75rem;
-
-  /* 字体粗细系统 */
-  --font-weight-thin: 100;
-  --font-weight-extralight: 200;
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-  --font-weight-extrabold: 800;
-  --font-weight-black: 900;
-
-  /* 行高系统 */
-  --leading-none: 1;
-  --leading-tight: 1.25;
-  --leading-snug: 1.375;
-  --leading-normal: 1.5;
-  --leading-relaxed: 1.625;
-  --leading-loose: 2;
-
-  /* 字间距 */
-  --tracking-tighter: -0.05em;
-  --tracking-tight: -0.025em;
-  --tracking-normal: 0;
-  --tracking-wide: 0.025em;
-  --tracking-wider: 0.05em;
-  --tracking-widest: 0.1em;
-
-  /* 间距 */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  --space-20: 5rem;
-  --space-24: 6rem;
-
-  /* 过渡时间 */
-  --duration-fast: 150ms;
-  --duration-normal: 200ms;
-  --duration-slow: 300ms;
-
-  /* 缓动函数 */
-  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* 暗色模式变量 */
+/* ===== 暗色模式覆盖（TODO: 后续迁入 tokens.json 暗色层）===== */
 .dark {
-  --bg-light: #27272a;
-  --bg-light-hover: #3f3f46;
-  --bg-white: #18181b;
-  --bg-gray: #1f1f23;
+  --bg-page: #292524;
+  --bg-card: #1C1917;
+  --bg-hover: #44403C;
+  --bg-mask: rgba(0, 0, 0, 0.6);
 
-  --neutral-50: #18181b;
-  --neutral-100: #27272a;
-  --neutral-200: #3f3f46;
-  --neutral-300: #52525b;
-  --neutral-400: #71717a;
-  --neutral-500: #a1a1aa;
-  --neutral-600: #d4d4d8;
-  --neutral-700: #e4e4e7;
-  --neutral-800: #f4f4f5;
-  --neutral-900: #fafafa;
+  --neutral-50: #1C1917;
+  --neutral-100: #292524;
+  --neutral-200: #44403C;
+  --neutral-300: #57534E;
+  --neutral-400: #78716C;
+  --neutral-500: #A8A29E;
+  --neutral-600: #D6CCC0;
+  --neutral-700: #E8E0D4;
+  --neutral-800: #F5F0E8;
+  --neutral-900: #FAF8F4;
 
-  --opacity-subtle: rgba(255, 255, 255, 0.03);
-  --opacity-light: rgba(255, 255, 255, 0.06);
-  --opacity-medium: rgba(255, 255, 255, 0.1);
-  --opacity-heavy: rgba(255, 255, 255, 0.15);
+  --text-primary: #FAF8F4;
+  --text-secondary: #A8A29E;
+  --text-placeholder: #78716C;
+  --text-disabled: #57534E;
+
+  --border-color: #44403C;
+  --border-light: #292524;
 }
 
-/* 基础样式 */
+/* ===== 基础样式 ===== */
 * {
   box-sizing: border-box;
 }
@@ -205,17 +78,12 @@ html {
 body {
   font-size: var(--font-base);
   line-height: var(--leading-normal);
-  background-color: var(--bg-light);
-  color: var(--neutral-900);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
   transition: background-color var(--duration-normal), color var(--duration-normal);
 }
 
-.dark body {
-  background-color: var(--bg-dark);
-  color: var(--neutral-900);
-}
-
-/* 滚动条美化 */
+/* ===== 滚动条美化 ===== */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -225,31 +93,19 @@ body {
   background-color: var(--neutral-100);
 }
 
-.dark ::-webkit-scrollbar-track {
-  background-color: var(--neutral-800);
-}
-
 ::-webkit-scrollbar-thumb {
   background-color: var(--neutral-300);
   border-radius: 9999px;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background-color: var(--neutral-600);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--neutral-400);
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--neutral-500);
-}
-
-/* 动画类 */
+/* ===== Vue 过渡动画 ===== */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity var(--duration-normal) var(--ease-out);
+  transition: opacity var(--duration-normal) var(--ease-default);
 }
 
 .fade-enter-from,
@@ -259,7 +115,7 @@ body {
 
 .slide-up-enter-active,
 .slide-up-leave-active {
-  transition: transform var(--duration-slow) var(--ease-out);
+  transition: transform var(--duration-slow) var(--ease-default);
 }
 
 .slide-up-enter-from {
@@ -273,8 +129,8 @@ body {
 }
 
 .scale-in-active {
-  transition: transform var(--duration-normal) var(--ease-out),
-    opacity var(--duration-normal) var(--ease-out);
+  transition: transform var(--duration-normal) var(--ease-default),
+    opacity var(--duration-normal) var(--ease-default);
 }
 
 .scale-in-from {
@@ -287,144 +143,7 @@ body {
   opacity: 1;
 }
 
-/* 字体大小工具类 */
-.text-xs {
-  font-size: var(--font-xs);
-}
-
-.text-sm {
-  font-size: var(--font-sm);
-}
-
-.text-base {
-  font-size: var(--font-base);
-}
-
-.text-lg {
-  font-size: var(--font-lg);
-}
-
-.text-xl {
-  font-size: var(--font-xl);
-}
-
-.text-2xl {
-  font-size: var(--font-2xl);
-}
-
-.text-3xl {
-  font-size: var(--font-3xl);
-}
-
-.text-4xl {
-  font-size: var(--font-4xl);
-}
-
-.text-5xl {
-  font-size: var(--font-5xl);
-}
-
-.text-6xl {
-  font-size: var(--font-6xl);
-}
-
-/* 字体粗细工具类 */
-.font-thin {
-  font-weight: var(--font-weight-thin);
-}
-
-.font-extralight {
-  font-weight: var(--font-weight-extralight);
-}
-
-.font-light {
-  font-weight: var(--font-weight-light);
-}
-
-.font-normal {
-  font-weight: var(--font-weight-normal);
-}
-
-.font-medium {
-  font-weight: var(--font-weight-medium);
-}
-
-.font-semibold {
-  font-weight: var(--font-weight-semibold);
-}
-
-.font-bold {
-  font-weight: var(--font-weight-bold);
-}
-
-.font-extrabold {
-  font-weight: var(--font-weight-extrabold);
-}
-
-.font-black {
-  font-weight: var(--font-weight-black);
-}
-
-/* 行高工具类 */
-.leading-none {
-  line-height: var(--leading-none);
-}
-
-.leading-tight {
-  line-height: var(--leading-tight);
-}
-
-.leading-snug {
-  line-height: var(--leading-snug);
-}
-
-.leading-normal {
-  line-height: var(--leading-normal);
-}
-
-.leading-relaxed {
-  line-height: var(--leading-relaxed);
-}
-
-.leading-loose {
-  line-height: var(--leading-loose);
-}
-
-/* 字间距工具类 */
-.tracking-tighter {
-  letter-spacing: var(--tracking-tighter);
-}
-
-.tracking-tight {
-  letter-spacing: var(--tracking-tight);
-}
-
-.tracking-normal {
-  letter-spacing: var(--tracking-normal);
-}
-
-.tracking-wide {
-  letter-spacing: var(--tracking-wide);
-}
-
-.tracking-wider {
-  letter-spacing: var(--tracking-wider);
-}
-
-.tracking-widest {
-  letter-spacing: var(--tracking-widest);
-}
-
-/* 字体家族工具类 */
-.font-sans {
-  font-family: var(--font-family-sans);
-}
-
-.font-mono {
-  font-family: var(--font-family-mono);
-}
-
-/* 图片懒加载样式 */
+/* ===== 图片懒加载 ===== */
 img.lazy-loading {
   opacity: 0.4;
   filter: blur(8px);

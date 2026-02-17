@@ -12,6 +12,7 @@
  */
 import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
+import { WARM_400 } from '../../constants/colors'
 import {
   getConversationMessages,
   createContractFromQuote,
@@ -355,7 +356,7 @@ async function handleSubmit() {
               >
                 {{ form.deliveryDate || '选择交付日期' }}
               </text>
-              <WgIcon name="right" :size="16" color="#999" />
+              <WgIcon name="right" :size="16" :color="WARM_400" />
             </view>
           </picker>
         </view>
@@ -379,7 +380,7 @@ async function handleSubmit() {
               >
                 {{ paymentLabel || '选择付款方式' }}
               </text>
-              <WgIcon name="right" :size="16" color="#999" />
+              <WgIcon name="right" :size="16" :color="WARM_400" />
             </view>
           </picker>
         </view>
@@ -394,7 +395,7 @@ async function handleSubmit() {
               >
                 {{ deliveryModeLabel || '选择交货方式' }}
               </text>
-              <WgIcon name="right" :size="16" color="#999" />
+              <WgIcon name="right" :size="16" :color="WARM_400" />
             </view>
           </picker>
         </view>
@@ -411,7 +412,7 @@ async function handleSubmit() {
               <text class="form-card__picker-text">
                 {{ form.unit || '吨' }}
               </text>
-              <WgIcon name="right" :size="16" color="#999" />
+              <WgIcon name="right" :size="16" :color="WARM_400" />
             </view>
           </picker>
         </view>
@@ -426,7 +427,7 @@ async function handleSubmit() {
               >
                 {{ invoiceTypeLabel || '选择发票类型' }}
               </text>
-              <WgIcon name="right" :size="16" color="#999" />
+              <WgIcon name="right" :size="16" :color="WARM_400" />
             </view>
           </picker>
         </view>
@@ -702,7 +703,7 @@ async function handleSubmit() {
   &__text {
     font-size: $font-lg;
     font-weight: bold;
-    color: #fff;
+    color: $text-inverse;
   }
 }
 </style>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { BRAND_600, WARM_500, ACTION_600, COLOR_ERROR, WHITE } from '../../constants/colors'
 import { onPullDownRefresh } from '@dcloudio/uni-app'
 import {
   listVehicles,
@@ -147,7 +148,7 @@ function maskIdCard(val: string): string {
       >
         <view class="vehicle-card__header">
           <view class="vehicle-card__plate-wrap">
-            <WgIcon name="truck" :size="18" color="#2D6A4F" />
+            <WgIcon name="truck" :size="18" :color="BRAND_600" />
             <text class="vehicle-card__plate">{{ v.plateNumber }}</text>
           </view>
           <view v-if="v.isDefault" class="vehicle-card__badge">
@@ -182,11 +183,11 @@ function maskIdCard(val: string): string {
             <text class="vehicle-card__action-text">设为默认</text>
           </view>
           <view class="vehicle-card__action" @tap="openEdit(v)">
-            <WgIcon name="square-pen" :size="16" color="#2563eb" />
+            <WgIcon name="square-pen" :size="16" :color="ACTION_600" />
             <text class="vehicle-card__action-text vehicle-card__action-text--blue">编辑</text>
           </view>
           <view class="vehicle-card__action" @tap="handleDelete(v)">
-            <WgIcon name="trash" :size="16" color="#ef4444" />
+            <WgIcon name="trash" :size="16" :color="COLOR_ERROR" />
             <text class="vehicle-card__action-text vehicle-card__action-text--red">删除</text>
           </view>
         </view>
@@ -207,7 +208,7 @@ function maskIdCard(val: string): string {
 
     <!-- FAB add -->
     <view v-if="vehicles.length > 0" class="fab" @tap="openCreate">
-      <WgIcon name="plus" :size="24" color="#fff" />
+      <WgIcon name="plus" :size="24" :color="WHITE" />
     </view>
 
     <!-- Form popup -->
@@ -216,7 +217,7 @@ function maskIdCard(val: string): string {
         <view class="popup-sheet__header">
           <text class="popup-sheet__title">{{ formMode === 'create' ? '添加车辆' : '编辑车辆' }}</text>
           <view @tap="showForm = false">
-            <WgIcon name="clear" :size="22" color="#78716C" />
+            <WgIcon name="clear" :size="22" :color="WARM_500" />
           </view>
         </view>
         <scroll-view scroll-y class="popup-sheet__body">
@@ -284,7 +285,7 @@ function maskIdCard(val: string): string {
 }
 
 .vehicle-card {
-  background: #ffffff;
+  background: $bg-card;
   border-radius: $radius-xl;
   overflow: hidden;
   box-shadow: $shadow-warm-card;
@@ -417,7 +418,7 @@ function maskIdCard(val: string): string {
 .popup-sheet {
   width: 100%;
   max-height: 85vh;
-  background: #ffffff;
+  background: $bg-card;
   border-radius: $radius-xl $radius-xl 0 0;
   display: flex;
   flex-direction: column;
@@ -474,7 +475,7 @@ function maskIdCard(val: string): string {
   border-radius: $radius-lg;
   font-size: $font-md;
   color: $text-primary;
-  background: #ffffff;
+  background: $bg-card;
 
   &:focus {
     border-color: $brand-500;
@@ -489,7 +490,7 @@ function maskIdCard(val: string): string {
   border-radius: $radius-lg;
   font-size: $font-md;
   color: $text-primary;
-  background: #ffffff;
+  background: $bg-card;
 }
 
 .form-pills {
@@ -531,7 +532,7 @@ function maskIdCard(val: string): string {
   }
 
   &__text {
-    color: #ffffff;
+    color: $text-inverse;
     font-size: $font-md;
     font-weight: bold;
   }

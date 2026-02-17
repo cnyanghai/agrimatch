@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { BRAND_600, WARM_300, WARM_400 } from '../../constants/colors'
 import { onLoad, onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import {
   getCompanyDirectory,
@@ -166,7 +167,7 @@ function clearSearch() {
     <!-- 搜索栏 -->
     <view class="search-bar">
       <view class="search-bar__inner">
-        <WgIcon name="search" :size="16" color="#A8A29E" />
+        <WgIcon name="search" :size="16" :color="WARM_400" />
         <input
           v-model="searchKeyword"
           class="search-bar__input"
@@ -175,7 +176,7 @@ function clearSearch() {
           @input="onSearchInput"
         />
         <view v-if="searchKeyword" class="search-bar__clear" @tap="clearSearch">
-          <WgIcon name="clear" :size="16" color="#A8A29E" />
+          <WgIcon name="clear" :size="16" :color="WARM_400" />
         </view>
       </view>
     </view>
@@ -208,7 +209,7 @@ function clearSearch() {
             </view>
           </view>
           <view v-if="formatLocation(c)" class="company-card__location">
-            <WgIcon name="map-pin" :size="14" color="#A8A29E" />
+            <WgIcon name="map-pin" :size="14" :color="WARM_400" />
             <text class="company-card__location-text">{{ formatLocation(c) }}</text>
           </view>
           <view v-if="getCategoryTags(c).length > 0" class="company-card__tags">
@@ -220,13 +221,13 @@ function clearSearch() {
           </view>
           <view class="company-card__footer">
             <view v-if="c.count" class="company-card__stat">
-              <WgIcon name="layout-grid" :size="14" color="#2D6A4F" />
+              <WgIcon name="layout-grid" :size="14" :color="BRAND_600" />
               <text class="company-card__stat-text">已发布 {{ c.count }} 条供应</text>
             </view>
             <view v-else class="company-card__stat">
               <text class="company-card__stat-text company-card__stat-text--muted">暂无供应</text>
             </view>
-            <WgIcon name="right" :size="14" color="#d1d5db" />
+            <WgIcon name="right" :size="14" :color="WARM_300" />
           </view>
         </view>
       </view>
@@ -307,7 +308,7 @@ function clearSearch() {
 
         <!-- 位置信息 -->
         <view v-if="formatLocation(c)" class="company-card__location">
-          <WgIcon name="map-pin" :size="14" color="#A8A29E" />
+          <WgIcon name="map-pin" :size="14" :color="WARM_400" />
           <text class="company-card__location-text">{{ formatLocation(c) }}</text>
         </view>
 
@@ -323,13 +324,13 @@ function clearSearch() {
         <!-- 底部统计 -->
         <view class="company-card__footer">
           <view v-if="c.count" class="company-card__stat">
-            <WgIcon name="layout-grid" :size="14" color="#2D6A4F" />
+            <WgIcon name="layout-grid" :size="14" :color="BRAND_600" />
             <text class="company-card__stat-text">已发布 {{ c.count }} 条供应</text>
           </view>
           <view v-else class="company-card__stat">
             <text class="company-card__stat-text company-card__stat-text--muted">暂无供应</text>
           </view>
-          <WgIcon name="right" :size="14" color="#d1d5db" />
+          <WgIcon name="right" :size="14" :color="WARM_300" />
         </view>
       </view>
 
@@ -353,7 +354,7 @@ function clearSearch() {
 
 /* ===== Search bar ===== */
 .search-bar {
-  background: #ffffff;
+  background: $bg-card;
   padding: $spacing-sm $spacing-md;
   border-bottom: 1rpx solid $border-light;
 
@@ -382,7 +383,7 @@ function clearSearch() {
 
 /* ===== Type tabs ===== */
 .type-tabs {
-  background: #ffffff;
+  background: $bg-card;
   border-bottom: 1rpx solid $border-light;
 
   &__scroll {
@@ -408,7 +409,7 @@ function clearSearch() {
 
     &--active {
       background: $brand-600;
-      color: #ffffff;
+      color: $text-inverse;
       font-weight: bold;
     }
   }
@@ -416,7 +417,7 @@ function clearSearch() {
 
 /* ===== Letter bar ===== */
 .letter-bar {
-  background: #ffffff;
+  background: $bg-card;
   border-bottom: 1rpx solid $border-light;
 
   &__scroll {
@@ -444,7 +445,7 @@ function clearSearch() {
 
     &--active {
       background: $brand-600;
-      color: #ffffff;
+      color: $text-inverse;
       font-weight: bold;
     }
   }
@@ -456,7 +457,7 @@ function clearSearch() {
 }
 
 .company-card {
-  background: #ffffff;
+  background: $bg-card;
   border-radius: $radius-xl;
   padding: $spacing-lg;
   margin-bottom: $spacing-md;

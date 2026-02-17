@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { BRAND_600, ACCENT_400, AUTUMN_500, WHITE } from '../../constants/colors'
 import { onShow } from '@dcloudio/uni-app'
 import { createSupply, getMySupplyTemplates, createSupplyTemplate, deleteSupplyTemplate } from '../../api/supply'
 import type { SupplyCreateRequest, BasisQuoteRequest, SupplyTemplateResponse } from '../../api/supply'
@@ -394,11 +395,11 @@ async function handleSubmit() {
     <!-- 模板操作栏 -->
     <view class="template-bar">
       <view class="template-bar__btn" @tap="templatePickerOpen = true">
-        <WgIcon name="file-text" :size="16" color="#2D6A4F" />
+        <WgIcon name="file-text" :size="16" :color="BRAND_600" />
         <text class="template-bar__text">使用模板</text>
       </view>
       <view class="template-bar__btn" @tap="saveAsTemplate">
-        <WgIcon name="bookmark" :size="16" color="#c28a55" />
+        <WgIcon name="bookmark" :size="16" :color="AUTUMN_500" />
         <text class="template-bar__text template-bar__text--save">保存模板</text>
       </view>
     </view>
@@ -528,11 +529,11 @@ async function handleSubmit() {
             </view>
           </view>
           <view class="basis-quote-row__delete" @tap="removeBasisQuote(idx)">
-            <WgIcon name="clear" :size="20" color="#E76F51" />
+            <WgIcon name="clear" :size="20" :color="ACCENT_400" />
           </view>
         </view>
         <view class="basis-quote-add" @tap="addBasisQuote">
-          <WgIcon name="plus" :size="16" color="#2D6A4F" />
+          <WgIcon name="plus" :size="16" :color="BRAND_600" />
           <text class="basis-quote-add__text">添加合约</text>
         </view>
       </view>
@@ -658,7 +659,7 @@ async function handleSubmit() {
           <view v-for="(img, idx) in images" :key="idx" class="image-grid__item">
             <image :src="img" mode="aspectFill" class="image-grid__img" @tap="previewImage(idx)" />
             <view class="image-grid__delete" @tap.stop="removeImage(idx)">
-              <WgIcon name="clear" :size="20" color="#fff" />
+              <WgIcon name="clear" :size="20" :color="WHITE" />
             </view>
           </view>
           <view v-if="images.length < 6 && !uploading" class="image-grid__add" @tap="chooseImage">
@@ -999,7 +1000,7 @@ async function handleSubmit() {
   &__text {
     font-size: $font-lg;
     font-weight: bold;
-    color: #fff;
+    color: $text-inverse;
   }
 }
 </style>

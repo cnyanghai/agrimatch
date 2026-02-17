@@ -8,6 +8,7 @@
 import { ref, computed } from 'vue'
 import { extractSealFromPath } from '../composables/useSealExtractor'
 import { uploadImage } from '../api/file'
+import { WARM_400, WARM_500, BRAND_600, AUTUMN_500, COLOR_ERROR, WHITE } from '../constants/colors'
 
 const emit = defineEmits<{
   (e: 'created', sealUrl: string): void
@@ -160,7 +161,7 @@ function writeBase64ToTemp(dataUrl: string): Promise<string> {
       <view class="seal-panel__header">
         <text class="seal-panel__title">{{ mode === 'choose' ? '添加印章' : mode === 'upload' ? '上传印章照片' : '系统生成印章' }}</text>
         <view class="seal-panel__close" @tap="close">
-          <WgIcon name="x" :size="20" color="#78716C" />
+          <WgIcon name="x" :size="20" :color="WARM_500" />
         </view>
       </view>
 
@@ -169,14 +170,14 @@ function writeBase64ToTemp(dataUrl: string): Promise<string> {
         <view class="choose-grid">
           <view class="choose-card" @tap="mode = 'upload'">
             <view class="choose-card__icon choose-card__icon--upload">
-              <WgIcon name="camera" :size="28" color="#2D6A4F" />
+              <WgIcon name="camera" :size="28" :color="BRAND_600" />
             </view>
             <text class="choose-card__title">拍照提取</text>
             <text class="choose-card__desc">拍摄白底红章照片，自动提取透明印章</text>
           </view>
           <view class="choose-card" @tap="mode = 'generate'">
             <view class="choose-card__icon choose-card__icon--gen">
-              <WgIcon name="sparkles" :size="28" color="#c28a55" />
+              <WgIcon name="sparkles" :size="28" :color="AUTUMN_500" />
             </view>
             <text class="choose-card__title">系统生成</text>
             <text class="choose-card__desc">输入公司名称，自动生成电子印章</text>
@@ -189,7 +190,7 @@ function writeBase64ToTemp(dataUrl: string): Promise<string> {
         <view class="upload-body">
           <!-- 原图 / 选择区域 -->
           <view v-if="!originalImage" class="upload-zone" @tap="chooseImage">
-            <WgIcon name="image-plus" :size="40" color="#A8A29E" />
+            <WgIcon name="image-plus" :size="40" :color="WARM_400" />
             <text class="upload-zone__text">点击选择印章照片</text>
             <text class="upload-zone__hint">支持拍照 / 相册选择，白底红章效果最佳</text>
           </view>
@@ -202,7 +203,7 @@ function writeBase64ToTemp(dataUrl: string): Promise<string> {
 
           <!-- 提取失败 -->
           <view v-else-if="extractError" class="upload-error">
-            <WgIcon name="alert-circle" :size="40" color="#ef4444" />
+            <WgIcon name="alert-circle" :size="40" :color="COLOR_ERROR" />
             <text class="upload-error__text">{{ extractError }}</text>
             <view class="upload-error__retry" @tap="chooseImage">
               <text class="upload-error__retry-text">重新选择</text>
@@ -218,7 +219,7 @@ function writeBase64ToTemp(dataUrl: string): Promise<string> {
                   <image :src="originalImage" class="extract-compare__img" mode="aspectFit" />
                 </view>
                 <view class="extract-compare__arrow">
-                  <WgIcon name="arrow-right" :size="20" color="#A8A29E" />
+                  <WgIcon name="arrow-right" :size="20" :color="WARM_400" />
                 </view>
                 <view class="extract-compare__item">
                   <text class="extract-compare__label">提取结果</text>
@@ -242,7 +243,7 @@ function writeBase64ToTemp(dataUrl: string): Promise<string> {
               <!-- 操作按钮 -->
               <view class="extract-actions">
                 <view class="extract-actions__btn extract-actions__btn--retry" @tap="chooseImage">
-                  <WgIcon name="rotate-ccw" :size="16" color="#78716C" />
+                  <WgIcon name="rotate-ccw" :size="16" :color="WARM_500" />
                   <text class="extract-actions__text">重新选择</text>
                 </view>
                 <view
@@ -261,7 +262,7 @@ function writeBase64ToTemp(dataUrl: string): Promise<string> {
 
         <!-- 返回 -->
         <view class="back-row" @tap="mode = 'choose'; originalImage = ''; extractedImage = ''; extractError = ''">
-          <WgIcon name="arrow-left" :size="16" color="#78716C" />
+          <WgIcon name="arrow-left" :size="16" :color="WARM_500" />
           <text class="back-row__text">返回选择</text>
         </view>
       </template>
@@ -286,14 +287,14 @@ function writeBase64ToTemp(dataUrl: string): Promise<string> {
               :class="{ 'extract-actions__btn--disabled': !sealName.trim() }"
               @tap="$emit('created', `__GENERATE__:${sealName.trim()}`)"
             >
-              <WgIcon name="sparkles" :size="16" color="#fff" />
+              <WgIcon name="sparkles" :size="16" :color="WHITE" />
               <text class="extract-actions__text extract-actions__text--white">生成印章</text>
             </view>
           </view>
         </view>
 
         <view class="back-row" @tap="mode = 'choose'; sealName = ''">
-          <WgIcon name="arrow-left" :size="16" color="#78716C" />
+          <WgIcon name="arrow-left" :size="16" :color="WARM_500" />
           <text class="back-row__text">返回选择</text>
         </view>
       </template>
@@ -584,7 +585,7 @@ function writeBase64ToTemp(dataUrl: string): Promise<string> {
     font-weight: 600;
     color: $text-primary;
 
-    &--white { color: #fff; }
+    &--white { color: $text-inverse; }
   }
 }
 

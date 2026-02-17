@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { ChatMessageResponse } from '../api/chat'
+import { WARM_500 } from '../constants/colors'
 
 const props = defineProps<{
   message: ChatMessageResponse
@@ -138,7 +139,7 @@ const showDraftContract = computed(() => status.value === 'ACCEPTED')
     </view>
 
     <view v-if="productLabel" class="quote-card__product">
-      <WgIcon name="package" :size="12" color="#78716C" />
+      <WgIcon name="package" :size="12" :color="WARM_500" />
       <text class="quote-card__product-text">{{ productLabel }}</text>
     </view>
 
@@ -394,7 +395,7 @@ const showDraftContract = computed(() => status.value === 'ACCEPTED')
     font-weight: 600;
 
     &--primary {
-      color: #fff;
+      color: $text-inverse;
     }
 
     &--secondary {

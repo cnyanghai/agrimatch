@@ -5,17 +5,16 @@ import { useAuthStore } from '../../store/auth'
 import { listSupplies } from '../../api/supply'
 import { listRequirements } from '../../api/requirement'
 import { listContracts } from '../../api/contract'
+import { BRAND_600, WARM_300, WARM_400, WARM_500, AUTUMN_500, ACCENT_400, ACTION_600, WHITE } from '../../constants/colors'
 
 const authStore = useAuthStore()
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 const user = computed(() => authStore.user)
 
-/** 统计数据 */
 const supplyCount = ref<number | null>(null)
 const requirementCount = ref<number | null>(null)
 const contractCount = ref<number | null>(null)
 
-// 用户名首字
 const avatarChar = computed(() => {
   const name = user.value?.nickName || user.value?.userName || '?'
   return name[0]
@@ -134,145 +133,163 @@ function handleLogout() {
 
 <template>
   <view class="profile-page">
-    <!-- 白色头部 (水平布局) -->
-    <view class="header">
-      <!-- 已登录 -->
-      <view v-if="isLoggedIn" class="header__user" @tap="goEditProfile">
-        <view class="header__avatar-wrap">
-          <image
-            v-if="user?.avatar"
-            class="header__avatar"
-            :src="user.avatar"
-            mode="aspectFill"
-          />
-          <view v-else class="header__avatar header__avatar--text">
-            <text class="header__avatar-char">{{ avatarChar }}</text>
+    <!-- ===== Hero Header (品牌渐变) ===== -->
+    <view class="hero stitch-hero">
+      <view class="hero__safe safe-area-top" />
+      <view class="hero__content">
+        <!-- 已登录 -->
+        <view v-if="isLoggedIn" class="hero__user" @tap="goEditProfile">
+          <view class="hero__avatar-wrap">
+            <image
+              v-if="user?.avatar"
+              class="hero__avatar"
+              :src="user.avatar"
+              mode="aspectFill"
+            />
+            <view v-else class="hero__avatar hero__avatar--text">
+              <text class="hero__avatar-char">{{ avatarChar }}</text>
+            </view>
+          </view>
+          <view class="hero__info">
+            <text class="hero__name">{{ user?.nickName || user?.userName || '用户' }}</text>
+            <text v-if="user?.companyName" class="hero__company">{{ user.companyName }}</text>
+            <view class="hero__roles">
+              <text v-if="user?.isSeller" class="hero__role">供应商</text>
+              <text v-if="user?.isBuyer" class="hero__role hero__role--gold">采购商</text>
+            </view>
+          </view>
+          <view class="hero__edit-btn">
+            <WgIcon name="edit-2" :size="16" :color="WHITE" />
           </view>
         </view>
-        <view class="header__info">
-          <text class="header__name">{{ user?.nickName || user?.userName || '用户' }}</text>
-          <text v-if="user?.companyName" class="header__company">{{ user.companyName }}</text>
-          <view class="header__roles">
-            <text v-if="user?.isSeller" class="header__role">供应商</text>
-            <text v-if="user?.isBuyer" class="header__role header__role--autumn">采购商</text>
+
+        <!-- 未登录 -->
+        <view v-else class="hero__guest" @tap="goLogin">
+          <view class="hero__avatar hero__avatar--guest">
+            <WgIcon name="user" :size="36" :color="WHITE" />
           </view>
+          <view class="hero__info">
+            <text class="hero__name">点击登录</text>
+            <text class="hero__company">登录后享受完整功能</text>
+          </view>
+          <WgIcon name="right" :size="18" :color="WHITE" />
         </view>
-        <WgIcon name="right" :size="16" color="#D6CCC0" />
       </view>
+    </view>
 
-      <!-- 未登录 -->
-      <view v-else class="header__guest" @tap="goLogin">
-        <view class="header__avatar header__avatar--placeholder">
-          <WgIcon name="user" :size="32" color="#A8A29E" />
+    <!-- ===== 统计卡片 (浮动在 hero 之上) ===== -->
+    <view v-if="isLoggedIn" class="stats-float">
+      <view class="stats-row">
+        <view class="stat-item" @tap="goMySupplies">
+          <text class="stat-item__value font-mono">{{ supplyCount ?? '-' }}</text>
+          <text class="stat-item__label">供应</text>
         </view>
-        <view class="header__info">
-          <text class="header__name">点击登录</text>
-          <text class="header__company">登录后享受完整功能</text>
+        <view class="stat-divider" />
+        <view class="stat-item" @tap="goMyRequirements">
+          <text class="stat-item__value font-mono">{{ requirementCount ?? '-' }}</text>
+          <text class="stat-item__label">采购</text>
         </view>
-        <WgIcon name="right" :size="16" color="#D6CCC0" />
+        <view class="stat-divider" />
+        <view class="stat-item" @tap="goContracts">
+          <text class="stat-item__value font-mono">{{ contractCount ?? '-' }}</text>
+          <text class="stat-item__label">合同</text>
+        </view>
       </view>
     </view>
 
-    <!-- 统计卡片 (独立暖色卡片) -->
-    <view v-if="isLoggedIn" class="stats-row anim-fade-in">
-      <view class="stat-card" @tap="goMySupplies">
-        <text class="stat-card__value font-mono">{{ supplyCount ?? '-' }}</text>
-        <text class="stat-card__label">供应</text>
-      </view>
-      <view class="stat-card" @tap="goMyRequirements">
-        <text class="stat-card__value font-mono">{{ requirementCount ?? '-' }}</text>
-        <text class="stat-card__label">采购</text>
-      </view>
-      <view class="stat-card" @tap="goContracts">
-        <text class="stat-card__value font-mono">{{ contractCount ?? '-' }}</text>
-        <text class="stat-card__label">合同</text>
-      </view>
-    </view>
-
-    <!-- 功能网格（紧凑4列） -->
-    <view class="func-grid anim-slide-up">
-      <view class="func-grid__item" @tap="goMySupplies">
-        <view class="func-grid__icon func-grid__icon--brand"><WgIcon name="store" :size="22" color="#2D6A4F" /></view>
-        <text class="func-grid__label">我的供应</text>
-      </view>
-      <view class="func-grid__item" @tap="goMyRequirements">
-        <view class="func-grid__icon func-grid__icon--autumn"><WgIcon name="shopping-bag" :size="22" color="#c28a55" /></view>
-        <text class="func-grid__label">我的采购</text>
-      </view>
-      <view class="func-grid__item" @tap="goContracts">
-        <view class="func-grid__icon func-grid__icon--action"><WgIcon name="file-text" :size="22" color="#2563eb" /></view>
-        <text class="func-grid__label">我的合同</text>
-      </view>
-      <view class="func-grid__item" @tap="goCollections">
-        <view class="func-grid__icon func-grid__icon--accent"><WgIcon name="bookmark" :size="22" color="#E76F51" /></view>
-        <text class="func-grid__label">我的收藏</text>
-      </view>
-      <view class="func-grid__item" @tap="goFollowing">
-        <view class="func-grid__icon func-grid__icon--brand"><WgIcon name="user-plus" :size="22" color="#2D6A4F" /></view>
-        <text class="func-grid__label">我的关注</text>
-      </view>
-      <view class="func-grid__item" @tap="goNotify">
-        <view class="func-grid__icon func-grid__icon--accent"><WgIcon name="bell" :size="22" color="#E76F51" /></view>
-        <text class="func-grid__label">通知中心</text>
-      </view>
-      <view class="func-grid__item" @tap="goPoints">
-        <view class="func-grid__icon func-grid__icon--autumn"><WgIcon name="award" :size="22" color="#c28a55" /></view>
-        <text class="func-grid__label">我的积分</text>
-      </view>
-      <view class="func-grid__item" @tap="goTopicSquare">
-        <view class="func-grid__icon func-grid__icon--action"><WgIcon name="message-square" :size="22" color="#2563eb" /></view>
-        <text class="func-grid__label">话题广场</text>
+    <!-- ===== 功能网格 ===== -->
+    <view class="section">
+      <text class="stitch-section-title">我的服务</text>
+      <view class="func-grid">
+        <view class="func-item" @tap="goMySupplies">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--brand"><WgIcon name="store" :size="20" :color="BRAND_600" /></view>
+          <text class="func-item__label">我的供应</text>
+        </view>
+        <view class="func-item" @tap="goMyRequirements">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--autumn"><WgIcon name="shopping-bag" :size="20" :color="AUTUMN_500" /></view>
+          <text class="func-item__label">我的采购</text>
+        </view>
+        <view class="func-item" @tap="goContracts">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--action"><WgIcon name="file-text" :size="20" :color="ACTION_600" /></view>
+          <text class="func-item__label">我的合同</text>
+        </view>
+        <view class="func-item" @tap="goCollections">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--accent"><WgIcon name="bookmark" :size="20" :color="ACCENT_400" /></view>
+          <text class="func-item__label">我的收藏</text>
+        </view>
+        <view class="func-item" @tap="goFollowing">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--brand"><WgIcon name="user-plus" :size="20" :color="BRAND_600" /></view>
+          <text class="func-item__label">我的关注</text>
+        </view>
+        <view class="func-item" @tap="goNotify">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--accent"><WgIcon name="bell" :size="20" :color="ACCENT_400" /></view>
+          <text class="func-item__label">通知中心</text>
+        </view>
+        <view class="func-item" @tap="goPoints">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--autumn"><WgIcon name="award" :size="20" :color="AUTUMN_500" /></view>
+          <text class="func-item__label">我的积分</text>
+        </view>
+        <view class="func-item" @tap="goTopicSquare">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--action"><WgIcon name="message-square" :size="20" :color="ACTION_600" /></view>
+          <text class="func-item__label">话题广场</text>
+        </view>
       </view>
     </view>
 
-    <!-- 发现与工具 -->
-    <view class="menu-card">
-      <view v-if="user?.companyId" class="menu-item" @tap="goCompany">
-        <view class="menu-item__icon menu-item__icon--brand"><WgIcon name="building" :size="20" color="#2D6A4F" /></view>
-        <text class="menu-item__label">企业信息</text>
-        <WgIcon name="right" :size="16" color="#D6CCC0" />
-      </view>
-      <view class="menu-item" @tap="goSealManage">
-        <view class="menu-item__icon menu-item__icon--accent"><WgIcon name="shield" :size="20" color="#E76F51" /></view>
-        <text class="menu-item__label">印章管理</text>
-        <WgIcon name="right" :size="16" color="#D6CCC0" />
-      </view>
-      <view class="menu-item" @tap="goDirectory">
-        <view class="menu-item__icon menu-item__icon--action"><WgIcon name="building2" :size="20" color="#2563eb" /></view>
-        <text class="menu-item__label">企业名录</text>
-        <WgIcon name="right" :size="16" color="#D6CCC0" />
-      </view>
-      <view class="menu-item" @tap="goCategoryDirectory">
-        <view class="menu-item__icon menu-item__icon--brand"><WgIcon name="layout-grid" :size="20" color="#2D6A4F" /></view>
-        <text class="menu-item__label">品类目录</text>
-        <WgIcon name="right" :size="16" color="#D6CCC0" />
-      </view>
-      <view class="menu-item" @tap="goMap">
-        <view class="menu-item__icon menu-item__icon--action"><WgIcon name="map-pin" :size="20" color="#2563eb" /></view>
-        <text class="menu-item__label">地图找商</text>
-        <WgIcon name="right" :size="16" color="#D6CCC0" />
-      </view>
-      <view v-if="user?.companyId" class="menu-item" @tap="goVehicles">
-        <view class="menu-item__icon menu-item__icon--autumn"><WgIcon name="truck" :size="20" color="#c28a55" /></view>
-        <text class="menu-item__label">车辆管理</text>
-        <WgIcon name="right" :size="16" color="#D6CCC0" />
-      </view>
-    </view>
-
-    <!-- 系统 -->
-    <view class="menu-card">
-      <view class="menu-item" @tap="goSettings">
-        <view class="menu-item__icon menu-item__icon--gray"><WgIcon name="settings" :size="20" color="#78716C" /></view>
-        <text class="menu-item__label">设置</text>
-        <WgIcon name="right" :size="16" color="#D6CCC0" />
+    <!-- ===== 工具与发现 ===== -->
+    <view class="section">
+      <text class="stitch-section-title">工具与发现</text>
+      <view class="menu-card stitch-card" style="padding: 0;">
+        <view v-if="user?.companyId" class="menu-item" @tap="goCompany">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--brand"><WgIcon name="building" :size="18" :color="BRAND_600" /></view>
+          <text class="menu-item__label">企业信息</text>
+          <WgIcon name="chevron-right" :size="16" :color="WARM_300" />
+        </view>
+        <view class="menu-item" @tap="goSealManage">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--accent"><WgIcon name="shield" :size="18" :color="ACCENT_400" /></view>
+          <text class="menu-item__label">印章管理</text>
+          <WgIcon name="chevron-right" :size="16" :color="WARM_300" />
+        </view>
+        <view class="menu-item" @tap="goDirectory">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--action"><WgIcon name="building2" :size="18" :color="ACTION_600" /></view>
+          <text class="menu-item__label">企业名录</text>
+          <WgIcon name="chevron-right" :size="16" :color="WARM_300" />
+        </view>
+        <view class="menu-item" @tap="goCategoryDirectory">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--brand"><WgIcon name="layout-grid" :size="18" :color="BRAND_600" /></view>
+          <text class="menu-item__label">品类目录</text>
+          <WgIcon name="chevron-right" :size="16" :color="WARM_300" />
+        </view>
+        <view class="menu-item" @tap="goMap">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--action"><WgIcon name="map-pin" :size="18" :color="ACTION_600" /></view>
+          <text class="menu-item__label">地图找商</text>
+          <WgIcon name="chevron-right" :size="16" :color="WARM_300" />
+        </view>
+        <view v-if="user?.companyId" class="menu-item menu-item--last" @tap="goVehicles">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--autumn"><WgIcon name="truck" :size="18" :color="AUTUMN_500" /></view>
+          <text class="menu-item__label">车辆管理</text>
+          <WgIcon name="chevron-right" :size="16" :color="WARM_300" />
+        </view>
       </view>
     </view>
 
-    <!-- 退出登录 -->
-    <view v-if="isLoggedIn" class="logout-wrap">
-      <button class="btn-logout" @tap="handleLogout">退出登录</button>
+    <!-- ===== 系统 ===== -->
+    <view class="section">
+      <view class="menu-card stitch-card" style="padding: 0;">
+        <view class="menu-item menu-item--last" @tap="goSettings">
+          <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--warm"><WgIcon name="settings" :size="18" :color="WARM_500" /></view>
+          <text class="menu-item__label">设置</text>
+          <WgIcon name="chevron-right" :size="16" :color="WARM_300" />
+        </view>
+      </view>
     </view>
 
+    <!-- ===== 退出登录 ===== -->
+    <view v-if="isLoggedIn" class="logout-section">
+      <button class="logout-btn" @tap="handleLogout">退出登录</button>
+    </view>
+
+    <view style="height: 160rpx;" />
     <WgTabBar :current="4" />
   </view>
 </template>
@@ -281,20 +298,25 @@ function handleLogout() {
 .profile-page {
   min-height: 100vh;
   background: $bg-page;
-  padding-bottom: 130rpx;
 }
 
-/* ===== Header (White, Horizontal) ===== */
-.header {
-  background: #ffffff;
-  padding: $spacing-xl $spacing-lg $spacing-lg;
-  padding-top: calc(var(--status-bar-height, 25px) + 40rpx);
+/* ===== Hero Header ===== */
+.hero {
+  padding-bottom: $spacing-3xl;
+
+  &__safe {
+    height: 0;
+  }
+
+  &__content {
+    padding: $spacing-xl $spacing-xl 0;
+  }
 
   &__user,
   &__guest {
     display: flex;
     align-items: center;
-    gap: $spacing-md;
+    gap: $spacing-lg;
   }
 
   &__avatar-wrap {
@@ -302,19 +324,20 @@ function handleLogout() {
   }
 
   &__avatar {
-    width: 112rpx;
-    height: 112rpx;
+    width: 120rpx;
+    height: 120rpx;
     border-radius: 50%;
+    border: 4rpx solid rgba(255, 255, 255, 0.3);
 
     &--text {
-      background: $warm-100;
+      background: rgba(255, 255, 255, 0.15);
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    &--placeholder {
-      background: $warm-100;
+    &--guest {
+      background: rgba(255, 255, 255, 0.15);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -322,9 +345,9 @@ function handleLogout() {
   }
 
   &__avatar-char {
-    font-size: $font-2xl;
+    font-size: $font-3xl;
     font-weight: 800;
-    color: $brand-600;
+    color: $text-inverse;
   }
 
   &__info {
@@ -334,17 +357,17 @@ function handleLogout() {
 
   &__name {
     display: block;
-    color: $text-primary;
+    color: $text-inverse;
     font-size: $font-xl;
-    font-weight: 700;
+    font-weight: 800;
     margin-bottom: 4rpx;
   }
 
   &__company {
     display: block;
-    color: $text-secondary;
+    color: rgba(255, 255, 255, 0.7);
     font-size: $font-sm;
-    margin-bottom: $spacing-xs;
+    margin-bottom: $spacing-sm;
   }
 
   &__roles {
@@ -354,38 +377,58 @@ function handleLogout() {
 
   &__role {
     font-size: $font-xs;
-    padding: 4rpx 16rpx;
-    border-radius: $radius-pill;
-    background: $brand-50;
-    color: $brand-600;
+    padding: 4rpx 18rpx;
+    border-radius: $radius-full;
+    background: rgba(255, 255, 255, 0.18);
+    color: $text-inverse;
     font-weight: 600;
 
-    &--autumn {
-      background: $autumn-50;
-      color: $autumn-500;
+    &--gold {
+      background: rgba(255, 200, 100, 0.25);
+      color: #FFF2D0;
+    }
+  }
+
+  &__edit-btn {
+    width: 64rpx;
+    height: 64rpx;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    &:active {
+      background: rgba(255, 255, 255, 0.25);
     }
   }
 }
 
-/* ===== Stats Row (Independent warm cards) ===== */
-.stats-row {
-  display: flex;
-  gap: $spacing-sm;
-  padding: $spacing-md $spacing-md 0;
+/* ===== 统计卡片 (浮动) ===== */
+.stats-float {
+  margin: -#{$spacing-xl} $spacing-lg $spacing-md;
+  position: relative;
+  z-index: 2;
 }
 
-.stat-card {
+.stats-row {
+  display: flex;
+  align-items: center;
+  background: $bg-card;
+  border-radius: $radius-2xl;
+  padding: $spacing-xl 0;
+  box-shadow: 0 4rpx 20rpx rgba(120, 90, 50, 0.06);
+}
+
+.stat-item {
   flex: 1;
-  background: #ffffff;
-  border-radius: $radius-xl;
-  padding: $spacing-lg $spacing-sm;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: $shadow-warm-card;
 
   &__value {
-    font-size: $font-xl;
+    font-size: $font-2xl;
     font-weight: 800;
     color: $text-primary;
     margin-bottom: 4rpx;
@@ -397,106 +440,86 @@ function handleLogout() {
   }
 }
 
+.stat-divider {
+  width: 1rpx;
+  height: 56rpx;
+  background: $warm-200;
+}
+
+/* ===== Section ===== */
+.section {
+  padding: $spacing-lg $spacing-lg 0;
+}
+
 /* ===== 功能网格 ===== */
 .func-grid {
   display: flex;
   flex-wrap: wrap;
-  background: $bg-card;
-  margin: $spacing-md;
-  border-radius: $radius-xl;
-  box-shadow: $shadow-warm-card;
-  padding: $spacing-sm 0;
+  margin-top: $spacing-md;
+}
 
-  &__item {
-    width: 25%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: $spacing-md 0;
+.func-item {
+  width: 25%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-lg 0;
+  transition: transform $transition-fast;
 
-    &:active {
-      opacity: 0.7;
-      transform: scale(0.95);
-    }
-  }
-
-  &__icon {
-    width: 80rpx;
-    height: 80rpx;
-    border-radius: $radius-lg;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: $spacing-xs;
-
-    &--brand { background: $brand-50; }
-    &--autumn { background: $autumn-50; }
-    &--action { background: rgba(37, 99, 235, 0.08); }
-    &--accent { background: $accent-50; }
+  &:active {
+    transform: scale(0.92);
   }
 
   &__label {
     font-size: 22rpx;
     color: $text-secondary;
     font-weight: 500;
+    margin-top: $spacing-xs;
   }
 }
 
-/* ===== Menu Card ===== */
-.menu-card {
-  background: $bg-card;
-  margin: $spacing-md;
-  border-radius: $radius-xl;
-  overflow: hidden;
-  box-shadow: $shadow-warm-card;
-}
-
+/* ===== 菜单卡片 ===== */
 .menu-item {
   display: flex;
   align-items: center;
-  padding: $spacing-lg $spacing-lg;
-  border-bottom: 1rpx solid $warm-100;
+  padding: $spacing-lg $spacing-xl;
   gap: $spacing-md;
+  border-bottom: 1rpx solid $warm-100;
+  transition: background $transition-fast;
 
-  &:last-child {
+  &--last {
     border-bottom: none;
   }
 
-  &__icon {
-    width: 72rpx;
-    height: 72rpx;
-    border-radius: $radius-lg;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    &--brand { background: $brand-50; }
-    &--autumn { background: $autumn-50; }
-    &--action { background: rgba(37, 99, 235, 0.08); }
-    &--accent { background: $accent-50; }
-    &--gray { background: $warm-100; }
+  &:active {
+    background: $warm-50;
   }
 
   &__label {
     flex: 1;
-    font-size: $font-md;
+    font-size: $font-base;
     color: $text-primary;
     font-weight: 500;
   }
 }
 
-/* ===== Logout ===== */
-.logout-wrap {
-  padding: $spacing-xl $spacing-lg;
+/* ===== 退出 ===== */
+.logout-section {
+  padding: $spacing-2xl $spacing-lg;
 }
 
-.btn-logout {
-  background: $bg-card;
+.logout-btn {
+  background: transparent;
   color: $color-error;
   border: 1rpx solid $warm-200;
-  border-radius: $radius-xl;
+  border-radius: $radius-full;
   font-size: $font-md;
-  height: 88rpx;
-  line-height: 88rpx;
+  font-weight: 600;
+  height: 92rpx;
+  line-height: 92rpx;
+
+  &:active {
+    background: rgba(239, 68, 68, 0.05);
+  }
 }
 </style>
