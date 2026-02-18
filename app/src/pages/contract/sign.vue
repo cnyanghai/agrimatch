@@ -111,20 +111,11 @@ async function handleSealCreated(result: string) {
   showCreateSeal.value = false
   if (!result) return
 
-  if (result.startsWith('__GENERATE__:')) {
-    const sealNameStr = result.replace('__GENERATE__:', '')
-    try {
-      await createSeal({ sealName: sealNameStr, sealType: 'company', generate: true })
-      uni.showToast({ title: '印章生成成功', icon: 'success' })
-      await loadSeals()
-    } catch { /* handled */ }
-  } else {
-    try {
-      await createSeal({ sealName: '上传印章', sealType: 'company', sealUrl: result, generate: false })
-      uni.showToast({ title: '印章创建成功', icon: 'success' })
-      await loadSeals()
-    } catch { /* handled */ }
-  }
+  try {
+    await createSeal({ sealName: '上传印章', sealType: 'company', sealUrl: result, generate: false })
+    uni.showToast({ title: '印章创建成功', icon: 'success' })
+    await loadSeals()
+  } catch { /* handled */ }
 }
 
 // ==================== 提交签署 ====================
@@ -224,7 +215,7 @@ async function handleSubmit() {
 
         <view class="create-seal-btn tap-feedback" @tap="showCreateSeal = true">
           <WgIcon name="plus-circle" :size="16" :color="BRAND_600" />
-          <text class="create-seal-btn__text">添加印章（拍照提取 / 系统生成）</text>
+          <text class="create-seal-btn__text">添加印章（拍照提取）</text>
         </view>
 
         <WgSealUploader

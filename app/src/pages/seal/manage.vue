@@ -67,20 +67,11 @@ async function handleSealCreated(result: string) {
   showUploader.value = false
   if (!result) return
 
-  if (result.startsWith('__GENERATE__:')) {
-    const sealName = result.replace('__GENERATE__:', '')
-    try {
-      await createSeal({ sealName, sealType: 'company', generate: true })
-      uni.showToast({ title: '印章生成成功', icon: 'success' })
-      await loadSeals()
-    } catch { /* handled */ }
-  } else {
-    try {
-      await createSeal({ sealName: '上传印章', sealType: 'company', sealUrl: result, generate: false })
-      uni.showToast({ title: '印章创建成功', icon: 'success' })
-      await loadSeals()
-    } catch { /* handled */ }
-  }
+  try {
+    await createSeal({ sealName: '上传印章', sealType: 'company', sealUrl: result, generate: false })
+    uni.showToast({ title: '印章创建成功', icon: 'success' })
+    await loadSeals()
+  } catch { /* handled */ }
 }
 </script>
 
@@ -122,7 +113,7 @@ async function handleSealCreated(result: string) {
               <text v-if="seal.isDefault" class="seal-card__default-tag">默认</text>
             </view>
             <text class="seal-card__meta">
-              {{ seal.isGenerated ? '系统生成' : '上传提取' }} · {{ seal.sealType === 'company' ? '公司章' : '个人章' }}
+              {{ seal.sealType === 'company' ? '公司章' : '个人章' }}
             </text>
           </view>
 
