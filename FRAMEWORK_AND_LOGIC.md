@@ -87,7 +87,7 @@
 
 ### 5.1 连接与初始化
 `application.yml`：
-- datasource: `jdbc:mysql://localhost:3306/nonghuitong ...`
+- datasource: `jdbc:mysql://localhost:3306/wogu ...`
 - `spring.sql.init.mode=always`
 - `schema-locations`：
   - `classpath:db/agrimatch_core.sql`

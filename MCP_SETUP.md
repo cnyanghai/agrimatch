@@ -8,7 +8,7 @@
 
 | 服务 | 包名 | 功能 |
 |------|------|------|
-| **MySQL** | `mcp-server-mysql` | 直接查询 `nonghuitong` 数据库 |
+| **MySQL** | `mcp-server-mysql` | 直接查询 `wogu` 数据库 |
 | **Fetch** | `fetch-mcp` | 调用外部 HTTP API |
 | **Filesystem** | `@modelcontextprotocol/server-filesystem` | 增强文件系统操作 |
 | **Sequential Thinking** | `@modelcontextprotocol/server-sequential-thinking` | 逻辑链增强，多步骤推理 |
@@ -29,10 +29,10 @@
       "args": [
         "-y",
         "mcp-server-mysql",
-        "mysql://root:red1986@localhost:3306/nonghuitong"
+        "mysql://root:root123@localhost:3306/wogu"
       ],
       "env": {
-        "MYSQL_URL": "mysql://root:red1986@localhost:3306/nonghuitong"
+        "MYSQL_URL": "mysql://root:root123@localhost:3306/wogu"
       }
     },
     "fetch": {
@@ -68,7 +68,7 @@
 ## 服务详细说明
 
 ### 1. MySQL MCP
-**用途**: 直接在 Cursor 中查询和管理 `nonghuitong` 数据库。
+**用途**: 直接在 Cursor 中查询和管理 `wogu` 数据库。
 
 **功能**:
 - 执行 SQL 查询（SELECT/INSERT/UPDATE/DELETE）
@@ -215,7 +215,7 @@
 **A**: 检查：
 1. MySQL 服务是否运行：`sudo systemctl status mysql`
 2. 用户名密码是否正确
-3. 数据库 `nonghuitong` 是否存在
+3. 数据库 `wogu` 是否存在
 
 ### Q: Puppeteer 无法启动？
 **A**: 可能原因：

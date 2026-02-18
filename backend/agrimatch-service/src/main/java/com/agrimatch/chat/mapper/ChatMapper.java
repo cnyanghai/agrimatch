@@ -26,6 +26,14 @@ public interface ChatMapper {
                               @Param("subjectType") String subjectType,
                               @Param("subjectId") Long subjectId);
 
+    Long selectConversationByUserPair(@Param("aUserId") Long aUserId,
+                                      @Param("bUserId") Long bUserId);
+
+    int updateConversationSubject(@Param("id") Long id,
+                                  @Param("subjectType") String subjectType,
+                                  @Param("subjectId") Long subjectId,
+                                  @Param("subjectSnapshotJson") String subjectSnapshotJson);
+
     int insertConversation(BusChatConversation c);
     
     BusChatConversation selectConversationById(@Param("id") Long id);

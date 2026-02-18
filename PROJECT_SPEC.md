@@ -45,7 +45,7 @@
 
 ### 3.1 依赖
 - Node.js（用于前端）
-- MySQL（默认 `localhost:3306`，库名 `nonghuitong`）
+- MySQL（默认 `localhost:3306`，库名 `wogu`）
 - Java 17（用于后端）
 
 ### 3.2 后端运行

@@ -109,17 +109,23 @@ public class ChatServiceImpl implements ChatService {
     @Transactional
     public Long openConversation(Long userId, Long peerUserId, String subjectType, Long subjectId, String subjectSnapshotJson) {
         if (userId == null) throw new ApiException(401, "未登录");
-        if (peerUserId == null || subjectId == null || !StringUtils.hasText(subjectType)) throw new ApiException(ResultCode.PARAM_ERROR);
-        String st = subjectType.trim().toUpperCase();
-        if (!"SUPPLY".equals(st) && !"NEED".equals(st)) throw new ApiException(400, "subjectType 仅支持 SUPPLY/NEED");
+        if (peerUserId == null) throw new ApiException(ResultCode.PARAM_ERROR);
         if (userId.equals(peerUserId)) throw new ApiException(400, "不能与自己发起会话");
+
+        String st = StringUtils.hasText(subjectType) ? subjectType.trim().toUpperCase() : null;
+        if (st != null && !"SUPPLY".equals(st) && !"NEED".equals(st) && !"USER".equals(st)) {
+            throw new ApiException(400, "subjectType 仅支持 SUPPLY/NEED/USER");
+        }
 
         long a = Math.min(userId, peerUserId);
         long b = Math.max(userId, peerUserId);
 
-        Long existing = chatMapper.selectConversationId(a, b, st, subjectId);
+        Long existing = chatMapper.selectConversationByUserPair(a, b);
         if (existing != null) {
-            if (StringUtils.hasText(subjectSnapshotJson)) {
+            if (st != null && subjectId != null) {
+                chatMapper.updateConversationSubject(existing, st, subjectId,
+                        StringUtils.hasText(subjectSnapshotJson) ? subjectSnapshotJson : null);
+            } else if (StringUtils.hasText(subjectSnapshotJson)) {
                 chatMapper.updateConversationSnapshot(existing, subjectSnapshotJson);
             }
             return existing;

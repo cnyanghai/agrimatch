@@ -144,6 +144,26 @@
         LIMIT 1
     </select>
 
+    <select id="selectConversationByUserPair" resultType="long">
+        SELECT id
+        FROM bus_chat_conversation
+        WHERE is_deleted = 0
+          AND a_user_id = #{aUserId}
+          AND b_user_id = #{bUserId}
+        ORDER BY last_time DESC, id DESC
+        LIMIT 1
+    </select>
+
+    <update id="updateConversationSubject">
+        UPDATE bus_chat_conversation
+        SET subject_type = #{subjectType},
+            subject_id = #{subjectId},
+            subject_snapshot_json = #{subjectSnapshotJson},
+            update_time = NOW(3)
+        WHERE id = #{id}
+          AND is_deleted = 0
+    </update>
+
     <insert id="insertConversation" parameterType="com.agrimatch.chat.domain.BusChatConversation"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO bus_chat_conversation

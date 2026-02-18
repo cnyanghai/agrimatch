@@ -61,7 +61,7 @@ Organized by domain modules, each containing its own controller/service/mapper/d
 - `points/` - Points/rewards system
 
 ### Database
-MySQL database `nonghuitong`. Schema files located at `backend/agrimatch-service/src/main/resources/db/`. MyBatis mapper XMLs at `backend/agrimatch-service/src/main/resources/mapper/`.
+MySQL database `wogu`. Schema files located at `backend/agrimatch-service/src/main/resources/db/`. MyBatis mapper XMLs at `backend/agrimatch-service/src/main/resources/mapper/`.
 
 ## Key Technical Decisions
 
