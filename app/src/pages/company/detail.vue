@@ -6,6 +6,7 @@ import { getCompanyProfile, companyTypeMap, type CompanyResponse } from '../../a
 import { openConversation } from '../../api/chat'
 import { useFollow } from '../../composables/useFollow'
 import { useAuthStore } from '../../store/auth'
+import { maskPhone } from '../../utils/format'
 
 const authStore = useAuthStore()
 const company = ref<CompanyResponse | null>(null)
@@ -71,7 +72,7 @@ function handlePreviewCertificate(index: number) {
 const infoRows = computed(() => {
   if (!company.value) return []
   const c = company.value
-  const rows: { label: string; value: string; phone?: boolean }[] = []
+  const rows: { label: string; value: string }[] = []
   if (c.legalPerson) rows.push({ label: '法人代表', value: c.legalPerson })
   if (c.registeredCapital) rows.push({ label: '注册资本', value: c.registeredCapital })
   if (c.scale) rows.push({ label: '企业规模', value: c.scale })
@@ -79,7 +80,7 @@ const infoRows = computed(() => {
   if (c.businessScope) rows.push({ label: '经营范围', value: c.businessScope })
   if (c.address) rows.push({ label: '详细地址', value: c.address })
   if (c.contacts) rows.push({ label: '联系人', value: c.contacts })
-  if (c.phone) rows.push({ label: '联系电话', value: c.phone, phone: true })
+  if (c.phone) rows.push({ label: '联系电话', value: maskPhone(c.phone) })
   return rows
 })
 
@@ -104,14 +105,6 @@ function formatLocation(c: CompanyResponse): string {
 function formatType(type?: string): string {
   if (!type) return ''
   return companyTypeMap[type] ?? type
-}
-
-function handleCall() {
-  if (!company.value?.phone) {
-    uni.showToast({ title: '暂无联系电话', icon: 'none' })
-    return
-  }
-  uni.makePhoneCall({ phoneNumber: company.value.phone, fail: () => {} })
 }
 
 async function handleChat() {
@@ -178,7 +171,7 @@ function handleViewRequirement(id: number) { uni.navigateTo({ url: `/pages/requi
         </view>
         <view v-for="(row, idx) in infoRows" :key="idx" class="info-row">
           <text class="info-row__label">{{ row.label }}</text>
-          <text class="info-row__value" :class="{ 'info-row__value--action': row.phone }">{{ row.value }}</text>
+          <text class="info-row__value">{{ row.value }}</text>
         </view>
       </view>
 
@@ -252,13 +245,9 @@ function handleViewRequirement(id: number) { uni.navigateTo({ url: `/pages/requi
       <button v-if="canFollow()" class="wg-btn" :class="isFollowing ? 'wg-btn--ghost' : 'wg-btn--secondary'" @tap="handleToggleFollow" style="max-width: 180rpx">
         {{ followLoading ? '...' : (isFollowing ? '已关注' : '+ 关注') }}
       </button>
-      <button v-if="canChat" class="wg-btn wg-btn--secondary" @tap="handleChat">
-        <WgIcon name="message-circle" :size="18" :color="BRAND_600" />
+      <button v-if="canChat" class="wg-btn wg-btn--primary" @tap="handleChat">
+        <WgIcon name="message-circle" :size="18" :color="WHITE" />
         <text>{{ chatLoading ? '连接中...' : '在线聊天' }}</text>
-      </button>
-      <button class="wg-btn wg-btn--primary" @tap="handleCall">
-        <WgIcon name="phone" :size="18" :color="WHITE" />
-        <text>{{ company?.phone ? '电话联系' : '暂无电话' }}</text>
       </button>
     </WgActionBar>
   </view>
@@ -374,8 +363,6 @@ function handleViewRequirement(id: number) { uni.navigateTo({ url: `/pages/requi
     font-size: $font-md;
     color: $text-primary;
     word-break: break-all;
-
-    &--action { color: $action-600; }
   }
 }
 

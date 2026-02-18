@@ -24,13 +24,13 @@
     {
       "path": "pages/supply/detail",
       "style": {
-        "navigationBarTitleText": "供应详情"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/supply/publish",
       "style": {
-        "navigationBarTitleText": "发布供应"
+        "navigationStyle": "custom"
       }
     },
     {
@@ -43,13 +43,13 @@
     {
       "path": "pages/requirement/detail",
       "style": {
-        "navigationBarTitleText": "采购详情"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/requirement/publish",
       "style": {
-        "navigationBarTitleText": "发布采购"
+        "navigationStyle": "custom"
       }
     },
     {
@@ -62,7 +62,7 @@
     {
       "path": "pages/chat/conversation",
       "style": {
-        "navigationBarTitleText": "聊天"
+        "navigationStyle": "custom"
       }
     },
     {
@@ -80,114 +80,114 @@
     {
       "path": "pages/search/index",
       "style": {
-        "navigationBarTitleText": "搜索"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/topic/square",
       "style": {
-        "navigationBarTitleText": "话题广场",
+        "navigationStyle": "custom",
         "enablePullDownRefresh": true
       }
     },
     {
       "path": "pages/topic/detail",
       "style": {
-        "navigationBarTitleText": "话题详情"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/topic/publish",
       "style": {
-        "navigationBarTitleText": "发布话题"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/topic/collections",
       "style": {
-        "navigationBarTitleText": "我的收藏",
+        "navigationStyle": "custom",
         "enablePullDownRefresh": true
       }
     },
     {
       "path": "pages/user/profile",
       "style": {
-        "navigationBarTitleText": "用户主页"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/company/detail",
       "style": {
-        "navigationBarTitleText": "企业详情"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/company/edit",
       "style": {
-        "navigationBarTitleText": "企业信息"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/contract/list",
       "style": {
-        "navigationBarTitleText": "我的合同",
+        "navigationStyle": "custom",
         "enablePullDownRefresh": true
       }
     },
     {
       "path": "pages/contract/detail",
       "style": {
-        "navigationBarTitleText": "合同详情"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/points/index",
       "style": {
-        "navigationBarTitleText": "我的积分"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/supply/my-list",
       "style": {
-        "navigationBarTitleText": "我的供应",
+        "navigationStyle": "custom",
         "enablePullDownRefresh": true
       }
     },
     {
       "path": "pages/supply/edit",
       "style": {
-        "navigationBarTitleText": "编辑供应"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/requirement/my-list",
       "style": {
-        "navigationBarTitleText": "我的采购",
+        "navigationStyle": "custom",
         "enablePullDownRefresh": true
       }
     },
     {
       "path": "pages/requirement/edit",
       "style": {
-        "navigationBarTitleText": "编辑采购"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/settings/index",
       "style": {
-        "navigationBarTitleText": "设置"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/settings/edit-profile",
       "style": {
-        "navigationBarTitleText": "编辑资料"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/settings/change-password",
       "style": {
-        "navigationBarTitleText": "修改密码"
+        "navigationStyle": "custom"
       }
     },
     {
@@ -205,70 +205,70 @@
     {
       "path": "pages/notify/index",
       "style": {
-        "navigationBarTitleText": "通知中心",
+        "navigationStyle": "custom",
         "enablePullDownRefresh": true
       }
     },
     {
       "path": "pages/company/directory",
       "style": {
-        "navigationBarTitleText": "企业名录",
+        "navigationStyle": "custom",
         "enablePullDownRefresh": true
       }
     },
     {
       "path": "pages/follow/list",
       "style": {
-        "navigationBarTitleText": "我的关注",
+        "navigationStyle": "custom",
         "enablePullDownRefresh": true
       }
     },
     {
       "path": "pages/chat/quote-form",
       "style": {
-        "navigationBarTitleText": "发送报价"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/contract/draft",
       "style": {
-        "navigationBarTitleText": "起草合同"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/contract/milestones",
       "style": {
-        "navigationBarTitleText": "履约节点"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/contract/sign",
       "style": {
-        "navigationBarTitleText": "签署合同"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/topic/edit",
       "style": {
-        "navigationBarTitleText": "编辑话题"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/category/directory",
       "style": {
-        "navigationBarTitleText": "品类目录"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/legal/index",
       "style": {
-        "navigationBarTitleText": "法律文档"
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/vehicle/list",
       "style": {
-        "navigationBarTitleText": "车辆管理",
+        "navigationStyle": "custom",
         "enablePullDownRefresh": true
       }
     },
@@ -282,7 +282,13 @@
     {
       "path": "pages/seal/manage",
       "style": {
-        "navigationBarTitleText": "印章管理"
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/market/index",
+      "style": {
+        "navigationStyle": "custom"
       }
     }
   ],

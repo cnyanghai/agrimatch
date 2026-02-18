@@ -128,11 +128,9 @@ async function handleContact() {
   }
 }
 
-function handleCall() {
+function goCompanyFromAction() {
   if (detail.value?.companyId) {
     uni.navigateTo({ url: `/pages/company/detail?id=${detail.value.companyId}` })
-  } else {
-    uni.showToast({ title: '暂无联系电话', icon: 'none' })
   }
 }
 
@@ -278,9 +276,9 @@ function handleShare() {
 
     <!-- 底部操作 -->
     <WgActionBar>
-      <button class="wg-btn wg-btn--secondary" @tap="handleCall">
-        <WgIcon name="phone" :size="18" :color="BRAND_600" />
-        <text>电话咨询</text>
+      <button class="wg-btn wg-btn--secondary" @tap="goCompanyFromAction">
+        <WgIcon name="building-2" :size="18" :color="BRAND_600" />
+        <text>查看企业</text>
       </button>
       <button class="wg-btn wg-btn--primary" @tap="handleContact">
         <WgIcon name="message-circle" :size="18" :color="WHITE" />

@@ -13,7 +13,7 @@ import { listMilestones, type MilestoneResponse } from '../../api/milestone'
 import { useContractActions } from '../../composables/useContractActions'
 import { useAuthStore } from '../../store/auth'
 import { getBaseUrl } from '../../utils/request'
-import { formatAmount, formatPrice, formatDate, formatDateTime } from '../../utils/format'
+import { formatAmount, formatPrice, formatDate, formatDateTime, maskPhone } from '../../utils/format'
 import ContractDocument from './components/contract-document.vue'
 
 const authStore = useAuthStore()
@@ -259,9 +259,8 @@ onShow(() => {
       <view class="status-header" :style="{ backgroundColor: getStatusColor(detail.status) }">
         <view class="status-header__row">
           <text class="status-header__label">{{ getStatusLabel(detail.status) }}</text>
-          <WgStatusChip :label="getStatusLabel(detail.status)" variant="neutral" size="sm" />
         </view>
-        <text class="status-header__no">合同编号：{{ detail.contractNo }}</text>
+        <text class="status-header__no">合同编号：{{ detail.contractNo || '-' }}</text>
       </view>
 
       <!-- 查看合同文档 & 下载PDF -->
@@ -341,7 +340,7 @@ onShow(() => {
             <text class="party-block__name">{{ detail.sellerCompanyName || '-' }}</text>
             <text class="party-block__contact" v-if="detail.sellerContacts">
               {{ detail.sellerContacts }}
-              <text v-if="detail.sellerPhone"> · {{ detail.sellerPhone }}</text>
+              <text v-if="detail.sellerPhone"> · {{ maskPhone(detail.sellerPhone) }}</text>
             </text>
           </view>
           <view class="party-block__sign">
@@ -354,7 +353,7 @@ onShow(() => {
             <text class="party-block__name">{{ detail.buyerCompanyName || '-' }}</text>
             <text class="party-block__contact" v-if="detail.buyerContacts">
               {{ detail.buyerContacts }}
-              <text v-if="detail.buyerPhone"> · {{ detail.buyerPhone }}</text>
+              <text v-if="detail.buyerPhone"> · {{ maskPhone(detail.buyerPhone) }}</text>
             </text>
           </view>
           <view class="party-block__sign">

@@ -23,10 +23,12 @@ const emit = defineEmits<{
   back: []
 }>()
 
-const statusBarHeight = ref(44)
+const statusBarHeight = ref(0)
 try {
   const sys = uni.getSystemInfoSync()
-  statusBarHeight.value = sys.statusBarHeight || 44
+  if (sys.statusBarHeight && sys.statusBarHeight > 0) {
+    statusBarHeight.value = sys.statusBarHeight
+  }
 } catch {}
 
 const navHeight = computed(() => statusBarHeight.value + 44)
@@ -43,37 +45,45 @@ function handleBack() {
 </script>
 
 <template>
-  <view
-    class="wg-nav"
-    :class="{
-      'wg-nav--transparent': transparent,
-      'wg-nav--light': light,
-    }"
-    :style="{ height: navHeight + 'px', paddingTop: statusBarHeight + 'px' }"
-  >
-    <view class="wg-nav__content">
-      <view class="wg-nav__left">
-        <slot name="left">
-          <view v-if="back" class="wg-nav__back tap-feedback" @tap="handleBack">
-            <WgIcon name="arrow-left" :size="20" :color="light ? '#fff' : WARM_900" />
-          </view>
-        </slot>
-      </view>
+  <view class="wg-nav-wrapper">
+    <view
+      class="wg-nav"
+      :class="{
+        'wg-nav--transparent': transparent,
+        'wg-nav--light': light,
+      }"
+      :style="{ height: navHeight + 'px', paddingTop: statusBarHeight + 'px' }"
+    >
+      <view class="wg-nav__content">
+        <view class="wg-nav__left">
+          <slot name="left">
+            <view v-if="back" class="wg-nav__back tap-feedback" @tap="handleBack">
+              <WgIcon name="arrow-left" :size="20" :color="light ? '#fff' : WARM_900" />
+            </view>
+          </slot>
+        </view>
 
-      <text
-        class="wg-nav__title"
-        :class="{ 'wg-nav__title--light': light }"
-      >{{ title }}</text>
+        <text
+          class="wg-nav__title"
+          :class="{ 'wg-nav__title--light': light }"
+        >{{ title }}</text>
 
-      <view class="wg-nav__right">
-        <slot name="right" />
+        <view class="wg-nav__right">
+          <slot name="right" />
+        </view>
       </view>
     </view>
+    <!-- 占位，防止 fixed 导航遮盖内容 -->
+    <view class="wg-nav-placeholder" :style="{ height: navHeight + 'px' }" />
   </view>
-  <view :style="{ height: navHeight + 'px' }" />
 </template>
 
 <style lang="scss" scoped>
+.wg-nav-wrapper {
+  position: relative;
+  z-index: 100;
+}
+
 .wg-nav {
   position: fixed;
   top: 0;
@@ -138,5 +148,10 @@ function handleBack() {
       color: $text-inverse;
     }
   }
+}
+
+.wg-nav-placeholder {
+  width: 100%;
+  flex-shrink: 0;
 }
 </style>

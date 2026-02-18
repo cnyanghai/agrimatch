@@ -69,6 +69,13 @@ export function formatQuantity(qty?: number | null, unit?: string): string {
   return unit ? `${str}${unit}` : str
 }
 
+/** 手机号脱敏：138****1234 */
+export function maskPhone(phone?: string | null): string {
+  if (!phone) return ''
+  if (phone.length < 7) return phone
+  return phone.slice(0, 3) + '****' + phone.slice(-4)
+}
+
 /**
  * 格式化剩余时长
  * - 剩余>1天：返回 { text: "剩余X天", level: "normal" }

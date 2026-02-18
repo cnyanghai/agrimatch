@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { BRAND_600, WARM_500, ACTION_600, COLOR_ERROR, WHITE } from '../../constants/colors'
+import { maskPhone } from '../../utils/format'
 import { onPullDownRefresh } from '@dcloudio/uni-app'
 import {
   listVehicles,
@@ -164,7 +165,7 @@ function maskIdCard(val: string): string {
           </view>
           <view class="vehicle-card__row">
             <text class="vehicle-card__label">手机</text>
-            <text class="vehicle-card__value">{{ v.driverPhone }}</text>
+            <text class="vehicle-card__value">{{ maskPhone(v.driverPhone) }}</text>
           </view>
           <view v-if="v.driverIdCard" class="vehicle-card__row">
             <text class="vehicle-card__label">身份证</text>

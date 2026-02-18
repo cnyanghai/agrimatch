@@ -15,6 +15,7 @@ import {
   MessageSquare, Navigation, Coins, ArrowLeft,
   ImagePlus, Sparkles, AlertCircle, RotateCcw, PlusCircle, ArrowRight,
   Home, Palette, Shield, Zap, Clock, CalendarDays, Filter, SlidersHorizontal,
+  Pencil, Archive, Calendar, Send, Tag, CreditCard, Box,
 } from 'lucide-vue-next'
 
 const props = withDefaults(defineProps<{
@@ -57,6 +58,7 @@ const iconMap: Record<string, Component> = {
   'trending-up': TrendingUp,
   bars: TrendingUp,
   building2: Building2,
+  'building-2': Building2,
   contact: Building2,
   building: Building,
   flag: Building,
@@ -130,6 +132,15 @@ const iconMap: Record<string, Component> = {
   filter: Filter,
   'sliders-horizontal': SlidersHorizontal,
   x: X,
+
+  edit: Pencil,
+  pencil: Pencil,
+  archive: Archive,
+  calendar: Calendar,
+  send: Send,
+  tag: Tag,
+  'credit-card': CreditCard,
+  box: Box,
 }
 
 const iconComponent = computed(() => iconMap[props.name] || null)

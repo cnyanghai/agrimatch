@@ -168,21 +168,47 @@ onLoad(async (options) => {
   if (options?.messageId) {
     messageId.value = Number(options.messageId)
     createSource.value = 'quote'
-    await loadQuoteMessage()
   }
   if (options?.conversationId) {
     conversationId.value = Number(options.conversationId)
-    createSource.value = 'negotiation'
+    if (!options?.messageId) {
+      createSource.value = 'negotiation'
+    }
   }
-  // 从 payload 预填充扩展字段
+  await loadQuoteMessage()
   prefillFromPayload()
   loading.value = false
 })
 
 async function loadQuoteMessage() {
-  // The actual message content will be fetched by the contract creation endpoint
-  // Pre-fill form from payload if available
-  prefillFromPayload()
+  // 优先从 Storage 读取（聊天页跳转时会写入）
+  const cached = uni.getStorageSync('__draftQuotePayload')
+  if (cached) {
+    uni.removeStorageSync('__draftQuotePayload')
+    try {
+      const parsed = typeof cached === 'string' ? JSON.parse(cached) : cached
+      quoteMessage.value = { payloadJson: JSON.stringify(parsed) } as any
+      return
+    } catch { /* fall through */ }
+  }
+
+  // 回退：从会话消息列表中查找
+  if (conversationId.value) {
+    try {
+      const msgs = await getConversationMessages(conversationId.value, 100)
+      if (messageId.value) {
+        const found = msgs.find((m: ChatMessageResponse) => m.id === messageId.value)
+        if (found) { quoteMessage.value = found; return }
+      }
+      // 如果按 ID 没找到，取最后一条 ACCEPTED 的报价
+      for (let i = msgs.length - 1; i >= 0; i--) {
+        if (msgs[i].msgType === 'QUOTE' && msgs[i].quoteStatus === 'ACCEPTED') {
+          quoteMessage.value = msgs[i]
+          return
+        }
+      }
+    } catch { /* silent */ }
+  }
 }
 
 function prefillFromPayload() {

@@ -13,13 +13,23 @@ export function useContractActions(detail: Ref<ContractResponse | null>) {
   const authStore = useAuthStore()
 
   const isMyBuyer = computed(() => {
-    if (!detail.value || !authStore.user?.companyName) return false
-    return detail.value.buyerCompanyName === authStore.user.companyName
+    if (!detail.value) return false
+    const myId = authStore.user?.companyId
+    if (myId && detail.value.buyerCompanyId) return myId === detail.value.buyerCompanyId
+    if (authStore.user?.companyName && detail.value.buyerCompanyName) {
+      return detail.value.buyerCompanyName === authStore.user.companyName
+    }
+    return false
   })
 
   const isMySeller = computed(() => {
-    if (!detail.value || !authStore.user?.companyName) return false
-    return detail.value.sellerCompanyName === authStore.user.companyName
+    if (!detail.value) return false
+    const myId = authStore.user?.companyId
+    if (myId && detail.value.sellerCompanyId) return myId === detail.value.sellerCompanyId
+    if (authStore.user?.companyName && detail.value.sellerCompanyName) {
+      return detail.value.sellerCompanyName === authStore.user.companyName
+    }
+    return false
   })
 
   const canEdit = computed(() => detail.value?.status === 0)

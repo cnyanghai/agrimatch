@@ -20,6 +20,7 @@ import { formatChatTime, formatPrice } from '../../utils/format'
 
 const authStore = useAuthStore()
 const myUserId = computed(() => authStore.user?.userId)
+const myCompanyId = computed(() => authStore.user?.companyId)
 
 const conversationId = ref(0)
 const peerUserId = ref(0)
@@ -364,7 +365,20 @@ function handleCounterQuote(msg: ChatMessageResponse) {
 }
 
 function handleDraftContract(msg: ChatMessageResponse) {
-  uni.navigateTo({ url: `/pages/contract/draft?messageId=${msg.id}` })
+  if (msg.payloadJson) {
+    uni.setStorageSync('__draftQuotePayload', msg.payloadJson)
+  }
+  uni.navigateTo({
+    url: `/pages/contract/draft?messageId=${msg.id}&conversationId=${conversationId.value}`,
+  })
+}
+
+function handleViewContract(contractId: number) {
+  uni.navigateTo({ url: `/pages/contract/detail?id=${contractId}` })
+}
+
+function handleSignContract(contractId: number) {
+  uni.navigateTo({ url: `/pages/contract/sign?id=${contractId}` })
 }
 </script>
 
@@ -388,7 +402,7 @@ function handleDraftContract(msg: ChatMessageResponse) {
           <text class="context-card__price">{{ subjectInfo.price }}</text>
         </view>
       </view>
-      <view class="context-card__quote-btn" @tap="goQuoteForm">
+      <view class="context-card__quote-btn" @tap="goQuoteForm()">
         <WgIcon name="coins" :size="14" :color="WHITE" />
         <text class="context-card__quote-text">发报价</text>
       </view>
@@ -430,6 +444,23 @@ function handleDraftContract(msg: ChatMessageResponse) {
             @draft-contract="handleDraftContract(msg)"
           />
           <view class="message__meta">
+            <text class="message__time">{{ formatChatTime(msg.createTime) }}</text>
+          </view>
+        </view>
+
+        <!-- 合同消息 -->
+        <view
+          v-else-if="msg.msgType === 'CONTRACT'"
+          :id="`msg-${msg.id}`"
+          class="message message--contract stitch-scale-in"
+        >
+          <WgContractCard
+            :message="msg"
+            :current-company-id="myCompanyId"
+            @view="handleViewContract"
+            @sign="handleSignContract"
+          />
+          <view class="message__meta message__meta--center">
             <text class="message__time">{{ formatChatTime(msg.createTime) }}</text>
           </view>
         </view>
@@ -642,6 +673,11 @@ function handleDraftContract(msg: ChatMessageResponse) {
     .message__text { color: $text-primary; }
   }
 
+  &--contract {
+    align-items: center;
+    width: 100%;
+  }
+
   &__bubble {
     max-width: 70%;
     padding: $spacing-sm $spacing-md;
@@ -659,6 +695,10 @@ function handleDraftContract(msg: ChatMessageResponse) {
     align-items: center;
     gap: 8rpx;
     margin-top: 4rpx;
+
+    &--center {
+      justify-content: center;
+    }
   }
 
   &__time {

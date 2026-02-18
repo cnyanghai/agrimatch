@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { ChatMessageResponse } from '../api/chat'
-import { WARM_500 } from '../constants/colors'
+import { WARM_500, BRAND_600 } from '../constants/colors'
 
 const props = defineProps<{
   message: ChatMessageResponse
@@ -26,6 +26,8 @@ interface QuotePayload {
   paymentMethod?: string
   deliveryMode?: string
   deliveryDate?: string
+  packaging?: string
+  invoiceType?: string
   remark?: string
   productName?: string
   categoryName?: string
@@ -35,372 +37,385 @@ interface QuotePayload {
 
 const payload = computed<QuotePayload>(() => {
   if (!props.message.payloadJson) return {}
-  try {
-    return JSON.parse(props.message.payloadJson)
-  } catch {
-    return {}
-  }
+  try { return JSON.parse(props.message.payloadJson) } catch { return {} }
 })
 
 const prevPayload = computed<QuotePayload>(() => {
   if (!props.prevMessage?.payloadJson) return {}
-  try {
-    return JSON.parse(props.prevMessage.payloadJson)
-  } catch {
-    return {}
-  }
+  try { return JSON.parse(props.prevMessage.payloadJson) } catch { return {} }
 })
 
 const status = computed(() => props.message.quoteStatus || 'OFFERED')
 
 const statusLabel = computed(() => {
-  const map: Record<string, string> = {
-    OFFERED: '待确认',
-    ACCEPTED: '已接受',
-    REJECTED: '已拒绝',
-    EXPIRED: '已过期',
-  }
+  const map: Record<string, string> = { OFFERED: '待确认', ACCEPTED: '已接受', REJECTED: '已拒绝', EXPIRED: '已过期' }
   return map[status.value] || status.value
 })
 
 const statusClass = computed(() => {
-  const map: Record<string, string> = {
-    OFFERED: 'quote-card__badge--warning',
-    ACCEPTED: 'quote-card__badge--success',
-    REJECTED: 'quote-card__badge--error',
-    EXPIRED: 'quote-card__badge--muted',
-  }
+  const map: Record<string, string> = { OFFERED: 'badge--warning', ACCEPTED: 'badge--success', REJECTED: 'badge--error', EXPIRED: 'badge--muted' }
   return map[status.value] || ''
 })
 
 const totalAmount = computed(() => {
-  if (payload.value.price && payload.value.quantity) {
-    return (payload.value.price * payload.value.quantity).toFixed(2)
-  }
+  if (payload.value.price && payload.value.quantity) return (payload.value.price * payload.value.quantity).toFixed(2)
   return null
 })
 
-const paymentLabel = computed(() => {
-  const map: Record<string, string> = {
-    '01': '款到发货',
-    '02': '货到付款',
-    '03': '账期30天',
-    '04': '账期60天',
-    '05': '分期付款',
-    '06': '预付定金',
-  }
-  return map[payload.value.paymentMethod || ''] || payload.value.paymentMethod || ''
-})
-
-const productLabel = computed(() => {
-  return payload.value.productName || payload.value.categoryName || ''
-})
+const productLabel = computed(() => payload.value.productName || payload.value.categoryName || '')
 
 const priceDelta = computed(() => {
-  const cur = payload.value.price
-  const prev = prevPayload.value.price
+  const cur = payload.value.price, prev = prevPayload.value.price
   if (cur == null || prev == null) return null
-  const diff = cur - prev
-  if (!Number.isFinite(diff) || diff === 0) return null
-  return diff
+  const d = cur - prev
+  return Number.isFinite(d) && d !== 0 ? d : null
 })
 
 const qtyDelta = computed(() => {
-  const cur = payload.value.quantity
-  const prev = prevPayload.value.quantity
+  const cur = payload.value.quantity, prev = prevPayload.value.quantity
   if (cur == null || prev == null) return null
-  const diff = cur - prev
-  if (!Number.isFinite(diff) || diff === 0) return null
-  return diff
+  const d = cur - prev
+  return Number.isFinite(d) && d !== 0 ? d : null
 })
 
-function formatDelta(value: number, unit?: string): string {
-  const sign = value > 0 ? '+' : ''
-  return `${sign}${value}${unit || ''}`
-}
+function fmtDelta(v: number, u?: string) { return `${v > 0 ? '+' : ''}${v}${u || ''}` }
+function deltaClass(v: number) { return v > 0 ? 'delta--up' : v < 0 ? 'delta--down' : '' }
 
-function getDeltaClass(value: number): string {
-  if (value > 0) return 'quote-card__delta-item--up'
-  if (value < 0) return 'quote-card__delta-item--down'
-  return ''
-}
+const tradeTerms = computed(() => {
+  const items: { label: string; value: string; icon: string }[] = []
+  if (payload.value.deliveryMode) items.push({ label: '交货', icon: 'truck', value: payload.value.deliveryMode })
+  if (payload.value.paymentMethod) items.push({ label: '付款', icon: 'credit-card', value: payload.value.paymentMethod })
+  if (payload.value.packaging) items.push({ label: '包装', icon: 'package', value: payload.value.packaging })
+  if (payload.value.invoiceType) items.push({ label: '发票', icon: 'file-text', value: payload.value.invoiceType })
+  return items
+})
+
+const logisticsInfo = computed(() => {
+  const items: { label: string; value: string; icon: string }[] = []
+  if (payload.value.deliveryPlace) items.push({ label: '交付地', icon: 'map-pin', value: payload.value.deliveryPlace })
+  if (payload.value.deliveryDate) items.push({ label: '到货日', icon: 'calendar', value: payload.value.deliveryDate })
+  return items
+})
 
 const showActions = computed(() => !props.isMine && status.value === 'OFFERED')
 const showDraftContract = computed(() => status.value === 'ACCEPTED')
 </script>
 
 <template>
-  <view class="quote-card">
+  <view class="qc">
     <!-- Header -->
-    <view class="quote-card__header">
-      <text class="quote-card__title">报价</text>
-      <text v-if="round" class="quote-card__round">第{{ round }}轮</text>
-      <text class="quote-card__badge" :class="statusClass">{{ statusLabel }}</text>
-    </view>
-
-    <view v-if="productLabel" class="quote-card__product">
-      <WgIcon name="package" :size="12" :color="WARM_500" />
-      <text class="quote-card__product-text">{{ productLabel }}</text>
-    </view>
-
-    <!-- Price info -->
-    <view class="quote-card__price-row">
-      <text class="quote-card__price">
-        ¥{{ payload.price || '-' }}/{{ payload.unit || '吨' }}
-      </text>
-      <text class="quote-card__qty">× {{ payload.quantity || '-' }}{{ payload.unit || '吨' }}</text>
-    </view>
-    <view v-if="priceDelta || qtyDelta" class="quote-card__delta">
-      <text class="quote-card__delta-label">较上次</text>
-      <text v-if="priceDelta" class="quote-card__delta-item" :class="getDeltaClass(priceDelta)">
-        单价 {{ formatDelta(priceDelta, '') }}
-      </text>
-      <text v-if="qtyDelta" class="quote-card__delta-item" :class="getDeltaClass(qtyDelta)">
-        数量 {{ formatDelta(qtyDelta, payload.unit || '吨') }}
-      </text>
-    </view>
-    <text v-if="totalAmount" class="quote-card__total">合计 ¥{{ totalAmount }}</text>
-
-    <!-- Details -->
-    <view v-if="payload.deliveryPlace || paymentLabel" class="quote-card__details">
-      <text v-if="payload.deliveryPlace" class="quote-card__detail-item">
-        交付: {{ payload.deliveryPlace }}
-      </text>
-      <text v-if="payload.deliveryPlace && paymentLabel" class="quote-card__separator">|</text>
-      <text v-if="paymentLabel" class="quote-card__detail-item">
-        {{ paymentLabel }}
-      </text>
-    </view>
-
-    <view v-if="payload.deliveryDate" class="quote-card__details">
-      <text class="quote-card__detail-item">到货日期: {{ payload.deliveryDate }}</text>
-    </view>
-
-    <view v-if="payload.remark" class="quote-card__remark">
-      <text class="quote-card__remark-text">{{ payload.remark }}</text>
-    </view>
-
-    <!-- Actions (visible to the other party when OFFERED) -->
-    <view v-if="showActions" class="quote-card__divider" />
-    <view v-if="showActions" class="quote-card__actions">
-      <view class="quote-card__btn quote-card__btn--primary" @tap="emit('accept')">
-        <text class="quote-card__btn-text quote-card__btn-text--primary">接受报价</text>
+    <view class="qc__head">
+      <view class="qc__head-left">
+        <text class="qc__title">报价单</text>
+        <text v-if="round" class="qc__round">R{{ round }}</text>
       </view>
-      <view class="quote-card__btn quote-card__btn--secondary" @tap="emit('counter')">
-        <text class="quote-card__btn-text quote-card__btn-text--secondary">还价</text>
+      <text class="qc__badge" :class="statusClass">{{ statusLabel }}</text>
+    </view>
+
+    <!-- 商品名 -->
+    <text v-if="productLabel" class="qc__product">{{ productLabel }}</text>
+
+    <!-- 核心价格区 -->
+    <view class="qc__hero">
+      <view class="qc__price-row">
+        <text class="qc__price">¥{{ payload.price ?? '-' }}</text>
+        <text class="qc__unit">/{{ payload.unit || '吨' }}</text>
+      </view>
+      <view class="qc__calc">
+        <text class="qc__calc-text">× {{ payload.quantity ?? '-' }}{{ payload.unit || '吨' }}</text>
+        <text v-if="totalAmount" class="qc__calc-total">= ¥{{ totalAmount }}</text>
       </view>
     </view>
 
-    <!-- Draft contract button (after accepted) -->
-    <view v-if="showDraftContract" class="quote-card__divider" />
-    <view v-if="showDraftContract" class="quote-card__actions">
-      <view class="quote-card__btn quote-card__btn--primary quote-card__btn--full" @tap="emit('draft-contract')">
-        <text class="quote-card__btn-text quote-card__btn-text--primary">起草合同 →</text>
+    <!-- 变动对比 -->
+    <view v-if="priceDelta || qtyDelta" class="qc__deltas">
+      <text v-if="priceDelta" class="qc__delta" :class="deltaClass(priceDelta)">单价{{ fmtDelta(priceDelta) }}</text>
+      <text v-if="qtyDelta" class="qc__delta" :class="deltaClass(qtyDelta)">数量{{ fmtDelta(qtyDelta, payload.unit || '吨') }}</text>
+    </view>
+
+    <!-- 交易条件网格 -->
+    <view v-if="tradeTerms.length" class="qc__grid">
+      <view v-for="(item, i) in tradeTerms" :key="i" class="qc__grid-cell">
+        <text class="qc__grid-label">{{ item.label }}</text>
+        <view class="qc__grid-val-row">
+          <WgIcon :name="item.icon" :size="11" :color="WARM_500" />
+          <text class="qc__grid-val">{{ item.value }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 物流信息 -->
+    <view v-if="logisticsInfo.length" class="qc__rows">
+      <view v-for="(item, i) in logisticsInfo" :key="i" class="qc__row">
+        <view class="qc__row-left">
+          <WgIcon :name="item.icon" :size="11" :color="WARM_500" />
+          <text class="qc__row-label">{{ item.label }}</text>
+        </view>
+        <text class="qc__row-val">{{ item.value }}</text>
+      </view>
+    </view>
+
+    <!-- 备注 -->
+    <view v-if="payload.remark" class="qc__remark">
+      <text class="qc__remark-text">{{ payload.remark }}</text>
+    </view>
+
+    <!-- 操作区 -->
+    <view v-if="showActions" class="qc__actions">
+      <view class="qc__btn qc__btn--pri" @tap="emit('accept')">
+        <text class="qc__btn-t qc__btn-t--w">接受</text>
+      </view>
+      <view class="qc__btn qc__btn--sec" @tap="emit('counter')">
+        <text class="qc__btn-t">还价</text>
+      </view>
+    </view>
+
+    <view v-if="showDraftContract" class="qc__actions">
+      <view class="qc__btn qc__btn--pri qc__btn--full" @tap="emit('draft-contract')">
+        <WgIcon name="file-text" :size="13" color="#fff" />
+        <text class="qc__btn-t qc__btn-t--w">起草合同</text>
       </view>
     </view>
   </view>
 </template>
 
 <style lang="scss" scoped>
-.quote-card {
+.qc {
   background: $bg-card;
   border-radius: $radius-lg;
-  padding: $spacing-md;
-  min-width: 420rpx;
+  padding: 20rpx 24rpx;
+  min-width: 400rpx;
   max-width: 520rpx;
   box-shadow: $shadow-sm;
 
-  &__header {
+  /* ===== Header ===== */
+  &__head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: $spacing-sm;
+    margin-bottom: 8rpx;
+  }
+
+  &__head-left { display: flex; align-items: center; gap: 8rpx; }
+
+  &__title {
+    font-size: $font-xs;
+    color: $text-secondary;
+    font-weight: 700;
+    letter-spacing: 1rpx;
   }
 
   &__round {
-    font-size: $font-xs;
-    color: $text-secondary;
-    background: $bg-page;
+    font-size: 20rpx;
+    color: $brand-600;
+    background: $brand-50;
     padding: 2rpx 10rpx;
     border-radius: $radius-pill;
-  }
-
-  &__title {
-    font-size: $font-sm;
-    color: $text-secondary;
     font-weight: 600;
   }
 
   &__badge {
-    font-size: $font-xs;
-    padding: 4rpx 14rpx;
-    border-radius: $radius-sm;
+    font-size: 20rpx;
+    padding: 2rpx 12rpx;
+    border-radius: $radius-pill;
+    font-weight: 600;
+  }
 
-    &--warning {
-      color: $color-warning;
-      background: rgba($color-warning, 0.1);
-    }
-    &--success {
-      color: $brand-600;
-      background: $brand-50;
-    }
-    &--error {
-      color: $color-error;
-      background: rgba($color-error, 0.1);
-    }
-    &--muted {
-      color: $text-placeholder;
-      background: $bg-hover;
-    }
+  .badge--warning { color: $color-warning; background: rgba($color-warning, 0.1); }
+  .badge--success { color: $brand-600; background: $brand-50; }
+  .badge--error   { color: $color-error; background: rgba($color-error, 0.1); }
+  .badge--muted   { color: $text-placeholder; background: $bg-hover; }
+
+  /* ===== 商品名 ===== */
+  &__product {
+    font-size: $font-xs;
+    color: $text-secondary;
+    display: block;
+    margin-bottom: 10rpx;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ===== 核心价格区 ===== */
+  &__hero {
+    background: linear-gradient(135deg, rgba($brand-600, 0.06) 0%, rgba($accent-400, 0.06) 100%);
+    border-radius: $radius-md;
+    padding: 14rpx 16rpx;
+    margin-bottom: 10rpx;
   }
 
   &__price-row {
     display: flex;
     align-items: baseline;
-    gap: $spacing-sm;
-  }
-
-  &__delta {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 6rpx;
-    margin-top: 4rpx;
-  }
-
-  &__delta-label {
-    font-size: $font-xs;
-    color: $text-placeholder;
-  }
-
-  &__delta-item {
-    font-size: $font-xs;
-    color: $brand-600;
-    background: $brand-50;
-    padding: 2rpx 10rpx;
-    border-radius: $radius-pill;
-  }
-
-  &__delta-item--up {
-    color: $color-error;
-    background: rgba($color-error, 0.08);
-  }
-
-  &__delta-item--down {
-    color: $brand-600;
-    background: $brand-50;
-  }
-
-  &__product {
-    display: flex;
-    align-items: center;
-    gap: 6rpx;
-    margin-bottom: $spacing-xs;
-  }
-
-  &__product-text {
-    font-size: $font-xs;
-    color: $text-secondary;
+    gap: 2rpx;
   }
 
   &__price {
-    font-size: $font-xl;
-    font-weight: bold;
+    font-size: 44rpx;
+    font-weight: 800;
     color: $accent-400;
+    line-height: 1.1;
   }
 
-  &__qty {
-    font-size: $font-md;
-    color: $text-secondary;
-  }
-
-  &__total {
+  &__unit {
     font-size: $font-sm;
     color: $text-secondary;
-    display: block;
+  }
+
+  &__calc {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
     margin-top: 4rpx;
   }
 
-  &__details {
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
-    margin-top: $spacing-xs;
-  }
-
-  &__detail-item {
-    font-size: $font-sm;
+  &__calc-text {
+    font-size: $font-xs;
     color: $text-secondary;
   }
 
-  &__separator {
-    font-size: $font-xs;
+  &__calc-total {
+    font-size: $font-sm;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  /* ===== 变动 ===== */
+  &__deltas {
+    display: flex;
+    gap: 8rpx;
+    flex-wrap: wrap;
+    margin-bottom: 10rpx;
+  }
+
+  &__delta {
+    font-size: 20rpx;
+    padding: 2rpx 10rpx;
+    border-radius: $radius-pill;
+    font-weight: 600;
+  }
+
+  .delta--up   { color: $color-error; background: rgba($color-error, 0.08); }
+  .delta--down { color: $brand-600; background: $brand-50; }
+
+  /* ===== 交易条件网格 ===== */
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rpx;
+    background: $border-light;
+    border-radius: $radius-md;
+    overflow: hidden;
+    margin-bottom: 10rpx;
+  }
+
+  &__grid-cell {
+    background: $bg-page;
+    padding: 10rpx 12rpx;
+  }
+
+  &__grid-label {
+    font-size: 20rpx;
+    color: $text-placeholder;
+    display: block;
+    margin-bottom: 2rpx;
+  }
+
+  &__grid-val-row {
+    display: flex;
+    align-items: center;
+    gap: 4rpx;
+  }
+
+  &__grid-val {
+    font-size: 22rpx;
+    color: $text-primary;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ===== 物流信息行 ===== */
+  &__rows {
+    margin-bottom: 10rpx;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6rpx 0;
+  }
+
+  &__row-left {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    flex-shrink: 0;
+  }
+
+  &__row-label {
+    font-size: 22rpx;
     color: $text-placeholder;
   }
 
+  &__row-val {
+    font-size: 22rpx;
+    color: $text-primary;
+    font-weight: 500;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 300rpx;
+  }
+
+  /* ===== 备注 ===== */
   &__remark {
-    margin-top: $spacing-xs;
-    padding: $spacing-xs $spacing-sm;
+    padding: 8rpx 14rpx;
     background: $bg-page;
     border-radius: $radius-sm;
+    margin-bottom: 8rpx;
   }
 
   &__remark-text {
-    font-size: $font-xs;
+    font-size: 20rpx;
     color: $text-secondary;
-    line-height: 1.5;
+    line-height: 1.4;
   }
 
-  &__divider {
-    height: 1rpx;
-    background: $border-light;
-    margin: $spacing-sm 0;
-  }
-
+  /* ===== 操作 ===== */
   &__actions {
     display: flex;
-    gap: $spacing-sm;
+    gap: 12rpx;
+    margin-top: 12rpx;
+    padding-top: 12rpx;
+    border-top: 1rpx solid $border-light;
   }
 
   &__btn {
     flex: 1;
-    height: 64rpx;
+    height: 56rpx;
     border-radius: $radius-md;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform $transition-fast;
+    gap: 6rpx;
+    transition: transform 0.12s;
 
-    &:active {
-      transform: scale(0.95);
-    }
-
-    &--primary {
-      background: $brand-600;
-    }
-
-    &--secondary {
-      background: $bg-page;
-      border: 1rpx solid $border-color;
-    }
-
-    &--full {
-      flex: none;
-      width: 100%;
-    }
+    &:active { transform: scale(0.96); }
+    &--pri { background: $brand-600; }
+    &--sec { background: $bg-page; border: 1rpx solid $border-color; }
+    &--full { flex: none; width: 100%; }
   }
 
-  &__btn-text {
+  &__btn-t {
     font-size: $font-sm;
     font-weight: 600;
-
-    &--primary {
-      color: $text-inverse;
-    }
-
-    &--secondary {
-      color: $text-primary;
-    }
+    color: $text-primary;
+    &--w { color: #fff; }
   }
 }
 </style>

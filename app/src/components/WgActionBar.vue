@@ -80,48 +80,48 @@ defineSlots<{
   align-items: center;
   justify-content: center;
   gap: $spacing-xs;
+}
 
-  &:active {
-    transform: scale(0.96);
-  }
+:deep(.wg-btn:active) {
+  transform: scale(0.96);
+}
 
-  &--primary {
-    background: $brand-600;
-    color: $text-inverse;
-    box-shadow: $shadow-brand;
-  }
+:deep(.wg-btn--primary) {
+  background: $brand-600;
+  color: $text-inverse;
+  box-shadow: $shadow-brand;
+}
 
-  &--secondary {
-    background: $brand-50;
-    color: $brand-600;
-  }
+:deep(.wg-btn--secondary) {
+  background: $brand-50;
+  color: $brand-600;
+}
 
-  &--action {
-    background: $action-600;
-    color: $text-inverse;
-    box-shadow: $shadow-action;
-  }
+:deep(.wg-btn--action) {
+  background: $action-600;
+  color: $text-inverse;
+  box-shadow: $shadow-action;
+}
 
-  &--accent {
-    background: $accent-400;
-    color: $text-inverse;
-    box-shadow: $shadow-accent;
-  }
+:deep(.wg-btn--accent) {
+  background: $accent-400;
+  color: $text-inverse;
+  box-shadow: $shadow-accent;
+}
 
-  &--ghost {
-    background: transparent;
-    color: $text-secondary;
-  }
+:deep(.wg-btn--ghost) {
+  background: transparent;
+  color: $text-secondary;
+}
 
-  &--error-soft {
-    background: rgba(239, 68, 68, 0.06);
-    color: $color-error;
-    border: 1rpx solid rgba(239, 68, 68, 0.2);
-  }
+:deep(.wg-btn--error-soft) {
+  background: rgba(239, 68, 68, 0.06);
+  color: $color-error;
+  border: 1rpx solid rgba(239, 68, 68, 0.2);
+}
 
-  &[disabled] {
-    opacity: 0.45;
-    pointer-events: none;
-  }
+:deep(.wg-btn[disabled]) {
+  opacity: 0.45;
+  pointer-events: none;
 }
 </style>

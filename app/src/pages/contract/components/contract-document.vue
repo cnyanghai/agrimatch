@@ -13,6 +13,7 @@
 import { ref, computed } from 'vue'
 import type { ContractResponse, BankInfo } from '../../../api/contract'
 import { getPaymentMethodText, getDeliveryModeText, parseBankInfo } from '../../../api/contract'
+import { maskPhone } from '../../../utils/format'
 import {
   CONTRACT_TERM_SECTIONS,
   LEGAL_NOTICE,
@@ -174,7 +175,7 @@ function formatDateTime(dateStr?: string | null): string {
         </view>
         <view v-if="contract.buyerPhone" class="doc-party__row">
           <text class="doc-party__label">电话:</text>
-          <text class="doc-party__value">{{ contract.buyerPhone }}</text>
+          <text class="doc-party__value">{{ maskPhone(contract.buyerPhone) }}</text>
         </view>
         <view v-if="contract.buyerAddress" class="doc-party__row">
           <text class="doc-party__label">地址:</text>
@@ -219,7 +220,7 @@ function formatDateTime(dateStr?: string | null): string {
         </view>
         <view v-if="contract.sellerPhone" class="doc-party__row">
           <text class="doc-party__label">电话:</text>
-          <text class="doc-party__value">{{ contract.sellerPhone }}</text>
+          <text class="doc-party__value">{{ maskPhone(contract.sellerPhone) }}</text>
         </view>
         <view v-if="contract.sellerAddress" class="doc-party__row">
           <text class="doc-party__label">地址:</text>
