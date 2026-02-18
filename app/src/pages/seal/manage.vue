@@ -14,6 +14,13 @@ import {
   type SealResponse,
   type SealCreateRequest,
 } from '../../api/contract'
+import { getBaseUrl } from '../../utils/request'
+
+function fullSealUrl(url?: string): string {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  return `${getBaseUrl()}${url}`
+}
 
 const seals = ref<SealResponse[]>([])
 const loading = ref(true)
@@ -21,12 +28,16 @@ const showUploader = ref(false)
 
 onShow(() => loadSeals())
 
+const loadError = ref('')
+
 async function loadSeals() {
   loading.value = true
+  loadError.value = ''
   try {
     seals.value = await listSeals() || []
-  } catch {
+  } catch (e: any) {
     seals.value = []
+    loadError.value = e?.message || '加载失败'
   } finally {
     loading.value = false
   }
@@ -83,8 +94,12 @@ async function handleSealCreated(result: string) {
     <WgSkeleton v-if="loading" type="list" :rows="3" />
 
     <template v-else>
-      <view v-if="seals.length === 0" class="empty-wrap">
-        <WgEmpty text="暂无印章" description="创建电子印章后可用于合同签署" />
+      <view v-if="loadError" class="empty-wrap">
+        <WgEmpty text="加载失败" :description="loadError" />
+      </view>
+
+      <view v-else-if="seals.length === 0" class="empty-wrap">
+        <WgEmpty text="暂无印章" description="点击下方按钮添加电子印章，可用于合同签署" />
       </view>
 
       <view v-else class="seal-list">
@@ -97,7 +112,7 @@ async function handleSealCreated(result: string) {
           <view class="seal-card__visual">
             <image
               v-if="seal.sealUrl"
-              :src="seal.sealUrl"
+              :src="fullSealUrl(seal.sealUrl)"
               class="seal-card__img"
               mode="aspectFit"
             />

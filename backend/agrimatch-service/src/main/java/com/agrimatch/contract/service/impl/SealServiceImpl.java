@@ -44,7 +44,7 @@ public class SealServiceImpl implements SealService {
     @Override
     @Transactional
     public Long uploadSeal(Long userId, String sealName, String sealType, String sealUrl) {
-        SysUser user = requireUserWithCompany(userId);
+        SysUser user = requireUser(userId);
         
         BusCompanySeal seal = new BusCompanySeal();
         seal.setCompanyId(user.getCompanyId());
@@ -55,8 +55,7 @@ public class SealServiceImpl implements SealService {
         seal.setIsGenerated(false);
         seal.setIsDefault(false);
         
-        // 如果是第一个章，设为默认
-        List<BusCompanySeal> existing = sealMapper.selectByCompanyId(user.getCompanyId());
+        List<BusCompanySeal> existing = listSealsForUser(user);
         if (existing.isEmpty()) {
             seal.setIsDefault(true);
         }
@@ -68,26 +67,28 @@ public class SealServiceImpl implements SealService {
     @Override
     @Transactional
     public Long generateSeal(Long userId, String sealName, String sealType) {
-        SysUser user = requireUserWithCompany(userId);
-        BusCompany company = companyMapper.selectById(user.getCompanyId());
-        if (company == null) {
-            throw new ApiException(ResultCode.NOT_FOUND.getCode(), "公司信息不存在");
+        SysUser user = requireUser(userId);
+        
+        String displayName;
+        if (user.getCompanyId() != null) {
+            BusCompany company = companyMapper.selectById(user.getCompanyId());
+            displayName = (company != null) ? company.getCompanyName() : user.getNickName();
+        } else {
+            displayName = user.getNickName();
         }
         
-        // 生成电子章图片
-        String sealUrl = generateSealImage(company.getCompanyName(), sealType);
+        String sealUrl = generateSealImage(displayName, sealType);
         
         BusCompanySeal seal = new BusCompanySeal();
         seal.setCompanyId(user.getCompanyId());
         seal.setUserId(userId);
-        seal.setSealName(sealName != null ? sealName : company.getCompanyName() + " 电子章");
+        seal.setSealName(sealName != null ? sealName : displayName + " 电子章");
         seal.setSealType(sealType != null ? sealType : "official");
         seal.setSealUrl(sealUrl);
         seal.setIsGenerated(true);
         seal.setIsDefault(false);
         
-        // 如果是第一个章，设为默认
-        List<BusCompanySeal> existing = sealMapper.selectByCompanyId(user.getCompanyId());
+        List<BusCompanySeal> existing = listSealsForUser(user);
         if (existing.isEmpty()) {
             seal.setIsDefault(true);
         }
@@ -98,54 +99,76 @@ public class SealServiceImpl implements SealService {
 
     @Override
     public List<BusCompanySeal> listByCompany(Long userId) {
-        SysUser user = requireUserWithCompany(userId);
-        return sealMapper.selectByCompanyId(user.getCompanyId());
+        SysUser user = requireUser(userId);
+        return listSealsForUser(user);
     }
 
     @Override
     public BusCompanySeal getDefault(Long userId) {
-        SysUser user = requireUserWithCompany(userId);
-        return sealMapper.selectDefaultByCompanyId(user.getCompanyId());
+        SysUser user = requireUser(userId);
+        if (user.getCompanyId() != null) {
+            return sealMapper.selectDefaultByCompanyId(user.getCompanyId());
+        }
+        return sealMapper.selectDefaultByUserId(userId);
     }
 
     @Override
     @Transactional
     public void setDefault(Long userId, Long sealId) {
-        SysUser user = requireUserWithCompany(userId);
+        SysUser user = requireUser(userId);
         
         BusCompanySeal seal = sealMapper.selectById(sealId);
-        if (seal == null || !seal.getCompanyId().equals(user.getCompanyId())) {
+        if (seal == null || !belongsToUser(seal, user)) {
             throw new ApiException(ResultCode.NOT_FOUND.getCode(), "电子章不存在");
         }
         
-        // 清除当前默认
-        sealMapper.clearDefault(user.getCompanyId());
+        if (user.getCompanyId() != null) {
+            sealMapper.clearDefault(user.getCompanyId());
+        } else {
+            List<BusCompanySeal> mySeals = sealMapper.selectByUserId(userId);
+            for (BusCompanySeal s : mySeals) {
+                if (s.getIsDefault()) {
+                    s.setIsDefault(false);
+                    sealMapper.update(s);
+                }
+            }
+        }
         
-        // 设置新默认
         seal.setIsDefault(true);
         sealMapper.update(seal);
     }
 
     @Override
     public void delete(Long userId, Long sealId) {
-        SysUser user = requireUserWithCompany(userId);
+        SysUser user = requireUser(userId);
         
         BusCompanySeal seal = sealMapper.selectById(sealId);
-        if (seal == null || !seal.getCompanyId().equals(user.getCompanyId())) {
+        if (seal == null || !belongsToUser(seal, user)) {
             throw new ApiException(ResultCode.NOT_FOUND.getCode(), "电子章不存在");
         }
         
         sealMapper.logicalDelete(sealId);
     }
 
-    private SysUser requireUserWithCompany(Long userId) {
+    private SysUser requireUser(Long userId) {
         if (userId == null) throw new ApiException(401, "未登录");
         SysUser user = userMapper.selectById(userId);
         if (user == null) throw new ApiException(401, "未登录");
-        if (user.getCompanyId() == null) {
-            throw new ApiException(ResultCode.PARAM_ERROR.getCode(), "请先完善公司档案");
-        }
         return user;
+    }
+
+    private List<BusCompanySeal> listSealsForUser(SysUser user) {
+        if (user.getCompanyId() != null) {
+            return sealMapper.selectByCompanyId(user.getCompanyId());
+        }
+        return sealMapper.selectByUserId(user.getUserId());
+    }
+
+    private boolean belongsToUser(BusCompanySeal seal, SysUser user) {
+        if (user.getCompanyId() != null && user.getCompanyId().equals(seal.getCompanyId())) {
+            return true;
+        }
+        return user.getUserId().equals(seal.getUserId());
     }
 
     /**

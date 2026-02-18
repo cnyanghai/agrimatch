@@ -14,7 +14,11 @@ public interface CompanySealMapper {
 
     List<BusCompanySeal> selectByCompanyId(@Param("companyId") Long companyId);
 
+    List<BusCompanySeal> selectByUserId(@Param("userId") Long userId);
+
     BusCompanySeal selectDefaultByCompanyId(@Param("companyId") Long companyId);
+
+    BusCompanySeal selectDefaultByUserId(@Param("userId") Long userId);
 
     int update(BusCompanySeal seal);
 

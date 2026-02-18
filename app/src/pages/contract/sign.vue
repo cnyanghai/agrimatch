@@ -14,8 +14,15 @@ import {
   type SealCreateRequest,
 } from '../../api/contract'
 import { useAuthStore } from '../../store/auth'
+import { getBaseUrl } from '../../utils/request'
 import { getMyCompany, type CompanyResponse } from '../../api/company'
 import WgSealUploader from '../../components/WgSealUploader.vue'
+
+function fullSealUrl(url?: string): string {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  return `${getBaseUrl()}${url}`
+}
 
 const authStore = useAuthStore()
 
@@ -198,7 +205,7 @@ async function handleSubmit() {
           >
             <image
               v-if="seal.sealUrl"
-              :src="seal.sealUrl"
+              :src="fullSealUrl(seal.sealUrl)"
               class="seal-item__img"
               mode="aspectFit"
             />

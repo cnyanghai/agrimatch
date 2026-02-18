@@ -38,6 +38,18 @@
         ORDER BY is_default DESC, create_time DESC
     </select>
 
+    <select id="selectByUserId" resultMap="SealMap">
+        SELECT * FROM bus_company_seal
+        WHERE user_id = #{userId} AND is_deleted = 0
+        ORDER BY is_default DESC, create_time DESC
+    </select>
+
+    <select id="selectDefaultByUserId" resultMap="SealMap">
+        SELECT * FROM bus_company_seal
+        WHERE user_id = #{userId} AND is_default = 1 AND is_deleted = 0
+        LIMIT 1
+    </select>
+
     <select id="selectDefaultByCompanyId" resultMap="SealMap">
         SELECT * FROM bus_company_seal
         WHERE company_id = #{companyId} AND is_default = 1 AND is_deleted = 0
