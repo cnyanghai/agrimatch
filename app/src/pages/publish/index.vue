@@ -52,7 +52,7 @@ function handleClose() {
 
         <view class="panel__cards">
           <!-- 发布供应 -->
-          <view class="publish-card publish-card--brand" @tap="goSupplyPublish">
+          <view class="publish-card publish-card--brand stitch-fade-up" @tap="goSupplyPublish">
             <view class="publish-card__icon">
               <WgIcon name="store" :size="28" :color="BRAND_600" />
             </view>
@@ -64,7 +64,7 @@ function handleClose() {
           </view>
 
           <!-- 发布采购 -->
-          <view class="publish-card publish-card--autumn" @tap="goRequirementPublish">
+          <view class="publish-card publish-card--autumn stitch-fade-up" style="animation-delay: .06s" @tap="goRequirementPublish">
             <view class="publish-card__icon">
               <WgIcon name="shopping-bag" :size="28" :color="AUTUMN_500" />
             </view>
@@ -76,7 +76,7 @@ function handleClose() {
           </view>
 
           <!-- 发布话题 -->
-          <view class="publish-card publish-card--action" @tap="goTopicPublish">
+          <view class="publish-card publish-card--action stitch-fade-up" style="animation-delay: .12s" @tap="goTopicPublish">
             <view class="publish-card__icon">
               <WgIcon name="square-pen" :size="28" :color="ACTION_600" />
             </view>

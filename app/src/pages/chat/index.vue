@@ -87,15 +87,15 @@ function goRequirement() {
 
     <template v-else>
       <!-- 通知分类入口 -->
-      <view class="notify-bar">
+      <view class="notify-bar stitch-fade-up">
         <view
           v-for="cat in notifyCategories"
           :key="cat.key"
-          class="notify-bar__item"
+          class="notify-bar__item tap-feedback"
           @tap="goNotify(cat.key)"
         >
           <view class="notify-bar__icon-wrap">
-            <WgIcon :name="cat.icon" :size="24" :color="WARM_600" />
+            <WgIcon :name="cat.icon" :size="22" :color="WARM_600" />
             <view v-if="cat.count > 0" class="notify-bar__badge">
               <text class="notify-bar__badge-text">{{ cat.count > 99 ? '99+' : cat.count }}</text>
             </view>
@@ -107,17 +107,19 @@ function goRequirement() {
       <!-- 会话列表标题 -->
       <view class="section-header">
         <text class="section-header__title">会话</text>
+        <text class="section-header__count">{{ conversations.length }}</text>
       </view>
 
       <!-- 会话列表 -->
       <view v-if="conversations.length > 0" class="conv-list">
         <view
-          v-for="conv in conversations"
+          v-for="(conv, cIdx) in conversations"
           :key="conv.id"
-          class="conv-item"
+          class="conv-item stitch-fade-up"
+          :style="{ animationDelay: `${cIdx * 0.04}s` }"
           @tap="goConversation(conv)"
         >
-          <view class="conv-item__avatar">
+          <view class="conv-item__avatar" :class="{ 'conv-item__avatar--unread': conv.unreadCount }">
             <text class="conv-item__avatar-text">{{ (conv.peerNickName || conv.peerUserName || '?')[0] }}</text>
           </view>
 
@@ -174,7 +176,8 @@ function goRequirement() {
   justify-content: space-around;
   background: $bg-card;
   padding: $spacing-lg $spacing-md;
-  margin-bottom: $spacing-sm;
+  margin-bottom: $spacing-xs;
+  box-shadow: $shadow-sm;
 
   &__item {
     display: flex;
@@ -185,68 +188,79 @@ function goRequirement() {
 
   &__icon-wrap {
     position: relative;
-    width: 96rpx;
-    height: 96rpx;
-    border-radius: 50%;
-    background: $warm-100;
+    width: 92rpx;
+    height: 92rpx;
+    border-radius: $radius-xl;
+    background: linear-gradient(135deg, $warm-50 0%, $warm-100 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: transform 0.15s;
-
-    &:active {
-      transform: scale(0.92);
-    }
+    border: 1rpx solid $border-light;
   }
 
   &__badge {
     position: absolute;
-    top: -4rpx;
-    right: -4rpx;
-    min-width: 32rpx;
-    height: 32rpx;
+    top: -6rpx;
+    right: -6rpx;
+    min-width: 34rpx;
+    height: 34rpx;
     background: $color-error;
-    border-radius: 16rpx;
+    border-radius: 17rpx;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0 8rpx;
-    border: 2rpx solid #fff;
+    border: 3rpx solid #fff;
+    box-shadow: 0 2rpx 6rpx rgba(239, 68, 68, 0.3);
   }
 
   &__badge-text {
     color: $text-inverse;
     font-size: 18rpx;
     font-weight: bold;
-    line-height: 32rpx;
+    line-height: 34rpx;
   }
 
   &__label {
     font-size: $font-xs;
     color: $text-secondary;
+    font-weight: 500;
   }
 }
 
 /* ===== Section Header ===== */
 .section-header {
   padding: $spacing-sm $spacing-md;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
 
   &__title {
     font-size: $font-lg;
     font-weight: 700;
     color: $text-primary;
   }
+
+  &__count {
+    font-size: $font-xs;
+    color: $text-placeholder;
+    background: $warm-100;
+    padding: 2rpx 14rpx;
+    border-radius: $radius-pill;
+  }
 }
 
 /* ===== Conversation List ===== */
 .conv-list {
   background: $bg-card;
+  border-radius: $radius-xl $radius-xl 0 0;
 }
 
 .conv-item {
   display: flex;
   align-items: center;
-  padding: $spacing-md;
+  padding: $spacing-md $spacing-lg;
   border-bottom: 1rpx solid $border-light;
   gap: $spacing-md;
   transition: background 0.15s;
@@ -255,15 +269,26 @@ function goRequirement() {
     background: $bg-hover;
   }
 
+  &:last-child {
+    border-bottom: none;
+  }
+
   &__avatar {
     width: 96rpx;
     height: 96rpx;
-    border-radius: 50%;
-    background: $brand-100;
+    border-radius: $radius-xl;
+    background: linear-gradient(135deg, $brand-50 0%, $brand-100 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    border: 2rpx solid transparent;
+    transition: border-color 0.2s;
+
+    &--unread {
+      border-color: $brand-400;
+      box-shadow: 0 0 0 4rpx rgba($brand-400, 0.15);
+    }
   }
 
   &__avatar-text {
@@ -286,7 +311,7 @@ function goRequirement() {
 
   &__name {
     font-size: $font-md;
-    font-weight: bold;
+    font-weight: 700;
     color: $text-primary;
   }
 
@@ -313,7 +338,7 @@ function goRequirement() {
 
   &__unread {
     background: $color-error;
-    border-radius: 20rpx;
+    border-radius: $radius-pill;
     padding: 0 12rpx;
     height: 36rpx;
     display: flex;
@@ -321,6 +346,7 @@ function goRequirement() {
     justify-content: center;
     flex-shrink: 0;
     margin-left: $spacing-xs;
+    box-shadow: 0 2rpx 6rpx rgba(239, 68, 68, 0.25);
   }
 
   &__unread-text {

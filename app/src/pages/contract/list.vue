@@ -230,19 +230,19 @@ function formatStatAmount(val: number): string {
     </view>
 
     <!-- ===== 统计卡片区域 ===== -->
-    <view class="stats-bar stitch-card">
+    <view class="stats-bar stitch-scale-in">
       <view class="stats-bar__item">
-        <text class="stats-bar__value stats-bar__value--amount font-mono">{{ formatStatAmount(stats.pendingTotal) }}</text>
+        <text class="stats-bar__value stats-bar__value--amount font-mono stitch-bounce-in">{{ formatStatAmount(stats.pendingTotal) }}</text>
         <text class="stats-bar__label">待结算(元)</text>
       </view>
       <view class="stats-bar__divider" />
       <view class="stats-bar__item">
-        <text class="stats-bar__value font-mono">{{ stats.monthlyNew }}</text>
+        <text class="stats-bar__value font-mono stitch-bounce-in" style="animation-delay: .05s">{{ stats.monthlyNew }}</text>
         <text class="stats-bar__label">本月新增</text>
       </view>
       <view class="stats-bar__divider" />
       <view class="stats-bar__item">
-        <text class="stats-bar__value font-mono">{{ stats.executionRate }}%</text>
+        <text class="stats-bar__value font-mono stitch-bounce-in" style="animation-delay: .1s">{{ stats.executionRate }}%</text>
         <text class="stats-bar__label">完成率</text>
       </view>
     </view>
@@ -305,9 +305,10 @@ function formatStatAmount(val: number): string {
     <!-- 合同列表 -->
     <view v-if="filteredContracts.length > 0" class="contract-list">
       <view
-        v-for="item in filteredContracts"
+        v-for="(item, cIdx) in filteredContracts"
         :key="item.id"
         class="contract-card stitch-card tap-feedback stitch-fade-up"
+        :style="{ animationDelay: `${cIdx * 0.04}s` }"
         @tap="goDetail(item.id)"
       >
         <!-- 头部：合同编号 + 状态标签 -->
@@ -393,11 +394,11 @@ function formatStatAmount(val: number): string {
 .stats-bar {
   display: flex;
   align-items: center;
-  background: $bg-card;
+  background: linear-gradient(135deg, $brand-700 0%, $brand-500 100%);
   margin: $spacing-md $spacing-md 0;
   border-radius: $radius-xl;
-  padding: $spacing-md $spacing-md;
-  box-shadow: $shadow-warm-card;
+  padding: $spacing-lg $spacing-md;
+  box-shadow: 0 8rpx 24rpx rgba($brand-600, 0.2);
 
   &__item {
     flex: 1;
@@ -405,27 +406,27 @@ function formatStatAmount(val: number): string {
   }
 
   &__value {
-    font-size: 36rpx;
-    font-weight: bold;
-    color: $text-primary;
+    font-size: 40rpx;
+    font-weight: 800;
+    color: $text-inverse;
     display: block;
 
     &--amount {
-      color: $accent-400;
+      color: #FFD700;
     }
   }
 
   &__label {
     font-size: $font-xs;
-    color: $text-secondary;
+    color: rgba(255, 255, 255, 0.7);
     display: block;
-    margin-top: 2rpx;
+    margin-top: 4rpx;
   }
 
   &__divider {
     width: 1rpx;
     height: 56rpx;
-    background: $border-light;
+    background: rgba(255, 255, 255, 0.2);
     flex-shrink: 0;
   }
 }

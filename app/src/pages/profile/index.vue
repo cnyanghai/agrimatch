@@ -195,20 +195,20 @@ function handleLogout() {
     </view>
 
     <!-- ===== 统计卡片 (浮动在 hero 之上) ===== -->
-    <view v-if="isLoggedIn" class="stats-float">
+    <view v-if="isLoggedIn" class="stats-float stitch-scale-in">
       <view class="stats-row">
         <view class="stat-item" @tap="goMySupplies">
-          <text class="stat-item__value font-mono">{{ supplyCount ?? '-' }}</text>
+          <text class="stat-item__value font-mono stitch-bounce-in">{{ supplyCount ?? '-' }}</text>
           <text class="stat-item__label">供应</text>
         </view>
         <view class="stat-divider" />
         <view class="stat-item" @tap="goMyRequirements">
-          <text class="stat-item__value font-mono">{{ requirementCount ?? '-' }}</text>
+          <text class="stat-item__value font-mono stitch-bounce-in" style="animation-delay: 80ms">{{ requirementCount ?? '-' }}</text>
           <text class="stat-item__label">采购</text>
         </view>
         <view class="stat-divider" />
         <view class="stat-item" @tap="goContracts">
-          <text class="stat-item__value font-mono">{{ contractCount ?? '-' }}</text>
+          <text class="stat-item__value font-mono stitch-bounce-in" style="animation-delay: 160ms">{{ contractCount ?? '-' }}</text>
           <text class="stat-item__label">合同</text>
         </view>
       </view>
@@ -217,18 +217,20 @@ function handleLogout() {
     <!-- ===== 待办提醒 ===== -->
     <view v-if="pendingItems.length" class="pending-bar">
       <view
-        v-for="item in pendingItems"
+        v-for="(item, idx) in pendingItems"
         :key="item.label"
-        class="pending-item"
+        class="pending-item stitch-fade-up"
         @tap="goUrl(item.url)"
       >
-        <text class="pending-item__count" :style="{ color: item.color }">{{ item.count }}</text>
+        <view class="pending-item__badge" :style="{ background: item.color }">
+          <text class="pending-item__count">{{ item.count }}</text>
+        </view>
         <text class="pending-item__label">{{ item.label }}</text>
       </view>
     </view>
 
     <!-- ===== 功能网格 ===== -->
-    <view class="section">
+    <view class="section stitch-fade-up">
       <text class="stitch-section-title">我的服务</text>
       <view class="func-grid">
         <view class="func-item" @tap="goMySupplies">
@@ -267,7 +269,7 @@ function handleLogout() {
     </view>
 
     <!-- ===== 工具与发现 ===== -->
-    <view class="section">
+    <view class="section stitch-fade-up">
       <text class="stitch-section-title">工具与发现</text>
       <view class="menu-card stitch-card" style="padding: 0;">
         <view v-if="isLoggedIn" class="menu-item" @tap="goCompany">
@@ -454,21 +456,35 @@ function handleLogout() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4rpx;
-  padding: $spacing-sm $spacing-xs;
+  gap: $spacing-xs;
+  padding: $spacing-md $spacing-xs;
   background: $bg-card;
-  border-radius: $radius-md;
-  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+  border-radius: $radius-xl;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+  transition: transform $transition-fast;
+
+  &:active { transform: scale(0.95); }
+
+  &__badge {
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   &__count {
-    font-size: 36rpx;
+    font-size: $font-lg;
     font-weight: 800;
     font-family: $font-mono;
+    color: $text-inverse;
   }
 
   &__label {
     font-size: $font-xs;
     color: $text-secondary;
+    font-weight: 500;
   }
 }
 

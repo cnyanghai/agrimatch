@@ -242,7 +242,7 @@ function getContentPreview(content?: string): string {
     </view>
 
     <!-- 搜索历史 -->
-    <view v-if="showHistory" class="history-section">
+    <view v-if="showHistory" class="history-section stitch-fade-up">
       <view class="history-section__header">
         <text class="history-section__title">搜索历史</text>
         <view class="history-section__clear" @tap="handleClearHistory">
@@ -272,9 +272,10 @@ function getContentPreview(content?: string): string {
     <!-- 搜索结果列表 -->
     <view v-if="showResults" class="result-list">
       <view
-        v-for="item in results"
+        v-for="(item, rIdx) in results"
         :key="`${item.entityType}-${item.entityId}`"
-        class="result-card"
+        class="result-card stitch-fade-up"
+        :style="{ animationDelay: `${rIdx * 0.04}s` }"
         @tap="handleResultTap(item)"
       >
         <view class="result-card__header">
@@ -352,9 +353,11 @@ function getContentPreview(content?: string): string {
     align-items: center;
     height: 72rpx;
     background: $bg-page;
-    border-radius: $radius-lg;
-    padding: 0 $spacing-sm;
+    border-radius: $radius-full;
+    padding: 0 $spacing-md;
     gap: $spacing-xs;
+    border: 1rpx solid $border-light;
+    transition: border-color 0.2s;
   }
 
   &__input {
@@ -465,9 +468,10 @@ function getContentPreview(content?: string): string {
 
 .result-card {
   background: $bg-card;
-  border-radius: $radius-lg;
+  border-radius: $radius-xl;
   padding: $spacing-md;
   margin-bottom: $spacing-sm;
+  box-shadow: $shadow-warm-card;
 
   &:active {
     background: $bg-hover;

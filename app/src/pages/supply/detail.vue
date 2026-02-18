@@ -165,44 +165,45 @@ function handleShare() {
     <WgEmpty v-else-if="!detail" text="供应信息不存在" icon="empty" />
 
     <scroll-view v-else scroll-y class="detail-scroll">
-      <!-- 商品图片 -->
-      <view v-if="imageList.length > 0" class="image-section stitch-card">
-        <scroll-view scroll-x class="image-section__scroll">
-          <view class="image-section__list">
+      <!-- 顶部 Hero 区 -->
+      <view class="detail-hero">
+        <!-- 商品图片 -->
+        <scroll-view v-if="imageList.length > 0" scroll-x class="detail-hero__gallery" :show-scrollbar="false">
+          <view class="detail-hero__gallery-inner">
             <image
               v-for="(img, idx) in imageList"
               :key="idx"
-              class="image-section__item"
+              class="detail-hero__img"
               :src="img"
               mode="aspectFill"
               @tap="handlePreviewImage(idx)"
             />
           </view>
         </scroll-view>
-      </view>
 
-      <!-- 核心信息卡片 -->
-      <view class="hero-card stitch-card stitch-card--elevated stitch-scale-in">
-        <view class="hero-card__header">
-          <text class="hero-card__name">{{ detail.categoryName }}</text>
-          <WgStatusChip v-if="detail.origin" :label="detail.origin" variant="brand" size="sm" />
-          <WgStatusChip v-if="isBasisQuote" label="基差报价" variant="autumn" size="sm" />
-          <WgStatusChip v-if="statusInfo" :label="statusInfo.label" :variant="statusInfo.variant" size="sm" dot />
-        </view>
-
-        <template v-if="!isBasisQuote">
-          <WgPriceTag :value="detail.exFactoryPrice" :unit="`${priceUnit} · 出厂价`" size="lg" />
-        </template>
-        <template v-else>
-          <view class="hero-card__basis">
-            <text class="hero-card__basis-label">基差定价</text>
-            <text class="hero-card__basis-hint">价格由期货价格 + 基差决定</text>
+        <!-- 价格信息覆盖层 -->
+        <view class="detail-hero__info">
+          <view class="detail-hero__tags">
+            <WgStatusChip v-if="detail.origin" :label="detail.origin" variant="brand" size="sm" />
+            <WgStatusChip v-if="isBasisQuote" label="基差报价" variant="autumn" size="sm" />
+            <WgStatusChip v-if="statusInfo" :label="statusInfo.label" :variant="statusInfo.variant" size="sm" dot />
           </view>
-        </template>
+          <text class="detail-hero__name">{{ detail.categoryName }}</text>
+          <template v-if="!isBasisQuote">
+            <view class="detail-hero__price-row">
+              <text class="detail-hero__price-sign">¥</text>
+              <text class="detail-hero__price">{{ detail.exFactoryPrice ?? '-' }}</text>
+              <text class="detail-hero__price-unit">/ {{ priceUnit }} · 出厂价</text>
+            </view>
+          </template>
+          <template v-else>
+            <text class="detail-hero__basis-label">基差定价 · 价格由期货 + 基差决定</text>
+          </template>
+        </view>
       </view>
 
       <!-- 基差报价明细 -->
-      <view v-if="isBasisQuote && basisQuotes.length > 0" class="section-card stitch-card">
+      <view v-if="isBasisQuote && basisQuotes.length > 0" class="section-card stitch-card stitch-fade-up">
         <view class="section-card__title">
           <text class="stitch-section-title">基差报价明细</text>
         </view>
@@ -232,7 +233,10 @@ function handleShare() {
       </view>
 
       <!-- 详情信息 -->
-      <view class="section-card stitch-card">
+      <view class="section-card stitch-card stitch-fade-up" style="animation-delay: .05s">
+        <view class="section-card__title">
+          <text class="stitch-section-title">供应信息</text>
+        </view>
         <view v-for="(row, idx) in infoRows" :key="idx" class="info-row">
           <text class="info-row__label">{{ row.label }}</text>
           <text class="info-row__value">{{ row.value }}</text>
@@ -240,7 +244,7 @@ function handleShare() {
       </view>
 
       <!-- 动态参数 -->
-      <view v-if="dynamicParams.length > 0" class="section-card stitch-card">
+      <view v-if="dynamicParams.length > 0" class="section-card stitch-card stitch-fade-up" style="animation-delay: .1s">
         <view class="section-card__title">
           <text class="stitch-section-title">产品参数</text>
         </view>
@@ -251,7 +255,7 @@ function handleShare() {
       </view>
 
       <!-- 价格规则 -->
-      <view v-if="priceRules.length > 0" class="section-card stitch-card">
+      <view v-if="priceRules.length > 0" class="section-card stitch-card stitch-fade-up" style="animation-delay: .15s">
         <view class="section-card__title">
           <text class="stitch-section-title">价格规则</text>
         </view>
@@ -262,7 +266,7 @@ function handleShare() {
       </view>
 
       <!-- 企业卡片 -->
-      <view v-if="detail.companyName" class="company-card stitch-card tap-feedback" @tap="goCompany">
+      <view v-if="detail.companyName" class="company-card stitch-card stitch-fade-up tap-feedback" style="animation-delay: .2s" @tap="goCompany">
         <WgAvatar :name="detail.companyName" size="md" />
         <view class="company-card__info">
           <text class="company-card__name">{{ detail.companyName }}</text>
@@ -307,63 +311,78 @@ function handleShare() {
   justify-content: center;
 }
 
-/* Image gallery */
-.image-section {
-  margin: $spacing-sm $spacing-sm 0;
-  padding: 0;
-  overflow: hidden;
+/* Hero 区 */
+.detail-hero {
+  background: linear-gradient(145deg, $brand-700 0%, $brand-500 60%, $warm-200 100%);
+  padding-bottom: $spacing-lg;
+  position: relative;
 
-  &__scroll { white-space: nowrap; }
-
-  &__list {
-    display: flex;
-    gap: $spacing-xs;
-    padding: $spacing-sm;
+  &__gallery {
+    white-space: nowrap;
   }
 
-  &__item {
-    width: 400rpx;
-    height: 300rpx;
-    border-radius: $radius-md;
+  &__gallery-inner {
+    display: flex;
+    gap: $spacing-xs;
+    padding: $spacing-sm $spacing-md;
+  }
+
+  &__img {
+    width: 440rpx;
+    height: 320rpx;
+    border-radius: $radius-lg;
     flex-shrink: 0;
   }
-}
 
-/* Hero card */
-.hero-card {
-  margin: $spacing-sm;
-  padding: $spacing-lg;
+  &__info {
+    padding: $spacing-sm $spacing-lg 0;
+  }
 
-  &__header {
+  &__tags {
     display: flex;
-    align-items: center;
     flex-wrap: wrap;
     gap: $spacing-xs;
-    margin-bottom: $spacing-md;
+    margin-bottom: $spacing-xs;
   }
 
   &__name {
-    font-size: $font-xl;
+    font-size: 40rpx;
     font-weight: 800;
-    color: $text-primary;
-    margin-right: $spacing-xs;
+    color: $text-inverse;
+    display: block;
+    margin-bottom: $spacing-xs;
   }
 
-  &__basis {
-    padding-top: $spacing-xs;
+  &__price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4rpx;
+  }
+
+  &__price-sign {
+    font-size: 32rpx;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  &__price {
+    font-size: 56rpx;
+    font-weight: 800;
+    color: #fff;
+    font-family: 'DIN Alternate', 'Roboto Mono', monospace;
+    line-height: 1;
+  }
+
+  &__price-unit {
+    font-size: $font-sm;
+    color: rgba(255, 255, 255, 0.65);
+    margin-left: $spacing-xs;
   }
 
   &__basis-label {
-    font-size: 48rpx;
-    font-weight: 800;
-    color: $autumn-600;
-    display: block;
-  }
-
-  &__basis-hint {
-    font-size: $font-sm;
-    color: $text-secondary;
-    margin-top: 4rpx;
+    font-size: $font-md;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
   }
 }
 

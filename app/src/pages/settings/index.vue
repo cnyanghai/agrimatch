@@ -57,7 +57,7 @@ function handleLogout() {
     <WgNavBar title="设置" />
 
     <!-- 账号设置 -->
-    <view v-if="isLoggedIn" class="menu-group stitch-card">
+    <view v-if="isLoggedIn" class="menu-group stitch-card stitch-fade-up">
       <view class="menu-group__title">账号设置</view>
       <view class="menu-item" @tap="goEditProfile">
         <view class="menu-item__left">
@@ -79,7 +79,7 @@ function handleLogout() {
     </view>
 
     <!-- 通用设置 -->
-    <view class="menu-group stitch-card">
+    <view class="menu-group stitch-card stitch-fade-up" style="animation-delay: .05s">
       <view class="menu-group__title">通用</view>
       <view class="menu-item" @tap="clearCache">
         <view class="menu-item__left">
@@ -101,7 +101,7 @@ function handleLogout() {
     </view>
 
     <!-- 法律文档 -->
-    <view class="menu-group stitch-card">
+    <view class="menu-group stitch-card stitch-fade-up" style="animation-delay: .1s">
       <view class="menu-group__title">法律与合规</view>
       <view class="menu-item" @tap="goLegal('terms')">
         <view class="menu-item__left">
@@ -154,13 +154,17 @@ function handleLogout() {
 .menu-group {
   background: $bg-card;
   margin: 0 $spacing-md $spacing-sm;
-  border-radius: $radius-lg;
+  border-radius: $radius-xl;
   overflow: hidden;
+  box-shadow: $shadow-warm-card;
 
   &__title {
-    font-size: $font-sm;
-    color: $text-secondary;
-    padding: $spacing-sm $spacing-md 0;
+    font-size: $font-xs;
+    color: $text-placeholder;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2rpx;
+    padding: $spacing-md $spacing-md $spacing-xs;
   }
 }
 
@@ -170,8 +174,13 @@ function handleLogout() {
   align-items: center;
   padding: $spacing-lg $spacing-md;
   border-bottom: 1rpx solid $border-light;
+  transition: background 0.15s;
 
   &:last-child { border-bottom: none; }
+
+  &:active {
+    background: $bg-hover;
+  }
 
   &__left {
     display: flex;
@@ -183,12 +192,16 @@ function handleLogout() {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44rpx;
+    width: 52rpx;
+    height: 52rpx;
+    border-radius: $radius-lg;
+    background: $warm-50;
   }
 
   &__label {
     font-size: $font-md;
     color: $text-primary;
+    font-weight: 500;
   }
 
   &__right {
@@ -210,11 +223,13 @@ function handleLogout() {
 .btn-logout {
   background: $bg-card;
   color: $color-error;
-  border: 1rpx solid $border-color;
-  border-radius: $radius-lg;
+  border: 1rpx solid rgba($color-error, 0.2);
+  border-radius: $radius-full;
   font-size: $font-md;
+  font-weight: 600;
   height: 88rpx;
   line-height: 88rpx;
+  box-shadow: 0 4rpx 16rpx rgba($color-error, 0.08);
 }
 
 .version-info {

@@ -137,35 +137,36 @@ function handleViewRequirement(id: number) { uni.navigateTo({ url: `/pages/requi
     <WgEmpty v-else-if="!company" text="企业信息不存在" icon="empty" />
 
     <scroll-view v-else scroll-y class="company-scroll">
-      <!-- Header -->
-      <view class="company-header stitch-card stitch-card--elevated stitch-scale-in">
-        <WgAvatar :name="company.companyName" size="lg" shape="square" />
-        <view class="company-header__info">
-          <text class="company-header__name">{{ company.companyName }}</text>
-          <view class="company-header__meta">
-            <WgStatusChip v-if="company.companyType" :label="formatType(company.companyType)" variant="brand" size="sm" />
-            <text v-if="formatLocation(company)" class="company-header__location">
-              <WgIcon name="map-pin" :size="12" :color="WARM_400" /> {{ formatLocation(company) }}
-            </text>
+      <!-- Hero Header -->
+      <view class="company-hero">
+        <view class="company-hero__inner">
+          <WgAvatar :name="company.companyName" size="lg" shape="square" />
+          <view class="company-hero__info">
+            <text class="company-hero__name">{{ company.companyName }}</text>
+            <view class="company-hero__meta">
+              <WgStatusChip v-if="company.companyType" :label="formatType(company.companyType)" variant="brand" size="sm" />
+              <text v-if="formatLocation(company)" class="company-hero__location">
+                <WgIcon name="map-pin" :size="12" color="rgba(255,255,255,0.7)" /> {{ formatLocation(company) }}
+              </text>
+            </view>
+          </view>
+        </view>
+        <!-- 统计数字浮于 Hero 底部 -->
+        <view class="company-hero__stats">
+          <view class="company-hero__stat">
+            <text class="company-hero__stat-num font-mono">{{ supplies.length }}</text>
+            <text class="company-hero__stat-label">供应</text>
+          </view>
+          <view class="company-hero__stat-divider" />
+          <view class="company-hero__stat">
+            <text class="company-hero__stat-num font-mono">{{ requirements.length }}</text>
+            <text class="company-hero__stat-label">采购</text>
           </view>
         </view>
       </view>
 
-      <!-- 统计 -->
-      <view class="stat-bar stitch-card">
-        <view class="stat-bar__item">
-          <text class="stat-bar__num font-mono">{{ supplies.length }}</text>
-          <text class="stat-bar__label">供应</text>
-        </view>
-        <view class="stat-bar__divider" />
-        <view class="stat-bar__item">
-          <text class="stat-bar__num font-mono">{{ requirements.length }}</text>
-          <text class="stat-bar__label">采购</text>
-        </view>
-      </view>
-
       <!-- 企业信息 -->
-      <view class="section-card stitch-card">
+      <view class="section-card stitch-card stitch-fade-up">
         <view class="section-card__title">
           <text class="stitch-section-title">企业信息</text>
         </view>
@@ -176,7 +177,7 @@ function handleViewRequirement(id: number) { uni.navigateTo({ url: `/pages/requi
       </view>
 
       <!-- 企业简介 -->
-      <view v-if="company.companyIntro" class="section-card stitch-card">
+      <view v-if="company.companyIntro" class="section-card stitch-card stitch-fade-up" style="animation-delay: .05s">
         <view class="section-card__title">
           <text class="stitch-section-title">企业简介</text>
         </view>
@@ -184,7 +185,7 @@ function handleViewRequirement(id: number) { uni.navigateTo({ url: `/pages/requi
       </view>
 
       <!-- 资质证书 -->
-      <view v-if="certificates.length > 0" class="section-card stitch-card">
+      <view v-if="certificates.length > 0" class="section-card stitch-card stitch-fade-up" style="animation-delay: .1s">
         <view class="section-card__title">
           <text class="stitch-section-title">资质证书</text>
         </view>
@@ -198,7 +199,7 @@ function handleViewRequirement(id: number) { uni.navigateTo({ url: `/pages/requi
       </view>
 
       <!-- 厂区位置 -->
-      <view v-if="showMapSection" class="section-card stitch-card">
+      <view v-if="showMapSection" class="section-card stitch-card stitch-fade-up" style="animation-delay: .15s">
         <view class="section-card__title">
           <text class="stitch-section-title">厂区位置</text>
         </view>
@@ -216,7 +217,7 @@ function handleViewRequirement(id: number) { uni.navigateTo({ url: `/pages/requi
       </view>
 
       <!-- 供应信息 -->
-      <view v-if="supplies.length" class="section-card stitch-card">
+      <view v-if="supplies.length" class="section-card stitch-card stitch-fade-up" style="animation-delay: .2s">
         <view class="section-card__title">
           <text class="stitch-section-title">供应信息 ({{ supplies.length }})</text>
         </view>
@@ -227,7 +228,7 @@ function handleViewRequirement(id: number) { uni.navigateTo({ url: `/pages/requi
       </view>
 
       <!-- 采购需求 -->
-      <view v-if="requirements.length" class="section-card stitch-card">
+      <view v-if="requirements.length" class="section-card stitch-card stitch-fade-up" style="animation-delay: .25s">
         <view class="section-card__title">
           <text class="stitch-section-title">采购需求 ({{ requirements.length }})</text>
         </view>
@@ -263,20 +264,24 @@ function handleViewRequirement(id: number) { uni.navigateTo({ url: `/pages/requi
   height: 100vh;
 }
 
-/* Header */
-.company-header {
-  display: flex;
-  align-items: center;
-  gap: $spacing-md;
-  margin: $spacing-sm;
-  padding: $spacing-lg;
+/* Hero Header */
+.company-hero {
+  background: linear-gradient(145deg, $brand-700 0%, $brand-500 55%, $warm-300 100%);
+  padding: $spacing-lg $spacing-lg $spacing-sm;
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+  }
 
   &__info { flex: 1; min-width: 0; }
 
   &__name {
     font-size: $font-xl;
     font-weight: 800;
-    color: $text-primary;
+    color: $text-inverse;
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -293,45 +298,45 @@ function handleViewRequirement(id: number) { uni.navigateTo({ url: `/pages/requi
 
   &__location {
     font-size: $font-sm;
-    color: $text-secondary;
+    color: rgba(255, 255, 255, 0.7);
     display: flex;
     align-items: center;
     gap: 4rpx;
   }
-}
 
-/* Stat bar */
-.stat-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 $spacing-sm;
-  margin-top: $spacing-sm;
-  padding: $spacing-md 0;
+  &__stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border-radius: $radius-xl;
+    padding: $spacing-sm 0;
+  }
 
-  &__item {
+  &__stat {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
-  &__num {
+  &__stat-num {
     font-size: $font-2xl;
     font-weight: 800;
-    color: $brand-600;
+    color: $text-inverse;
   }
 
-  &__label {
+  &__stat-label {
     font-size: $font-sm;
-    color: $text-secondary;
+    color: rgba(255, 255, 255, 0.7);
     margin-top: 4rpx;
   }
 
-  &__divider {
+  &__stat-divider {
     width: 1rpx;
-    height: 60rpx;
-    background: $border-light;
+    height: 48rpx;
+    background: rgba(255, 255, 255, 0.25);
   }
 }
 

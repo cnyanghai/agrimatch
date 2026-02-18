@@ -256,9 +256,10 @@ onShow(() => {
 
     <template v-else>
       <!-- 状态头部 -->
-      <view class="status-header" :style="{ backgroundColor: getStatusColor(detail.status) }">
+      <view class="status-header">
         <view class="status-header__row">
           <text class="status-header__label">{{ getStatusLabel(detail.status) }}</text>
+          <WgStatusChip :label="getStatusLabel(detail.status)" variant="brand" size="sm" />
         </view>
         <text class="status-header__no">合同编号：{{ detail.contractNo || '-' }}</text>
       </view>
@@ -290,10 +291,10 @@ onShow(() => {
       </view>
 
       <!-- 金额卡片 -->
-      <view class="amount-card stitch-card stitch-card--elevated">
+      <view class="amount-card stitch-card stitch-card--elevated stitch-scale-in">
         <view class="amount-card__row">
           <text class="amount-card__label">合同总额</text>
-          <text class="amount-card__value">{{ formatAmount(detail.totalAmount) }}</text>
+          <text class="amount-card__value font-mono">{{ formatAmount(detail.totalAmount) }}</text>
         </view>
         <view class="amount-card__sub">
           <text class="amount-card__detail">
@@ -303,7 +304,7 @@ onShow(() => {
       </view>
 
       <!-- 商品信息 -->
-      <view class="info-section">
+      <view class="info-section stitch-fade-up">
         <text class="info-section__title">商品信息</text>
         <view class="info-row">
           <text class="info-row__label">商品名称</text>
@@ -332,7 +333,7 @@ onShow(() => {
       </view>
 
       <!-- 交易双方 -->
-      <view class="info-section">
+      <view class="info-section stitch-fade-up" style="animation-delay: .05s">
         <text class="info-section__title">交易双方</text>
         <view class="party-block">
           <WgStatusChip label="卖方" variant="brand" size="sm" />
@@ -363,7 +364,7 @@ onShow(() => {
       </view>
 
       <!-- 交付信息 -->
-      <view class="info-section">
+      <view class="info-section stitch-fade-up" style="animation-delay: .1s">
         <text class="info-section__title">交付信息</text>
         <view class="info-row">
           <text class="info-row__label">交付日期</text>
@@ -384,7 +385,7 @@ onShow(() => {
       </view>
 
       <!-- 履约进度 -->
-      <view class="info-section" v-if="detail.milestoneTotal">
+      <view class="info-section stitch-fade-up" style="animation-delay: .15s" v-if="detail.milestoneTotal">
         <text class="info-section__title">履约进度</text>
         <view class="milestone">
           <view class="milestone__bar">
@@ -403,7 +404,7 @@ onShow(() => {
       </view>
 
       <!-- 履约节点预览 -->
-      <view class="info-section" v-if="milestones.length > 0">
+      <view class="info-section stitch-fade-up" style="animation-delay: .2s" v-if="milestones.length > 0">
         <text class="info-section__title">履约节点</text>
         <view
           v-for="ms in previewMilestones"
@@ -433,7 +434,7 @@ onShow(() => {
       </view>
 
       <!-- 备注 -->
-      <view class="info-section" v-if="detail.remark">
+      <view class="info-section stitch-fade-up" style="animation-delay: .25s" v-if="detail.remark">
         <text class="info-section__title">备注</text>
         <view class="remark-block">
           <text class="remark-block__text">{{ detail.remark }}</text>
@@ -441,7 +442,7 @@ onShow(() => {
       </view>
 
       <!-- 时间信息 -->
-      <view class="info-section">
+      <view class="info-section stitch-fade-up" style="animation-delay: .3s">
         <text class="info-section__title">时间记录</text>
         <view class="info-row">
           <text class="info-row__label">创建时间</text>
@@ -530,18 +531,25 @@ onShow(() => {
 /* ===== 状态头部 ===== */
 .status-header {
   padding: $spacing-xl $spacing-lg $spacing-lg;
+  background: linear-gradient(145deg, $brand-700 0%, $brand-500 60%, $warm-200 100%);
   color: $text-inverse;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
 
   &__label {
     font-size: $font-2xl;
-    font-weight: bold;
+    font-weight: 800;
     display: block;
     margin-bottom: $spacing-xs;
   }
 
   &__no {
     font-size: $font-sm;
-    opacity: 0.85;
+    color: rgba(255, 255, 255, 0.75);
   }
 }
 

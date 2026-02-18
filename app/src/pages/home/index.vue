@@ -199,7 +199,7 @@ function getImages(item: PostResponse): string[] {
     </view>
 
     <!-- ===== 快捷入口 (2行3列 → 大图标) ===== -->
-    <view class="quick-section">
+    <view class="quick-section stitch-scale-in">
       <view class="quick-grid">
         <view class="quick-item" @tap="goSupplyHall">
           <view class="stitch-icon-box stitch-icon-box--md stitch-icon-box--brand">
@@ -278,9 +278,10 @@ function getImages(item: PostResponse): string[] {
       <!-- 帖子列表 -->
       <view v-if="displayList.length > 0" class="post-list">
         <view
-          v-for="item in displayList"
+          v-for="(item, pIdx) in displayList"
           :key="item.id"
-          class="post-card stitch-card"
+          class="post-card stitch-card stitch-fade-up"
+          :style="{ animationDelay: `${pIdx * 0.04}s` }"
           @tap="goDetail(item.id)"
         >
           <text class="post-card__title">{{ item.title }}</text>

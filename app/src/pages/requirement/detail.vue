@@ -149,41 +149,47 @@ function handleShare() {
     <WgEmpty v-else-if="!detail" text="采购信息不存在" icon="empty" />
 
     <scroll-view v-else scroll-y class="detail-scroll">
-      <!-- 商品图片 -->
-      <view v-if="imageList.length > 0" class="image-section stitch-card">
-        <scroll-view scroll-x class="image-section__scroll">
-          <view class="image-section__list">
+      <!-- 顶部 Hero 区 -->
+      <view class="detail-hero">
+        <scroll-view v-if="imageList.length > 0" scroll-x class="detail-hero__gallery" :show-scrollbar="false">
+          <view class="detail-hero__gallery-inner">
             <image
               v-for="(img, idx) in imageList"
               :key="idx"
-              class="image-section__item"
+              class="detail-hero__img"
               :src="img"
               mode="aspectFill"
               @tap="handlePreviewImage(idx)"
             />
           </view>
         </scroll-view>
-      </view>
 
-      <!-- 核心信息 -->
-      <view class="hero-card stitch-card stitch-card--elevated stitch-scale-in">
-        <view class="hero-card__header">
-          <text class="hero-card__name">{{ detail.categoryName }}</text>
-          <WgStatusChip v-if="statusInfo" :label="statusInfo.label" :variant="statusInfo.variant" size="sm" dot />
+        <view class="detail-hero__info">
+          <view class="detail-hero__tags">
+            <WgStatusChip v-if="statusInfo" :label="statusInfo.label" :variant="statusInfo.variant" size="sm" dot />
+          </view>
+          <text class="detail-hero__name">{{ detail.categoryName }}</text>
+          <view class="detail-hero__price-row">
+            <text class="detail-hero__price-sign">¥</text>
+            <text class="detail-hero__price">{{ detail.expectedPrice ?? '-' }}</text>
+            <text class="detail-hero__price-unit">/ {{ priceUnit }} · 期望价格</text>
+          </view>
         </view>
-        <WgPriceTag :value="detail.expectedPrice" :unit="`${priceUnit} · 期望价格`" size="lg" />
       </view>
 
-      <!-- 详情 -->
-      <view class="section-card stitch-card">
+      <!-- 采购信息 -->
+      <view class="section-card stitch-card stitch-fade-up">
+        <view class="section-card__title">
+          <text class="stitch-section-title">采购信息</text>
+        </view>
         <view v-for="(row, idx) in infoRows" :key="idx" class="info-row">
           <text class="info-row__label">{{ row.label }}</text>
           <text class="info-row__value" :class="{ 'info-row__value--accent': row.accent }">{{ row.value }}</text>
         </view>
       </view>
 
-      <!-- 动态参数 -->
-      <view v-if="dynamicParams.length > 0" class="section-card stitch-card">
+      <!-- 质量要求 -->
+      <view v-if="dynamicParams.length > 0" class="section-card stitch-card stitch-fade-up" style="animation-delay: .05s">
         <view class="section-card__title">
           <text class="stitch-section-title">质量要求</text>
         </view>
@@ -194,7 +200,7 @@ function handleShare() {
       </view>
 
       <!-- 企业卡片 -->
-      <view v-if="detail.companyName" class="company-card stitch-card tap-feedback" @tap="goCompany">
+      <view v-if="detail.companyName" class="company-card stitch-card stitch-fade-up tap-feedback" style="animation-delay: .1s" @tap="goCompany">
         <WgAvatar :name="detail.companyName" size="md" />
         <view class="company-card__info">
           <text class="company-card__name">{{ detail.companyName }}</text>
@@ -239,33 +245,69 @@ function handleShare() {
   justify-content: center;
 }
 
-.image-section {
-  margin: $spacing-sm $spacing-sm 0;
-  padding: 0;
-  overflow: hidden;
+/* Hero 区 — 采购主题（秋色系） */
+.detail-hero {
+  background: linear-gradient(145deg, $autumn-600 0%, $autumn-400 60%, $warm-200 100%);
+  padding-bottom: $spacing-lg;
 
-  &__scroll { white-space: nowrap; }
-  &__list { display: flex; gap: $spacing-xs; padding: $spacing-sm; }
-  &__item { width: 400rpx; height: 300rpx; border-radius: $radius-md; flex-shrink: 0; }
-}
+  &__gallery { white-space: nowrap; }
 
-.hero-card {
-  margin: $spacing-sm;
-  padding: $spacing-lg;
-
-  &__header {
+  &__gallery-inner {
     display: flex;
-    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-sm $spacing-md;
+  }
+
+  &__img {
+    width: 440rpx;
+    height: 320rpx;
+    border-radius: $radius-lg;
+    flex-shrink: 0;
+  }
+
+  &__info {
+    padding: $spacing-sm $spacing-lg 0;
+  }
+
+  &__tags {
+    display: flex;
     flex-wrap: wrap;
     gap: $spacing-xs;
-    margin-bottom: $spacing-md;
+    margin-bottom: $spacing-xs;
   }
 
   &__name {
-    font-size: $font-xl;
+    font-size: 40rpx;
     font-weight: 800;
-    color: $text-primary;
-    margin-right: $spacing-xs;
+    color: $text-inverse;
+    display: block;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4rpx;
+  }
+
+  &__price-sign {
+    font-size: 32rpx;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  &__price {
+    font-size: 56rpx;
+    font-weight: 800;
+    color: #fff;
+    font-family: 'DIN Alternate', 'Roboto Mono', monospace;
+    line-height: 1;
+  }
+
+  &__price-unit {
+    font-size: $font-sm;
+    color: rgba(255, 255, 255, 0.65);
+    margin-left: $spacing-xs;
   }
 }
 

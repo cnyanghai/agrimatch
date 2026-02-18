@@ -311,38 +311,23 @@ async function handleConsult(item: SupplyResponse) {
       <view
         v-for="item in displayList"
         :key="item.id"
-        class="supply-card stitch-card"
+        class="supply-card stitch-card stitch-fade-up"
         @tap="goDetail(item.id)"
       >
-        <!-- 标题行 -->
-        <view class="supply-card__header">
-          <view class="supply-card__title-row">
+        <!-- 价格横幅 -->
+        <view class="supply-card__hero">
+          <view class="supply-card__hero-left">
             <text class="supply-card__name">{{ item.categoryName }}</text>
-            <text v-if="item.origin" class="stitch-tag stitch-tag--warm">{{ item.origin }}</text>
-            <text v-if="item.priceType === 1" class="stitch-tag stitch-tag--autumn">基差报价</text>
+            <view class="supply-card__origin-row">
+              <text v-if="item.origin" class="supply-card__origin">{{ item.origin }}</text>
+              <text v-if="item.priceType === 1" class="supply-card__basis-badge">基差</text>
+            </view>
           </view>
-          <text v-if="item.priceType !== 1" class="supply-card__price">{{ formatPrice(item.exFactoryPrice) }}</text>
-        </view>
-
-        <!-- 企业行 -->
-        <view class="supply-card__company-row">
-          <WgIcon name="store" :size="14" :color="WARM_400" />
-          <text class="supply-card__company">{{ item.companyName || item.nickName || item.userName }}</text>
-          <view
-            v-if="authStore.isLoggedIn && item.userId && !isSelfUser(item.userId)"
-            class="follow-btn"
-            :class="{ 'follow-btn--active': isFollowingUser(item.userId) }"
-            @tap.stop="toggleFollow(item)"
-          >
-            <text class="follow-btn__text">{{ isFollowingUser(item.userId) ? '已关注' : '+ 关注' }}</text>
+          <view v-if="item.priceType !== 1" class="supply-card__price-block">
+            <text class="supply-card__price-sign">¥</text>
+            <text class="supply-card__price">{{ item.exFactoryPrice ?? '-' }}</text>
+            <text class="supply-card__price-unit">/{{ getUnitLabel(item.schemaCode, 'price', item.categoryName) }}</text>
           </view>
-        </view>
-
-        <!-- 标签 -->
-        <view class="supply-card__tags">
-          <text v-if="item.quantity" class="stitch-tag stitch-tag--warm">{{ item.quantity }}{{ getUnitLabel(item.schemaCode, 'quantity', item.categoryName) }}</text>
-          <text v-if="item.deliveryMode" class="stitch-tag stitch-tag--warm">{{ item.deliveryMode }}</text>
-          <text v-if="item.paymentMethod" class="stitch-tag stitch-tag--warm">{{ item.paymentMethod }}</text>
         </view>
 
         <!-- 质量参数 -->
@@ -351,6 +336,14 @@ async function handleConsult(item: SupplyResponse) {
             <text v-for="(tag, idx) in getParamTags(item)" :key="idx" class="param-tag">{{ tag }}</text>
           </view>
         </scroll-view>
+
+        <!-- 交易条件标签 -->
+        <view class="supply-card__tags">
+          <text v-if="item.quantity" class="stitch-tag stitch-tag--brand">{{ item.quantity }}{{ getUnitLabel(item.schemaCode, 'quantity', item.categoryName) }}</text>
+          <text v-if="item.deliveryMode" class="stitch-tag stitch-tag--warm">{{ item.deliveryMode }}</text>
+          <text v-if="item.paymentMethod" class="stitch-tag stitch-tag--warm">{{ item.paymentMethod }}</text>
+          <text v-if="item.packaging" class="stitch-tag stitch-tag--warm">{{ item.packaging }}</text>
+        </view>
 
         <!-- 基差报价 -->
         <view v-if="item.priceType === 1 && item.basisQuotes && item.basisQuotes.length > 0" class="basis-section">
@@ -370,28 +363,48 @@ async function handleConsult(item: SupplyResponse) {
           </view>
         </view>
 
-        <!-- 底部：时间 + 咨询按钮 -->
-        <view class="supply-card__bottom">
-          <view class="supply-card__meta">
-            <view class="supply-card__time-row">
-              <text class="supply-card__time">{{ formatRelativeTime(item.createTime) }}</text>
-              <text
-                v-if="formatRemainingTime(item.expireTime)"
-                class="supply-card__expire"
-                :class="{
-                  'supply-card__expire--warning': formatRemainingTime(item.expireTime)?.level === 'warning',
-                  'supply-card__expire--expired': formatRemainingTime(item.expireTime)?.level === 'expired',
-                }"
-              >{{ formatRemainingTime(item.expireTime)?.text }}</text>
+        <!-- 底部：企业 + 时间 + 咨询 -->
+        <view class="supply-card__footer">
+          <view class="supply-card__seller">
+            <view class="supply-card__seller-avatar">
+              <text class="supply-card__seller-char">{{ (item.companyName || item.nickName || '?')[0] }}</text>
             </view>
-            <view v-if="item.shipAddress" class="supply-card__location">
-              <WgIcon name="map-pin" :size="12" :color="WARM_400" />
-              <text class="supply-card__address">{{ item.shipAddress }}</text>
+            <view class="supply-card__seller-info">
+              <text class="supply-card__company">{{ item.companyName || item.nickName || item.userName }}</text>
+              <view class="supply-card__meta-row">
+                <text class="supply-card__time">{{ formatRelativeTime(item.createTime) }}</text>
+                <text v-if="item.shipAddress" class="supply-card__dot">·</text>
+                <text v-if="item.shipAddress" class="supply-card__address">{{ item.shipAddress }}</text>
+              </view>
             </view>
           </view>
-          <view class="consult-btn stitch-pill stitch-pill--brand" @tap.stop="handleConsult(item)">
-            <text class="consult-btn__text">咨询</text>
+          <view class="supply-card__actions">
+            <view
+              v-if="authStore.isLoggedIn && item.userId && !isSelfUser(item.userId)"
+              class="follow-btn"
+              :class="{ 'follow-btn--active': isFollowingUser(item.userId) }"
+              @tap.stop="toggleFollow(item)"
+            >
+              <text class="follow-btn__text">{{ isFollowingUser(item.userId) ? '已关注' : '+ 关注' }}</text>
+            </view>
+            <view class="consult-btn" @tap.stop="handleConsult(item)">
+              <WgIcon name="message-circle" :size="14" :color="WHITE" />
+              <text class="consult-btn__text">咨询</text>
+            </view>
           </view>
+        </view>
+
+        <!-- 过期提示 -->
+        <view
+          v-if="formatRemainingTime(item.expireTime)"
+          class="supply-card__expire-bar"
+          :class="{
+            'supply-card__expire-bar--warning': formatRemainingTime(item.expireTime)?.level === 'warning',
+            'supply-card__expire-bar--expired': formatRemainingTime(item.expireTime)?.level === 'expired',
+          }"
+        >
+          <WgIcon name="clock" :size="11" :color="formatRemainingTime(item.expireTime)?.level === 'warning' ? '#DC2626' : WARM_400" />
+          <text class="supply-card__expire-text">{{ formatRemainingTime(item.expireTime)?.text }}</text>
         </view>
       </view>
       <WgLoadMore :status="loadStatus" @loadMore="loadMore" />
@@ -515,60 +528,82 @@ async function handleConsult(item: SupplyResponse) {
 
 /* ===== List ===== */
 .list {
-  padding: $spacing-md $spacing-lg;
+  padding: $spacing-sm $spacing-lg;
 }
 
 /* ===== Supply Card ===== */
 .supply-card {
-  margin-bottom: $spacing-md;
+  margin-bottom: $spacing-lg;
 
-  &__header {
+  &__hero {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: $spacing-sm;
+    padding: $spacing-lg;
+    margin: -#{$spacing-xl} -#{$spacing-xl} $spacing-md;
+    background: linear-gradient(135deg, $brand-50 0%, rgba(45, 106, 79, 0.04) 100%);
+    border-radius: $radius-2xl $radius-2xl $radius-lg $radius-lg;
   }
 
-  &__title-row {
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
+  &__hero-left {
     flex: 1;
     min-width: 0;
   }
 
   &__name {
-    font-size: $font-lg;
+    font-size: $font-xl;
     font-weight: 800;
     color: $text-primary;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: block;
+    margin-bottom: 6rpx;
+  }
+
+  &__origin-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+  }
+
+  &__origin {
+    font-size: $font-xs;
+    color: $text-secondary;
+  }
+
+  &__basis-badge {
+    font-size: 20rpx;
+    color: $autumn-600;
+    background: $autumn-50;
+    padding: 2rpx 12rpx;
+    border-radius: $radius-full;
+    font-weight: 700;
+  }
+
+  &__price-block {
+    display: flex;
+    align-items: baseline;
+    flex-shrink: 0;
+    margin-left: $spacing-md;
+  }
+
+  &__price-sign {
+    font-size: $font-md;
+    font-weight: 700;
+    color: $accent-400;
+    margin-right: 2rpx;
   }
 
   &__price {
-    font-size: $font-xl;
-    font-weight: 800;
+    font-size: $font-3xl;
+    font-weight: 900;
     color: $accent-400;
-    flex-shrink: 0;
-    margin-left: $spacing-sm;
     font-family: 'DIN Alternate', 'Roboto Mono', -apple-system, sans-serif;
+    line-height: 1;
   }
 
-  &__company-row {
-    display: flex;
-    align-items: center;
-    gap: 8rpx;
-    margin-bottom: $spacing-md;
-  }
-
-  &__company {
-    flex: 1;
-    font-size: $font-sm;
-    color: $text-secondary;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  &__price-unit {
+    font-size: $font-xs;
+    color: $text-placeholder;
+    margin-left: 4rpx;
   }
 
   &__tags {
@@ -588,7 +623,7 @@ async function handleConsult(item: SupplyResponse) {
     gap: $spacing-xs;
   }
 
-  &__bottom {
+  &__footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -596,45 +631,105 @@ async function handleConsult(item: SupplyResponse) {
     border-top: 1rpx solid $warm-100;
   }
 
-  &__meta {
+  &__seller {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
     flex: 1;
     min-width: 0;
   }
 
-  &__time-row {
+  &__seller-avatar {
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 50%;
+    background: $brand-50;
     display: flex;
     align-items: center;
-    gap: $spacing-sm;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
-  &__time {
-    font-size: $font-xs;
-    color: $text-placeholder;
+  &__seller-char {
+    font-size: 22rpx;
+    font-weight: 700;
+    color: $brand-600;
   }
 
-  &__expire {
-    font-size: $font-xs;
-    color: $text-secondary;
-    font-weight: 500;
-
-    &--warning { color: #DC2626; font-weight: 600; }
-    &--expired { color: $text-placeholder; }
+  &__seller-info {
+    flex: 1;
+    min-width: 0;
   }
 
-  &__location {
+  &__company {
+    font-size: $font-sm;
+    color: $text-primary;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+  }
+
+  &__meta-row {
     display: flex;
     align-items: center;
     gap: 6rpx;
-    max-width: 340rpx;
-    margin-top: 6rpx;
+    margin-top: 2rpx;
+  }
+
+  &__time {
+    font-size: 22rpx;
+    color: $text-placeholder;
+  }
+
+  &__dot {
+    font-size: 22rpx;
+    color: $text-placeholder;
   }
 
   &__address {
-    font-size: $font-xs;
+    font-size: 22rpx;
     color: $text-placeholder;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    flex-shrink: 0;
+  }
+
+  &__expire-bar {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    margin-top: $spacing-sm;
+    padding: 6rpx $spacing-md;
+    background: $warm-50;
+    border-radius: $radius-md;
+
+    &--warning {
+      background: #fef2f2;
+    }
+
+    &--expired {
+      opacity: 0.6;
+    }
+  }
+
+  &__expire-text {
+    font-size: 22rpx;
+    color: $text-secondary;
+    font-weight: 500;
+
+    .supply-card__expire-bar--warning & {
+      color: #DC2626;
+      font-weight: 600;
+    }
   }
 }
 
@@ -679,12 +774,19 @@ async function handleConsult(item: SupplyResponse) {
 
 /* ===== Consult Button ===== */
 .consult-btn {
-  flex-shrink: 0;
-  margin-left: $spacing-sm;
-  padding: $spacing-sm $spacing-xl;
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: $spacing-xs $spacing-lg;
+  background: $brand-600;
+  border-radius: $radius-full;
+  box-shadow: $shadow-brand;
+  transition: transform $transition-fast;
+
+  &:active { transform: scale(0.93); }
 
   &__text {
-    font-size: $font-sm;
+    font-size: $font-xs;
     color: $text-inverse;
     font-weight: 700;
   }

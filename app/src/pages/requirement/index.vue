@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { WARM_400, WHITE, AUTUMN_500 } from '../../constants/colors'
+import { WARM_400, WHITE, AUTUMN_500, ACCENT_400 } from '../../constants/colors'
 import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import { listRequirements, type RequirementResponse } from '../../api/requirement'
 import { getSchemaTree, type ProductSchemaVO } from '../../api/productSchema'
@@ -298,25 +298,55 @@ async function handleQuote(item: RequirementResponse) {
       <view
         v-for="item in displayList"
         :key="item.id"
-        class="req-card stitch-card"
+        class="req-card stitch-card stitch-fade-up"
         @tap="goDetail(item.id)"
       >
-        <!-- 左侧色条 -->
-        <view class="req-card__accent" />
-        <view class="req-card__body">
-          <!-- 标题行 -->
-          <view class="req-card__header">
-            <view class="req-card__title-row">
-              <text class="req-card__name">{{ item.categoryName }}</text>
-              <text v-if="item.packaging" class="stitch-tag stitch-tag--autumn">{{ item.packaging }}</text>
-            </view>
-            <text class="req-card__price">{{ formatPrice(item.expectedPrice) }}</text>
+        <!-- 价格横幅 -->
+        <view class="req-card__hero">
+          <view class="req-card__hero-left">
+            <text class="req-card__name">{{ item.categoryName }}</text>
+            <text v-if="item.packaging" class="req-card__sub">{{ item.packaging }}</text>
           </view>
+          <view class="req-card__price-block">
+            <text class="req-card__price-label">期望价</text>
+            <view class="req-card__price-row">
+              <text class="req-card__price-sign">¥</text>
+              <text class="req-card__price">{{ item.expectedPrice ?? '-' }}</text>
+              <text class="req-card__price-unit">/{{ getUnitLabel(item.schemaCode, 'price', item.categoryName) }}</text>
+            </view>
+          </view>
+        </view>
 
-          <!-- 企业行 -->
-          <view class="req-card__company-row">
-            <WgIcon name="store" :size="14" :color="WARM_400" />
-            <text class="req-card__company">{{ item.companyName || item.nickName || item.userName }}</text>
+        <!-- 质量参数 -->
+        <scroll-view v-if="getParamTags(item).length > 0" scroll-x class="req-card__params-scroll" :show-scrollbar="false">
+          <view class="req-card__params">
+            <text v-for="(tag, idx) in getParamTags(item)" :key="idx" class="param-tag">{{ tag }}</text>
+          </view>
+        </scroll-view>
+
+        <!-- 交易条件标签 -->
+        <view class="req-card__tags">
+          <text v-if="item.quantity" class="stitch-tag stitch-tag--autumn">{{ item.quantity }}{{ getUnitLabel(item.schemaCode, 'quantity', item.categoryName) }}</text>
+          <text v-if="item.paymentMethod" class="stitch-tag stitch-tag--warm">{{ item.paymentMethod }}</text>
+          <text v-if="item.deliveryMethod" class="stitch-tag stitch-tag--warm">{{ item.deliveryMethod }}</text>
+        </view>
+
+        <!-- 底部 -->
+        <view class="req-card__footer">
+          <view class="req-card__buyer">
+            <view class="req-card__buyer-avatar">
+              <text class="req-card__buyer-char">{{ (item.companyName || item.nickName || '?')[0] }}</text>
+            </view>
+            <view class="req-card__buyer-info">
+              <text class="req-card__company">{{ item.companyName || item.nickName || item.userName }}</text>
+              <view class="req-card__meta-row">
+                <text class="req-card__time">{{ formatRelativeTime(item.createTime) }}</text>
+                <text v-if="item.purchaseAddress" class="req-card__dot">·</text>
+                <text v-if="item.purchaseAddress" class="req-card__address">{{ item.purchaseAddress }}</text>
+              </view>
+            </view>
+          </view>
+          <view class="req-card__actions">
             <view
               v-if="authStore.isLoggedIn && item.userId && !isSelfUser(item.userId)"
               class="follow-btn"
@@ -325,45 +355,24 @@ async function handleQuote(item: RequirementResponse) {
             >
               <text class="follow-btn__text">{{ isFollowingUser(item.userId) ? '已关注' : '+ 关注' }}</text>
             </view>
-          </view>
-
-          <!-- 标签 -->
-          <view class="req-card__tags">
-            <text v-if="item.quantity" class="stitch-tag stitch-tag--autumn">{{ item.quantity }}{{ getUnitLabel(item.schemaCode, 'quantity', item.categoryName) }}</text>
-            <text v-if="item.paymentMethod" class="stitch-tag stitch-tag--autumn">{{ item.paymentMethod }}</text>
-            <text v-if="item.deliveryMethod" class="stitch-tag stitch-tag--autumn">{{ item.deliveryMethod }}</text>
-          </view>
-
-          <!-- 质量参数 -->
-          <scroll-view v-if="getParamTags(item).length > 0" scroll-x class="req-card__params-scroll" :show-scrollbar="false">
-            <view class="req-card__params">
-              <text v-for="(tag, idx) in getParamTags(item)" :key="idx" class="param-tag">{{ tag }}</text>
-            </view>
-          </scroll-view>
-
-          <!-- 底部 -->
-          <view class="req-card__bottom">
-            <view class="req-card__meta">
-              <view class="req-card__time-row">
-                <text class="req-card__time">{{ formatRelativeTime(item.createTime) }}</text>
-                <text
-                  v-if="formatRemainingTime(item.expireTime)"
-                  class="req-card__expire"
-                  :class="{
-                    'req-card__expire--warning': formatRemainingTime(item.expireTime)?.level === 'warning',
-                    'req-card__expire--expired': formatRemainingTime(item.expireTime)?.level === 'expired',
-                  }"
-                >{{ formatRemainingTime(item.expireTime)?.text }}</text>
-              </view>
-              <view v-if="item.purchaseAddress" class="req-card__location">
-                <WgIcon name="map-pin" :size="12" :color="WARM_400" />
-                <text class="req-card__address">{{ item.purchaseAddress }}</text>
-              </view>
-            </view>
-            <view class="quote-btn stitch-pill stitch-pill--autumn" @tap.stop="handleQuote(item)">
+            <view class="quote-btn" @tap.stop="handleQuote(item)">
+              <WgIcon name="send" :size="14" :color="WHITE" />
               <text class="quote-btn__text">报价</text>
             </view>
           </view>
+        </view>
+
+        <!-- 过期提示 -->
+        <view
+          v-if="formatRemainingTime(item.expireTime)"
+          class="req-card__expire-bar"
+          :class="{
+            'req-card__expire-bar--warning': formatRemainingTime(item.expireTime)?.level === 'warning',
+            'req-card__expire-bar--expired': formatRemainingTime(item.expireTime)?.level === 'expired',
+          }"
+        >
+          <WgIcon name="clock" :size="11" :color="formatRemainingTime(item.expireTime)?.level === 'warning' ? '#DC2626' : WARM_400" />
+          <text class="req-card__expire-text">{{ formatRemainingTime(item.expireTime)?.text }}</text>
         </view>
       </view>
       <WgLoadMore :status="loadStatus" @loadMore="loadMore" />
@@ -491,75 +500,79 @@ async function handleQuote(item: RequirementResponse) {
 
 /* ===== List ===== */
 .list {
-  padding: $spacing-md $spacing-lg;
+  padding: $spacing-sm $spacing-lg;
 }
 
 /* ===== Requirement Card ===== */
 .req-card {
-  display: flex;
-  margin-bottom: $spacing-md;
-  padding: 0;
+  margin-bottom: $spacing-lg;
 
-  &__accent {
-    width: 8rpx;
-    flex-shrink: 0;
-    background: linear-gradient(180deg, $autumn-300 0%, $autumn-400 100%);
-    border-radius: $radius-2xl 0 0 $radius-2xl;
-  }
-
-  &__body {
-    flex: 1;
-    padding: $spacing-xl;
-    min-width: 0;
-  }
-
-  &__header {
+  &__hero {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: $spacing-sm;
+    padding: $spacing-lg;
+    margin: -#{$spacing-xl} -#{$spacing-xl} $spacing-md;
+    background: linear-gradient(135deg, $autumn-50 0%, rgba(212, 163, 115, 0.06) 100%);
+    border-radius: $radius-2xl $radius-2xl $radius-lg $radius-lg;
   }
 
-  &__title-row {
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
+  &__hero-left {
     flex: 1;
     min-width: 0;
   }
 
   &__name {
-    font-size: $font-lg;
+    font-size: $font-xl;
     font-weight: 800;
     color: $text-primary;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: block;
+    margin-bottom: 4rpx;
+  }
+
+  &__sub {
+    font-size: $font-xs;
+    color: $text-secondary;
+  }
+
+  &__price-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+    margin-left: $spacing-md;
+  }
+
+  &__price-label {
+    font-size: 20rpx;
+    color: $text-placeholder;
+    margin-bottom: 2rpx;
+  }
+
+  &__price-row {
+    display: flex;
+    align-items: baseline;
+  }
+
+  &__price-sign {
+    font-size: $font-md;
+    font-weight: 700;
+    color: $autumn-500;
+    margin-right: 2rpx;
   }
 
   &__price {
-    font-size: $font-xl;
-    font-weight: 800;
+    font-size: $font-3xl;
+    font-weight: 900;
     color: $autumn-500;
-    flex-shrink: 0;
-    margin-left: $spacing-sm;
     font-family: 'DIN Alternate', 'Roboto Mono', -apple-system, sans-serif;
+    line-height: 1;
   }
 
-  &__company-row {
-    display: flex;
-    align-items: center;
-    gap: 8rpx;
-    margin-bottom: $spacing-md;
-  }
-
-  &__company {
-    flex: 1;
-    font-size: $font-sm;
-    color: $text-secondary;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  &__price-unit {
+    font-size: $font-xs;
+    color: $text-placeholder;
+    margin-left: 4rpx;
   }
 
   &__tags {
@@ -579,7 +592,7 @@ async function handleQuote(item: RequirementResponse) {
     gap: $spacing-xs;
   }
 
-  &__bottom {
+  &__footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -587,45 +600,100 @@ async function handleQuote(item: RequirementResponse) {
     border-top: 1rpx solid $warm-100;
   }
 
-  &__meta {
+  &__buyer {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
     flex: 1;
     min-width: 0;
   }
 
-  &__time-row {
+  &__buyer-avatar {
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 50%;
+    background: $autumn-50;
     display: flex;
     align-items: center;
-    gap: $spacing-sm;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
-  &__time {
-    font-size: $font-xs;
-    color: $text-placeholder;
+  &__buyer-char {
+    font-size: 22rpx;
+    font-weight: 700;
+    color: $autumn-500;
   }
 
-  &__expire {
-    font-size: $font-xs;
-    color: $text-secondary;
-    font-weight: 500;
-
-    &--warning { color: #DC2626; font-weight: 600; }
-    &--expired { color: $text-placeholder; }
+  &__buyer-info {
+    flex: 1;
+    min-width: 0;
   }
 
-  &__location {
+  &__company {
+    font-size: $font-sm;
+    color: $text-primary;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+  }
+
+  &__meta-row {
     display: flex;
     align-items: center;
     gap: 6rpx;
-    max-width: 340rpx;
-    margin-top: 6rpx;
+    margin-top: 2rpx;
+  }
+
+  &__time {
+    font-size: 22rpx;
+    color: $text-placeholder;
+  }
+
+  &__dot {
+    font-size: 22rpx;
+    color: $text-placeholder;
   }
 
   &__address {
-    font-size: $font-xs;
+    font-size: 22rpx;
     color: $text-placeholder;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    flex-shrink: 0;
+  }
+
+  &__expire-bar {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    margin-top: $spacing-sm;
+    padding: 6rpx $spacing-md;
+    background: $warm-50;
+    border-radius: $radius-md;
+
+    &--warning { background: #fef2f2; }
+    &--expired { opacity: 0.6; }
+  }
+
+  &__expire-text {
+    font-size: 22rpx;
+    color: $text-secondary;
+    font-weight: 500;
+
+    .req-card__expire-bar--warning & {
+      color: #DC2626;
+      font-weight: 600;
+    }
   }
 }
 
@@ -670,12 +738,19 @@ async function handleQuote(item: RequirementResponse) {
 
 /* ===== Quote Button ===== */
 .quote-btn {
-  flex-shrink: 0;
-  margin-left: $spacing-sm;
-  padding: $spacing-sm $spacing-xl;
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: $spacing-xs $spacing-lg;
+  background: $autumn-400;
+  border-radius: $radius-full;
+  box-shadow: 0 4rpx 14rpx rgba(212, 163, 115, 0.3);
+  transition: transform $transition-fast;
+
+  &:active { transform: scale(0.93); }
 
   &__text {
-    font-size: $font-sm;
+    font-size: $font-xs;
     color: $text-inverse;
     font-weight: 700;
   }

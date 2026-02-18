@@ -292,7 +292,7 @@ function handleViewPrivacy() {
     <!-- Navigation -->
     <view class="nav" :style="{ paddingTop: statusBarHeight + 'px' }">
       <view v-if="canGoBack" class="nav__back" @tap="handleBack">
-        <WgIcon name="left" :size="18" color="#1C1917" />
+        <WgIcon name="left" :size="18" :color="WHITE" />
       </view>
     </view>
 
@@ -593,7 +593,7 @@ function handleViewPrivacy() {
 <style lang="scss" scoped>
 .login-page {
   min-height: 100vh;
-  background: $warm-50;
+  background: linear-gradient(175deg, $brand-700 0%, $brand-600 30%, $warm-50 30.1%);
   position: relative;
   overflow-x: hidden;
 }
@@ -615,7 +615,7 @@ function handleViewPrivacy() {
     width: 72rpx;
     height: 72rpx;
     border-radius: 50%;
-    background: $warm-100;
+    background: rgba(255, 255, 255, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -623,7 +623,7 @@ function handleViewPrivacy() {
 
     &:active {
       transform: scale(0.92);
-      background: $warm-200;
+      background: rgba(255, 255, 255, 0.25);
     }
   }
 }
@@ -643,12 +643,14 @@ function handleViewPrivacy() {
     width: 96rpx;
     height: 96rpx;
     border-radius: 28rpx;
-    background: $brand-600;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2rpx solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20rpx);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: $spacing-md;
-    box-shadow: 0 6rpx 20rpx rgba(45, 106, 79, 0.2);
+    box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.1);
   }
 
   &__logo {
@@ -659,14 +661,14 @@ function handleViewPrivacy() {
   &__name {
     font-size: $font-3xl;
     font-weight: 900;
-    color: $text-primary;
+    color: $text-inverse;
     letter-spacing: 6rpx;
     margin-bottom: 8rpx;
   }
 
   &__subtitle {
     font-size: $font-sm;
-    color: $text-placeholder;
+    color: rgba(255, 255, 255, 0.7);
     letter-spacing: 4rpx;
   }
 }
@@ -676,10 +678,12 @@ function handleViewPrivacy() {
 // ==============================
 .form-area {
   background: $bg-card;
-  border-radius: 40rpx 40rpx 0 0;
+  border-radius: $radius-2xl $radius-2xl 0 0;
   padding: 52rpx 48rpx 60rpx;
-  box-shadow: 0 -2rpx 16rpx rgba(120, 90, 50, 0.04);
+  box-shadow: 0 -4rpx 24rpx rgba(45, 106, 79, 0.08);
   min-height: 55vh;
+  position: relative;
+  z-index: 2;
 }
 
 // ==============================
@@ -879,16 +883,17 @@ function handleViewPrivacy() {
   background: $brand-600;
   color: $text-inverse;
   border: none;
-  border-radius: 20rpx;
+  border-radius: $radius-full;
   font-size: 32rpx;
   font-weight: 700;
   text-align: center;
   letter-spacing: 4rpx;
+  box-shadow: $shadow-brand;
   transition: all 0.2s ease;
 
   &:active {
     transform: scale(0.97);
-    opacity: 0.9;
+    box-shadow: 0 2rpx 8rpx rgba(45, 106, 79, 0.15);
   }
 
   &[disabled] {

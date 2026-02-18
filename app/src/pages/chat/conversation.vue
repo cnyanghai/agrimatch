@@ -543,7 +543,7 @@ function handleSignContract(contractId: number) {
   display: flex;
   align-items: center;
   padding: $spacing-sm $spacing-md;
-  background: $bg-card;
+  background: linear-gradient(135deg, $warm-50 0%, $bg-card 100%);
   border-bottom: 1rpx solid $border-light;
   gap: $spacing-sm;
 
@@ -558,14 +558,15 @@ function handleSignContract(contractId: number) {
   &__icon {
     width: 56rpx;
     height: 56rpx;
-    border-radius: $radius-md;
+    border-radius: $radius-lg;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
 
-    &--brand { background: $brand-600; }
-    &--autumn { background: $autumn-400; }
+    &--brand { background: linear-gradient(135deg, $brand-600 0%, $brand-500 100%); }
+    &--autumn { background: linear-gradient(135deg, $autumn-500 0%, $autumn-400 100%); }
   }
 
   &__info {
@@ -576,7 +577,7 @@ function handleSignContract(contractId: number) {
   &__name {
     font-size: $font-sm;
     color: $text-primary;
-    font-weight: 600;
+    font-weight: 700;
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -586,7 +587,8 @@ function handleSignContract(contractId: number) {
   &__price {
     font-size: $font-xs;
     color: $accent-400;
-    font-weight: 600;
+    font-weight: 700;
+    font-family: 'DIN Alternate', 'Roboto Mono', monospace;
   }
 
   &__quote-btn {
@@ -597,6 +599,7 @@ function handleSignContract(contractId: number) {
     padding: $spacing-xs $spacing-md;
     background: $brand-600;
     border-radius: $radius-pill;
+    box-shadow: 0 4rpx 12rpx rgba($brand-600, 0.25);
 
     &:active { opacity: 0.8; transform: scale(0.95); }
   }
@@ -743,13 +746,14 @@ function handleSignContract(contractId: number) {
   background: $bg-card;
   border-top: 1rpx solid $border-light;
   gap: $spacing-sm;
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.04);
 
   &__plus {
     width: 72rpx;
     height: 72rpx;
-    border-radius: 50%;
-    background: $bg-page;
-    border: 1rpx solid $border-color;
+    border-radius: $radius-xl;
+    background: linear-gradient(135deg, $warm-50 0%, $warm-100 100%);
+    border: 1rpx solid $border-light;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -765,7 +769,7 @@ function handleSignContract(contractId: number) {
     flex: 1;
     height: 72rpx;
     background: $bg-page;
-    border-radius: $radius-lg;
+    border-radius: $radius-full;
     padding: 0 $spacing-md;
     font-size: $font-md;
   }
@@ -797,11 +801,12 @@ function handleSignContract(contractId: number) {
     height: 72rpx;
     padding: 0 $spacing-lg;
     background: $brand-600;
-    border-radius: $radius-lg;
+    border-radius: $radius-full;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: transform 0.15s;
+    box-shadow: 0 4rpx 12rpx rgba($brand-600, 0.25);
 
     &:active {
       transform: scale(0.95);

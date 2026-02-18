@@ -234,9 +234,10 @@ function handleDelete(item: RequirementResponse) {
     <!-- 列表 -->
     <view v-if="displayList.length > 0" class="list">
       <view
-        v-for="item in displayList"
+        v-for="(item, mIdx) in displayList"
         :key="item.id"
-        class="my-card"
+        class="my-card stitch-fade-up"
+        :style="{ animationDelay: `${mIdx * 0.04}s` }"
       >
         <view class="my-card__accent" />
         <view class="my-card__content">
@@ -359,16 +360,16 @@ function handleDelete(item: RequirementResponse) {
 .my-card {
   display: flex;
   background: $bg-card;
-  border-radius: $radius-lg;
+  border-radius: $radius-xl;
   margin-bottom: $spacing-sm;
   overflow: hidden;
-  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+  box-shadow: $shadow-warm-card;
 
   &__accent {
     width: 6rpx;
     flex-shrink: 0;
-    background: $autumn-400;
-    border-radius: $radius-lg 0 0 $radius-lg;
+    background: linear-gradient(180deg, $autumn-500 0%, $autumn-300 100%);
+    border-radius: $radius-xl 0 0 $radius-xl;
   }
 
   &__content {
@@ -600,19 +601,19 @@ function handleDelete(item: RequirementResponse) {
   position: fixed;
   right: 32rpx;
   bottom: 60rpx;
-  width: 100rpx;
-  height: 100rpx;
-  border-radius: 50%;
-  background: $autumn-400;
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: $radius-2xl;
+  background: linear-gradient(135deg, $autumn-500 0%, $autumn-400 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 24rpx rgba(212, 163, 115, 0.3);
+  box-shadow: 0 8rpx 28rpx rgba($autumn-400, 0.35);
   transition: transform 0.15s;
   z-index: 20;
 
   &:active {
-    transform: scale(0.92);
+    transform: scale(0.92) rotate(-90deg);
   }
 }
 </style>
