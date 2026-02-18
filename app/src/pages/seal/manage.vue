@@ -86,6 +86,8 @@ async function handleSealCreated(result: string) {
 
 <template>
   <view class="seal-page">
+    <WgNavBar title="印章管理" />
+
     <!-- 印章列表 -->
     <WgSkeleton v-if="loading" type="list" :rows="3" />
 

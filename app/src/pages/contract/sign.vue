@@ -405,6 +405,8 @@ function onMethodChange(method: SignMethod) {
 
 <template>
   <view class="sign-page">
+    <WgNavBar title="签署合同" />
+
     <WgSkeleton v-if="loading" type="detail" />
 
     <template v-else-if="contract">

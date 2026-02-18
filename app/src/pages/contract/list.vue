@@ -176,6 +176,20 @@ function getStatusColor(status: number): string {
   return contractStatusMap[status]?.color || '#999'
 }
 
+type ChipVariant = 'brand' | 'autumn' | 'accent' | 'success' | 'warning' | 'error' | 'neutral'
+
+function getStatusVariant(status: number): ChipVariant {
+  const map: Record<number, ChipVariant> = {
+    0: 'neutral',    // 草稿
+    1: 'warning',    // 待签署
+    2: 'brand',      // 已签署
+    3: 'accent',     // 履约中
+    4: 'success',    // 已完成
+    5: 'error',      // 已取消
+  }
+  return map[status] || 'neutral'
+}
+
 /** 获取Tab对应的合同数量 */
 function getTabCount(tabValue: number): number {
   if (tabValue === -1) return contracts.value.length
@@ -194,45 +208,47 @@ function formatStatAmount(val: number): string {
 
 <template>
   <view class="contract-page">
+    <WgNavBar title="合同管理" :back="true" />
+
     <!-- ===== 搜索栏 ===== -->
     <view class="search-bar">
-      <view class="search-bar__input-wrap">
+      <view class="stitch-search">
         <WgIcon name="search" :size="16" :color="WARM_400" />
         <input
-          class="search-bar__input"
+          class="stitch-search__input"
           type="text"
           :value="searchInput"
           placeholder="搜索合同编号、产品、公司"
-          placeholder-class="search-bar__placeholder"
+          placeholder-class="stitch-search__placeholder"
           confirm-type="search"
           @input="onSearchInput(($event as any).detail.value)"
         />
-        <view v-if="searchInput" class="search-bar__clear" @tap="clearSearch">
+        <view v-if="searchInput" class="stitch-search__action" @tap="clearSearch">
           <WgIcon name="x" :size="14" :color="WARM_400" />
         </view>
       </view>
     </view>
 
     <!-- ===== 统计卡片区域 ===== -->
-    <view class="stats-bar">
+    <view class="stats-bar stitch-card">
       <view class="stats-bar__item">
-        <text class="stats-bar__value stats-bar__value--amount">{{ formatStatAmount(stats.pendingTotal) }}</text>
+        <text class="stats-bar__value stats-bar__value--amount font-mono">{{ formatStatAmount(stats.pendingTotal) }}</text>
         <text class="stats-bar__label">待结算(元)</text>
       </view>
       <view class="stats-bar__divider" />
       <view class="stats-bar__item">
-        <text class="stats-bar__value">{{ stats.monthlyNew }}</text>
+        <text class="stats-bar__value font-mono">{{ stats.monthlyNew }}</text>
         <text class="stats-bar__label">本月新增</text>
       </view>
       <view class="stats-bar__divider" />
       <view class="stats-bar__item">
-        <text class="stats-bar__value">{{ stats.executionRate }}%</text>
+        <text class="stats-bar__value font-mono">{{ stats.executionRate }}%</text>
         <text class="stats-bar__label">完成率</text>
       </view>
     </view>
 
     <!-- ===== 待办提醒（可折叠） ===== -->
-    <view v-if="hasTodo" class="todo-section">
+    <view v-if="hasTodo" class="todo-section stitch-card">
       <view class="todo-section__header" @tap="todoExpanded = !todoExpanded">
         <view class="todo-section__title-wrap">
           <WgIcon name="alert-circle" :size="16" color="#f59e0b" />
@@ -291,18 +307,13 @@ function formatStatAmount(val: number): string {
       <view
         v-for="item in filteredContracts"
         :key="item.id"
-        class="contract-card"
+        class="contract-card stitch-card tap-feedback stitch-fade-up"
         @tap="goDetail(item.id)"
       >
         <!-- 头部：合同编号 + 状态标签 -->
         <view class="contract-card__header">
           <text class="contract-card__no">{{ item.contractNo }}</text>
-          <text
-            class="contract-card__status"
-            :style="{ color: getStatusColor(item.status), backgroundColor: getStatusColor(item.status) + '18' }"
-          >
-            {{ getStatusLabel(item.status) }}
-          </text>
+          <WgStatusChip :label="getStatusLabel(item.status)" :variant="getStatusVariant(item.status)" size="sm" />
         </view>
 
         <!-- 商品 + 金额 -->

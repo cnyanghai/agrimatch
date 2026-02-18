@@ -170,6 +170,8 @@ async function handleSubmit() {
 
 <template>
   <view class="quote-form-page">
+    <WgNavBar title="发送报价" />
+
     <view class="form-card">
       <!-- Subject name (read-only) -->
       <view v-if="subjectName" class="form-card__field">

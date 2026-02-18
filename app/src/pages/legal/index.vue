@@ -47,6 +47,8 @@ function switchType(type: PageType) {
 
 <template>
   <view class="legal-page">
+    <WgNavBar title="法律条款" />
+
     <!-- Tab navigation -->
     <scroll-view scroll-x class="type-tabs" :show-scrollbar="false">
       <view class="type-tabs__inner">

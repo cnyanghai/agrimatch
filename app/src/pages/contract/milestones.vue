@@ -198,6 +198,8 @@ async function handleAddCustom() {
 
 <template>
   <view class="milestones-page">
+    <WgNavBar title="履约节点" />
+
     <!-- Header actions -->
     <view v-if="milestones.length === 0 && !loading" class="generate-bar">
       <view class="generate-bar__btn" @tap="handleGenerate">

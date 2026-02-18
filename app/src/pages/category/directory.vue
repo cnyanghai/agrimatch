@@ -84,6 +84,8 @@ onMounted(async () => {
 
 <template>
   <view class="category-page">
+    <WgNavBar title="分类目录" />
+
     <!-- Search bar -->
     <view class="search-section">
       <view class="search-bar">

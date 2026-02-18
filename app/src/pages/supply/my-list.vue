@@ -200,6 +200,8 @@ function handleDelete(item: SupplyResponse) {
 
 <template>
   <view class="my-list-page">
+    <WgNavBar title="我的供应" />
+
     <!-- 状态筛选 -->
     <view class="filter-bar">
       <view class="filter-bar__pills">

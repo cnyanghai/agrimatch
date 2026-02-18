@@ -102,6 +102,8 @@ function getLatestUpdateTime(): string {
 
 <template>
   <view class="market-page">
+    <WgNavBar title="行情" />
+
     <!-- 品种 tabs -->
     <view class="product-tabs">
       <WgSkeleton v-if="productsLoading" type="list" :rows="1" />

@@ -198,6 +198,8 @@ function handleDelete(item: RequirementResponse) {
 
 <template>
   <view class="my-list-page">
+    <WgNavBar title="我的采购" />
+
     <!-- 状态筛选 -->
     <view class="filter-bar">
       <view class="filter-bar__pills">

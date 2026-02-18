@@ -203,6 +203,8 @@ function getContentPreview(content?: string): string {
 
 <template>
   <view class="search-page">
+    <WgNavBar title="搜索" />
+
     <!-- 搜索栏 -->
     <view class="search-bar">
       <view class="search-bar__input-wrap">

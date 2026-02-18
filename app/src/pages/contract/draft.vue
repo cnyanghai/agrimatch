@@ -286,6 +286,8 @@ async function handleSubmit() {
 
 <template>
   <view class="draft-page">
+    <WgNavBar title="起草合同" />
+
     <WgSkeleton v-if="loading" type="detail" />
 
     <template v-else>

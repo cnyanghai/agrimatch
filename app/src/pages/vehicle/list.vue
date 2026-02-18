@@ -138,6 +138,8 @@ function maskIdCard(val: string): string {
 
 <template>
   <view class="vehicle-page">
+    <WgNavBar title="车辆列表" />
+
     <!-- Vehicle list -->
     <view v-if="vehicles.length > 0" class="vehicle-list">
       <view

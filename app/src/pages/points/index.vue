@@ -211,6 +211,8 @@ function handleRedeem() {
 
 <template>
   <view class="points-page">
+    <WgNavBar title="积分中心" />
+
     <!-- Not logged in state -->
     <view v-if="!isLoggedIn" class="points-page__login-prompt">
       <view class="login-prompt__card">
@@ -226,18 +228,18 @@ function handleRedeem() {
     <!-- Logged in content -->
     <view v-else>
       <!-- Balance card -->
-      <view class="balance-card">
+      <view class="balance-card stitch-hero">
         <view class="balance-card__header">
           <text class="balance-card__title">我的积分</text>
         </view>
         <view class="balance-card__body">
           <view class="balance-card__main">
-            <text class="balance-card__points">{{ formatPoints(balanceInfo?.pointsBalance) }}</text>
+            <text class="balance-card__points font-mono">{{ formatPoints(balanceInfo?.pointsBalance) }}</text>
             <text class="balance-card__points-label">积分余额</text>
           </view>
           <view class="balance-card__divider"></view>
           <view class="balance-card__sub">
-            <text class="balance-card__cny">¥{{ formatCny(balanceInfo?.cnyBalance) }}</text>
+            <text class="balance-card__cny font-mono">¥{{ formatCny(balanceInfo?.cnyBalance) }}</text>
             <text class="balance-card__cny-label">约合人民币</text>
           </view>
         </view>
@@ -259,7 +261,7 @@ function handleRedeem() {
       </view>
 
       <!-- JD Card Redeem Section -->
-      <view class="jd-section">
+      <view class="jd-section stitch-card">
         <view class="jd-section__header">
           <text class="jd-section__title">京东卡兑换</text>
           <text class="jd-section__ratio">兑换比例：10积分 = ¥8</text>
@@ -313,7 +315,7 @@ function handleRedeem() {
       </view>
 
       <!-- Transaction history -->
-      <view class="tx-section">
+      <view class="tx-section stitch-card">
         <view class="tx-section__header">
           <text class="tx-section__title">交易记录</text>
           <text class="tx-section__refresh" @tap="handleRefresh">刷新</text>

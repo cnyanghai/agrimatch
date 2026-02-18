@@ -178,7 +178,9 @@ async function handleSave() {
 </script>
 
 <template>
-  <scroll-view scroll-y class="edit-company-page">
+  <view class="edit-company-page">
+    <WgNavBar :title="isEdit ? '编辑企业信息' : '创建企业'" />
+    <scroll-view scroll-y class="edit-company-scroll">
     <view v-if="loading" class="loading-wrap">
       <WgSkeleton :rows="8" />
     </view>
@@ -344,7 +346,8 @@ async function handleSave() {
 
       <view style="height: 80rpx;" />
     </view>
-  </scroll-view>
+    </scroll-view>
+  </view>
 </template>
 
 <style lang="scss" scoped>

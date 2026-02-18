@@ -370,13 +370,15 @@ function handleDraftContract(msg: ChatMessageResponse) {
 
 <template>
   <view class="conversation-page">
+    <WgNavBar :title="peerName || '聊天'" />
+
     <!-- Connection status bar -->
     <view v-if="!connected" class="status-bar">
-      <text class="status-bar__text">{{ connecting ? '连接中...' : '未连接' }}</text>
+      <WgStatusChip :label="connecting ? '连接中...' : '未连接'" variant="warning" size="sm" dot />
     </view>
 
     <!-- Subject context card + 报价入口 -->
-    <view v-if="subjectInfo" class="context-card">
+    <view v-if="subjectInfo" class="context-card stitch-card">
       <view class="context-card__main" @tap="goSubjectDetail">
         <view class="context-card__icon" :class="subjectInfo.type === 'supply' ? 'context-card__icon--brand' : 'context-card__icon--autumn'">
           <WgIcon :name="subjectInfo.type === 'supply' ? 'store' : 'shopping-bag'" :size="16" :color="WHITE" />
@@ -591,9 +593,9 @@ function handleDraftContract(msg: ChatMessageResponse) {
   &__text {
     font-size: $font-xs;
     color: $text-placeholder;
-    background: rgba(0, 0, 0, 0.04);
+    background: $warm-100;
     padding: 6rpx 24rpx;
-    border-radius: 20rpx;
+    border-radius: $radius-full;
     max-width: 80%;
     text-align: center;
   }
@@ -608,9 +610,9 @@ function handleDraftContract(msg: ChatMessageResponse) {
   &__text {
     font-size: $font-xs;
     color: $text-placeholder;
-    background: rgba(0, 0, 0, 0.04);
+    background: $warm-100;
     padding: 4rpx 20rpx;
-    border-radius: 20rpx;
+    border-radius: $radius-full;
   }
 }
 
@@ -643,7 +645,7 @@ function handleDraftContract(msg: ChatMessageResponse) {
   &__bubble {
     max-width: 70%;
     padding: $spacing-sm $spacing-md;
-    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+    box-shadow: $shadow-sm;
   }
 
   &__text {

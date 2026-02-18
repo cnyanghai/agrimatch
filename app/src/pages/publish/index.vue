@@ -38,6 +38,8 @@ function handleClose() {
 
 <template>
   <view class="publish-page">
+    <WgNavBar title="发布" />
+
     <!-- 半透明遮罩 + 底部弹窗 -->
     <view v-if="showPanel" class="overlay anim-overlay-in" @tap="handleClose">
       <view class="panel anim-panel-up" @tap.stop>

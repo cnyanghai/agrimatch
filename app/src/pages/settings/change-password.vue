@@ -64,6 +64,7 @@ async function handleSubmit() {
 
 <template>
   <view class="change-pwd-page">
+    <WgNavBar title="修改密码" />
     <view class="form-card stitch-card">
       <view class="section-tip">
         <WgIcon name="shield" :size="18" :color="BRAND_600" />

@@ -257,6 +257,8 @@ function handleDeletePost() {
 
 <template>
   <view class="detail-page">
+    <WgNavBar title="帖子详情" />
+
     <!-- 加载中 -->
     <WgSkeleton v-if="loading" type="detail" />
 

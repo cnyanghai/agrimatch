@@ -97,6 +97,8 @@ function getImages(item: PostResponse): string[] {
 
 <template>
   <view class="collections-page">
+    <WgNavBar title="我的收藏" />
+
     <!-- Post list -->
     <view v-if="displayList.length > 0" class="post-list">
       <view

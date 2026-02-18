@@ -104,6 +104,8 @@ function handleViewCompany(companyId: number) {
 
 <template>
   <view class="profile-page">
+    <WgNavBar title="用户主页" />
+
     <!-- Loading -->
     <WgSkeleton v-if="loading" type="detail" />
 

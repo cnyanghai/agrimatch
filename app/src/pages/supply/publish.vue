@@ -392,6 +392,8 @@ async function handleSubmit() {
 
 <template>
   <view class="publish-page">
+    <WgNavBar title="发布供应" />
+
     <!-- 模板操作栏 -->
     <view class="template-bar">
       <view class="template-bar__btn" @tap="templatePickerOpen = true">

@@ -158,6 +158,8 @@ async function handleSubmit() {
 
 <template>
   <view class="publish-page">
+    <WgNavBar title="发布帖子" />
+
     <!-- 标题输入 -->
     <view class="form-card">
       <view class="form-card__field">

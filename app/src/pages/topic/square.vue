@@ -171,6 +171,8 @@ function getImages(item: PostResponse): string[] {
 
 <template>
   <view class="square-page">
+    <WgNavBar title="话题广场" />
+
     <!-- 搜索栏 -->
     <view v-if="showSearch" class="search-bar">
       <view class="search-bar__inner">

@@ -74,6 +74,8 @@ function getNotifyStyle(type: string): { icon: string; bgClass: string } {
 
 <template>
   <view class="notify-page">
+    <WgNavBar title="消息通知" />
+
     <!-- 筛选栏 -->
     <view class="filter-bar">
       <view class="filter-bar__tabs">

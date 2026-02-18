@@ -485,4 +485,105 @@ input, textarea {
     color: $accent-400;
   }
 }
+
+/* ================================================================
+   Stitch Motion System (Sprint 4)
+   ================================================================ */
+
+/* 列表项 staggered fade-up 入场 */
+.stitch-fade-up {
+  animation: stitch-fade-up-in $transition-normal ease-out both;
+}
+
+@for $i from 1 through 20 {
+  .stitch-fade-up:nth-child(#{$i}) {
+    animation-delay: #{$i * 50}ms;
+  }
+}
+
+@keyframes stitch-fade-up-in {
+  from {
+    opacity: 0;
+    transform: translateY(16rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 卡片入场：scale + fade */
+.stitch-scale-in {
+  animation: stitch-scale-in $transition-normal cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes stitch-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 数字弹跳入场（积分/统计） */
+.stitch-bounce-in {
+  animation: stitch-bounce-in 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes stitch-bounce-in {
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* 全局按下反馈增强 */
+.tap-feedback {
+  transition: transform $transition-fast ease, opacity $transition-fast ease;
+
+  &:active {
+    transform: scale(0.97);
+    opacity: 0.85;
+  }
+}
+
+/* 骨架屏暖色 shimmer */
+@keyframes stitch-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.stitch-shimmer {
+  background: linear-gradient(
+    90deg,
+    $warm-100 25%,
+    $warm-200 37%,
+    $warm-100 63%
+  );
+  background-size: 200% 100%;
+  animation: stitch-shimmer 1.5s ease infinite;
+}
+
+/* 页面 slide 过渡 */
+.stitch-slide-in {
+  animation: stitch-slide-in-right $transition-normal ease-out;
+}
+
+@keyframes stitch-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(40rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 进度条动画 */
+.stitch-progress-fill {
+  transition: width 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
 </style>

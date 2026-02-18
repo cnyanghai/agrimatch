@@ -54,8 +54,10 @@ function handleLogout() {
 
 <template>
   <view class="settings-page">
+    <WgNavBar title="设置" />
+
     <!-- 账号设置 -->
-    <view v-if="isLoggedIn" class="menu-group">
+    <view v-if="isLoggedIn" class="menu-group stitch-card">
       <view class="menu-group__title">账号设置</view>
       <view class="menu-item" @tap="goEditProfile">
         <view class="menu-item__left">
@@ -64,7 +66,7 @@ function handleLogout() {
         </view>
         <view class="menu-item__right">
           <text class="menu-item__value">{{ user?.nickName || user?.userName || '' }}</text>
-          <WgIcon name="right" :size="16" :color="WARM_400" />
+          <WgIcon name="chevron-right" :size="16" :color="WARM_400" />
         </view>
       </view>
       <view class="menu-item" @tap="goChangePassword">
@@ -72,19 +74,19 @@ function handleLogout() {
           <view class="menu-item__icon"><WgIcon name="lock" :size="20" color="#666" /></view>
           <text class="menu-item__label">修改密码</text>
         </view>
-        <WgIcon name="right" :size="16" :color="WARM_400" />
+        <WgIcon name="chevron-right" :size="16" :color="WARM_400" />
       </view>
     </view>
 
     <!-- 通用设置 -->
-    <view class="menu-group">
+    <view class="menu-group stitch-card">
       <view class="menu-group__title">通用</view>
       <view class="menu-item" @tap="clearCache">
         <view class="menu-item__left">
           <view class="menu-item__icon"><WgIcon name="trash" :size="20" :color="WARM_400" /></view>
           <text class="menu-item__label">清除缓存</text>
         </view>
-        <WgIcon name="right" :size="16" :color="WARM_400" />
+        <WgIcon name="chevron-right" :size="16" :color="WARM_400" />
       </view>
       <view class="menu-item" @tap="goAbout">
         <view class="menu-item__left">
@@ -93,41 +95,41 @@ function handleLogout() {
         </view>
         <view class="menu-item__right">
           <text class="menu-item__value">v1.0.0</text>
-          <WgIcon name="right" :size="16" :color="WARM_400" />
+          <WgIcon name="chevron-right" :size="16" :color="WARM_400" />
         </view>
       </view>
     </view>
 
     <!-- 法律文档 -->
-    <view class="menu-group">
+    <view class="menu-group stitch-card">
       <view class="menu-group__title">法律与合规</view>
       <view class="menu-item" @tap="goLegal('terms')">
         <view class="menu-item__left">
           <view class="menu-item__icon"><WgIcon name="file-text" :size="20" :color="BRAND_600" /></view>
           <text class="menu-item__label">用户协议</text>
         </view>
-        <WgIcon name="right" :size="16" :color="WARM_400" />
+        <WgIcon name="chevron-right" :size="16" :color="WARM_400" />
       </view>
       <view class="menu-item" @tap="goLegal('privacy')">
         <view class="menu-item__left">
           <view class="menu-item__icon"><WgIcon name="lock" :size="20" :color="BRAND_600" /></view>
           <text class="menu-item__label">隐私政策</text>
         </view>
-        <WgIcon name="right" :size="16" :color="WARM_400" />
+        <WgIcon name="chevron-right" :size="16" :color="WARM_400" />
       </view>
       <view class="menu-item" @tap="goLegal('disclaimer')">
         <view class="menu-item__left">
           <view class="menu-item__icon"><WgIcon name="info" :size="20" :color="ACCENT_400" /></view>
           <text class="menu-item__label">免责声明</text>
         </view>
-        <WgIcon name="right" :size="16" :color="WARM_400" />
+        <WgIcon name="chevron-right" :size="16" :color="WARM_400" />
       </view>
       <view class="menu-item" @tap="goLegal('feedback')">
         <view class="menu-item__left">
           <view class="menu-item__icon"><WgIcon name="message-square" :size="20" :color="ACTION_600" /></view>
           <text class="menu-item__label">意见反馈</text>
         </view>
-        <WgIcon name="right" :size="16" :color="WARM_400" />
+        <WgIcon name="chevron-right" :size="16" :color="WARM_400" />
       </view>
     </view>
 

@@ -187,6 +187,8 @@ async function handleSubmit() {
 
 <template>
   <view class="edit-page">
+    <WgNavBar title="编辑帖子" />
+
     <WgSkeleton v-if="loading" type="detail" />
 
     <template v-else>

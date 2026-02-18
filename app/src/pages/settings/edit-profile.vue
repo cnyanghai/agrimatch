@@ -102,6 +102,7 @@ async function handleSave() {
 
 <template>
   <view class="edit-page">
+    <WgNavBar title="编辑资料" />
     <!-- 头像 -->
     <view class="avatar-section" @tap="handleChangeAvatar">
       <view class="avatar-section__wrap">

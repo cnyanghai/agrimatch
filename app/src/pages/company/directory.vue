@@ -164,6 +164,8 @@ function clearSearch() {
 
 <template>
   <view class="directory-page">
+    <WgNavBar title="企业目录" />
+
     <!-- 搜索栏 -->
     <view class="search-bar">
       <view class="search-bar__inner">

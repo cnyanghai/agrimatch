@@ -249,16 +249,18 @@ onShow(() => {
 
 <template>
   <view class="detail-page">
-    <!-- 加载中 -->
-    <WgSkeleton v-if="loading" type="detail" />
+    <WgNavBar title="合同详情" />
 
-    <!-- 不存在 -->
+    <WgSkeleton v-if="loading" type="detail" />
     <WgEmpty v-else-if="!detail" text="合同信息不存在" icon="empty" />
 
     <template v-else>
       <!-- 状态头部 -->
       <view class="status-header" :style="{ backgroundColor: getStatusColor(detail.status) }">
-        <text class="status-header__label">{{ getStatusLabel(detail.status) }}</text>
+        <view class="status-header__row">
+          <text class="status-header__label">{{ getStatusLabel(detail.status) }}</text>
+          <WgStatusChip :label="getStatusLabel(detail.status)" variant="neutral" size="sm" />
+        </view>
         <text class="status-header__no">合同编号：{{ detail.contractNo }}</text>
       </view>
 
@@ -289,7 +291,7 @@ onShow(() => {
       </view>
 
       <!-- 金额卡片 -->
-      <view class="amount-card">
+      <view class="amount-card stitch-card stitch-card--elevated">
         <view class="amount-card__row">
           <text class="amount-card__label">合同总额</text>
           <text class="amount-card__value">{{ formatAmount(detail.totalAmount) }}</text>
@@ -334,7 +336,7 @@ onShow(() => {
       <view class="info-section">
         <text class="info-section__title">交易双方</text>
         <view class="party-block">
-          <text class="party-block__role party-block__role--seller">卖方</text>
+          <WgStatusChip label="卖方" variant="brand" size="sm" />
           <view class="party-block__detail">
             <text class="party-block__name">{{ detail.sellerCompanyName || '-' }}</text>
             <text class="party-block__contact" v-if="detail.sellerContacts">
@@ -343,16 +345,11 @@ onShow(() => {
             </text>
           </view>
           <view class="party-block__sign">
-            <text
-              class="party-block__sign-tag"
-              :class="detail.sellerSigned ? 'party-block__sign-tag--done' : 'party-block__sign-tag--pending'"
-            >
-              {{ detail.sellerSigned ? '已签署' : '待签署' }}
-            </text>
+            <WgStatusChip :label="detail.sellerSigned ? '已签署' : '待签署'" :variant="detail.sellerSigned ? 'success' : 'warning'" size="sm" dot />
           </view>
         </view>
         <view class="party-block">
-          <text class="party-block__role party-block__role--buyer">买方</text>
+          <WgStatusChip label="买方" variant="autumn" size="sm" />
           <view class="party-block__detail">
             <text class="party-block__name">{{ detail.buyerCompanyName || '-' }}</text>
             <text class="party-block__contact" v-if="detail.buyerContacts">
@@ -361,12 +358,7 @@ onShow(() => {
             </text>
           </view>
           <view class="party-block__sign">
-            <text
-              class="party-block__sign-tag"
-              :class="detail.buyerSigned ? 'party-block__sign-tag--done' : 'party-block__sign-tag--pending'"
-            >
-              {{ detail.buyerSigned ? '已签署' : '待签署' }}
-            </text>
+            <WgStatusChip :label="detail.buyerSigned ? '已签署' : '待签署'" :variant="detail.buyerSigned ? 'success' : 'warning'" size="sm" dot />
           </view>
         </view>
       </view>
@@ -462,41 +454,18 @@ onShow(() => {
         </view>
       </view>
 
-      <!-- 底部占位 -->
-      <view class="bottom-placeholder" />
-
-      <!-- 操作栏 -->
-      <view
-        v-if="canEdit || canSend || canSign || canCancel"
-        class="action-bar safe-area-bottom"
-      >
-        <view v-if="canEdit" class="action-bar__btn action-bar__btn--secondary" @tap="goEdit">
-          <text class="action-bar__btn-text action-bar__btn-text--secondary">编辑</text>
-        </view>
-        <view v-if="canEdit" class="action-bar__btn action-bar__btn--danger" @tap="handleDelete">
-          <text class="action-bar__btn-text action-bar__btn-text--danger">删除</text>
-        </view>
-        <view v-if="canSend" class="action-bar__btn action-bar__btn--primary" @tap="onSend">
-          <text class="action-bar__btn-text action-bar__btn-text--primary">发送签署</text>
-        </view>
-        <view v-if="canSign" class="action-bar__btn action-bar__btn--primary" @tap="goSign">
-          <text class="action-bar__btn-text action-bar__btn-text--primary">签署合同</text>
-        </view>
-        <view v-if="canCancel && !canEdit" class="action-bar__btn action-bar__btn--danger" @tap="onCancel">
-          <text class="action-bar__btn-text action-bar__btn-text--danger">取消合同</text>
-        </view>
-      </view>
-      <!-- 仅有PDF下载（无其他操作）时的单独底部栏 -->
-      <view
-        v-else-if="canDownloadPdf"
-        class="action-bar safe-area-bottom"
-      >
-        <view class="action-bar__btn action-bar__btn--secondary" @tap="downloadPdf">
-          <text class="action-bar__btn-text action-bar__btn-text--secondary">
-            {{ pdfDownloading ? '下载中...' : '下载PDF' }}
-          </text>
-        </view>
-      </view>
+      <WgActionBar v-if="canEdit || canSend || canSign || canCancel">
+        <button v-if="canEdit" class="wg-btn wg-btn--secondary" @tap="goEdit">编辑</button>
+        <button v-if="canEdit" class="wg-btn wg-btn--error-soft" @tap="handleDelete">删除</button>
+        <button v-if="canSend" class="wg-btn wg-btn--primary" @tap="onSend">发送签署</button>
+        <button v-if="canSign" class="wg-btn wg-btn--primary" @tap="goSign">签署合同</button>
+        <button v-if="canCancel && !canEdit" class="wg-btn wg-btn--error-soft" @tap="onCancel">取消合同</button>
+      </WgActionBar>
+      <WgActionBar v-else-if="canDownloadPdf">
+        <button class="wg-btn wg-btn--secondary" :disabled="pdfDownloading" @tap="downloadPdf">
+          {{ pdfDownloading ? '下载中...' : '下载PDF' }}
+        </button>
+      </WgActionBar>
     </template>
   </view>
 </template>

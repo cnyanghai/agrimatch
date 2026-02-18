@@ -122,6 +122,8 @@ function getPostInitial(item: PostResponse): string {
 
 <template>
   <view class="follow-page">
+    <WgNavBar title="关注列表" />
+
     <!-- Tab 栏 -->
     <view class="tab-bar">
       <view

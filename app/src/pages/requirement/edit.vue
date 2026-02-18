@@ -115,6 +115,8 @@ async function handleSubmit() {
 
 <template>
   <view class="edit-page">
+    <WgNavBar title="编辑采购" />
+
     <!-- Loading -->
     <view v-if="loading" class="edit-page__loading">
       <text class="edit-page__loading-text">加载中...</text>
