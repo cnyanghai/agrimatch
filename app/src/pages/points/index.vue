@@ -8,8 +8,11 @@ import {
   listPointsTx,
   rechargePoints,
   redeemPoints,
+  redeemJdCard,
+  listMyJdRedeems,
   type PointsMeResponse,
   type PointsTxResponse,
+  type JdRedeemDetailResponse,
 } from '../../api/points'
 import { formatRelativeTime } from '../../utils/format'
 
@@ -18,8 +21,17 @@ const isLoggedIn = computed(() => authStore.isLoggedIn)
 
 const balanceInfo = ref<PointsMeResponse | null>(null)
 const txList = ref<PointsTxResponse[]>([])
+const jdRedeems = ref<JdRedeemDetailResponse[]>([])
 const loading = ref(false)
 const refreshing = ref(false)
+
+const jdFaces = [500, 1000, 2000, 5000]
+const selectedJdFace = ref(1000)
+const jdRedeeming = ref(false)
+const jdPointsCost = computed(() => Math.ceil(selectedJdFace.value * 10 / 8))
+const canRedeemJd = computed(() =>
+  selectedJdFace.value > 0 && (balanceInfo.value?.pointsBalance ?? 0) >= jdPointsCost.value
+)
 
 onShow(() => {
   if (isLoggedIn.value) {
@@ -30,12 +42,14 @@ onShow(() => {
 async function loadData() {
   loading.value = true
   try {
-    const [meRes, txRes] = await Promise.allSettled([
+    const [meRes, txRes, jdRes] = await Promise.allSettled([
       getPointsMe(),
       listPointsTx(),
+      listMyJdRedeems(),
     ])
     if (meRes.status === 'fulfilled') balanceInfo.value = meRes.value
     if (txRes.status === 'fulfilled') txList.value = txRes.value || []
+    if (jdRes.status === 'fulfilled') jdRedeems.value = jdRes.value || []
   } finally {
     loading.value = false
     refreshing.value = false
@@ -124,6 +138,37 @@ function handleRecharge() {
   })
 }
 
+/** JD card redeem */
+async function handleJdRedeem() {
+  if (!canRedeemJd.value) {
+    uni.showToast({ title: '积分余额不足', icon: 'none' }); return
+  }
+  uni.showModal({
+    title: '京东卡兑换',
+    content: `确认兑换 ¥${selectedJdFace.value} 京东卡？\n消耗 ${jdPointsCost.value} 积分`,
+    success: async (res) => {
+      if (!res.confirm) return
+      jdRedeeming.value = true
+      try {
+        uni.showLoading({ title: '兑换中...' })
+        await redeemJdCard(selectedJdFace.value)
+        uni.hideLoading()
+        uni.showToast({ title: '兑换申请已提交', icon: 'success' })
+        await loadData()
+      } catch (e: any) {
+        uni.hideLoading()
+      } finally {
+        jdRedeeming.value = false
+      }
+    }
+  })
+}
+
+function jdStatusLabel(status: number): string {
+  const map: Record<number, string> = { 0: '待处理', 1: '已完成', 2: '已拒绝' }
+  return map[status] ?? '未知'
+}
+
 /** Redeem flow */
 function handleRedeem() {
   if (!balanceInfo.value || balanceInfo.value.pointsBalance <= 0) {
@@ -210,6 +255,60 @@ function handleRedeem() {
         <view class="action-bar__btn action-bar__btn--redeem" @tap="handleRedeem">
           <WgIcon name="refresh-cw" :size="20" color="#D4A373" />
           <text class="action-bar__btn-text">兑换</text>
+        </view>
+      </view>
+
+      <!-- JD Card Redeem Section -->
+      <view class="jd-section">
+        <view class="jd-section__header">
+          <text class="jd-section__title">京东卡兑换</text>
+          <text class="jd-section__ratio">兑换比例：10积分 = ¥8</text>
+        </view>
+
+        <view class="jd-faces">
+          <view
+            v-for="face in jdFaces"
+            :key="face"
+            class="jd-face-item"
+            :class="{ 'jd-face-item--active': selectedJdFace === face }"
+            @tap="selectedJdFace = face"
+          >
+            <text class="jd-face-item__value">¥{{ face }}</text>
+          </view>
+        </view>
+
+        <view class="jd-cost-info">
+          <text class="jd-cost-info__text">需消耗 <text class="jd-cost-info__num">{{ jdPointsCost }}</text> 积分</text>
+        </view>
+
+        <button
+          class="jd-redeem-btn"
+          :class="{ 'jd-redeem-btn--disabled': !canRedeemJd }"
+          :disabled="!canRedeemJd || jdRedeeming"
+          @tap="handleJdRedeem"
+        >
+          {{ jdRedeeming ? '兑换中...' : '兑换京东卡' }}
+        </button>
+
+        <!-- Recent JD redeems -->
+        <view v-if="jdRedeems.length" class="jd-history">
+          <text class="jd-history__title">兑换记录</text>
+          <view v-for="r in jdRedeems" :key="r.id" class="jd-history-item">
+            <view class="jd-history-item__left">
+              <text class="jd-history-item__face">¥{{ r.faceValue }}</text>
+              <text class="jd-history-item__time">{{ formatRelativeTime(r.createTime) }}</text>
+            </view>
+            <view class="jd-history-item__right">
+              <text v-if="r.cardCode" class="jd-history-item__code">{{ r.cardCode }}</text>
+              <text
+                class="jd-history-item__status"
+                :class="{
+                  'jd-history-item__status--done': r.status === 1,
+                  'jd-history-item__status--reject': r.status === 2,
+                }"
+              >{{ jdStatusLabel(r.status) }}</text>
+            </view>
+          </view>
         </view>
       </view>
 
@@ -575,6 +674,165 @@ function handleRedeem() {
   &__cny-delta {
     font-size: $font-xs;
     color: $text-secondary;
+  }
+}
+
+/* ===== JD Card Redeem ===== */
+.jd-section {
+  margin: $spacing-md;
+  background: $bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-md;
+  }
+
+  &__title {
+    font-size: $font-md;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  &__ratio {
+    font-size: $font-xs;
+    color: $text-secondary;
+  }
+}
+
+.jd-faces {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+.jd-face-item {
+  flex: 1;
+  min-width: 140rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid $border-color;
+  border-radius: $radius-md;
+  background: $bg-page;
+  transition: all 0.2s;
+
+  &--active {
+    border-color: $color-brand;
+    background: rgba($color-brand, 0.06);
+  }
+
+  &__value {
+    font-size: $font-md;
+    font-weight: 700;
+    color: $text-primary;
+  }
+}
+
+.jd-cost-info {
+  margin-top: $spacing-md;
+  text-align: center;
+
+  &__text {
+    font-size: $font-sm;
+    color: $text-secondary;
+  }
+
+  &__num {
+    color: $color-brand;
+    font-weight: 700;
+  }
+}
+
+.jd-redeem-btn {
+  margin-top: $spacing-md;
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: #E53935;
+  color: white;
+  border-radius: $radius-lg;
+  font-size: $font-md;
+  font-weight: 700;
+
+  &--disabled {
+    background: $warm-200;
+    color: $text-placeholder;
+  }
+}
+
+.jd-history {
+  margin-top: $spacing-lg;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $border-light;
+
+  &__title {
+    font-size: $font-sm;
+    font-weight: 600;
+    color: $text-secondary;
+    margin-bottom: $spacing-sm;
+  }
+}
+
+.jd-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm 0;
+  border-bottom: 1rpx solid $border-light;
+
+  &:last-child { border-bottom: none; }
+
+  &__left {
+    display: flex;
+    flex-direction: column;
+    gap: 4rpx;
+  }
+
+  &__face {
+    font-size: $font-md;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  &__time {
+    font-size: $font-xs;
+    color: $text-placeholder;
+  }
+
+  &__right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4rpx;
+  }
+
+  &__code {
+    font-size: $font-xs;
+    color: $text-secondary;
+    font-family: $font-mono;
+  }
+
+  &__status {
+    font-size: $font-xs;
+    color: $text-placeholder;
+    padding: 2rpx 12rpx;
+    border-radius: $radius-sm;
+    background: $warm-100;
+
+    &--done {
+      color: $color-success;
+      background: rgba(#16a34a, 0.08);
+    }
+
+    &--reject {
+      color: $color-error;
+      background: rgba(#dc2626, 0.08);
+    }
   }
 }
 </style>

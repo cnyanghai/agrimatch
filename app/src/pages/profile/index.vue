@@ -2,18 +2,30 @@
 import { ref, computed } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useAuthStore } from '../../store/auth'
-import { listSupplies } from '../../api/supply'
-import { listRequirements } from '../../api/requirement'
-import { listContracts } from '../../api/contract'
+import { getDashboard, type DashboardResponse } from '../../api/dashboard'
 import { BRAND_600, WARM_300, WARM_400, WARM_500, AUTUMN_500, ACCENT_400, ACTION_600, WHITE } from '../../constants/colors'
 
 const authStore = useAuthStore()
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 const user = computed(() => authStore.user)
 
-const supplyCount = ref<number | null>(null)
-const requirementCount = ref<number | null>(null)
-const contractCount = ref<number | null>(null)
+const dashboard = ref<DashboardResponse | null>(null)
+
+const supplyCount = computed(() => dashboard.value?.myActiveListingCount ?? null)
+const requirementCount = computed(() =>
+  dashboard.value ? (dashboard.value.activeContractCount ?? 0) : null
+)
+const contractCount = computed(() => dashboard.value?.totalSignedContractCount ?? null)
+
+const pendingItems = computed(() => {
+  if (!dashboard.value) return []
+  const d = dashboard.value
+  const items: { label: string; count: number; url: string; color: string }[] = []
+  if (d.unreadMessageCount > 0) items.push({ label: '未读消息', count: d.unreadMessageCount, url: '/pages/chat/index', color: ACTION_600 })
+  if (d.pendingContractCount > 0) items.push({ label: '待签合同', count: d.pendingContractCount, url: '/pages/contract/list', color: AUTUMN_500 })
+  if (d.pendingMilestoneCount > 0) items.push({ label: '待确认节点', count: d.pendingMilestoneCount, url: '/pages/contract/list', color: ACCENT_400 })
+  return items
+})
 
 const avatarChar = computed(() => {
   const name = user.value?.nickName || user.value?.userName || '?'
@@ -23,24 +35,25 @@ const avatarChar = computed(() => {
 onShow(() => {
   if (isLoggedIn.value) {
     authStore.checkSession()
-    loadStats()
+    loadDashboard()
   }
 })
 
-async function loadStats() {
-  const userId = user.value?.userId
-  if (!userId) return
+async function loadDashboard() {
   try {
-    const [supplies, requirements, contracts] = await Promise.all([
-      listSupplies({ userId }).catch(() => []),
-      listRequirements({ userId }).catch(() => []),
-      listContracts().catch(() => []),
-    ])
-    supplyCount.value = supplies?.length ?? 0
-    requirementCount.value = requirements?.length ?? 0
-    contractCount.value = contracts?.length ?? 0
+    const res = await getDashboard()
+    if (res) dashboard.value = res
   } catch {
     // silently fail
+  }
+}
+
+const tabBarPaths = ['/pages/home/index', '/pages/supply/index', '/pages/requirement/index', '/pages/chat/index', '/pages/profile/index']
+function goUrl(url: string) {
+  if (tabBarPaths.includes(url)) {
+    uni.switchTab({ url })
+  } else {
+    uni.navigateTo({ url })
   }
 }
 
@@ -69,6 +82,10 @@ function goMyRequirements() {
 }
 
 function goCompany() {
+  uni.navigateTo({ url: '/pages/company/edit' })
+}
+
+function goCompanyDetail() {
   if (user.value?.companyId) {
     uni.navigateTo({ url: `/pages/company/detail?id=${user.value.companyId}` })
   }
@@ -197,6 +214,19 @@ function handleLogout() {
       </view>
     </view>
 
+    <!-- ===== 待办提醒 ===== -->
+    <view v-if="pendingItems.length" class="pending-bar">
+      <view
+        v-for="item in pendingItems"
+        :key="item.label"
+        class="pending-item"
+        @tap="goUrl(item.url)"
+      >
+        <text class="pending-item__count" :style="{ color: item.color }">{{ item.count }}</text>
+        <text class="pending-item__label">{{ item.label }}</text>
+      </view>
+    </view>
+
     <!-- ===== 功能网格 ===== -->
     <view class="section">
       <text class="stitch-section-title">我的服务</text>
@@ -240,9 +270,9 @@ function handleLogout() {
     <view class="section">
       <text class="stitch-section-title">工具与发现</text>
       <view class="menu-card stitch-card" style="padding: 0;">
-        <view v-if="user?.companyId" class="menu-item" @tap="goCompany">
+        <view v-if="isLoggedIn" class="menu-item" @tap="goCompany">
           <view class="stitch-icon-box stitch-icon-box--sm stitch-icon-box--brand"><WgIcon name="building" :size="18" :color="BRAND_600" /></view>
-          <text class="menu-item__label">企业信息</text>
+          <text class="menu-item__label">{{ user?.companyId ? '编辑企业信息' : '创建企业信息' }}</text>
           <WgIcon name="chevron-right" :size="16" :color="WARM_300" />
         </view>
         <view class="menu-item" @tap="goSealManage">
@@ -410,6 +440,36 @@ function handleLogout() {
   margin: -#{$spacing-xl} $spacing-lg $spacing-md;
   position: relative;
   z-index: 2;
+}
+
+/* ===== 待办提醒 ===== */
+.pending-bar {
+  display: flex;
+  gap: $spacing-sm;
+  margin: 0 $spacing-lg $spacing-md;
+}
+
+.pending-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  padding: $spacing-sm $spacing-xs;
+  background: $bg-card;
+  border-radius: $radius-md;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+
+  &__count {
+    font-size: 36rpx;
+    font-weight: 800;
+    font-family: $font-mono;
+  }
+
+  &__label {
+    font-size: $font-xs;
+    color: $text-secondary;
+  }
 }
 
 .stats-row {

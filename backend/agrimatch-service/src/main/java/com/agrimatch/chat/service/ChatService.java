@@ -19,6 +19,8 @@ public interface ChatService {
 
     List<ChatConversationResponse> conversations(Long userId);
 
+    ChatConversationResponse getConversation(Long userId, Long conversationId);
+
     List<ChatMessageResponse> conversationMessages(Long userId, Long conversationId, Integer limit);
 
     void markConversationRead(Long userId, Long conversationId);

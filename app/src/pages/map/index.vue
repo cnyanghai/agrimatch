@@ -59,9 +59,22 @@ const nativeMarkers = computed(() => {
 })
 
 // ==================== 高德地图 JS API（H5 模式） ====================
-const mapContainerRef = ref<any>(null)
+const mapContainerId = 'amap-container-' + Date.now()
 let map: any = null
 let cluster: any = null
+
+function waitForDom(id: string, timeout = 3000): Promise<HTMLElement> {
+  return new Promise((resolve, reject) => {
+    const el = document.getElementById(id)
+    if (el) return resolve(el)
+    const start = Date.now()
+    const timer = setInterval(() => {
+      const el = document.getElementById(id)
+      if (el) { clearInterval(timer); resolve(el) }
+      else if (Date.now() - start > timeout) { clearInterval(timer); reject(new Error('DOM not ready')) }
+    }, 50)
+  })
+}
 
 /** 动态加载高德地图 JS SDK（跟 Web 端同一方式） */
 function loadAmapScript(): Promise<any> {
@@ -114,8 +127,7 @@ async function initAmapMap() {
     const AMap = await loadAmapScript()
     await loadClusterPlugin(AMap)
     await nextTick()
-    const el = mapContainerRef.value?.$el || mapContainerRef.value
-    if (!el) return
+    const el = await waitForDom(mapContainerId)
     map = new AMap.Map(el, {
       zoom: 4,
       center: [104.5, 35.5],
@@ -259,6 +271,14 @@ function handleSearch() {
   loadData()
 }
 
+function goBack() {
+  if (getCurrentPages().length > 1) {
+    uni.navigateBack()
+  } else {
+    uni.switchTab({ url: '/pages/home/index' })
+  }
+}
+
 function goCompany(companyId: number) {
   uni.navigateTo({ url: `/pages/company/detail?id=${companyId}` })
 }
@@ -307,6 +327,12 @@ onUnmounted(() => {
   <view class="map-page">
     <!-- 顶部搜索 & 筛选 -->
     <view class="top-bar safe-area-top">
+      <view class="top-nav-row">
+        <view class="back-btn" @tap="goBack">
+          <WgIcon name="chevron-left" :size="20" :color="BRAND_600" />
+        </view>
+        <text class="top-nav-row__title">地图找商</text>
+      </view>
       <view class="search-bar">
         <WgIcon name="search" :size="16" :color="WARM_400" />
         <input
@@ -397,7 +423,7 @@ onUnmounted(() => {
       <view class="map-wrapper">
         <!-- H5 模式：高德 JS API 渲染 -->
         <!-- #ifdef H5 -->
-        <view ref="mapContainerRef" class="amap-container" />
+        <div :id="mapContainerId" class="amap-container"></div>
         <view v-if="mapError" class="map-error">
           <WgIcon name="info" :size="32" :color="ACCENT_400" />
           <text class="map-error__text">{{ mapError }}</text>
@@ -448,6 +474,31 @@ onUnmounted(() => {
   z-index: 20;
   position: sticky;
   top: 0;
+}
+
+.top-nav-row {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-xs;
+}
+
+.top-nav-row__title {
+  font-size: $font-lg;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.back-btn {
+  width: 64rpx;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: $brand-50;
+  flex-shrink: 0;
+  &:active { background: $brand-100; }
 }
 
 .search-bar {

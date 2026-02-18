@@ -146,7 +146,11 @@ $uni-bg-color: $bg-card;
 $uni-bg-color-grey: $bg-page;
 $uni-border-color: $border-color;
 
+// ===== 字体族 =====
+$font-mono: 'Menlo', 'Monaco', 'Courier New', monospace;
+
 // ===== 别名（兼容旧组件）=====
 $radius-pill: $radius-full;
+$color-brand: $brand-600;
 $shadow-warm-card: $shadow-sm;
 $shadow-warm-elevated: $shadow-md;

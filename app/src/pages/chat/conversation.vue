@@ -4,7 +4,6 @@ import { BRAND_600, WARM_500, WHITE } from '../../constants/colors'
 import { onLoad } from '@dcloudio/uni-app'
 import { useAuthStore } from '../../store/auth'
 import {
-  getConversation,
   getConversationMessages,
   markConversationRead,
   sendMessage as sendMessageApi,
@@ -13,8 +12,9 @@ import {
   type ChatMessageResponse,
   type ChatConversationResponse,
 } from '../../api/chat'
-import { getSupply, type SupplyResponse } from '../../api/supply'
-import { getRequirement, type RequirementResponse } from '../../api/requirement'
+import type { SupplyResponse } from '../../api/supply'
+import type { RequirementResponse } from '../../api/requirement'
+import { get } from '../../utils/request'
 import { useWebSocket, type WsMessage } from '../../composables/useWebSocket'
 import { formatChatTime, formatPrice } from '../../utils/format'
 
@@ -115,13 +115,17 @@ async function loadMessages() {
 
 async function loadSubjectContext() {
   try {
-    const conv = await getConversation(conversationId.value)
+    const conv = await get<ChatConversationResponse>(
+      `/api/chat/conversations/${conversationId.value}`, undefined, { silent: true }
+    )
     conversation.value = conv
     const subjectType = normalizeSubjectType(conv?.subjectType)
     if (!subjectType || !conv?.subjectId) return
 
     if (subjectType === 'supply') {
-      const supply = await getSupply(conv.subjectId)
+      const supply = await get<SupplyResponse>(
+        `/api/supplies/${conv.subjectId}`, undefined, { silent: true }
+      )
       if (supply) {
         subjectInfo.value = {
           type: 'supply',
@@ -131,7 +135,9 @@ async function loadSubjectContext() {
         }
       }
     } else if (subjectType === 'requirement') {
-      const req = await getRequirement(conv.subjectId)
+      const req = await get<RequirementResponse>(
+        `/api/requirements/${conv.subjectId}`, undefined, { silent: true }
+      )
       if (req) {
         subjectInfo.value = {
           type: 'requirement',

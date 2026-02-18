@@ -72,6 +72,13 @@ public class ChatController {
         return Result.success(chatService.conversations(userId));
     }
 
+    @GetMapping("/conversations/{id}")
+    public Result<ChatConversationResponse> getConversation(Authentication authentication,
+                                                            @PathVariable("id") Long conversationId) {
+        Long userId = SecurityUtil.requireUserId(authentication);
+        return Result.success(chatService.getConversation(userId, conversationId));
+    }
+
     @GetMapping("/conversations/{id}/messages")
     public Result<List<ChatMessageResponse>> conversationMessages(Authentication authentication,
                                                                   @PathVariable("id") Long conversationId,

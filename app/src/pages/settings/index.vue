@@ -12,7 +12,7 @@ function goEditProfile() {
 }
 
 function goChangePassword() {
-  uni.showToast({ title: '功能开发中', icon: 'none' })
+  uni.navigateTo({ url: '/pages/settings/change-password' })
 }
 
 function goAbout() {

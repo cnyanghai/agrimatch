@@ -163,6 +163,33 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
+    public ChatConversationResponse getConversation(Long userId, Long conversationId) {
+        if (userId == null) throw new ApiException(401, "未登录");
+        if (conversationId == null) throw new ApiException(ResultCode.PARAM_ERROR);
+        List<ChatMapper.ConversationRow> rows = chatMapper.selectConversations(userId);
+        for (ChatMapper.ConversationRow r : rows) {
+            if (r.getId().equals(conversationId)) {
+                ChatConversationResponse o = new ChatConversationResponse();
+                o.setId(r.getId());
+                o.setPeerUserId(r.getPeerUserId());
+                o.setPeerUserName(r.getPeerUserName());
+                o.setPeerNickName(r.getPeerNickName());
+                o.setPeerCompanyName(r.getPeerCompanyName());
+                o.setPeerAvatar(r.getPeerAvatar());
+                o.setSubjectType(r.getSubjectType());
+                o.setSubjectId(r.getSubjectId());
+                o.setSubjectSnapshotJson(r.getSubjectSnapshotJson());
+                o.setInitiatorUserId(r.getInitiatorUserId());
+                o.setLastContent(r.getLastContent());
+                o.setLastTime(r.getLastTime());
+                o.setUnreadCount(r.getUnreadCount());
+                return o;
+            }
+        }
+        throw new ApiException(ResultCode.NOT_FOUND);
+    }
+
+    @Override
     public List<ChatMessageResponse> conversationMessages(Long userId, Long conversationId, Integer limit) {
         requireConversationMember(userId, conversationId);
         int lim = (limit == null ? 50 : Math.max(1, Math.min(limit, 200)));

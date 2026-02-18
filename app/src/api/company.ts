@@ -1,4 +1,4 @@
-import { get } from '../utils/request'
+import { get, post, put } from '../utils/request'
 
 export interface CompanyResponse {
   id: number
@@ -48,6 +48,35 @@ export function getCompanyProfile(id: number) {
 
 export function getMyCompany() {
   return get<CompanyResponse | null>('/api/companies/my')
+}
+
+export interface CompanyCreateRequest {
+  companyName: string
+  companyType?: string
+  licenseNo?: string
+  licenseImgUrl?: string
+  legalPerson?: string
+  businessScope?: string
+  contacts?: string
+  phone?: string
+  wechat?: string
+  province?: string
+  city?: string
+  district?: string
+  address?: string
+  registeredCapital?: string
+  establishDate?: string
+  scale?: string
+  companyIntro?: string
+  certificatesJson?: string
+}
+
+export function createCompany(data: CompanyCreateRequest) {
+  return post<number>('/api/companies', data)
+}
+
+export function updateCompany(id: number, data: Partial<CompanyCreateRequest>) {
+  return put<void>(`/api/companies/${id}`, data)
 }
 
 export function getCompanyByUserId(userId: number) {

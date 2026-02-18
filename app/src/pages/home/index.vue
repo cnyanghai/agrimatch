@@ -108,6 +108,13 @@ function goPublish() {
   uni.navigateTo({ url: '/pages/topic/publish' })
 }
 
+function domainLabel(d?: string): string {
+  const map: Record<string, string> = {
+    feed: '饲料', breed: '养殖', vet: '兽药', equipment: '设备', logistics: '物流', other: '其他',
+  }
+  return (d && map[d]) || ''
+}
+
 function goSearch() {
   uni.navigateTo({ url: '/pages/search/index' })
 }
@@ -313,8 +320,8 @@ function getImages(item: PostResponse): string[] {
               <WgIcon name="message-circle" :size="14" :color="WARM_400" />
               <text class="post-card__stat-num">{{ item.commentCount || 0 }}</text>
             </view>
-            <view v-if="item.domain" class="post-card__domain">
-              <text class="stitch-tag stitch-tag--brand">{{ item.domain }}</text>
+            <view v-if="domainLabel(item.domain)" class="post-card__domain">
+              <text class="stitch-tag stitch-tag--brand">{{ domainLabel(item.domain) }}</text>
             </view>
           </view>
         </view>

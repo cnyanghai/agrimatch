@@ -122,6 +122,12 @@
       }
     },
     {
+      "path": "pages/company/edit",
+      "style": {
+        "navigationBarTitleText": "企业信息"
+      }
+    },
+    {
       "path": "pages/contract/list",
       "style": {
         "navigationBarTitleText": "我的合同",
@@ -176,6 +182,12 @@
       "path": "pages/settings/edit-profile",
       "style": {
         "navigationBarTitleText": "编辑资料"
+      }
+    },
+    {
+      "path": "pages/settings/change-password",
+      "style": {
+        "navigationBarTitleText": "修改密码"
       }
     },
     {

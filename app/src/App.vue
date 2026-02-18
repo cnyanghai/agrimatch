@@ -25,6 +25,14 @@ onHide(() => {
    设计理念：大留白 · 大圆角 · 柔和层次 · 品牌色点缀 · 呼吸感
    ================================================================ */
 
+/* ===== 隐藏原生 TabBar（使用自定义 WgTabBar） ===== */
+uni-tabbar, .uni-tabbar {
+  display: none !important;
+}
+.uni-tabbar-bottom {
+  display: none !important;
+}
+
 /* ===== 全局 Reset ===== */
 page {
   background-color: $bg-page;

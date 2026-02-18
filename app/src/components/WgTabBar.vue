@@ -1,6 +1,11 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useAuthStore } from '../store/auth'
 import { BRAND_600, WARM_400 } from '../constants/colors'
+
+onMounted(() => {
+  uni.hideTabBar({ animation: false })
+})
 
 const props = defineProps<{
   current: number
