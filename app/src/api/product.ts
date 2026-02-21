@@ -16,6 +16,7 @@ export interface ProductParam {
   options?: string[]
   required?: boolean
   unit?: string
+  paramGroup?: string
 }
 
 /** Get product category tree */

@@ -6,8 +6,10 @@ import { createSupply, getMySupplyTemplates, createSupplyTemplate, deleteSupplyT
 import type { SupplyCreateRequest, BasisQuoteRequest, SupplyTemplateResponse } from '../../api/supply'
 import { uploadFile } from '../../utils/request'
 import { useAuthStore } from '../../store/auth'
-import type { PickedCategory } from '../../components/WgCategoryPicker.vue'
+import type { PickedCategory } from '../../components/SchemaAwareCategoryPicker.vue'
 import type { TemplateItem } from '../../components/WgTemplatePicker.vue'
+import SchemaAwareCategoryPicker from '../../components/SchemaAwareCategoryPicker.vue'
+import BasisQuoteEditor from '../../components/BasisQuoteEditor.vue'
 
 const authStore = useAuthStore()
 
@@ -164,6 +166,9 @@ onShow(() => {
 /** 基差报价列表 */
 const basisQuotes = ref<BasisQuoteRequest[]>([])
 
+/** 基差报价编辑器引用 */
+const basisQuoteEditorRef = ref<any>()
+
 /** 添加一条基差报价 */
 function addBasisQuote() {
   basisQuotes.value.push({ contractCode: '', basisPrice: 0, availableQty: 0 })
@@ -172,6 +177,14 @@ function addBasisQuote() {
 /** 删除一条基差报价 */
 function removeBasisQuote(idx: number) {
   basisQuotes.value.splice(idx, 1)
+}
+
+/** 验证基差报价数据 */
+function validateBasisQuotes(): boolean {
+  if (form.value.priceType === 1) {
+    return basisQuoteEditorRef.value?.validate() || false
+  }
+  return true
 }
 
 /** 切换报价类型时重置相关字段 */
@@ -328,7 +341,7 @@ async function handleSubmit() {
     return
   }
 
-  if (!validate()) {
+  if (!validate() || !validateBasisQuotes()) {
     uni.showToast({ title: '请检查填写内容', icon: 'none' })
     return
   }
@@ -361,8 +374,9 @@ async function handleSubmit() {
       req.imagesJson = JSON.stringify(images.value)
     }
     // 基差报价（priceType=1时附带）
-    if (form.value.priceType === 1 && basisQuotes.value.length > 0) {
-      req.basisQuotes = basisQuotes.value.filter(q => q.contractCode.trim())
+    if (form.value.priceType === 1) {
+      const validQuotes = basisQuoteEditorRef.value?.getValidQuotes() || []
+      req.basisQuotes = validQuotes
     }
     await createSupply(req)
     uni.showModal({
@@ -420,7 +434,7 @@ async function handleSubmit() {
       <!-- 商品品类选择 -->
       <view class="form-card__field" :class="{ 'form-card__field--error': errors.categoryName }">
         <text class="form-card__label">商品品类 <text class="form-card__required">*</text></text>
-        <WgCategoryPicker
+        <SchemaAwareCategoryPicker
           v-model="pickedCategory"
           @update:modelValue="(v: PickedCategory | null) => { form.categoryName = v?.name || ''; form.productId = v?.id; clearError('categoryName'); }"
         />
@@ -503,41 +517,10 @@ async function handleSubmit() {
       <!-- 基差报价明细（基差模式） -->
       <view v-if="form.priceType === 1" class="form-card__field">
         <text class="form-card__label">基差报价明细</text>
-        <view v-for="(quote, idx) in basisQuotes" :key="idx" class="basis-quote-row">
-          <view class="basis-quote-row__fields">
-            <input
-              class="basis-quote-row__input"
-              v-model="quote.contractCode"
-              placeholder="合约代码 (如M2509)"
-              :maxlength="20"
-            />
-            <view class="basis-quote-row__num-group">
-              <input
-                class="basis-quote-row__input basis-quote-row__input--short"
-                v-model.number="quote.basisPrice"
-                type="digit"
-                placeholder="基差"
-              />
-              <text class="basis-quote-row__unit">元</text>
-            </view>
-            <view class="basis-quote-row__num-group">
-              <input
-                class="basis-quote-row__input basis-quote-row__input--short"
-                v-model.number="quote.availableQty"
-                type="digit"
-                placeholder="可售量"
-              />
-              <text class="basis-quote-row__unit">吨</text>
-            </view>
-          </view>
-          <view class="basis-quote-row__delete" @tap="removeBasisQuote(idx)">
-            <WgIcon name="clear" :size="20" :color="ACCENT_400" />
-          </view>
-        </view>
-        <view class="basis-quote-add" @tap="addBasisQuote">
-          <WgIcon name="plus" :size="16" :color="BRAND_600" />
-          <text class="basis-quote-add__text">添加合约</text>
-        </view>
+        <BasisQuoteEditor 
+          v-model="basisQuotes"
+          ref="basisQuoteEditorRef"
+        />
       </view>
 
       <!-- 发货地 -->

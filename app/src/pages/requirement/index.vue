@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { WARM_400, WHITE, AUTUMN_500, ACCENT_400 } from '../../constants/colors'
 import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
-import { listRequirements, type RequirementResponse } from '../../api/requirement'
+import { listRequirements, type RequirementResponse, type BasisQuoteRequest } from '../../api/requirement'
 import { getSchemaTree, type ProductSchemaVO } from '../../api/productSchema'
 import { followUser, unfollowUser, batchCheckFollowStatus } from '../../api/follow'
 import { openConversation } from '../../api/chat'
@@ -12,6 +12,17 @@ import { parseParamTags } from '../../utils/parseParams'
 import { getUnitLabel } from '../../utils/unitConfig'
 
 const authStore = useAuthStore()
+
+const expandedBasisIds = ref<Set<number>>(new Set())
+
+function toggleBasis(id: number) {
+  const s = expandedBasisIds.value
+  if (s.has(id)) { s.delete(id) } else { s.add(id) }
+}
+
+function formatBasisPrice(price: number): string {
+  return price >= 0 ? `+${price}` : `${price}`
+}
 
 function getParamTags(item: RequirementResponse): string[] {
   return parseParamTags(item.paramsJson, 5)
@@ -305,15 +316,38 @@ async function handleQuote(item: RequirementResponse) {
         <view class="req-card__hero">
           <view class="req-card__hero-left">
             <text class="req-card__name">{{ item.categoryName }}</text>
-            <text v-if="item.packaging" class="req-card__sub">{{ item.packaging }}</text>
+            <view class="req-card__origin-row">
+              <text v-if="item.packaging" class="req-card__sub">{{ item.packaging }}</text>
+              <text v-if="item.priceType === 1" class="req-card__basis-badge">基差</text>
+            </view>
+          <view v-if="item.priceType !== 1" class="req-card__price-block">
+            <text class="req-card__price-label">期望价</text>
+          <template v-if="item.priceType !== 1">
+            <view class="req-card__price-row">
+              <text class="req-card__price-sign">¥</text>
+              <text class="req-card__price">{{ item.expectedPrice ?? '-' }}</text>
+              <text class="req-card__price-unit">/{{ getUnitLabel(item.schemaCode, 'price', item.categoryName) }}</text>
+            </view>
+          </template>
+          <template v-else>
+            <view class="req-card__basis-block">
+              <text class="req-card__basis-label">基差报价</text>
+              <text class="req-card__basis-note">点击查看详情</text>
+            </view>
+          </template>
+        </view>
           </view>
-          <view class="req-card__price-block">
+          <view v-if="item.priceType !== 1" class="req-card__price-block">
             <text class="req-card__price-label">期望价</text>
             <view class="req-card__price-row">
               <text class="req-card__price-sign">¥</text>
               <text class="req-card__price">{{ item.expectedPrice ?? '-' }}</text>
               <text class="req-card__price-unit">/{{ getUnitLabel(item.schemaCode, 'price', item.categoryName) }}</text>
             </view>
+          </view>
+          <view v-else class="req-card__basis-block">
+            <text class="req-card__basis-label">基差报价</text>
+            <text class="req-card__basis-note">点击查看详情</text>
           </view>
         </view>
 
@@ -329,6 +363,24 @@ async function handleQuote(item: RequirementResponse) {
           <text v-if="item.quantity" class="stitch-tag stitch-tag--autumn">{{ item.quantity }}{{ getUnitLabel(item.schemaCode, 'quantity', item.categoryName) }}</text>
           <text v-if="item.paymentMethod" class="stitch-tag stitch-tag--warm">{{ item.paymentMethod }}</text>
           <text v-if="item.deliveryMethod" class="stitch-tag stitch-tag--warm">{{ item.deliveryMethod }}</text>
+        </view>
+
+        <!-- 基差报价 -->
+        <view v-if="item.priceType === 1 && item.basisQuotes && item.basisQuotes.length > 0" class="basis-section">
+          <view class="basis-toggle" @tap.stop="toggleBasis(item.id)">
+            <text class="basis-toggle__text">
+              {{ expandedBasisIds.has(item.id) ? '收起报价' : `查看基差报价 (${item.basisQuotes.length})` }}
+            </text>
+            <WgIcon :name="expandedBasisIds.has(item.id) ? 'chevron-up' : 'chevron-down'" :size="12" color="#B45309" />
+          </view>
+          <view v-if="expandedBasisIds.has(item.id)" class="basis-list">
+            <view v-for="bq in item.basisQuotes" :key="bq.id" class="basis-item">
+              <text class="basis-item__contract">{{ bq.contractName || bq.contractCode }}</text>
+              <text class="basis-item__price" :class="bq.basisPrice >= 0 ? 'basis-item__price--up' : 'basis-item__price--down'">{{ formatBasisPrice(bq.basisPrice) }}</text>
+              <text v-if="bq.referencePrice != null" class="basis-item__ref">{{ '\u2192' }} ¥{{ bq.referencePrice }}</text>
+              <text class="basis-item__qty">{{ bq.remainingQty ?? bq.availableQty }}{{ getUnitLabel(item.schemaCode, 'quantity', item.categoryName) }}</text>
+            </view>
+          </view>
         </view>
 
         <!-- 底部 -->
@@ -575,11 +627,103 @@ async function handleQuote(item: RequirementResponse) {
     margin-left: 4rpx;
   }
 
+  &__basis-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  &__basis-label {
+    font-size: $font-sm;
+    color: $warm-500;
+    font-weight: 600;
+  }
+
+  &__basis-note {
+    font-size: $font-xs;
+    color: $text-placeholder;
+    margin-top: 4rpx;
+  }
+
   &__tags {
     display: flex;
     flex-wrap: wrap;
     gap: $spacing-xs;
     margin-bottom: $spacing-sm;
+  }
+
+  // 基差报价样式（复用供应页面样式）
+  .basis-section {
+    margin-bottom: $spacing-sm;
+    padding: $spacing-sm;
+    background: $warm-50;
+    border-radius: $radius-md;
+    border: 1rpx solid $warm-200;
+  }
+
+  .basis-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8rpx 0;
+  }
+
+  .basis-toggle__text {
+    font-size: $font-sm;
+    color: $warm-700;
+    font-weight: 500;
+  }
+
+  .basis-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8rpx;
+    margin-top: 8rpx;
+  }
+
+  .basis-item {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    padding: 8rpx 12rpx;
+    background: $bg-card;
+    border-radius: $radius-sm;
+    border: 1rpx solid $warm-100;
+  }
+
+  .basis-item__contract {
+    font-size: $font-sm;
+    color: $text-primary;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .basis-item__price {
+    font-size: $font-sm;
+    font-weight: 700;
+    flex-shrink: 0;
+
+    &--up {
+      color: #dc2626;
+    }
+
+    &--down {
+      color: $success-500;
+    }
+  }
+
+  .basis-item__ref {
+    font-size: $font-sm;
+    color: $autumn-600;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .basis-item__qty {
+    font-size: $font-sm;
+    color: $text-secondary;
+    flex-shrink: 0;
   }
 
   &__params-scroll {

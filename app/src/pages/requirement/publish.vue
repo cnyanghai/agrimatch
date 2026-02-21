@@ -4,10 +4,11 @@ import { BRAND_600, AUTUMN_500, WHITE } from '../../constants/colors'
 import { onShow } from '@dcloudio/uni-app'
 import { createRequirement, listMyRequirementTemplates, createRequirementTemplate, deleteRequirementTemplate } from '../../api/requirement'
 import type { RequirementCreateRequest, RequirementTemplateResponse } from '../../api/requirement'
-import type { PickedCategory } from '../../components/WgCategoryPicker.vue'
+import type { PickedCategory } from '../../components/SchemaAwareCategoryPicker.vue'
 import type { TemplateItem } from '../../components/WgTemplatePicker.vue'
 import { uploadFile } from '../../utils/request'
 import { useAuthStore } from '../../store/auth'
+import SchemaAwareCategoryPicker from '../../components/SchemaAwareCategoryPicker.vue'
 
 const authStore = useAuthStore()
 
@@ -338,7 +339,7 @@ async function handleSubmit() {
       <!-- 商品品类选择 -->
       <view class="form-card__field" :class="{ 'form-card__field--error': errors.categoryName }">
         <text class="form-card__label">商品品类 <text class="form-card__required">*</text></text>
-        <WgCategoryPicker
+        <SchemaAwareCategoryPicker
           v-model="pickedCategory"
           @update:modelValue="(v: PickedCategory | null) => { form.categoryName = v?.name || ''; form.productId = v?.id; clearError('categoryName'); }"
         />

@@ -12,6 +12,16 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { getProductParams, type ProductParam } from '../api/product'
 import { WARM_400, WARM_500, BRAND_600, COLOR_ERROR } from '../constants/colors'
 
+// 参数分组定义
+const PARAM_GROUPS = {
+  breed: { label: '品种信息', color: BRAND_600 },
+  biology: { label: '生物指标', color: WARM_500 },
+  quality: { label: '品质规格', color: BRAND_600 },
+  logistics: { label: '物流包装', color: WARM_500 },
+  trade: { label: '交易条款', color: BRAND_600 },
+  custom: { label: '自定义参数', color: WARM_500 }
+}
+
 const props = defineProps<{
   productId?: number
   modelValue?: Record<string, any>
@@ -27,6 +37,35 @@ const localValues = ref<Record<string, any>>({})
 
 /** 自定义参数（用户可自由添加） */
 const customParams = ref<Array<{ name: string; value: string }>>([])
+
+// 按分组归类参数
+const groupedParams = computed(() => {
+  const groups: Record<string, { label: string; color: string; params: ProductParam[] }> = {}
+  
+  // 初始化分组
+  Object.keys(PARAM_GROUPS).forEach(key => {
+    if (key !== 'custom') {
+      groups[key] = {
+        label: PARAM_GROUPS[key as keyof typeof PARAM_GROUPS].label,
+        color: PARAM_GROUPS[key as keyof typeof PARAM_GROUPS].color,
+        params: []
+      }
+    }
+  })
+  
+  // 归类参数
+  paramList.value.forEach(param => {
+    const groupKey = param.paramGroup || 'quality'
+    if (groups[groupKey]) {
+      groups[groupKey].params.push(param)
+    } else {
+      // 如果分组不存在，归到品质规格
+      groups.quality.params.push(param)
+    }
+  })
+  
+  return groups
+})
 
 /** 当 productId 变化时重新加载参数 */
 watch(() => props.productId, async (id) => {
@@ -116,53 +155,73 @@ function handlePickerConfirm(idx: number) {
       <text class="params-form__empty-text">请先选择商品品类</text>
     </view>
 
-    <!-- 参数列表 -->
+    <!-- 分组参数列表 -->
     <template v-else>
       <view
-        v-for="param in paramList"
-        :key="param.id"
-        class="param-row"
+        v-for="(group, groupKey) in groupedParams"
+        :key="groupKey"
+        class="param-group"
       >
-        <view class="param-row__header">
-          <text class="param-row__name">{{ param.paramName }}</text>
-          <text v-if="param.required" class="param-row__required">*</text>
-          <text v-if="param.unit" class="param-row__unit">{{ param.unit }}</text>
+        <!-- 分组标题 -->
+        <view class="param-group__header">
+          <view class="param-group__indicator" :style="{ background: group.color }"></view>
+          <text class="param-group__title">{{ group.label }}</text>
         </view>
 
-        <!-- 下拉选择类型 -->
+        <!-- 分组参数 -->
         <view
-          v-if="parseOptions(param).length > 0"
-          class="param-row__select"
-          @tap="openPicker(param)"
+          v-for="param in group.params"
+          :key="param.id"
+          class="param-row"
         >
-          <text :class="localValues[param.id] ? 'param-row__value' : 'param-row__placeholder'">
-            {{ localValues[param.id] || '请选择' }}
-          </text>
-          <WgIcon name="chevron-down" :size="14" :color="WARM_400" />
+          <view class="param-row__header">
+            <text class="param-row__name">{{ param.paramName }}</text>
+            <text v-if="param.required" class="param-row__required">*</text>
+            <text v-if="param.unit" class="param-row__unit">{{ param.unit }}</text>
+          </view>
+
+          <!-- 下拉选择类型 -->
+          <view
+            v-if="parseOptions(param).length > 0"
+            class="param-row__select"
+            @tap="openPicker(param)"
+          >
+            <text :class="localValues[param.id] ? 'param-row__value' : 'param-row__placeholder'">
+              {{ localValues[param.id] || '请选择' }}
+            </text>
+            <WgIcon name="chevron-down" :size="14" :color="WARM_400" />
+          </view>
+
+          <!-- 数值输入 -->
+          <input
+            v-else-if="param.paramType === 'number'"
+            class="param-row__input"
+            type="digit"
+            :value="localValues[param.id]"
+            :placeholder="`请输入${param.paramName}`"
+            @input="(e: any) => updateParam(param.id, e.detail?.value)"
+          />
+
+          <!-- 文本输入 -->
+          <input
+            v-else
+            class="param-row__input"
+            :value="localValues[param.id]"
+            :placeholder="`请输入${param.paramName}`"
+            @input="(e: any) => updateParam(param.id, e.detail?.value)"
+          />
         </view>
-
-        <!-- 数值输入 -->
-        <input
-          v-else-if="param.paramType === 'number'"
-          class="param-row__input"
-          type="digit"
-          :value="localValues[param.id]"
-          :placeholder="`请输入${param.paramName}`"
-          @input="(e: any) => updateParam(param.id, e.detail?.value)"
-        />
-
-        <!-- 文本输入 -->
-        <input
-          v-else
-          class="param-row__input"
-          :value="localValues[param.id]"
-          :placeholder="`请输入${param.paramName}`"
-          @input="(e: any) => updateParam(param.id, e.detail?.value)"
-        />
       </view>
 
       <!-- 自定义参数 -->
-      <view class="custom-section">
+      <view class="param-group">
+        <!-- 分组标题 -->
+        <view class="param-group__header">
+          <view class="param-group__indicator" :style="{ background: PARAM_GROUPS.custom.color }"></view>
+          <text class="param-group__title">{{ PARAM_GROUPS.custom.label }}</text>
+        </view>
+
+        <!-- 自定义参数列表 -->
         <view
           v-for="(cp, idx) in customParams"
           :key="idx"
@@ -224,6 +283,35 @@ function handlePickerConfirm(idx: number) {
   &__loading-text, &__empty-text {
     font-size: $font-sm;
     color: $text-placeholder;
+  }
+}
+
+.param-group {
+  margin-bottom: $spacing-lg;
+  padding: $spacing-md;
+  background: $bg-card;
+  border-radius: $radius-md;
+  border: 1rpx solid $border-light;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1rpx solid $border-light;
+  }
+
+  &__indicator {
+    width: 12rpx;
+    height: 12rpx;
+    border-radius: 50%;
+  }
+
+  &__title {
+    font-size: $font-sm;
+    font-weight: 600;
+    color: $text-primary;
   }
 }
 
