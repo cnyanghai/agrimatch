@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import PublicFooter from '../components/PublicFooter.vue'
 import ChatDrawer from '../components/chat/ChatDrawer.vue'
 import CategorySidebar from '../components/CategorySidebar.vue'
@@ -14,7 +14,7 @@ import { useHallInteractions } from '../composables/useHallInteractions'
 
 const authStore = useAuthStore()
 const router = useRouter()
-const route = useRoute()
+
 
 function go(path: string) {
   router.push(path)

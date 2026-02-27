@@ -699,23 +699,32 @@ async function handleQuote(item: RequirementResponse) {
     flex-shrink: 0;
   }
 
-  .basis-item__price {
-    font-size: $font-sm;
-    font-weight: 700;
-    flex-shrink: 0;
-
-    &--up {
-      color: #dc2626;
+    .basis-item__price {
+      font-size: $font-sm;
+      font-weight: 700;
+      flex-shrink: 0;
+  
+      &--up {
+        color: $ERROR_600;
+      }
+    
+  &--down {
+      color: $SUCCESS_600;
     }
-
+    }
+  
     &--down {
-      color: $success-500;
+      color: $SUCCESS_600;
     }
+  
+    &--down {
+      color: $SUCCESS_600;
+    }  }
   }
 
   .basis-item__ref {
     font-size: $font-sm;
-    color: $autumn-600;
+    color: $AUTUMN_600;
     font-weight: 700;
     flex-shrink: 0;
   }
@@ -816,7 +825,7 @@ async function handleQuote(item: RequirementResponse) {
     flex-shrink: 0;
   }
 
-  &__expire-bar {
+    &__expire-bar {
     display: flex;
     align-items: center;
     gap: 6rpx;
@@ -824,7 +833,7 @@ async function handleQuote(item: RequirementResponse) {
     padding: 6rpx $spacing-md;
     background: $warm-50;
     border-radius: $radius-md;
-
+ 
     &--warning { background: #fef2f2; }
     &--expired { opacity: 0.6; }
   }
@@ -833,9 +842,9 @@ async function handleQuote(item: RequirementResponse) {
     font-size: 22rpx;
     color: $text-secondary;
     font-weight: 500;
-
-    .req-card__expire-bar--warning & {
-      color: #DC2626;
+ 
+     .req-card__expire-bar--warning & {
+      color: $WARNING_700;
       font-weight: 600;
     }
   }
@@ -893,10 +902,15 @@ async function handleQuote(item: RequirementResponse) {
 
   &:active { transform: scale(0.93); }
 
-  &__text {
-    font-size: $font-xs;
-    color: $text-inverse;
-    font-weight: 700;
-  }
+    &__text {
+      font-size: 22rpx;
+      color: $text-secondary;
+      font-weight: 500;
+  
+      .req-card__expire-bar--warning & {
+        color: $WARNING_700;
+        font-weight: 600;
+      }
+    }
 }
 </style>

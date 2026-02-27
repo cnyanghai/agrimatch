@@ -32,6 +32,11 @@ services:
       AMAP_WEB_KEY: ${AMAP_WEB_KEY}
       AMAP_JS_KEY: ${AMAP_JS_KEY}
       APP_COOKIE_SECURE: ${APP_COOKIE_SECURE:-false}
+      SMS_PROVIDER: ${SMS_PROVIDER:-console}
+      SMS_DEV_BYPASS: ${SMS_DEV_BYPASS:-false}
+      ALIYUN_SMS_ACCESS_KEY_ID: ${ALIYUN_SMS_ACCESS_KEY_ID:-}
+      ALIYUN_SMS_ACCESS_KEY_SECRET: ${ALIYUN_SMS_ACCESS_KEY_SECRET:-}
+      ALIYUN_SMS_TEMPLATE_CODE: ${ALIYUN_SMS_TEMPLATE_CODE:-}
       TZ: Asia/Shanghai
     volumes:
       - wogu-upload-data:/app/uploads

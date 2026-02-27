@@ -3,13 +3,13 @@
  * Extracts common URL-parameter parsing, schema/category tree,
  * pagination, keyword search, and mobile sidebar state.
  */
-import { computed, ref, watch, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { getSchemaTree, type ProductSchemaVO, type CategoryNode } from '../api/productSchema'
 
 export function useHallFilters() {
   const route = useRoute()
-  const router = useRouter()
+
 
   // -- Search --
   const searchKeyword = ref('')

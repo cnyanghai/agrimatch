@@ -45,3 +45,5 @@ export const ERROR_700 = '#b91c1c'
 // 纯色
 export const WHITE = '#ffffff'
 export const BLACK = '#000000'
+export const ERROR_500 = '#dc2626'
+export const SUCCESS_500 = '#16a34a'

@@ -2,7 +2,7 @@
  * Shared composable for Supply/Purchase Hall interactions.
  * Handles follow status, chat drawer, and card focus.
  */
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { requireAuth } from '../utils/requireAuth'
 import { useAuthStore } from '../store/auth'
