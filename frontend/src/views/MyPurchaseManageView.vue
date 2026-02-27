@@ -1011,7 +1011,7 @@ async function applyTemplate(template: RequirementTemplateResponse) {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                  {{ currentUnitConfig.quantityLabel }} <span class="text-red-500">*</span>
+                  {{ currentUnitConfig.purchaseQuantityLabel }} <span class="text-red-500">*</span>
                 </label>
                 <el-input-number
                   v-model="publishForm.quantity"

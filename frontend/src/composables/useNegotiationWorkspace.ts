@@ -801,19 +801,27 @@ export function useNegotiationWorkspace() {
   /** 发送文本消息 */
   function sendText(text: string) {
     const convId = activeConversationId.value
-    if (!text.trim() || !convId || !webSocket.ensureConnected()) return
+    if (!text.trim() || !convId) return
 
     sending.value = true
     const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`
 
+    // 先做乐观更新，确保消息立即可见
     addPendingMessageToConv(convId, 'TEXT', text, tempId)
     chatMessages.addPendingMessage(convId, 'TEXT', text, tempId)
 
-    const sent = webSocket.sendText(convId, text, tempId)
-    if (!sent) {
+    // 再检查连接并发送
+    if (!webSocket.ensureConnected()) {
       failMessageInMap(tempId)
       chatMessages.failMessage(tempId)
-      ElMessage.error('发送失败')
+      ElMessage.error('连接未就绪，请稍后重试')
+    } else {
+      const sent = webSocket.sendText(convId, text, tempId)
+      if (!sent) {
+        failMessageInMap(tempId)
+        chatMessages.failMessage(tempId)
+        ElMessage.error('发送失败')
+      }
     }
 
     sending.value = false
@@ -822,19 +830,27 @@ export function useNegotiationWorkspace() {
   /** 发送报价 */
   function sendQuote(payloadJson: string, previewText: string) {
     const convId = activeConversationId.value
-    if (!convId || !webSocket.ensureConnected()) return
+    if (!convId) return
 
     sending.value = true
     const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`
 
+    // 先做乐观更新，确保消息立即可见
     addPendingMessageToConv(convId, 'QUOTE', previewText, tempId)
     chatMessages.addPendingMessage(convId, 'QUOTE', previewText, tempId)
 
-    const sent = webSocket.sendQuote(convId, payloadJson, previewText, tempId)
-    if (!sent) {
+    // 再检查连接并发送
+    if (!webSocket.ensureConnected()) {
       failMessageInMap(tempId)
       chatMessages.failMessage(tempId)
-      ElMessage.error('发送失败')
+      ElMessage.error('连接未就绪，请稍后重试')
+    } else {
+      const sent = webSocket.sendQuote(convId, payloadJson, previewText, tempId)
+      if (!sent) {
+        failMessageInMap(tempId)
+        chatMessages.failMessage(tempId)
+        ElMessage.error('发送失败')
+      }
     }
 
     sending.value = false
@@ -873,7 +889,7 @@ export function useNegotiationWorkspace() {
   /** 发送图片消息 */
   function sendImage(fileData: FileUploadResponse) {
     const convId = activeConversationId.value
-    if (!convId || !webSocket.ensureConnected()) return
+    if (!convId) return
 
     sending.value = true
     const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`
@@ -886,14 +902,22 @@ export function useNegotiationWorkspace() {
       mimeType: fileData.mimeType
     })
 
+    // 先做乐观更新，确保消息立即可见
     addPendingMessageToConv(convId, 'IMAGE', `[图片] ${fileData.fileName}`, tempId, payloadJson)
     chatMessages.addPendingMessage(convId, 'IMAGE', `[图片] ${fileData.fileName}`, tempId, payloadJson)
 
-    const sent = webSocket.sendImage(convId, payloadJson, tempId)
-    if (!sent) {
+    // 再检查连接并发送
+    if (!webSocket.ensureConnected()) {
       failMessageInMap(tempId)
       chatMessages.failMessage(tempId)
-      ElMessage.error('发送失败')
+      ElMessage.error('连接未就绪，请稍后重试')
+    } else {
+      const sent = webSocket.sendImage(convId, payloadJson, tempId)
+      if (!sent) {
+        failMessageInMap(tempId)
+        chatMessages.failMessage(tempId)
+        ElMessage.error('发送失败')
+      }
     }
 
     sending.value = false
@@ -902,7 +926,7 @@ export function useNegotiationWorkspace() {
   /** 发送附件消息 */
   function sendAttachment(fileData: FileUploadResponse) {
     const convId = activeConversationId.value
-    if (!convId || !webSocket.ensureConnected()) return
+    if (!convId) return
 
     sending.value = true
     const tempId = `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`
@@ -915,14 +939,22 @@ export function useNegotiationWorkspace() {
       mimeType: fileData.mimeType
     })
 
+    // 先做乐观更新，确保消息立即可见
     addPendingMessageToConv(convId, 'ATTACHMENT', `[附件] ${fileData.fileName}`, tempId, payloadJson)
     chatMessages.addPendingMessage(convId, 'ATTACHMENT', `[附件] ${fileData.fileName}`, tempId, payloadJson)
 
-    const sent = webSocket.sendAttachment(convId, payloadJson, fileData.fileName, tempId)
-    if (!sent) {
+    // 再检查连接并发送
+    if (!webSocket.ensureConnected()) {
       failMessageInMap(tempId)
       chatMessages.failMessage(tempId)
-      ElMessage.error('发送失败')
+      ElMessage.error('连接未就绪，请稍后重试')
+    } else {
+      const sent = webSocket.sendAttachment(convId, payloadJson, fileData.fileName, tempId)
+      if (!sent) {
+        failMessageInMap(tempId)
+        chatMessages.failMessage(tempId)
+        ElMessage.error('发送失败')
+      }
     }
 
     sending.value = false
@@ -1032,7 +1064,7 @@ export function useNegotiationWorkspace() {
   /** 确认合同条款 */
   function confirmContract() {
     const convId = activeConversationId.value
-    if (!convId || !webSocket.ensureConnected()) return
+    if (!convId) return
 
     const isBuyer = currentIsBuyer.value
     const role = isBuyer ? 'buyer' : 'seller'
@@ -1054,9 +1086,18 @@ export function useNegotiationWorkspace() {
     })
     const content = `${roleLabel}已确认合同条款`
 
+    // 先做乐观更新，确保消息立即可见
     addPendingMessageToConv(convId, 'SYSTEM', content, tempId, payloadJson)
     chatMessages.addPendingMessage(convId, 'SYSTEM', content, tempId, payloadJson)
-    webSocket.sendSystem(convId, content, payloadJson, tempId)
+
+    // 再检查连接并发送
+    if (!webSocket.ensureConnected()) {
+      failMessageInMap(tempId)
+      chatMessages.failMessage(tempId)
+      ElMessage.error('连接未就绪，请稍后重试')
+    } else {
+      webSocket.sendSystem(convId, content, payloadJson, tempId)
+    }
 
     // 检查是否双方都已确认
     if (buyerConfirmed.value && sellerConfirmed.value) {

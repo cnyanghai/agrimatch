@@ -15,6 +15,7 @@ export interface SchemaUnitConfig {
   // 数量单位
   quantityUnit: string
   quantityLabel: string
+  purchaseQuantityLabel: string
   quantityPlaceholder: string
   quantityStep: number
   // 价格单位
@@ -37,6 +38,7 @@ export const schemaUnits: Record<string, SchemaUnitConfig> = {
     schemaName: '原料饲料',
     quantityUnit: '吨',
     quantityLabel: '可供数量（吨）',
+    purchaseQuantityLabel: '采购数量（吨）',
     quantityPlaceholder: '请输入数量',
     quantityStep: 1,
     priceUnit: '元/吨',
@@ -51,6 +53,7 @@ export const schemaUnits: Record<string, SchemaUnitConfig> = {
     schemaName: '生物种苗',
     quantityUnit: '只',
     quantityLabel: '可供数量',
+    purchaseQuantityLabel: '采购数量',
     quantityPlaceholder: '请输入数量',
     quantityStep: 100,
     priceUnit: '元/只',
@@ -65,6 +68,7 @@ export const schemaUnits: Record<string, SchemaUnitConfig> = {
     schemaName: '农牧加工',
     quantityUnit: '吨',
     quantityLabel: '可供数量（吨）',
+    purchaseQuantityLabel: '采购数量（吨）',
     quantityPlaceholder: '请输入数量',
     quantityStep: 0.1,
     priceUnit: '元/吨',
@@ -79,6 +83,7 @@ export const schemaUnits: Record<string, SchemaUnitConfig> = {
     schemaName: '装备物流',
     quantityUnit: '台/套',
     quantityLabel: '可供数量',
+    purchaseQuantityLabel: '采购数量',
     quantityPlaceholder: '请输入数量',
     quantityStep: 1,
     priceUnit: '元',
@@ -94,6 +99,7 @@ export const schemaUnits: Record<string, SchemaUnitConfig> = {
     schemaName: '生物种苗',
     quantityUnit: '只',
     quantityLabel: '可供数量',
+    purchaseQuantityLabel: '采购数量',
     quantityPlaceholder: '请输入数量',
     quantityStep: 100,
     priceUnit: '元/只',
@@ -108,6 +114,7 @@ export const schemaUnits: Record<string, SchemaUnitConfig> = {
     schemaName: '农牧加工',
     quantityUnit: '吨',
     quantityLabel: '可供数量（吨）',
+    purchaseQuantityLabel: '采购数量（吨）',
     quantityPlaceholder: '请输入数量',
     quantityStep: 0.1,
     priceUnit: '元/吨',
@@ -122,6 +129,7 @@ export const schemaUnits: Record<string, SchemaUnitConfig> = {
     schemaName: '装备物流',
     quantityUnit: '台/套',
     quantityLabel: '可供数量',
+    purchaseQuantityLabel: '采购数量',
     quantityPlaceholder: '请输入数量',
     quantityStep: 1,
     priceUnit: '元',
@@ -137,35 +145,40 @@ export const schemaUnits: Record<string, SchemaUnitConfig> = {
  * 生物种苗细分单位配置
  * 根据具体品类使用不同单位
  */
-export const breedSubUnits: Record<string, { quantityUnit: string; quantityLabel: string; priceUnit: string; priceLabel: string }> = {
+export const breedSubUnits: Record<string, { quantityUnit: string; quantityLabel: string; purchaseQuantityLabel: string; priceUnit: string; priceLabel: string }> = {
   // 禽类种苗
   '种蛋': {
     quantityUnit: '枚',
     quantityLabel: '可供数量（枚）',
+    purchaseQuantityLabel: '采购数量（枚）',
     priceUnit: '元/枚',
     priceLabel: '单价（元/枚）'
   },
   '鸡苗': {
     quantityUnit: '只',
     quantityLabel: '可供数量（只）',
+    purchaseQuantityLabel: '采购数量（只）',
     priceUnit: '元/只',
     priceLabel: '单价（元/只）'
   },
   '鸭苗': {
     quantityUnit: '只',
     quantityLabel: '可供数量（只）',
+    purchaseQuantityLabel: '采购数量（只）',
     priceUnit: '元/只',
     priceLabel: '单价（元/只）'
   },
   '鹅苗': {
     quantityUnit: '只',
     quantityLabel: '可供数量（只）',
+    purchaseQuantityLabel: '采购数量（只）',
     priceUnit: '元/只',
     priceLabel: '单价（元/只）'
   },
   '商品蛋': {
     quantityUnit: '斤',
     quantityLabel: '可供数量（斤）',
+    purchaseQuantityLabel: '采购数量（斤）',
     priceUnit: '元/斤',
     priceLabel: '单价（元/斤）'
   },
@@ -173,18 +186,21 @@ export const breedSubUnits: Record<string, { quantityUnit: string; quantityLabel
   '种猪': {
     quantityUnit: '头',
     quantityLabel: '可供数量（头）',
+    purchaseQuantityLabel: '采购数量（头）',
     priceUnit: '元/头',
     priceLabel: '单价（元/头）'
   },
   '种牛': {
     quantityUnit: '头',
     quantityLabel: '可供数量（头）',
+    purchaseQuantityLabel: '采购数量（头）',
     priceUnit: '元/头',
     priceLabel: '单价（元/头）'
   },
   '种羊': {
     quantityUnit: '只',
     quantityLabel: '可供数量（只）',
+    purchaseQuantityLabel: '采购数量（只）',
     priceUnit: '元/只',
     priceLabel: '单价（元/只）'
   },
@@ -192,18 +208,21 @@ export const breedSubUnits: Record<string, { quantityUnit: string; quantityLabel
   '鱼苗': {
     quantityUnit: '万尾',
     quantityLabel: '可供数量（万尾）',
+    purchaseQuantityLabel: '采购数量（万尾）',
     priceUnit: '元/万尾',
     priceLabel: '单价（元/万尾）'
   },
   '虾苗': {
     quantityUnit: '万尾',
     quantityLabel: '可供数量（万尾）',
+    purchaseQuantityLabel: '采购数量（万尾）',
     priceUnit: '元/万尾',
     priceLabel: '单价（元/万尾）'
   },
   '蟹苗': {
     quantityUnit: '斤',
     quantityLabel: '可供数量（斤）',
+    purchaseQuantityLabel: '采购数量（斤）',
     priceUnit: '元/斤',
     priceLabel: '单价（元/斤）'
   }
@@ -212,23 +231,26 @@ export const breedSubUnits: Record<string, { quantityUnit: string; quantityLabel
 /**
  * 农牧加工细分单位配置
  */
-export const processSubUnits: Record<string, { quantityUnit: string; quantityLabel: string; priceUnit: string; priceLabel: string }> = {
+export const processSubUnits: Record<string, { quantityUnit: string; quantityLabel: string; purchaseQuantityLabel: string; priceUnit: string; priceLabel: string }> = {
   // 水产加工类通常按公斤
   '冷冻鱼类': {
     quantityUnit: '公斤',
     quantityLabel: '可供数量（公斤）',
+    purchaseQuantityLabel: '采购数量（公斤）',
     priceUnit: '元/公斤',
     priceLabel: '单价（元/公斤）'
   },
   '冷冻虾类': {
     quantityUnit: '公斤',
     quantityLabel: '可供数量（公斤）',
+    purchaseQuantityLabel: '采购数量（公斤）',
     priceUnit: '元/公斤',
     priceLabel: '单价（元/公斤）'
   },
   '水产制品': {
     quantityUnit: '公斤',
     quantityLabel: '可供数量（公斤）',
+    purchaseQuantityLabel: '采购数量（公斤）',
     priceUnit: '元/公斤',
     priceLabel: '单价（元/公斤）'
   }
@@ -237,23 +259,26 @@ export const processSubUnits: Record<string, { quantityUnit: string; quantityLab
 /**
  * 装备物流细分单位配置
  */
-export const equipmentSubUnits: Record<string, { quantityUnit: string; quantityLabel: string; priceUnit: string; priceLabel: string }> = {
+export const equipmentSubUnits: Record<string, { quantityUnit: string; quantityLabel: string; purchaseQuantityLabel: string; priceUnit: string; priceLabel: string }> = {
   // 物流服务类按次计价
   '冷链物流': {
     quantityUnit: '次',
     quantityLabel: '服务次数',
+    purchaseQuantityLabel: '需求次数',
     priceUnit: '元/次',
     priceLabel: '单价（元/次）'
   },
   '活禽运输': {
     quantityUnit: '次',
     quantityLabel: '服务次数',
+    purchaseQuantityLabel: '需求次数',
     priceUnit: '元/次',
     priceLabel: '单价（元/次）'
   },
   '大宗散料运输': {
     quantityUnit: '吨',
     quantityLabel: '运输量（吨）',
+    purchaseQuantityLabel: '采购量（吨）',
     priceUnit: '元/吨',
     priceLabel: '运费（元/吨）'
   },
@@ -261,12 +286,14 @@ export const equipmentSubUnits: Record<string, { quantityUnit: string; quantityL
   '蛋托/蛋箱': {
     quantityUnit: '个',
     quantityLabel: '数量（个）',
+    purchaseQuantityLabel: '采购数量（个）',
     priceUnit: '元/个',
     priceLabel: '单价（元/个）'
   },
   '编织袋/吨包': {
     quantityUnit: '个',
     quantityLabel: '数量（个）',
+    purchaseQuantityLabel: '采购数量（个）',
     priceUnit: '元/个',
     priceLabel: '单价（元/个）'
   }
@@ -288,6 +315,7 @@ export function getSchemaUnitConfig(schemaCode: string): SchemaUnitConfig {
 export function getCategoryUnitConfig(schemaCode: string, categoryName: string): {
   quantityUnit: string
   quantityLabel: string
+  purchaseQuantityLabel: string
   priceUnit: string
   priceLabel: string
 } {
@@ -320,6 +348,7 @@ export function getCategoryUnitConfig(schemaCode: string, categoryName: string):
   return {
     quantityUnit: baseConfig.quantityUnit,
     quantityLabel: baseConfig.quantityLabel,
+    purchaseQuantityLabel: baseConfig.purchaseQuantityLabel,
     priceUnit: baseConfig.priceUnit,
     priceLabel: baseConfig.priceLabel
   }

@@ -147,7 +147,7 @@ function getAvatarChar(name?: string): string {
 }
 
 function isQuoteMessage(msg: UiMessage): boolean {
-  return msg.msgType === 'QUOTE' || (!!msg.payloadJson && msg.payloadJson.length > 10)
+  return (msg.msgType || '').toUpperCase() === 'QUOTE'
 }
 function isImageMessage(msg: UiMessage): boolean { return msg.msgType === 'IMAGE' }
 function isAttachmentMessage(msg: UiMessage): boolean { return msg.msgType === 'ATTACHMENT' }

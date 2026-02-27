@@ -151,16 +151,11 @@ async function sendMessage() {
   if (!props.conversationId) return
   if (!messageInput.value.trim()) return
 
-  if (!websocket.ensureConnected()) {
-    ElMessage.warning('实时连接未就绪，正在重连…')
-    return
-  }
-
   const content = messageInput.value.trim()
   const tempId = `t_${Date.now()}_${Math.random().toString(16).slice(2)}`
   messageInput.value = ''
 
-  // 乐观更新
+  // 先做乐观更新，确保消息立即可见
   messages.value.push({
     id: tempId,
     type: 'sent',
@@ -172,9 +167,22 @@ async function sendMessage() {
   await nextTick()
   scrollToBottom()
 
-  // 使用 composable 发送
+  // 再检查连接并发送
+  if (!websocket.ensureConnected()) {
+    const idx = messages.value.findIndex(m => m.id === tempId)
+    if (idx >= 0 && messages.value[idx]) {
+      messages.value[idx].status = 'failed'
+    }
+    ElMessage.warning('实时连接未就绪，正在重连…')
+    return
+  }
+
   const sent = websocket.sendText(props.conversationId, content, tempId)
   if (!sent) {
+    const idx = messages.value.findIndex(m => m.id === tempId)
+    if (idx >= 0 && messages.value[idx]) {
+      messages.value[idx].status = 'failed'
+    }
     ElMessage.error('发送失败')
   }
 }
