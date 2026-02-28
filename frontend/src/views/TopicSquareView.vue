@@ -12,6 +12,7 @@ import ExpertBadge from '../components/post/ExpertBadge.vue'
 import PaidBadge from '../components/post/PaidBadge.vue'
 import CollectButton from '../components/post/CollectButton.vue'
 import { Card, StatusBadge } from '../components/ui'
+import { usePullToRefresh } from '../composables/usePullToRefresh'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -30,6 +31,12 @@ const collectedPostIds = ref<number[]>([])
 
 const followedUsers = ref<FollowedUser[]>([])
 const collectedPosts = ref<PostResponse[]>([])
+
+// -- Pull to refresh --
+const pullRefreshEl = ref<HTMLElement | null>(null)
+const { isPulling, pullDistance, isRefreshing } = usePullToRefresh(pullRefreshEl, async () => {
+  await loadPosts()
+})
 
 function go(path: string) {
   router.push(path)
@@ -157,7 +164,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="bg-neutral-50 text-neutral-900 min-h-screen">
+  <div ref="pullRefreshEl" class="bg-neutral-50 text-neutral-900 min-h-screen">
+    <!-- 下拉刷新指示器 -->
+    <div
+      v-if="isPulling || isRefreshing"
+      class="flex items-center justify-center overflow-hidden transition-all duration-200 bg-neutral-50"
+      :style="{ height: (isPulling || isRefreshing) ? `${pullDistance}px` : '0px' }"
+    >
+      <div class="flex items-center gap-2 text-sm text-neutral-500">
+        <svg v-if="isRefreshing" class="w-5 h-5 ptr-spinner text-brand-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        <svg v-else class="w-5 h-5 transition-transform" :style="{ transform: `rotate(${pullDistance / 60 * 180}deg)` }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+        <span>{{ isRefreshing ? '正在刷新...' : (pullDistance >= 60 ? '松手刷新' : '下拉刷新') }}</span>
+      </div>
+    </div>
 
     <!-- 头部：知乎风格沉浸式 -->
     <header class="bg-white border-b sticky top-0 z-30 shadow-sm">
@@ -281,7 +300,7 @@ onMounted(() => {
                     </p>
                   </div>
                   <div v-if="getPostCover(post)" class="w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-neutral-100">
-                    <img :src="getPostCover(post)!" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <img :src="getPostCover(post)!" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   </div>
                 </div>
 

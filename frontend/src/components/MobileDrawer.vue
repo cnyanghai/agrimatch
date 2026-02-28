@@ -97,7 +97,7 @@ watch(() => route.path, () => {
     <Transition name="slide-left">
       <div
         v-if="visible"
-        class="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-white z-[101] flex flex-col shadow-2xl"
+        class="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-white z-[101] flex flex-col shadow-2xl safe-all"
       >
         <!-- Header -->
         <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-100">

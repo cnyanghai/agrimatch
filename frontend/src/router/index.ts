@@ -120,6 +120,18 @@ router.beforeEach(async (to) => {
   return true
 })
 
+// 部署后旧缓存请求不存在的hash文件 → 自动刷新一次（防止无限循环）
+router.onError((error, to) => {
+  if (error.message?.includes('Failed to fetch dynamically imported module') ||
+      error.message?.includes('Importing a module script failed')) {
+    const key = 'chunk-reload'
+    if (!sessionStorage.getItem(key)) {
+      sessionStorage.setItem(key, '1')
+      window.location.href = to.fullPath
+    }
+  }
+})
+
 router.afterEach((to) => {
   const defaultTitle = '沃谷 - 农牧供需智能匹配平台'
   document.title = (to.meta.title as string) || defaultTitle

@@ -34,8 +34,7 @@ export function handleApiError(error: any): void {
           break
         case 401:
           message = '登录已过期，请重新登录'
-          window.location.href = '/'
-          return
+          break
         case 403:
           message = '没有权限执行此操作'
           type = 'warning'

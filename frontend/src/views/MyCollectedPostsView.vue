@@ -127,7 +127,7 @@ onMounted(() => {
                 </p>
               </div>
               <div class="w-32 h-24 rounded-xl overflow-hidden shrink-0 bg-neutral-100">
-                <img :src="getPostCover(post)" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                <img :src="getPostCover(post)" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
               </div>
             </div>
 

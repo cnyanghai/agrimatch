@@ -1,10 +1,14 @@
 import axios from 'axios'
+import { Capacitor } from '@capacitor/core'
 import { useAuthStore } from '../store/auth'
 import { ElMessage } from 'element-plus'
-import { ErrorHandler } from '../utils/error-handler'
+
+const baseURL = Capacitor.isNativePlatform()
+  ? 'https://www.wogucloud.com/api'
+  : '/api'
 
 export const http = axios.create({
-  baseURL: '',
+  baseURL,
   timeout: 15000,
   // 为 HttpOnly Cookie 会话准备（同域也无害；跨域部署时必须）
   withCredentials: true
@@ -41,7 +45,10 @@ http.interceptors.response.use(
     return response
   },
   (error) => {
-    ErrorHandler.handle(error)
+    // 401未认证：静默处理，由路由守卫决定是否跳转登录页
+    if (error.response?.status === 401) {
+      return Promise.reject(error)
+    }
     const msg = error.response?.data?.message || error.message || '请求失败'
     ElMessage.error(msg)
     return Promise.reject(error)

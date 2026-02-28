@@ -1,15 +1,19 @@
 package com.agrimatch.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.util.Map;
 
 @Configuration
 public class SecurityConfig {
@@ -31,7 +35,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenUtil jwtTokenUtil) throws Exception {
         http.csrf(csrf -> csrf.disable());
         http.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.httpBasic(Customizer.withDefaults());
+        http.httpBasic(basic -> basic.disable());
+
+        // 未认证时返回JSON 401，不触发浏览器Basic Auth弹窗
+        http.exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setCharacterEncoding("UTF-8");
+            new ObjectMapper().writeValue(response.getOutputStream(),
+                    Map.of("code", 401, "message", "未登录"));
+        }));
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/error", "/api/health", "/api/config", "/api/auth/**",
@@ -55,5 +68,3 @@ public class SecurityConfig {
         return http.build();
     }
 }
-
-

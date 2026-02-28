@@ -12,6 +12,7 @@ import { Menu, MessageCircle } from 'lucide-vue-next'
 import ProductInfoRow from '../components/ProductInfoRow.vue'
 import { useHallFilters } from '../composables/useHallFilters'
 import { useHallInteractions } from '../composables/useHallInteractions'
+import { usePullToRefresh } from '../composables/usePullToRefresh'
 
 const router = useRouter()
 
@@ -37,6 +38,12 @@ const {
   drawerSubjectSnapshotJson, drawerSubjectId,
   openConsultDrawer, onDrawerClosed,
 } = useHallInteractions('/hall/supply')
+
+// -- Pull to refresh --
+const pullRefreshEl = ref<HTMLElement | null>(null)
+const { isPulling, pullDistance, isRefreshing } = usePullToRefresh(pullRefreshEl, async () => {
+  await loadSupplies()
+})
 
 // -- Local state --
 const supplies = ref<SupplyResponse[]>([])
@@ -265,7 +272,20 @@ function getSupplyUnitConfig(s: SupplyResponse) {
 </script>
 
 <template>
-  <div class="bg-neutral-50 text-neutral-900 min-h-screen">
+  <div ref="pullRefreshEl" class="bg-neutral-50 text-neutral-900 min-h-screen">
+    <!-- 下拉刷新指示器 -->
+    <div
+      v-if="isPulling || isRefreshing"
+      class="flex items-center justify-center overflow-hidden transition-all duration-200 bg-neutral-50"
+      :style="{ height: (isPulling || isRefreshing) ? `${pullDistance}px` : '0px' }"
+    >
+      <div class="flex items-center gap-2 text-sm text-neutral-500">
+        <svg v-if="isRefreshing" class="w-5 h-5 ptr-spinner text-brand-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        <svg v-else class="w-5 h-5 transition-transform" :style="{ transform: `rotate(${pullDistance / 60 * 180}deg)` }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+        <span>{{ isRefreshing ? '正在刷新...' : (pullDistance >= 60 ? '松手刷新' : '下拉刷新') }}</span>
+      </div>
+    </div>
+
     <!-- 公司筛选提示 -->
     <div v-if="companyIdFilter" class="bg-brand-50 border-b border-brand-100">
       <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">

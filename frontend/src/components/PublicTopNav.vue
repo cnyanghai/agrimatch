@@ -94,7 +94,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <nav class="bg-brand-700/90 backdrop-blur-md border-b border-brand-800/30 sticky top-0 z-50 shadow-lg shadow-brand-900/20">
+  <nav class="bg-brand-700/90 backdrop-blur-md border-b border-brand-800/30 sticky top-0 z-50 shadow-lg shadow-brand-900/20 safe-top">
     <div class="w-full px-4 md:px-10">
       <div class="min-h-11 py-1 flex items-center justify-between gap-6">
         <!-- Left: Hamburger (mobile) + Logo & Dropdowns -->

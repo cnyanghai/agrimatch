@@ -93,9 +93,9 @@ onUnmounted(() => {
         />
         
         <!-- 弹窗容器 -->
-        <div 
+        <div
           :class="[
-            'relative bg-white rounded-[32px] shadow-2xl w-full overflow-hidden flex flex-col max-h-[90vh]',
+            'relative bg-white rounded-[32px] shadow-2xl w-full overflow-hidden flex flex-col max-h-[90vh] safe-all',
             sizeClass
           ]"
           class="animate-zoom-in"

@@ -82,3 +82,36 @@ button {
 .shadow-modern-hover {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
+
+/* ========== 移动端体验优化 ========== */
+
+/* Safe Area 工具类 */
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-left { padding-left: env(safe-area-inset-left); }
+.safe-right { padding-right: env(safe-area-inset-right); }
+.safe-all {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* 消除移动端300ms点击延迟 */
+*, *::before, *::after {
+  touch-action: manipulation;
+}
+
+/* 平滑滚动（iOS橡皮筋效果） */
+.overflow-y-auto, .overflow-y-scroll, [class*="overflow-y"] {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 下拉刷新动画 */
+@keyframes ptr-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.ptr-spinner {
+  animation: ptr-spin 0.8s linear infinite;
+}

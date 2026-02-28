@@ -499,7 +499,7 @@ onBeforeUnmount(() => {
           >
             <!-- 封面图 -->
             <div class="aspect-video overflow-hidden bg-neutral-100 relative">
-              <img :src="getPostCover(post)" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out" />
+              <img :src="getPostCover(post)" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
             </div>
 

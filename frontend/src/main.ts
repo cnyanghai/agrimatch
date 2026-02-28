@@ -29,3 +29,19 @@ app.mount('#app')
 
 // 首屏完成后，后台预加载高频路由页面（不影响主流程）
 prefetchCommonRoutes()
+
+// Capacitor 原生平台插件初始化
+import { Capacitor } from '@capacitor/core'
+
+if (Capacitor.isNativePlatform()) {
+  import('@capacitor/splash-screen').then(({ SplashScreen }) => {
+    SplashScreen.hide({ fadeOutDuration: 500 })
+  })
+  import('@capacitor/status-bar').then(({ StatusBar, Style }) => {
+    StatusBar.setBackgroundColor({ color: '#2D6A4F' })
+    StatusBar.setStyle({ style: Style.Dark })
+  })
+  import('@capacitor/keyboard').then(({ Keyboard }) => {
+    Keyboard.setResizeMode({ mode: 'body' as any })
+  })
+}

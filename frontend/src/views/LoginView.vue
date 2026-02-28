@@ -47,11 +47,28 @@ function handleResetSuccess() {
     <!-- Form Area -->
     <div class="flex-1 flex flex-col items-center justify-center px-6 py-12">
       <!-- Mobile brand bar -->
-      <div class="lg:hidden flex items-center gap-2 mb-10">
-        <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center">
-          <span class="text-white font-black text-sm">沃谷</span>
+      <div class="lg:hidden flex items-center justify-between w-full max-w-md mb-10">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center">
+            <span class="text-white font-black text-sm">沃谷</span>
+          </div>
+          <span class="text-lg font-black text-neutral-900">沃谷</span>
         </div>
-        <span class="text-lg font-black text-neutral-900">沃谷</span>
+        <button
+          class="text-sm text-neutral-500 hover:text-neutral-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-neutral-100"
+          @click="router.push('/')"
+        >
+          返回首页
+        </button>
+      </div>
+      <!-- Desktop back link -->
+      <div class="hidden lg:block w-full max-w-md mb-6">
+        <button
+          class="text-sm text-neutral-500 hover:text-neutral-700 transition-colors flex items-center gap-1"
+          @click="router.push('/')"
+        >
+          ← 返回首页
+        </button>
       </div>
 
       <div class="w-full max-w-md">
