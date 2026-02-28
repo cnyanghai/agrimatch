@@ -4,8 +4,8 @@ import { useAuthStore } from '../store/auth'
 import { ElMessage } from 'element-plus'
 
 const baseURL = Capacitor.isNativePlatform()
-  ? 'https://www.wogucloud.com/api'
-  : '/api'
+  ? 'https://www.wogucloud.com'
+  : ''
 
 export const http = axios.create({
   baseURL,

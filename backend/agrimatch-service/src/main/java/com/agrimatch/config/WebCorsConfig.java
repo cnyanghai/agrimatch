@@ -18,7 +18,11 @@ public class WebCorsConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns(
                         "http://localhost:*",
                         "http://127.0.0.1:*",
-                        "http://172.28.0.135:*"
+                        "http://172.28.0.135:*",
+                        "https://www.wogucloud.com",
+                        "https://wogucloud.com",
+                        "capacitor://localhost",
+                        "http://localhost"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
