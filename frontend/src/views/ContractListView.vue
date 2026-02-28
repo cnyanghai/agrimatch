@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm, showPrompt } from '@/composables/useConfirm'
 import {
   FileText, Search, Pen, RefreshCw,
   ChevronLeft, ChevronRight, BarChart3, AlertCircle,
@@ -231,64 +232,50 @@ function onSigned() {
 // 删除合同
 async function handleDelete(contract: ContractResponse) {
   if (contract.status !== 0) {
-    ElMessage.warning('只能删除草稿状态的合同')
+    showToast.warning('只能删除草稿状态的合同')
     return
   }
 
-  try {
-    await ElMessageBox.confirm(
-      '确定要删除此合同吗？删除后不可恢复。',
-      '删除确认',
-      {
-        confirmButtonText: '确定删除',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }
-    )
+  const ok = await showConfirm({ title: '删除确认', message: '确定要删除此合同吗？删除后不可恢复。', type: 'warning' })
+  if (!ok) return
 
+  try {
     const res = await deleteContract(contract.id)
     if (res.code === 0) {
-      ElMessage.success('删除成功')
+      showToast.success('删除成功')
       loadContracts()
     } else {
-      ElMessage.error(res.message || '删除失败')
+      showToast.error(res.message || '删除失败')
     }
   } catch (e: any) {
-    if (e !== 'cancel') {
-      ElMessage.error(e.message || '删除失败')
-    }
+    showToast.error(e.message || '删除失败')
   }
 }
 
 // 取消合同
 async function handleCancel(contract: ContractResponse) {
   if (contract.status !== 0 && contract.status !== 1) {
-    ElMessage.warning('只有草稿或待签署状态的合同可以取消')
+    showToast.warning('只有草稿或待签署状态的合同可以取消')
     return
   }
 
-  try {
-    const { value: reason } = await ElMessageBox.prompt(
-      '请输入取消原因（可选）',
-      '取消合同',
-      {
-        confirmButtonText: '确定取消',
-        cancelButtonText: '返回',
-        inputPlaceholder: '例如：买卖双方协商一致取消',
-      }
-    )
+  const reason = await showPrompt({
+    title: '取消合同',
+    message: '请输入取消原因（可选）',
+    placeholder: '例如：买卖双方协商一致取消',
+  })
+  if (reason === null) return
 
+  try {
     const res = await cancelContract(contract.id, reason || undefined)
     if (res.code === 0) {
-      ElMessage.success('合同已取消')
+      showToast.success('合同已取消')
       loadContracts()
     } else {
-      ElMessage.error(res.message || '取消失败')
+      showToast.error(res.message || '取消失败')
     }
   } catch (e: any) {
-    if (e !== 'cancel') {
-      ElMessage.error(e.message || '取消失败')
-    }
+    showToast.error(e.message || '取消失败')
   }
 }
 

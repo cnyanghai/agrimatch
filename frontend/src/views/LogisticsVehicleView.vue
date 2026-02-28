@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { Truck, Plus, Star, Edit2, Trash2, Phone, CreditCard, ArrowLeft } from 'lucide-vue-next'
 import { 
   listVehicles, 
@@ -42,10 +43,10 @@ async function loadVehicles() {
     if (r.code === 0) {
       vehicles.value = r.data ?? []
     } else {
-      ElMessage.error(r.message || '加载失败')
+      showToast.error(r.message || '加载失败')
     }
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载车辆列表失败')
+    showToast.error(e?.message ?? '加载车辆列表失败')
   } finally {
     loading.value = false
   }
@@ -84,19 +85,19 @@ function openEdit(v: VehicleResponse) {
 // 提交表单
 async function handleSubmit() {
   if (!form.value.driverName?.trim()) {
-    ElMessage.warning('请输入司机姓名')
+    showToast.warning('请输入司机姓名')
     return
   }
   if (!form.value.driverIdCard?.trim()) {
-    ElMessage.warning('请输入身份证号')
+    showToast.warning('请输入身份证号')
     return
   }
   if (!form.value.plateNumber?.trim()) {
-    ElMessage.warning('请输入车牌号')
+    showToast.warning('请输入车牌号')
     return
   }
   if (!form.value.driverPhone?.trim()) {
-    ElMessage.warning('请输入联系电话')
+    showToast.warning('请输入联系电话')
     return
   }
 
@@ -105,24 +106,24 @@ async function handleSubmit() {
     if (dialogMode.value === 'create') {
       const r = await createVehicle(form.value)
       if (r.code === 0) {
-        ElMessage.success('车辆添加成功')
+        showToast.success('车辆添加成功')
         dialogVisible.value = false
         loadVehicles()
       } else {
-        ElMessage.error(r.message || '添加失败')
+        showToast.error(r.message || '添加失败')
       }
     } else {
       const r = await updateVehicle(editingId.value!, form.value)
       if (r.code === 0) {
-        ElMessage.success('车辆修改成功')
+        showToast.success('车辆修改成功')
         dialogVisible.value = false
         loadVehicles()
       } else {
-        ElMessage.error(r.message || '修改失败')
+        showToast.error(r.message || '修改失败')
       }
     }
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '操作失败')
+    showToast.error(e?.message ?? '操作失败')
   } finally {
     submitting.value = false
   }
@@ -130,22 +131,14 @@ async function handleSubmit() {
 
 // 删除车辆
 async function handleDelete(v: VehicleResponse) {
-  try {
-    await ElMessageBox.confirm(
-      `确定要删除车辆 "${v.plateNumber}" 吗？`,
-      '删除确认',
-      { confirmButtonText: '删除', cancelButtonText: '取消', type: 'warning' }
-    )
-    
-    const r = await deleteVehicle(v.id)
-    if (r.code === 0) {
-      ElMessage.success('删除成功')
-      loadVehicles()
-    } else {
-      ElMessage.error(r.message || '删除失败')
-    }
-  } catch {
-    // 用户取消
+  const ok = await showConfirm({ title: '删除确认', message: `确定要删除车辆 "${v.plateNumber}" 吗？`, type: 'warning' })
+  if (!ok) return
+  const r = await deleteVehicle(v.id)
+  if (r.code === 0) {
+    showToast.success('删除成功')
+    loadVehicles()
+  } else {
+    showToast.error(r.message || '删除失败')
   }
 }
 
@@ -154,13 +147,13 @@ async function handleSetDefault(v: VehicleResponse) {
   try {
     const r = await setDefaultVehicle(v.id)
     if (r.code === 0) {
-      ElMessage.success(`已将 ${v.plateNumber} 设为默认车辆`)
+      showToast.success(`已将 ${v.plateNumber} 设为默认车辆`)
       loadVehicles()
     } else {
-      ElMessage.error(r.message || '设置失败')
+      showToast.error(r.message || '设置失败')
     }
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '操作失败')
+    showToast.error(e?.message ?? '操作失败')
   }
 }
 

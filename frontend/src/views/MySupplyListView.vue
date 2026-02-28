@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { Plus, RefreshCcw, Pencil, Ban, RotateCcw, X, Package, MapPin, DollarSign, Clock, Search } from 'lucide-vue-next'
 import { listSupplies, updateSupply, type SupplyResponse, type SupplyUpdateRequest } from '../api/supply'
 import { useAuthStore } from '../store/auth'
@@ -62,7 +63,7 @@ async function loadSupplies() {
       throw new Error(r.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '加载供应列表失败')
+    showToast.error(e?.message || '加载供应列表失败')
   } finally {
     loading.value = false
   }
@@ -166,11 +167,11 @@ async function saveEdit() {
       remark: editForm.remark
     })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已保存')
+    showToast.success('已保存')
     editOpen.value = false
     await loadSupplies()
   } catch (e: any) {
-    ElMessage.error(e?.message || '保存失败')
+    showToast.error(e?.message || '保存失败')
   } finally {
     saving.value = false
   }
@@ -178,37 +179,29 @@ async function saveEdit() {
 
 async function revoke(s: SupplyResponse) {
   if (!s.id) return
+  const ok = await showConfirm({ title: '确认下架？', message: '下架后该供应将从大厅隐藏，可随时再次发布。', type: 'warning' })
+  if (!ok) return
   try {
-    await ElMessageBox.confirm('下架后该供应将从大厅隐藏，可随时再次发布。', '确认下架？', {
-      confirmButtonText: '下架',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
     const r = await updateSupply(s.id, { status: 2 })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已下架')
+    showToast.success('已下架')
     await loadSupplies()
   } catch (e: any) {
-    if (e === 'cancel' || e === 'close') return
-    ElMessage.error(e?.message || '操作失败')
+    showToast.error(e?.message || '操作失败')
   }
 }
 
 async function republish(s: SupplyResponse) {
   if (!s.id) return
+  const ok = await showConfirm({ title: '再次发布？', message: '将该供应重新发布到大厅，并按有效期重新计时（如有）。', type: 'info' })
+  if (!ok) return
   try {
-    await ElMessageBox.confirm('将该供应重新发布到大厅，并按有效期重新计时（如有）。', '再次发布？', {
-      confirmButtonText: '发布',
-      cancelButtonText: '取消',
-      type: 'info'
-    })
     const r = await updateSupply(s.id, { status: 0, expireMinutes: s.expireMinutes ?? undefined })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已再次发布')
+    showToast.success('已再次发布')
     await loadSupplies()
   } catch (e: any) {
-    if (e === 'cancel' || e === 'close') return
-    ElMessage.error(e?.message || '操作失败')
+    showToast.error(e?.message || '操作失败')
   }
 }
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { getSchemaTree, type ProductSchemaVO, type CategoryNode } from '../api/productSchema'
 import { createCustomProduct } from '../api/product'
 
@@ -86,7 +86,7 @@ async function refresh() {
       }
     }
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载业态分类失败')
+    showToast.error(e?.message ?? '加载业态分类失败')
   } finally {
     loading.value = false
   }
@@ -217,7 +217,7 @@ async function attachListeners() {
 
     const parentId = cascaderValue.value?.[0]
     if (!parentId) {
-      ElMessage.warning('请先选择一级品类')
+      showToast.warning('请先选择一级品类')
       return
     }
 
@@ -245,11 +245,11 @@ function onVisibleChange(visible: boolean) {
 
 async function submitCustom() {
   if (!customName.value.trim()) {
-    ElMessage.warning('请输入品类名称')
+    showToast.warning('请输入品类名称')
     return
   }
   if (!customParentId.value) {
-    ElMessage.warning('请先选择一级品类（作为父级）')
+    showToast.warning('请先选择一级品类（作为父级）')
     return
   }
   loading.value = true
@@ -269,9 +269,9 @@ async function submitCustom() {
       allowCustomName: true
     })
     customDialogOpen.value = false
-    ElMessage.success('已创建并选中')
+    showToast.success('已创建并选中')
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '创建失败')
+    showToast.error(e?.message ?? '创建失败')
   } finally {
     loading.value = false
   }

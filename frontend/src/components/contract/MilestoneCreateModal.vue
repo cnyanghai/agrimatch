@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { Truck, Package, CreditCard, ClipboardCheck, Settings, Plus } from 'lucide-vue-next'
 import { createMilestone, type MilestoneCreateRequest } from '../../api/contract'
 import { BaseModal, BaseButton } from '../ui'
@@ -93,22 +93,22 @@ function close() {
 // 提交
 async function handleSubmit() {
   if (!form.value.milestoneName?.trim()) {
-    ElMessage.warning('请输入节点名称')
+    showToast.warning('请输入节点名称')
     return
   }
 
   // 发货节点需要验证车辆信息
   if (showVehicle.value) {
     if (!vehicleInfo.value.driverName?.trim()) {
-      ElMessage.warning('请输入司机姓名')
+      showToast.warning('请输入司机姓名')
       return
     }
     if (!vehicleInfo.value.plateNumber?.trim()) {
-      ElMessage.warning('请输入车牌号')
+      showToast.warning('请输入车牌号')
       return
     }
     if (!vehicleInfo.value.driverPhone?.trim()) {
-      ElMessage.warning('请输入联系电话')
+      showToast.warning('请输入联系电话')
       return
     }
   }
@@ -132,14 +132,14 @@ async function handleSubmit() {
     })
     
     if (res.code === 0) {
-      ElMessage.success('节点添加成功')
+      showToast.success('节点添加成功')
       emit('created')
       close()
     } else {
-      ElMessage.error(res.message || '添加失败')
+      showToast.error(res.message || '添加失败')
     }
   } catch (e: any) {
-    ElMessage.error(e.message || '添加失败')
+    showToast.error(e.message || '添加失败')
   } finally {
     loading.value = false
   }

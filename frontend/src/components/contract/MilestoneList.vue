@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import {
   Plus, Truck, Package, CreditCard, ClipboardCheck, Settings,
   Clock, Upload, Check, X, Eye, Trash2, AlertCircle, Sparkles
@@ -103,13 +103,13 @@ async function handleGenerateStandard() {
     const res = await generateStandardMilestones(props.contractId)
     if (res.code === 0 && res.data) {
       milestones.value = res.data
-      ElMessage.success('标准流程已生成')
+      showToast.success('标准流程已生成')
       emit('refresh')
     } else {
-      ElMessage.error(res.message || '生成失败')
+      showToast.error(res.message || '生成失败')
     }
   } catch (e: any) {
-    ElMessage.error(e.response?.data?.message || e.message || '生成失败')
+    showToast.error(e.response?.data?.message || e.message || '生成失败')
   } finally {
     generating.value = false
   }
@@ -132,14 +132,14 @@ async function handleConfirm(milestone: MilestoneResponse) {
   try {
     const res = await confirmMilestone(props.contractId, milestone.id)
     if (res.code === 0) {
-      ElMessage.success('确认成功')
+      showToast.success('确认成功')
       loadMilestones()
       emit('refresh')
     } else {
-      ElMessage.error(res.message || '确认失败')
+      showToast.error(res.message || '确认失败')
     }
   } catch (e: any) {
-    ElMessage.error(e.response?.data?.message || e.message || '确认失败')
+    showToast.error(e.response?.data?.message || e.message || '确认失败')
   }
 }
 
@@ -151,13 +151,13 @@ async function handleReject(milestone: MilestoneResponse) {
   try {
     const res = await rejectMilestone(props.contractId, milestone.id, reason || undefined)
     if (res.code === 0) {
-      ElMessage.success('已拒绝')
+      showToast.success('已拒绝')
       loadMilestones()
     } else {
-      ElMessage.error(res.message || '操作失败')
+      showToast.error(res.message || '操作失败')
     }
   } catch (e: any) {
-    ElMessage.error(e.response?.data?.message || e.message || '操作失败')
+    showToast.error(e.response?.data?.message || e.message || '操作失败')
   }
 }
 
@@ -168,13 +168,13 @@ async function handleDelete(milestone: MilestoneResponse) {
   try {
     const res = await deleteMilestone(props.contractId, milestone.id)
     if (res.code === 0) {
-      ElMessage.success('删除成功')
+      showToast.success('删除成功')
       loadMilestones()
     } else {
-      ElMessage.error(res.message || '删除失败')
+      showToast.error(res.message || '删除失败')
     }
   } catch (e: any) {
-    ElMessage.error(e.message || '删除失败')
+    showToast.error(e.message || '删除失败')
   }
 }
 

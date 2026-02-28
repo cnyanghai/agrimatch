@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { ArrowLeft, Star, MessageSquare, Heart } from 'lucide-vue-next'
 import { listPosts, type PostResponse } from '../api/post'
 import { useAuthStore } from '../store/auth'
@@ -26,7 +26,7 @@ async function loadCollectedPosts() {
       posts.value = r.data || []
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '加载收藏列表失败')
+    showToast.error(e?.message || '加载收藏列表失败')
   } finally {
     loading.value = false
   }

@@ -1,4 +1,4 @@
-import { ElNotification } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { ref, onMounted, onUnmounted, inject, type InjectionKey } from 'vue'
 
 export interface Notification {
@@ -70,18 +70,16 @@ class NotificationManager {
         }
       }
     } else {
-      ElNotification({
-        title: notification.title,
-        message: notification.message,
-        type: notification.type === 'error' ? 'error' : notification.type === 'warning' ? 'warning' : notification.type === 'success' ? 'success' : 'info',
-        duration: 3000,
-        showClose: true,
-        onClick: () => {
-          if (notification.action) {
-            notification.action.handler()
-          }
-        }
-      })
+      const msg = `${notification.title}: ${notification.message}`
+      if (notification.type === 'error') {
+        showToast.error(msg, { persistent: true })
+      } else if (notification.type === 'warning') {
+        showToast.warning(msg)
+      } else if (notification.type === 'success') {
+        showToast.success(msg)
+      } else {
+        showToast.info(msg)
+      }
     }
   }
 

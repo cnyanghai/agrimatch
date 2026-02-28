@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { ArrowLeft, Users, Heart, MessageSquare, Clock } from 'lucide-vue-next'
 import { getFollowedPosts } from '../api/follow'
 import { listCollectedPostIds, type PostResponse } from '../api/post'
@@ -27,7 +27,7 @@ async function loadFollowedPosts() {
       throw new Error(r.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '加载关注动态失败')
+    showToast.error(e?.message || '加载关注动态失败')
   } finally {
     loading.value = false
   }

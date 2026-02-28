@@ -2,7 +2,7 @@
 import { reactive, ref, onMounted } from 'vue'
 import { KeyRound, ShieldCheck, RefreshCw, Image as ImageIcon } from 'lucide-vue-next'
 import { useAuthStore } from '../../store/auth'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 
 const props = defineProps<{
   phone: string
@@ -47,11 +47,11 @@ onMounted(refreshCaptcha)
 
 async function handleLogin() {
   if (!form.password) {
-    ElMessage.warning('请输入密码')
+    showToast.warning('请输入密码')
     return
   }
   if (!form.captchaCode) {
-    ElMessage.warning('请输入验证码')
+    showToast.warning('请输入验证码')
     return
   }
   localLoading.value = true
@@ -60,7 +60,7 @@ async function handleLogin() {
     await auth.fetchMe()
     emit('success')
   } catch (e: any) {
-    ElMessage.error(e?.message || '登录失败')
+    showToast.error(e?.message || '登录失败')
     refreshCaptcha()
     form.captchaCode = ''
   } finally {

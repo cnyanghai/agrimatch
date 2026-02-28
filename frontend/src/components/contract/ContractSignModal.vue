@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { Stamp, Check, FileSignature, Package, ShieldCheck } from 'lucide-vue-next'
 import { signContract, getContract, type ContractResponse, type SealResponse } from '../../api/contract'
 import { sendSmsCode } from '../../api/sms'
@@ -122,7 +122,7 @@ watch(() => props.modelValue, async (val) => {
 async function handleSendSms() {
   if (smsSending.value || smsCountdown.value > 0) return
   if (!signerPhone.value) {
-    ElMessage.warning('未找到签署方手机号，请先在公司资料中完善联系电话')
+    showToast.warning('未找到签署方手机号，请先在公司资料中完善联系电话')
     return
   }
 
@@ -130,17 +130,17 @@ async function handleSendSms() {
   try {
     const res = await sendSmsCode(signerPhone.value, 4)
     if (res.code === 0) {
-      ElMessage.success('验证码已发送')
+      showToast.success('验证码已发送')
       smsCountdown.value = 60
       const timer = setInterval(() => {
         smsCountdown.value--
         if (smsCountdown.value <= 0) clearInterval(timer)
       }, 1000)
     } else {
-      ElMessage.error(res.message || '发送失败')
+      showToast.error(res.message || '发送失败')
     }
   } catch (e: any) {
-    ElMessage.error(e?.response?.data?.message || e?.message || '发送失败')
+    showToast.error(e?.response?.data?.message || e?.message || '发送失败')
   } finally {
     smsSending.value = false
   }
@@ -156,11 +156,11 @@ async function handleSign() {
   if (!props.contractId) return
 
   if (!selectedSeal.value) {
-    ElMessage.warning('请选择一枚公章')
+    showToast.warning('请选择一枚公章')
     return
   }
   if (!smsCode.value || smsCode.value.length !== 6) {
-    ElMessage.warning('请输入6位短信验证码')
+    showToast.warning('请输入6位短信验证码')
     return
   }
 
@@ -198,7 +198,7 @@ async function handleSign() {
           success: true
         }
       })
-      ElMessage.success('签署成功')
+      showToast.success('签署成功')
       emit('signed')
       visible.value = false
     } else {
@@ -214,7 +214,7 @@ async function handleSign() {
           error: res.message
         }
       })
-      ElMessage.error(res.message || '签署失败')
+      showToast.error(res.message || '签署失败')
     }
   } catch (e: any) {
     ErrorHandler.handle(e)
@@ -228,7 +228,7 @@ async function handleSign() {
         error: e?.message || '未知错误'
       }
     })
-    ElMessage.error(e.message || '签署失败')
+    showToast.error(e.message || '签署失败')
   } finally {
     loading.value = false
   }

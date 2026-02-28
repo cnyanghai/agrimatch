@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { Search, Heart, MessageCircle, FileText, ExternalLink } from 'lucide-vue-next'
 import { getFollowedUsers, getFollowedSupplies, getFollowedRequirements, unfollowUser, type FollowedUser } from '../api/follow'
 import { openChatConversation } from '../api/chat'
@@ -84,25 +84,25 @@ async function handleUnfollow() {
   try {
     const r = await unfollowUser(selectedUser.value.userId)
     if (r.code === 0) {
-      ElMessage.success(`已取消关注 ${selectedUser.value.nickName || selectedUser.value.userName}`)
+      showToast.success(`已取消关注 ${selectedUser.value.nickName || selectedUser.value.userName}`)
       selectedUser.value = null
       await loadData()
     } else {
       throw new Error(r.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '取消关注失败')
+    showToast.error(e?.message ?? '取消关注失败')
   }
 }
 
 // 联系商家（供应）
 async function contactForSupply(supply: any) {
   if (!authStore.me) {
-    ElMessage.warning('请先登录')
+    showToast.warning('请先登录')
     return
   }
   if (!supply.userId) {
-    ElMessage.warning('无法联系该商户')
+    showToast.warning('无法联系该商户')
     return
   }
   try {
@@ -132,21 +132,21 @@ async function contactForSupply(supply: any) {
     if (res.code === 0 && res.data) {
       router.push({ path: '/chat', query: { conversationId: String(res.data) } })
     } else {
-      ElMessage.error(res.message || '打开聊天失败')
+      showToast.error(res.message || '打开聊天失败')
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '联系商家失败')
+    showToast.error(e?.message || '联系商家失败')
   }
 }
 
 // 联系商家（采购需求）
 async function contactForRequirement(req: any) {
   if (!authStore.me) {
-    ElMessage.warning('请先登录')
+    showToast.warning('请先登录')
     return
   }
   if (!req.userId) {
-    ElMessage.warning('无法联系该商户')
+    showToast.warning('无法联系该商户')
     return
   }
   try {
@@ -169,10 +169,10 @@ async function contactForRequirement(req: any) {
     if (res.code === 0 && res.data) {
       router.push({ path: '/chat', query: { conversationId: String(res.data) } })
     } else {
-      ElMessage.error(res.message || '打开聊天失败')
+      showToast.error(res.message || '打开聊天失败')
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '联系商家失败')
+    showToast.error(e?.message || '联系商家失败')
   }
 }
 

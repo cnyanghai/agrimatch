@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { ArrowLeft, MessageSquare, Heart, MessageCircle } from 'lucide-vue-next'
 import { listPosts, type PostResponse } from '../api/post'
 import { getUser, type UserResponse } from '../api/user'
@@ -57,7 +57,7 @@ async function loadPosts() {
       posts.value = r.data || []
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '加载帖子失败')
+    showToast.error(e?.message || '加载帖子失败')
   } finally {
     loading.value = false
   }
@@ -73,17 +73,17 @@ async function onToggleFollow() {
       const r = await unfollowUser(userId.value)
       if (r.code === 0) {
         isFollowing.value = false
-        ElMessage.success('已取消关注')
+        showToast.success('已取消关注')
       }
     } else {
       const r = await followUser(userId.value)
       if (r.code === 0) {
         isFollowing.value = true
-        ElMessage.success('关注成功')
+        showToast.success('关注成功')
       }
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '操作失败')
+    showToast.error(e?.message || '操作失败')
   } finally {
     followLoading.value = false
   }
@@ -120,7 +120,7 @@ function handleSendMessage() {
   if (!requireAuth()) return
 
   if (!user.value) {
-    ElMessage.warning('用户信息加载中，请稍后再试')
+    showToast.warning('用户信息加载中，请稍后再试')
     return
   }
 

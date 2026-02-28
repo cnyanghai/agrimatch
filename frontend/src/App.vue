@@ -10,6 +10,9 @@ import AuthDialog from './components/AuthDialog.vue'
 import PublicTopNav from './components/PublicTopNav.vue'
 import MobileBottomNav from './components/MobileBottomNav.vue'
 import NotificationToast from './components/notification/NotificationToast.vue'
+import Toast from './components/ui/Toast.vue'
+import ConfirmDialog from './components/ui/ConfirmDialog.vue'
+import { useToast } from './composables/useToast'
 import {
   LayoutDashboard, FilePlus, Star, Map,
   MessageSquare, FileCheck, User, LogOut,
@@ -20,6 +23,7 @@ const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
 const notificationStore = useNotificationStore()
+const { toasts, removeToast } = useToast()
 
 // 初始化全局 WebSocket
 useGlobalWebSocket()
@@ -211,6 +215,12 @@ onMounted(async () => {
 
     <!-- 全局通知 Toast -->
     <NotificationToast />
+
+    <!-- 自建 Toast 通知系统 -->
+    <Toast :toasts="toasts" @remove="removeToast" />
+
+    <!-- 自建 Confirm/Prompt 弹窗 -->
+    <ConfirmDialog />
   </div>
 </template>
 

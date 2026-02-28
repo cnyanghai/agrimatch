@@ -12,7 +12,7 @@
  * 6. 跳转第三方电子签章平台完成签署
  */
 import { onMounted, onBeforeUnmount, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { MessageCircle } from 'lucide-vue-next'
 
 // Composables
@@ -140,7 +140,7 @@ function handleRejectQuote(msg: UiMessage) {
 
 function handleDraftContract(_msg: UiMessage) {
   contractStatus.value = 'PENDING_CONFIRM'
-  ElMessage.success('合同已准备就绪，请双方确认条款')
+  showToast.success('合同已准备就绪，请双方确认条款')
 }
 
 // ==================== Lifecycle ====================

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { FileText, Building2, Package, Calendar, MapPin, CreditCard, FileEdit } from 'lucide-vue-next'
 import { createContractFromQuote, type ContractFromQuoteRequest } from '../../api/contract'
 import { BaseModal, BaseButton } from '../ui'
@@ -188,7 +189,7 @@ watch(() => props.modelValue, (v) => {
 // 提交创建合同
 async function handleSubmit() {
   if (!props.quoteMessageId) {
-    ElMessage.error('报价消息ID缺失')
+    showToast.error('报价消息ID缺失')
     return
   }
   
@@ -205,7 +206,7 @@ async function handleSubmit() {
     
     const res = await createContractFromQuote(req)
     if (res.code === 0 && res.data) {
-      ElMessage.success('合同草稿创建成功')
+      showToast.success('合同草稿创建成功')
       emit('success', res.data)
       emit('update:modelValue', false)
     } else {
@@ -219,26 +220,16 @@ async function handleSubmit() {
 }
 
 // 处理创建合同错误，提供友好提示
-function handleCreateError(message: string) {
+async function handleCreateError(message: string) {
   // 检查是否是公司信息缺失的错误
   if (message.includes('公司信息') || message.includes('公司档案') || message.includes('完善资料')) {
-    ElMessageBox.confirm(
-      message,
-      '无法创建合同',
-      {
-        confirmButtonText: '前往完善资料',
-        cancelButtonText: '稍后再说',
-        type: 'warning',
-        confirmButtonClass: '!bg-brand-600 !border-brand-600 hover:!bg-brand-700',
-      }
-    ).then(() => {
+    const ok = await showConfirm({ title: '无法创建合同', message, type: 'warning' })
+    if (ok) {
       emit('update:modelValue', false)
       router.push('/profile')
-    }).catch(() => {
-      // 用户选择稍后再说
-    })
+    }
   } else {
-    ElMessage.error(message)
+    showToast.error(message)
   }
 }
 </script>

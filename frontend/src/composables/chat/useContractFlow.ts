@@ -4,7 +4,7 @@
  */
 
 import { ref, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import type { ContractPayload, ContractStatus } from '../../types/chat/message'
 import { CONTRACT_STATUS_MAP } from '../../types/chat/message'
 import type { QuoteFieldsV1, BasisQuoteFieldsV1 } from '../../types/chat/quote'
@@ -191,7 +191,7 @@ export function useContractFlow(options: UseContractFlowOptions) {
    */
   function onContractCreated(_contractId: number): void {
     closeDraftModal()
-    ElMessage.success('合同已创建')
+    showToast.success('合同已创建')
   }
 
   // ==================== Sign Contract ====================
@@ -217,7 +217,7 @@ export function useContractFlow(options: UseContractFlowOptions) {
    */
   function onContractSigned(): void {
     closeSignModal()
-    ElMessage.success('签署成功')
+    showToast.success('签署成功')
   }
 
   // ==================== View Contract ====================

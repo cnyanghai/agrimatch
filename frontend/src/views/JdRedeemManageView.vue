@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { CreditCard, RefreshCw, Check, X, Clock, User } from 'lucide-vue-next'
 import { listAdminJdRedeems, fulfillJdRedeem, failJdRedeem, type AdminJdRedeemResponse } from '../api/points'
 import { BaseButton, Skeleton, EmptyState } from '../components/ui'
@@ -60,7 +61,7 @@ async function loadRedeems() {
     if (res.code !== 0) throw new Error(res.message)
     redeems.value = res.data ?? []
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载失败')
+    showToast.error(e?.message ?? '加载失败')
   } finally {
     loading.value = false
   }
@@ -74,7 +75,7 @@ function openFulfillDialog(item: AdminJdRedeemResponse) {
 
 async function submitFulfill() {
   if (!fulfillTarget.value || !cardCodeInput.value.trim()) {
-    ElMessage.warning('请输入卡密')
+    showToast.warning('请输入卡密')
     return
   }
 
@@ -82,11 +83,11 @@ async function submitFulfill() {
   try {
     const res = await fulfillJdRedeem(fulfillTarget.value.id, cardCodeInput.value.trim())
     if (res.code !== 0) throw new Error(res.message)
-    ElMessage.success('发卡成功')
+    showToast.success('发卡成功')
     showFulfillDialog.value = false
     await loadRedeems()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '发卡失败')
+    showToast.error(e?.message ?? '发卡失败')
   } finally {
     submitting.value = false
   }
@@ -101,25 +102,18 @@ function openFailDialog(item: AdminJdRedeemResponse) {
 async function submitFail() {
   if (!failTarget.value) return
 
-  try {
-    await ElMessageBox.confirm(
-      `确认拒绝该订单？将退还用户 ${failTarget.value.pointsCost} 积分。`,
-      '确认拒绝',
-      { confirmButtonText: '确认拒绝', cancelButtonText: '取消', type: 'warning' }
-    )
-  } catch {
-    return
-  }
+  const ok = await showConfirm({ title: '确认拒绝', message: `确认拒绝该订单？将退还用户 ${failTarget.value.pointsCost} 积分。`, type: 'warning' })
+  if (!ok) return
 
   submitting.value = true
   try {
     const res = await failJdRedeem(failTarget.value.id, failRemarkInput.value.trim() || undefined)
     if (res.code !== 0) throw new Error(res.message)
-    ElMessage.success('已拒绝，积分已退还')
+    showToast.success('已拒绝，积分已退还')
     showFailDialog.value = false
     await loadRedeems()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '操作失败')
+    showToast.error(e?.message ?? '操作失败')
   } finally {
     submitting.value = false
   }

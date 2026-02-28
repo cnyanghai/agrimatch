@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { ArrowLeft, Users, UserMinus, MessageSquare } from 'lucide-vue-next'
 import { getFollowedUsers, unfollowUser, type FollowedUser } from '../api/follow'
 import { Card } from '../components/ui'
@@ -24,7 +24,7 @@ async function loadFollowedUsers() {
       throw new Error(r.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '加载关注列表失败')
+    showToast.error(e?.message || '加载关注列表失败')
   } finally {
     loading.value = false
   }
@@ -38,12 +38,12 @@ async function handleUnfollow(user: FollowedUser) {
     const r = await unfollowUser(user.userId)
     if (r.code === 0) {
       users.value = users.value.filter(u => u.userId !== user.userId)
-      ElMessage.success(`已取消关注 ${user.nickName || user.userName}`)
+      showToast.success(`已取消关注 ${user.nickName || user.userName}`)
     } else {
       throw new Error(r.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '取消关注失败')
+    showToast.error(e?.message || '取消关注失败')
   } finally {
     unfollowingId.value = null
   }

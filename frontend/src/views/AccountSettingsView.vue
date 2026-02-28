@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import { useAuthStore } from '../store/auth'
 import { updateMe, type UserUpdateRequest, getLoginLogs, type LoginLogResponse } from '../api/user'
@@ -170,12 +171,12 @@ async function handleLicenseUpload(event: Event) {
   
   // 校验文件类型
   if (!file.type.startsWith('image/')) {
-    ElMessage.warning('请上传图片格式文件')
+    showToast.warning('请上传图片格式文件')
     return
   }
   // 校验文件大小（最大 10MB）
   if (file.size > 10 * 1024 * 1024) {
-    ElMessage.warning('图片大小不能超过 10MB')
+    showToast.warning('图片大小不能超过 10MB')
     return
   }
   
@@ -184,12 +185,12 @@ async function handleLicenseUpload(event: Event) {
     const res = await uploadImage(file)
     if (res.code === 0 && res.data?.fileUrl) {
       companyForm.licenseImgUrl = res.data.fileUrl
-      ElMessage.success('营业执照上传成功')
+      showToast.success('营业执照上传成功')
     } else {
-      ElMessage.error(res.message || '上传失败')
+      showToast.error(res.message || '上传失败')
     }
   } catch (e: any) {
-    ElMessage.error(e.message || '上传失败')
+    showToast.error(e.message || '上传失败')
   } finally {
     licenseUploading.value = false
     input.value = '' // 清空以便重复上传同一文件
@@ -289,7 +290,7 @@ async function loadVehicles() {
 
 async function saveUserInfo() {
   if (!userForm.displayName?.trim()) {
-    ElMessage.warning('请输入姓名/昵称')
+    showToast.warning('请输入姓名/昵称')
     return
   }
   loading.value = true
@@ -306,14 +307,14 @@ async function saveUserInfo() {
     }
     const res = await updateMe(req)
     if (res.code === 0) {
-      ElMessage.success('保存成功')
+      showToast.success('保存成功')
       await auth.fetchMe()
       userSnapshot.value = { ...userForm }
     } else {
       throw new Error(res.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '保存失败')
+    showToast.error(e?.message ?? '保存失败')
   } finally {
     loading.value = false
   }
@@ -321,7 +322,7 @@ async function saveUserInfo() {
 
 async function saveCompanyInfo() {
   if (!companyForm.companyName?.trim()) {
-    ElMessage.warning('请输入公司名称')
+    showToast.warning('请输入公司名称')
     return
   }
   loading.value = true
@@ -339,14 +340,14 @@ async function saveCompanyInfo() {
       res = await createCompany(req)
     }
     if (res.code === 0) {
-      ElMessage.success('保存成功')
+      showToast.success('保存成功')
       await loadCompanyData()
       companySnapshot.value = { ...companyForm }
     } else {
       throw new Error(res.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '保存失败')
+    showToast.error(e?.message ?? '保存失败')
   } finally {
     loading.value = false
   }
@@ -354,18 +355,18 @@ async function saveCompanyInfo() {
 
 async function changePassword() {
   if (!passwordForm.newPassword || !passwordForm.confirmPassword) {
-    ElMessage.warning('请填写完整信息')
+    showToast.warning('请填写完整信息')
     return
   }
   if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    ElMessage.warning('两次密码输入不一致')
+    showToast.warning('两次密码输入不一致')
     return
   }
   if (passwordForm.newPassword.length < 6) {
-    ElMessage.warning('密码长度不能少于6位')
+    showToast.warning('密码长度不能少于6位')
     return
   }
-  ElMessage.info('密码修改功能开发中...')
+  showToast.info('密码修改功能开发中...')
 }
 
 function resetUserForm() { Object.assign(userForm, userSnapshot.value) }
@@ -379,11 +380,11 @@ async function handleAvatarUpload(event: Event) {
   const file = input.files?.[0]
   if (!file) return
   if (!file.type.startsWith('image/')) {
-    ElMessage.warning('请上传图片格式文件')
+    showToast.warning('请上传图片格式文件')
     return
   }
   if (file.size > 5 * 1024 * 1024) {
-    ElMessage.warning('图片大小不能超过 5MB')
+    showToast.warning('图片大小不能超过 5MB')
     return
   }
   avatarUploading.value = true
@@ -391,12 +392,12 @@ async function handleAvatarUpload(event: Event) {
     const res = await uploadImage(file)
     if (res.code === 0 && res.data?.fileUrl) {
       userForm.avatar = res.data.fileUrl
-      ElMessage.success('头像上传成功')
+      showToast.success('头像上传成功')
     } else {
-      ElMessage.error(res.message || '上传失败')
+      showToast.error(res.message || '上传失败')
     }
   } catch (e: any) {
-    ElMessage.error(e.message || '上传失败')
+    showToast.error(e.message || '上传失败')
   } finally {
     avatarUploading.value = false
     input.value = ''
@@ -427,7 +428,7 @@ function openVehicleDialog(mode: 'create' | 'edit', vehicle?: VehicleResponse) {
 
 async function saveVehicle() {
   if (!vehicleForm.driverName?.trim() || !vehicleForm.plateNumber?.trim() || !vehicleForm.driverPhone?.trim()) {
-    ElMessage.warning('请填写完整信息')
+    showToast.warning('请填写完整信息')
     return
   }
   loading.value = true
@@ -439,33 +440,32 @@ async function saveVehicle() {
       res = await createVehicle(vehicleForm)
     }
     if (res.code === 0) {
-      ElMessage.success(vehicleDialogMode.value === 'edit' ? '修改成功' : '添加成功')
+      showToast.success(vehicleDialogMode.value === 'edit' ? '修改成功' : '添加成功')
       vehicleDialogVisible.value = false
       await loadVehicles()
     } else {
       throw new Error(res.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '操作失败')
+    showToast.error(e?.message ?? '操作失败')
   } finally {
     loading.value = false
   }
 }
 
 async function removeVehicle(id: number) {
+  const ok = await showConfirm({ title: '确认删除', message: '确定要删除这辆车吗？', type: 'warning' })
+  if (!ok) return
   try {
-    await ElMessageBox.confirm('确定要删除这辆车吗？', '确认删除', { type: 'warning' })
     const res = await deleteVehicle(id)
     if (res.code === 0) {
-      ElMessage.success('删除成功')
+      showToast.success('删除成功')
       await loadVehicles()
     } else {
       throw new Error(res.message)
     }
   } catch (e: any) {
-    if (e !== 'cancel') {
-      ElMessage.error(e?.message ?? '删除失败')
-    }
+    showToast.error(e?.message ?? '删除失败')
   }
 }
 
@@ -473,13 +473,13 @@ async function setDefault(id: number) {
   try {
     const res = await setDefaultVehicle(id)
     if (res.code === 0) {
-      ElMessage.success('设置成功')
+      showToast.success('设置成功')
       await loadVehicles()
     } else {
       throw new Error(res.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '设置失败')
+    showToast.error(e?.message ?? '设置失败')
   }
 }
 
@@ -500,7 +500,7 @@ function openRecruitmentDialog(mode: 'create' | 'edit', item?: { id: string, pos
 
 function saveRecruitment() {
   if (!recruitmentForm.position?.trim()) {
-    ElMessage.warning('请填写岗位名称')
+    showToast.warning('请填写岗位名称')
     return
   }
   if (editingRecruitmentId.value) {
@@ -513,12 +513,12 @@ function saveRecruitment() {
     recruitments.value.push({ ...recruitmentForm, id: String(Date.now()) })
   }
   recruitmentDialogVisible.value = false
-  ElMessage.success('保存成功')
+  showToast.success('保存成功')
 }
 
 function removeRecruitment(id: string) {
   recruitments.value = recruitments.value.filter(r => r.id !== id)
-  ElMessage.success('删除成功')
+  showToast.success('删除成功')
 }
 
 // 资质证书上传
@@ -527,11 +527,11 @@ async function handleCertificateUpload(event: Event) {
   const file = input.files?.[0]
   if (!file) return
   if (!file.type.startsWith('image/')) {
-    ElMessage.warning('请上传图片格式文件')
+    showToast.warning('请上传图片格式文件')
     return
   }
   if (file.size > 10 * 1024 * 1024) {
-    ElMessage.warning('图片大小不能超过 10MB')
+    showToast.warning('图片大小不能超过 10MB')
     return
   }
   certificateUploading.value = true
@@ -539,12 +539,12 @@ async function handleCertificateUpload(event: Event) {
     const res = await uploadImage(file)
     if (res.code === 0 && res.data?.fileUrl) {
       certificates.value.push(res.data.fileUrl)
-      ElMessage.success('上传成功')
+      showToast.success('上传成功')
     } else {
-      ElMessage.error(res.message || '上传失败')
+      showToast.error(res.message || '上传失败')
     }
   } catch (e: any) {
-    ElMessage.error(e.message || '上传失败')
+    showToast.error(e.message || '上传失败')
   } finally {
     certificateUploading.value = false
     input.value = ''
@@ -553,7 +553,7 @@ async function handleCertificateUpload(event: Event) {
 
 function removeCertificate(index: number) {
   certificates.value.splice(index, 1)
-  ElMessage.success('删除成功')
+  showToast.success('删除成功')
 }
 
 const genderOptions = [{ label: '男', value: 1 }, { label: '女', value: 2 }]

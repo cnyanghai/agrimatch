@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { createRequirement, getNextRequirementNo, listRequirements, updateRequirement, type RequirementCreateRequest, type RequirementResponse, type RequirementUpdateRequest } from '../api/requirement'
 import { listMyRequirementTemplates as listRequirementTemplates, createRequirementTemplate, deleteRequirementTemplate, type RequirementTemplateCreateRequest, type RequirementTemplateResponse } from '../api/requirementTemplate'
 import { getProductParams, type ProductParamResponse } from '../api/product'
@@ -86,7 +87,7 @@ async function loadRequirements() {
       throw new Error(r.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '加载需求列表失败')
+    showToast.error(e?.message || '加载需求列表失败')
   } finally {
     listLoading.value = false
   }
@@ -166,11 +167,11 @@ async function saveEdit() {
       remark: editForm.remark
     })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已保存')
+    showToast.success('已保存')
     editOpen.value = false
     await loadRequirements()
   } catch (e: any) {
-    ElMessage.error(e?.message || '保存失败')
+    showToast.error(e?.message || '保存失败')
   } finally {
     saving.value = false
   }
@@ -178,37 +179,29 @@ async function saveEdit() {
 
 async function revokeRequirement(req: RequirementResponse) {
   if (!req.id) return
+  const ok = await showConfirm({ title: '确认撤销？', message: '撤销后该需求将从大厅隐藏，可随时再次发布。', type: 'warning' })
+  if (!ok) return
   try {
-    await ElMessageBox.confirm('撤销后该需求将从大厅隐藏，可随时再次发布。', '确认撤销？', {
-      confirmButtonText: '撤销',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
     const r = await updateRequirement(req.id, { status: 2 })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已撤销')
+    showToast.success('已撤销')
     await loadRequirements()
   } catch (e: any) {
-    if (e === 'cancel' || e === 'close') return
-    ElMessage.error(e?.message || '操作失败')
+    showToast.error(e?.message || '操作失败')
   }
 }
 
 async function republishRequirement(req: RequirementResponse) {
   if (!req.id) return
+  const ok = await showConfirm({ title: '再次发布？', message: '将该需求重新发布到大厅，并按有效期重新计时。', type: 'info' })
+  if (!ok) return
   try {
-    await ElMessageBox.confirm('将该需求重新发布到大厅，并按有效期重新计时。', '再次发布？', {
-      confirmButtonText: '发布',
-      cancelButtonText: '取消',
-      type: 'info'
-    })
     const r = await updateRequirement(req.id, { status: 0, expireMinutes: req.expireMinutes ?? 4320 })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已再次发布')
+    showToast.success('已再次发布')
     await loadRequirements()
   } catch (e: any) {
-    if (e === 'cancel' || e === 'close') return
-    ElMessage.error(e?.message || '操作失败')
+    showToast.error(e?.message || '操作失败')
   }
 }
 
@@ -427,7 +420,7 @@ async function loadTemplates() {
     const r = await listRequirementTemplates()
     if (r.code === 0) templates.value = r.data || []
   } catch (e) {
-    ElMessage.error('加载模板列表失败')
+    showToast.error('加载模板列表失败')
   }
 }
 
@@ -467,7 +460,7 @@ async function loadCategoryParams(productId: number) {
       dynamicParams.value = params
     }
   } catch (e) {
-    ElMessage.error('加载品类参数失败')
+    showToast.error('加载品类参数失败')
   }
 }
 
@@ -489,15 +482,15 @@ function buildParamsJson() {
 
 async function publishRequirement() {
   if (!publishForm.categoryId) {
-    ElMessage.warning('请选择品类')
+    showToast.warning('请选择品类')
     return
   }
   if (!publishForm.quantity) {
-    ElMessage.warning('请输入数量')
+    showToast.warning('请输入数量')
     return
   }
   if (!publishForm.purchaseAddress) {
-    ElMessage.warning('请输入交付地')
+    showToast.warning('请输入交付地')
     return
   }
   
@@ -522,7 +515,7 @@ async function publishRequirement() {
     
     const r = await createRequirement(req)
     if (r.code === 0) {
-      ElMessage.success('需求发布成功')
+      showToast.success('需求发布成功')
       // 清除企业资料缓存，确保企业主页显示最新数据
       if (company.value?.id) {
         companyStore.invalidateProfile(company.value.id)
@@ -555,10 +548,10 @@ async function publishRequirement() {
       customParams.value = []
       await loadNextContractNo()
     } else {
-      ElMessage.error(r.message || '发布失败')
+      showToast.error(r.message || '发布失败')
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '发布失败')
+    showToast.error(e?.message || '发布失败')
   } finally {
     loading.value = false
   }
@@ -570,7 +563,7 @@ const templateNameInput = ref('')
 
 async function saveAsTemplate() {
   if (!publishForm.categoryId) {
-    ElMessage.warning('请先选择品类')
+    showToast.warning('请先选择品类')
     return
   }
   saveTemplateDialogVisible.value = true
@@ -578,7 +571,7 @@ async function saveAsTemplate() {
 
 async function confirmSaveTemplate() {
   if (!templateNameInput.value.trim()) {
-    ElMessage.warning('请输入模板名称')
+    showToast.warning('请输入模板名称')
     return
   }
   
@@ -611,33 +604,29 @@ async function confirmSaveTemplate() {
     
     const r = await createRequirementTemplate(req)
     if (r.code === 0) {
-      ElMessage.success('模板保存成功')
+      showToast.success('模板保存成功')
       await loadTemplates()
       saveTemplateDialogVisible.value = false
       templateNameInput.value = ''
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '保存失败')
+    showToast.error(e?.message || '保存失败')
   } finally {
     loading.value = false
   }
 }
 
 async function deleteTemplate(id: number) {
+  const ok = await showConfirm({ title: '删除确认', message: '确定要删除此模板吗？删除后无法恢复。', type: 'warning' })
+  if (!ok) return
   try {
-    await ElMessageBox.confirm('确定要删除此模板吗？删除后无法恢复。', '删除确认', {
-      confirmButtonText: '删除',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
     const r = await deleteRequirementTemplate(id)
     if (r.code === 0) {
-      ElMessage.success('模板删除成功')
+      showToast.success('模板删除成功')
       await loadTemplates()
     }
   } catch (e: any) {
-    if (e === 'cancel' || e === 'close') return
-    ElMessage.error(e?.message || '删除失败')
+    showToast.error(e?.message || '删除失败')
   }
 }
 
@@ -711,10 +700,10 @@ async function applyTemplate(template: RequirementTemplateResponse) {
 
     suspendCategoryWatch.value = false
     templatePickerOpen.value = false
-    ElMessage.success('模板已应用')
+    showToast.success('模板已应用')
   } catch {
     suspendCategoryWatch.value = false
-    ElMessage.error('模板数据格式错误')
+    showToast.error('模板数据格式错误')
   }
 }
 </script>

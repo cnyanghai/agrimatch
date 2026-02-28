@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import {
   ArrowLeft, Download, Pen, RefreshCw, Scale
 } from 'lucide-vue-next'
@@ -140,10 +140,10 @@ async function loadContract() {
     if (res.code === 0 && res.data) {
       contract.value = res.data
     } else {
-      ElMessage.error(res.message || '加载失败')
+      showToast.error(res.message || '加载失败')
     }
   } catch (e: any) {
-    ElMessage.error(e.message || '加载失败')
+    showToast.error(e.message || '加载失败')
   } finally {
     loading.value = false
   }
@@ -156,13 +156,13 @@ async function handleSendForSign() {
   try {
     const res = await sendContractForSigning(contract.value.id)
     if (res.code === 0) {
-      ElMessage.success('已发送给对方签署')
+      showToast.success('已发送给对方签署')
       loadContract()
     } else {
-      ElMessage.error(res.message || '发送失败')
+      showToast.error(res.message || '发送失败')
     }
   } catch (e: any) {
-    ElMessage.error(e.message || '发送失败')
+    showToast.error(e.message || '发送失败')
   }
 }
 
@@ -231,10 +231,10 @@ async function downloadPdf() {
     }
 
     await html2pdf().set(opt).from(element).save()
-    ElMessage.success('PDF 下载成功')
+    showToast.success('PDF 下载成功')
   } catch (e: any) {
     console.error('PDF generation failed:', e)
-    ElMessage.error('PDF 生成失败，请重试')
+    showToast.error('PDF 生成失败，请重试')
   } finally {
     pdfGenerating.value = false
   }

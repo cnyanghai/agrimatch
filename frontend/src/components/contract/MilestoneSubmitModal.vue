@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { Upload, Trash2, Check } from 'lucide-vue-next'
 import { submitMilestone, type MilestoneResponse, type MilestoneSubmitRequest } from '../../api/contract'
 import { uploadImage } from '../../api/file'
@@ -57,9 +57,9 @@ async function handleFileChange(event: Event) {
         form.value.evidenceUrls.push(res.data.fileUrl)
       }
     }
-    ElMessage.success('上传成功')
+    showToast.success('上传成功')
   } catch (e: any) {
-    ElMessage.error(e.message || '上传失败')
+    showToast.error(e.message || '上传失败')
   } finally {
     uploading.value = false
     // 重置 input
@@ -94,7 +94,7 @@ async function handleSubmit() {
   if (!props.milestone) return
   
   if (form.value.evidenceUrls.length === 0) {
-    ElMessage.warning('请上传至少一张凭证图片')
+    showToast.warning('请上传至少一张凭证图片')
     return
   }
   
@@ -110,14 +110,14 @@ async function handleSubmit() {
     const res = await submitMilestone(props.contractId, props.milestone.id, req)
     
     if (res.code === 0) {
-      ElMessage.success('凭证提交成功，等待对方确认')
+      showToast.success('凭证提交成功，等待对方确认')
       emit('submitted')
       close()
     } else {
-      ElMessage.error(res.message || '提交失败')
+      showToast.error(res.message || '提交失败')
     }
   } catch (e: any) {
-    ElMessage.error(e.message || '提交失败')
+    showToast.error(e.message || '提交失败')
   } finally {
     loading.value = false
   }

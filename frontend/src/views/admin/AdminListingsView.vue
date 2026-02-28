@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { Search, RefreshCw, EyeOff, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import {
   listAdminSupplies, takedownSupply, restoreSupply,
@@ -29,7 +30,7 @@ async function load() {
     items.value = res.data.list
     total.value = res.data.total
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载失败')
+    showToast.error(e?.message ?? '加载失败')
   } finally {
     loading.value = false
   }
@@ -48,18 +49,17 @@ function doSearch() {
 }
 
 async function handleTakedown(item: AdminListingResponse) {
-  try {
-    await ElMessageBox.confirm(`确认下架「${item.categoryName}」？`, '下架确认', { type: 'warning' })
-  } catch { return }
+  const ok = await showConfirm({ title: '下架确认', message: `确认下架「${item.categoryName}」？`, type: 'warning' })
+  if (!ok) return
   try {
     const res = activeTab.value === 'supply'
       ? await takedownSupply(item.id)
       : await takedownRequirement(item.id)
     if (res.code !== 0) throw new Error(res.message)
-    ElMessage.success('已下架')
+    showToast.success('已下架')
     await load()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '操作失败')
+    showToast.error(e?.message ?? '操作失败')
   }
 }
 
@@ -69,10 +69,10 @@ async function handleRestore(item: AdminListingResponse) {
       ? await restoreSupply(item.id)
       : await restoreRequirement(item.id)
     if (res.code !== 0) throw new Error(res.message)
-    ElMessage.success('已恢复')
+    showToast.success('已恢复')
     await load()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '操作失败')
+    showToast.error(e?.message ?? '操作失败')
   }
 }
 

@@ -1,4 +1,4 @@
-import { ElMessage, ElNotification } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import type { AxiosError } from 'axios'
 
 export interface ApiError {
@@ -68,40 +68,25 @@ export function handleApiError(error: any): void {
     message = error.message
   }
 
-  ElMessage({
-    message,
-    type,
-    duration: 3000,
-    grouping: true
-  })
+  if (type === 'warning') {
+    showToast.warning(message)
+  } else {
+    showToast.error(message)
+  }
 
   reportToMonitoring(error)
 }
 
 export function handleNetworkError(): void {
-  ElNotification({
-    title: '网络连接异常',
-    message: '请检查网络连接后重试',
-    type: 'error',
-    duration: 5000,
-    showClose: true
-  })
+  showToast.error('网络连接异常: 请检查网络连接后重试', { persistent: true })
 }
 
 export function handleValidationError(field: string, message: string): void {
-  ElMessage({
-    message: `${field}: ${message}`,
-    type: 'warning',
-    duration: 3000
-  })
+  showToast.warning(`${field}: ${message}`)
 }
 
 export function handleSuccess(message: string): void {
-  ElMessage({
-    message,
-    type: 'success',
-    duration: 2000
-  })
+  showToast.success(message)
 }
 
 function reportToMonitoring(error: any): void {

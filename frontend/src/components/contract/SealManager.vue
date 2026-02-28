@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { Plus, Check, Trash2, Stamp, ArrowRight } from 'lucide-vue-next'
 import { listSeals, createSeal, setDefaultSeal, deleteSeal, type SealResponse } from '../../api/contract'
 import { vLazy } from '../../directives/lazyLoad'
@@ -49,11 +49,11 @@ async function loadSeals() {
 
 async function handleCreate() {
   if (!newSealForm.value.sealName.trim()) {
-    ElMessage.warning('请输入公章名称')
+    showToast.warning('请输入公章名称')
     return
   }
   if (!uploadedSealUrl.value) {
-    ElMessage.warning('请先上传并提取印章图片')
+    showToast.warning('请先上传并提取印章图片')
     return
   }
 
@@ -66,14 +66,14 @@ async function handleCreate() {
       generate: false
     })
     if (res.code === 0) {
-      ElMessage.success('公章创建成功')
+      showToast.success('公章创建成功')
       resetForm()
       await loadSeals()
     } else {
-      ElMessage.error(res.message || '创建失败')
+      showToast.error(res.message || '创建失败')
     }
   } catch (err: any) {
-    ElMessage.error(err.message || '创建失败')
+    showToast.error(err.message || '创建失败')
   } finally {
     creating.value = false
   }
@@ -97,7 +97,7 @@ async function handleSetDefault(id: number) {
   try {
     const res = await setDefaultSeal(id)
     if (res.code === 0) {
-      ElMessage.success('已设为默认公章')
+      showToast.success('已设为默认公章')
       await loadSeals()
     }
   } catch (err) {
@@ -109,7 +109,7 @@ async function handleDelete(id: number) {
   try {
     const res = await deleteSeal(id)
     if (res.code === 0) {
-      ElMessage.success('公章已删除')
+      showToast.success('公章已删除')
       await loadSeals()
     }
   } catch (err) {

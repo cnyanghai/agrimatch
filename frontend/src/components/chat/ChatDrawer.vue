@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import { ElDrawer, ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import Drawer from '@/components/ui/Drawer.vue'
 import { ArrowUpRight, X, MessageCircle } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { getConversationMessages, markConversationRead, type ChatMessageResponse } from '../../api/chat'
@@ -43,7 +44,7 @@ const websocket = useChatWebSocket(
     onMessage: handleWsMessage,
     onDisconnect: (reason) => {
       if (reason !== 'logged_out' && reason !== 'manual') {
-        ElMessage.warning('实时连接已断开，正在重连…')
+        showToast.warning('实时连接已断开，正在重连…')
       }
     }
   }
@@ -135,7 +136,7 @@ async function loadMessages() {
       // ignore
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '加载消息失败')
+    showToast.error(e?.message || '加载消息失败')
   } finally {
     loading.value = false
   }
@@ -173,7 +174,7 @@ async function sendMessage() {
     if (idx >= 0 && messages.value[idx]) {
       messages.value[idx].status = 'failed'
     }
-    ElMessage.warning('实时连接未就绪，正在重连…')
+    showToast.warning('实时连接未就绪，正在重连…')
     return
   }
 
@@ -183,7 +184,7 @@ async function sendMessage() {
     if (idx >= 0 && messages.value[idx]) {
       messages.value[idx].status = 'failed'
     }
-    ElMessage.error('发送失败')
+    showToast.error('发送失败')
   }
 }
 
@@ -233,17 +234,12 @@ watch(
 </script>
 
 <template>
-  <ElDrawer
+  <Drawer
     :model-value="modelValue"
-    direction="rtl"
+    direction="right"
     size="520px"
-    :with-header="false"
-    :append-to-body="true"
-    :lock-scroll="true"
-    :close-on-click-modal="true"
-    :destroy-on-close="false"
-    :modal-class="'chat-drawer-mask'"
-    @close="close"
+    :no-header="true"
+    @update:model-value="(v) => { if (!v) close() }"
   >
     <div class="h-full flex flex-col bg-neutral-50">
       <!-- header simplified -->
@@ -355,7 +351,7 @@ watch(
         </div>
       </div>
     </div>
-  </ElDrawer>
+  </Drawer>
 </template>
 
 <style>

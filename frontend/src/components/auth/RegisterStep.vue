@@ -2,7 +2,7 @@
 import { reactive, ref, computed, onMounted } from 'vue'
 import { KeyRound, ShieldCheck, RefreshCw, Image as ImageIcon } from 'lucide-vue-next'
 import { useAuthStore } from '../../store/auth'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 
 const props = defineProps<{
   phone: string
@@ -76,19 +76,19 @@ onMounted(refreshCaptcha)
 
 async function handleRegister() {
   if (!agreed.value) {
-    ElMessage.warning('请先同意用户协议和隐私政策')
+    showToast.warning('请先同意用户协议和隐私政策')
     return
   }
   if (!form.password || form.password.length < 6) {
-    ElMessage.warning('密码至少6位')
+    showToast.warning('密码至少6位')
     return
   }
   if (form.password !== form.confirmPassword) {
-    ElMessage.warning('两次输入的密码不一致')
+    showToast.warning('两次输入的密码不一致')
     return
   }
   if (!form.captchaCode) {
-    ElMessage.warning('请输入验证码')
+    showToast.warning('请输入验证码')
     return
   }
   localLoading.value = true
@@ -103,9 +103,9 @@ async function handleRegister() {
     emit('success')
   } catch (e: any) {
     if (e?.message?.includes('已存在') || e?.response?.status === 409) {
-      ElMessage.error('该手机号已注册，请返回登录')
+      showToast.error('该手机号已注册，请返回登录')
     } else {
-      ElMessage.error(e?.message || '注册失败')
+      showToast.error(e?.message || '注册失败')
     }
     refreshCaptcha()
     form.captchaCode = ''

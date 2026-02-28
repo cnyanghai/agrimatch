@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { requireAuth } from '../utils/requireAuth'
 import { listPosts, listCollectedPostIds, type PostResponse } from '../api/post'
 import { getFollowedPosts, getFollowedUsers, type FollowedUser } from '../api/follow'
@@ -95,7 +95,7 @@ async function loadPosts() {
     if (r.code !== 0) throw new Error(r.message)
     posts.value = r.data ?? []
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载话题列表失败')
+    showToast.error(e?.message ?? '加载话题列表失败')
   } finally {
     loading.value = false
   }

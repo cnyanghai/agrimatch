@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { useCompany } from '../composables/useCompany'
 import { useCompanyStore } from '../stores/company'
 import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
@@ -204,13 +204,13 @@ function goToPartnerProfile(companyId: number) {
 // 关注/取消关注
 async function toggleFollow() {
   if (!authStore.me) {
-    ElMessage.warning('请先登录')
+    showToast.warning('请先登录')
     return
   }
   
   if (!company.value?.ownerUserId) {
     console.error('Company ownerUserId is missing:', company.value)
-    ElMessage.warning('该企业未关联用户，无法关注')
+    showToast.warning('该企业未关联用户，无法关注')
     return
   }
   
@@ -222,22 +222,22 @@ async function toggleFollow() {
       const r = await unfollowUser(company.value.ownerUserId)
       if (r.code === 0) {
         isFollowing.value = false
-        ElMessage.success('已取消关注')
+        showToast.success('已取消关注')
       } else {
-        ElMessage.error(r.message || '取消关注失败')
+        showToast.error(r.message || '取消关注失败')
       }
     } else {
       const r = await followUser(company.value.ownerUserId)
       if (r.code === 0) {
         isFollowing.value = true
-        ElMessage.success('关注成功')
+        showToast.success('关注成功')
       } else {
-        ElMessage.error(r.message || '关注失败')
+        showToast.error(r.message || '关注失败')
       }
     }
   } catch (e: any) {
     console.error('Follow operation error:', e)
-    ElMessage.error(e?.message || '操作失败，请稍后重试')
+    showToast.error(e?.message || '操作失败，请稍后重试')
   } finally {
     followLoading.value = false
   }
@@ -246,12 +246,12 @@ async function toggleFollow() {
 // 联系商家（通用）
 async function contactMerchant() {
   if (!authStore.me) {
-    ElMessage.warning('请先登录')
+    showToast.warning('请先登录')
     return
   }
   
   if (!company.value?.ownerUserId) {
-    ElMessage.warning('该企业未关联用户，无法联系')
+    showToast.warning('该企业未关联用户，无法联系')
     return
   }
   
@@ -295,23 +295,23 @@ async function contactMerchant() {
       // 跳转到聊天页面，使用query参数
       router.push({ path: '/chat', query: { conversationId: String(res.data) } })
     } else {
-      ElMessage.error(res.message || '打开聊天失败')
+      showToast.error(res.message || '打开聊天失败')
     }
   } catch (e: any) {
     console.error('Contact merchant error:', e)
-    ElMessage.error(e?.message || '联系商家失败，请稍后重试')
+    showToast.error(e?.message || '联系商家失败，请稍后重试')
   }
 }
 
 // 针对特定供应信息联系商家
 async function sendInquiry(supply: any) {
   if (!authStore.me) {
-    ElMessage.warning('请先登录')
+    showToast.warning('请先登录')
     return
   }
   
   if (!company.value?.ownerUserId) {
-    ElMessage.warning('该企业未关联用户，无法联系')
+    showToast.warning('该企业未关联用户，无法联系')
     return
   }
   
@@ -343,11 +343,11 @@ async function sendInquiry(supply: any) {
     if (res.code === 0 && res.data) {
       router.push({ path: '/chat', query: { conversationId: String(res.data) } })
     } else {
-      ElMessage.error(res.message || '打开聊天失败')
+      showToast.error(res.message || '打开聊天失败')
     }
   } catch (e: any) {
     console.error('Send inquiry error:', e)
-    ElMessage.error(e?.message || '联系商家失败，请稍后重试')
+    showToast.error(e?.message || '联系商家失败，请稍后重试')
   }
 }
 
@@ -356,9 +356,9 @@ async function shareProfile() {
   const url = window.location.href
   try {
     await navigator.clipboard.writeText(url)
-    ElMessage.success('链接已复制到剪贴板')
+    showToast.success('链接已复制到剪贴板')
   } catch {
-    ElMessage.error('复制失败，请手动复制链接')
+    showToast.error('复制失败，请手动复制链接')
   }
 }
 

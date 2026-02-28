@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { Coins, RefreshCw, ArrowUpCircle, ArrowDownCircle, TrendingUp, TrendingDown, CreditCard, Copy, Check, X, ShieldCheck, Package, Info, FileText, Gift } from 'lucide-vue-next'
 import { getPointsMe, listPointsTx, rechargePoints, redeemJdCard, listMyJdRedeems, type PointsTxResponse, type JdRedeemDetailResponse } from '../api/points'
 import { BaseButton, EmptyState, Skeleton } from '../components/ui'
@@ -217,7 +218,7 @@ function getRedeemStatusInfo(status: number) {
 function copyCardCode(code: string) {
   navigator.clipboard.writeText(code)
   cardCodeCopied.value = true
-  ElMessage.success('卡密已复制')
+  showToast.success('卡密已复制')
   setTimeout(() => { cardCodeCopied.value = false }, 3000)
 }
 
@@ -239,7 +240,7 @@ async function refresh() {
       myRedeems.value = r3.data ?? []
     }
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载失败')
+    showToast.error(e?.message ?? '加载失败')
   } finally {
     loading.value = false
   }
@@ -249,15 +250,8 @@ async function refresh() {
 async function onRecharge() {
   if (!canRecharge.value) return
 
-  try {
-    await ElMessageBox.confirm(
-      `确认充值 ${rechargeVal.value} 元？将使用${payChannel.value === 'wechat' ? '微信' : '支付宝'}支付。`,
-      '确认充值',
-      { confirmButtonText: '确认支付', cancelButtonText: '取消', type: 'info' }
-    )
-  } catch {
-    return
-  }
+  const ok = await showConfirm({ title: '确认充值', message: `确认充值 ${rechargeVal.value} 元？将使用${payChannel.value === 'wechat' ? '微信' : '支付宝'}支付。`, type: 'info' })
+  if (!ok) return
 
   creating.value = true
   try {
@@ -267,7 +261,7 @@ async function onRecharge() {
     showPayQrDialog.value = true
     startPayPolling()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '创建订单失败')
+    showToast.error(e?.message ?? '创建订单失败')
   } finally {
     creating.value = false
   }
@@ -286,7 +280,7 @@ function startPayPolling() {
       const r = await rechargePoints(rechargeVal.value)
       if (r.code === 0) {
         me.value = r.data ?? me.value
-        ElMessage.success('充值成功！')
+        showToast.success('充值成功！')
         await refresh()
       }
 
@@ -317,7 +311,7 @@ function closePayDialog() {
 // ================= 兑换流程 =================
 function openRedeemDialog() {
   if (!canRedeem.value) {
-    ElMessage.warning('积分余额不足')
+    showToast.warning('积分余额不足')
     return
   }
   redeemStep.value = 'confirm'
@@ -334,7 +328,7 @@ async function confirmRedeem() {
     redeemStep.value = 'result'
     await refresh()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '兑换失败')
+    showToast.error(e?.message ?? '兑换失败')
   } finally {
     creating.value = false
   }

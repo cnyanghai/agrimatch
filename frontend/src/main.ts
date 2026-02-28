@@ -3,8 +3,7 @@ import './styles/design-system.css'
 import './style.css'
 import App from './App.vue'
 import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
-// 全局覆盖样式需放在第三方组件库样式之后，保证生效
+// 全局覆盖样式（需放在第三方样式之后）
 import './assets/animations.css'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import dayjs from 'dayjs'

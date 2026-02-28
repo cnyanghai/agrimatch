@@ -111,6 +111,16 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         );
         sendToUser(saved.getToUserId(), new TextMessage(messagePayload));
 
+        // 推送给发送方的其他设备（当前session已通过SENT回执处理，跳过避免重复）
+        Set<WebSocketSession> senderSessions = sessions.get(fromUserId);
+        if (senderSessions != null) {
+            for (WebSocketSession s : senderSessions) {
+                if (s != null && s.isOpen() && !s.equals(session)) {
+                    try { s.sendMessage(new TextMessage(messagePayload)); } catch (Exception ignored) {}
+                }
+            }
+        }
+
         // 回执给发送方（包含 tempId -> id）
         var ack = objectMapper.createObjectNode()
                 .put("type", "SENT")

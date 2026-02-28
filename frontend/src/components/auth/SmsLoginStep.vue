@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { ShieldCheck } from 'lucide-vue-next'
 import { useAuthStore } from '../../store/auth'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 
 const props = defineProps<{
   phone: string
@@ -26,14 +26,14 @@ async function sendCode() {
   sending.value = true
   try {
     await auth.sendLoginSmsCode(props.phone)
-    ElMessage.success('验证码已发送')
+    showToast.success('验证码已发送')
     countdown.value = 60
     const timer = setInterval(() => {
       countdown.value--
       if (countdown.value <= 0) clearInterval(timer)
     }, 1000)
   } catch (e: any) {
-    ElMessage.error(e?.message || '发送失败')
+    showToast.error(e?.message || '发送失败')
   } finally {
     sending.value = false
   }
@@ -41,7 +41,7 @@ async function sendCode() {
 
 async function handleLogin() {
   if (!smsCode.value) {
-    ElMessage.warning('请输入验证码')
+    showToast.warning('请输入验证码')
     return
   }
   localLoading.value = true
@@ -50,7 +50,7 @@ async function handleLogin() {
     await auth.fetchMe()
     emit('success')
   } catch (e: any) {
-    ElMessage.error(e?.message || '登录失败')
+    showToast.error(e?.message || '登录失败')
   } finally {
     localLoading.value = false
   }

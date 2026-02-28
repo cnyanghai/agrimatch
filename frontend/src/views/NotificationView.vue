@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { useRouter } from 'vue-router'
 import { Bell, MessageSquare, Heart, AlertCircle, CheckCircle, Clock, RefreshCw, CheckCheck } from 'lucide-vue-next'
 import { listMyNotify, markNotifyRead, markNotifyReadAll, type NotifyResponse } from '../api/notify'
@@ -50,7 +50,7 @@ async function refresh() {
     if (r.code !== 0) throw new Error(r.message)
     list.value = r.data ?? []
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载失败')
+    showToast.error(e?.message ?? '加载失败')
   } finally {
     loading.value = false
   }
@@ -63,7 +63,7 @@ async function onRead(row: NotifyResponse) {
     row.read = true
     if (row.link) router.push(row.link)
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '操作失败')
+    showToast.error(e?.message ?? '操作失败')
   }
 }
 
@@ -71,10 +71,10 @@ async function onReadAll() {
   try {
     const r = await markNotifyReadAll()
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已全部标记已读')
+    showToast.success('已全部标记已读')
     await refresh()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '操作失败')
+    showToast.error(e?.message ?? '操作失败')
   }
 }
 

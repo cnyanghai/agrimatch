@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref, shallowRef } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { createPost } from '../api/post'
 import { getPointsMe } from '../api/points'
 import { useAuthStore } from '../store/auth'
@@ -56,7 +56,7 @@ const editorConfig: Partial<IEditorConfig> = {
     uploadImage: {
       async customUpload(file: File, insertFn: (url: string, alt?: string, href?: string) => void) {
         if (file.size > 10 * 1024 * 1024) {
-          ElMessage.warning('图片大小不能超过 10MB')
+          showToast.warning('图片大小不能超过 10MB')
           return
         }
 
@@ -77,7 +77,7 @@ const editorConfig: Partial<IEditorConfig> = {
             throw new Error(result.message || '上传失败')
           }
         } catch (e: any) {
-          ElMessage.error(e?.message || '图片上传失败')
+          showToast.error(e?.message || '图片上传失败')
         }
       },
       allowedFileTypes: ['image/*'],
@@ -107,11 +107,11 @@ async function handleCoverUpload(e: Event) {
   const file = files[0]
   if (!file) return
   if (!file.type.startsWith('image/')) {
-    ElMessage.warning('请选择图片文件')
+    showToast.warning('请选择图片文件')
     return
   }
   if (file.size > 5 * 1024 * 1024) {
-    ElMessage.warning('图片大小不能超过 5MB')
+    showToast.warning('图片大小不能超过 5MB')
     return
   }
 
@@ -128,12 +128,12 @@ async function handleCoverUpload(e: Event) {
 
     if (result.code === 0 && result.data?.fileUrl) {
       coverImages.value.push(result.data.fileUrl)
-      ElMessage.success('封面图上传成功')
+      showToast.success('封面图上传成功')
     } else {
       throw new Error(result.message || '上传失败')
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '图片上传失败')
+    showToast.error(e?.message || '图片上传失败')
   } finally {
     uploadingCover.value = false
     input.value = ''
@@ -161,19 +161,19 @@ function getPlainText(): string {
 }
 
 async function submit() {
-  if (!title.value.trim()) return ElMessage.warning('请输入标题')
+  if (!title.value.trim()) return showToast.warning('请输入标题')
 
   const plainText = getPlainText()
-  if (!plainText) return ElMessage.warning('请输入内容')
+  if (!plainText) return showToast.warning('请输入内容')
 
   if (!requireAuth('/talks/publish')) {
-    ElMessage.warning('请先登录后再发布话题')
+    showToast.warning('请先登录后再发布话题')
     return
   }
 
   if (postType.value === 'paid') {
     if (!price.value || price.value <= 0) {
-      ElMessage.warning('请输入有效的阅读价格')
+      showToast.warning('请输入有效的阅读价格')
       return
     }
   }
@@ -190,14 +190,14 @@ async function submit() {
       teaserLength: postType.value === 'paid' ? teaserLength.value : undefined
     })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('发布成功！')
+    showToast.success('发布成功！')
     title.value = ''
     content.value = ''
     coverImages.value = []
     postType.value = 'general'
     router.push('/talks')
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '发布失败，请稍后重试')
+    showToast.error(e?.message ?? '发布失败，请稍后重试')
   } finally {
     submitting.value = false
   }

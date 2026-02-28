@@ -8,7 +8,7 @@ import { requireAuth } from '../utils/requireAuth'
 import { useAuthStore } from '../store/auth'
 import { openChatConversation } from '../api/chat'
 import { followUser, unfollowUser, checkFollowStatus } from '../api/follow'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 
 export interface ListingItem {
   id: number
@@ -42,7 +42,7 @@ export function useHallInteractions(hallPath: string) {
   async function toggleFollow(item: ListingItem) {
     if (!requireAuth(hallPath)) return
     if (!item.userId) {
-      ElMessage.warning('无法关注该用户')
+      showToast.warning('无法关注该用户')
       return
     }
     const isFollowing = followingMap.value.get(item.userId) || false
@@ -50,14 +50,14 @@ export function useHallInteractions(hallPath: string) {
       if (isFollowing) {
         await unfollowUser(item.userId)
         followingMap.value.set(item.userId, false)
-        ElMessage.success(`已取消关注 ${item.nickName || item.companyName || '该用户'}`)
+        showToast.success(`已取消关注 ${item.nickName || item.companyName || '该用户'}`)
       } else {
         await followUser(item.userId)
         followingMap.value.set(item.userId, true)
-        ElMessage.success(`已关注 ${item.nickName || item.companyName || '该用户'}`)
+        showToast.success(`已关注 ${item.nickName || item.companyName || '该用户'}`)
       }
     } catch (e: any) {
-      ElMessage.error(e?.message || '操作失败')
+      showToast.error(e?.message || '操作失败')
     }
   }
 
@@ -116,7 +116,7 @@ export function useHallInteractions(hallPath: string) {
   ) {
     if (!requireAuth(hallPath)) return
     if (!item.userId || !item.id) {
-      ElMessage.warning('该条信息暂不支持咨询')
+      showToast.warning('该条信息暂不支持咨询')
       return
     }
     try {
@@ -134,7 +134,7 @@ export function useHallInteractions(hallPath: string) {
       drawerSubjectSnapshotJson.value = snapshotJson
       drawerOpen.value = true
     } catch (e: any) {
-      ElMessage.error(e?.message || '发起咨询失败')
+      showToast.error(e?.message || '发起咨询失败')
     }
   }
 

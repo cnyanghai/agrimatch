@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { Search, RefreshCw, Trash2, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { listAdminPosts, deleteAdminPost, type AdminPostResponse } from '../../api/admin'
 
@@ -19,7 +20,7 @@ async function load() {
     posts.value = res.data.list
     total.value = res.data.total
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载失败')
+    showToast.error(e?.message ?? '加载失败')
   } finally {
     loading.value = false
   }
@@ -31,16 +32,15 @@ function doSearch() {
 }
 
 async function handleDelete(post: AdminPostResponse) {
-  try {
-    await ElMessageBox.confirm(`确认删除话题「${post.title}」？此操作不可恢复。`, '删除确认', { type: 'warning' })
-  } catch { return }
+  const ok = await showConfirm({ title: '删除确认', message: `确认删除话题「${post.title}」？此操作不可恢复。`, type: 'warning' })
+  if (!ok) return
   try {
     const res = await deleteAdminPost(post.id)
     if (res.code !== 0) throw new Error(res.message)
-    ElMessage.success('已删除')
+    showToast.success('已删除')
     await load()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '操作失败')
+    showToast.error(e?.message ?? '操作失败')
   }
 }
 

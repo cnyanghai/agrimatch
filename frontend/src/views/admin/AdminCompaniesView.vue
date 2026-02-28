@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { Search, RefreshCw, CheckCircle, XCircle, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { listAdminCompanies, verifyCompany, rejectCompany, type AdminCompanyResponse } from '../../api/admin'
 
@@ -35,7 +36,7 @@ async function load() {
     companies.value = res.data.list
     total.value = res.data.total
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载失败')
+    showToast.error(e?.message ?? '加载失败')
   } finally {
     loading.value = false
   }
@@ -53,30 +54,28 @@ function switchTab(val: number | undefined) {
 }
 
 async function handleVerify(c: AdminCompanyResponse) {
-  try {
-    await ElMessageBox.confirm(`确认认证企业「${c.companyName}」？`, '企业认证', { type: 'info' })
-  } catch { return }
+  const ok = await showConfirm({ title: '企业认证', message: `确认认证企业「${c.companyName}」？`, type: 'info' })
+  if (!ok) return
   try {
     const res = await verifyCompany(c.id)
     if (res.code !== 0) throw new Error(res.message)
-    ElMessage.success('已认证')
+    showToast.success('已认证')
     await load()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '操作失败')
+    showToast.error(e?.message ?? '操作失败')
   }
 }
 
 async function handleReject(c: AdminCompanyResponse) {
-  try {
-    await ElMessageBox.confirm(`确认拒绝企业「${c.companyName}」的认证？`, '拒绝认证', { type: 'warning' })
-  } catch { return }
+  const ok = await showConfirm({ title: '拒绝认证', message: `确认拒绝企业「${c.companyName}」的认证？`, type: 'warning' })
+  if (!ok) return
   try {
     const res = await rejectCompany(c.id)
     if (res.code !== 0) throw new Error(res.message)
-    ElMessage.success('已拒绝')
+    showToast.success('已拒绝')
     await load()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '操作失败')
+    showToast.error(e?.message ?? '操作失败')
   }
 }
 

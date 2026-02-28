@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { Upload, RotateCcw, ImagePlus } from 'lucide-vue-next'
 import { useSealExtractor } from '../../composables/useSealExtractor'
 import { uploadImage } from '../../api/file'
@@ -46,11 +46,11 @@ function handleFileSelect(e: Event) {
 async function processFile(file: File) {
   // 验证文件类型和大小
   if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
-    ElMessage.warning('仅支持 JPG/PNG 格式')
+    showToast.warning('仅支持 JPG/PNG 格式')
     return
   }
   if (file.size > 5 * 1024 * 1024) {
-    ElMessage.warning('图片大小不超过 5MB')
+    showToast.warning('图片大小不超过 5MB')
     return
   }
 
@@ -63,7 +63,7 @@ async function processFile(file: File) {
     const result = await extractSeal(file)
     extractedPreview.value = result
   } catch (err: any) {
-    ElMessage.error(err.message || '印章提取失败')
+    showToast.error(err.message || '印章提取失败')
     originalPreview.value = ''
   } finally {
     processing.value = false
@@ -84,14 +84,14 @@ async function handleConfirm() {
     const file = dataUrlToFile(extractedPreview.value, 'seal-extracted.png')
     const res = await uploadImage(file)
     if (res.code === 0 && res.data) {
-      ElMessage.success('印章提取成功')
+      showToast.success('印章提取成功')
       uploaded.value = true
       emit('extracted', res.data.fileUrl)
     } else {
-      ElMessage.error(res.message || '上传失败')
+      showToast.error(res.message || '上传失败')
     }
   } catch (err: any) {
-    ElMessage.error(err.message || '上传失败')
+    showToast.error(err.message || '上传失败')
   } finally {
     uploading.value = false
   }

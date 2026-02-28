@@ -2,7 +2,8 @@
 import { ref, onMounted, computed, reactive } from 'vue'
 import DOMPurify from 'dompurify'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { MessageSquare, ThumbsUp, Share2, Gift, ArrowLeft, Edit3, Trash2 } from 'lucide-vue-next'
 import {
   getPost,
@@ -65,7 +66,7 @@ const tipping = ref(false)
 
 async function loadPost() {
   if (!postId.value) {
-    ElMessage.error('话题ID无效')
+    showToast.error('话题ID无效')
     router.back()
     return
   }
@@ -76,14 +77,14 @@ async function loadPost() {
     if (r.code !== 0) throw new Error(r.message)
     post.value = r.data ?? null
     if (!post.value) {
-      ElMessage.error('话题不存在')
+      showToast.error('话题不存在')
       router.back()
     } else {
       // 加载关注状态
       loadFollowStatus()
     }
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载话题失败')
+    showToast.error(e?.message ?? '加载话题失败')
     router.back()
   } finally {
     loading.value = false
@@ -112,7 +113,7 @@ async function onToggleFollow() {
   
   // 不能关注自己
   if (post.value.userId === auth.me?.userId) {
-    ElMessage.warning('不能关注你自己哦')
+    showToast.warning('不能关注你自己哦')
     return
   }
   
@@ -123,7 +124,7 @@ async function onToggleFollow() {
       const r = await unfollowUser(targetId)
       if (r.code === 0) {
         isFollowing.value = false
-        ElMessage.success('已取消关注')
+        showToast.success('已取消关注')
       } else {
         throw new Error(r.message)
       }
@@ -131,13 +132,13 @@ async function onToggleFollow() {
       const r = await followUser(targetId)
       if (r.code === 0) {
         isFollowing.value = true
-        ElMessage.success('关注成功')
+        showToast.success('关注成功')
       } else {
         throw new Error(r.message)
       }
     }
   } catch (e: any) {
-    ElMessage.error(e.message || '操作失败')
+    showToast.error(e.message || '操作失败')
   } finally {
     followLoading.value = false
   }
@@ -145,25 +146,18 @@ async function onToggleFollow() {
 
 async function onDeletePost() {
   if (!post.value) return
+  const ok = await showConfirm({ title: '确认删除', message: '删除后将无法恢复，确定要删除这篇文章吗？', type: 'warning' })
+  if (!ok) return
   try {
-    await ElMessageBox.confirm('删除后将无法恢复，确定要删除这篇文章吗？', '确认删除', {
-      confirmButtonText: '确定删除',
-      cancelButtonText: '取消',
-      type: 'warning',
-      confirmButtonClass: 'el-button--danger'
-    })
-    
     const r = await deletePost(post.value.id)
     if (r.code === 0) {
-      ElMessage.success('删除成功')
+      showToast.success('删除成功')
       router.push('/talks')
     } else {
       throw new Error(r.message)
     }
   } catch (e: any) {
-    if (e !== 'cancel') {
-      ElMessage.error(e?.message || '删除失败')
-    }
+    showToast.error(e?.message || '删除失败')
   }
 }
 
@@ -180,9 +174,9 @@ async function onPurchase() {
     // 模拟购买逻辑：直接扣积分（后续可接入真实支付接口）
     await giftPoints(post.value!.userId, post.value!.price || 0, `解锁文章《${post.value!.title}》`)
     hasPurchased.value = true
-    ElMessage.success('文章已解锁')
+    showToast.success('文章已解锁')
   } catch (e: any) {
-    ElMessage.error(e.message || '支付失败')
+    showToast.error(e.message || '支付失败')
   }
 }
 
@@ -193,7 +187,7 @@ async function loadComments() {
     if (r.code !== 0) throw new Error(r.message)
     comments.value = r.data ?? []
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载评论失败')
+    showToast.error(e?.message ?? '加载评论失败')
   }
 }
 
@@ -203,7 +197,7 @@ async function onToggleLike() {
   
   // 检查登录状态
   if (!requireAuth('/talks')) {
-    ElMessage.warning('请先登录后再点赞')
+    showToast.warning('请先登录后再点赞')
     return
   }
   
@@ -216,7 +210,7 @@ async function onToggleLike() {
       post.value.likeCount = r.data?.likeCount ?? post.value.likeCount
     }
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '点赞失败')
+    showToast.error(e?.message ?? '点赞失败')
   } finally {
     liking.value = false
   }
@@ -229,7 +223,7 @@ async function onAddComment() {
   
   // 检查登录状态
   if (!requireAuth('/talks')) {
-    ElMessage.warning('请先登录后再评论')
+    showToast.warning('请先登录后再评论')
     return
   }
   
@@ -242,9 +236,9 @@ async function onAddComment() {
     if (post.value) {
       post.value.commentCount = (post.value.commentCount ?? 0) + 1
     }
-    ElMessage.success('评论成功')
+    showToast.success('评论成功')
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '评论失败')
+    showToast.error(e?.message ?? '评论失败')
   } finally {
     commenting.value = false
   }
@@ -252,12 +246,12 @@ async function onAddComment() {
 
 function openTipDialog() {
   if (!post.value?.userId) {
-    ElMessage.warning('无法获取作者信息')
+    showToast.warning('无法获取作者信息')
     return
   }
   // 不能打赏自己
   if (post.value.userId === auth.me?.userId) {
-    ElMessage.info('不能打赏自己的话题哦')
+    showToast.info('不能打赏自己的话题哦')
     return
   }
   tipForm.points = 10
@@ -267,18 +261,18 @@ function openTipDialog() {
 
 async function submitTip() {
   if (!post.value?.userId) {
-    ElMessage.warning('无法获取作者信息')
+    showToast.warning('无法获取作者信息')
     return
   }
   
   if (tipForm.points < 1) {
-    ElMessage.warning('打赏积分数量至少为1')
+    showToast.warning('打赏积分数量至少为1')
     return
   }
   
   // 检查登录状态
   if (!requireAuth('/talks')) {
-    ElMessage.warning('请先登录后再打赏')
+    showToast.warning('请先登录后再打赏')
     return
   }
   
@@ -290,10 +284,10 @@ async function submitTip() {
       tipForm.points, 
       tipForm.remark || `打赏话题《${post.value.title}》`
     )
-    ElMessage.success(`已成功打赏 ${tipForm.points} 积分给 ${authorName}`)
+    showToast.success(`已成功打赏 ${tipForm.points} 积分给 ${authorName}`)
     tipDialogOpen.value = false
   } catch (e: any) {
-    ElMessage.error(e?.message || '打赏失败，请稍后重试')
+    showToast.error(e?.message || '打赏失败，请稍后重试')
   } finally {
     tipping.value = false
   }
@@ -325,9 +319,9 @@ async function handleShare() {
   const url = window.location.href
   try {
     await navigator.clipboard.writeText(url)
-    ElMessage.success('链接已复制到剪贴板')
+    showToast.success('链接已复制到剪贴板')
   } catch {
-    ElMessage.error('复制失败，请手动复制链接')
+    showToast.error('复制失败，请手动复制链接')
   }
 }
 

@@ -4,7 +4,8 @@
  */
 
 import { ref, computed } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { confirmChatOffer } from '../../api/chat'
 import type { QuotePayloadV1, BasisQuotePayloadV1, QuoteFieldsV1, BasisQuoteFieldsV1 } from '../../types/chat/quote'
 import type { UiMessage } from '../../types/chat/message'
@@ -43,15 +44,15 @@ export function useQuoteActions(options: UseQuoteActionsOptions) {
       if (res.code === 0) {
         // 更新消息状态
         messages.handleQuoteStatusUpdate(messageId, 'ACCEPTED')
-        ElMessage.success('报价已确认')
+        showToast.success('报价已确认')
         return true
       } else {
-        ElMessage.error(res.message || '确认失败')
+        showToast.error(res.message || '确认失败')
         return false
       }
     } catch (e: any) {
       console.error('[useQuoteActions] Failed to confirm:', e)
-      ElMessage.error(e.response?.data?.message || '确认失败')
+      showToast.error(e.response?.data?.message || '确认失败')
       return false
     } finally {
       confirming.value = false
@@ -82,20 +83,8 @@ export function useQuoteActions(options: UseQuoteActionsOptions) {
    * 拒绝报价（需确认）
    */
   async function rejectQuote(messageId: number): Promise<boolean> {
-    try {
-      await ElMessageBox.confirm(
-        '确定要拒绝此报价吗？',
-        '拒绝报价',
-        {
-          confirmButtonText: '确定拒绝',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }
-      )
-    } catch {
-      // 用户取消
-      return false
-    }
+    const ok = await showConfirm({ title: '拒绝报价', message: '确定要拒绝此报价吗？', type: 'warning' })
+    if (!ok) return false
 
     rejecting.value = true
 
@@ -103,11 +92,11 @@ export function useQuoteActions(options: UseQuoteActionsOptions) {
       // TODO: 实现拒绝 API
       // const res = await rejectChatOffer(messageId)
       messages.handleQuoteStatusUpdate(messageId, 'REJECTED')
-      ElMessage.info('已拒绝报价')
+      showToast.info('已拒绝报价')
       return true
     } catch (e: any) {
       console.error('[useQuoteActions] Failed to reject:', e)
-      ElMessage.error('操作失败')
+      showToast.error('操作失败')
       return false
     } finally {
       rejecting.value = false
@@ -122,12 +111,12 @@ export function useQuoteActions(options: UseQuoteActionsOptions) {
   ): boolean {
     const conversationId = getConversationId()
     if (!conversationId) {
-      ElMessage.warning('请先选择会话')
+      showToast.warning('请先选择会话')
       return false
     }
 
     if (!webSocket.ensureConnected()) {
-      ElMessage.warning('实时连接未就绪，正在重连…')
+      showToast.warning('实时连接未就绪，正在重连…')
       return false
     }
 
@@ -149,7 +138,7 @@ export function useQuoteActions(options: UseQuoteActionsOptions) {
     const sent = webSocket.sendQuote(conversationId, payloadJson, summary, tempId)
     if (!sent) {
       messages.failMessage(tempId)
-      ElMessage.error('发送失败')
+      showToast.error('发送失败')
       return false
     }
 
@@ -164,12 +153,12 @@ export function useQuoteActions(options: UseQuoteActionsOptions) {
   ): boolean {
     const conversationId = getConversationId()
     if (!conversationId) {
-      ElMessage.warning('请先选择会话')
+      showToast.warning('请先选择会话')
       return false
     }
 
     if (!webSocket.ensureConnected()) {
-      ElMessage.warning('实时连接未就绪，正在重连…')
+      showToast.warning('实时连接未就绪，正在重连…')
       return false
     }
 
@@ -191,7 +180,7 @@ export function useQuoteActions(options: UseQuoteActionsOptions) {
     const sent = webSocket.sendQuote(conversationId, payloadJson, summary, tempId)
     if (!sent) {
       messages.failMessage(tempId)
-      ElMessage.error('发送失败')
+      showToast.error('发送失败')
       return false
     }
 

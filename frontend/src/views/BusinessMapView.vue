@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { MapPin, Building2, Package, ShoppingCart, RefreshCw, Search, Navigation, MessageCircle, AlertTriangle, Zap, ArrowUpDown, Eye } from 'lucide-vue-next'
 import { listMapCompanies, type MapCompanyMarkerResponse, type MapCompanyQuery } from '../api/map'
 import { openChatConversation } from '../api/chat'
@@ -310,11 +310,11 @@ async function startChat(c: MapCompanyMarkerResponse) {
     return
   }
   if (!c.ownerUserId) {
-    ElMessage.warning('该公司暂无联系人信息')
+    showToast.warning('该公司暂无联系人信息')
     return
   }
   if (c.ownerUserId === auth.me.userId) {
-    ElMessage.info('不能和自己沟通')
+    showToast.info('不能和自己沟通')
     return
   }
   try {
@@ -330,7 +330,7 @@ async function startChat(c: MapCompanyMarkerResponse) {
       router.push('/chat')
     }
   } catch (e: any) {
-    ElMessage.error('发起沟通失败：' + (e.response?.data?.message || e.message || '未知错误'))
+    showToast.error('发起沟通失败：' + (e.response?.data?.message || e.message || '未知错误'))
   }
 }
 
@@ -461,7 +461,7 @@ async function refresh() {
     if (map) renderMarkers()
     updateUrl()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载地图数据失败')
+    showToast.error(e?.message ?? '加载地图数据失败')
   } finally {
     loading.value = false
   }
@@ -544,7 +544,7 @@ onMounted(async () => {
   try {
     await initMap()
   } catch (e: any) {
-    ElMessage.warning(e?.message ?? '地图初始化失败（请配置 VITE_AMAP_JS_KEY）')
+    showToast.warning(e?.message ?? '地图初始化失败（请配置 VITE_AMAP_JS_KEY）')
   }
   await refresh()
 })

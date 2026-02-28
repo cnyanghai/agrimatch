@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { Plus, RefreshCcw, Pencil, Ban, RotateCcw, X, ShoppingCart, MapPin, DollarSign, Clock, Search } from 'lucide-vue-next'
 import { listRequirements, updateRequirement, type RequirementResponse, type RequirementUpdateRequest } from '../api/requirement'
 import { useAuthStore } from '../store/auth'
@@ -62,7 +63,7 @@ async function loadRequirements() {
       throw new Error(r.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '加载需求列表失败')
+    showToast.error(e?.message || '加载需求列表失败')
   } finally {
     loading.value = false
   }
@@ -160,11 +161,11 @@ async function saveEdit() {
       remark: editForm.remark
     })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已保存')
+    showToast.success('已保存')
     editOpen.value = false
     await loadRequirements()
   } catch (e: any) {
-    ElMessage.error(e?.message || '保存失败')
+    showToast.error(e?.message || '保存失败')
   } finally {
     saving.value = false
   }
@@ -172,37 +173,29 @@ async function saveEdit() {
 
 async function revoke(req: RequirementResponse) {
   if (!req.id) return
+  const ok = await showConfirm({ title: '确认撤销？', message: '撤销后该需求将从大厅隐藏，可随时再次发布。', type: 'warning' })
+  if (!ok) return
   try {
-    await ElMessageBox.confirm('撤销后该需求将从大厅隐藏，可随时再次发布。', '确认撤销？', {
-      confirmButtonText: '撤销',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
     const r = await updateRequirement(req.id, { status: 2 })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已撤销')
+    showToast.success('已撤销')
     await loadRequirements()
   } catch (e: any) {
-    if (e === 'cancel' || e === 'close') return
-    ElMessage.error(e?.message || '操作失败')
+    showToast.error(e?.message || '操作失败')
   }
 }
 
 async function republish(req: RequirementResponse) {
   if (!req.id) return
+  const ok = await showConfirm({ title: '再次发布？', message: '将该需求重新发布到大厅，并按有效期重新计时（如有）。', type: 'info' })
+  if (!ok) return
   try {
-    await ElMessageBox.confirm('将该需求重新发布到大厅，并按有效期重新计时（如有）。', '再次发布？', {
-      confirmButtonText: '发布',
-      cancelButtonText: '取消',
-      type: 'info'
-    })
     const r = await updateRequirement(req.id, { status: 0, expireMinutes: req.expireMinutes ?? undefined })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已再次发布')
+    showToast.success('已再次发布')
     await loadRequirements()
   } catch (e: any) {
-    if (e === 'cancel' || e === 'close') return
-    ElMessage.error(e?.message || '操作失败')
+    showToast.error(e?.message || '操作失败')
   }
 }
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { Search, Heart, MessageCircle, Gift, Trash2, Send, X, RefreshCw } from 'lucide-vue-next'
 import { createPost, createPostComment, deletePost, listPostComments, listPosts, togglePostLike, type PostCommentResponse, type PostResponse } from '../api/post'
 import { useAuthStore } from '../store/auth'
@@ -54,7 +54,7 @@ async function refresh() {
     if (r.code !== 0) throw new Error(r.message)
     list.value = r.data ?? []
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载失败')
+    showToast.error(e?.message ?? '加载失败')
   } finally {
     loading.value = false
   }
@@ -62,7 +62,7 @@ async function refresh() {
 
 async function onToggleLike(row: PostResponse) {
   if (liking.value[row.id]) return
-  if (!requireAuth('/posts')) { ElMessage.warning('请先登录后再点赞'); return }
+  if (!requireAuth('/posts')) { showToast.warning('请先登录后再点赞'); return }
   liking.value = { ...liking.value, [row.id]: true }
   try {
     const r = await togglePostLike(row.id)
@@ -70,7 +70,7 @@ async function onToggleLike(row: PostResponse) {
     row.likedByMe = r.data?.liked ?? row.likedByMe
     row.likeCount = r.data?.likeCount ?? row.likeCount
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '点赞失败')
+    showToast.error(e?.message ?? '点赞失败')
   } finally {
     liking.value = { ...liking.value, [row.id]: false }
   }
@@ -90,7 +90,7 @@ async function refreshComments() {
     if (r.code !== 0) throw new Error(r.message)
     comments.value = r.data ?? []
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载评论失败')
+    showToast.error(e?.message ?? '加载评论失败')
   } finally {
     commentsLoading.value = false
   }
@@ -101,22 +101,22 @@ async function onAddComment() {
   if (!pid) return
   const content = commentText.value.trim()
   if (!content) return
-  if (!requireAuth('/posts')) { ElMessage.warning('请先登录后再评论'); return }
+  if (!requireAuth('/posts')) { showToast.warning('请先登录后再评论'); return }
   try {
     const r = await createPostComment(pid, content)
     if (r.code !== 0) throw new Error(r.message)
     commentText.value = ''
     await refreshComments()
     await refresh()
-    ElMessage.success('评论成功')
+    showToast.success('评论成功')
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '评论失败')
+    showToast.error(e?.message ?? '评论失败')
   }
 }
 
 async function onCreate() {
   if (!canCreate.value) return
-  if (!requireAuth('/posts')) { ElMessage.warning('请先登录后再发布话题'); return }
+  if (!requireAuth('/posts')) { showToast.warning('请先登录后再发布话题'); return }
   creating.value = true
   try {
     const r = await createPost({ 
@@ -125,13 +125,13 @@ async function onCreate() {
       domain: form.domain
     })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('发布成功')
+    showToast.success('发布成功')
     form.title = ''
     form.content = ''
     form.domain = 'general'
     await refresh()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '发布失败')
+    showToast.error(e?.message ?? '发布失败')
   } finally {
     creating.value = false
   }
@@ -142,18 +142,18 @@ async function onDelete(id: number) {
   try {
     const r = await deletePost(id)
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已删除')
+    showToast.success('已删除')
     await refresh()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '删除失败')
+    showToast.error(e?.message ?? '删除失败')
   } finally {
     loading.value = false
   }
 }
 
 function openTipDialog(row: PostResponse) {
-  if (!row.userId) { ElMessage.warning('无法获取作者信息'); return }
-  if (row.userId === auth.me?.userId) { ElMessage.info('不能打赏自己的帖子哦'); return }
+  if (!row.userId) { showToast.warning('无法获取作者信息'); return }
+  if (row.userId === auth.me?.userId) { showToast.info('不能打赏自己的帖子哦'); return }
   currentTipPost.value = row
   tipForm.points = 10
   tipForm.remark = ''
@@ -161,16 +161,16 @@ function openTipDialog(row: PostResponse) {
 }
 
 async function submitTip() {
-  if (!currentTipPost.value?.userId) { ElMessage.warning('无法获取作者信息'); return }
-  if (tipForm.points < 1) { ElMessage.warning('打赏积分数量至少为1'); return }
+  if (!currentTipPost.value?.userId) { showToast.warning('无法获取作者信息'); return }
+  if (tipForm.points < 1) { showToast.warning('打赏积分数量至少为1'); return }
   tipping.value = true
   try {
     const authorName = currentTipPost.value.nickName || currentTipPost.value.userName || '作者'
     await giftPoints(currentTipPost.value.userId, tipForm.points, tipForm.remark || `打赏帖子《${currentTipPost.value.title}》`)
-    ElMessage.success(`已成功打赏 ${tipForm.points} 积分给 ${authorName}`)
+    showToast.success(`已成功打赏 ${tipForm.points} 积分给 ${authorName}`)
     tipDialogOpen.value = false
   } catch (e: any) {
-    ElMessage.error(e?.message || '打赏失败，请稍后重试')
+    showToast.error(e?.message || '打赏失败，请稍后重试')
   } finally {
     tipping.value = false
   }

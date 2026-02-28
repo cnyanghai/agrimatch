@@ -2,7 +2,7 @@
 import { reactive, ref } from 'vue'
 import { ShieldCheck, KeyRound } from 'lucide-vue-next'
 import { useAuthStore } from '../../store/auth'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 
 const props = defineProps<{
   phone: string
@@ -30,14 +30,14 @@ async function sendCode() {
   sending.value = true
   try {
     await auth.sendResetSmsCode(props.phone)
-    ElMessage.success('验证码已发送')
+    showToast.success('验证码已发送')
     countdown.value = 60
     const timer = setInterval(() => {
       countdown.value--
       if (countdown.value <= 0) clearInterval(timer)
     }, 1000)
   } catch (e: any) {
-    ElMessage.error(e?.message || '发送失败')
+    showToast.error(e?.message || '发送失败')
   } finally {
     sending.value = false
   }
@@ -45,24 +45,24 @@ async function sendCode() {
 
 async function handleReset() {
   if (!form.smsCode) {
-    ElMessage.warning('请输入验证码')
+    showToast.warning('请输入验证码')
     return
   }
   if (!form.newPassword || form.newPassword.length < 6) {
-    ElMessage.warning('新密码至少6位')
+    showToast.warning('新密码至少6位')
     return
   }
   if (form.newPassword !== form.confirmPassword) {
-    ElMessage.warning('两次输入的密码不一致')
+    showToast.warning('两次输入的密码不一致')
     return
   }
   localLoading.value = true
   try {
     await auth.resetPassword(props.phone, form.smsCode, form.newPassword)
-    ElMessage.success('密码重置成功')
+    showToast.success('密码重置成功')
     emit('success')
   } catch (e: any) {
-    ElMessage.error(e?.message || '重置失败')
+    showToast.error(e?.message || '重置失败')
   } finally {
     localLoading.value = false
   }

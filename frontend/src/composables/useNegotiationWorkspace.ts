@@ -4,7 +4,7 @@
  */
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { useAuthStore } from '../store/auth'
 import {
   listChatConversations,
@@ -423,10 +423,10 @@ export function useNegotiationWorkspace() {
             // 检查是否双方都已确认
             if (buyerConfirmed.value && sellerConfirmed.value) {
               contractStatus.value = 'CONFIRMED'
-              ElMessage.success('双方已确认条款，可以生成正式合同！')
+              showToast.success('双方已确认条款，可以生成正式合同！')
             } else {
               contractStatus.value = 'PENDING_CONFIRM'
-              ElMessage.info('对方已确认条款')
+              showToast.info('对方已确认条款')
             }
           }
         } catch {
@@ -440,7 +440,7 @@ export function useNegotiationWorkspace() {
           const payload = JSON.parse(message.payloadJson)
           contractStatus.value = 'SIGNING'
           if (payload.contractId) {
-            ElMessage.success('合同已生成，正在跳转到合同详情...')
+            showToast.success('合同已生成，正在跳转到合同详情...')
             router.push(`/contracts/${payload.contractId}`)
           }
         } catch {
@@ -457,7 +457,7 @@ export function useNegotiationWorkspace() {
     if (type === 'ERROR' && data.tempId) {
       failMessageInMap(data.tempId)
       chatMessages.failMessage(data.tempId)
-      ElMessage.error(data.message || '发送失败')
+      showToast.error(data.message || '发送失败')
     }
 
     // 更新会话列表的最新消息
@@ -641,7 +641,7 @@ export function useNegotiationWorkspace() {
       }
     } catch (e) {
       console.error('Load messages failed:', e)
-      ElMessage.error('加载消息失败')
+      showToast.error('加载消息失败')
     } finally {
       loadingMessages.value = false
     }
@@ -725,7 +725,7 @@ export function useNegotiationWorkspace() {
       }
     } catch (e) {
       console.error('Load merchant messages failed:', e)
-      ElMessage.error('加载消息失败')
+      showToast.error('加载消息失败')
     } finally {
       loadingMessages.value = false
     }
@@ -794,7 +794,7 @@ export function useNegotiationWorkspace() {
       }
     } catch (e) {
       console.error('Open conversation failed:', e)
-      ElMessage.error('打开会话失败')
+      showToast.error('打开会话失败')
     }
   }
 
@@ -814,13 +814,13 @@ export function useNegotiationWorkspace() {
     if (!webSocket.ensureConnected()) {
       failMessageInMap(tempId)
       chatMessages.failMessage(tempId)
-      ElMessage.error('连接未就绪，请稍后重试')
+      showToast.error('连接未就绪，请稍后重试')
     } else {
       const sent = webSocket.sendText(convId, text, tempId)
       if (!sent) {
         failMessageInMap(tempId)
         chatMessages.failMessage(tempId)
-        ElMessage.error('发送失败')
+        showToast.error('发送失败')
       }
     }
 
@@ -843,13 +843,13 @@ export function useNegotiationWorkspace() {
     if (!webSocket.ensureConnected()) {
       failMessageInMap(tempId)
       chatMessages.failMessage(tempId)
-      ElMessage.error('连接未就绪，请稍后重试')
+      showToast.error('连接未就绪，请稍后重试')
     } else {
       const sent = webSocket.sendQuote(convId, payloadJson, previewText, tempId)
       if (!sent) {
         failMessageInMap(tempId)
         chatMessages.failMessage(tempId)
-        ElMessage.error('发送失败')
+        showToast.error('发送失败')
       }
     }
 
@@ -910,13 +910,13 @@ export function useNegotiationWorkspace() {
     if (!webSocket.ensureConnected()) {
       failMessageInMap(tempId)
       chatMessages.failMessage(tempId)
-      ElMessage.error('连接未就绪，请稍后重试')
+      showToast.error('连接未就绪，请稍后重试')
     } else {
       const sent = webSocket.sendImage(convId, payloadJson, tempId)
       if (!sent) {
         failMessageInMap(tempId)
         chatMessages.failMessage(tempId)
-        ElMessage.error('发送失败')
+        showToast.error('发送失败')
       }
     }
 
@@ -947,13 +947,13 @@ export function useNegotiationWorkspace() {
     if (!webSocket.ensureConnected()) {
       failMessageInMap(tempId)
       chatMessages.failMessage(tempId)
-      ElMessage.error('连接未就绪，请稍后重试')
+      showToast.error('连接未就绪，请稍后重试')
     } else {
       const sent = webSocket.sendAttachment(convId, payloadJson, fileData.fileName, tempId)
       if (!sent) {
         failMessageInMap(tempId)
         chatMessages.failMessage(tempId)
-        ElMessage.error('发送失败')
+        showToast.error('发送失败')
       }
     }
 
@@ -967,15 +967,15 @@ export function useNegotiationWorkspace() {
     try {
       const res = await giftPointsApi(toUserId, points, remark)
       if (res.code === 0) {
-        ElMessage.success(`成功赠送 ${points} 积分`)
+        showToast.success(`成功赠送 ${points} 积分`)
         // 发送一条系统消息通知对方
         sendText(`🎁 我向您赠送了 ${points} 积分${remark ? `，备注：${remark}` : ''}`)
       } else {
-        ElMessage.error(res.message || '赠送失败')
+        showToast.error(res.message || '赠送失败')
       }
     } catch (e: any) {
       console.error('Gift points failed:', e)
-      ElMessage.error(e.response?.data?.message || '赠送失败')
+      showToast.error(e.response?.data?.message || '赠送失败')
     }
   }
 
@@ -988,7 +988,7 @@ export function useNegotiationWorkspace() {
       // 调用后端API确认报价
       const res = await confirmChatOffer(messageId)
       if (res.code !== 0) {
-        ElMessage.error(res.message || '接受报价失败')
+        showToast.error(res.message || '接受报价失败')
         return
       }
 
@@ -1003,10 +1003,10 @@ export function useNegotiationWorkspace() {
 
       // 更新合同状态
       contractStatus.value = 'PENDING_CONFIRM'
-      ElMessage.success('已接受报价')
+      showToast.success('已接受报价')
     } catch (e: any) {
       console.error('Accept quote failed:', e)
-      ElMessage.error(e.response?.data?.message || '接受报价失败')
+      showToast.error(e.response?.data?.message || '接受报价失败')
     }
   }
 
@@ -1018,17 +1018,17 @@ export function useNegotiationWorkspace() {
       // 调用后端API拒绝报价
       const res = await rejectChatOffer(messageId)
       if (res.code !== 0) {
-        ElMessage.error(res.message || '拒绝报价失败')
+        showToast.error(res.message || '拒绝报价失败')
         return
       }
 
       // 更新本地消息状态
       chatMessages.updateQuoteStatus(messageId, 'REJECTED')
 
-      ElMessage.info('已拒绝报价')
+      showToast.info('已拒绝报价')
     } catch (e: any) {
       console.error('Reject quote failed:', e)
-      ElMessage.error(e.response?.data?.message || '拒绝报价失败')
+      showToast.error(e.response?.data?.message || '拒绝报价失败')
     }
   }
 
@@ -1094,7 +1094,7 @@ export function useNegotiationWorkspace() {
     if (!webSocket.ensureConnected()) {
       failMessageInMap(tempId)
       chatMessages.failMessage(tempId)
-      ElMessage.error('连接未就绪，请稍后重试')
+      showToast.error('连接未就绪，请稍后重试')
     } else {
       webSocket.sendSystem(convId, content, payloadJson, tempId)
     }
@@ -1102,10 +1102,10 @@ export function useNegotiationWorkspace() {
     // 检查是否双方都已确认
     if (buyerConfirmed.value && sellerConfirmed.value) {
       contractStatus.value = 'CONFIRMED'
-      ElMessage.success('双方已确认条款，可以生成正式合同！')
+      showToast.success('双方已确认条款，可以生成正式合同！')
     } else {
       contractStatus.value = 'PENDING_CONFIRM'
-      ElMessage.success('条款确认成功，等待对方确认')
+      showToast.success('条款确认成功，等待对方确认')
     }
   }
 
@@ -1157,13 +1157,13 @@ export function useNegotiationWorkspace() {
   /** 生成正式合同并跳转到合同详情页 */
   async function generateFormalContract() {
     if (!buyerConfirmed.value || !sellerConfirmed.value) {
-      ElMessage.warning('请等待双方都确认条款后再生成正式合同')
+      showToast.warning('请等待双方都确认条款后再生成正式合同')
       return
     }
 
     const convId = activeConversationId.value
     if (!convId) {
-      ElMessage.error('未选中会话，无法生成合同')
+      showToast.error('未选中会话，无法生成合同')
       return
     }
 
@@ -1202,16 +1202,16 @@ export function useNegotiationWorkspace() {
         // 更新状态为签署中
         contractStatus.value = 'SIGNING'
 
-        ElMessage.success('合同已生成，正在跳转到合同详情...')
+        showToast.success('合同已生成，正在跳转到合同详情...')
 
         // 跳转到合同详情页
         router.push(`/contracts/${contractId}`)
       } else {
-        ElMessage.error(res.message || '生成合同失败')
+        showToast.error(res.message || '生成合同失败')
       }
     } catch (e: any) {
       console.error('Generate contract failed:', e)
-      ElMessage.error(e.response?.data?.message || '生成合同失败')
+      showToast.error(e.response?.data?.message || '生成合同失败')
     } finally {
       sending.value = false
     }

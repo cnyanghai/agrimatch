@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { createCustomProduct, getProductTree, type ProductNode } from '../api/product'
 
 const props = defineProps<{
@@ -47,7 +47,7 @@ async function refresh() {
     if (r.code !== 0) throw new Error(r.message)
     tree.value = r.data ?? []
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载品类失败')
+    showToast.error(e?.message ?? '加载品类失败')
   } finally {
     loading.value = false
   }
@@ -70,7 +70,7 @@ function openCustom() {
 
 async function submitCustom() {
   if (!customName.value.trim()) {
-    ElMessage.warning('请输入品类名称')
+    showToast.warning('请输入品类名称')
     return
   }
   loading.value = true
@@ -80,10 +80,10 @@ async function submitCustom() {
     await refresh()
     const newId = r.data!
     onNodeChange(newId)
-    ElMessage.success('已创建并选中')
+    showToast.success('已创建并选中')
     dialogOpen.value = false
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '创建失败')
+    showToast.error(e?.message ?? '创建失败')
   } finally {
     loading.value = false
   }

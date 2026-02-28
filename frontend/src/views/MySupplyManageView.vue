@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { FileText, Save, Send, Package, Truck, Clock, FileCheck, TrendingUp, Plus, X, ChevronDown, RefreshCcw, Search } from 'lucide-vue-next'
 import { createSupply, getNextSupplyNo, createSupplyTemplate, getMySupplyTemplates, deleteSupplyTemplate, listSupplies, updateSupply, type SupplyCreateRequest, type BasisQuoteRequest, type SupplyTemplateResponse, type SupplyResponse, type SupplyUpdateRequest } from '../api/supply'
 import { listFuturesContracts, type FuturesContractResponse } from '../api/futures'
@@ -83,7 +84,7 @@ async function loadSupplies() {
       throw new Error(r.message)
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '加载供应列表失败')
+    showToast.error(e?.message || '加载供应列表失败')
   } finally {
     listLoading.value = false
   }
@@ -169,11 +170,11 @@ async function saveEdit() {
       remark: editForm.remark
     })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已保存')
+    showToast.success('已保存')
     editOpen.value = false
     await loadSupplies()
   } catch (e: any) {
-    ElMessage.error(e?.message || '保存失败')
+    showToast.error(e?.message || '保存失败')
   } finally {
     saving.value = false
   }
@@ -181,37 +182,29 @@ async function saveEdit() {
 
 async function revokeSupply(s: SupplyResponse) {
   if (!s.id) return
+  const ok = await showConfirm({ title: '确认下架？', message: '下架后该供应将从大厅隐藏，可随时再次发布。', type: 'warning' })
+  if (!ok) return
   try {
-    await ElMessageBox.confirm('下架后该供应将从大厅隐藏，可随时再次发布。', '确认下架？', {
-      confirmButtonText: '下架',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
     const r = await updateSupply(s.id, { status: 2 })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已下架')
+    showToast.success('已下架')
     await loadSupplies()
   } catch (e: any) {
-    if (e === 'cancel' || e === 'close') return
-    ElMessage.error(e?.message || '操作失败')
+    showToast.error(e?.message || '操作失败')
   }
 }
 
 async function republishSupply(s: SupplyResponse) {
   if (!s.id) return
+  const ok = await showConfirm({ title: '再次发布？', message: '将该供应重新发布到大厅，并按有效期重新计时。', type: 'info' })
+  if (!ok) return
   try {
-    await ElMessageBox.confirm('将该供应重新发布到大厅，并按有效期重新计时。', '再次发布？', {
-      confirmButtonText: '发布',
-      cancelButtonText: '取消',
-      type: 'info'
-    })
     const r = await updateSupply(s.id, { status: 0, expireMinutes: s.expireMinutes ?? 4320 })
     if (r.code !== 0) throw new Error(r.message)
-    ElMessage.success('已再次发布')
+    showToast.success('已再次发布')
     await loadSupplies()
   } catch (e: any) {
-    if (e === 'cancel' || e === 'close') return
-    ElMessage.error(e?.message || '操作失败')
+    showToast.error(e?.message || '操作失败')
   }
 }
 
@@ -568,7 +561,7 @@ async function loadCategoryParams(productId: number) {
       categoryParams.value.forEach(param => { params[param.id] = '' })
       dynamicParams.value = params
     }
-  } catch { ElMessage.error('加载品类参数失败') }
+  } catch { showToast.error('加载品类参数失败') }
 }
 
 function buildParamsJson() {
@@ -588,17 +581,17 @@ function buildParamsJson() {
 }
 
 async function publishSupply() {
-  if (!publishForm.categoryId) { ElMessage.warning('请选择品类'); return }
+  if (!publishForm.categoryId) { showToast.warning('请选择品类'); return }
   
   // 验证报价
   if (publishForm.priceType === 1) {
     const validQuotes = basisQuotes.value.filter(q => q.contractCode && q.basisPrice !== undefined && q.availableQty && q.availableQty > 0)
     if (validQuotes.length === 0) {
-      ElMessage.warning('请至少添加一条有效的基差报价')
+      showToast.warning('请至少添加一条有效的基差报价')
       return
     }
   } else {
-    if (!publishForm.exFactoryPrice) { ElMessage.warning('请输入出厂价'); return }
+    if (!publishForm.exFactoryPrice) { showToast.warning('请输入出厂价'); return }
   }
   
   loading.value = true
@@ -637,7 +630,7 @@ async function publishSupply() {
     
     const r = await createSupply(req)
     if (r.code === 0) {
-      ElMessage.success('发布成功')
+      showToast.success('发布成功')
       // 清除企业资料缓存，确保企业主页显示最新数据
       if (company.value?.id) {
         companyStore.invalidateProfile(company.value.id)
@@ -646,22 +639,22 @@ async function publishSupply() {
       activeTab.value = 'published'
       await loadSupplies()
     } else {
-      ElMessage.error(r.message || '发布失败')
+      showToast.error(r.message || '发布失败')
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '发布失败')
+    showToast.error(e?.message || '发布失败')
   } finally {
     loading.value = false
   }
 }
 
 async function saveAsTemplate() {
-  if (!publishForm.categoryId) { ElMessage.warning('请先选择品类'); return }
+  if (!publishForm.categoryId) { showToast.warning('请先选择品类'); return }
   saveTemplateDialogVisible.value = true
 }
 
 async function confirmSaveTemplate() {
-  if (!templateNameInput.value.trim()) { ElMessage.warning('请输入模板名称'); return }
+  if (!templateNameInput.value.trim()) { showToast.warning('请输入模板名称'); return }
   
   loading.value = true
   try {
@@ -690,37 +683,33 @@ async function confirmSaveTemplate() {
     })
     
     if (res.code === 0) {
-      ElMessage.success('模板保存成功')
+      showToast.success('模板保存成功')
       saveTemplateDialogVisible.value = false
       templateNameInput.value = ''
       await loadTemplates() // 重新加载模板列表
     } else {
-      ElMessage.error(res.message || '保存失败')
+      showToast.error(res.message || '保存失败')
     }
   } catch (e: any) {
-    ElMessage.error(e?.message || '保存失败')
+    showToast.error(e?.message || '保存失败')
   } finally {
     loading.value = false
   }
 }
 
 async function deleteTemplate(id: number) {
+  const ok = await showConfirm({ title: '删除确认', message: '确定要删除此模板吗？删除后无法恢复。', type: 'warning' })
+  if (!ok) return
   try {
-    await ElMessageBox.confirm('确定要删除此模板吗？删除后无法恢复。', '删除确认', {
-      confirmButtonText: '删除',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
     const res = await deleteSupplyTemplate(id)
     if (res.code === 0) {
       templates.value = templates.value.filter(t => t.id !== id)
-      ElMessage.success('模板删除成功')
+      showToast.success('模板删除成功')
     } else {
-      ElMessage.error(res.message || '删除失败')
+      showToast.error(res.message || '删除失败')
     }
   } catch (e: any) {
-    if (e === 'cancel' || e === 'close') return
-    ElMessage.error(e?.message || '删除失败')
+    showToast.error(e?.message || '删除失败')
   }
 }
 
@@ -795,10 +784,10 @@ async function applyTemplate(template: SupplyTemplateResponse) {
 
     suspendCategoryWatch.value = false
     templatePickerOpen.value = false
-    ElMessage.success('模板已应用')
+    showToast.success('模板已应用')
   } catch {
     suspendCategoryWatch.value = false
-    ElMessage.error('模板数据格式错误')
+    showToast.error('模板数据格式错误')
   }
 }
 </script>

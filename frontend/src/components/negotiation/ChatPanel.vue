@@ -7,7 +7,7 @@
 import { ref, nextTick, watch, onMounted } from 'vue'
 import { Send, Paperclip, DollarSign, Gift, FileText, X, Download, Loader2, CheckCircle, Info, AlertCircle, FileSignature, ExternalLink } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { formatMessageTime, shouldShowTimeSeparator, type UiMessage } from '../../types/chat/message'
 import QuoteCard from '../chat/message/QuoteCard.vue'
 import { uploadImage, uploadAttachment, isImageFile, formatFileSize, type FileUploadResponse } from '../../api/file'
@@ -229,7 +229,7 @@ async function handleFileSelect(event: Event) {
 
   // 检查文件大小（最大 20MB）
   if (file.size > 20 * 1024 * 1024) {
-    ElMessage.warning('文件大小不能超过 20MB')
+    showToast.warning('文件大小不能超过 20MB')
     return
   }
 
@@ -244,9 +244,9 @@ async function handleFileSelect(event: Event) {
       })
       if (res.code === 0 && res.data) {
         emit('send-image', res.data)
-        ElMessage.success('图片发送成功')
+        showToast.success('图片发送成功')
       } else {
-        ElMessage.error(res.message || '图片上传失败')
+        showToast.error(res.message || '图片上传失败')
       }
     } else {
       // 上传附件
@@ -255,14 +255,14 @@ async function handleFileSelect(event: Event) {
       })
       if (res.code === 0 && res.data) {
         emit('send-attachment', res.data)
-        ElMessage.success('附件发送成功')
+        showToast.success('附件发送成功')
       } else {
-        ElMessage.error(res.message || '附件上传失败')
+        showToast.error(res.message || '附件上传失败')
       }
     }
   } catch (e: any) {
     console.error('Upload failed:', e)
-    ElMessage.error(e.response?.data?.message || '上传失败')
+    showToast.error(e.response?.data?.message || '上传失败')
   } finally {
     uploading.value = false
     uploadProgress.value = 0
@@ -279,11 +279,11 @@ function openGiftPointsDialog() {
 // 确认赠送积分
 async function confirmGiftPoints() {
   if (!props.peerUserId) {
-    ElMessage.warning('无法获取对方用户信息')
+    showToast.warning('无法获取对方用户信息')
     return
   }
   if (giftPointsAmount.value <= 0) {
-    ElMessage.warning('请输入有效的积分数量')
+    showToast.warning('请输入有效的积分数量')
     return
   }
 

@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { Star } from 'lucide-vue-next'
 import { togglePostCollect } from '../../api/post'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 import { requireAuth } from '../../utils/requireAuth'
 
 const props = defineProps<{
@@ -21,12 +21,12 @@ async function onToggle() {
     const r = await togglePostCollect(props.postId)
     if (r.code === 0) {
       isCollected.value = r.data ?? !isCollected.value
-      ElMessage.success(isCollected.value ? '已收藏' : '已取消收藏')
+      showToast.success(isCollected.value ? '已收藏' : '已取消收藏')
     } else {
       throw new Error(r.message)
     }
   } catch (e: any) {
-    ElMessage.error(e.message || '操作失败')
+    showToast.error(e.message || '操作失败')
   } finally {
     loading.value = false
   }

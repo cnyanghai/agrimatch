@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { showToast } from '@/composables/useToast'
+import { showConfirm } from '@/composables/useConfirm'
 import { Search, RefreshCw, ShieldCheck, ShieldOff, UserX, UserCheck, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { listAdminUsers, toggleAdminFlag, toggleUserStatus, type AdminUserResponse } from '../../api/admin'
 
@@ -19,7 +20,7 @@ async function load() {
     users.value = res.data.list
     total.value = res.data.total
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '加载失败')
+    showToast.error(e?.message ?? '加载失败')
   } finally {
     loading.value = false
   }
@@ -32,31 +33,29 @@ function doSearch() {
 
 async function handleToggleAdmin(user: AdminUserResponse) {
   const action = user.isAdmin === 1 ? '取消管理员' : '设为管理员'
-  try {
-    await ElMessageBox.confirm(`确认将 ${user.nickName || user.userName} ${action}？`, action, { type: 'warning' })
-  } catch { return }
+  const ok = await showConfirm({ title: action, message: `确认将 ${user.nickName || user.userName} ${action}？`, type: 'warning' })
+  if (!ok) return
   try {
     const res = await toggleAdminFlag(user.userId)
     if (res.code !== 0) throw new Error(res.message)
-    ElMessage.success(`已${action}`)
+    showToast.success(`已${action}`)
     await load()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '操作失败')
+    showToast.error(e?.message ?? '操作失败')
   }
 }
 
 async function handleToggleStatus(user: AdminUserResponse) {
   const action = user.isDeleted === 1 ? '启用' : '禁用'
-  try {
-    await ElMessageBox.confirm(`确认${action}用户 ${user.nickName || user.userName}？`, action, { type: 'warning' })
-  } catch { return }
+  const ok = await showConfirm({ title: action, message: `确认${action}用户 ${user.nickName || user.userName}？`, type: 'warning' })
+  if (!ok) return
   try {
     const res = await toggleUserStatus(user.userId)
     if (res.code !== 0) throw new Error(res.message)
-    ElMessage.success(`已${action}`)
+    showToast.success(`已${action}`)
     await load()
   } catch (e: any) {
-    ElMessage.error(e?.message ?? '操作失败')
+    showToast.error(e?.message ?? '操作失败')
   }
 }
 

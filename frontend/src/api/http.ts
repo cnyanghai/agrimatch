@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Capacitor } from '@capacitor/core'
 import { useAuthStore } from '../store/auth'
-import { ElMessage } from 'element-plus'
+import { showToast } from '@/composables/useToast'
 
 const baseURL = Capacitor.isNativePlatform()
   ? 'https://www.wogucloud.com'
@@ -50,7 +50,7 @@ http.interceptors.response.use(
       return Promise.reject(error)
     }
     const msg = error.response?.data?.message || error.message || '请求失败'
-    ElMessage.error(msg)
+    showToast.error(msg)
     return Promise.reject(error)
   }
 )
