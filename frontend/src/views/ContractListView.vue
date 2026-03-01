@@ -451,7 +451,95 @@ onMounted(() => {
 
           <!-- 表格内容 -->
           <template v-else>
-            <div class="overflow-x-auto">
+            <!-- 移动端卡片列表（< md） -->
+            <div class="md:hidden divide-y divide-neutral-100">
+              <div
+                v-for="contract in paginatedContracts"
+                :key="contract.id"
+                class="p-4 cursor-pointer active:bg-neutral-50 transition-colors"
+                @click="viewContract(contract.id)"
+              >
+                <!-- 第一行：合同编号 + 状态 -->
+                <div class="flex items-center justify-between gap-2 mb-1.5">
+                  <span class="text-xs font-mono text-neutral-400 truncate">
+                    {{ contract.contractNo || '-' }}
+                  </span>
+                  <span
+                    :class="[
+                      'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border shrink-0',
+                      statusConfig[contract.status]?.bgColor,
+                      statusConfig[contract.status]?.color,
+                      statusConfig[contract.status]?.borderColor
+                    ]"
+                  >
+                    <component :is="statusIconMap[contract.status]" class="w-3 h-3" />
+                    {{ statusConfig[contract.status]?.label || '未知' }}
+                  </span>
+                </div>
+                <!-- 第二行：产品名称 -->
+                <div class="text-sm font-bold text-neutral-900 mb-1 truncate">
+                  {{ contract.productName || '-' }}
+                  <span v-if="contract.quantity" class="text-neutral-400 font-normal ml-1 text-xs">
+                    {{ contract.quantity }}{{ contract.unit }}
+                  </span>
+                </div>
+                <!-- 第三行：交易对手 -->
+                <div class="text-xs text-neutral-500 mb-2">
+                  交易对手：<span class="text-brand-600 font-medium">{{ getCounterparty(contract) }}</span>
+                </div>
+                <!-- 第四行：金额 + 日期 -->
+                <div class="flex items-center justify-between text-xs text-neutral-600 mb-2">
+                  <span class="font-medium">总额：¥{{ formatAmount(contract.totalAmount) }}</span>
+                  <span class="text-neutral-400">{{ formatDate(contract.createTime) }}</span>
+                </div>
+                <!-- 第五行：履约进度（如有） + 操作 -->
+                <div class="flex items-center justify-between gap-2">
+                  <div
+                    v-if="contract.milestoneTotal != null && contract.milestoneTotal > 0"
+                    class="flex items-center gap-2 flex-1"
+                  >
+                    <div class="flex-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                      <div
+                        class="h-full rounded-full transition-all"
+                        :class="(contract.milestoneCompleted ?? 0) >= contract.milestoneTotal ? 'bg-brand-500' : 'bg-autumn-400'"
+                        :style="{ width: `${Math.round(((contract.milestoneCompleted ?? 0) / contract.milestoneTotal) * 100)}%` }"
+                      />
+                    </div>
+                    <span class="text-xs text-neutral-500 whitespace-nowrap shrink-0">
+                      {{ Math.round(((contract.milestoneCompleted ?? 0) / contract.milestoneTotal) * 100) }}%
+                    </span>
+                  </div>
+                  <div v-else class="flex-1" />
+                  <div class="flex gap-3 text-xs font-bold text-brand-600 shrink-0" @click.stop>
+                    <button class="hover:text-brand-800" @click="viewContract(contract.id)">查看详情 →</button>
+                    <button
+                      v-if="contract.status === 1 && (!contract.buyerSigned || !contract.sellerSigned)"
+                      class="hover:text-brand-800"
+                      @click="openSignModal(contract.id)"
+                    >
+                      签署
+                    </button>
+                    <button
+                      v-if="contract.status === 0"
+                      class="text-error-500 hover:text-error-600"
+                      @click="handleDelete(contract)"
+                    >
+                      删除
+                    </button>
+                    <button
+                      v-if="contract.status === 0 || contract.status === 1"
+                      class="text-warning-600 hover:text-warning-700"
+                      @click="handleCancel(contract)"
+                    >
+                      取消
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PC 端表格（>= md） -->
+            <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="bg-neutral-50 text-neutral-500 text-xs font-bold uppercase tracking-wider">

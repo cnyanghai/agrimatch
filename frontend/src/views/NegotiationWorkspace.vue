@@ -11,9 +11,9 @@
  * 5. 双方都确认后，生成正式签署合同
  * 6. 跳转第三方电子签章平台完成签署
  */
-import { onMounted, onBeforeUnmount, watch } from 'vue'
+import { onMounted, onBeforeUnmount, watch, ref } from 'vue'
 import { showToast } from '@/composables/useToast'
-import { MessageCircle } from 'lucide-vue-next'
+import { MessageCircle, ArrowLeft, FileText } from 'lucide-vue-next'
 
 // Composables
 import { useNegotiationWorkspace, type MerchantGroup } from '../composables/useNegotiationWorkspace'
@@ -29,6 +29,38 @@ import {
   type RequirementData
 } from '../components/negotiation'
 import type { UiMessage } from '../types/chat/message'
+
+// ==================== Mobile State ====================
+
+/** 是否为移动端（< 768px） */
+const isMobile = ref(false)
+/** 移动端当前面板：'list' | 'chat' | 'contract' */
+const mobilePanelView = ref<'list' | 'chat' | 'contract'>('list')
+/** 移动端合同预览弹窗 */
+const showContractModal = ref(false)
+
+function setupMobileDetect() {
+  const mq = window.matchMedia('(max-width: 767px)')
+  isMobile.value = mq.matches
+  mq.addEventListener('change', (e) => {
+    isMobile.value = e.matches
+    if (!e.matches) {
+      // 回到 PC 端时关闭合同弹窗
+      showContractModal.value = false
+    }
+  })
+}
+
+function handleMobileSelectMerchant(merchant: MerchantGroup) {
+  handleSelectMerchant(merchant)
+  if (isMobile.value) {
+    mobilePanelView.value = 'chat'
+  }
+}
+
+function goBackToList() {
+  mobilePanelView.value = 'list'
+}
 
 // ==================== State Management ====================
 
@@ -160,6 +192,7 @@ watch(
 )
 
 onMounted(() => {
+  setupMobileDetect()
   initialize()
 })
 
@@ -177,7 +210,157 @@ onBeforeUnmount(() => {
       <div class="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
     </div>
 
-    <!-- 主内容区 -->
+    <!-- ===================== 移动端布局（< md） ===================== -->
+    <template v-else-if="isMobile">
+      <!-- 面板：会话列表 -->
+      <div v-if="mobilePanelView === 'list'" class="flex-1 flex flex-col overflow-hidden bg-white">
+        <!-- 顶部标题栏 -->
+        <div class="px-4 py-3 border-b border-neutral-100 flex items-center gap-2 shrink-0">
+          <MessageCircle class="w-5 h-5 text-brand-500" />
+          <h2 class="text-base font-bold text-neutral-900">聊天议价</h2>
+        </div>
+
+        <!-- 空状态 -->
+        <div v-if="merchantGroups.length === 0" class="flex-1 flex items-center justify-center">
+          <div class="text-center px-6">
+            <MessageCircle class="w-12 h-12 text-neutral-300 mx-auto mb-3" />
+            <h3 class="text-base font-medium text-neutral-600 mb-1">暂无会话</h3>
+            <p class="text-xs text-neutral-400">从供应/采购详情页发起议价</p>
+          </div>
+        </div>
+
+        <!-- 商户列表（直接展开渲染，不用 ConversationSidebar） -->
+        <div v-else class="flex-1 overflow-y-auto divide-y divide-neutral-50">
+          <div
+            v-for="merchant in merchantGroups"
+            :key="merchant.peerId"
+            class="flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-neutral-100 transition-colors"
+            :class="currentConversation?.peerUserId === merchant.peerId ? 'bg-brand-50' : ''"
+            @click="handleMobileSelectMerchant(merchant)"
+          >
+            <div class="w-10 h-10 rounded-xl bg-brand-500 text-white flex items-center justify-center font-bold text-sm shrink-0 relative">
+              {{ merchant.peerName?.[0]?.toUpperCase() || '?' }}
+              <span
+                v-if="merchant.totalUnread"
+                class="absolute -top-1 -right-1 w-4 h-4 bg-error-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold"
+              >
+                {{ merchant.totalUnread > 9 ? '9+' : merchant.totalUnread }}
+              </span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-sm text-neutral-900 truncate">{{ merchant.peerName }}</span>
+                <span class="text-[10px] text-neutral-400 shrink-0 ml-1">
+                  {{ merchant.lastTime ? new Date(merchant.lastTime).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) : '' }}
+                </span>
+              </div>
+              <div v-if="merchant.peerCompany" class="text-xs text-neutral-400 truncate">{{ merchant.peerCompany }}</div>
+              <div class="text-xs text-neutral-500 truncate">{{ merchant.lastContent || '暂无消息' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 面板：聊天工作区 -->
+      <div v-else-if="mobilePanelView === 'chat'" class="flex-1 flex flex-col overflow-hidden">
+        <!-- 顶部导航栏 -->
+        <div class="bg-white px-3 py-2.5 border-b border-neutral-200 flex items-center gap-2 shrink-0">
+          <button
+            class="p-1.5 rounded-lg text-neutral-500 hover:bg-neutral-100 active:bg-neutral-200 transition-colors"
+            @click="goBackToList"
+          >
+            <ArrowLeft class="w-5 h-5" />
+          </button>
+          <div class="flex-1 min-w-0">
+            <div class="font-medium text-sm text-neutral-900 truncate">{{ peerInfo.name }}</div>
+            <div v-if="peerInfo.company" class="text-xs text-neutral-400 truncate">{{ peerInfo.company }}</div>
+          </div>
+          <!-- 查看合同按钮 -->
+          <button
+            class="flex items-center gap-1 px-2.5 py-1.5 bg-brand-50 text-brand-600 rounded-lg text-xs font-bold shrink-0"
+            @click="showContractModal = true"
+          >
+            <FileText class="w-3.5 h-3.5" />
+            合同预览
+          </button>
+        </div>
+
+        <!-- 聊天内容区（产品表单 + 聊天面板上下排列） -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+          <!-- 产品需求表单（折叠区） -->
+          <div class="overflow-auto bg-white border-b border-neutral-100" style="max-height: 35%;">
+            <ProductRequirementForm
+              :initial-data="requirementData"
+              :readonly="!!buyerConfirmed || !!sellerConfirmed"
+              :subject-type="activeConversation?.subjectType === 'SUPPLY' ? 'SUPPLY' : 'NEED'"
+              :sending="sending"
+              @update="handleRequirementUpdate"
+            />
+          </div>
+
+          <!-- 聊天面板 -->
+          <div class="flex-1 bg-white overflow-hidden flex flex-col">
+            <MergedChatPanel
+              v-if="!loadingMessages"
+              :conversations="currentMerchantConversations"
+              :merged-messages="mergedMessages"
+              :active-conversation-id="activeConversationId"
+              :active-product-name="activeProductName"
+              :peer-name="peerInfo.name"
+              :peer-company="peerInfo.company"
+              :peer-user-id="currentConversation?.peerUserId"
+              :ws-connected="isConnected"
+              :sending="sending"
+              @send="handleSendMessage"
+              @send-image="handleSendImage"
+              @send-attachment="handleSendAttachment"
+              @gift-points="handleGiftPoints"
+              @accept-quote="handleAcceptQuote"
+              @counter-quote="handleCounterQuote"
+              @reject-quote="handleRejectQuote"
+              @draft-contract="handleDraftContract"
+              @activate-conversation="handleActivateConversation"
+            />
+            <div v-else class="flex-1 flex items-center justify-center">
+              <div class="w-5 h-5 border-2 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 移动端合同预览弹窗（全屏 Modal） -->
+      <Teleport to="body">
+        <div
+          v-if="showContractModal"
+          class="fixed inset-0 z-50 flex flex-col bg-white"
+        >
+          <!-- 弹窗顶栏 -->
+          <div class="flex items-center gap-2 px-4 py-3 border-b border-neutral-200 shrink-0">
+            <button
+              class="p-1.5 rounded-lg text-neutral-500 hover:bg-neutral-100 active:bg-neutral-200 transition-colors"
+              @click="showContractModal = false"
+            >
+              <ArrowLeft class="w-5 h-5" />
+            </button>
+            <span class="font-bold text-neutral-900">合同预览</span>
+          </div>
+          <!-- 合同内容 -->
+          <div class="flex-1 overflow-auto p-3">
+            <ContractPreview
+              :contract-data="contractData"
+              :status="contractStatus"
+              :buyer-confirmed="buyerConfirmed"
+              :seller-confirmed="sellerConfirmed"
+              :current-is-buyer="currentIsBuyer"
+              @confirm="handleConfirm"
+              @generate-formal-contract="handleGenerateFormalContract"
+            />
+          </div>
+        </div>
+      </Teleport>
+    </template>
+
+    <!-- ===================== PC 端布局（>= md） ===================== -->
     <div v-else class="flex-1 flex overflow-hidden">
       <!-- 商户侧边栏 -->
       <ConversationSidebar
