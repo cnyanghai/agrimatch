@@ -8,6 +8,7 @@ import { requestNotificationPermission } from './utils/browserNotification'
 import { initAudioContext } from './utils/notificationSound'
 import AuthDialog from './components/AuthDialog.vue'
 import PublicTopNav from './components/PublicTopNav.vue'
+import AppDownloadBanner from './components/AppDownloadBanner.vue'
 import MobileBottomNav from './components/MobileBottomNav.vue'
 import NotificationToast from './components/notification/NotificationToast.vue'
 import Toast from './components/ui/Toast.vue'
@@ -88,6 +89,9 @@ onMounted(async () => {
 
 <template>
   <div class="h-screen flex flex-col overflow-hidden bg-neutral-50">
+    <!-- Smart Banner：移动端浏览器下载/安装入口 -->
+    <AppDownloadBanner />
+
     <!-- Global Navigation -->
     <PublicTopNav v-if="!hideNav" />
 
