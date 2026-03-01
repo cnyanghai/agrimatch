@@ -6,6 +6,8 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     // 生产环境使用本地资源
+    hostname: 'localhost',
+    androidScheme: 'https'
   }
 };
 
