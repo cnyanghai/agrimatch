@@ -372,11 +372,11 @@ onMounted(() => {
         <!-- Tab + 筛选栏 -->
         <div class="bg-white rounded-xl shadow-sm border border-neutral-100 mb-6">
           <!-- Tab 导航 -->
-          <div class="flex border-b border-neutral-100 px-6">
+          <div class="flex border-b border-neutral-100 px-6 overflow-x-auto">
             <button
               v-for="tab in tabs"
               :key="tab.key"
-              class="py-4 px-4 text-sm font-medium transition-colors border-b-2 -mb-px"
+              class="py-4 px-4 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap flex-shrink-0"
               :class="activeTab === tab.key
                 ? 'border-brand-600 text-brand-600 font-bold'
                 : 'border-transparent text-neutral-500 hover:text-neutral-700'"
@@ -451,6 +451,7 @@ onMounted(() => {
 
           <!-- 表格内容 -->
           <template v-else>
+            <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="bg-neutral-50 text-neutral-500 text-xs font-bold uppercase tracking-wider">
@@ -553,6 +554,7 @@ onMounted(() => {
                 </tr>
               </tbody>
             </table>
+            </div>
 
             <!-- 分页 -->
             <div class="px-6 py-4 border-t border-neutral-100 flex items-center justify-between">
@@ -594,7 +596,7 @@ onMounted(() => {
       </div>
 
       <!-- 右侧边栏 -->
-      <aside class="w-80 flex-shrink-0 flex flex-col gap-6">
+      <aside class="hidden lg:flex w-80 flex-shrink-0 flex-col gap-6">
         <!-- 合同统计 -->
         <div class="bg-white rounded-xl shadow-sm border border-neutral-100 p-6">
           <h3 class="text-sm font-bold mb-6 flex items-center gap-2">

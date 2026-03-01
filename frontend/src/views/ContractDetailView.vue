@@ -262,7 +262,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="flex gap-3">
+      <div class="flex flex-wrap gap-3">
         <button
           class="flex items-center gap-2 px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-sm font-bold rounded-xl transition-all"
           @click="loadContract"

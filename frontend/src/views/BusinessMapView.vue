@@ -698,7 +698,7 @@ onMounted(async () => {
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- 地图区域 -->
       <div class="lg:col-span-3 bg-white rounded-xl border border-neutral-200 overflow-hidden shadow-sm">
-        <div ref="mapRef" class="h-[50vh] lg:h-[calc(100vh-280px)] lg:min-h-[400px] w-full"></div>
+        <div ref="mapRef" class="h-[60vh] min-h-[300px] lg:h-[calc(100vh-280px)] lg:min-h-[400px] w-full"></div>
       </div>
 
       <!-- 公司列表 -->
@@ -739,7 +739,7 @@ onMounted(async () => {
         </div>
 
         <!-- G: 使用 sorted 列表 / F: 自适应高度 -->
-        <div v-else class="lg:max-h-[calc(100vh-280px)] overflow-y-auto">
+        <div v-else class="max-h-[40vh] lg:max-h-[calc(100vh-280px)] overflow-y-auto">
           <div
             v-for="c in sorted"
             :key="c.companyId"
@@ -801,7 +801,7 @@ onMounted(async () => {
               </div>
 
               <!-- A: 操作按钮 -->
-              <div v-else class="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div v-else class="flex gap-2 mt-3 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                 <button
                   class="flex items-center gap-1 px-2.5 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 text-xs font-medium rounded-lg transition-all"
                   @click.stop="focusCompany(c)"

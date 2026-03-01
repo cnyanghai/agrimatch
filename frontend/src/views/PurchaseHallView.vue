@@ -379,13 +379,14 @@ function getRequirementUnitConfig(r: RequirementResponse) {
             <!-- 关注按钮 -->
             <button
               v-if="authStore.token && r.userId"
-              class="shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all active:scale-95"
+              class="shrink-0 text-[10px] font-bold px-2 sm:px-2.5 py-1 rounded-full border transition-all active:scale-95"
               :class="isFollowingUser(r.userId)
                 ? 'bg-autumn-50 text-autumn-600 border-autumn-200'
                 : 'bg-white text-neutral-500 border-neutral-200 hover:border-autumn-300 hover:text-autumn-600'"
               @click.stop="toggleFollow(r)"
             >
-              {{ isFollowingUser(r.userId) ? '已关注' : '+ 关注' }}
+              <span class="hidden sm:inline">{{ isFollowingUser(r.userId) ? '已关注' : '+ 关注' }}</span>
+              <span class="sm:hidden">{{ isFollowingUser(r.userId) ? '✓' : '+' }}</span>
             </button>
             <!-- 报价按钮 -->
             <button
@@ -430,7 +431,7 @@ function getRequirementUnitConfig(r: RequirementResponse) {
       </div>
 
       <!-- 分页 -->
-      <div v-if="total > pageSize" class="flex justify-center mt-10">
+      <div v-if="total > pageSize" class="flex justify-center mt-10 overflow-x-auto">
         <el-pagination
           v-model:current-page="currentPage"
           :page-size="pageSize"
