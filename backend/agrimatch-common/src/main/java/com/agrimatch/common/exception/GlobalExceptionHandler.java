@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -23,6 +25,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public Result<Void> handleNotFound(Exception e) {
         return Result.fail(ResultCode.NOT_FOUND.getCode(), ResultCode.NOT_FOUND.getMessage());
     }

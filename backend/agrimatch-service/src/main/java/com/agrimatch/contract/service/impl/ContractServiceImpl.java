@@ -1309,6 +1309,8 @@ public class ContractServiceImpl implements ContractService {
             BusContractSignature sigSeller = signatureMapper.selectByContractAndParty(contractId, "seller");
             o.setBuyerSigned(sigBuyer != null);
             o.setSellerSigned(sigSeller != null);
+            if (sigBuyer != null) o.setBuyerSealUrl(sigBuyer.getSealUrl());
+            if (sigSeller != null) o.setSellerSealUrl(sigSeller.getSealUrl());
         }
         
         return o;

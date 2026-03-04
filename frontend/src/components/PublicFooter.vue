@@ -130,7 +130,7 @@ onMounted(async () => {
     <!-- 底部版权 -->
     <div class="border-t border-white/5">
       <div class="max-w-7xl mx-auto px-4 py-5 flex flex-col md:flex-row justify-between items-center gap-3 text-[11px] text-neutral-600">
-        <p>© 2026 天津市东丽区农汇通网络科技信息咨询厅</p>
+        <p>© 2026 天津市东丽区农汇通网络科技信息咨询厅 · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" class="hover:text-neutral-400 transition-colors">津ICP备2026001703号</a></p>
         <div class="flex items-center gap-1 text-neutral-700">
           <RouterLink to="/legal/terms" class="hover:text-neutral-400 transition-colors">用户协议</RouterLink>
           <span class="text-neutral-800">·</span>

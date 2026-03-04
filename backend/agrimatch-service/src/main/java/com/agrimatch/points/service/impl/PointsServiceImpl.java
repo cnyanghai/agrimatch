@@ -7,6 +7,8 @@ import com.agrimatch.points.domain.BusPointsAccount;
 import com.agrimatch.points.domain.BusPointsGift;
 import com.agrimatch.points.domain.BusPointsTx;
 import com.agrimatch.points.domain.BusRechargeOrder;
+import com.agrimatch.points.payment.WxPayService;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.agrimatch.user.mapper.UserMapper;
 import com.agrimatch.user.domain.SysUser;
 import com.agrimatch.points.dto.*;
@@ -14,6 +16,7 @@ import com.agrimatch.points.mapper.PointsMapper;
 import com.agrimatch.points.service.PointsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -41,10 +45,16 @@ public class PointsServiceImpl implements PointsService {
 
     private final PointsMapper pointsMapper;
     private final UserMapper userMapper;
+    private WxPayService wxPayService;
 
     public PointsServiceImpl(PointsMapper pointsMapper, UserMapper userMapper) {
         this.pointsMapper = pointsMapper;
         this.userMapper = userMapper;
+    }
+
+    @Autowired(required = false)
+    public void setWxPayService(WxPayService wxPayService) {
+        this.wxPayService = wxPayService;
     }
 
     @Override
@@ -217,6 +227,21 @@ public class PointsServiceImpl implements PointsService {
             throw new ApiException(400, "充值金额不合法");
         }
 
+        // 仅支持微信支付
+        if (!"wechat".equalsIgnoreCase(req.getPayChannel())) {
+            throw new ApiException(400, "暂仅支持微信支付");
+        }
+
+        // payType 默认 NATIVE
+        String payType = req.getPayType();
+        if (payType == null || payType.isBlank()) {
+            payType = "NATIVE";
+        }
+        payType = payType.toUpperCase();
+        if (!"NATIVE".equals(payType) && !"H5".equals(payType) && !"JSAPI".equals(payType)) {
+            throw new ApiException(400, "不支持的支付方式: " + payType);
+        }
+
         // 检查日限额
         Integer todayTotal = pointsMapper.sumTodayRechargeByUserId(userId);
         if (todayTotal == null) todayTotal = 0;
@@ -237,17 +262,47 @@ public class PointsServiceImpl implements PointsService {
         order.setStatus(0); // 待支付
 
         pointsMapper.insertRechargeOrder(order);
-        log.info("创建充值订单: orderNo={}, userId={}, amount={}", orderNo, userId, req.getAmount());
+        log.info("创建充值订单: orderNo={}, userId={}, amount={}, payType={}", orderNo, userId, req.getAmount(), payType);
 
-        // TODO: 调用微信/支付宝接口获取真实二维码
-        // 这里返回模拟二维码
-        String qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + orderNo;
+        // 微信支付服务未配置时无法下单
+        if (wxPayService == null) {
+            throw new ApiException(500, "微信支付服务未配置，请联系管理员");
+        }
+
+        // 金额：元 → 分
+        int amountCents = req.getAmount() * 100;
+        String description = "农汇通积分充值 " + req.getAmount() + "元";
 
         RechargeCreateResponse resp = new RechargeCreateResponse();
         resp.setOrderNo(orderNo);
-        resp.setQrCodeUrl(qrCodeUrl);
         resp.setAmount(req.getAmount());
         resp.setPoints(req.getAmount());
+        resp.setPayType(payType);
+
+        switch (payType) {
+            case "NATIVE":
+                String codeUrl = wxPayService.createNativeOrder(orderNo, amountCents, description);
+                resp.setCodeUrl(codeUrl);
+                break;
+            case "H5":
+                String clientIp = req.getClientIp();
+                if (clientIp == null || clientIp.isBlank()) {
+                    clientIp = "127.0.0.1";
+                }
+                String h5Url = wxPayService.createH5Order(orderNo, amountCents, description, clientIp);
+                resp.setH5Url(h5Url);
+                break;
+            case "JSAPI":
+                if (req.getOpenid() == null || req.getOpenid().isBlank()) {
+                    throw new ApiException(400, "JSAPI支付需要提供openid");
+                }
+                Map<String, String> jsapiParams = wxPayService.createJsapiOrder(orderNo, amountCents, description, req.getOpenid());
+                resp.setJsapiParams(jsapiParams);
+                break;
+            default:
+                throw new ApiException(400, "不支持的支付方式");
+        }
+
         return resp;
     }
 
@@ -488,6 +543,33 @@ public class PointsServiceImpl implements PointsService {
     @Override
     public List<GiftResponse> myGifts(Long userId) {
         return pointsMapper.selectGiftsByUserId(userId);
+    }
+
+    // ================= 订单超时关闭 =================
+
+    @Scheduled(fixedRate = 60000)
+    public void closeExpiredOrders() {
+        if (wxPayService == null) return;
+        try {
+            List<BusRechargeOrder> expiredOrders = pointsMapper.selectExpiredUnpaidOrders();
+            if (expiredOrders.isEmpty()) return;
+
+            for (BusRechargeOrder order : expiredOrders) {
+                try {
+                    // 先关闭微信侧订单
+                    wxPayService.closeOrder(order.getOrderNo());
+                    // 乐观锁更新状态为已关闭(2)
+                    int rows = pointsMapper.updateRechargeOrderStatusWithLock(order.getOrderNo(), 2, null);
+                    if (rows == 1) {
+                        log.info("关闭超时订单: orderNo={}", order.getOrderNo());
+                    }
+                } catch (Exception e) {
+                    log.error("关闭超时订单失败: orderNo={}, error={}", order.getOrderNo(), e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            log.error("定时关闭超时订单任务异常: {}", e.getMessage(), e);
+        }
     }
 }
 

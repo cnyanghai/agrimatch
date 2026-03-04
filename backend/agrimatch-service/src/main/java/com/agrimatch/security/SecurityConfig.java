@@ -60,7 +60,8 @@ public class SecurityConfig {
                         "/api/search/**",
                         "/api/home/stats",
                         "/api/futures/**",
-                        "/api/files/download", "/uploads/**").permitAll()
+                        "/api/files/download", "/uploads/**",
+                        "/api/pay/wechat/notify").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
         );

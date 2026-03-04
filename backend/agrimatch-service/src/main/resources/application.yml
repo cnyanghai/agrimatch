@@ -48,6 +48,16 @@ amap:
   # 高德地图：JS API Key（前端加载地图脚本用）
   js-key: ${AMAP_JS_KEY:}
 
+wxpay:
+  mch-id: ${WXPAY_MCH_ID:1106967009}
+  app-id: ${WXPAY_APP_ID:wxf55c129266067a91}
+  api-v3-key: ${WXPAY_API_V3_KEY:}
+  cert-serial-no: ${WXPAY_CERT_SERIAL_NO:5877B7DA8ADABE2F7C65764F840028824BFAEAF7}
+  private-key-path: ${WXPAY_PRIVATE_KEY_PATH:/opt/agrimatch/cert/apiclient_key.pem}
+  public-key-path: ${WXPAY_PUBLIC_KEY_PATH:/opt/agrimatch/cert/pub_key.pem}
+  public-key-id: ${WXPAY_PUBLIC_KEY_ID:PUB_KEY_ID_0111069670092026030400292262006400}
+  notify-url: ${WXPAY_NOTIFY_URL:https://nongv1.com/api/pay/wechat/notify}
+
 agrimatch:
   freight:
     # 运费单价（元/吨/公里），用于到厂价Beta：deliveredPrice = exFactoryPrice + distanceKm * rate

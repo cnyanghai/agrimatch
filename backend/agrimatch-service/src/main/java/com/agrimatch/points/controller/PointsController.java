@@ -6,6 +6,7 @@ import com.agrimatch.points.dto.*;
 import com.agrimatch.points.service.PointsService;
 import com.agrimatch.user.mapper.UserMapper;
 import com.agrimatch.util.SecurityUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -57,8 +58,17 @@ public class PointsController {
     @PostMapping("/recharge/create")
     public Result<RechargeCreateResponse> createRechargeOrder(
             Authentication authentication,
-            @Valid @RequestBody RechargeCreateRequest req) {
+            @Valid @RequestBody RechargeCreateRequest req,
+            HttpServletRequest request) {
         Long userId = SecurityUtil.requireUserId(authentication);
+        // Extract client IP from request for H5 payment
+        String clientIp = request.getHeader("X-Forwarded-For");
+        if (clientIp != null && !clientIp.isBlank()) {
+            clientIp = clientIp.split(",")[0].trim();
+        } else {
+            clientIp = request.getRemoteAddr();
+        }
+        req.setClientIp(clientIp);
         return Result.success(pointsService.createRechargeOrder(userId, req));
     }
 

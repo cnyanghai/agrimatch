@@ -3,7 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { showToast } from '@/composables/useToast'
 import { showConfirm } from '@/composables/useConfirm'
 import { Coins, RefreshCw, ArrowUpCircle, ArrowDownCircle, TrendingUp, TrendingDown, CreditCard, Copy, Check, X, ShieldCheck, Package, Info, FileText, Gift } from 'lucide-vue-next'
-import { getPointsMe, listPointsTx, rechargePoints, redeemJdCard, listMyJdRedeems, type PointsTxResponse, type JdRedeemDetailResponse } from '../api/points'
+import { getPointsMe, listPointsTx, createRechargeOrder, getRechargeOrderStatus, redeemJdCard, listMyJdRedeems, type PointsTxResponse, type JdRedeemDetailResponse } from '../api/points'
 import { BaseButton, EmptyState, Skeleton } from '../components/ui'
 
 const loading = ref(false)
@@ -15,7 +15,6 @@ const myRedeems = ref<JdRedeemDetailResponse[]>([])
 // ================= 充值相关 =================
 const rechargeAmounts = [100, 500, 1000, 5000, 10000]
 const rechargeVal = ref<number>(100)
-const payChannel = ref<'wechat' | 'alipay'>('wechat')
 const showPayQrDialog = ref(false)
 const payQrCode = ref('')
 const payOrderNo = ref('')
@@ -246,22 +245,91 @@ async function refresh() {
   }
 }
 
+// ================= 支付方式检测 =================
+function detectPayType(): 'NATIVE' | 'H5' | 'JSAPI' {
+  const ua = navigator.userAgent.toLowerCase()
+  if (/micromessenger/.test(ua)) return 'JSAPI'
+  if (/mobile|android|iphone/.test(ua)) return 'H5'
+  return 'NATIVE'
+}
+
+// WeixinJSBridge 类型声明
+declare global {
+  interface Window {
+    WeixinJSBridge?: {
+      invoke(
+        api: string,
+        params: Record<string, string>,
+        callback: (res: { err_msg: string }) => void
+      ): void
+    }
+  }
+}
+
 // ================= 充值流程 =================
 async function onRecharge() {
   if (!canRecharge.value) return
 
-  const ok = await showConfirm({ title: '确认充值', message: `确认充值 ${rechargeVal.value} 元？将使用${payChannel.value === 'wechat' ? '微信' : '支付宝'}支付。`, type: 'info' })
+  const ok = await showConfirm({ title: '确认充值', message: `确认充值 ${rechargeVal.value} 元？将使用微信支付。`, type: 'info' })
   if (!ok) return
 
   creating.value = true
   try {
-    payQrCode.value = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=pay_${Date.now()}`
-    payOrderNo.value = `ORD${Date.now()}`
+    const payType = detectPayType()
+    const r = await createRechargeOrder({
+      amount: rechargeVal.value,
+      payChannel: 'wechat',
+      payType,
+    })
+    if (r.code !== 0) throw new Error(r.message)
+    if (!r.data) throw new Error('创建订单失败：返回数据为空')
+
+    const order = r.data
+    payOrderNo.value = order.orderNo
     payStatus.value = 'pending'
-    showPayQrDialog.value = true
-    startPayPolling()
-  } catch (e: any) {
-    showToast.error(e?.message ?? '创建订单失败')
+
+    if (payType === 'NATIVE') {
+      if (!order.codeUrl) throw new Error('未获取到支付二维码')
+      payQrCode.value = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(order.codeUrl)}`
+      showPayQrDialog.value = true
+      startPayPolling()
+    } else if (payType === 'H5') {
+      if (!order.h5Url) throw new Error('未获取到支付链接')
+      // H5: start polling before redirect so it runs when user returns
+      startPayPolling()
+      showPayQrDialog.value = true
+      window.location.href = order.h5Url
+    } else if (payType === 'JSAPI') {
+      if (!order.jsapiParams) throw new Error('未获取到支付参数')
+      const params = order.jsapiParams
+      if (!window.WeixinJSBridge) {
+        throw new Error('请在微信中打开此页面')
+      }
+      window.WeixinJSBridge.invoke(
+        'getBrandWCPayRequest',
+        {
+          appId: params.appId,
+          timeStamp: params.timeStamp,
+          nonceStr: params.nonceStr,
+          package: params.package,
+          signType: params.signType,
+          paySign: params.paySign,
+        },
+        (res) => {
+          if (res.err_msg === 'get_brand_wcpay_request:ok') {
+            showPayQrDialog.value = true
+            startPayPolling()
+          } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
+            showToast.warning('已取消支付')
+          } else {
+            showToast.error('支付失败，请重试')
+          }
+        }
+      )
+    }
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : '创建订单失败'
+    showToast.error(msg)
   } finally {
     creating.value = false
   }
@@ -271,29 +339,44 @@ function startPayPolling() {
   if (payPollingTimer.value) clearInterval(payPollingTimer.value)
 
   let count = 0
+  const maxPolls = 150 // 150 * 2s = 5 minutes
   payPollingTimer.value = setInterval(async () => {
     count++
-    if (count >= 5) {
-      payStatus.value = 'success'
-      stopPayPolling()
 
-      const r = await rechargePoints(rechargeVal.value)
-      if (r.code === 0) {
-        me.value = r.data ?? me.value
+    try {
+      const r = await getRechargeOrderStatus(payOrderNo.value)
+      if (r.code !== 0) return // silently skip on error, keep polling
+
+      // 后端返回 Result<Integer>，r.data 直接是数字
+      const status = typeof r.data === 'object' ? (r.data as any)?.status : r.data
+      if (status === 1) {
+        // Payment successful
+        payStatus.value = 'success'
+        stopPayPolling()
         showToast.success('充值成功！')
         await refresh()
+        setTimeout(() => {
+          showPayQrDialog.value = false
+        }, 2000)
+        return
       }
-
-      setTimeout(() => {
-        showPayQrDialog.value = false
-      }, 2000)
+      if (status === 2) {
+        // Order closed
+        payStatus.value = 'failed'
+        stopPayPolling()
+        showToast.warning('订单已关闭，请重新发起支付')
+        return
+      }
+    } catch {
+      // Network error during polling, silently continue
     }
 
-    if (count >= 300) {
+    if (count >= maxPolls) {
       payStatus.value = 'failed'
       stopPayPolling()
+      showToast.warning('请确认是否已支付，如已支付请稍后刷新查看')
     }
-  }, 1000)
+  }, 2000)
 }
 
 function stopPayPolling() {
@@ -381,7 +464,7 @@ onUnmounted(() => {
           </div>
           <div>
             <h3 class="text-2xl font-bold text-neutral-900">充值积分</h3>
-            <p class="text-xs text-neutral-500">支持微信、支付宝扫码</p>
+            <p class="text-xs text-neutral-500">支持微信支付</p>
           </div>
         </div>
 
@@ -423,29 +506,10 @@ onUnmounted(() => {
 
           <div>
             <label class="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">支付方式</label>
-            <div class="grid grid-cols-2 gap-3">
-              <button
-                :class="[
-                  'flex items-center justify-center gap-2 py-3 rounded-lg font-bold transition-all  border-2',
-                  payChannel === 'wechat'
-                    ? 'border-brand-500 bg-brand-50 text-brand-700'
-                    : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-200'
-                ]"
-                @click="payChannel = 'wechat'"
-              >
+            <div class="grid grid-cols-1 gap-3">
+              <div class="flex items-center justify-center gap-2 py-3 rounded-lg font-bold border-2 border-brand-500 bg-brand-50 text-brand-700">
                 微信支付
-              </button>
-              <button
-                :class="[
-                  'flex items-center justify-center gap-2 py-3 rounded-lg font-bold transition-all  border-2',
-                  payChannel === 'alipay'
-                    ? 'border-action-500 bg-action-50 text-action-700'
-                    : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-200'
-                ]"
-                @click="payChannel = 'alipay'"
-              >
-                支付宝
-              </button>
+              </div>
             </div>
           </div>
 
@@ -667,7 +731,7 @@ onUnmounted(() => {
       <div class="p-6 text-center">
         <div v-if="payStatus === 'pending'">
           <h3 class="text-2xl font-bold text-neutral-900 mb-2">扫码支付</h3>
-          <p class="text-sm text-neutral-500 mb-6">请使用{{ payChannel === 'wechat' ? '微信' : '支付宝' }}扫描二维码完成支付</p>
+          <p class="text-sm text-neutral-500 mb-6">请使用微信扫描二维码完成支付</p>
 
           <div class="inline-block p-4 bg-white rounded-lg border-2 border-neutral-200 shadow-md mb-4">
             <img :src="payQrCode" alt="支付二维码" class="w-48 h-48" />
@@ -694,8 +758,8 @@ onUnmounted(() => {
           <div class="w-16 h-16 mx-auto rounded-full bg-error-100 flex items-center justify-center mb-4">
             <X class="w-8 h-8 text-error-600" />
           </div>
-          <h3 class="text-2xl font-bold text-neutral-900">支付超时</h3>
-          <p class="text-sm text-neutral-500 mt-2">请重新发起支付</p>
+          <h3 class="text-2xl font-bold text-neutral-900">支付未完成</h3>
+          <p class="text-sm text-neutral-500 mt-2">订单已关闭或支付超时，请重新发起</p>
         </div>
 
         <button
@@ -823,7 +887,7 @@ onUnmounted(() => {
             <ul class="space-y-1.5 text-sm text-neutral-600 pl-8">
               <li>充值比例：<b class="text-neutral-900">1 元 = 1 积分</b></li>
               <li>单次充值上限 {{ limits.rechargeMax.toLocaleString() }} 元</li>
-              <li>支持微信、支付宝扫码支付</li>
+              <li>支持微信支付</li>
             </ul>
           </div>
 

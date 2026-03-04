@@ -18,10 +18,24 @@ public class RechargeCreateRequest {
     @NotBlank(message = "支付渠道不能为空")
     private String payChannel; // wechat / alipay
 
+    private String payType; // NATIVE / H5 / JSAPI
+
+    private String clientIp; // H5 必需
+
+    private String openid; // JSAPI 必需
+
     public Integer getAmount() { return amount; }
     public void setAmount(Integer amount) { this.amount = amount; }
 
     public String getPayChannel() { return payChannel; }
     public void setPayChannel(String payChannel) { this.payChannel = payChannel; }
-}
 
+    public String getPayType() { return payType; }
+    public void setPayType(String payType) { this.payType = payType; }
+
+    public String getClientIp() { return clientIp; }
+    public void setClientIp(String clientIp) { this.clientIp = clientIp; }
+
+    public String getOpenid() { return openid; }
+    public void setOpenid(String openid) { this.openid = openid; }
+}

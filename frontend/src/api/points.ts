@@ -5,6 +5,37 @@ export interface PointsMeResponse {
   cnyBalance: number
 }
 
+// ================= 微信支付充值 =================
+
+export interface RechargeCreateRequest {
+  amount: number
+  payChannel: 'wechat'
+  payType: 'NATIVE' | 'H5' | 'JSAPI'
+  clientIp?: string
+  openid?: string
+}
+
+export interface RechargeCreateResponse {
+  orderNo: string
+  amount: number
+  points: number
+  payType: string
+  codeUrl?: string
+  h5Url?: string
+  jsapiParams?: {
+    appId: string
+    timeStamp: string
+    nonceStr: string
+    package: string
+    signType: string
+    paySign: string
+  }
+}
+
+export interface RechargeOrderStatus {
+  status: number  // 0=待支付 1=已支付 2=已关闭
+}
+
 export interface PointsTxResponse {
   id: number
   txType: string
@@ -41,6 +72,18 @@ export async function giftPoints(toUserId: number, points: number, remark?: stri
     points,
     remark
   })
+  return data
+}
+
+// ================= 微信支付充值 API =================
+
+export async function createRechargeOrder(data: RechargeCreateRequest) {
+  const { data: result } = await http.post<Result<RechargeCreateResponse>>('/api/points/recharge/create', data)
+  return result
+}
+
+export async function getRechargeOrderStatus(orderNo: string) {
+  const { data } = await http.get<Result<RechargeOrderStatus>>(`/api/points/recharge/${orderNo}/status`)
   return data
 }
 

@@ -60,6 +60,14 @@ public interface PointsMapper {
                      @Param("adminUserId") Long adminUserId,
                      @Param("adminRemark") String adminRemark);
 
+    // 乐观锁更新订单状态（仅当 status=0 时更新）
+    int updateRechargeOrderStatusWithLock(@Param("orderNo") String orderNo,
+                                          @Param("status") Integer status,
+                                          @Param("tradeNo") String tradeNo);
+
+    // 查询超时未支付订单（status=0 且创建时间超过30分钟）
+    List<BusRechargeOrder> selectExpiredUnpaidOrders();
+
     // ==================== 积分赠送 ====================
     int insertGift(BusPointsGift gift);
 
