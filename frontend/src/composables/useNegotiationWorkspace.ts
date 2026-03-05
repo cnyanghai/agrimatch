@@ -115,12 +115,8 @@ export function useNegotiationWorkspace() {
     () => !!auth.me || !!auth.token,
     {
       onMessage: handleWsMessage,
-      onConnect: () => console.log('[NegotiationWorkspace] WebSocket connected'),
-      onDisconnect: (reason) => {
-        if (reason !== 'logged_out' && reason !== 'manual') {
-          console.warn('[NegotiationWorkspace] WebSocket disconnected:', reason)
-        }
-      }
+      onConnect: () => {},
+      onDisconnect: () => {}
     }
   )
 
@@ -592,8 +588,8 @@ export function useNegotiationWorkspace() {
           negotiationStatus: inferNegotiationStatus(c)
         }))
       }
-    } catch (e) {
-      console.error('Load conversations failed:', e)
+    } catch {
+      // silently ignore
     } finally {
       loading.value = false
     }
@@ -639,8 +635,7 @@ export function useNegotiationWorkspace() {
       if (chatMessages.hasAcceptedQuote.value && contractStatus.value === 'DRAFT') {
         contractStatus.value = 'PENDING_CONFIRM'
       }
-    } catch (e) {
-      console.error('Load messages failed:', e)
+    } catch {
       showToast.error('加载消息失败')
     } finally {
       loadingMessages.value = false
@@ -687,8 +682,8 @@ export function useNegotiationWorkspace() {
                 messages: res.data.map((m: ChatMessageResponse) => toUiMessage(m, userId)).reverse()
               }
             }
-          } catch (e) {
-            console.error(`Load messages for conv ${conv.id} failed:`, e)
+          } catch {
+            // silently ignore
           }
           return { convId: conv.id, messages: [] as UiMessage[] }
         })
@@ -723,8 +718,7 @@ export function useNegotiationWorkspace() {
       if (chatMessages.hasAcceptedQuote.value && contractStatus.value === 'DRAFT') {
         contractStatus.value = 'PENDING_CONFIRM'
       }
-    } catch (e) {
-      console.error('Load merchant messages failed:', e)
+    } catch {
       showToast.error('加载消息失败')
     } finally {
       loadingMessages.value = false
@@ -792,8 +786,7 @@ export function useNegotiationWorkspace() {
           await selectConversation(conv)
         }
       }
-    } catch (e) {
-      console.error('Open conversation failed:', e)
+    } catch {
       showToast.error('打开会话失败')
     }
   }
@@ -974,7 +967,6 @@ export function useNegotiationWorkspace() {
         showToast.error(res.message || '赠送失败')
       }
     } catch (e: any) {
-      console.error('Gift points failed:', e)
       showToast.error(e.response?.data?.message || '赠送失败')
     }
   }
@@ -1005,7 +997,6 @@ export function useNegotiationWorkspace() {
       contractStatus.value = 'PENDING_CONFIRM'
       showToast.success('已接受报价')
     } catch (e: any) {
-      console.error('Accept quote failed:', e)
       showToast.error(e.response?.data?.message || '接受报价失败')
     }
   }
@@ -1027,7 +1018,6 @@ export function useNegotiationWorkspace() {
 
       showToast.info('已拒绝报价')
     } catch (e: any) {
-      console.error('Reject quote failed:', e)
       showToast.error(e.response?.data?.message || '拒绝报价失败')
     }
   }
@@ -1114,35 +1104,23 @@ export function useNegotiationWorkspace() {
     let buyer = false
     let seller = false
 
-    // DEBUG: 打印所有 SYSTEM 消息
-    const systemMsgs = chatMessages.messages.value.filter(m => (m.msgType || '').toUpperCase() === 'SYSTEM')
-    console.log('[DEBUG] SYSTEM messages:', systemMsgs.map(m => ({
-      id: m.id,
-      msgType: m.msgType,
-      content: m.content,
-      payloadJson: m.payloadJson
-    })))
-
     for (const msg of chatMessages.messages.value) {
       if ((msg.msgType || '').toUpperCase() !== 'SYSTEM') continue
       if (!msg.payloadJson) {
-        console.log('[DEBUG] SYSTEM message without payloadJson:', msg.id, msg.content)
         continue
       }
 
       try {
         const payload = JSON.parse(msg.payloadJson)
-        console.log('[DEBUG] Parsed payload:', payload)
         if (payload.action === 'CONFIRM_TERMS') {
           if (payload.role === 'buyer') buyer = true
           if (payload.role === 'seller') seller = true
         }
-      } catch (e) {
-        console.error('[DEBUG] Failed to parse payloadJson:', msg.payloadJson, e)
+      } catch {
+        // silently ignore
       }
     }
 
-    console.log('[DEBUG] Confirmation result - buyer:', buyer, 'seller:', seller)
     buyerConfirmed.value = buyer
     sellerConfirmed.value = seller
 
@@ -1210,7 +1188,6 @@ export function useNegotiationWorkspace() {
         showToast.error(res.message || '生成合同失败')
       }
     } catch (e: any) {
-      console.error('Generate contract failed:', e)
       showToast.error(e.response?.data?.message || '生成合同失败')
     } finally {
       sending.value = false
@@ -1254,8 +1231,8 @@ export function useNegotiationWorkspace() {
 
       // 连接 WebSocket
       webSocket.connect()
-    } catch (e) {
-      console.error('Initialize workspace failed:', e)
+    } catch {
+      // silently ignore
     } finally {
       loading.value = false
     }

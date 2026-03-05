@@ -106,8 +106,8 @@ async function initMap() {
     })
     mapInstance.add(marker)
     
-  } catch (e: any) {
-    console.error('Map init failed:', e)
+  } catch {
+    // silently ignore
   }
 }
 
@@ -126,8 +126,7 @@ const recruitments = computed(() => {
   try {
     const parsed = JSON.parse(company.value.recruitmentJson)
     return Array.isArray(parsed) ? parsed : []
-  } catch (e) {
-    console.error('Failed to parse recruitmentJson:', e)
+  } catch {
     return []
   }
 })
@@ -138,8 +137,7 @@ const certificates = computed(() => {
   try {
     const parsed = JSON.parse(company.value.certificatesJson)
     return Array.isArray(parsed) ? parsed : []
-  } catch (e) {
-    console.error('Failed to parse certificatesJson:', e)
+  } catch {
     return []
   }
 })
@@ -171,8 +169,8 @@ async function loadFollowStatus() {
     if (r.code === 0) {
       isFollowing.value = r.data || false
     }
-  } catch (e) {
-    console.error('Failed to load follow status:', e)
+  } catch {
+    // silently ignore
   }
 }
 
@@ -191,8 +189,8 @@ async function loadContractStats() {
     if (partnersRes.code === 0) {
       partnerCompanies.value = partnersRes.data ?? []
     }
-  } catch (e) {
-    console.error('Failed to load contract stats:', e)
+  } catch {
+    // silently ignore
   }
 }
 
@@ -209,12 +207,9 @@ async function toggleFollow() {
   }
   
   if (!company.value?.ownerUserId) {
-    console.error('Company ownerUserId is missing:', company.value)
     showToast.warning('该企业未关联用户，无法关注')
     return
   }
-  
-  console.log('Toggle follow - ownerUserId:', company.value.ownerUserId, 'current status:', isFollowing.value)
   
   followLoading.value = true
   try {
@@ -236,7 +231,6 @@ async function toggleFollow() {
       }
     }
   } catch (e: any) {
-    console.error('Follow operation error:', e)
     showToast.error(e?.message || '操作失败，请稍后重试')
   } finally {
     followLoading.value = false
@@ -298,7 +292,6 @@ async function contactMerchant() {
       showToast.error(res.message || '打开聊天失败')
     }
   } catch (e: any) {
-    console.error('Contact merchant error:', e)
     showToast.error(e?.message || '联系商家失败，请稍后重试')
   }
 }
@@ -346,7 +339,6 @@ async function sendInquiry(supply: any) {
       showToast.error(res.message || '打开聊天失败')
     }
   } catch (e: any) {
-    console.error('Send inquiry error:', e)
     showToast.error(e?.message || '联系商家失败，请稍后重试')
   }
 }

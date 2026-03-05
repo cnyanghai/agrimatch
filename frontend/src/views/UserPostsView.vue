@@ -32,8 +32,8 @@ async function loadUser() {
     if (r.code === 0) {
       user.value = r.data || null
     }
-  } catch (e) {
-    console.error('加载用户信息失败', e)
+  } catch {
+    // silently ignore
   }
 }
 

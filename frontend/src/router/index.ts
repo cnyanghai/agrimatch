@@ -13,7 +13,7 @@ const router = createRouter({
     { path: '/hall/need', name: 'hall-need', component: () => import('../views/PurchaseHallView.vue'), meta: { public: true, minimal: true, title: '采购大厅 - 精准匹配采购需求 - 沃谷' } },
     { path: '/search', name: 'search', component: () => import('../views/UnifiedSearchView.vue'), meta: { public: true, minimal: true, title: '全站搜索 - 沃谷' } },
     { path: '/talks', name: 'talks', component: () => import('../views/TopicSquareView.vue'), meta: { public: true, minimal: true, title: '话题广场 - 行业深度交流与资讯 - 沃谷' } },
-    { path: '/talks/:id', name: 'talk-detail', component: () => import('../views/TopicDetailView.vue'), meta: { public: true, minimal: true, title: '话题详情 - 沃谷' } },
+    { path: '/talks/:id', name: 'talk-detail', component: () => import('../views/TopicDetailView.vue'), meta: { requiresAuth: true, minimal: true, title: '话题详情 - 沃谷' } },
     { path: '/talks/publish', name: 'talks-publish', component: () => import('../views/TopicPublishView.vue'), meta: { minimal: true, requiresAuth: true, title: '发布话题 - 沃谷' } },
     { path: '/talks/:id/edit', name: 'talk-edit', component: () => import('../views/TopicEditView.vue'), meta: { minimal: true, requiresAuth: true, title: '编辑话题 - 沃谷' } },
     { path: '/talks/collected', name: 'collected-posts', component: () => import('../views/MyCollectedPostsView.vue'), meta: { requiresAuth: true, minimal: true, title: '我的收藏 - 沃谷' } },
@@ -62,10 +62,18 @@ const router = createRouter({
 
     // 名录与公司详情
     { path: '/companies/directory', name: 'company-directory', component: () => import('../views/CompanyDirectoryView.vue'), meta: { public: true, minimal: true, title: '企业名录 - 优质供应商与采购商黄页 - 沃谷' } },
-    { path: '/companies/:id', name: 'company-profile', component: () => import('../views/CompanyProfileView.vue'), meta: { public: true, minimal: true, title: '企业主页 - 沃谷' } },
+    { path: '/companies/:id', name: 'company-profile', component: () => import('../views/CompanyProfileView.vue'), meta: { requiresAuth: true, minimal: true, title: '企业主页 - 沃谷' } },
 
     // 法律与合规
-    { path: '/legal/:type', name: 'legal', component: () => import('../views/LegalPageView.vue'), meta: { public: true, minimal: true, title: '法律文档 - 沃谷' } }
+    { path: '/legal/:type', name: 'legal', component: () => import('../views/LegalPageView.vue'), meta: { public: true, minimal: true, title: '法律文档 - 沃谷' } },
+
+    // 404 catch-all
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('../views/NotFoundView.vue'),
+      meta: { public: true }
+    }
   ]
 })
 

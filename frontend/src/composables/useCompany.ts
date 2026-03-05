@@ -30,7 +30,6 @@ export function useCompany() {
       }
     } catch (e: any) {
       error.value = e?.message || '加载公司资料失败'
-      console.error('Failed to load company profile:', e)
     } finally {
       loading.value = false
     }
@@ -52,7 +51,6 @@ export function useCompany() {
       }
     } catch (e: any) {
       error.value = e?.message || '加载公司目录失败'
-      console.error('Failed to load company directory:', e)
     } finally {
       loading.value = false
     }
@@ -73,7 +71,6 @@ export function useCompany() {
       }
     } catch (e: any) {
       error.value = e?.message || '搜索公司失败'
-      console.error('Failed to search companies:', e)
     } finally {
       loading.value = false
     }

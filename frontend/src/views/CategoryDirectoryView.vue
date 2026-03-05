@@ -44,8 +44,8 @@ const loadData = async () => {
     if (r.code === 0) {
       categoryTree.value = r.data ?? []
     }
-  } catch (e) {
-    console.error('Failed to load category tree', e)
+  } catch {
+    // silently ignore
   } finally {
     loading.value = false
   }

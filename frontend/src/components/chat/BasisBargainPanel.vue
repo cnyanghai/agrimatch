@@ -47,8 +47,8 @@ function initFromSnapshot() {
     if (s.paramsJson) {
       productParams.value = parseProductParams(s.paramsJson)
     }
-  } catch (e) {
-    console.error('Failed to parse subject snapshot', e)
+  } catch {
+    // silently ignore
   }
 }
 

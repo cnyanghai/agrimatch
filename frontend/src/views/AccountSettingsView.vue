@@ -99,11 +99,9 @@ async function fetchLoginLogs() {
     const res = await getLoginLogs()
     if (res.code === 0) {
       loginLogs.value = res.data ?? []
-    } else {
-      console.error('Failed to fetch login logs:', res.message)
     }
-  } catch (e) {
-    console.error('API Error when fetching login logs:', e)
+  } catch {
+    // silently ignore
   } finally {
     loginLogsLoading.value = false
   }
@@ -221,8 +219,8 @@ async function loadUserData() {
       userForm.avatar = auth.me.avatar || ''
     }
     userSnapshot.value = { ...userForm }
-  } catch (e) {
-    console.error('Failed to load user data', e)
+  } catch {
+    // silently ignore
   }
 }
 
@@ -271,8 +269,8 @@ async function loadCompanyData() {
       }
     }
     companySnapshot.value = { ...companyForm }
-  } catch (e) {
-    console.error('Failed to load company data', e)
+  } catch {
+    // silently ignore
   }
 }
 
@@ -283,8 +281,8 @@ async function loadVehicles() {
     if (r.code === 0) {
       vehicles.value = r.data ?? []
     }
-  } catch (e: any) {
-    console.error('Failed to load vehicles', e)
+  } catch {
+    // silently ignore
   }
 }
 

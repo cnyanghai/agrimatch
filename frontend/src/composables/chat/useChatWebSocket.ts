@@ -153,12 +153,11 @@ export function useChatWebSocket(
         try {
           const data = JSON.parse(ev.data) as WsIncomingMessage
           callbacks?.onMessage?.(data)
-        } catch (e) {
-          console.error('[useChatWebSocket] Failed to parse message:', e)
+        } catch {
+          // silently ignore
         }
       }
     } catch (e) {
-      console.error('[useChatWebSocket] Failed to connect:', e)
       status.value = 'disconnected'
       lastError.value = String(e)
       scheduleReconnect()
@@ -201,8 +200,7 @@ export function useChatWebSocket(
     try {
       ws.value.send(JSON.stringify(payload))
       return true
-    } catch (e) {
-      console.error('[useChatWebSocket] Failed to send:', e)
+    } catch {
       return false
     }
   }

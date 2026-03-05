@@ -109,7 +109,6 @@ export function useGlobalWebSocket() {
       lastError.value = null
 
       ws.onopen = () => {
-        console.log('[GlobalWS] Connected')
         status.value = 'connected'
         reconnectAttempt = 0
 
@@ -117,8 +116,7 @@ export function useGlobalWebSocket() {
         startPing()
       }
 
-      ws.onclose = (ev) => {
-        console.log('[GlobalWS] Disconnected:', ev.reason || 'connection closed')
+      ws.onclose = () => {
         status.value = 'disconnected'
         stopPing()
 
@@ -128,8 +126,7 @@ export function useGlobalWebSocket() {
         }
       }
 
-      ws.onerror = (err) => {
-        console.error('[GlobalWS] Error:', err)
+      ws.onerror = () => {
         status.value = 'disconnected'
         lastError.value = 'WebSocket error'
       }
@@ -138,12 +135,11 @@ export function useGlobalWebSocket() {
         try {
           const data = JSON.parse(ev.data) as WsIncomingMessage
           handleMessage(data)
-        } catch (e) {
-          console.error('[GlobalWS] Failed to parse message:', e)
+        } catch {
+          // silently ignore
         }
       }
     } catch (e) {
-      console.error('[GlobalWS] Failed to connect:', e)
       status.value = 'disconnected'
       lastError.value = String(e)
       scheduleReconnect()
@@ -156,7 +152,6 @@ export function useGlobalWebSocket() {
   function handleMessage(data: WsIncomingMessage) {
     switch (data.type) {
       case 'CONNECTED':
-        console.log('[GlobalWS] Server confirmed connection at', data.serverTime)
         break
 
       case 'PONG':
@@ -177,7 +172,7 @@ export function useGlobalWebSocket() {
         break
 
       default:
-        console.log('[GlobalWS] Unknown message type:', data.type)
+        // unknown message type, ignore
     }
   }
 
@@ -264,8 +259,6 @@ export function useGlobalWebSocket() {
     status.value = 'reconnecting'
     reconnectAttempt += 1
     const delay = Math.min(MAX_RECONNECT_DELAY, BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttempt - 1))
-
-    console.log(`[GlobalWS] Reconnecting in ${delay}ms (attempt ${reconnectAttempt})`)
 
     reconnectTimer = window.setTimeout(() => {
       reconnectTimer = null

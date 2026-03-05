@@ -524,8 +524,8 @@ async function loadTemplates() {
     if (res.code === 0) {
       templates.value = res.data || []
     }
-  } catch (e) {
-    console.error('加载模板失败', e)
+  } catch {
+    // silently ignore
   }
 }
 

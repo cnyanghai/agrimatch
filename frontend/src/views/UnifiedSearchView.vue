@@ -37,8 +37,8 @@ async function fetchResults() {
       results.value = res.data?.list ?? []
       total.value = res.data?.total ?? 0
     }
-  } catch (e) {
-    console.error('Search failed', e)
+  } catch {
+    // silently ignore
   } finally {
     loading.value = false
   }

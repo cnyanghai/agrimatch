@@ -47,8 +47,8 @@ export function playNotificationSound() {
     // 播放
     oscillator.start(ctx.currentTime)
     oscillator.stop(ctx.currentTime + 0.3)
-  } catch (e) {
-    console.warn('[NotificationSound] Failed to play sound:', e)
+  } catch {
+    // silently ignore
   }
 }
 
@@ -89,8 +89,8 @@ export function playDoubleBeep() {
     gain2.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.35)
     osc2.start(ctx.currentTime + 0.15)
     osc2.stop(ctx.currentTime + 0.35)
-  } catch (e) {
-    console.warn('[NotificationSound] Failed to play double beep:', e)
+  } catch {
+    // silently ignore
   }
 }
 

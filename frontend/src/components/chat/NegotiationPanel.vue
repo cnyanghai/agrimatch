@@ -105,8 +105,8 @@ function initFromSnapshot() {
       form.dynamicParams = { ...dynamic }
       productParams.value = { ...dynamic }
     }
-  } catch (e) {
-    console.error('Failed to parse subject snapshot', e)
+  } catch {
+    // silently ignore
   }
 }
 

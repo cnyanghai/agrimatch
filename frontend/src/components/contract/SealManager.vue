@@ -40,8 +40,8 @@ async function loadSeals() {
     if (res.code === 0) {
       seals.value = res.data || []
     }
-  } catch (err) {
-    console.error('加载公章失败', err)
+  } catch {
+    // silently ignore
   } finally {
     loading.value = false
   }
@@ -100,8 +100,8 @@ async function handleSetDefault(id: number) {
       showToast.success('已设为默认公章')
       await loadSeals()
     }
-  } catch (err) {
-    console.error('设置默认失败', err)
+  } catch {
+    // silently ignore
   }
 }
 
@@ -112,8 +112,8 @@ async function handleDelete(id: number) {
       showToast.success('公章已删除')
       await loadSeals()
     }
-  } catch (err) {
-    console.error('删除失败', err)
+  } catch {
+    // silently ignore
   }
 }
 

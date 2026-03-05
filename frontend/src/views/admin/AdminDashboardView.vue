@@ -30,8 +30,8 @@ async function load() {
   try {
     const res = await getAdminDashboard()
     if (res.code === 0) data.value = res.data
-  } catch (e) {
-    console.error('加载仪表盘失败', e)
+  } catch {
+    // silently ignore
   } finally {
     loading.value = false
   }

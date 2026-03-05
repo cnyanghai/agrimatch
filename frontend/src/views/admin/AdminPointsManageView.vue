@@ -41,7 +41,7 @@ async function loadOverview() {
   try {
     const res = await getAdminPointsOverview()
     if (res.code === 0) overview.value = res.data
-  } catch (e) { console.error(e) }
+  } catch { /* silently ignore */ }
 }
 
 async function loadRecharges() {
@@ -55,7 +55,7 @@ async function loadRecharges() {
       rechargeList.value = res.data.list
       rechargeTotal.value = res.data.total
     }
-  } catch (e) { console.error(e) }
+  } catch { /* silently ignore */ }
 }
 
 async function loadRechargeUsers() {
@@ -69,7 +69,7 @@ async function loadRechargeUsers() {
       rechargeUserList.value = res.data.list
       rechargeUserTotal.value = res.data.total
     }
-  } catch (e) { console.error(e) }
+  } catch { /* silently ignore */ }
 }
 
 async function loadGifts() {
@@ -83,7 +83,7 @@ async function loadGifts() {
       giftList.value = res.data.list
       giftTotal.value = res.data.total
     }
-  } catch (e) { console.error(e) }
+  } catch { /* silently ignore */ }
 }
 
 function handleSearchRecharges() {

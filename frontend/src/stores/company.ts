@@ -32,7 +32,6 @@ export const useCompanyStore = defineStore('company', () => {
       }
     } catch (e: any) {
       error.value = e?.message || '加载公司资料失败'
-      console.error('Failed to load company profile:', e)
     } finally {
       loading.value = false
     }
@@ -54,7 +53,6 @@ export const useCompanyStore = defineStore('company', () => {
       }
     } catch (e: any) {
       error.value = e?.message || '加载公司目录失败'
-      console.error('Failed to load company directory:', e)
     } finally {
       loading.value = false
     }
@@ -75,7 +73,6 @@ export const useCompanyStore = defineStore('company', () => {
       }
     } catch (e: any) {
       error.value = e?.message || '加载热门公司失败'
-      console.error('Failed to load top companies:', e)
     } finally {
       loading.value = false
     }

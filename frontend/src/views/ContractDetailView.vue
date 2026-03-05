@@ -233,7 +233,6 @@ async function downloadPdf() {
     await html2pdf().set(opt).from(element).save()
     showToast.success('PDF 下载成功')
   } catch (e: any) {
-    console.error('PDF generation failed:', e)
     showToast.error('PDF 生成失败，请重试')
   } finally {
     pdfGenerating.value = false

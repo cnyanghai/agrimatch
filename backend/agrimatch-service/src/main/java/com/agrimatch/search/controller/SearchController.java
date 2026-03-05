@@ -30,7 +30,9 @@ public class SearchController {
             @RequestParam(required = false) String tagFiltersJson,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        
+
+        if (size > 100) size = 100;
+
         UnifiedSearchQuery query = new UnifiedSearchQuery();
         query.setKeyword(keyword);
         query.setDomain(domain);

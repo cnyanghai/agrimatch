@@ -63,8 +63,7 @@ export class AuditLogger {
         body: JSON.stringify({ logs }),
         credentials: 'include'
       })
-    } catch (error) {
-      console.error('[AuditLogger] Failed to flush logs:', error)
+    } catch {
       this.queue.unshift(...logs)
     }
   }

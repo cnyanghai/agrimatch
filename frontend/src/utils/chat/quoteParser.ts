@@ -29,8 +29,7 @@ export function parseQuotePayload(payloadJson?: string | null): QuotePayload | n
   try {
     const obj = JSON.parse(payloadJson)
     return normalizeQuotePayload(obj)
-  } catch (e) {
-    console.error('[quoteParser] Failed to parse quote payload:', e)
+  } catch {
     return null
   }
 }

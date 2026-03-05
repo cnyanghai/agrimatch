@@ -203,8 +203,8 @@ async function loadFollowedUsers() {
     if (r.code === 0) {
       followedUsers.value = r.data || []
     }
-  } catch (e) {
-    console.error('加载关注列表失败', e)
+  } catch {
+    // silently ignore
   }
 }
 
@@ -215,8 +215,8 @@ async function loadFollowedSupplies() {
     if (r.code === 0) {
       followedSupplies.value = r.data || []
     }
-  } catch (e) {
-    console.error('加载关注供应失败', e)
+  } catch {
+    // silently ignore
   }
 }
 
@@ -227,8 +227,8 @@ async function loadFollowedRequirements() {
     if (r.code === 0) {
       followedRequirements.value = r.data || []
     }
-  } catch (e) {
-    console.error('加载关注采购失败', e)
+  } catch {
+    // silently ignore
   }
 }
 

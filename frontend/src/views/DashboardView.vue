@@ -170,8 +170,8 @@ async function loadDashboard() {
     if (res.code === 0 && res.data) {
       dashboard.value = res.data
     }
-  } catch (e) {
-    console.error('加载首页数据失败', e)
+  } catch {
+    // silently ignore
   } finally {
     loading.value = false
   }

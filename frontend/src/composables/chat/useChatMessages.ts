@@ -58,7 +58,6 @@ export function useChatMessages(options: UseChatMessagesOptions) {
         messages.value = []
       }
     } catch (e: any) {
-      console.error('[useChatMessages] Failed to load messages:', e)
       error.value = e.message || '加载消息失败'
       messages.value = []
     } finally {

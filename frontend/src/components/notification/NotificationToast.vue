@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNotificationStore } from '../../stores/notification'
 import { MessageCircle, X, FileText, Bell } from 'lucide-vue-next'
@@ -9,11 +9,6 @@ const notificationStore = useNotificationStore()
 
 const toast = computed(() => notificationStore.currentToast)
 const show = computed(() => notificationStore.showToast)
-
-// 调试：监听 show 变化
-watch(show, (val) => {
-  console.log('[NotificationToast] show changed to:', val, 'toast:', toast.value)
-}, { immediate: true })
 
 function handleClick() {
   if (toast.value?.conversationId) {

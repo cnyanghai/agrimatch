@@ -106,8 +106,8 @@ watch(() => props.modelValue, async (val) => {
       if (res.code === 0 && res.data) {
         contract.value = res.data
       }
-    } catch (e) {
-      console.error('加载合同失败', e)
+    } catch {
+      // silently ignore
     }
   } else {
     // 重置

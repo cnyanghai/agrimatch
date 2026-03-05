@@ -33,13 +33,12 @@ class NotificationManager {
       try {
         const notification = JSON.parse(event.data)
         this.showNotification(notification)
-      } catch (error) {
-        console.error('[NotificationManager] Failed to parse SSE message:', error)
+      } catch {
+        // silently ignore
       }
     }
 
-    this.eventSource.onerror = (error) => {
-      console.error('[NotificationManager] SSE error:', error)
+    this.eventSource.onerror = () => {
       if (this.eventSource?.readyState === EventSource.CLOSED) {
         this.eventSource = null
       }

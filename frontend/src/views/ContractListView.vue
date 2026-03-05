@@ -206,8 +206,8 @@ async function loadContracts() {
     if (res.code === 0 && res.data) {
       contracts.value = res.data
     }
-  } catch (e) {
-    console.error('加载合同列表失败', e)
+  } catch {
+    // silently ignore
   } finally {
     loading.value = false
   }

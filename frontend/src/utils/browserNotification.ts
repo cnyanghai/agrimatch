@@ -9,7 +9,6 @@ let permissionGranted = false
  */
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!('Notification' in window)) {
-    console.warn('[BrowserNotification] This browser does not support notifications')
     return false
   }
 
@@ -26,8 +25,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
     const permission = await Notification.requestPermission()
     permissionGranted = permission === 'granted'
     return permissionGranted
-  } catch (e) {
-    console.warn('[BrowserNotification] Failed to request permission:', e)
+  } catch {
     return false
   }
 }
@@ -77,8 +75,7 @@ export function showBrowserNotification(
     }, 5000)
 
     return notification
-  } catch (e) {
-    console.warn('[BrowserNotification] Failed to show notification:', e)
+  } catch {
     return null
   }
 }

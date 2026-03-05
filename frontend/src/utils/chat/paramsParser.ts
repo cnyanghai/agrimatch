@@ -19,8 +19,7 @@ export function parseProductParams(paramsJson?: string | null): ProductParams {
   try {
     const parsed = JSON.parse(paramsJson)
     return normalizeParams(parsed)
-  } catch (e) {
-    console.error('[paramsParser] Failed to parse paramsJson:', e)
+  } catch {
     return {}
   }
 }
@@ -143,8 +142,7 @@ export function extractParamsFromSnapshot(snapshotJson?: string | null): Product
       return parseProductParams(snapshot.paramsJson)
     }
     return {}
-  } catch (e) {
-    console.error('[paramsParser] Failed to extract params from snapshot:', e)
+  } catch {
     return {}
   }
 }

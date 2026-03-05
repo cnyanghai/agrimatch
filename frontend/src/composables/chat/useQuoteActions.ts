@@ -51,7 +51,6 @@ export function useQuoteActions(options: UseQuoteActionsOptions) {
         return false
       }
     } catch (e: any) {
-      console.error('[useQuoteActions] Failed to confirm:', e)
       showToast.error(e.response?.data?.message || '确认失败')
       return false
     } finally {
@@ -95,7 +94,6 @@ export function useQuoteActions(options: UseQuoteActionsOptions) {
       showToast.info('已拒绝报价')
       return true
     } catch (e: any) {
-      console.error('[useQuoteActions] Failed to reject:', e)
       showToast.error('操作失败')
       return false
     } finally {

@@ -98,7 +98,6 @@ export function useChatConversations() {
         error.value = res.message || '加载会话失败'
       }
     } catch (e: any) {
-      console.error('[useChatConversations] Failed to load:', e)
       error.value = e.message || '加载会话失败'
     } finally {
       loading.value = false
@@ -116,8 +115,8 @@ export function useChatConversations() {
       if (conv) {
         conv.unreadCount = 0
       }
-    } catch (e) {
-      console.error('[useChatConversations] Failed to mark read:', e)
+    } catch {
+      // silently ignore
     }
   }
 

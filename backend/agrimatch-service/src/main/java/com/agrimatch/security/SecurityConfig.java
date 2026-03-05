@@ -33,6 +33,11 @@ public class SecurityConfig {
     }
 
     @Bean
+    public RateLimitFilter rateLimitFilter() {
+        return new RateLimitFilter();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenUtil jwtTokenUtil) throws Exception {
         http.cors(Customizer.withDefaults()); // 让Spring Security放行CORS预检请求
         http.csrf(csrf -> csrf.disable());
@@ -52,20 +57,21 @@ public class SecurityConfig {
                 .requestMatchers("/", "/error", "/api/health", "/api/config", "/api/auth/**",
                         "/api/products/tree", "/api/products/search", "/api/products/*/params",
                         "/api/product-schemas", "/api/product-schemas/**",
-                        "/api/posts", "/api/posts/*", "/api/posts/*/comments",
+                        "/api/posts",
                         "/api/supplies", "/api/supplies/*",
                         "/api/requirements", "/api/requirements/*",
                         "/api/companies/top", "/api/companies/suppliers", "/api/companies/buyers",
-                        "/api/companies/*/profile", "/api/companies/directory",
+                        "/api/companies/directory",
                         "/api/search/**",
                         "/api/home/stats",
                         "/api/futures/**",
                         "/api/files/download", "/uploads/**",
                         "/api/pay/wechat/notify").permitAll()
                 .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
         );
 
+        http.addFilterBefore(rateLimitFilter(), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(new JwtAuthFilter(jwtTokenUtil), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

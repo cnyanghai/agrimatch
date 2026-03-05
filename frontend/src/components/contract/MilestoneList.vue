@@ -87,8 +87,8 @@ async function loadMilestones() {
     if (res.code === 0 && res.data) {
       milestones.value = res.data
     }
-  } catch (e: any) {
-    console.error('加载履约节点失败', e)
+  } catch {
+    // silently ignore
   } finally {
     loading.value = false
   }

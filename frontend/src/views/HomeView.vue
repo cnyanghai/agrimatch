@@ -59,8 +59,8 @@ async function loadData() {
     if (statsRes.code === 0) stats.value = statsRes.data ?? null
     if (supRes.code === 0) suppliers.value = supRes.data ?? []
     if (buyRes.code === 0) buyers.value = buyRes.data ?? []
-  } catch (e) {
-    console.error('Failed to load landing data', e)
+  } catch {
+    // silently ignore
   } finally {
     dataLoading.value = false
   }

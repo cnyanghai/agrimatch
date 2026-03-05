@@ -44,8 +44,8 @@ async function loadVehicles() {
     if (r.code === 0) {
       vehicles.value = r.data ?? []
     }
-  } catch (e: any) {
-    console.error('加载车辆列表失败', e)
+  } catch {
+    // silently ignore
   } finally {
     loading.value = false
   }

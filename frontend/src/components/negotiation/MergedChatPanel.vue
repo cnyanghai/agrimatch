@@ -214,7 +214,6 @@ async function handleFileSelect(event: Event) {
       else showToast.error(res.message || '附件上传失败')
     }
   } catch (e: any) {
-    console.error('Upload failed:', e)
     showToast.error(e.response?.data?.message || '上传失败')
   } finally {
     uploading.value = false
